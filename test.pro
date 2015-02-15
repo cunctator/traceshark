@@ -27,6 +27,7 @@ SOURCES      += ftraceparser.cpp
 SOURCES      += mempool.cpp
 SOURCES      += tracefile.cpp
 QT           += core
+QT           += widgets
 
 QMAKE_CXXFLAGS_RELEASE += -Wall -g
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99
