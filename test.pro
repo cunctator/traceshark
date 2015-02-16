@@ -21,11 +21,14 @@ HEADERS       = ftraceparser.h
 HEADERS      += mempool.h
 HEADERS      += tracefile.h
 HEADERS      += traceline.h
+HEADERS      += mainwindow.h
+HEADERS      += traceshark.h
 
 SOURCES       = main.cpp
 SOURCES      += ftraceparser.cpp
 SOURCES      += mempool.cpp
 SOURCES      += tracefile.cpp
+SOURCES      += mainwindow.cpp
 QT           += core
 QT           += widgets
 

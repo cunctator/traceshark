@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace traces
- * Copyright (C) 2014-2015  Viktor Rosendahl
+ * Copyright (C) 2015  Viktor Rosendahl
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,17 +16,9 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QApplication>
-#include "mainwindow.h"
+#ifndef TRACESHARK_H
 
-int main(int argc, char* argv[])
-{
-	QApplication app(argc, argv);
-	MainWindow mainWindow;
-	
-	app.setApplicationName("Traceshark");
-	
-	mainWindow.resize(1024,740);
-	mainWindow.show();
-	return app.exec();
-}
+#define tsconnect(src, ssig, dest, dslot) \
+	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
+
+#endif /* TRACESHARK_H */
