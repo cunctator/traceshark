@@ -44,6 +44,7 @@ private slots:
 	void openTrace();
 	void closeTrace();
 	void about();
+	void license();
 
 private:
 	QLabel *traceLabel;
@@ -62,6 +63,7 @@ private:
 	QAction *closeAction;
 	QAction *exitAction;
 	QAction *aboutAction;
+	QAction *licenseAction;
 	QAction *aboutQtAction;
 
 	FtraceParser *parser;
