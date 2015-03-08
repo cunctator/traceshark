@@ -16,39 +16,14 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QtGlobal>
-#include <QString>
-#include <QTextStream>
-#include "ftraceparser.h"
-#include "tracefile.h"
+#ifndef TRACEEVENT_H
+#define TRACEEVENT_H
 
-bool FtraceParser::open(const QString &fileName)
-{
-	unsigned long long nr = 0;
-	bool ok = false;
-	TraceFile file(fileName.toLocal8Bit().data(), ok, 1024*1024);
+#include "traceline.h"
 
-	if (!ok)
-		return ok;
+class TraceEvent {
+public:
+	TraceLine line;
+};
 
-	//vector.resize(0);
-	events.reserve(80000000);
-
-	while(!file.atEnd()) {
-		TraceEvent event;
-		quint32 n = file.ReadLine(&event.line);
-		events.append(event);
-		nr += n;
-	}
-	QTextStream(stdout) << nr << "\n";
-	return true;
-}
-
-FtraceParser::FtraceParser()
-{
-}
-
-bool parse(void)
-{
-	return true;
-}
+#endif

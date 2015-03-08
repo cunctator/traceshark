@@ -24,7 +24,7 @@
 #include <QVector>
 #include <QList>
 
-#include "traceline.h"
+#include "traceevent.h"
 
 class FtraceEvent;
 
@@ -33,7 +33,8 @@ class FtraceParser
 public:
 	FtraceParser();
 	bool open(const QString &fileName);
-	QVector<TraceLine> vector;
+	QVector<TraceEvent> events;
+	bool parse(void);
 private:
 };
 
