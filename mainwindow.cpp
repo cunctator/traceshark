@@ -121,7 +121,7 @@ void MainWindow::createActions()
 	aboutQtAction->setStatusTip(tr("Show info about Qt"));
 	tsconnect(aboutQtAction, triggered(), qApp, aboutQt());
 
-	aboutAction = new QAction(tr("&About"), this);
+	aboutAction = new QAction(tr("&About Traceshark"), this);
 	aboutAction->setStatusTip(tr("Show info about Traceshark"));
 	tsconnect(aboutAction, triggered(), this, about());
 
