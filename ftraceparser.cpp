@@ -34,11 +34,6 @@ bool FtraceParser::open(const QString &fileName)
 	//vector.resize(0);
 	vector.reserve(80000000);
 
-#if 0
-	if (!file.open(QIODevice::ReadOnly))
-		return false;
-#endif
-
 	while(!file.atEnd()) {
 		TraceLine line;
 		quint32 n = file.ReadLine(&line);
