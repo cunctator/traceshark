@@ -21,23 +21,35 @@
 #include <QTextStream>
 #include "ftraceparser.h"
 #include "tracefile.h"
+#include "grammarroot.h"
+#include "namepidnode.h"
+#include "cpunode.h"
+#include "timenode.h"
+#include "eventnode.h"
+#include "argnode.h"
 
 bool FtraceParser::open(const QString &fileName)
 {
 	unsigned long long nr = 0;
 	bool ok = false;
-	TraceFile file(fileName.toLocal8Bit().data(), ok, 1024*1024);
 
-	if (!ok)
+	if (traceFile != NULL)
 		return ok;
 
-	//vector.resize(0);
-	events.reserve(80000000);
+	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok, 1024*1024);
 
-	while(!file.atEnd()) {
-		TraceEvent event;
-		quint32 n = file.ReadLine(&event.line);
-		events.append(event);
+	if (!ok) {
+		delete traceFile;
+		traceFile = NULL;
+		return ok;
+	}
+
+	lines.reserve(80000000);
+
+	while(!traceFile->atEnd()) {
+		TraceLine line;
+		quint32 n = traceFile->ReadLine(&line);
+		lines.append(line);
 		nr += n;
 	}
 	QTextStream(stdout) << nr << "\n";
@@ -46,9 +58,64 @@ bool FtraceParser::open(const QString &fileName)
 
 FtraceParser::FtraceParser()
 {
+	NamePidNode *namePidNode;
+	CpuNode *cpuNode;
+	TimeNode *timeNode;
+	EventNode *eventNode;
+	ArgNode *argNode;
+
+	traceFile = NULL;
+	ptrPool = new MemPool(1024*1024*sizeof(char *), sizeof(char*));
+
+	argNode = new ArgNode("argnode");
+	argNode->nChildren = 1;
+	argNode->children[0] = argNode;
+	argNode->isLeaf = true;
+
+	eventNode = new EventNode("eventnode");
+	eventNode->nChildren = 1;
+	eventNode->children[0] = argNode;
+	eventNode->isLeaf = true;
+
+	timeNode = new TimeNode("timenode");
+	timeNode->nChildren = 1;
+	timeNode->children[0] = eventNode;
+	timeNode->isLeaf = false;
+
+	cpuNode = new CpuNode("cpunode");
+	cpuNode->nChildren = 1;
+	cpuNode->children[0] = timeNode;
+	cpuNode->isLeaf = false;
+
+	namePidNode = new NamePidNode("namepidnode");
+	namePidNode->nChildren = 1;
+	namePidNode->children[0] = cpuNode;
+	namePidNode->isLeaf = false;
+
+	grammarRoot = new GrammarRoot("rootnode");
+	grammarRoot->nChildren = 1;
+	grammarRoot->children[0] = namePidNode;
+	grammarRoot->isLeaf = false;
 }
 
-bool parse(void)
+bool FtraceParser::parse(void)
 {
+	quint32 s = lines.size();
+	quint32 i;
+
+	events.resize(0);
+	events.reserve(s);
+
+	for(i = 0; i < s; i++) {
+		TraceLine &line = lines[i];
+		TraceEvent event;
+		event.argc = 0;
+		event.argv = (char**) ptrPool->PreAllocN(256);
+		if (parseLine(&line, &event)) {
+			ptrPool->CommitN(event.argc);
+			events.push_back(event);
+		}
+	}
+
 	return true;
 }

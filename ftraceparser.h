@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace traces
- * Copyright (C) 2014-2015  Viktor Rosendahl
+ * Copyright (C) 2015  Viktor Rosendahl
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -24,18 +24,52 @@
 #include <QVector>
 #include <QList>
 
+#include "mempool.h"
 #include "traceevent.h"
+#include "traceline.h"
+#include "grammarnode.h"
 
 class FtraceEvent;
+class TraceFile;
 
-class FtraceParser 
+class FtraceParser
 {
 public:
 	FtraceParser();
 	bool open(const QString &fileName);
 	QVector<TraceEvent> events;
 	bool parse(void);
+	QVector<TraceLine> lines;
 private:
+	inline bool parseLine(TraceLine* line, TraceEvent* event);
+	GrammarNode *grammarRoot;
+	TraceFile *traceFile;
+	MemPool *ptrPool;
 };
+
+inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
+{
+	unsigned int i,j;
+	GrammarNode *node = grammarRoot;
+	bool retval = grammarRoot->isLeaf;
+
+	for (i = 0; i < line->nStrings; i++)
+	{
+		char *str = line->strings[i];
+		if (node->nChildren == 0)
+			break;
+		for (j = 0; j < node->nChildren; j++) {
+			if (node->children[j]->match(str, event)) {
+				node = node->children[j];
+				retval = node->children[j]->isLeaf;
+				goto cont;
+			}
+		}
+		return false;
+	cont:
+		continue;
+	}
+	return retval;
+}
 
 #endif

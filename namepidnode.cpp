@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace traces
- * Copyright (C) 2014-2015  Viktor Rosendahl
+ * Copyright (C) 2015  Viktor Rosendahl
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,30 +16,46 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRACEEVENT_H
-#define TRACEEVENT_H
+#include <cstring>
 
-#include "traceline.h"
+#include "namepidnode.h"
+#include "traceevent.h"
 
-typedef enum {
-	TASK_ARRIVE,
-	TASK_DEPART,
-	TASK_DEQUEUED,
-	TASK_QUEUED
-} EventType;
+NamePidNode::NamePidNode(const char *name)
+	: GrammarNode(name) {};
 
-class TraceEvent {
-public:
-	char* taskName;
-	unsigned int pid;
-	char *pidStr;
-	unsigned int cpu;
-	double time;
-	char *timeStr;
-	char *eventName;
-	EventType event;
-	char **argv;
-	unsigned int argc;
-};
+bool NamePidNode::match(char *str, TraceEvent *event)
+{
+	int len = strlen(str);
+	char *lastChr = str + len - 1;
+	char *c;
+	char *beginPid;
+	int pid;
+	int digit;
 
-#endif
+	if (len < 3)
+		return false;
+
+	for (c = lastChr - 1; c >= str; c--) {
+		if (*c == '-')
+			goto found1;
+	}
+	return false;
+found1:
+	*c = '\0';
+	beginPid = c + 1;
+	
+	pid = 0;
+	for (c = beginPid; c < lastChr; c++) {
+		pid *= 10;
+		digit = *c - '0';
+		if (digit <= 9 && digit >= 0)
+			pid += digit;
+		else
+			return false;
+	}
+
+	event->taskName = str;
+	event->pid = pid;
+	return true;
+}

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace traces
- * Copyright (C) 2014-2015  Viktor Rosendahl
+ * Copyright (C) 2015  Viktor Rosendahl
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,30 +16,26 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRACEEVENT_H
-#define TRACEEVENT_H
+#include <cstdlib>
+#include <cstring>
 
-#include "traceline.h"
+#include "timenode.h"
+#include "traceevent.h"
 
-typedef enum {
-	TASK_ARRIVE,
-	TASK_DEPART,
-	TASK_DEQUEUED,
-	TASK_QUEUED
-} EventType;
+TimeNode::TimeNode(const char *name)
+	: GrammarNode(name) {};
 
-class TraceEvent {
-public:
-	char* taskName;
-	unsigned int pid;
-	char *pidStr;
-	unsigned int cpu;
-	double time;
-	char *timeStr;
-	char *eventName;
-	EventType event;
-	char **argv;
-	unsigned int argc;
-};
+bool TimeNode::match(char *str, TraceEvent *event)
+{
+	int len = strlen(str);
+	char *lastChr = str + len - 1;
+	double time = 0;
 
-#endif
+	if (*lastChr == ':')
+		*lastChr = '\0';
+
+	time = atof(str);
+	event->time = time;
+	return true;
+}
+

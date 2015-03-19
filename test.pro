@@ -23,12 +23,27 @@ HEADERS      += tracefile.h
 HEADERS      += traceline.h
 HEADERS      += mainwindow.h
 HEADERS      += traceshark.h
+HEADERS      += grammarnode.h
+HEADERS      += grammarroot.h
+HEADERS      += namepidnode.h
+HEADERS      += cpunode.h
+HEADERS      += timenode.h
+HEADERS      += eventnode.h
+HEADERS      += argnode.h
 
 SOURCES       = main.cpp
 SOURCES      += ftraceparser.cpp
 SOURCES      += mempool.cpp
 SOURCES      += tracefile.cpp
 SOURCES      += mainwindow.cpp
+SOURCES      += grammarnode.cpp
+SOURCES      += grammarroot.cpp
+SOURCES      += namepidnode.cpp
+SOURCES      += cpunode.cpp
+SOURCES      += timenode.cpp
+SOURCES      += eventnode.cpp
+SOURCES      += argnode.cpp
+
 QT           += core
 QT           += widgets
 
