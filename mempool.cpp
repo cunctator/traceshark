@@ -27,6 +27,7 @@ MemPool::MemPool(unsigned long long size, unsigned long objsize)
 	poolSize = size;
 	objSize = objsize;
 	next = NULL;
+	memory = NULL;
 	if (!newmap()) {
 		used = 0;
 		poolSize = 0;
@@ -40,4 +41,6 @@ MemPool::~MemPool()
 	for (i = 0; i < len; i++) {
 		munmap(exhaustList[i], poolSize);
 	}
+	if (memory != NULL)
+		munmap(memory, poolSize);
 }
