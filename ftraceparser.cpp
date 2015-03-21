@@ -98,6 +98,24 @@ FtraceParser::FtraceParser()
 	grammarRoot->isLeaf = false;
 }
 
+FtraceParser::~FtraceParser()
+{
+	DeleteGrammarTree(grammarRoot);
+	if (traceFile != NULL)
+		delete traceFile;
+	delete ptrPool;
+}
+
+void FtraceParser::DeleteGrammarTree(GrammarNode* node) {
+	unsigned int i;
+	for (i = 0; i < node->nChildren; i++) {
+		/* Delete subtree unless it's a node being it's own child */
+		if (node->children[i] != node)
+			DeleteGrammarTree(node->children[i]);
+	}
+	delete node;
+}
+
 bool FtraceParser::parse(void)
 {
 	quint32 s = lines.size();

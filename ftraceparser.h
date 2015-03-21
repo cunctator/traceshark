@@ -36,6 +36,8 @@ class FtraceParser
 {
 public:
 	FtraceParser();
+	~FtraceParser();
+	void DeleteGrammarTree(GrammarNode* node);
 	bool open(const QString &fileName);
 	QVector<TraceEvent> events;
 	bool parse(void);
