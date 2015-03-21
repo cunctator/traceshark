@@ -56,6 +56,23 @@ bool FtraceParser::open(const QString &fileName)
 	return true;
 }
 
+bool FtraceParser::isOpen()
+{
+	return (traceFile != NULL);
+}
+
+void FtraceParser::close()
+{
+	if (traceFile != NULL) {
+		lines.resize(0);
+		lines.reserve(1);
+		events.resize(0);
+		events.reserve(0);
+		delete traceFile;
+		traceFile = NULL;
+	}
+}
+
 FtraceParser::FtraceParser()
 {
 	NamePidNode *namePidNode;

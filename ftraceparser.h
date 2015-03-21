@@ -39,6 +39,8 @@ public:
 	~FtraceParser();
 	void DeleteGrammarTree(GrammarNode* node);
 	bool open(const QString &fileName);
+	bool isOpen();
+	void close();
 	QVector<TraceEvent> events;
 	bool parse(void);
 	QVector<TraceLine> lines;
