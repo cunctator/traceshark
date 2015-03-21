@@ -25,6 +25,8 @@
 
 MainWindow::MainWindow()
 {
+	parser = new FtraceParser;
+
 	traceLabel = new QLabel;
 	setCentralWidget(traceLabel);
 
@@ -153,7 +155,6 @@ void MainWindow::createMenus()
 
 void MainWindow::loadTraceFile(QString &fileName)
 {
-	parser = new FtraceParser();
 	QTextStream(stdout) << "opening " << fileName << "\n";
 	
 	if (!parser->open(fileName)) {
