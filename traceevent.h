@@ -37,7 +37,7 @@ public:
 	unsigned int cpu;
 	double time;
 	TString *timeStr;
-	TString eventName;
+	TString *eventName;
 	EventType event;
 	TString **argv;
 	unsigned int argc;

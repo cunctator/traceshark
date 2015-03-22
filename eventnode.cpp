@@ -33,6 +33,6 @@ bool EventNode::match(TString *str, TraceEvent *event)
 	if (*lastChr == ':')
 		*lastChr = '\0';
 
-	event->eventName = *str;
+	event->eventName = str;
 	return true;
 }
