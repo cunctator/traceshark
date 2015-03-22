@@ -45,7 +45,7 @@ found1:
 	beginPid = c + 1;
 	
 	pid = 0;
-	for (c = beginPid; c < lastChr; c++) {
+	for (c = beginPid; c <= lastChr; c++) {
 		pid *= 10;
 		digit = *c - '0';
 		if (digit <= 9 && digit >= 0)
