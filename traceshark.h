@@ -17,6 +17,7 @@
  */
 
 #ifndef TRACESHARK_H
+#define TRACESHARK_H
 
 #include <cmath>
 
