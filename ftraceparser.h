@@ -59,7 +59,7 @@ inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 
 	for (i = 0; i < line->nStrings; i++)
 	{
-		char *str = line->strings[i];
+		TString *str = &line->strings[i];
 		if (node->nChildren == 0)
 			break;
 		for (j = 0; j < node->nChildren; j++) {

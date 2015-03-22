@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace traces
- * Copyright (C) 2014-2015  Viktor Rosendahl
+ * Copyright (C) 2015  Viktor Rosendahl
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,15 +16,13 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRACELINE_H
-#define TRACELINE_H
+#ifndef TSTRING_H
+#define TSTRING_H
 
-#include "tstring.h"
-
-class TraceLine {
+struct TString {
 public:
-	TString *strings;
-	unsigned int nStrings;
+	char *ptr;
+	unsigned int len;
 };
 
 #endif

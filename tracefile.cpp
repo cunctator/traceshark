@@ -47,7 +47,7 @@ TraceFile::TraceFile(char *name, bool &ok, quint32 bsize)
 	lastBuf = 0;
 	eof = false;
 	strPool = new MemPool(8*1024*1024, 1);
-	ptrPool = new MemPool(1024*1024, sizeof(char *));
+	ptrPool = new MemPool(1024*1024, sizeof(TString));
 	bufSize = bsize;
 	memory = new char[2*bsize];
 	buffer[0] = memory;
@@ -60,22 +60,19 @@ TraceFile::TraceFile(char *name, bool &ok, quint32 bsize)
 
 quint32 TraceFile::ReadLine(TraceLine* line)
 {
-	char **strings;
 	quint32 col;
-	char *word;
 	quint32 n;
 
-	strings = (char**) ptrPool->PreAllocN(MAXPTR);
-	Q_ASSERT(strings != NULL);
-	line->strings = strings;
+	line->strings = (TString*) ptrPool->PreAllocN(MAXPTR);
+	Q_ASSERT(line->strings != NULL);
 
 	for(col = 0; col < MAXPTR; col++) {
-		word = (char*) strPool->PreAllocChars(MAXSTR);
-		n = ReadNextWord(word, MAXSTR);
+		line->strings[col].ptr = (char*) strPool->PreAllocChars(MAXSTR);
+		n = ReadNextWord(line->strings[col].ptr, MAXSTR);
 		if (n == 0)
 			break;
 		strPool->CommitChars(n + 1 ); // + 1 for null termination
-		strings[col] = word;
+		line->strings[col].len = n;
 	}
 	if (col > 0)
 		ptrPool->CommitN(col);

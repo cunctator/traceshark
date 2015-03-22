@@ -26,11 +26,11 @@
 TimeNode::TimeNode(const char *name)
 	: GrammarNode(name) {};
 
-bool TimeNode::match(char *str, TraceEvent *event)
+bool TimeNode::match(TString *str, TraceEvent *event)
 {
 	bool rval;
 	/* atof() and sscanf() are buggy */
-	event->time = TraceShark::strToDouble(str, rval);
+	event->time = TraceShark::strToDouble(str->ptr, rval);
 	return rval;
 }
 

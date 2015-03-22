@@ -25,7 +25,7 @@ class ArgNode: public GrammarNode
 {
 public:
 	ArgNode(const char *name);
-	bool match(char *str, TraceEvent *event);
+	bool match(TString *str, TraceEvent *event);
 };
 
 #endif

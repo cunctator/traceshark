@@ -20,6 +20,7 @@
 #define TRACEEVENT_H
 
 #include "traceline.h"
+#include "tstring.h"
 
 typedef enum {
 	TASK_ARRIVE,
@@ -30,15 +31,15 @@ typedef enum {
 
 class TraceEvent {
 public:
-	char* taskName;
+	TString taskName;
 	unsigned int pid;
-	char *pidStr;
+	TString pidStr;
 	unsigned int cpu;
 	double time;
-	char *timeStr;
-	char *eventName;
+	TString timeStr;
+	TString eventName;
 	EventType event;
-	char **argv;
+	TString *argv;
 	unsigned int argc;
 };
 

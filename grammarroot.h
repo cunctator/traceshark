@@ -26,7 +26,7 @@ class GrammarRoot: public GrammarNode
 public:
 	GrammarRoot(const char* name)
 		: GrammarNode(name) {};
-	bool match(char *str, TraceEvent *event);
+	bool match(TString *str, TraceEvent *event);
 };
 
 #endif

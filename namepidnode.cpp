@@ -16,27 +16,26 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstring>
-
 #include "namepidnode.h"
 #include "traceevent.h"
+#include "tstring.h"
 
 NamePidNode::NamePidNode(const char *name)
 	: GrammarNode(name) {};
 
-bool NamePidNode::match(char *str, TraceEvent *event)
+bool NamePidNode::match(TString *str, TraceEvent *event)
 {
-	int len = strlen(str);
-	char *lastChr = str + len - 1;
+
+	char *lastChr = str->ptr + str->len - 1;
 	char *c;
 	char *beginPid;
 	int pid;
 	int digit;
 
-	if (len < 3)
+	if (str->len < 3)
 		return false;
 
-	for (c = lastChr - 1; c >= str; c--) {
+	for (c = lastChr - 1; c >= str->ptr; c--) {
 		if (*c == '-')
 			goto found1;
 	}
@@ -55,7 +54,7 @@ found1:
 			return false;
 	}
 
-	event->taskName = str;
+	event->taskName = *str;
 	event->pid = pid;
 	return true;
 }

@@ -23,6 +23,7 @@
 
 class GrammarNode;
 class TraceEvent;
+class TString;
 
 class GrammarNode
 {
@@ -33,7 +34,7 @@ public:
 	virtual ~GrammarNode();
 	unsigned int nChildren;
 	GrammarNode *children[MAXNODES];
-	virtual bool match(char *str, TraceEvent *event) = 0;
+	virtual bool match(TString *str, TraceEvent *event) = 0;
 	bool isLeaf;
 	char *nameDebug;
 };

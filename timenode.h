@@ -25,7 +25,7 @@ class TimeNode: public GrammarNode
 {
 public:
 	TimeNode(const char *name);
-	bool match(char *str, TraceEvent *event);
+	bool match(TString *str, TraceEvent *event);
 };
 
 #endif

@@ -18,20 +18,21 @@
 
 #include "eventnode.h"
 #include "traceevent.h"
-#include <cstdlib>
-#include <cstring>
+#include "tstring.h"
 
 EventNode::EventNode(const char *name)
 	: GrammarNode(name) {};
 
-bool EventNode::match(char *str, TraceEvent *event)
+bool EventNode::match(TString *str, TraceEvent *event)
 {
-	int len = strlen(str);
-	char *lastChr = str + len - 1;
+	char *lastChr = str->ptr + str->len - 1;
+
+	if (str->len < 1)
+		return false;
 
 	if (*lastChr == ':')
 		*lastChr = '\0';
 
-	event->eventName = str;
+	event->eventName = *str;
 	return true;
 }

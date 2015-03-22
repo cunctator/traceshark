@@ -25,7 +25,7 @@ class EventNode: public GrammarNode
 {
 public:
 	EventNode(const char *name);
-	bool match(char *str, TraceEvent *event);
+	bool match(TString *str, TraceEvent *event);
 };
 
 #endif

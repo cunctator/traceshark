@@ -25,7 +25,7 @@ class NamePidNode: public GrammarNode
 {
 public:
 	NamePidNode(const char *name);
-	bool match(char *str, TraceEvent *event);
+	bool match(TString *str, TraceEvent *event);
 };
 
 #endif

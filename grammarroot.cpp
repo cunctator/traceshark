@@ -18,7 +18,7 @@
 
 #include "grammarroot.h"
 
-bool GrammarRoot::match(char * /*str*/, TraceEvent * /*event*/)
+bool GrammarRoot::match(TString * /*str*/, TraceEvent * /*event*/)
 {
 	return true;
 }

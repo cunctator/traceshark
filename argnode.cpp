@@ -22,10 +22,10 @@
 ArgNode::ArgNode(const char *name) 
 	: GrammarNode(name) {};
 
-bool ArgNode::match(char *str, TraceEvent *event)
+bool ArgNode::match(TString *str, TraceEvent *event)
 {
 	if (event->argc < 255) {
-		event->argv[event->argc] = str;
+		event->argv[event->argc] = *str;
 		event->argc++;
 		return true;
 	}
