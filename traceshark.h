@@ -18,7 +18,63 @@
 
 #ifndef TRACESHARK_H
 
+#include <cmath>
+
 #define tsconnect(src, ssig, dest, dslot) \
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
+
+namespace TraceShark {
+	inline double strToDouble(char* str, bool &ok)
+	{
+		char *c;
+		double r;
+		unsigned long long base = 0;
+		bool isNeg = false;
+		unsigned int d, n;
+		double div;
+
+		ok = true;
+
+		if (*str == '-') {
+			str++;
+			isNeg = true;
+		}
+
+		for (c = str; *c != '\0'; c++) {
+			if (*c == '.')
+				break;
+			if (*c < '0' || *c > '9')
+				goto error;
+			d = *c - '0';
+			base *= 10;
+			base += d;
+		}
+
+		r = (double) base;
+
+		if (*c == '.') {
+			n = 0;
+			base = 0;
+			for (c++; *c != '\0'; c++) {
+				if (*c < '0' || *c > '9')
+					goto error;
+				d = *c - '0';
+				base *= 10;
+				base += d;
+				n++;
+			}
+			div = pow(10, n);
+			r += base / div;
+		}
+
+		if (isNeg)
+			return -r;
+		else
+			return r;
+	error:
+	        ok = false;
+		return 0;
+	}
+}
 
 #endif /* TRACESHARK_H */

@@ -21,21 +21,22 @@
 
 #include "timenode.h"
 #include "traceevent.h"
+#include "traceshark.h"
 
 TimeNode::TimeNode(const char *name)
 	: GrammarNode(name) {};
 
 bool TimeNode::match(char *str, TraceEvent *event)
 {
+	bool rval;
 	int len = strlen(str);
 	char *lastChr = str + len - 1;
-	double time = 0;
 
 	if (*lastChr == ':')
 		*lastChr = '\0';
 
-	time = atof(str);
-	event->time = time;
-	return true;
+	/* atof() and sscanf() are buggy */
+	event->time = TraceShark::strToDouble(str, rval);
+	return rval;
 }
 
