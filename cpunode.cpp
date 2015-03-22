@@ -18,32 +18,30 @@
 
 #include "cpunode.h"
 #include "traceevent.h"
-#include <cstring>
 
 CpuNode::CpuNode(const char *name)
 	: GrammarNode(name) {};
 
 bool CpuNode::match(char *str, TraceEvent *event)
 {
-	int len = strlen(str);
-	char *lastChr = str + len - 1;
 	char *c;
 	unsigned int cpu = 0;
 	int digit;
 
-	if (*lastChr != ']' || str[0] != '[')
+	if (str[0] != '[')
 		return false;
 
 	cpu = 0;
-	for (c = str + 1; c < lastChr; c++) {
-		cpu *= 10;
+	for (c = str + 1; *c != '\0' && *c != ']'; c++) {
 		digit = *c - '0';
-		if (digit <= 9 && digit >= 0)
-			cpu += digit;
-		else
-			return false;
+		if (digit > 9 || digit < 0)
+			goto error;
+		cpu *= 10;
+		cpu += digit;
 	}
-
 	event->cpu = cpu;
 	return true;
+error:
+	event->cpu = 0;
+	return false;
 }
