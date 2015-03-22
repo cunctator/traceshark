@@ -54,7 +54,7 @@ found1:
 			return false;
 	}
 
-	event->taskName = *str;
+	event->taskName = str;
 	event->pid = pid;
 	return true;
 }

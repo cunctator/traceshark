@@ -82,7 +82,7 @@ FtraceParser::FtraceParser()
 	ArgNode *argNode;
 
 	traceFile = NULL;
-	ptrPool = new MemPool(1024*1024*8, sizeof(TString));
+	ptrPool = new MemPool(1024*1024*8, sizeof(TString*));
 
 	argNode = new ArgNode("argnode");
 	argNode->nChildren = 1;
@@ -145,7 +145,7 @@ bool FtraceParser::parse(void)
 		TraceLine &line = lines[i];
 		TraceEvent event;
 		event.argc = 0;
-		event.argv = (TString*) ptrPool->PreAllocN(256);
+		event.argv = (TString**) ptrPool->PreAllocN(256);
 		if (parseLine(&line, &event)) {
 			ptrPool->CommitN(event.argc);
 			events.push_back(event);

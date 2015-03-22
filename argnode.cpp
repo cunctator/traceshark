@@ -25,7 +25,7 @@ ArgNode::ArgNode(const char *name)
 bool ArgNode::match(TString *str, TraceEvent *event)
 {
 	if (event->argc < 255) {
-		event->argv[event->argc] = *str;
+		event->argv[event->argc] = str;
 		event->argc++;
 		return true;
 	}

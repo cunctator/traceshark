@@ -31,15 +31,15 @@ typedef enum {
 
 class TraceEvent {
 public:
-	TString taskName;
+	TString *taskName;
 	unsigned int pid;
-	TString pidStr;
+	TString *pidStr;
 	unsigned int cpu;
 	double time;
-	TString timeStr;
+	TString *timeStr;
 	TString eventName;
 	EventType event;
-	TString *argv;
+	TString **argv;
 	unsigned int argc;
 };
 
