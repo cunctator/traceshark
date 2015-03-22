@@ -17,6 +17,7 @@
  */
 
 #include <QTextStream>
+#include <QDateTime>
 #include <QtWidgets>
 
 #include "mainwindow.h"
@@ -155,9 +156,32 @@ void MainWindow::createMenus()
 
 void MainWindow::loadTraceFile(QString &fileName)
 {
-	QTextStream(stdout) << "opening " << fileName << "\n";
+	qint64 start, stop;
+	QTextStream qout(stdout);
+
+	qout.setRealNumberPrecision(6);
+	qout.setRealNumberNotation(QTextStream::FixedNotation);
+
+	qout << "opening " << fileName << "\n";
 	
 	if (!parser->open(fileName)) {
-		QTextStream(stdout) << "failed to open " << fileName << "\n";
+		qout << "failed to open " << fileName << "\n";
 	}
+
+	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+	parser->parse();
+	stop = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	stop = stop - start;
+
+	qout << "Parsing took " << (double) stop / 1000 << " ms\n";
+
+#if 0
+	int i, s;
+	s = parser->events.size();
+	for (i = 0; i < s; i++) {
+		TraceEvent &event = parser->events[i];
+		qout << event.time << "\n";
+        }
+#endif
 }
