@@ -20,7 +20,7 @@
 #define MEMPOOL_H
 
 #include <QVector>
-#include <QDebug>
+#include <QTextStream>
 
 extern "C" {
 #include <sys/mman.h>
@@ -212,6 +212,6 @@ inline bool MemPool::newmap()
 		used = 0ULL;
 		return true;
 	}
-	qDebug() << "mmap() failed\n";
+	QTextStream(stderr) << "mmap() failed\n";
 	return false;
 }
