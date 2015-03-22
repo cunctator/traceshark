@@ -29,12 +29,6 @@ TimeNode::TimeNode(const char *name)
 bool TimeNode::match(char *str, TraceEvent *event)
 {
 	bool rval;
-	int len = strlen(str);
-	char *lastChr = str + len - 1;
-
-	if (*lastChr == ':')
-		*lastChr = '\0';
-
 	/* atof() and sscanf() are buggy */
 	event->time = TraceShark::strToDouble(str, rval);
 	return rval;

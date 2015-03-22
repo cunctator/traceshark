@@ -25,6 +25,11 @@
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
 
 namespace TraceShark {
+
+	/* This functions accepts ':' at the end of the value
+	 * For example, 123.456: is ok. 123.456X is not ok if
+	 * X is not a digit between 0-9 or a ':'
+	 */
 	inline double strToDouble(char* str, bool &ok)
 	{
 		char *c;
@@ -42,10 +47,8 @@ namespace TraceShark {
 		}
 
 		for (c = str; *c != '\0'; c++) {
-			if (*c == '.')
-				break;
 			if (*c < '0' || *c > '9')
-				goto error;
+				break;
 			d = *c - '0';
 			base *= 10;
 			base += d;
@@ -58,7 +61,7 @@ namespace TraceShark {
 			base = 0;
 			for (c++; *c != '\0'; c++) {
 				if (*c < '0' || *c > '9')
-					goto error;
+					break;
 				d = *c - '0';
 				base *= 10;
 				base += d;
@@ -67,6 +70,9 @@ namespace TraceShark {
 			div = pow(10, n);
 			r += base / div;
 		}
+
+		if (*c != ':' && *c != '\0')
+			goto error;
 
 		if (isNeg)
 			return -r;
