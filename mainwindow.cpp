@@ -178,10 +178,16 @@ void MainWindow::loadTraceFile(QString &fileName)
 
 #if 0
 	int i, s;
+	unsigned int j;
 	s = parser->events.size();
 	for (i = 0; i < s; i++) {
 		TraceEvent &event = parser->events[i];
-		qout << event.time << "\n";
+		qout << event.taskName->ptr << " " << event.pid << " " <<
+			event.time << " " << event.eventName->ptr;
+		for (j = 0; j < event.argc; j++) {
+			qout << " " << event.argv[j]->ptr;
+		}
+		qout << "\n";
         }
 #endif
 }
