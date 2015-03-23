@@ -17,32 +17,34 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-HEADERS       = ftraceparser.h
-HEADERS      += mempool.h
-HEADERS      += tracefile.h
-HEADERS      += traceline.h
-HEADERS      += mainwindow.h
-HEADERS      += traceshark.h
+HEADERS       = argnode.h
+HEADERS      += cpunode.h
+HEADERS      += eventnode.h
+HEADERS      += ftraceparser.h
 HEADERS      += grammarnode.h
 HEADERS      += grammarroot.h
+HEADERS      += mainwindow.h
 HEADERS      += namepidnode.h
-HEADERS      += cpunode.h
+HEADERS      += mempool.h
 HEADERS      += timenode.h
-HEADERS      += eventnode.h
-HEADERS      += argnode.h
+HEADERS      += traceevent.h
+HEADERS      += tracefile.h
+HEADERS      += traceline.h
+HEADERS      += traceshark.h
+HEADERS      += tstring.h
 
-SOURCES       = main.cpp
+SOURCES       = argnode.cpp
+SOURCES      += cpunode.cpp
+SOURCES      += eventnode.cpp
 SOURCES      += ftraceparser.cpp
-SOURCES      += mempool.cpp
-SOURCES      += tracefile.cpp
-SOURCES      += mainwindow.cpp
 SOURCES      += grammarnode.cpp
 SOURCES      += grammarroot.cpp
+SOURCES      += main.cpp
+SOURCES      += mainwindow.cpp
+SOURCES      += mempool.cpp
 SOURCES      += namepidnode.cpp
-SOURCES      += cpunode.cpp
 SOURCES      += timenode.cpp
-SOURCES      += eventnode.cpp
-SOURCES      += argnode.cpp
+SOURCES      += tracefile.cpp
 
 QT           += core
 QT           += widgets
