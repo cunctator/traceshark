@@ -145,9 +145,9 @@ bool FtraceParser::parse(void)
 		TraceLine &line = lines[i];
 		TraceEvent event;
 		event.argc = 0;
-		event.argv = (TString**) ptrPool->PreAllocN(256);
+		event.argv = (TString**) ptrPool->preallocN(256);
 		if (parseLine(&line, &event)) {
-			ptrPool->CommitN(event.argc);
+			ptrPool->commitN(event.argc);
 			events.push_back(event);
 		}
 	}

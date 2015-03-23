@@ -63,19 +63,19 @@ quint32 TraceFile::ReadLine(TraceLine* line)
 	quint32 col;
 	quint32 n;
 
-	line->strings = (TString*) ptrPool->PreAllocN(MAXPTR);
+	line->strings = (TString*) ptrPool->preallocN(MAXPTR);
 	Q_ASSERT(line->strings != NULL);
 
 	for(col = 0; col < MAXPTR; col++) {
-		line->strings[col].ptr = (char*) strPool->PreAllocChars(MAXSTR);
+		line->strings[col].ptr = (char*) strPool->preallocChars(MAXSTR);
 		n = ReadNextWord(line->strings[col].ptr, MAXSTR);
 		if (n == 0)
 			break;
-		strPool->CommitChars(n + 1 ); // + 1 for null termination
+		strPool->commitChars(n + 1 ); // + 1 for null termination
 		line->strings[col].len = n;
 	}
 	if (col > 0)
-		ptrPool->CommitN(col);
+		ptrPool->commitN(col);
 	line->nStrings = col;
 	return col;
 }

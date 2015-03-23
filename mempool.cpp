@@ -28,7 +28,7 @@ MemPool::MemPool(unsigned long long size, unsigned long objsize)
 	objSize = objsize;
 	next = NULL;
 	memory = NULL;
-	if (!newmap()) {
+	if (!newMap()) {
 		used = 0;
 		poolSize = 0;
 	}

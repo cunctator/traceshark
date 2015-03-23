@@ -32,17 +32,17 @@ public:
 	MemPool(unsigned long long size = 1024*1024*10,
 		unsigned long objsize = 64);
 	~MemPool();
-	inline void* AllocObj();
-	inline void* AllocN(unsigned long n);
-	inline void* PreAllocN(unsigned long n);
-	inline bool CommitN(unsigned long n);
-	inline void* AllocBytes(quint32 bytes);
-	inline void* AllocChars(quint32 chars);
-	inline void* PreAllocBytes(quint32 maxbytes);
-	inline void* PreAllocChars(quint32 maxchars);
-	inline bool CommitBytes(quint32 nrbytes);
-	inline bool CommitChars(quint32 nrbytes);
-	void Reset();
+	inline void* allocObj();
+	inline void* allocN(unsigned long n);
+	inline void* preallocN(unsigned long n);
+	inline bool commitN(unsigned long n);
+	inline void* allocBytes(quint32 bytes);
+	inline void* allocChars(quint32 chars);
+	inline void* preallocBytes(quint32 maxbytes);
+	inline void* preallocChars(quint32 maxchars);
+	inline bool commitBytes(quint32 nrbytes);
+	inline bool commitChars(quint32 nrbytes);
+	void reset();
 private:
 	quint8 *memory;
 	quint8 *next;
@@ -50,12 +50,12 @@ private:
 	unsigned long long used;
 	unsigned long objSize;
 	QVector <void*> exhaustList;
-	inline bool newmap();
-	inline bool AddMemory();
+	inline bool newMap();
+	inline bool addMemory();
 };
 #endif /* MEMPOOL_H */
 
-inline void* MemPool::AllocObj()
+inline void* MemPool::allocObj()
 {
 	quint8 *ptr;
 	int retries = 0;
@@ -68,14 +68,14 @@ inline void* MemPool::AllocObj()
 			return ptr;
 		}
 		used -= objSize;
-		if (used == 0 || !AddMemory())
+		if (used == 0 || !addMemory())
 			return NULL;
 		retries++;
 	} while(retries < 2);
 	return NULL;
 }
 
-inline void* MemPool::AllocN(unsigned long n)
+inline void* MemPool::allocN(unsigned long n)
 {
 	quint8 *ptr;
 	unsigned long chunk = objSize * n;
@@ -89,14 +89,14 @@ inline void* MemPool::AllocN(unsigned long n)
 			return ptr;
 		}
 		used -= chunk;
-		if (used == 0 || !AddMemory())
+		if (used == 0 || !addMemory())
 			return NULL;
 		retries++;
 	} while(retries < 2);
 	return NULL;
 }
 
-inline void* MemPool::PreAllocN(unsigned long n)
+inline void* MemPool::preallocN(unsigned long n)
 {
 	unsigned long chunk = objSize * n;
 	int retries = 0;
@@ -107,7 +107,7 @@ inline void* MemPool::PreAllocN(unsigned long n)
 			return next;
 		if (used == 0)
 			return NULL;
-		if (!AddMemory())
+		if (!addMemory())
 			return NULL;
 		maxused = chunk; /* used will be 0 here */
 		retries++;
@@ -115,7 +115,7 @@ inline void* MemPool::PreAllocN(unsigned long n)
 	return NULL;
 }
 
-inline bool MemPool::CommitN(unsigned long n)
+inline bool MemPool::commitN(unsigned long n)
 {
 	unsigned long chunk = objSize * n;
 
@@ -128,7 +128,7 @@ inline bool MemPool::CommitN(unsigned long n)
 	return true;
 }
 
-inline void* MemPool::AllocBytes(quint32 bytes)
+inline void* MemPool::allocBytes(quint32 bytes)
 {
 	quint8* ptr;
 	int retries = 0;
@@ -141,19 +141,19 @@ inline void* MemPool::AllocBytes(quint32 bytes)
 			return ptr;
 		}
 		used -= bytes;
-		if (used == 0 || !AddMemory())
+		if (used == 0 || !addMemory())
 			return NULL;
 		retries++;
 	} while(retries < 2);
 	return NULL;
 }
 
-inline void* MemPool::AllocChars(quint32 chars)
+inline void* MemPool::allocChars(quint32 chars)
 {
-	return AllocBytes(sizeof(char) * chars);
+	return allocBytes(sizeof(char) * chars);
 }
 
-inline void* MemPool::PreAllocBytes(quint32 bytes)
+inline void* MemPool::preallocBytes(quint32 bytes)
 {
 	unsigned long long maxused = used + bytes;
 	int retries = 0;
@@ -163,7 +163,7 @@ inline void* MemPool::PreAllocBytes(quint32 bytes)
 			return next;
 		if (used == 0)
 			return NULL;
-		if (!AddMemory())
+		if (!addMemory())
 			return NULL;
 		maxused = bytes; /* used will be 0 here */
 		retries++;
@@ -171,7 +171,7 @@ inline void* MemPool::PreAllocBytes(quint32 bytes)
 	return NULL;
 }
 
-inline bool MemPool::CommitBytes(quint32 bytes)
+inline bool MemPool::commitBytes(quint32 bytes)
 {
 	used += bytes;
 	if (used >= poolSize) {
@@ -182,26 +182,26 @@ inline bool MemPool::CommitBytes(quint32 bytes)
 	return true;
 }
 
-inline void* MemPool::PreAllocChars(quint32 maxchars)
+inline void* MemPool::preallocChars(quint32 maxchars)
 {
-	return PreAllocBytes(sizeof(char) * maxchars);
+	return preallocBytes(sizeof(char) * maxchars);
 }
 
-inline bool MemPool::CommitChars(quint32 chars)
+inline bool MemPool::commitChars(quint32 chars)
 {
-	return CommitBytes(sizeof(char) * chars);
+	return commitBytes(sizeof(char) * chars);
 }
 
-inline bool MemPool::AddMemory()
+inline bool MemPool::addMemory()
 {
 	exhaustList.append(memory);
-	if (newmap())
+	if (newMap())
 		return true;
 	exhaustList.removeLast();
 	return false;
 }
 
-inline bool MemPool::newmap()
+inline bool MemPool::newMap()
 {
 	quint8 *ptr;
 	ptr = (quint8*) mmap(NULL, (size_t) poolSize, PROT_READ|PROT_WRITE,
