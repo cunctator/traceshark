@@ -46,12 +46,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::openTrace()
 {
 	QString name = QFileDialog::getOpenFileName(this);
-	if (!name.isEmpty())
+	if (!name.isEmpty()) {
+		if (parser->isOpen())
+			parser->close();
 		loadTraceFile(name);
+	}
 }
 
 void MainWindow::closeTrace()
-{	
+{
+	if(parser->isOpen())
+		parser->close();
 }
 
 void MainWindow::about()
