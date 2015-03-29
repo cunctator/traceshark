@@ -19,6 +19,7 @@
 #include <QtGlobal>
 #include <QString>
 #include <QTextStream>
+#include "ftraceparams.h"
 #include "ftraceparser.h"
 #include "tracefile.h"
 #include "grammarroot.h"

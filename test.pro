@@ -20,6 +20,7 @@
 HEADERS       = argnode.h
 HEADERS      += cpunode.h
 HEADERS      += eventnode.h
+HEADERS      += ftraceparams.h
 HEADERS      += ftraceparser.h
 HEADERS      += grammarnode.h
 HEADERS      += grammarroot.h
@@ -37,6 +38,7 @@ SOURCES       = argnode.cpp
 SOURCES      += cpunode.cpp
 SOURCES      += eventnode.cpp
 SOURCES      += ftraceparser.cpp
+SOURCES      += ftraceparams.cpp
 SOURCES      += grammarnode.cpp
 SOURCES      += grammarroot.cpp
 SOURCES      += main.cpp
@@ -49,7 +51,7 @@ SOURCES      += tracefile.cpp
 QT           += core
 QT           += widgets
 
-QMAKE_CXXFLAGS_RELEASE += -Wall -g
+QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -g -std=c++11
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99
 QMAKE_LFLAGS_RELEASE =
 CONFIG += DEBUG
