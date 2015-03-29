@@ -48,11 +48,20 @@ public:
 	void processCPUfreq();
 	QVector<TraceEvent> events;
 	QVector<TraceLine> lines;
+	inline unsigned int getMaxCPU();
+	inline double getStartTime();
+	inline double getEndTime();
+	inline unsigned long getNrEvents();
 private:
 	inline bool parseLine(TraceLine* line, TraceEvent* event);
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
 	MemPool *ptrPool;
+	unsigned int maxCPU;
+	double startTime;
+	double endTime;
+	unsigned long nrEvents;
+	unsigned long lastEvent;
 };
 
 inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
@@ -78,6 +87,26 @@ inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 		continue;
 	}
 	return retval;
+}
+
+inline unsigned int FtraceParser::getMaxCPU()
+{
+	return maxCPU;
+}
+
+inline double  FtraceParser::getStartTime()
+{
+	return startTime;
+}
+
+inline double FtraceParser::getEndTime()
+{
+	return endTime;
+}
+
+inline unsigned long int FtraceParser::getNrEvents()
+{
+	return nrEvents;
 }
 
 #endif

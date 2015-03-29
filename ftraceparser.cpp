@@ -28,6 +28,8 @@
 #include "eventnode.h"
 #include "argnode.h"
 
+#define FAKE_DELTA ((double) 0.0000005)
+
 bool FtraceParser::open(const QString &fileName)
 {
 	unsigned long long nr = 0;
@@ -155,18 +157,36 @@ bool FtraceParser::parse(void)
 	return true;
 }
 
-void FtraceParser::preScan(void)
+void FtraceParser::preScan()
+{
+	unsigned long i;
+
+	nrEvents = events.size();
+	lastEvent = nrEvents - 1;
+	maxCPU = 0;
+	startTime = 0;
+	endTime = 0;
+
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		if (event.cpu > maxCPU)
+			maxCPU = event.cpu;
+	}
+
+	if (nrEvents >= 2) {
+		startTime = events[0].time;
+		endTime = events[lastEvent].time;
+	}
+}
+
+void FtraceParser::processMigration()
 {
 }
 
-void FtraceParser::processMigration(void)
+void FtraceParser::processSched()
 {
 }
 
-void FtraceParser::processSched(void)
-{
-}
-
-void FtraceParser::processCPUfreq(void)
+void FtraceParser::processCPUfreq()
 {
 }
