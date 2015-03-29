@@ -42,6 +42,7 @@ protected:
 
 private slots:
 	void openTrace();
+	void processTrace();
 	void closeTrace();
 	void about();
 	void license();

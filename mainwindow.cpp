@@ -51,6 +51,17 @@ void MainWindow::openTrace()
 			parser->close();
 		loadTraceFile(name);
 	}
+	if (parser->isOpen()) {
+		processTrace();
+	}
+}
+
+void MainWindow::processTrace()
+{
+	parser->preScan();
+	parser->processSched();
+	parser->processMigration();
+	parser->processCPUfreq();
 }
 
 void MainWindow::closeTrace()

@@ -41,8 +41,12 @@ public:
 	bool open(const QString &fileName);
 	bool isOpen();
 	void close();
-	QVector<TraceEvent> events;
 	bool parse(void);
+	void preScan();
+	void processMigration();
+	void processSched();
+	void processCPUfreq();
+	QVector<TraceEvent> events;
 	QVector<TraceLine> lines;
 private:
 	inline bool parseLine(TraceLine* line, TraceEvent* event);

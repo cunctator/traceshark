@@ -154,3 +154,19 @@ bool FtraceParser::parse(void)
 
 	return true;
 }
+
+void FtraceParser::preScan(void)
+{
+}
+
+void FtraceParser::processMigration(void)
+{
+}
+
+void FtraceParser::processSched(void)
+{
+}
+
+void FtraceParser::processCPUfreq(void)
+{
+}
