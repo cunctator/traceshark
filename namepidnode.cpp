@@ -21,7 +21,7 @@
 #include "tstring.h"
 
 NamePidNode::NamePidNode(const char *name)
-	: GrammarNode(name) {};
+	: GrammarNode(name) {}
 
 bool NamePidNode::match(TString *str, TraceEvent *event)
 {

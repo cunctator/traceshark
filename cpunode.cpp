@@ -21,7 +21,7 @@
 #include "tstring.h"
 
 CpuNode::CpuNode(const char *name)
-	: GrammarNode(name) {};
+	: GrammarNode(name) {}
 
 bool CpuNode::match(TString *str, TraceEvent *event)
 {

@@ -24,7 +24,7 @@
 #include "traceshark.h"
 
 TimeNode::TimeNode(const char *name)
-	: GrammarNode(name) {};
+	: GrammarNode(name) {}
 
 bool TimeNode::match(TString *str, TraceEvent *event)
 {

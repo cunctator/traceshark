@@ -20,7 +20,7 @@
 #include "traceevent.h"
 
 ArgNode::ArgNode(const char *name) 
-	: GrammarNode(name) {};
+	: GrammarNode(name) {}
 
 bool ArgNode::match(TString *str, TraceEvent *event)
 {

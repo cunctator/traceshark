@@ -28,7 +28,7 @@ extern "C" {
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
-};
+}
 
 ssize_t TraceFile::Read(int fd, void *buf, size_t count)
 {
