@@ -23,6 +23,8 @@
 #include <cstring>
 #include <cstdint>
 
+extern char *eventstrings[];
+
 typedef enum {
 	CPU_FREQUENCY = 0,
 	CPU_IDLE,
@@ -36,7 +38,7 @@ typedef enum {
 #define ABSURD_UNSIGNED (2147483647)
 
 #define is_this_event(EVENTNAME, EVENT) (strcmp(eventstrings[EVENTNAME], \
-						 EVENT.eventName) == 0)
+						 EVENT.eventName->ptr) == 0)
 
 static __always_inline unsigned int param_after_char(const TraceEvent &event,
 					    int n_param, char ch)
@@ -93,11 +95,11 @@ static __always_inline unsigned int param_inside_braces(TraceEvent &event,
 
 #define cpufreq_event(EVENT) (is_this_event(CPU_FREQUENCY, EVENT) && \
 			      EVENT.argc >= 2)
-#define cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '=')
-#define cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '=')
+#define cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
+#define cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '='))
 
 #define cpuidle_event(EVENT) (is_this_event(CPU_IDLE, EVENT) && EVENT.argc >= 2)
-#define cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '=')
+#define cpuidle_cpu(EVENT) (param_after_char(EVENT, 1, '='))
 static __always_inline int cpuidle_state(const TraceEvent &event)
 {
 	int32_t state;
@@ -123,7 +125,7 @@ static __always_inline int cpuidle_state(const TraceEvent &event)
 	(is_this_event(SCHED_SWITCH, EVENT) && EVENT.argc >= 6)
 #define sched_switch_newprio(EVENT) (param_inside_braces(EVENT, EVENT.argc - 1))
 #define sched_switch_newpid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 2), ':')
+	(param_after_char(EVENT, EVENT.argc - 2), ':'))
 
 static __always_inline unsigned int sched_switch_oldprio(TraceEvent &event)
 {

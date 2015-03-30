@@ -62,6 +62,8 @@ private:
 	double endTime;
 	unsigned long nrEvents;
 	unsigned long lastEvent;
+	unsigned int maxFreq;
+	unsigned int minFreq;
 };
 
 inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)

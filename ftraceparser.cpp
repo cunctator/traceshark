@@ -167,11 +167,34 @@ void FtraceParser::preScan()
 	maxCPU = 0;
 	startTime = 0;
 	endTime = 0;
+	minFreq = 2147483647;
+	maxFreq = 0;
 
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
 		if (event.cpu > maxCPU)
 			maxCPU = event.cpu;
+		if (cpuidle_event(event)) {
+			unsigned int cpu = cpuidle_cpu(event);
+			if (cpu > maxCPU)
+				maxCPU = cpu;
+		} else if (cpufreq_event(event)) {
+			unsigned int cpu = cpufreq_cpu(event);
+			unsigned int freq = cpufreq_freq(event);
+			if (freq > maxFreq)
+				maxFreq = freq;
+			if (freq < minFreq)
+				minFreq = freq;
+			if (cpu > maxCPU)
+				maxCPU = cpu;
+		} else if (sched_migrate(event)) {
+			unsigned int dest = sched_migrate_destCPU(event);
+			unsigned int orig = sched_migrate_origCPU(event);
+			if (dest > maxCPU)
+				maxCPU = dest;
+			if (orig > maxCPU)
+				maxCPU = dest;
+		}
 	}
 
 	if (nrEvents >= 2) {
