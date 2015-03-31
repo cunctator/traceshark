@@ -64,6 +64,9 @@ private:
 	unsigned long lastEvent;
 	unsigned int maxFreq;
 	unsigned int minFreq;
+	int minIdleState;
+	int maxIdleState;
+	unsigned int nrMigrateEvents;
 };
 
 inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
