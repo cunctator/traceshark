@@ -70,7 +70,7 @@ void FtraceParser::close()
 		lines.resize(0);
 		lines.reserve(1);
 		events.resize(0);
-		events.reserve(0);
+		events.reserve(1);
 		delete traceFile;
 		traceFile = NULL;
 	}
