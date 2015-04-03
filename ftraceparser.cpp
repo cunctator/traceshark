@@ -85,7 +85,7 @@ FtraceParser::FtraceParser()
 	ArgNode *argNode;
 
 	traceFile = NULL;
-	ptrPool = new MemPool(1024*1024*8, sizeof(TString*));
+	ptrPool = new MemPool(2048, sizeof(TString*));
 
 	argNode = new ArgNode("argnode");
 	argNode->nChildren = 1;

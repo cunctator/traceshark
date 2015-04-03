@@ -22,9 +22,13 @@ extern "C" {
 #include <sys/mman.h>
 }
 
-MemPool::MemPool(unsigned long long size, unsigned long objsize)
+extern "C" {
+#include <unistd.h>
+}
+
+MemPool::MemPool(unsigned int nr_pages, unsigned long objsize)
 {
-	poolSize = size;
+	poolSize = nr_pages * sysconf(_SC_PAGESIZE);
 	objSize = objsize;
 	next = NULL;
 	memory = NULL;

@@ -29,7 +29,7 @@ extern "C" {
 class MemPool
 {
 public:
-	MemPool(unsigned long long size = 1024*1024*10,
+	MemPool(unsigned int nr_pages = 256*10,
 		unsigned long objsize = 64);
 	~MemPool();
 	inline void* allocObj();
