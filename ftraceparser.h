@@ -25,6 +25,7 @@
 #include <QList>
 
 #include "mempool.h"
+#include "task.h"
 #include "traceevent.h"
 #include "traceline.h"
 #include "grammarnode.h"
@@ -57,6 +58,7 @@ private:
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
 	MemPool *ptrPool;
+	MemPool *taskNamePool;
 	unsigned int maxCPU;
 	double startTime;
 	double endTime;
@@ -67,6 +69,7 @@ private:
 	int minIdleState;
 	int maxIdleState;
 	unsigned int nrMigrateEvents;
+	QMap<unsigned int, Task> *cpuTaskMaps;
 };
 
 inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)

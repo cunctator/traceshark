@@ -28,6 +28,9 @@
 #include "timenode.h"
 #include "eventnode.h"
 #include "argnode.h"
+#include "traceshark.h"
+
+using namespace TraceShark;
 
 #define FAKE_DELTA ((double) 0.0000005)
 
@@ -86,6 +89,7 @@ FtraceParser::FtraceParser()
 
 	traceFile = NULL;
 	ptrPool = new MemPool(2048, sizeof(TString*));
+	taskNamePool = new MemPool(16, sizeof(char));
 
 	argNode = new ArgNode("argnode");
 	argNode->nChildren = 1;
@@ -210,14 +214,123 @@ void FtraceParser::preScan()
 		startTime = events[0].time;
 		endTime = events[lastEvent].time;
 	}
+
+	if (cpuTaskMaps != NULL)
+		delete[] cpuTaskMaps;
+
+	cpuTaskMaps = new QMap<unsigned int, Task>[maxCPU];
 }
 
 void FtraceParser::processMigration()
 {
 }
 
+static __always_inline void processSwitchEvent(TraceEvent &event,
+					       QMap<unsigned int, Task>
+					       *taskMaps, double &startTime,
+					       double &endTime, MemPool
+					       *pool)
+{
+	unsigned int cpu = event.cpu;
+	double oldtime = event.time - FAKE_DELTA;
+	double newtime = event.time + FAKE_DELTA;
+	unsigned int oldpid = sched_switch_oldpid(event);
+	unsigned int newpid = sched_switch_newpid(event);
+
+	/* Handle the outgoing task */
+	if (!taskMaps[cpu].contains(oldpid)) {
+		Task task;
+		double lastT = 0;
+		task.pid = oldpid;
+
+		/* Apparenly this task was on CPU when we started tracing */
+		task.timev.push_back(startTime);
+		task.data.push_back(1);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.timev.push_back(oldtime);
+		task.data.push_back(1);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.timev.push_back(oldtime);
+		task.data.push_back(0);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.lastT = lastT;
+		task.name = sched_switch_oldname_strdup(event, pool);
+		taskMaps[cpu][oldpid] = task;
+	} else {
+		Task &task = taskMaps[cpu][oldpid];
+		double lastT = task.lastT;
+
+		task.timev.push_back(oldtime);
+		task.data.push_back(1);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.timev.push_back(oldtime);
+		task.data.push_back(0);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.lastT = lastT;
+	}
+
+	/* Handle the incoming task */
+	if (!taskMaps[cpu].contains(newpid)) {
+		Task task;
+		double lastT = 0;
+		task.pid = newpid;
+
+		task.timev.push_back(startTime);
+		task.data.push_back(0);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.timev.push_back(newtime);
+		task.data.push_back(0);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.timev.push_back(newtime);
+		task.data.push_back(0);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.lastT = lastT;
+		task.name = sched_switch_newname_strdup(event, pool);
+		taskMaps[cpu][oldpid] = task;
+	} else {
+		Task &task = taskMaps[cpu][newpid];
+		double lastT = task.lastT;
+
+		task.timev.push_back(newtime);
+		task.data.push_back(0);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.timev.push_back(newtime);
+		task.data.push_back(1);
+		task.t.push_back(lastT);
+		lastT += 1;
+
+		task.lastT = lastT;
+	}
+}
+
 void FtraceParser::processSched()
 {
+	unsigned long i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		if (sched_switch(event)) {
+			processSwitchEvent(event, cpuTaskMaps, startTime,
+					   endTime, taskNamePool);
+		}
+	}
 }
 
 void FtraceParser::processCPUfreq()

@@ -16,31 +16,20 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ftraceparams.h"
+#ifndef TASK_H
+#define TASK_H
 
-/* Do not change the order of these without updating the enum in
- * ftraceevents.h */
+#include <QVector>
 
-static char cpufreqstr[] = "cpu_frequency";
-static char cpuidlestr[] = "cpu_idle";
-static char migratestr[] = "sched_migrate_task";
-static char sswitchstr[] = "sched_switch";
-static char swakeupstr[] = "sched_wakeup";
-static char swaknewstr[] = "sched_wakeup_new";
-
-char *eventstrings[NR_EVENTS] = {
-	cpufreqstr,
-	cpuidlestr,
-	migratestr,
-	sswitchstr,
-	swakeupstr,
-	swaknewstr,
+class Task {
+public:
+	char *name;
+	unsigned int pid; /* is really tid as all other pids here */
+	QVector<double> timev;
+	QVector<double> data;
+	QVector<double> t;
+	QVector<double> scaledData;
+	double lastT;
 };
 
-char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_oldname_strdup(event, pool);
-}
-
-char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_newname_strdup(event, pool);
-}
+#endif

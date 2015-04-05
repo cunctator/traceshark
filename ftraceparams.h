@@ -19,9 +19,13 @@
 #ifndef FTRACEPARAMS_H
 #define FTRACEPARAMS_H
 
+#include "mempool.h"
 #include "traceevent.h"
 #include <cstring>
 #include <cstdint>
+
+#define TASKNAME_MAXLEN (128) /* Should be enough, I wouldn't expect more
+				 than about 16 */
 
 extern char *eventstrings[];
 
@@ -125,7 +129,7 @@ static __always_inline int cpuidle_state(const TraceEvent &event)
 	(is_this_event(SCHED_SWITCH, EVENT) && EVENT.argc >= 6)
 #define sched_switch_newprio(EVENT) (param_inside_braces(EVENT, EVENT.argc - 1))
 #define sched_switch_newpid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 2), ':'))
+	(param_after_char(EVENT, EVENT.argc - 2, ':'))
 
 static __always_inline unsigned int sched_switch_oldprio(TraceEvent &event)
 {
@@ -150,6 +154,149 @@ static __always_inline unsigned int sched_switch_oldpid(TraceEvent &event)
 		return param_after_char(event, i - 3, ':');
 	return ABSURD_UNSIGNED;
 }
+
+static __always_inline char * __sched_switch_oldname_strdup(TraceEvent &event,
+	MemPool *pool)
+{
+	unsigned int i;
+	unsigned int endidx;
+	unsigned int len = 0;
+	char *retstr;
+	char *c;
+	char *d;
+	char *end;
+
+	/* Find the index of the '==>' */
+	for (i = 3; i < event.argc; i++) {
+		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+			break;
+	}
+	if (!(i < event.argc))
+		return NULL;
+	endidx = i - 3;
+
+	/* + 1 needed for null termination */
+	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
+	c = retstr;
+
+	/* This loop will merge any strings before the final string, in case
+	 * such strings exists due to the task name containing spaces, and
+	 * then the taskname would be split into several strings
+	 */
+	for (i = 0; i < endidx; i++) {
+		len += event.argv[i]->len;
+		if (len > TASKNAME_MAXLEN)
+			return NULL;
+		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
+		c += event.argv[i]->len;
+		*c = ' ';
+		len++;
+		c++;
+	}
+
+	/*
+	 * Localize the separing '-' in the final string. The final
+	 * string is the only sting in case of no spaces in the task name.
+	 * we are searching backwards because we are interested in the last '-',
+	 * since the task name can contain '-' characters
+	 */
+	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
+	     end > event.argv[endidx]->ptr; end--) {
+		if (*end == '-')
+			break;
+	}
+
+	/* Copy the final portion up to the '-' we found previously */
+	for (d = event.argv[endidx]->ptr; d < end; d++) {
+		len++;
+		if (len > TASKNAME_MAXLEN)
+			return NULL;
+		*c = *d;
+		c++;
+	}
+	/* Terminate the string */
+	*c = '\0';
+	len++;
+	/* commmit the allocation */
+	if (pool->commitChars(len))
+		return retstr;
+	return NULL;
+}
+
+char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool);
+
+/* TODO: Check what code could be shared between this and the above function */
+static __always_inline char * __sched_switch_newname_strdup(TraceEvent &event,
+	MemPool *pool)
+{
+	unsigned int i;
+	unsigned int startidx, endidx;
+	unsigned int len = 0;
+	char *retstr;
+	char *c;
+	char *d;
+	char *end;
+
+	endidx = event.argc - 2;
+
+	/* Find the index of the '==>' */
+	for (i = 3; i < event.argc; i++) {
+		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+			break;
+	}
+	if (!(i < event.argc))
+		return NULL;
+	startidx = i + 1;
+
+	/* + 1 needed for null termination */
+	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
+	c = retstr;
+
+	/* This loop will merge any strings before the final string, in case
+	 * such strings exists due to the task name containing spaces, and
+	 * then the taskname would be split into several strings
+	 */
+	for (i = startidx; i < endidx; i++) {
+		len += event.argv[i]->len;
+		if (len > TASKNAME_MAXLEN)
+			return NULL;
+		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
+		c += event.argv[i]->len;
+		*c = ' ';
+		len++;
+		c++;
+	}
+
+	/*
+	 * Localize the separing '-' in the final string. The final
+	 * string is the only sting in case of no spaces in the task name.
+	 * we are searching backwards because we are interested in the last '-',
+	 * since the task name can contain '-' characters
+	 */
+	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
+	     end > event.argv[endidx]->ptr; end--) {
+		if (*end == '-')
+			break;
+	}
+
+	/* Copy the final portion up to the '-' we found previously */
+	for (d = event.argv[endidx]->ptr; d < end; d++) {
+		len++;
+		if (len > TASKNAME_MAXLEN)
+			return NULL;
+		*c = *d;
+		c++;
+	}
+	/* Terminate the string */
+	*c = '\0';
+	len++;
+	/* commmit the allocation */
+	if (pool->commitChars(len))
+		return retstr;
+	return NULL;
+}
+
+char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool);
 
 #define sched_wakeup(EVENT) \
 	(is_this_event(SCHED_WAKEUP, EVENT) && EVENT.argc >= 4)

@@ -53,7 +53,6 @@ private:
 	inline bool newMap();
 	inline bool addMemory();
 };
-#endif /* MEMPOOL_H */
 
 inline void* MemPool::allocObj()
 {
@@ -215,3 +214,5 @@ inline bool MemPool::newMap()
 	QTextStream(stderr) << "mmap() failed\n";
 	return false;
 }
+
+#endif /* MEMPOOL_H */

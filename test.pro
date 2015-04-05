@@ -27,6 +27,7 @@ HEADERS      += grammarroot.h
 HEADERS      += mainwindow.h
 HEADERS      += namepidnode.h
 HEADERS      += mempool.h
+HEADERS      += task.h
 HEADERS      += timenode.h
 HEADERS      += traceevent.h
 HEADERS      += tracefile.h

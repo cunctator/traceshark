@@ -20,6 +20,7 @@
 #define TRACESHARK_H
 
 #include <cmath>
+#include "task.h"
 
 #define tsconnect(src, ssig, dest, dslot) \
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
@@ -82,6 +83,9 @@ namespace TraceShark {
 	        ok = false;
 		return 0;
 	}
+
+#define DEFINE_TASKMAP_ITERATOR(name)  \
+	QMap<unsigned int, Task>::const_iterator name
 }
 
 #endif /* TRACESHARK_H */
