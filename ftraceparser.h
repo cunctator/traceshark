@@ -60,6 +60,7 @@ private:
 	MemPool *ptrPool;
 	MemPool *taskNamePool;
 	unsigned int maxCPU;
+	unsigned int nrCPUs;
 	double startTime;
 	double endTime;
 	unsigned long nrEvents;

@@ -219,7 +219,9 @@ void FtraceParser::preScan()
 	if (cpuTaskMaps != NULL)
 		delete[] cpuTaskMaps;
 
-	cpuTaskMaps = new QMap<unsigned int, Task>[maxCPU];
+	nrCPUs = maxCPU + 1;
+
+	cpuTaskMaps = new QMap<unsigned int, Task>[nrCPUs];
 }
 
 void FtraceParser::processMigration()
