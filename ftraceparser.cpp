@@ -228,8 +228,7 @@ void FtraceParser::processMigration()
 static __always_inline void processSwitchEvent(TraceEvent &event,
 					       QMap<unsigned int, Task>
 					       *taskMaps, double &startTime,
-					       double &endTime, MemPool
-					       *pool)
+					       MemPool *pool)
 {
 	unsigned int cpu = event.cpu;
 	double oldtime = event.time - FAKE_DELTA;
@@ -238,86 +237,82 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 	unsigned int newpid = sched_switch_newpid(event);
 
 	/* Handle the outgoing task */
-	if (!taskMaps[cpu].contains(oldpid)) {
-		Task task;
-		double lastT = 0;
-		task.pid = oldpid;
+	Task &oldtask = taskMaps[cpu][oldpid]; /* Modifiable reference */
+	if (oldtask.lastT == 0) { /* 0 means task is newly constructed above */
+		double lastT = oldtask.lastT;
+		oldtask.pid = oldpid;
 
 		/* Apparenly this task was on CPU when we started tracing */
-		task.timev.push_back(startTime);
-		task.data.push_back(1);
-		task.t.push_back(lastT);
+		oldtask.timev.push_back(startTime);
+		oldtask.data.push_back(1);
+		oldtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.timev.push_back(oldtime);
-		task.data.push_back(1);
-		task.t.push_back(lastT);
+		oldtask.timev.push_back(oldtime);
+		oldtask.data.push_back(1);
+		oldtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.timev.push_back(oldtime);
-		task.data.push_back(0);
-		task.t.push_back(lastT);
+		oldtask.timev.push_back(oldtime);
+		oldtask.data.push_back(0);
+		oldtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.lastT = lastT;
-		task.name = sched_switch_oldname_strdup(event, pool);
-		taskMaps[cpu][oldpid] = task;
+		oldtask.lastT = lastT;
+		oldtask.name = sched_switch_oldname_strdup(event, pool);
 	} else {
-		Task &task = taskMaps[cpu][oldpid];
-		double lastT = task.lastT;
+		double lastT = oldtask.lastT;
 
-		task.timev.push_back(oldtime);
-		task.data.push_back(1);
-		task.t.push_back(lastT);
+		oldtask.timev.push_back(oldtime);
+		oldtask.data.push_back(1);
+		oldtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.timev.push_back(oldtime);
-		task.data.push_back(0);
-		task.t.push_back(lastT);
+		oldtask.timev.push_back(oldtime);
+		oldtask.data.push_back(0);
+		oldtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.lastT = lastT;
+		oldtask.lastT = lastT;
 	}
 
 	/* Handle the incoming task */
-	if (!taskMaps[cpu].contains(newpid)) {
-		Task task;
-		double lastT = 0;
-		task.pid = newpid;
+	Task &newtask = taskMaps[cpu][newpid]; /* Modifiable reference */
+	if (newtask.lastT == 0) { /* 0 means task is newly constructed above */
+		double lastT = newtask.lastT;
+		newtask.pid = newpid;
 
-		task.timev.push_back(startTime);
-		task.data.push_back(0);
-		task.t.push_back(lastT);
+		newtask.timev.push_back(startTime);
+		newtask.data.push_back(0);
+		newtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.timev.push_back(newtime);
-		task.data.push_back(0);
-		task.t.push_back(lastT);
+		newtask.timev.push_back(newtime);
+		newtask.data.push_back(0);
+		newtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.timev.push_back(newtime);
-		task.data.push_back(0);
-		task.t.push_back(lastT);
+		newtask.timev.push_back(newtime);
+		newtask.data.push_back(0);
+		newtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.lastT = lastT;
-		task.name = sched_switch_newname_strdup(event, pool);
-		taskMaps[cpu][oldpid] = task;
+		newtask.lastT = lastT;
+		newtask.name = sched_switch_newname_strdup(event, pool);
 	} else {
-		Task &task = taskMaps[cpu][newpid];
-		double lastT = task.lastT;
+		double lastT = newtask.lastT;
 
-		task.timev.push_back(newtime);
-		task.data.push_back(0);
-		task.t.push_back(lastT);
+		newtask.timev.push_back(newtime);
+		newtask.data.push_back(0);
+		newtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.timev.push_back(newtime);
-		task.data.push_back(1);
-		task.t.push_back(lastT);
+		newtask.timev.push_back(newtime);
+		newtask.data.push_back(1);
+		newtask.t.push_back(lastT);
 		lastT += 1;
 
-		task.lastT = lastT;
+		newtask.lastT = lastT;
 	}
 }
 
@@ -328,7 +323,7 @@ void FtraceParser::processSched()
 		TraceEvent &event = events[i];
 		if (sched_switch(event)) {
 			processSwitchEvent(event, cpuTaskMaps, startTime,
-					   endTime, taskNamePool);
+					   taskNamePool);
 		}
 	}
 }

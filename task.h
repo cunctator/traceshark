@@ -23,6 +23,7 @@
 
 class Task {
 public:
+	Task(): lastT(0) {}
 	char *name;
 	unsigned int pid; /* is really tid as all other pids here */
 	QVector<double> timev;
