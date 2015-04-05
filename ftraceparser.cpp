@@ -80,6 +80,7 @@ void FtraceParser::close()
 }
 
 FtraceParser::FtraceParser()
+	: cpuTaskMaps(NULL)
 {
 	NamePidNode *namePidNode;
 	CpuNode *cpuNode;
