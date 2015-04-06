@@ -20,6 +20,7 @@
 #include <QString>
 #include <QTextStream>
 #include "cpufreq.h"
+#include "cpuidle.h"
 #include "ftraceparams.h"
 #include "ftraceparser.h"
 #include "tracefile.h"
@@ -82,10 +83,12 @@ void FtraceParser::close()
 		delete[] cpuTaskMaps;
 	if (cpuFreq != NULL)
 		delete[] cpuFreq;
+	if (cpuIdle != NULL)
+		delete[] cpuIdle;
 }
 
 FtraceParser::FtraceParser()
-	: cpuTaskMaps(NULL), cpuFreq(NULL)
+	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL)
 {
 	NamePidNode *namePidNode;
 	CpuNode *cpuNode;
@@ -224,6 +227,7 @@ void FtraceParser::preScan()
 	nrCPUs = maxCPU + 1;
 	cpuTaskMaps = new QMap<unsigned int, Task>[nrCPUs];
 	cpuFreq = new CpuFreq[nrCPUs];
+	cpuIdle = new CpuIdle[nrCPUs];
 }
 
 void FtraceParser::processMigration()
@@ -359,13 +363,31 @@ static __always_inline void processCPUfreqEvent(TraceEvent &event,
 	cpuFreq[cpu].data.push_back((double) freq);
 }
 
+static __always_inline void processCPUidleEvent(TraceEvent &event,
+						CpuIdle *cpuIdle)
+{
+	unsigned int cpu = cpuidle_cpu(event);
+	double time = event.time;
+	unsigned int state = cpuidle_state(event);
+
+	cpuIdle[cpu].timev.push_back(time);
+	cpuIdle[cpu].data.push_back((double) state);
+}
+
 void FtraceParser::processCPUfreq()
 {
 	unsigned int i;
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
-		if (cpufreq_event(event)) {
-			processCPUfreqEvent(event, cpuFreq);
+		/*
+		 * I expect this loop to be so fast in comparison
+		 * to the other functions that will be running in parallel
+		 * that it's acceptable to piggy back cpuidle events here */
+		if (cpuidle_event(event)) {
+			processCPUidleEvent(event, cpuIdle);
+			continue;
 		}
+		if (cpufreq_event(event))
+			processCPUfreqEvent(event, cpuFreq);
 	}
 }

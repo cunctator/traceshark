@@ -34,6 +34,7 @@
 class FtraceEvent;
 class TraceFile;
 class CpuFreq;
+class CpuIdle;
 
 class FtraceParser
 {
@@ -74,6 +75,7 @@ private:
 	unsigned int nrMigrateEvents;
 	QMap<unsigned int, Task> *cpuTaskMaps;
 	CpuFreq *cpuFreq;
+	CpuIdle *cpuIdle;
 };
 
 __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
