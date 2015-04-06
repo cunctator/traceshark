@@ -19,6 +19,7 @@
 #include <QtGlobal>
 #include <QString>
 #include <QTextStream>
+#include "cpufreq.h"
 #include "ftraceparams.h"
 #include "ftraceparser.h"
 #include "tracefile.h"
@@ -77,10 +78,14 @@ void FtraceParser::close()
 		delete traceFile;
 		traceFile = NULL;
 	}
+	if (cpuTaskMaps != NULL)
+		delete[] cpuTaskMaps;
+	if (cpuFreq != NULL)
+		delete[] cpuFreq;
 }
 
 FtraceParser::FtraceParser()
-	: cpuTaskMaps(NULL)
+	: cpuTaskMaps(NULL), cpuFreq(NULL)
 {
 	NamePidNode *namePidNode;
 	CpuNode *cpuNode;
@@ -125,10 +130,10 @@ FtraceParser::FtraceParser()
 
 FtraceParser::~FtraceParser()
 {
+	FtraceParser::close();
 	DeleteGrammarTree(grammarRoot);
-	if (traceFile != NULL)
-		delete traceFile;
 	delete ptrPool;
+	delete taskNamePool;
 }
 
 void FtraceParser::DeleteGrammarTree(GrammarNode* node) {
@@ -216,12 +221,9 @@ void FtraceParser::preScan()
 		endTime = events[lastEvent].time;
 	}
 
-	if (cpuTaskMaps != NULL)
-		delete[] cpuTaskMaps;
-
 	nrCPUs = maxCPU + 1;
-
 	cpuTaskMaps = new QMap<unsigned int, Task>[nrCPUs];
+	cpuFreq = new CpuFreq[nrCPUs];
 }
 
 void FtraceParser::processMigration()
@@ -346,6 +348,24 @@ void FtraceParser::processSched()
 	}
 }
 
+static __always_inline void processCPUfreqEvent(TraceEvent &event,
+						CpuFreq *cpuFreq)
+{
+	unsigned int cpu = cpufreq_cpu(event);
+	double time = event.time;
+	unsigned int freq = cpufreq_freq(event);
+
+	cpuFreq[cpu].timev.push_back(time);
+	cpuFreq[cpu].data.push_back((double) freq);
+}
+
 void FtraceParser::processCPUfreq()
 {
+	unsigned int i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		if (cpufreq_event(event)) {
+			processCPUfreqEvent(event, cpuFreq);
+		}
+	}
 }

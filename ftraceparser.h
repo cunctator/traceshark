@@ -32,6 +32,7 @@
 
 class FtraceEvent;
 class TraceFile;
+class CpuFreq;
 
 class FtraceParser
 {
@@ -71,6 +72,7 @@ private:
 	int maxIdleState;
 	unsigned int nrMigrateEvents;
 	QMap<unsigned int, Task> *cpuTaskMaps;
+	CpuFreq *cpuFreq;
 };
 
 inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
