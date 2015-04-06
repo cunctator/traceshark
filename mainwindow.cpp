@@ -190,7 +190,7 @@ void MainWindow::loadTraceFile(QString &fileName)
 
 	stop = stop - start;
 
-	qout << "Parsing took " << (double) stop / 1000 << " ms\n";
+	qout << "Parsing took " << (double) stop / 1000 << "s\n";
 
 #if 0
 	int i, s;
