@@ -85,7 +85,7 @@ namespace TraceShark {
 	}
 
 #define DEFINE_TASKMAP_ITERATOR(name)  \
-	QMap<unsigned int, Task>::const_iterator name
+	QMap<unsigned int, Task>::iterator name
 }
 
 #endif /* TRACESHARK_H */

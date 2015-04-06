@@ -329,6 +329,21 @@ void FtraceParser::processSched()
 					   taskNamePool);
 		}
 	}
+
+	/* Add the "tail" to all tasks, i.e. extend them until endTime */
+	unsigned int cpu;
+	for (cpu = 0; i < nrCPUs; i++) {
+		DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
+		while (iter != cpuTaskMaps[cpu].end()) {
+			Task &task = iter.value();
+			double d = task.data[task.data.size() - 1];
+			task.timev.push_back(endTime);
+			task.data.push_back(d);
+			task.t.push_back(task.lastT);
+			task.lastT += 1;
+			iter++;
+		}
+	}
 }
 
 void FtraceParser::processCPUfreq()
