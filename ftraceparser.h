@@ -23,6 +23,7 @@
 #include <QStringList>
 #include <QVector>
 #include <QList>
+#include <QMap>
 
 #include "mempool.h"
 #include "task.h"
@@ -50,12 +51,12 @@ public:
 	void processCPUfreq();
 	QVector<TraceEvent> events;
 	QVector<TraceLine> lines;
-	inline unsigned int getMaxCPU();
-	inline double getStartTime();
-	inline double getEndTime();
-	inline unsigned long getNrEvents();
+	__always_inline unsigned int getMaxCPU();
+	__always_inline double getStartTime();
+	__always_inline double getEndTime();
+	__always_inline unsigned long getNrEvents();
 private:
-	inline bool parseLine(TraceLine* line, TraceEvent* event);
+	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
 	MemPool *ptrPool;
@@ -75,7 +76,7 @@ private:
 	CpuFreq *cpuFreq;
 };
 
-inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
+__always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 {
 	unsigned int i,j;
 	GrammarNode *node = grammarRoot;
@@ -100,22 +101,22 @@ inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 	return retval;
 }
 
-inline unsigned int FtraceParser::getMaxCPU()
+__always_inline unsigned int FtraceParser::getMaxCPU()
 {
 	return maxCPU;
 }
 
-inline double  FtraceParser::getStartTime()
+__always_inline double  FtraceParser::getStartTime()
 {
 	return startTime;
 }
 
-inline double FtraceParser::getEndTime()
+__always_inline double FtraceParser::getEndTime()
 {
 	return endTime;
 }
 
-inline unsigned long int FtraceParser::getNrEvents()
+__always_inline unsigned long int FtraceParser::getNrEvents()
 {
 	return nrEvents;
 }

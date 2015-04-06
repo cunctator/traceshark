@@ -20,6 +20,7 @@
 #define TRACESHARK_H
 
 #include <cmath>
+#include <QMap>
 #include "task.h"
 
 #define tsconnect(src, ssig, dest, dslot) \
