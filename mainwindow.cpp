@@ -58,10 +58,34 @@ void MainWindow::openTrace()
 
 void MainWindow::processTrace()
 {
+	QTextStream qout(stdout);
+	quint64 start, pre, sched, migration, cpufreq;
+
+	qout.setRealNumberPrecision(6);
+	qout.setRealNumberNotation(QTextStream::FixedNotation);
+
+	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 	parser->preScan();
+	pre = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 	parser->processSched();
+	sched = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 	parser->processMigration();
+	migration = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 	parser->processCPUfreq();
+	cpufreq = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	qout << "preScan() took " << (double) (pre - start) / 1000 << " s\n";
+	qout << "processSched() took " << (double) (sched - pre) / 1000 << 
+		" s\n";
+	qout << "processMigration() took " << (double) (migration - sched) /
+		1000 << " s\n";
+	qout << "processCPUfreq() took " << (double) (cpufreq - migration) /
+		1000 << " s\n";
+	qout.flush();
 }
 
 void MainWindow::closeTrace()
@@ -191,6 +215,7 @@ void MainWindow::loadTraceFile(QString &fileName)
 	stop = stop - start;
 
 	qout << "Parsing took " << (double) stop / 1000 << " s\n";
+	qout.flush();
 
 #if 0
 	int i, s;
