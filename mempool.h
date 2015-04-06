@@ -36,12 +36,12 @@ public:
 	inline void* allocN(unsigned long n);
 	inline void* preallocN(unsigned long n);
 	inline bool commitN(unsigned long n);
-	inline void* allocBytes(quint32 bytes);
-	inline void* allocChars(quint32 chars);
-	inline void* preallocBytes(quint32 maxbytes);
-	inline void* preallocChars(quint32 maxchars);
-	inline bool commitBytes(quint32 nrbytes);
-	inline bool commitChars(quint32 nrbytes);
+	inline void* allocBytes(unsigned int bytes);
+	inline void* allocChars(unsigned int chars);
+	inline void* preallocBytes(unsigned int maxbytes);
+	inline void* preallocChars(unsigned int maxchars);
+	inline bool commitBytes(unsigned int nrbytes);
+	inline bool commitChars(unsigned int nrbytes);
 	void reset();
 private:
 	quint8 *memory;
@@ -127,7 +127,7 @@ inline bool MemPool::commitN(unsigned long n)
 	return true;
 }
 
-inline void* MemPool::allocBytes(quint32 bytes)
+inline void* MemPool::allocBytes(unsigned int bytes)
 {
 	quint8* ptr;
 	int retries = 0;
@@ -147,12 +147,12 @@ inline void* MemPool::allocBytes(quint32 bytes)
 	return NULL;
 }
 
-inline void* MemPool::allocChars(quint32 chars)
+inline void* MemPool::allocChars(unsigned int chars)
 {
 	return allocBytes(sizeof(char) * chars);
 }
 
-inline void* MemPool::preallocBytes(quint32 bytes)
+inline void* MemPool::preallocBytes(unsigned int bytes)
 {
 	unsigned long long maxused = used + bytes;
 	int retries = 0;
@@ -170,7 +170,7 @@ inline void* MemPool::preallocBytes(quint32 bytes)
 	return NULL;
 }
 
-inline bool MemPool::commitBytes(quint32 bytes)
+inline bool MemPool::commitBytes(unsigned int bytes)
 {
 	used += bytes;
 	if (used >= poolSize) {
@@ -181,12 +181,12 @@ inline bool MemPool::commitBytes(quint32 bytes)
 	return true;
 }
 
-inline void* MemPool::preallocChars(quint32 maxchars)
+inline void* MemPool::preallocChars(unsigned int maxchars)
 {
 	return preallocBytes(sizeof(char) * maxchars);
 }
 
-inline bool MemPool::commitChars(quint32 chars)
+inline bool MemPool::commitChars(unsigned int chars)
 {
 	return commitBytes(sizeof(char) * chars);
 }
