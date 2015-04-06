@@ -20,7 +20,6 @@
 #define TRACESHARK_H
 
 #include <cmath>
-#include <QMap>
 #include "task.h"
 
 #define tsconnect(src, ssig, dest, dslot) \
@@ -32,7 +31,7 @@ namespace TraceShark {
 	 * For example, 123.456: is ok. 123.456X is not ok if
 	 * X is not a digit between 0-9 or a ':'
 	 */
-	inline double strToDouble(char* str, bool &ok)
+	static __always_inline double strToDouble(char* str, bool &ok)
 	{
 		char *c;
 		double r;
