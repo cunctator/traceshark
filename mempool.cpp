@@ -48,3 +48,12 @@ MemPool::~MemPool()
 	if (memory != NULL)
 		munmap(memory, poolSize);
 }
+
+bool MemPool::addMemory()
+{
+	exhaustList.append(memory);
+	if (newMap())
+		return true;
+	exhaustList.removeLast();
+	return false;
+}
