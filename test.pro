@@ -25,6 +25,7 @@ HEADERS      += ftraceparser.h
 HEADERS      += grammarnode.h
 HEADERS      += grammarroot.h
 HEADERS      += mainwindow.h
+HEADERS      += migration.h
 HEADERS      += namepidnode.h
 HEADERS      += mempool.h
 HEADERS      += task.h

@@ -30,6 +30,7 @@
 #include "traceevent.h"
 #include "traceline.h"
 #include "grammarnode.h"
+#include "migration.h"
 
 class FtraceEvent;
 class TraceFile;
@@ -76,6 +77,7 @@ private:
 	QMap<unsigned int, Task> *cpuTaskMaps;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
+	QVector<Migration> migrations;
 };
 
 __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)

@@ -85,6 +85,7 @@ void FtraceParser::close()
 		delete[] cpuFreq;
 	if (cpuIdle != NULL)
 		delete[] cpuIdle;
+	migrations.resize(0);
 }
 
 FtraceParser::FtraceParser()
@@ -232,6 +233,18 @@ void FtraceParser::preScan()
 
 void FtraceParser::processMigration()
 {
+	unsigned long i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		if (sched_migrate(event)) {
+			Migration m;
+			m.pid = sched_migrate_pid(event);
+			m.oldcpu = sched_migrate_origCPU(event);
+			m.newcpu = sched_migrate_destCPU(event);
+			m.time = event.time;
+			migrations.push_back(m);
+		}
+	}
 }
 
 static __always_inline void processSwitchEvent(TraceEvent &event,
