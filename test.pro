@@ -18,6 +18,8 @@
 #
 
 HEADERS       = argnode.h
+HEADERS      += cpufreq.h
+HEADERS      += cpuidle.h
 HEADERS      += cpunode.h
 HEADERS      += eventnode.h
 HEADERS      += ftraceparams.h
