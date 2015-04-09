@@ -261,24 +261,24 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 	/* Handle the outgoing task */
 	Task &oldtask = taskMaps[cpu][oldpid]; /* Modifiable reference */
 	if (oldtask.lastT == 0) { /* 0 means task is newly constructed above */
-		double lastT = oldtask.lastT;
+		double lastT = (unsigned long long) oldtask.lastT;
 		oldtask.pid = oldpid;
 
 		/* Apparenly this task was on CPU when we started tracing */
 		oldtask.timev.push_back(startTime);
 		oldtask.data.push_back(1);
-		oldtask.t.push_back(lastT);
-		lastT += 1;
+		oldtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		oldtask.timev.push_back(oldtime);
 		oldtask.data.push_back(1);
-		oldtask.t.push_back(lastT);
-		lastT += 1;
+		oldtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		oldtask.timev.push_back(oldtime);
 		oldtask.data.push_back(0);
-		oldtask.t.push_back(lastT);
-		lastT += 1;
+		oldtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		oldtask.lastT = lastT;
 		oldtask.name = sched_switch_oldname_strdup(event, pool);
@@ -287,13 +287,13 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 
 		oldtask.timev.push_back(oldtime);
 		oldtask.data.push_back(1);
-		oldtask.t.push_back(lastT);
-		lastT += 1;
+		oldtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		oldtask.timev.push_back(oldtime);
 		oldtask.data.push_back(0);
-		oldtask.t.push_back(lastT);
-		lastT += 1;
+		oldtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		oldtask.lastT = lastT;
 	}
@@ -301,23 +301,23 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 	/* Handle the incoming task */
 	Task &newtask = taskMaps[cpu][newpid]; /* Modifiable reference */
 	if (newtask.lastT == 0) { /* 0 means task is newly constructed above */
-		double lastT = newtask.lastT;
+		unsigned long long lastT = newtask.lastT;
 		newtask.pid = newpid;
 
 		newtask.timev.push_back(startTime);
 		newtask.data.push_back(0);
-		newtask.t.push_back(lastT);
-		lastT += 1;
+		newtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		newtask.timev.push_back(newtime);
 		newtask.data.push_back(0);
-		newtask.t.push_back(lastT);
-		lastT += 1;
+		newtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		newtask.timev.push_back(newtime);
 		newtask.data.push_back(0);
-		newtask.t.push_back(lastT);
-		lastT += 1;
+		newtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		newtask.lastT = lastT;
 		newtask.name = sched_switch_newname_strdup(event, pool);
@@ -326,13 +326,13 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 
 		newtask.timev.push_back(newtime);
 		newtask.data.push_back(0);
-		newtask.t.push_back(lastT);
-		lastT += 1;
+		newtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		newtask.timev.push_back(newtime);
 		newtask.data.push_back(1);
-		newtask.t.push_back(lastT);
-		lastT += 1;
+		newtask.t.push_back(lastfunc(lastT));
+		lastT++;
 
 		newtask.lastT = lastT;
 	}

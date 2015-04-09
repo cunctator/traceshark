@@ -25,6 +25,8 @@
 #define tsconnect(src, ssig, dest, dslot) \
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
 
+#define lastfunc(myint) ((double) myint)
+
 namespace TraceShark {
 
 	/* This functions accepts ':' at the end of the value

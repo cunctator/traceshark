@@ -30,7 +30,7 @@ public:
 	QVector<double> data;
 	QVector<double> t;
 	QVector<double> scaledData;
-	double lastT;
+	unsigned long long lastT;
 };
 
 #endif
