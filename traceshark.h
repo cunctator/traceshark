@@ -37,7 +37,8 @@ namespace TraceShark {
 		double r;
 		unsigned long long base = 0;
 		bool isNeg = false;
-		unsigned int d, n;
+		unsigned int d;
+		unsigned long long divint;
 		double div;
 
 		ok = true;
@@ -58,7 +59,7 @@ namespace TraceShark {
 		r = (double) base;
 
 		if (*c == '.') {
-			n = 0;
+			divint = 1;
 			base = 0;
 			for (c++; *c != '\0'; c++) {
 				if (*c < '0' || *c > '9')
@@ -66,9 +67,9 @@ namespace TraceShark {
 				d = *c - '0';
 				base *= 10;
 				base += d;
-				n++;
+				divint *= 10;
 			}
-			div = pow(10, n);
+			div = (double) divint;
 			r += base / div;
 		}
 
