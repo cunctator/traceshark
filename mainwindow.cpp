@@ -204,9 +204,16 @@ void MainWindow::loadTraceFile(QString &fileName)
 
 	qout << "opening " << fileName << "\n";
 	
+	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 	if (!parser->open(fileName)) {
 		qout << "failed to open " << fileName << "\n";
 	}
+	stop = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	stop = stop - start;
+
+	qout << "Loading took " << (double) stop / 1000 << " s\n";
+	qout.flush();
 
 	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 	parser->parse();
