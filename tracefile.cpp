@@ -58,36 +58,9 @@ TraceFile::TraceFile(char *name, bool &ok, quint32 bsize)
 	nRead = n;
 }
 
-quint32 TraceFile::ReadLine(TraceLine* line)
-{
-	quint32 col;
-	quint32 n;
-
-	line->strings = (TString*) ptrPool->preallocN(MAXPTR);
-	Q_ASSERT(line->strings != NULL);
-
-	for(col = 0; col < MAXPTR; col++) {
-		line->strings[col].ptr = (char*) strPool->preallocChars(MAXSTR);
-		n = ReadNextWord(line->strings[col].ptr, MAXSTR);
-		if (n == 0)
-			break;
-		strPool->commitChars(n + 1 ); // + 1 for null termination
-		line->strings[col].len = n;
-	}
-	if (col > 0)
-		ptrPool->commitN(col);
-	line->nStrings = col;
-	return col;
-}
-
 TraceFile::~TraceFile()
 {
 	delete[] memory;
 	delete strPool;
 	delete ptrPool;
-}
-
-bool TraceFile::atEnd()
-{
-	return eof;
 }

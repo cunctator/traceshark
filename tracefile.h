@@ -23,16 +23,16 @@
 #include <QVector>
 #include <QDebug>
 
-class MemPool;
-class TraceLine;
+#include "mempool.h"
+#include "traceline.h"
 
 class TraceFile
 {
 public:
 	TraceFile(char *name, bool &ok, quint32 bsize = 1024*1024);
 	~TraceFile();
-	quint32 ReadLine(TraceLine* line);
-	bool atEnd();
+	__always_inline quint32 ReadLine(TraceLine* line);
+	__always_inline bool atEnd();
 private:
 	int fd;
 	bool eof;
@@ -46,11 +46,11 @@ private:
 	MemPool *ptrPool;
 	static const quint32 MAXPTR = 640;
 	static const quint32 MAXSTR = 480;
-	inline quint32 ReadNextWord(char *word, quint32 maxstr);
+	__always_inline quint32 ReadNextWord(char *word, quint32 maxstr);
 	ssize_t Read(int fd, void *buf, size_t count);
 };
 
-inline quint32 TraceFile::ReadNextWord(char *word, quint32 maxstr)
+__always_inline quint32 TraceFile::ReadNextWord(char *word, quint32 maxstr)
 {
 	quint32 pos = lastPos;
 	ssize_t n;
@@ -123,6 +123,32 @@ inline quint32 TraceFile::ReadNextWord(char *word, quint32 maxstr)
 	lastPos = pos;
 	word[nchar] = '\0';
 	return nchar;
+}
+
+__always_inline quint32 TraceFile::ReadLine(TraceLine* line)
+{
+	quint32 col;
+	quint32 n;
+
+	line->strings = (TString*) ptrPool->preallocN(MAXPTR);
+
+	for(col = 0; col < MAXPTR; col++) {
+		line->strings[col].ptr = (char*) strPool->preallocChars(MAXSTR);
+		n = ReadNextWord(line->strings[col].ptr, MAXSTR);
+		if (n == 0)
+			break;
+		strPool->commitChars(n + 1 ); // + 1 for null termination
+		line->strings[col].len = n;
+	}
+	if (col > 0)
+		ptrPool->commitN(col);
+	line->nStrings = col;
+	return col;
+}
+
+__always_inline bool TraceFile::atEnd()
+{
+	return eof;
 }
 
 #endif
