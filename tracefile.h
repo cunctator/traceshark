@@ -50,7 +50,8 @@ private:
 	static const unsigned int MAXSTR = 480;
 	__always_inline unsigned int ReadNextWord(char *word,
 						  unsigned int maxstr);
-	LoadBuffer *buffers[3];
+	static const unsigned int NR_BUFFERS = 3;
+	LoadBuffer *buffers[NR_BUFFERS];
 	LoadThread *loadThread;
 };
 
@@ -68,7 +69,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		lastPos++;
 		if (lastPos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = (lastBuf + 1) % 3;
+			lastBuf = (lastBuf + 1) % NR_BUFFERS;
 			lastPos = 0;
 			e = buffers[lastBuf]->beginConsumeBuffer();
 			if (e) {
@@ -89,7 +90,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		pos++;
 		if (pos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = (lastBuf + 1) % 3;
+			lastBuf = (lastBuf + 1) % NR_BUFFERS;
 			lastPos = 0;
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();
@@ -115,7 +116,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		pos++;
 		if (pos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = (lastBuf + 1) % 3;
+			lastBuf = (lastBuf + 1) % NR_BUFFERS;
 			lastPos = 0;
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();

@@ -31,7 +31,7 @@ extern "C" {
 
 TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 {
-	int i;
+	unsigned int i;
 	char *m;
 	fd = open(name, O_RDONLY);
 	if (fd >= 0)
@@ -43,13 +43,13 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 	eof = false;
 	strPool = new MemPool(2048, 1);
 	ptrPool = new MemPool(256, sizeof(TString));
-	memory = new char[3*bsize];
+	memory = new char[NR_BUFFERS * bsize];
 	m = memory;
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < NR_BUFFERS; i++) {
 		buffers[i] = new LoadBuffer(m, bsize);
 		m += bsize;
 	}
-	loadThread = new LoadThread(buffers, 3, fd);
+	loadThread = new LoadThread(buffers, NR_BUFFERS, fd);
 	loadThread->start();
 	eof = buffers[0]->beginConsumeBuffer();
 	nRead = buffers[0]->nRead;
@@ -57,13 +57,13 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 
 TraceFile::~TraceFile()
 {
-	int i;
+	unsigned int i;
 	loadThread->wait();
 	delete loadThread;
 	delete[] memory;
 	delete strPool;
 	delete ptrPool;
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < NR_BUFFERS; i++) {
 		delete buffers[i];
 	}
 }
