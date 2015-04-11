@@ -23,80 +23,88 @@
 #include <QVector>
 #include <QDebug>
 
+#include "loadbuffer.h"
 #include "mempool.h"
 #include "traceline.h"
+
+class LoadThread;
 
 class TraceFile
 {
 public:
-	TraceFile(char *name, bool &ok, quint32 bsize = 1024*1024);
+	TraceFile(char *name, bool &ok, unsigned int bsize = 1024*1024);
 	~TraceFile();
-	__always_inline quint32 ReadLine(TraceLine* line);
+	__always_inline unsigned int ReadLine(TraceLine* line);
 	__always_inline bool atEnd();
 private:
 	int fd;
 	bool eof;
-	quint32 bufSize;
-	quint32 nRead;
+	unsigned int nRead;
 	char *memory;
-	char *buffer[2];
-	quint32 lastBuf;
-	quint32 lastPos;
+
+	unsigned lastBuf;
+	unsigned lastPos;
 	MemPool *strPool;
 	MemPool *ptrPool;
-	static const quint32 MAXPTR = 640;
-	static const quint32 MAXSTR = 480;
-	__always_inline quint32 ReadNextWord(char *word, quint32 maxstr);
-	ssize_t Read(int fd, void *buf, size_t count);
+	static const unsigned int MAXPTR = 640;
+	static const unsigned int MAXSTR = 480;
+	__always_inline unsigned int ReadNextWord(char *word,
+						  unsigned int maxstr);
+	LoadBuffer *buffers[3];
+	LoadThread *loadThread;
 };
 
-__always_inline quint32 TraceFile::ReadNextWord(char *word, quint32 maxstr)
+__always_inline unsigned int TraceFile::ReadNextWord(char *word,
+						     unsigned int maxstr)
 {
-	quint32 pos = lastPos;
-	ssize_t n;
-	quint32 nchar = 0;
+	unsigned int pos = lastPos;
+	unsigned int nchar = 0;
 	char c;
+	bool e;
 
 	maxstr--; /* Reserve space for null termination */
 
-	if (buffer[lastBuf][lastPos] == '\n') {
+	if (buffers[lastBuf]->buffer[lastPos] == '\n') {
 		lastPos++;
 		if (lastPos >= nRead) {
-			lastBuf = (lastBuf + 1) % 2;
+			buffers[lastBuf]->endConsumeBuffer();
+			lastBuf = (lastBuf + 1) % 3;
 			lastPos = 0;
-			n = Read(fd, buffer[lastBuf], bufSize);
-			if (n <= 0) {
-				eof = true;
+			e = buffers[lastBuf]->beginConsumeBuffer();
+			if (e) {
+				eof = e;
 				word[nchar] = '\0';
 				nRead = 0;
 				return nchar;
 			}
-			nRead = (quint32) n;
+			nRead = (unsigned int) buffers[lastBuf]->nRead;
 		}
 		word[nchar] = '\0';
 		return nchar;
 	}
 
 
-	for (c = buffer[lastBuf][pos]; c == ' '; c = buffer[lastBuf][pos]) {
+	for (c = buffers[lastBuf]->buffer[pos]; c == ' ';
+	     c = buffers[lastBuf]->buffer[pos]) {
 		pos++;
 		if (pos >= nRead) {
-			lastBuf = (lastBuf + 1) % 2;
+			buffers[lastBuf]->endConsumeBuffer();
+			lastBuf = (lastBuf + 1) % 3;
 			lastPos = 0;
 			pos = lastPos;
-			n = Read(fd, buffer[lastBuf], bufSize);
-			if (n <= 0) {
-				eof = true;
+			e = buffers[lastBuf]->beginConsumeBuffer();
+			if (e) {
+				eof = e;
 				word[nchar] = '\0';
 			        nRead = 0;
 				return nchar;
 			}
-			nRead = (quint32) n;
+			nRead = (unsigned int) buffers[lastBuf]->nRead;
 		}
 	}
 
 	while (nchar < maxstr) {
-		c = buffer[lastBuf][pos];
+		c = buffers[lastBuf]->buffer[pos];
 		if (c == ' ' || c == '\n') {
 			lastPos = pos;
 			word[nchar] = '\0';
@@ -106,17 +114,18 @@ __always_inline quint32 TraceFile::ReadNextWord(char *word, quint32 maxstr)
 		nchar++;
 		pos++;
 		if (pos >= nRead) {
-			lastBuf = (lastBuf + 1) % 2;
+			buffers[lastBuf]->endConsumeBuffer();
+			lastBuf = (lastBuf + 1) % 3;
 			lastPos = 0;
 			pos = lastPos;
-			n = Read(fd, buffer[lastBuf], bufSize);
-			if (n <= 0) {
-				eof = true;
+			e = buffers[lastBuf]->beginConsumeBuffer();
+			if (e) {
+				eof = e;
 				word[nchar] = '\0';
 				nRead = 0;
 				return nchar;
 			}
-			nRead = (quint32) n;
+			nRead = (unsigned int) buffers[lastBuf]->nRead;
 		}
 	}
 
@@ -125,10 +134,10 @@ __always_inline quint32 TraceFile::ReadNextWord(char *word, quint32 maxstr)
 	return nchar;
 }
 
-__always_inline quint32 TraceFile::ReadLine(TraceLine* line)
+__always_inline unsigned int TraceFile::ReadLine(TraceLine* line)
 {
-	quint32 col;
-	quint32 n;
+	unsigned int col;
+	unsigned int n;
 
 	line->strings = (TString*) ptrPool->preallocN(MAXPTR);
 

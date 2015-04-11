@@ -18,6 +18,7 @@
 
 #include "tracefile.h"
 #include "traceline.h"
+#include "loadthread.h"
 #include "mempool.h"
 #include <QtGlobal>
 #include <new>
@@ -26,18 +27,12 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
 }
 
-ssize_t TraceFile::Read(int fd, void *buf, size_t count)
+TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 {
-	return read(fd, buf, count);
-}
-
-TraceFile::TraceFile(char *name, bool &ok, quint32 bsize)
-{
-	ssize_t n;
+	int i;
+	char *m;
 	fd = open(name, O_RDONLY);
 	if (fd >= 0)
 	        ok = true;
@@ -48,19 +43,27 @@ TraceFile::TraceFile(char *name, bool &ok, quint32 bsize)
 	eof = false;
 	strPool = new MemPool(2048, 1);
 	ptrPool = new MemPool(256, sizeof(TString));
-	bufSize = bsize;
-	memory = new char[2*bsize];
-	buffer[0] = memory;
-	buffer[1] = memory + bsize;
-	n = Read(fd, buffer[0], bsize);
-	if (n <= 0)
-		eof = true;
-	nRead = n;
+	memory = new char[3*bsize];
+	m = memory;
+	for (i = 0; i < 3; i++) {
+		buffers[i] = new LoadBuffer(m, bsize);
+		m += bsize;
+	}
+	loadThread = new LoadThread(buffers, 3, fd);
+	loadThread->start();
+	eof = buffers[0]->beginConsumeBuffer();
+	nRead = buffers[0]->nRead;
 }
 
 TraceFile::~TraceFile()
 {
+	int i;
+	loadThread->wait();
+	delete loadThread;
 	delete[] memory;
 	delete strPool;
 	delete ptrPool;
+	for (i = 0; i < 3; i++) {
+		delete buffers[i];
+	}
 }
