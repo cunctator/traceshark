@@ -87,6 +87,11 @@ void MainWindow::processTrace()
 	qout << "processing took " << (double) (process - pre) / 1000 << 
 		" s\n";
 	qout.flush();
+
+	/* A bit crazy to create and destroy these thread objects */
+	delete migThread;
+	delete schedThread;
+	delete freqThread;
 }
 
 void MainWindow::closeTrace()
