@@ -32,6 +32,7 @@ HEADERS      += mainwindow.h
 HEADERS      += migration.h
 HEADERS      += namepidnode.h
 HEADERS      += mempool.h
+HEADERS      += parserthread.h
 HEADERS      += task.h
 HEADERS      += timenode.h
 HEADERS      += traceevent.h
@@ -53,6 +54,7 @@ SOURCES      += main.cpp
 SOURCES      += mainwindow.cpp
 SOURCES      += mempool.cpp
 SOURCES      += namepidnode.cpp
+SOURCES      += parserthread.cpp
 SOURCES      += timenode.cpp
 SOURCES      += tracefile.cpp
 

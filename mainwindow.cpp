@@ -20,9 +20,10 @@
 #include <QDateTime>
 #include <QtWidgets>
 
+#include "ftraceparser.h"
 #include "mainwindow.h"
 #include "traceshark.h"
-#include "ftraceparser.h"
+#include "parserthread.h"
 
 MainWindow::MainWindow()
 {
@@ -59,32 +60,32 @@ void MainWindow::openTrace()
 void MainWindow::processTrace()
 {
 	QTextStream qout(stdout);
-	quint64 start, pre, sched, migration, cpufreq;
+	quint64 start, pre, process;
+	ParserThread *schedThread, *migThread, *freqThread;
 
 	qout.setRealNumberPrecision(6);
 	qout.setRealNumberNotation(QTextStream::FixedNotation);
 
 	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
 	parser->preScan();
 	pre = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-	parser->processSched();
-	sched = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+	schedThread = new ParserThread(parser, &FtraceParser::processSched);
+	schedThread->start();
+	migThread = new ParserThread(parser, &FtraceParser::processMigration);
+	migThread->start();
+	freqThread = new ParserThread(parser, &FtraceParser::processCPUfreq);
+	freqThread->start();
 
-	parser->processMigration();
-	migration = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+	migThread->wait();
+	freqThread->wait();
+	schedThread->wait();
 
-	parser->processCPUfreq();
-	cpufreq = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 	qout << "preScan() took " << (double) (pre - start) / 1000 << " s\n";
-	qout << "processSched() took " << (double) (sched - pre) / 1000 << 
+	qout << "processing took " << (double) (process - pre) / 1000 << 
 		" s\n";
-	qout << "processMigration() took " << (double) (migration - sched) /
-		1000 << " s\n";
-	qout << "processCPUfreq() took " << (double) (cpufreq - migration) /
-		1000 << " s\n";
 	qout.flush();
 }
 
