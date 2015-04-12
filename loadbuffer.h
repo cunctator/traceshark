@@ -25,6 +25,9 @@ extern "C" {
 #include <unistd.h>
 }
 
+/* This class is a load buffer for two threads where one is a producer, i.e.
+ * IO thread, and the other is a consumer, i.e. data processing thread.
+ */
 class LoadBuffer
 {
 public:

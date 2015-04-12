@@ -24,11 +24,12 @@ extern "C" {
 
 LoadBuffer::LoadBuffer(char *buf, unsigned int size):
 	buffer(buf), bufSize(size) {
+	/* Prevent consumer from consuming empty newly created buffer */
 	productionComplete.lock();
 }
 
 /* This function should be called from the IO thread 
- * until the function returns false */
+ * until the function returns true */
 bool LoadBuffer::produceBuffer(int fd) {
 	waitForConsumptionComplete();
 	nRead = read(fd, buffer, bufSize);
@@ -48,7 +49,7 @@ bool LoadBuffer::beginConsumeBuffer() {
 }
 
 /* This should be called from the data processing thread
- * after starting to process a buffer */
+ * when the processing of a buffer has been completed */
 void LoadBuffer::endConsumeBuffer() {
 	completeConsumption();
 }
