@@ -27,6 +27,9 @@
 
 #define lastfunc(myint) ((double) myint)
 
+#define DEFINE_TASKMAP_ITERATOR(name) \
+	QMap<unsigned int, Task>::iterator name
+
 namespace TraceShark {
 
 	/* This functions accepts ':' at the end of the value
@@ -86,9 +89,6 @@ namespace TraceShark {
 	        ok = false;
 		return 0;
 	}
-
-#define DEFINE_TASKMAP_ITERATOR(name)  \
-	QMap<unsigned int, Task>::iterator name
 }
 
 #endif /* TRACESHARK_H */
