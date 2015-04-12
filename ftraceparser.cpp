@@ -36,6 +36,12 @@ using namespace TraceShark;
 
 #define FAKE_DELTA ((double) 0.0000005)
 
+/* Macros for the heights of the scheduling graph */
+#define FULL_HEIGHT  ((double) 1)
+#define SCHED_HEIGHT ((double) 0.6)
+#define FLOOR_HEIGHT ((double) 0.1)
+#define SUBFLOOR_HEIGHT ((double) 0)
+
 bool FtraceParser::open(const QString &fileName)
 {
 	unsigned long long nr = 0;
@@ -267,20 +273,31 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 	if (task->lastT == 0) { /* 0 means task is newly constructed above */
 		double lastT = (unsigned long long) task->lastT;
 		task->pid = oldpid;
+		char state = sched_switch_state(event);
 
 		/* Apparenly this task was on CPU when we started tracing */
 		task->timev.push_back(startTime);
-		task->data.push_back(1);
+		task->data.push_back(SCHED_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
 		task->timev.push_back(oldtime);
-		task->data.push_back(1);
+		task->data.push_back(SCHED_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
+		/* If task is still running we indicate it with a small 
+		 * "subfloor" spike */
+		if (state == 'R') {
+			task->timev.push_back(oldtime);
+			task->data.push_back(SUBFLOOR_HEIGHT);
+			task->t.push_back(lastfunc(lastT));
+			task->lastWakeUP = oldtime;
+			lastT++;
+		}
+
 		task->timev.push_back(oldtime);
-		task->data.push_back(0);
+		task->data.push_back(FLOOR_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
@@ -290,12 +307,12 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 		double lastT = task->lastT;
 
 		task->timev.push_back(oldtime);
-		task->data.push_back(1);
+		task->data.push_back(SCHED_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
 		task->timev.push_back(oldtime);
-		task->data.push_back(0);
+		task->data.push_back(FLOOR_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
@@ -313,17 +330,17 @@ skip:
 		task->pid = newpid;
 
 		task->timev.push_back(startTime);
-		task->data.push_back(0);
+		task->data.push_back(FLOOR_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
 		task->timev.push_back(newtime);
-		task->data.push_back(0);
+		task->data.push_back(FLOOR_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
 		task->timev.push_back(newtime);
-		task->data.push_back(0);
+		task->data.push_back(SCHED_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
@@ -333,12 +350,12 @@ skip:
 		double lastT = task->lastT;
 
 		task->timev.push_back(newtime);
-		task->data.push_back(0);
+		task->data.push_back(FLOOR_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
 		task->timev.push_back(newtime);
-		task->data.push_back(1);
+		task->data.push_back(SCHED_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
 

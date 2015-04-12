@@ -31,6 +31,7 @@ public:
 	QVector<double> t;
 	QVector<double> scaledData;
 	unsigned long long lastT;
+	double lastWakeUP;
 };
 
 #endif

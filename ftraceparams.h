@@ -131,6 +131,18 @@ static __always_inline int cpuidle_state(const TraceEvent &event)
 #define sched_switch_newpid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 2, ':'))
 
+static __always_inline char sched_switch_state(TraceEvent &event)
+{
+	unsigned int i;
+	for (i = 3; i < event.argc; i++) {
+		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+			break;
+	}
+	if (i < event.argc)
+		return event.argv[i - 1]->ptr[0];
+	return '\0';
+}
+
 static __always_inline unsigned int sched_switch_oldprio(TraceEvent &event)
 {
 	unsigned int i;
