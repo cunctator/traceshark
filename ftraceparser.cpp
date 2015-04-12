@@ -39,8 +39,11 @@ using namespace TraceShark;
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
 #define SCHED_HEIGHT ((double) 0.6)
+#define MAXDELAY_RISER  (FULL_HEIGHT - SCHED_HEIGHT)
 #define FLOOR_HEIGHT ((double) 0.1)
 #define SUBFLOOR_HEIGHT ((double) 0)
+
+#define FULLDELAY (0.02)
 
 bool FtraceParser::open(const QString &fileName)
 {
@@ -327,6 +330,13 @@ skip:
 	task = &taskMaps[cpu][newpid]; /* Modifiable reference */
 	if (task->lastT == 0) { /* 0 means task is newly constructed above */
 		unsigned long long lastT = 0ULL;
+		/* A tasks woken up after startTime would have been created by
+		 * the wakeup event */
+		double delay = newtime - startTime;
+		delay = TSMAX(delay, FULLDELAY);
+		double riser = MAXDELAY_RISER * delay / FULLDELAY;
+		riser += SCHED_HEIGHT;
+
 		task->pid = newpid;
 
 		task->timev.push_back(startTime);
@@ -340,6 +350,11 @@ skip:
 		lastT++;
 
 		task->timev.push_back(newtime);
+		task->data.push_back(riser);
+		task->t.push_back(lastfunc(lastT));
+		lastT++;
+
+		task->timev.push_back(newtime);
 		task->data.push_back(SCHED_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
@@ -348,6 +363,20 @@ skip:
 		task->name = sched_switch_newname_strdup(event, pool);
 	} else {
 		unsigned long long lastT = task->lastT;
+		double delay = newtime - task->lastWakeUP;
+		delay = TSMAX(delay, FULLDELAY);
+		double riser = MAXDELAY_RISER * delay / FULLDELAY;
+		riser += SCHED_HEIGHT;
+
+		task->timev.push_back(newtime);
+		task->data.push_back(FLOOR_HEIGHT);
+		task->t.push_back(lastfunc(lastT));
+		lastT++;
+
+		task->timev.push_back(newtime);
+		task->data.push_back(riser);
+		task->t.push_back(lastfunc(lastT));
+		lastT++;
 
 		task->timev.push_back(newtime);
 		task->data.push_back(FLOOR_HEIGHT);

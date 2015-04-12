@@ -30,6 +30,9 @@
 #define DEFINE_TASKMAP_ITERATOR(name) \
 	QMap<unsigned int, Task>::iterator name
 
+#define TSMAX(A, B) (A >= B ? A:B)
+#define TSMIN(A, b) (A < B ? A:B)
+
 namespace TraceShark {
 
 	/* This functions accepts ':' at the end of the value
