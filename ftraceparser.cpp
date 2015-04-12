@@ -271,7 +271,7 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 	/* Handle the outgoing task */
 	task = &taskMaps[cpu][oldpid]; /* Modifiable reference */
 	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		double lastT = (unsigned long long) task->lastT;
+		double lastT = 0ULL;
 		task->pid = oldpid;
 		char state = sched_switch_state(event);
 
