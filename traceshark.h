@@ -20,7 +20,6 @@
 #define TRACESHARK_H
 
 #include <cmath>
-#include "task.h"
 
 #define tsconnect(src, ssig, dest, dslot) \
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
@@ -29,6 +28,9 @@
 
 #define DEFINE_TASKMAP_ITERATOR(name) \
 	QMap<unsigned int, Task>::iterator name
+
+#define DEFINE_COLORMAP_ITERATOR(name) \
+	QMap<unsigned int, TColor>::iterator name
 
 #define TSMAX(A, B) (A >= B ? A:B)
 #define TSMIN(A, b) (A < B ? A:B)

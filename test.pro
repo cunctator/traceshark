@@ -34,6 +34,7 @@ HEADERS      += namepidnode.h
 HEADERS      += mempool.h
 HEADERS      += parserthread.h
 HEADERS      += task.h
+HEADERS      += tcolor.h
 HEADERS      += timenode.h
 HEADERS      += traceevent.h
 HEADERS      += tracefile.h
@@ -55,6 +56,7 @@ SOURCES      += mainwindow.cpp
 SOURCES      += mempool.cpp
 SOURCES      += namepidnode.cpp
 SOURCES      += parserthread.cpp
+SOURCES      += tcolor.cpp
 SOURCES      += timenode.cpp
 SOURCES      += tracefile.cpp
 

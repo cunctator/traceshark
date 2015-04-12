@@ -60,7 +60,7 @@ void MainWindow::openTrace()
 void MainWindow::processTrace()
 {
 	QTextStream qout(stdout);
-	quint64 start, pre, process;
+	quint64 start, pre, process, colorize;
 	ParserThread *schedThread, *migThread, *freqThread;
 
 	qout.setRealNumberPrecision(6);
@@ -87,6 +87,13 @@ void MainWindow::processTrace()
 	qout << "processing took " << (double) (process - pre) / 1000 << 
 		" s\n";
 	qout.flush();
+
+	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+	parser->colorizeTasks();
+	colorize = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	qout << "colorize() took " << (double) (colorize - start) / 1000 <<
+		" s\n";
 
 	/* A bit crazy to create and destroy these thread objects */
 	delete migThread;

@@ -27,6 +27,7 @@
 
 #include "mempool.h"
 #include "task.h"
+#include "tcolor.h"
 #include "traceevent.h"
 #include "traceline.h"
 #include "grammarnode.h"
@@ -57,6 +58,7 @@ public:
 	__always_inline double getStartTime();
 	__always_inline double getEndTime();
 	__always_inline unsigned long getNrEvents();
+	void colorizeTasks();
 private:
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
 	GrammarNode *grammarRoot;
@@ -78,6 +80,11 @@ private:
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QVector<Migration> migrations;
+	QMap <unsigned int, TColor> colorMap;
+	TColor black;
+	TColor white;
+	__always_inline bool checkColorMap(const TColor &color);
+	TColor getNewColor();
 };
 
 __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)

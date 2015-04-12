@@ -98,7 +98,8 @@ void FtraceParser::close()
 }
 
 FtraceParser::FtraceParser()
-	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL)
+	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL), black(0, 0, 0),
+	  white(255, 255, 255)
 {
 	NamePidNode *namePidNode;
 	CpuNode *cpuNode;
@@ -489,5 +490,53 @@ void FtraceParser::processCPUfreq()
 		}
 		if (cpufreq_event(event))
 			processCPUfreqEvent(event, cpuFreq);
+	}
+}
+
+__always_inline bool FtraceParser::checkColorMap(const TColor &color)
+{
+	if (black.SqDistance(color) < 500)
+		return false;
+	if (white.SqDistance(color) < 500)
+		return false;
+
+	DEFINE_COLORMAP_ITERATOR(iter) = colorMap.begin();
+
+	while (iter != colorMap.end()) {
+		TColor c = iter.value();
+		if (c.SqDistance(color) < 500)
+			return false;
+		iter++;
+	}
+	return true;
+}
+
+TColor FtraceParser::getNewColor()
+{
+	TColor color;
+	bool ok;
+	int retries = 0;
+	do {
+		color = TColor::getRandomColor();
+		ok = checkColorMap(color);
+		retries++;
+	}
+	while(!ok && retries < 200);
+	return color;
+}
+
+void FtraceParser::colorizeTasks()
+{
+	unsigned int cpu;
+	for (cpu = 0; cpu < maxCPU; cpu++) {
+		DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
+		while (iter != cpuTaskMaps[cpu].end()) {
+			Task &task = iter.value();
+			iter++;
+			if (colorMap.contains(task.pid))
+				continue;
+			TColor color = getNewColor();
+			colorMap.insert(task.pid, color);
+		}
 	}
 }
