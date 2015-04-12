@@ -257,84 +257,92 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 	double newtime = event.time + FAKE_DELTA;
 	unsigned int oldpid = sched_switch_oldpid(event);
 	unsigned int newpid = sched_switch_newpid(event);
+	Task *task;
+
+	if (oldpid == 0) /* We don't care about the idle task */
+		goto skip;
 
 	/* Handle the outgoing task */
-	Task &oldtask = taskMaps[cpu][oldpid]; /* Modifiable reference */
-	if (oldtask.lastT == 0) { /* 0 means task is newly constructed above */
-		double lastT = (unsigned long long) oldtask.lastT;
-		oldtask.pid = oldpid;
+	task = &taskMaps[cpu][oldpid]; /* Modifiable reference */
+	if (task->lastT == 0) { /* 0 means task is newly constructed above */
+		double lastT = (unsigned long long) task->lastT;
+		task->pid = oldpid;
 
 		/* Apparenly this task was on CPU when we started tracing */
-		oldtask.timev.push_back(startTime);
-		oldtask.data.push_back(1);
-		oldtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(startTime);
+		task->data.push_back(1);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		oldtask.timev.push_back(oldtime);
-		oldtask.data.push_back(1);
-		oldtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(oldtime);
+		task->data.push_back(1);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		oldtask.timev.push_back(oldtime);
-		oldtask.data.push_back(0);
-		oldtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(oldtime);
+		task->data.push_back(0);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		oldtask.lastT = lastT;
-		oldtask.name = sched_switch_oldname_strdup(event, pool);
+		task->lastT = lastT;
+		task->name = sched_switch_oldname_strdup(event, pool);
 	} else {
-		double lastT = oldtask.lastT;
+		double lastT = task->lastT;
 
-		oldtask.timev.push_back(oldtime);
-		oldtask.data.push_back(1);
-		oldtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(oldtime);
+		task->data.push_back(1);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		oldtask.timev.push_back(oldtime);
-		oldtask.data.push_back(0);
-		oldtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(oldtime);
+		task->data.push_back(0);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		oldtask.lastT = lastT;
+		task->lastT = lastT;
 	}
 
+skip:
+	if (newpid == 0) /* We don't care about the idle task */
+		return;
+
 	/* Handle the incoming task */
-	Task &newtask = taskMaps[cpu][newpid]; /* Modifiable reference */
-	if (newtask.lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = newtask.lastT;
-		newtask.pid = newpid;
+	task = &taskMaps[cpu][newpid]; /* Modifiable reference */
+	if (task->lastT == 0) { /* 0 means task is newly constructed above */
+		unsigned long long lastT = task->lastT;
+		task->pid = newpid;
 
-		newtask.timev.push_back(startTime);
-		newtask.data.push_back(0);
-		newtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(startTime);
+		task->data.push_back(0);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		newtask.timev.push_back(newtime);
-		newtask.data.push_back(0);
-		newtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(newtime);
+		task->data.push_back(0);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		newtask.timev.push_back(newtime);
-		newtask.data.push_back(0);
-		newtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(newtime);
+		task->data.push_back(0);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		newtask.lastT = lastT;
-		newtask.name = sched_switch_newname_strdup(event, pool);
+		task->lastT = lastT;
+		task->name = sched_switch_newname_strdup(event, pool);
 	} else {
-		double lastT = newtask.lastT;
+		double lastT = task->lastT;
 
-		newtask.timev.push_back(newtime);
-		newtask.data.push_back(0);
-		newtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(newtime);
+		task->data.push_back(0);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		newtask.timev.push_back(newtime);
-		newtask.data.push_back(1);
-		newtask.t.push_back(lastfunc(lastT));
+		task->timev.push_back(newtime);
+		task->data.push_back(1);
+		task->t.push_back(lastfunc(lastT));
 		lastT++;
 
-		newtask.lastT = lastT;
+		task->lastT = lastT;
 	}
 }
 
