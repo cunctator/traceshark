@@ -271,7 +271,7 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 	/* Handle the outgoing task */
 	task = &taskMaps[cpu][oldpid]; /* Modifiable reference */
 	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		double lastT = 0ULL;
+		unsigned long long lastT = 0ULL;
 		task->pid = oldpid;
 		char state = sched_switch_state(event);
 
@@ -304,7 +304,7 @@ static __always_inline void processSwitchEvent(TraceEvent &event,
 		task->lastT = lastT;
 		task->name = sched_switch_oldname_strdup(event, pool);
 	} else {
-		double lastT = task->lastT;
+		unsigned long long lastT = task->lastT;
 
 		task->timev.push_back(oldtime);
 		task->data.push_back(SCHED_HEIGHT);
@@ -326,7 +326,7 @@ skip:
 	/* Handle the incoming task */
 	task = &taskMaps[cpu][newpid]; /* Modifiable reference */
 	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = task->lastT;
+		unsigned long long lastT = 0ULL;
 		task->pid = newpid;
 
 		task->timev.push_back(startTime);
@@ -347,7 +347,7 @@ skip:
 		task->lastT = lastT;
 		task->name = sched_switch_newname_strdup(event, pool);
 	} else {
-		double lastT = task->lastT;
+		unsigned long long lastT = task->lastT;
 
 		task->timev.push_back(newtime);
 		task->data.push_back(FLOOR_HEIGHT);
