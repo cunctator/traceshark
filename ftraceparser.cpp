@@ -363,6 +363,40 @@ skip:
 	}
 }
 
+static __always_inline void processWakeupEvent(TraceEvent &event,
+					       QMap<unsigned int, Task>
+					       *taskMaps, double &startTime,
+					       MemPool *pool)
+{
+	unsigned int cpu, pid;
+	Task *task;
+	double time;
+
+	if (!sched_wakeup_success(event)) /* Only interested in success */
+		return;
+
+	time = event.time;
+	cpu = sched_wakeup_cpu(event);
+	pid = sched_wakeup_pid(event);
+
+	/* Handle the woken up task */
+	task = &taskMaps[cpu][pid]; /* Modifiable reference */
+
+	if (task->lastT == 0) { /* 0 means task is newly constructed above */
+		unsigned long long lastT = 0;
+		task->pid = pid;
+
+		task->timev.push_back(startTime);
+		task->data.push_back(FLOOR_HEIGHT);
+		task->t.push_back(lastfunc(lastT));
+		lastT++;
+
+		task->lastT = lastT;
+		task->name = sched_wakeup_name_strdup(event, pool);
+	}
+	task->lastWakeUP = time;
+}
+
 void FtraceParser::processSched()
 {
 	unsigned long i;
@@ -370,6 +404,10 @@ void FtraceParser::processSched()
 		TraceEvent &event = events[i];
 		if (sched_switch(event)) {
 			processSwitchEvent(event, cpuTaskMaps, startTime,
+					   taskNamePool);
+		}
+		if (sched_wakeup(event)) {
+			processWakeupEvent(event, cpuTaskMaps, startTime,
 					   taskNamePool);
 		}
 	}

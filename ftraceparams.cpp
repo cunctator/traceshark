@@ -44,3 +44,7 @@ char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
 char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
 	return __sched_switch_newname_strdup(event, pool);
 }
+
+char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool) {
+	return __sched_wakeup_name_strdup(event, pool);
+}

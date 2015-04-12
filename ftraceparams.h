@@ -326,4 +326,70 @@ static __always_inline bool sched_wakeup_success(TraceEvent &event)
 #define sched_wakeup_prio(EVENT) (param_inside_braces(EVENT, EVENT.argc - 3))
 #define sched_wakeup_pid(EVENT) (param_after_char(EVENT, EVENT.argc - 4, \
 						  ':'))
+/* Todo, code could be shrared with the other two *_strup() functions */
+static __always_inline char *__sched_wakeup_name_strdup(TraceEvent &event,
+	MemPool *pool)
+{
+	unsigned int i;
+	char *c, *retstr;
+	unsigned int endidx;
+	char *d;
+	char *end;
+	unsigned int len = 0;
+
+	if (event.argc < 4)
+		return NULL;
+
+	endidx = event.argc - 4;
+
+	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
+	c = retstr;
+
+	/* This loop will merge any strings before the final string, in case
+	 * such strings exists due to the task name containing spaces, and
+	 * then the taskname would be split into several strings
+	 */
+	for(i = 0; i < event.argc - 4; i++) {
+		len += event.argv[i]->len;
+		if (len > TASKNAME_MAXLEN)
+			return NULL;
+		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
+		c += event.argv[i]->len;
+		*c = ' ';
+		len++;
+		c++;
+	}
+
+	/*
+	 * Localize the separating ':' in the final string. The final
+	 * string is the only sting in case of no spaces in the task name.
+	 * we are searching backwards because we are interested in the last ':',
+	 * since the task name can contain ':' characters
+	 */
+	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
+	     end > event.argv[endidx]->ptr; end--) {
+		if (*end == ':')
+			break;
+	}
+
+	/* Copy the final portion up to the ':' we found previously */
+	for (d = event.argv[endidx]->ptr; d < end; d++) {
+		len++;
+		if (len > TASKNAME_MAXLEN)
+			return NULL;
+		*c = *d;
+		c++;
+	}
+
+	/* Terminate the string */
+	*c = '\0';
+	len++;
+	/* commmit the allocation */
+	if (pool->commitChars(len))
+		return retstr;
+	return NULL;
+}
+
+char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool);
+
 #endif
