@@ -379,11 +379,6 @@ skip:
 		lastT++;
 
 		task->timev.push_back(newtime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
 		task->data.push_back(SCHED_HEIGHT);
 		task->t.push_back(lastfunc(lastT));
 		lastT++;
