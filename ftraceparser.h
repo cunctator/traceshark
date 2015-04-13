@@ -19,6 +19,7 @@
 #ifndef FTRACEPARSER_H
 #define FTRACEPARSER_H
 
+#include <QColor>
 #include <QString>
 #include <QStringList>
 #include <QVector>
@@ -58,7 +59,15 @@ public:
 	__always_inline double getStartTime();
 	__always_inline double getEndTime();
 	__always_inline unsigned long getNrEvents();
+	__always_inline int getMinIdleState();
+	__always_inline int getMaxIdleState();
+	__always_inline int getNrMigrateEvents();
+	__always_inline QColor getTaskColor(unsigned int pid);
 	void colorizeTasks();
+	QMap<unsigned int, Task> *cpuTaskMaps;
+	CpuFreq *cpuFreq;
+	CpuIdle *cpuIdle;
+	QVector<Migration> migrations;
 private:
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
 	GrammarNode *grammarRoot;
@@ -76,10 +85,6 @@ private:
 	int minIdleState;
 	int maxIdleState;
 	unsigned int nrMigrateEvents;
-	QMap<unsigned int, Task> *cpuTaskMaps;
-	CpuFreq *cpuFreq;
-	CpuIdle *cpuIdle;
-	QVector<Migration> migrations;
 	QMap <unsigned int, TColor> colorMap;
 	TColor black;
 	TColor white;
@@ -130,6 +135,27 @@ __always_inline double FtraceParser::getEndTime()
 __always_inline unsigned long int FtraceParser::getNrEvents()
 {
 	return nrEvents;
+}
+
+__always_inline int FtraceParser::getMinIdleState()
+{
+	return minIdleState;
+}
+
+__always_inline int FtraceParser::getMaxIdleState()
+{
+	return minIdleState;
+}
+
+__always_inline int FtraceParser::getNrMigrateEvents()
+{
+	return nrMigrateEvents;
+}
+
+__always_inline QColor FtraceParser::getTaskColor(unsigned int pid)
+{
+	TColor taskColor = colorMap.value(pid, black);
+	return taskColor.toQColor();
 }
 
 #endif
