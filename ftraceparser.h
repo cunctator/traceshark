@@ -63,6 +63,15 @@ public:
 	__always_inline int getMaxIdleState();
 	__always_inline int getNrMigrateEvents();
 	__always_inline QColor getTaskColor(unsigned int pid);
+	void setSchedOffset(unsigned int cpu, double offset);
+	void setSchedScale(unsigned int cpu, double scale);
+	void setCpuIdleOffset(unsigned int cpu, double offset);
+	void setCpuIdleScale(unsigned int cpu, double scale);
+	void setCpuFreqOffset(unsigned int cpu, double offset);
+	void setCpuFreqScale(unsigned int cpu, double scale);
+	void scaleSched(unsigned int cpu);
+	void scaleCpuIdle(unsigned int cpu);
+	void scaleCpuFreq(unsigned int cpu);
 	void colorizeTasks();
 	QMap<unsigned int, Task> *cpuTaskMaps;
 	CpuFreq *cpuFreq;
@@ -90,6 +99,12 @@ private:
 	TColor white;
 	__always_inline bool checkColorMap(const TColor &color);
 	TColor getNewColor();
+	QVector<double> schedOffset;
+	QVector<double> schedScale;
+	QVector<double> cpuIdleOffset;
+	QVector<double> cpuIdleScale;
+	QVector<double> cpuFreqOffset;
+	QVector<double> cpuFreqScale;
 };
 
 __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)

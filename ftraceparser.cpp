@@ -239,6 +239,18 @@ void FtraceParser::preScan()
 	cpuTaskMaps = new QMap<unsigned int, Task>[nrCPUs];
 	cpuFreq = new CpuFreq[nrCPUs];
 	cpuIdle = new CpuIdle[nrCPUs];
+	schedOffset.resize(0);
+	schedOffset.resize(nrCPUs);
+	schedScale.resize(0);
+	schedScale.resize(nrCPUs);
+	cpuIdleOffset.resize(0);
+	cpuIdleOffset.resize(nrCPUs);
+	cpuIdleScale.resize(0);
+	cpuIdleScale.resize(nrCPUs);
+	cpuFreqOffset.resize(0);
+	cpuFreqOffset.resize(nrCPUs);
+	cpuFreqScale.resize(0);
+	cpuFreqScale.resize(nrCPUs);
 }
 
 void FtraceParser::processMigration()
@@ -539,4 +551,71 @@ void FtraceParser::colorizeTasks()
 			colorMap.insert(task.pid, color);
 		}
 	}
+}
+
+void FtraceParser::setSchedOffset(unsigned int cpu, double offset)
+{
+	schedOffset[cpu] = offset;
+}
+
+void FtraceParser::setSchedScale(unsigned int cpu, double scale)
+{
+	schedScale[cpu] = scale;
+}
+
+void FtraceParser::setCpuIdleOffset(unsigned int cpu, double offset)
+{
+	cpuIdleOffset[cpu] = offset;
+}
+
+void FtraceParser::setCpuIdleScale(unsigned int cpu, double scale)
+{
+	cpuIdleScale[cpu] = scale;
+}
+
+void FtraceParser::setCpuFreqOffset(unsigned int cpu, double offset)
+{
+	cpuFreqOffset[cpu] = offset;
+}
+
+void FtraceParser::setCpuFreqScale(unsigned int cpu, double scale)
+{
+	schedOffset[cpu] = scale;
+}
+
+void FtraceParser::scaleSched(unsigned int cpu)
+{
+	double scale = schedScale.value(cpu);
+	double offset = schedOffset.value(cpu);
+	DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
+	while (iter != cpuTaskMaps[cpu].end()) {
+		Task &task = iter.value();
+		int size = task.data.size();
+		task.scaledData.resize(size);
+		for (int i = 0; i < size; i++)
+			task.scaledData[i] = task.data.at(i) * scale + offset;
+		iter++;
+	}
+}
+
+void FtraceParser::scaleCpuIdle(unsigned int cpu)
+{
+	double scale = cpuIdleScale.value(cpu);
+	double offset = cpuIdleOffset.value(cpu);
+	CpuIdle *idle = cpuIdle + cpu;
+	int size = idle->data.size();
+
+	for (int i = 0; i < size; i++)
+		idle->scaledData[i] = idle->data.at(i) * scale + offset;
+}
+
+void FtraceParser::scaleCpuFreq(unsigned int cpu)
+{
+	double scale = cpuFreqScale.value(cpu);
+	double offset = cpuFreqOffset.value(cpu);
+	CpuFreq *freq = cpuFreq + cpu;
+	int size = freq->data.size();
+
+	for (int i = 0; i < size; i++)
+		freq->scaledData[i] = freq->data.at(i) * scale + offset;
 }
