@@ -23,7 +23,7 @@
 #include "ftraceparser.h"
 #include "mainwindow.h"
 #include "traceshark.h"
-#include "parserthread.h"
+#include "workthread.h"
 
 MainWindow::MainWindow()
 {
@@ -61,7 +61,7 @@ void MainWindow::processTrace()
 {
 	QTextStream qout(stdout);
 	quint64 start, pre, process, colorize;
-	ParserThread *schedThread, *migThread, *freqThread;
+	WorkThread<FtraceParser> *schedThread, *migThread, *freqThread;
 
 	qout.setRealNumberPrecision(6);
 	qout.setRealNumberNotation(QTextStream::FixedNotation);
@@ -70,11 +70,13 @@ void MainWindow::processTrace()
 	parser->preScan();
 	pre = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-	schedThread = new ParserThread(parser, &FtraceParser::processSched);
+	schedThread = new WorkThread<FtraceParser> (parser, &FtraceParser::processSched);
 	schedThread->start();
-	migThread = new ParserThread(parser, &FtraceParser::processMigration);
+
+	migThread = new WorkThread<FtraceParser> (parser, &FtraceParser::processMigration);
 	migThread->start();
-	freqThread = new ParserThread(parser, &FtraceParser::processCPUfreq);
+
+	freqThread = new WorkThread<FtraceParser> (parser, &FtraceParser::processCPUfreq);
 	freqThread->start();
 
 	migThread->wait();

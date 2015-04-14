@@ -32,15 +32,16 @@ HEADERS      += mainwindow.h
 HEADERS      += migration.h
 HEADERS      += namepidnode.h
 HEADERS      += mempool.h
-HEADERS      += parserthread.h
 HEADERS      += task.h
 HEADERS      += tcolor.h
+HEADERS      += tthread.h
 HEADERS      += timenode.h
 HEADERS      += traceevent.h
 HEADERS      += tracefile.h
 HEADERS      += traceline.h
 HEADERS      += traceshark.h
 HEADERS      += tstring.h
+HEADERS      += workthread.h
 
 SOURCES       = argnode.cpp
 SOURCES      += cpunode.cpp
@@ -55,8 +56,8 @@ SOURCES      += main.cpp
 SOURCES      += mainwindow.cpp
 SOURCES      += mempool.cpp
 SOURCES      += namepidnode.cpp
-SOURCES      += parserthread.cpp
 SOURCES      += tcolor.cpp
+SOURCES      += tthread.cpp
 SOURCES      += timenode.cpp
 SOURCES      += tracefile.cpp
 

@@ -16,27 +16,43 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PARSERTHREAD_H
-#define PARSERTHREAD_H
+#ifndef WORKTHREAD_H
+#define WORKTHREAD_H
 
-#include <QThread>
-#include "ftraceparser.h"
+#include "tthread.h"
 
-/* C++ syntax for declaring a pointer to a member function */
-typedef void (FtraceParser::*FtraceParserMemFn)();
 /* C++ syntax for calling the pointer to a member function for an object */
 #define CALL_MEMBER_FN(ptrObject, ptrToMember) ((ptrObject)->*(ptrToMember))
+/* C++ syntax for declaring a pointer to a member function */
+#define DECLARE_MEMBER_FN(className, name) void (className::* name)()
 
-class ParserThread : public QThread
+template <class ObjType>
+class WorkThread : public TThread
 {
-	Q_OBJECT
 public:
-	ParserThread(FtraceParser *p, FtraceParserMemFn pF);
+	WorkThread(ObjType *p, DECLARE_MEMBER_FN(ObjType, oF));
+	~WorkThread();
 protected:
 	void run();
 private:
-	FtraceParser *ftraceParser;
-	FtraceParserMemFn workFunc;
+	ObjType *workObject;
+	DECLARE_MEMBER_FN(ObjType, objectFunc);
 };
 
-#endif /* PARSERTHREAD */
+template <class ObjType>
+WorkThread<ObjType>::WorkThread(ObjType *p, DECLARE_MEMBER_FN(ObjType, oF)):
+workObject(p), objectFunc(oF) {}
+
+
+template <class ObjType>
+void WorkThread<ObjType>::run()
+{
+	CALL_MEMBER_FN(workObject, objectFunc)();
+}
+
+template <class ObjType>
+WorkThread<ObjType>::~WorkThread()
+{
+}
+
+#endif /* WORKTHREAD */
