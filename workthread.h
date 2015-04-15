@@ -24,23 +24,23 @@
 /* C++ syntax for calling the pointer to a member function for an object */
 #define CALL_MEMBER_FN(ptrObject, ptrToMember) ((ptrObject)->*(ptrToMember))
 /* C++ syntax for declaring a pointer to a member function */
-#define DECLARE_MEMBER_FN(className, name) void (className::* name)()
+#define DEFINE_MEMBER_FN(className, name) void (className::* name)()
 
 template <class ObjType>
 class WorkThread : public TThread
 {
 public:
-	WorkThread(ObjType *p, DECLARE_MEMBER_FN(ObjType, oF));
+	WorkThread(ObjType *p, DEFINE_MEMBER_FN(ObjType, oF));
 	~WorkThread();
 protected:
 	void run();
 private:
 	ObjType *workObject;
-	DECLARE_MEMBER_FN(ObjType, objectFunc);
+	DEFINE_MEMBER_FN(ObjType, objectFunc);
 };
 
 template <class ObjType>
-WorkThread<ObjType>::WorkThread(ObjType *p, DECLARE_MEMBER_FN(ObjType, oF)):
+WorkThread<ObjType>::WorkThread(ObjType *p, DEFINE_MEMBER_FN(ObjType, oF)):
 workObject(p), objectFunc(oF) {}
 
 
