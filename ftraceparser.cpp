@@ -161,10 +161,47 @@ void FtraceParser::DeleteGrammarTree(GrammarNode* node) {
 	delete node;
 }
 
+__always_inline void FtraceParser::preScanEvent(TraceEvent &event)
+{
+	if (event.cpu > maxCPU)
+		maxCPU = event.cpu;
+	if (cpuidle_event(event)) {
+		int state = cpuidle_state(event);
+		unsigned int cpu = cpuidle_cpu(event);
+		if (cpu > maxCPU)
+			maxCPU = cpu;
+		if (state < minIdleState)
+			minIdleState = state;
+		if (state > maxIdleState)
+			maxIdleState = state;
+	} else if (cpufreq_event(event)) {
+		unsigned int cpu = cpufreq_cpu(event);
+		unsigned int freq = cpufreq_freq(event);
+		if (freq > maxFreq)
+			maxFreq = freq;
+		if (freq < minFreq)
+			minFreq = freq;
+		if (cpu > maxCPU)
+			maxCPU = cpu;
+	} else if (sched_migrate(event)) {
+		unsigned int dest = sched_migrate_destCPU(event);
+		unsigned int orig = sched_migrate_origCPU(event);
+		if (dest > maxCPU)
+			maxCPU = dest;
+		if (orig > maxCPU)
+			maxCPU = dest;
+		nrMigrateEvents++;
+	}
+}
+
+/* This function does prescanning as well, to determine number of events,
+ * number of CPUs, max/min CPU frequency etc */
 bool FtraceParser::parse(void)
 {
 	quint32 s = lines.size();
 	quint32 i;
+
+	preparePreScan();
 
 	events.resize(0);
 	events.reserve(s);
@@ -177,18 +214,18 @@ bool FtraceParser::parse(void)
 		if (parseLine(&line, &event)) {
 			ptrPool->commitN(event.argc);
 			events.push_back(event);
+			nrEvents++;
+			preScanEvent(event);
 		}
 	}
 
+	finalizePreScan();
 	return true;
 }
 
-void FtraceParser::preScan()
+void FtraceParser::preparePreScan()
 {
-	unsigned long i;
-
-	nrEvents = events.size();
-	lastEvent = nrEvents - 1;
+	nrEvents = 0;
 	maxCPU = 0;
 	startTime = 0;
 	endTime = 0;
@@ -197,40 +234,11 @@ void FtraceParser::preScan()
 	minIdleState = INT_MAX;
 	maxIdleState = INT_MIN;
 	nrMigrateEvents = 0;
+}
 
-	for (i = 0; i < nrEvents; i++) {
-		TraceEvent &event = events[i];
-		if (event.cpu > maxCPU)
-			maxCPU = event.cpu;
-		if (cpuidle_event(event)) {
-			int state = cpuidle_state(event);
-			unsigned int cpu = cpuidle_cpu(event);
-			if (cpu > maxCPU)
-				maxCPU = cpu;
-			if (state < minIdleState)
-				minIdleState = state;
-			if (state > maxIdleState)
-				maxIdleState = state;
-		} else if (cpufreq_event(event)) {
-			unsigned int cpu = cpufreq_cpu(event);
-			unsigned int freq = cpufreq_freq(event);
-			if (freq > maxFreq)
-				maxFreq = freq;
-			if (freq < minFreq)
-				minFreq = freq;
-			if (cpu > maxCPU)
-				maxCPU = cpu;
-		} else if (sched_migrate(event)) {
-			unsigned int dest = sched_migrate_destCPU(event);
-			unsigned int orig = sched_migrate_origCPU(event);
-			if (dest > maxCPU)
-				maxCPU = dest;
-			if (orig > maxCPU)
-				maxCPU = dest;
-			nrMigrateEvents++;
-		}
-	}
-
+void FtraceParser::finalizePreScan()
+{
+	lastEvent = nrEvents - 1;
 	if (nrEvents >= 2) {
 		startTime = events[0].time;
 		endTime = events[lastEvent].time;
@@ -252,6 +260,10 @@ void FtraceParser::preScan()
 	cpuFreqOffset.resize(nrCPUs);
 	cpuFreqScale.resize(0);
 	cpuFreqScale.resize(nrCPUs);
+}
+
+void FtraceParser::preScan()
+{
 }
 
 void FtraceParser::processMigration()

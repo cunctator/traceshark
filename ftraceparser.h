@@ -78,6 +78,9 @@ public:
 	CpuIdle *cpuIdle;
 	QVector<Migration> migrations;
 private:
+	void preparePreScan();
+	void finalizePreScan();
+	__always_inline void preScanEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
