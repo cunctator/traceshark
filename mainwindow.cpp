@@ -115,7 +115,8 @@ void MainWindow::about()
             tr("<h1>Traceshark</h1>"
                "<p>Copyright &copy; 2014-2015 Viktor Rosendahl"
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below."
-	       "<p>This is free software, and you are welcome to redistribute it"	       "under certain conditions; select \"License\" under the \"Help\""
+	       "<p>This is free software, and you are welcome to redistribute it"
+	       " under certain conditions; select \"License\" under the \"Help\""
 	       "menu for details."
 
 	       "<h2>15. Disclaimer of Warranty.</h2>"
