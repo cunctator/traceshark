@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <climits>
 #include <QtGlobal>
 #include <QString>
 #include <QTextStream>
@@ -191,10 +192,10 @@ void FtraceParser::preScan()
 	maxCPU = 0;
 	startTime = 0;
 	endTime = 0;
-	minFreq = 2147483647;
+	minFreq = UINT_MAX;
 	maxFreq = 0;
-	minIdleState = 31000;
-	maxIdleState = -31000;
+	minIdleState = INT_MAX;
+	maxIdleState = INT_MIN;
 	nrMigrateEvents = 0;
 
 	for (i = 0; i < nrEvents; i++) {
