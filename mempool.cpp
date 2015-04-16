@@ -57,3 +57,14 @@ bool MemPool::addMemory()
 	exhaustList.removeLast();
 	return false;
 }
+
+void MemPool::reset()
+{
+	int i;
+	int len = exhaustList.size();
+	for (i = 0; i < len; i++)
+		munmap(exhaustList[i], poolSize);
+	exhaustList.resize(0);
+	used = 0ULL;
+	next = memory;
+}
