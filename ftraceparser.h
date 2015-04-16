@@ -33,6 +33,7 @@
 #include "traceline.h"
 #include "grammarnode.h"
 #include "migration.h"
+#include "threadbuffer.h"
 
 class FtraceEvent;
 class TraceFile;
@@ -48,13 +49,13 @@ public:
 	bool open(const QString &fileName);
 	bool isOpen();
 	void close();
-	bool parse(void);
+	void parse();
+	void parseThread();
 	void preScan();
 	void processMigration();
 	void processSched();
 	void processCPUfreq();
 	QVector<TraceEvent> events;
-	QVector<TraceLine> lines;
 	__always_inline unsigned int getMaxCPU();
 	__always_inline double getStartTime();
 	__always_inline double getEndTime();
@@ -80,8 +81,10 @@ public:
 private:
 	void preparePreScan();
 	void finalizePreScan();
+	__always_inline bool parseBuffer(unsigned int index);
 	__always_inline void preScanEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
+	ThreadBuffer<TraceLine> **tbuffers;
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
 	MemPool *ptrPool;

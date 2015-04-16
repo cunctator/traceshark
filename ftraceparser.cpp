@@ -28,10 +28,12 @@
 #include "grammarroot.h"
 #include "namepidnode.h"
 #include "cpunode.h"
+#include "threadbuffer.h"
 #include "timenode.h"
 #include "eventnode.h"
 #include "argnode.h"
 #include "traceshark.h"
+#include "workthread.h"
 
 using namespace TraceShark;
 
@@ -43,13 +45,18 @@ using namespace TraceShark;
 #define MAXDELAY_RISER  (FULL_HEIGHT - SCHED_HEIGHT)
 #define FLOOR_HEIGHT ((double) 0.1)
 #define SUBFLOOR_HEIGHT ((double) 0)
+#define NR_TBUFFERS (3)
+#define TBUFSIZE (10000)
 
 #define FULLDELAY (0.02)
 
 bool FtraceParser::open(const QString &fileName)
 {
 	unsigned long long nr = 0;
+	unsigned int i = 0;
+	unsigned int curbuf = 0;
 	bool ok = false;
+	WorkThread<FtraceParser> *parserThread;
 
 	if (traceFile != NULL)
 		return ok;
@@ -62,14 +69,40 @@ bool FtraceParser::open(const QString &fileName)
 		return ok;
 	}
 
-	lines.reserve(80000000);
+	for (i = 0; i < NR_TBUFFERS; i++)
+		tbuffers[i] = new ThreadBuffer<TraceLine>(TBUFSIZE,
+							  NR_TBUFFERS);
+	parserThread = new WorkThread<FtraceParser>
+		(this, &FtraceParser::parseThread);
+	parserThread->start();
 
+	i = 0;
+	tbuffers[curbuf]->beginProduceBuffer();
 	while(!traceFile->atEnd()) {
-		TraceLine line;
-		quint32 n = traceFile->ReadLine(&line);
-		lines.append(line);
+		TraceLine *line = &tbuffers[curbuf]->buffer[i];
+		quint32 n = traceFile->ReadLine(line);
 		nr += n;
+		i++;
+		if (i == (TBUFSIZE - 1)) {
+			tbuffers[curbuf]->endProduceBuffer(i);
+			curbuf = (curbuf + 1) % NR_TBUFFERS;
+			i = 0;
+			tbuffers[curbuf]->beginProduceBuffer();
+		}
 	}
+	tbuffers[curbuf]->endProduceBuffer(i);
+	/* We must send an empty buffer at the end to signal that we are EOF */
+	if (i != 0) {
+		curbuf = (curbuf + 1) % NR_TBUFFERS;
+		tbuffers[curbuf]->beginProduceBuffer();
+		tbuffers[curbuf]->endProduceBuffer(0);
+	}
+
+	parserThread->wait();
+
+	for (i = 0; i < NR_TBUFFERS; i++)
+		delete tbuffers[i];
+
 	QTextStream(stdout) << nr << "\n";
 	return true;
 }
@@ -82,8 +115,6 @@ bool FtraceParser::isOpen()
 void FtraceParser::close()
 {
 	if (traceFile != NULL) {
-		lines.resize(0);
-		lines.reserve(1);
 		events.resize(0);
 		events.reserve(1);
 		delete traceFile;
@@ -141,6 +172,8 @@ FtraceParser::FtraceParser()
 	grammarRoot->nChildren = 1;
 	grammarRoot->children[0] = namePidNode;
 	grammarRoot->isLeaf = false;
+
+	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
 }
 
 FtraceParser::~FtraceParser()
@@ -149,6 +182,7 @@ FtraceParser::~FtraceParser()
 	DeleteGrammarTree(grammarRoot);
 	delete ptrPool;
 	delete taskNamePool;
+	delete[] tbuffers;
 }
 
 void FtraceParser::DeleteGrammarTree(GrammarNode* node) {
@@ -196,31 +230,48 @@ __always_inline void FtraceParser::preScanEvent(TraceEvent &event)
 
 /* This function does prescanning as well, to determine number of events,
  * number of CPUs, max/min CPU frequency etc */
-bool FtraceParser::parse(void)
+void FtraceParser::parseThread()
 {
-	quint32 s = lines.size();
-	quint32 i;
-
+	unsigned int i = 0;
 	preparePreScan();
-
 	events.resize(0);
-	events.reserve(s);
+	events.reserve(80000000); /* Reserve for eight million events first */
+
+	while(true) {
+		if (parseBuffer(i))
+			break;
+		i = (i + 1) % NR_TBUFFERS;
+	}
+
+	finalizePreScan();
+}
+
+/* This parses a buffer */
+__always_inline bool FtraceParser::parseBuffer(unsigned int index)
+{
+	unsigned int i, s;
+	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
+	if (tbuf->beginConsumeBuffer()) {
+		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
+		return true;
+	}
+
+	s = tbuf->nRead;
 
 	for(i = 0; i < s; i++) {
-		TraceLine &line = lines[i];
+		TraceLine *line = &tbuf->buffer[i];
 		TraceEvent event;
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
-		if (parseLine(&line, &event)) {
+		if (parseLine(line, &event)) {
 			ptrPool->commitN(event.argc);
 			events.push_back(event);
 			nrEvents++;
 			preScanEvent(event);
 		}
 	}
-
-	finalizePreScan();
-	return true;
+	tbuf->endConsumeBuffer();
+	return false;
 }
 
 void FtraceParser::preparePreScan()
@@ -263,6 +314,10 @@ void FtraceParser::finalizePreScan()
 }
 
 void FtraceParser::preScan()
+{
+}
+
+void FtraceParser::parse()
 {
 }
 
