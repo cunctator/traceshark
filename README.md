@@ -1,4 +1,4 @@
 traceshark
 ==========
 
-This will evolve into something useful one day, I hope
+This will evolve into an ftrace visualizer one day, I hope.
