@@ -24,13 +24,14 @@
 #include "mainwindow.h"
 #include "traceshark.h"
 #include "workthread.h"
+#include "qcustomplot.h"
 
-MainWindow::MainWindow()
+MainWindow::MainWindow():
+	tracePlot(NULL)
 {
 	parser = new FtraceParser;
 
-	traceLabel = new QLabel;
-	setCentralWidget(traceLabel);
+	//setCentralWidget(traceLabel);
 
 	createActions();
 	createToolBars();
@@ -54,6 +55,9 @@ void MainWindow::openTrace()
 	}
 	if (parser->isOpen()) {
 		processTrace();
+		computeLayout();
+		rescaleTrace();
+		showTrace();
 	}
 }
 
@@ -101,6 +105,42 @@ void MainWindow::processTrace()
 	delete migThread;
 	delete schedThread;
 	delete freqThread;
+}
+
+void MainWindow::computeLayout()
+{
+	unsigned int cpu;
+	unsigned int nrCPUs;
+	unsigned int offset = schedSectionSpace;
+
+	nrCPUs = parser->getNrCPUs();
+
+	/* Set the offset and scale of the scheduling graphs */
+	for (cpu = 0; cpu < nrCPUs; cpu++) {
+		parser->setSchedOffset(cpu, offset);
+		parser->setSchedOffset(cpu, schedHeight);
+		offset += schedHeight + schedSpacing;
+	}
+
+	offset += cpuSectionOffset;
+
+	for (cpu = 0; cpu < nrCPUs; cpu++) {
+		parser->setCpuFreqOffset(cpu, offset);
+		parser->setCpuIdleOffset(cpu, offset);
+		parser->setCpuFreqScale(cpu, cpuHeight);
+		parser->setCpuIdleScale(cpu, cpuHeight);
+		offset += cpuHeight + cpuSpacing;
+	}
+
+	totalHeight = offset;
+}
+
+void MainWindow::rescaleTrace()
+{
+}
+
+void MainWindow::showTrace()
+{
 }
 
 void MainWindow::closeTrace()

@@ -42,6 +42,7 @@ HEADERS      += traceline.h
 HEADERS      += traceshark.h
 HEADERS      += tstring.h
 HEADERS      += workthread.h
+HEADERS      += qcustomplot.h
 
 SOURCES       = argnode.cpp
 SOURCES      += cpunode.cpp
@@ -60,9 +61,11 @@ SOURCES      += tcolor.cpp
 SOURCES      += tthread.cpp
 SOURCES      += timenode.cpp
 SOURCES      += tracefile.cpp
+SOURCES      += qcustomplot.cpp
 
 QT           += core
 QT           += widgets
+QT           += printsupport
 
 QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -g -std=c++11
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99

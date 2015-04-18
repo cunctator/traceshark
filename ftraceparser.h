@@ -73,6 +73,7 @@ public:
 	void processCPUfreq();
 	QVector<TraceEvent> events;
 	__always_inline unsigned int getMaxCPU();
+	__always_inline unsigned int getNrCPUs();
 	__always_inline double getStartTime();
 	__always_inline double getEndTime();
 	__always_inline unsigned long getNrEvents();
@@ -222,6 +223,11 @@ __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 __always_inline unsigned int FtraceParser::getMaxCPU()
 {
 	return maxCPU;
+}
+
+__always_inline unsigned int FtraceParser::getNrCPUs()
+{
+	return nrCPUs;;
 }
 
 __always_inline double  FtraceParser::getStartTime()

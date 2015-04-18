@@ -26,6 +26,7 @@ class QAction;
 class QLabel;
 class QMenu;
 class QPlainTextEdit;
+class QCustomPlot;
 QT_END_NAMESPACE
 
 class FtraceParser;
@@ -42,13 +43,16 @@ protected:
 
 private slots:
 	void openTrace();
-	void processTrace();
 	void closeTrace();
 	void about();
 	void license();
 
 private:
-	QLabel *traceLabel;
+	void processTrace();
+	void computeLayout();
+	void rescaleTrace();
+	void showTrace();
+	QCustomPlot *tracePlot;
 	QString traceFile;
 
 	void createActions();
@@ -68,6 +72,19 @@ private:
 	QAction *aboutQtAction;
 
 	FtraceParser *parser;
+
+	const double graphSpacing = 100;
+	const double schedSectionSpace = 100;
+	const double schedSpacing = 100;
+	const double schedHeight = 1000;
+	const double cpuSectionOffset = 100;
+	const double cpuSpacing = 100;
+	const double cpuHeight = 1000;
+	const double cpuIdleSkew = 0;
+	const double migrateHeight = 5000;
+	const double migratSectionOffset = 100;
+
+	double totalHeight;
 };
 
 #endif /* MAINWINDOW_H */
