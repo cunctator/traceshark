@@ -35,21 +35,6 @@
 #include "traceshark.h"
 #include "workthread.h"
 
-using namespace TraceShark;
-
-#define FAKE_DELTA ((double) 0.0000005)
-
-/* Macros for the heights of the scheduling graph */
-#define FULL_HEIGHT  ((double) 1)
-#define SCHED_HEIGHT ((double) 0.6)
-#define MAXDELAY_RISER  (FULL_HEIGHT - SCHED_HEIGHT)
-#define FLOOR_HEIGHT ((double) 0.1)
-#define SUBFLOOR_HEIGHT ((double) 0)
-#define NR_TBUFFERS (3)
-#define TBUFSIZE (10000)
-
-#define FULLDELAY (0.02)
-
 bool FtraceParser::open(const QString &fileName)
 {
 	unsigned long long nr = 0;
@@ -199,39 +184,6 @@ void FtraceParser::DeleteGrammarTree(GrammarNode* node) {
 	delete node;
 }
 
-__always_inline void FtraceParser::preScanEvent(TraceEvent &event)
-{
-	if (event.cpu > maxCPU)
-		maxCPU = event.cpu;
-	if (cpuidle_event(event)) {
-		int state = cpuidle_state(event);
-		unsigned int cpu = cpuidle_cpu(event);
-		if (cpu > maxCPU)
-			maxCPU = cpu;
-		if (state < minIdleState)
-			minIdleState = state;
-		if (state > maxIdleState)
-			maxIdleState = state;
-	} else if (cpufreq_event(event)) {
-		unsigned int cpu = cpufreq_cpu(event);
-		unsigned int freq = cpufreq_freq(event);
-		if (freq > maxFreq)
-			maxFreq = freq;
-		if (freq < minFreq)
-			minFreq = freq;
-		if (cpu > maxCPU)
-			maxCPU = cpu;
-	} else if (sched_migrate(event)) {
-		unsigned int dest = sched_migrate_destCPU(event);
-		unsigned int orig = sched_migrate_origCPU(event);
-		if (dest > maxCPU)
-			maxCPU = dest;
-		if (orig > maxCPU)
-			maxCPU = dest;
-		nrMigrateEvents++;
-	}
-}
-
 /* This function does prescanning as well, to determine number of events,
  * number of CPUs, max/min CPU frequency etc */
 void FtraceParser::parseThread()
@@ -250,34 +202,6 @@ void FtraceParser::parseThread()
 	}
 
 	finalizePreScan();
-}
-
-/* This parses a buffer */
-__always_inline bool FtraceParser::parseBuffer(unsigned int index)
-{
-	unsigned int i, s;
-	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
-	if (tbuf->beginConsumeBuffer()) {
-		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
-		return true;
-	}
-
-	s = tbuf->nRead;
-
-	for(i = 0; i < s; i++) {
-		TraceLine *line = &tbuf->buffer[i];
-		TraceEvent event;
-		event.argc = 0;
-		event.argv = (TString**) ptrPool->preallocN(256);
-		if (parseLine(line, &event)) {
-			ptrPool->commitN(event.argc);
-			events.push_back(event);
-			nrEvents++;
-			preScanEvent(event);
-		}
-	}
-	tbuf->endConsumeBuffer();
-	return false;
 }
 
 void FtraceParser::preparePreScan()
@@ -343,183 +267,16 @@ void FtraceParser::processMigration()
 	}
 }
 
-static __always_inline void processSwitchEvent(TraceEvent &event,
-					       QMap<unsigned int, Task>
-					       *taskMaps, double &startTime,
-					       MemPool *pool)
-{
-	unsigned int cpu = event.cpu;
-	double oldtime = event.time - FAKE_DELTA;
-	double newtime = event.time + FAKE_DELTA;
-	unsigned int oldpid = sched_switch_oldpid(event);
-	unsigned int newpid = sched_switch_newpid(event);
-	Task *task;
-
-	if (oldpid == 0) /* We don't care about the idle task */
-		goto skip;
-
-	/* Handle the outgoing task */
-	task = &taskMaps[cpu][oldpid]; /* Modifiable reference */
-	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = 0ULL;
-		task->pid = oldpid;
-		char state = sched_switch_state(event);
-
-		/* Apparenly this task was on CPU when we started tracing */
-		task->timev.push_back(startTime);
-		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(oldtime);
-		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		/* If task is still running we indicate it with a small 
-		 * "subfloor" spike */
-		if (state == 'R') {
-			task->timev.push_back(oldtime);
-			task->data.push_back(SUBFLOOR_HEIGHT);
-			task->t.push_back(lastfunc(lastT));
-			task->lastWakeUP = oldtime;
-			lastT++;
-		}
-
-		task->timev.push_back(oldtime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->lastT = lastT;
-		task->name = sched_switch_oldname_strdup(event, pool);
-	} else {
-		unsigned long long lastT = task->lastT;
-
-		task->timev.push_back(oldtime);
-		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(oldtime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->lastT = lastT;
-	}
-
-skip:
-	if (newpid == 0) /* We don't care about the idle task */
-		return;
-
-	/* Handle the incoming task */
-	task = &taskMaps[cpu][newpid]; /* Modifiable reference */
-	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = 0ULL;
-		/* A tasks woken up after startTime would have been created by
-		 * the wakeup event */
-		double delay = newtime - startTime;
-		delay = TSMAX(delay, FULLDELAY);
-		double riser = MAXDELAY_RISER * delay / FULLDELAY;
-		riser += SCHED_HEIGHT;
-
-		task->pid = newpid;
-
-		task->timev.push_back(startTime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(riser);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->lastT = lastT;
-		task->name = sched_switch_newname_strdup(event, pool);
-	} else {
-		unsigned long long lastT = task->lastT;
-		double delay = newtime - task->lastWakeUP;
-		delay = TSMAX(delay, FULLDELAY);
-		double riser = MAXDELAY_RISER * delay / FULLDELAY;
-		riser += SCHED_HEIGHT;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(riser);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->lastT = lastT;
-	}
-}
-
-static __always_inline void processWakeupEvent(TraceEvent &event,
-					       QMap<unsigned int, Task>
-					       *taskMaps, double &startTime,
-					       MemPool *pool)
-{
-	unsigned int cpu, pid;
-	Task *task;
-	double time;
-
-	if (!sched_wakeup_success(event)) /* Only interested in success */
-		return;
-
-	time = event.time;
-	cpu = sched_wakeup_cpu(event);
-	pid = sched_wakeup_pid(event);
-
-	/* Handle the woken up task */
-	task = &taskMaps[cpu][pid]; /* Modifiable reference */
-
-	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = 0;
-		task->pid = pid;
-
-		task->timev.push_back(startTime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->lastT = lastT;
-		task->name = sched_wakeup_name_strdup(event, pool);
-	}
-	task->lastWakeUP = time;
-}
-
 void FtraceParser::processSched()
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
 		if (sched_switch(event)) {
-			processSwitchEvent(event, cpuTaskMaps, startTime,
-					   taskNamePool);
+			processSwitchEvent(event);
 		}
 		if (sched_wakeup(event)) {
-			processWakeupEvent(event, cpuTaskMaps, startTime,
-					   taskNamePool);
+			processWakeupEvent(event);
 		}
 	}
 
@@ -539,28 +296,6 @@ void FtraceParser::processSched()
 	}
 }
 
-static __always_inline void processCPUfreqEvent(TraceEvent &event,
-						CpuFreq *cpuFreq)
-{
-	unsigned int cpu = cpufreq_cpu(event);
-	double time = event.time;
-	unsigned int freq = cpufreq_freq(event);
-
-	cpuFreq[cpu].timev.push_back(time);
-	cpuFreq[cpu].data.push_back((double) freq);
-}
-
-static __always_inline void processCPUidleEvent(TraceEvent &event,
-						CpuIdle *cpuIdle)
-{
-	unsigned int cpu = cpuidle_cpu(event);
-	double time = event.time;
-	unsigned int state = cpuidle_state(event);
-
-	cpuIdle[cpu].timev.push_back(time);
-	cpuIdle[cpu].data.push_back((double) state);
-}
-
 void FtraceParser::processCPUfreq()
 {
 	unsigned int i;
@@ -571,30 +306,12 @@ void FtraceParser::processCPUfreq()
 		 * to the other functions that will be running in parallel
 		 * that it's acceptable to piggy back cpuidle events here */
 		if (cpuidle_event(event)) {
-			processCPUidleEvent(event, cpuIdle);
+			processCPUidleEvent(event);
 			continue;
 		}
 		if (cpufreq_event(event))
-			processCPUfreqEvent(event, cpuFreq);
+			processCPUfreqEvent(event);
 	}
-}
-
-__always_inline bool FtraceParser::checkColorMap(const TColor &color)
-{
-	if (black.SqDistance(color) < 500)
-		return false;
-	if (white.SqDistance(color) < 500)
-		return false;
-
-	DEFINE_COLORMAP_ITERATOR(iter) = colorMap.begin();
-
-	while (iter != colorMap.end()) {
-		TColor c = iter.value();
-		if (c.SqDistance(color) < 500)
-			return false;
-		iter++;
-	}
-	return true;
 }
 
 TColor FtraceParser::getNewColor()
