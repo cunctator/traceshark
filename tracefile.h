@@ -73,6 +73,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 			lastPos = 0;
 			e = buffers[lastBuf]->beginConsumeBuffer();
 			if (e) {
+				buffers[lastBuf]->endConsumeBuffer();
 				eof = e;
 				word[nchar] = '\0';
 				nRead = 0;

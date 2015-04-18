@@ -32,6 +32,7 @@ class LoadBuffer
 {
 public:
 	LoadBuffer(char *buf, unsigned int size);
+	~LoadBuffer();
 	char *buffer;
 	size_t bufSize;
 	ssize_t nRead;

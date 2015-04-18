@@ -28,6 +28,12 @@ LoadBuffer::LoadBuffer(char *buf, unsigned int size):
 	productionComplete.lock();
 }
 
+LoadBuffer::~LoadBuffer()
+{
+	/* Prevent consumer from consuming empty newly created buffer */
+	productionComplete.unlock();
+}
+
 /* This function should be called from the IO thread 
  * until the function returns true */
 bool LoadBuffer::produceBuffer(int fd) {
