@@ -35,7 +35,7 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 	char *m;
 	fd = open(name, O_RDONLY);
 	if (fd >= 0)
-	        ok = true;
+		ok = true;
 	else
 		ok = false;
 	lastPos = 0;
