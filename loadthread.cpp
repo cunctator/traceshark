@@ -29,6 +29,8 @@ void LoadThread::run()
 	bool eof;
 	do {
 		eof = loadBuffers[i]->produceBuffer(fd);
-		i = (i + 1) % nBuffers;
+		i++;
+		if (i == nBuffers)
+			i = 0;
 	} while(!eof);
 }

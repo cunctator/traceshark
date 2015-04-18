@@ -69,7 +69,9 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		lastPos++;
 		if (lastPos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = (lastBuf + 1) % NR_BUFFERS;
+			lastBuf++;
+			if (lastBuf == NR_BUFFERS)
+				lastBuf = 0;
 			lastPos = 0;
 			e = buffers[lastBuf]->beginConsumeBuffer();
 			if (e) {
@@ -85,13 +87,14 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		return nchar;
 	}
 
-
 	for (c = buffers[lastBuf]->buffer[pos]; c == ' ';
 	     c = buffers[lastBuf]->buffer[pos]) {
 		pos++;
 		if (pos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = (lastBuf + 1) % NR_BUFFERS;
+			lastBuf++;
+			if (lastBuf == NR_BUFFERS)
+				lastBuf = 0;
 			lastPos = 0;
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();
@@ -117,7 +120,9 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		pos++;
 		if (pos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = (lastBuf + 1) % NR_BUFFERS;
+			lastBuf++;
+			if (lastBuf == NR_BUFFERS)
+				lastBuf = 0;
 			lastPos = 0;
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();

@@ -85,7 +85,9 @@ bool FtraceParser::open(const QString &fileName)
 		i++;
 		if (i == (TBUFSIZE - 1)) {
 			tbuffers[curbuf]->endProduceBuffer(i);
-			curbuf = (curbuf + 1) % NR_TBUFFERS;
+			curbuf++;
+			if (curbuf == NR_TBUFFERS)
+				curbuf = 0;
 			i = 0;
 			tbuffers[curbuf]->beginProduceBuffer();
 		}
@@ -93,7 +95,9 @@ bool FtraceParser::open(const QString &fileName)
 	tbuffers[curbuf]->endProduceBuffer(i);
 	/* We must send an empty buffer at the end to signal that we are EOF */
 	if (i != 0) {
-		curbuf = (curbuf + 1) % NR_TBUFFERS;
+		curbuf++;
+		if (curbuf == NR_TBUFFERS)
+			curbuf = 0;
 		tbuffers[curbuf]->beginProduceBuffer();
 		tbuffers[curbuf]->endProduceBuffer(0);
 	}
@@ -240,7 +244,9 @@ void FtraceParser::parseThread()
 	while(true) {
 		if (parseBuffer(i))
 			break;
-		i = (i + 1) % NR_TBUFFERS;
+		i++;
+		if (i == NR_TBUFFERS)
+			i = 0;
 	}
 
 	finalizePreScan();
