@@ -50,6 +50,8 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 		m += bsize;
 	}
 	loadThread = new LoadThread(buffers, NR_BUFFERS, fd);
+	if (fd < 0) /* Don't start thread if open() failed earlier, we go*/
+		return; /* this far in order to avoid problems in destructor */
 	loadThread->start();
 	eof = buffers[0]->beginConsumeBuffer();
 	nRead = buffers[0]->nRead;
