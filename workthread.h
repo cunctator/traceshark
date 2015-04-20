@@ -20,27 +20,26 @@
 #define WORKTHREAD_H
 
 #include "tthread.h"
-
-/* C++ syntax for calling the pointer to a member function for an object */
-#define CALL_MEMBER_FN(ptrObject, ptrToMember) ((ptrObject)->*(ptrToMember))
-/* C++ syntax for declaring a pointer to a member function */
-#define DEFINE_MEMBER_FN(className, name) void (className::* name)()
+#include "traceshark.h"
 
 template <class ObjType>
 class WorkThread : public TThread
 {
 public:
-	WorkThread(ObjType *p, DEFINE_MEMBER_FN(ObjType, oF));
+	WorkThread() {};
+	WorkThread(ObjType *p, DEFINE_MEMBER_FN(void, ObjType, oF));
 	~WorkThread();
+	void setObjFn(ObjType *p, DEFINE_MEMBER_FN(void, ObjType, oF));
 protected:
 	void run();
 private:
 	ObjType *workObject;
-	DEFINE_MEMBER_FN(ObjType, objectFunc);
+	DEFINE_MEMBER_FN(void, ObjType, objectFunc);
 };
 
 template <class ObjType>
-WorkThread<ObjType>::WorkThread(ObjType *p, DEFINE_MEMBER_FN(ObjType, oF)):
+WorkThread<ObjType>::WorkThread(ObjType *p,
+				DEFINE_MEMBER_FN(void, ObjType, oF)):
 workObject(p), objectFunc(oF) {}
 
 
@@ -53,6 +52,13 @@ void WorkThread<ObjType>::run()
 template <class ObjType>
 WorkThread<ObjType>::~WorkThread()
 {
+}
+
+template <class ObjType>
+void WorkThread<ObjType>::setObjFn(ObjType *p,
+				   DEFINE_MEMBER_FN(void, ObjType, oF)) {
+	workObject = p;
+	objectFunc = oF;
 }
 
 #endif /* WORKTHREAD */

@@ -32,8 +32,14 @@
 #define DEFINE_COLORMAP_ITERATOR(name) \
 	QMap<unsigned int, TColor>::iterator name
 
-#define TSMAX(A, B) (A >= B ? A:B)
-#define TSMIN(A, b) (A < B ? A:B)
+#define TSMAX(A, B) ((A) >= (B) ? A:B)
+#define TSMIN(A, B) ((A) < (B) ? A:B)
+
+/* C++ syntax for calling the pointer to a member function for an object */
+#define CALL_MEMBER_FN(ptrObject, ptrToMember) ((ptrObject)->*(ptrToMember))
+/* C++ syntax for declaring a pointer to a member function */
+#define DEFINE_MEMBER_FN(returntype, className, name) \
+	returntype (className::* name)()
 
 namespace TraceShark {
 

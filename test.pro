@@ -41,7 +41,9 @@ HEADERS      += tracefile.h
 HEADERS      += traceline.h
 HEADERS      += traceshark.h
 HEADERS      += tstring.h
+HEADERS      += workitem.h
 HEADERS      += workthread.h
+HEADERS      += workqueue.h
 HEADERS      += qcustomplot.h
 
 SOURCES       = argnode.cpp
@@ -61,6 +63,7 @@ SOURCES      += tcolor.cpp
 SOURCES      += tthread.cpp
 SOURCES      += timenode.cpp
 SOURCES      += tracefile.cpp
+SOURCES      += workqueue.cpp
 SOURCES      += qcustomplot.cpp
 
 QT           += core
