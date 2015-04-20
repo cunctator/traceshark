@@ -54,8 +54,8 @@ public:
 protected:
 	__always_inline bool run();
 private:
-	DEFINE_MEMBER_FN(bool, W,  workObjFn);
 	W *workObj;
+	DEFINE_MEMBER_FN(bool, W,  workObjFn);
 };
 
 template <class W>
@@ -70,7 +70,7 @@ void WorkItem<W>::setObjFn(W *obj, DEFINE_MEMBER_FN(bool, W, fn)) {
 
 template <class W>
 __always_inline bool WorkItem<W>::run() {
-	return CALL_MEMBER_FN(workObj, workObjFn);
+	return CALL_MEMBER_FN(workObj, workObjFn)();
 }
 
 #endif /* WORKITEM_H */
