@@ -29,6 +29,7 @@ class ThreadBuffer
 {
 public:
 	ThreadBuffer(unsigned int bufsize, unsigned int nr);
+	~ThreadBuffer();
 	unsigned int bufSize;
 	unsigned int nrBuffers;
 	unsigned int nRead;
@@ -73,6 +74,12 @@ ThreadBuffer<T>::ThreadBuffer(unsigned int bufsize, unsigned int nr):
 	buffer = new T[bufsize];
 	/* Prevent consumer from consuming empty newly created buffer */
 	productionComplete.lock();
+}
+
+template<class T>
+ThreadBuffer<T>::~ThreadBuffer()
+{
+	productionComplete.unlock();
 }
 
 /* This should be called from the producer thread
