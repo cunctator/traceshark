@@ -50,6 +50,7 @@ class WorkItem : public AbstractWorkItem {
 public:
 	WorkItem(W *obj, DEFINE_MEMBER_FN(bool, W, fn));
 	WorkItem() {}
+	virtual ~WorkItem() {}
 	void setObjFn(W *obj, DEFINE_MEMBER_FN(bool, W, fn));
 protected:
 	__always_inline bool run();
