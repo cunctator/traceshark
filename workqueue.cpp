@@ -24,9 +24,17 @@
 WorkQueue::WorkQueue():
 	error(false)
 {
-	int cpus;
+	int cpus, i;
 	cpus = QThread::idealThreadCount();
-	nrHostCPUs = cpus > 0 ? cpus:DEFAULT_NR_CPUS;
+	nrThreads = cpus > 0 ? cpus:DEFAULT_NR_CPUS;
+	threads = new WorkThread<WorkQueue>[nrThreads]();
+	for (i = 0; i < nrThreads; i++)
+		threads[i].setObjFn(this, &WorkQueue::ThreadRun);
+}
+
+WorkQueue::~WorkQueue()
+{
+	delete[] threads;
 }
 
 void WorkQueue::addWorkItem(AbstractWorkItem *item)
@@ -47,19 +55,13 @@ void WorkQueue::setWorkItemsDefault()
 bool WorkQueue::start() {
 	int i;
 	int qs = queue.size();
-	nrThreads = TSMIN(qs, nrHostCPUs);
-	threads = new WorkThread<WorkQueue>[nrThreads]();
+	int nr;
 
-	for (i = 0; i < nrThreads; i++)
-		threads[i].setObjFn(this, &WorkQueue::ThreadRun);
-
-	for (i = 0; i < nrThreads; i++)
+	nr = TSMIN(qs, nrThreads);
+	for (i = 0; i < nr; i++)
 		threads[i].start();
-
-	for (i = 0; i < nrThreads; i++)
+	for (i = 0; i < nr; i++)
 		threads[i].wait();
-
-	delete[] threads;
 	return error;
 }
 

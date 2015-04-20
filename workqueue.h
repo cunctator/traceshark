@@ -28,6 +28,7 @@ class WorkQueue {
 	friend class WorkThread<WorkQueue>;
 public:
 	WorkQueue();
+	~WorkQueue();
 	void addWorkItem(AbstractWorkItem *item);
 	void addDefaultWorkItem(AbstractWorkItem *item);
 	void setWorkItemsDefault();
@@ -42,7 +43,6 @@ private:
 	bool error;
 	WorkThread<WorkQueue> *threads;
 	int nrThreads;
-	int nrHostCPUs;
 };
 
 #endif /* WORKQUEUE_H */
