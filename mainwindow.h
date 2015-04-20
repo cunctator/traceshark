@@ -38,7 +38,7 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow();
-	~MainWindow();
+	virtual ~MainWindow();
 protected:
 	void closeEvent(QCloseEvent *event);
 
