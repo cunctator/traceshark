@@ -20,6 +20,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "workitem.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -37,7 +38,7 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow();
-
+	~MainWindow();
 protected:
 	void closeEvent(QCloseEvent *event);
 
@@ -72,6 +73,9 @@ private:
 	QAction *aboutQtAction;
 
 	FtraceParser *parser;
+	WorkItem<FtraceParser> *schedItem;
+	WorkItem<FtraceParser> *migItem;
+	WorkItem<FtraceParser> *freqItem;
 
 	const double graphSpacing = 100;
 	const double schedSectionSpace = 100;

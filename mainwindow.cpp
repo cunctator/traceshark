@@ -36,7 +36,22 @@ MainWindow::MainWindow():
 
 	createActions();
 	createToolBars();
-	createMenus();	
+	createMenus();
+
+	schedItem = new WorkItem<FtraceParser> (parser,
+						&FtraceParser::processSched);
+	migItem = new WorkItem<FtraceParser> (parser,
+					      &FtraceParser::processMigration);
+	freqItem = new WorkItem<FtraceParser> (parser,
+					       &FtraceParser::processCPUfreq);
+}
+
+MainWindow::~MainWindow()
+{
+	delete parser;
+	delete schedItem;
+	delete migItem;
+	delete freqItem;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -67,7 +82,6 @@ void MainWindow::processTrace()
 	QTextStream qout(stdout);
 	quint64 start, pre, process, colorize;
 	WorkQueue *workQueue;
-	WorkItem<FtraceParser> *schedItem, *migItem, *freqItem;
 
 	qout.setRealNumberPrecision(6);
 	qout.setRealNumberNotation(QTextStream::FixedNotation);
@@ -77,19 +91,9 @@ void MainWindow::processTrace()
 	pre = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 	workQueue = new WorkQueue();
-
-	schedItem = new WorkItem<FtraceParser> (parser,
-						  &FtraceParser::processSched);
 	workQueue->addWorkItem(schedItem);
-
-	migItem = new WorkItem<FtraceParser> (parser,
-					      &FtraceParser::processMigration);
 	workQueue->addWorkItem(migItem);
-
-	freqItem = new WorkItem<FtraceParser> (parser,
-					       &FtraceParser::processCPUfreq);
 	workQueue->addWorkItem(freqItem);
-
 	workQueue->start();
 
 	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
