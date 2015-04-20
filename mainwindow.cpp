@@ -110,12 +110,6 @@ void MainWindow::processTrace()
 
 	qout << "colorize() took " << (double) (colorize - start) / 1000 <<
 		" s\n";
-
-	/* A bit crazy to create and destroy these objects */
-	delete workQueue;
-	delete migItem;
-	delete schedItem;
-	delete freqItem;
 }
 
 void MainWindow::computeLayout()
