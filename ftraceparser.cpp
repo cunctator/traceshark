@@ -41,7 +41,6 @@ bool FtraceParser::open(const QString &fileName)
 	unsigned int i = 0;
 	unsigned int curbuf = 0;
 	bool ok = false;
-	WorkThread<FtraceParser> *parserThread;
 
 	if (traceFile != NULL)
 		return ok;
@@ -57,8 +56,6 @@ bool FtraceParser::open(const QString &fileName)
 	for (i = 0; i < NR_TBUFFERS; i++)
 		tbuffers[i] = new ThreadBuffer<TraceLine>(TBUFSIZE,
 							  NR_TBUFFERS);
-	parserThread = new WorkThread<FtraceParser>
-		(this, &FtraceParser::parseThread);
 	parserThread->start();
 
 	i = 0;
@@ -163,6 +160,8 @@ FtraceParser::FtraceParser()
 	grammarRoot->isLeaf = false;
 
 	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
+	parserThread = new WorkThread<FtraceParser>
+		(this, &FtraceParser::parseThread);
 }
 
 FtraceParser::~FtraceParser()
@@ -172,6 +171,7 @@ FtraceParser::~FtraceParser()
 	delete ptrPool;
 	delete taskNamePool;
 	delete[] tbuffers;
+	delete parserThread;
 }
 
 void FtraceParser::DeleteGrammarTree(GrammarNode* node) {

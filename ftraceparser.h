@@ -38,6 +38,7 @@
 #include "migration.h"
 #include "threadbuffer.h"
 #include "traceshark.h"
+#include "workthread.h"
 
 using namespace TraceShark;
 
@@ -106,6 +107,7 @@ private:
 	__always_inline void processCPUfreqEvent(TraceEvent &event);
 	__always_inline void processCPUidleEvent(TraceEvent &event);
 	ThreadBuffer<TraceLine> **tbuffers;
+	WorkThread<FtraceParser> *parserThread;
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
 	MemPool *ptrPool;
