@@ -19,7 +19,7 @@
 #ifndef WORKQUEUE_H
 #define WORKQUEUE_H
 
-#include <QQueue>
+#include <QList>
 #include <QMutex>
 #include "workitem.h"
 #include "workthread.h"
@@ -29,11 +29,14 @@ class WorkQueue {
 public:
 	WorkQueue();
 	void addWorkItem(AbstractWorkItem *item);
+	void addDefaultWorkItem(AbstractWorkItem *item);
+	void setWorkItemsDefault();
 	bool start();
 protected:
 	void ThreadRun();
 private:
-	QQueue<AbstractWorkItem*> queue;
+	QList<AbstractWorkItem*> queue;
+	QList<AbstractWorkItem*> defaultQueue;
 	QMutex queueMutex;
 	QMutex errorMutex;
 	bool error;

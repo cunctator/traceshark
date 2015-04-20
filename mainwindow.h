@@ -31,6 +31,7 @@ class QCustomPlot;
 QT_END_NAMESPACE
 
 class FtraceParser;
+class WorkQueue;
 
 class MainWindow : public QMainWindow
 {
@@ -76,6 +77,7 @@ private:
 	WorkItem<FtraceParser> *schedItem;
 	WorkItem<FtraceParser> *migItem;
 	WorkItem<FtraceParser> *freqItem;
+	WorkQueue *workQueue;
 
 	const double graphSpacing = 100;
 	const double schedSectionSpace = 100;

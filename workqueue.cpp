@@ -29,10 +29,19 @@ WorkQueue::WorkQueue():
 	nrHostCPUs = cpus > 0 ? cpus:DEFAULT_NR_CPUS;
 }
 
-void WorkQueue::addWorkItem(AbstractWorkItem *item) {
-	queueMutex.lock();
+void WorkQueue::addWorkItem(AbstractWorkItem *item)
+{
 	queue.append(item);
-	queueMutex.unlock();
+}
+
+void WorkQueue::addDefaultWorkItem(AbstractWorkItem *item)
+{
+	defaultQueue.append(item);
+}
+
+void WorkQueue::setWorkItemsDefault()
+{
+	queue = defaultQueue;
 }
 
 bool WorkQueue::start() {
