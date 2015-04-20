@@ -68,9 +68,9 @@ public:
 	void parse();
 	void parseThread();
 	void preScan();
-	void processMigration();
-	void processSched();
-	void processCPUfreq();
+	bool processMigration();
+	bool processSched();
+	bool processCPUfreq();
 	QVector<TraceEvent> events;
 	__always_inline unsigned int getMaxCPU();
 	__always_inline unsigned int getNrCPUs();

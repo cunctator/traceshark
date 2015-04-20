@@ -251,7 +251,7 @@ void FtraceParser::parse()
 {
 }
 
-void FtraceParser::processMigration()
+bool FtraceParser::processMigration()
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
@@ -265,9 +265,10 @@ void FtraceParser::processMigration()
 			migrations.push_back(m);
 		}
 	}
+	return false;
 }
 
-void FtraceParser::processSched()
+bool FtraceParser::processSched()
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
@@ -294,9 +295,10 @@ void FtraceParser::processSched()
 			iter++;
 		}
 	}
+	return false;
 }
 
-void FtraceParser::processCPUfreq()
+bool FtraceParser::processCPUfreq()
 {
 	unsigned int i;
 	for (i = 0; i < nrEvents; i++) {
@@ -312,6 +314,7 @@ void FtraceParser::processCPUfreq()
 		if (cpufreq_event(event))
 			processCPUfreqEvent(event);
 	}
+	return false;
 }
 
 TColor FtraceParser::getNewColor()

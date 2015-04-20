@@ -23,7 +23,8 @@
 #include "ftraceparser.h"
 #include "mainwindow.h"
 #include "traceshark.h"
-#include "workthread.h"
+#include "workqueue.h"
+#include "workitem.h"
 #include "qcustomplot.h"
 
 MainWindow::MainWindow():
@@ -65,7 +66,8 @@ void MainWindow::processTrace()
 {
 	QTextStream qout(stdout);
 	quint64 start, pre, process, colorize;
-	WorkThread<FtraceParser> *schedThread, *migThread, *freqThread;
+	WorkQueue *workQueue;
+	WorkItem<FtraceParser> *schedItem, *migItem, *freqItem;
 
 	qout.setRealNumberPrecision(6);
 	qout.setRealNumberNotation(QTextStream::FixedNotation);
@@ -74,18 +76,21 @@ void MainWindow::processTrace()
 	parser->preScan();
 	pre = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-	schedThread = new WorkThread<FtraceParser> (parser, &FtraceParser::processSched);
-	schedThread->start();
+	workQueue = new WorkQueue();
 
-	migThread = new WorkThread<FtraceParser> (parser, &FtraceParser::processMigration);
-	migThread->start();
+	schedItem = new WorkItem<FtraceParser> (parser,
+						  &FtraceParser::processSched);
+	workQueue->addWorkItem(schedItem);
 
-	freqThread = new WorkThread<FtraceParser> (parser, &FtraceParser::processCPUfreq);
-	freqThread->start();
+	migItem = new WorkItem<FtraceParser> (parser,
+					      &FtraceParser::processMigration);
+	workQueue->addWorkItem(migItem);
 
-	migThread->wait();
-	freqThread->wait();
-	schedThread->wait();
+	freqItem = new WorkItem<FtraceParser> (parser,
+					       &FtraceParser::processCPUfreq);
+	workQueue->addWorkItem(freqItem);
+
+	workQueue->start();
 
 	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -101,10 +106,11 @@ void MainWindow::processTrace()
 	qout << "colorize() took " << (double) (colorize - start) / 1000 <<
 		" s\n";
 
-	/* A bit crazy to create and destroy these thread objects */
-	delete migThread;
-	delete schedThread;
-	delete freqThread;
+	/* A bit crazy to create and destroy these objects */
+	delete workQueue;
+	delete migItem;
+	delete schedItem;
+	delete freqItem;
 }
 
 void MainWindow::computeLayout()
