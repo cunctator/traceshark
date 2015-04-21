@@ -30,8 +30,11 @@ public:
 	QVector<double> data;
 	QVector<double> t;
 	QVector<double> scaledData;
-	unsigned long long lastT;
-	double lastWakeUP;
+	unsigned long long lastT; /* Only used during extraction */
+	double lastWakeUP;        /* Only used during extraction */
+	double offset;
+	double scale;
+	bool doScale();
 };
 
 #endif

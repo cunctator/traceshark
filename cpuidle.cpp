@@ -16,19 +16,14 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPUIDLE_H
-#define CPUIDLE_H
+#include "cpuidle.h"
 
-#include <QVector>
-
-class CpuIdle {
-public:
-	QVector<double> timev;
-	QVector<double> data;
-	QVector<double> scaledData;
-	double offset;
-	double scale;
-	bool doScale();
-};
-
-#endif /* CPUIDLE_H */
+bool CpuIdle::doScale()
+{
+	int i;
+	int s = data.size();
+	scaledData.resize(s);
+	for (i = 0; i < s; i++)
+		scaledData[i] = data[i] * scale + offset;
+	return false; /* No error */	
+}

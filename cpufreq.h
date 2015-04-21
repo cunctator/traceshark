@@ -26,6 +26,9 @@ public:
 	QVector<double> timev;
 	QVector<double> data;
 	QVector<double> scaledData;
+	double offset;
+	double scale;
+	bool doScale();
 };
 
 #endif /* CPUFREQ_H*/

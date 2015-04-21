@@ -47,6 +47,8 @@ HEADERS      += workqueue.h
 HEADERS      += qcustomplot.h
 
 SOURCES       = argnode.cpp
+SOURCES      += cpufreq.cpp
+SOURCES      += cpuidle.cpp
 SOURCES      += cpunode.cpp
 SOURCES      += eventnode.cpp
 SOURCES      += ftraceparser.cpp
@@ -59,6 +61,7 @@ SOURCES      += main.cpp
 SOURCES      += mainwindow.cpp
 SOURCES      += mempool.cpp
 SOURCES      += namepidnode.cpp
+SOURCES      += task.cpp
 SOURCES      += tcolor.cpp
 SOURCES      += tthread.cpp
 SOURCES      += timenode.cpp
