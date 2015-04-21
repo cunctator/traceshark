@@ -75,10 +75,32 @@ void MainWindow::openTrace()
 		loadTraceFile(name);
 	}
 	if (parser->isOpen()) {
+		QTextStream qout(stdout);
+		qout.setRealNumberPrecision(6);
+		qout.setRealNumberNotation(QTextStream::FixedNotation);
+		quint64 start, process, layout, rescale, show;
+
+		start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 		processTrace();
+		process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 		computeLayout();
+		layout = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 		rescaleTrace();
+		rescale = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 		showTrace();
+		show = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+		qout << "processTrace() took "
+		     << (double) (process - start) / 1000;
+		qout << " s\n";
+		qout << "computeLayout() took "
+		     << (double) (layout - process) / 1000;
+		qout << " s\n";
+		qout << "rescaleTrace() took "
+		     << (double) (rescale - layout) / 1000;
+		qout << " s\n";
+		qout << "showTrace() took "
+		     << (double) (show - rescale) / 1000;
+		qout << " s\n";
 	}
 }
 
@@ -142,6 +164,7 @@ void MainWindow::computeLayout()
 
 void MainWindow::rescaleTrace()
 {
+	parser->doScale();
 }
 
 void MainWindow::showTrace()

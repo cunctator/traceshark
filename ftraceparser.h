@@ -39,6 +39,7 @@
 #include "threadbuffer.h"
 #include "traceshark.h"
 #include "workthread.h"
+#include "workqueue.h"
 
 using namespace TraceShark;
 
@@ -88,9 +89,7 @@ public:
 	void setCpuIdleScale(unsigned int cpu, double scale);
 	void setCpuFreqOffset(unsigned int cpu, double offset);
 	void setCpuFreqScale(unsigned int cpu, double scale);
-	void scaleSched(unsigned int cpu);
-	void scaleCpuIdle(unsigned int cpu);
-	void scaleCpuFreq(unsigned int cpu);
+	void doScale();
 	void colorizeTasks();
 	QMap<unsigned int, Task> *cpuTaskMaps;
 	CpuFreq *cpuFreq;
@@ -108,6 +107,7 @@ private:
 	__always_inline void processCPUidleEvent(TraceEvent &event);
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<FtraceParser> *parserThread;
+	WorkQueue scalingQueue;
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
 	MemPool *ptrPool;
@@ -134,6 +134,12 @@ private:
 	QVector<double> cpuIdleScale;
 	QVector<double> cpuFreqOffset;
 	QVector<double> cpuFreqScale;
+	void addCpuFreqWork(unsigned int cpu,
+		       QList<AbstractWorkItem*> &list);
+	void addCpuIdleWork(unsigned int cpu,
+		       QList<AbstractWorkItem*> &list);
+	void addCpuSchedWork(unsigned int cpu,
+		       QList<AbstractWorkItem*> &list);
 };
 
 /* This parses a buffer */

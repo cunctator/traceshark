@@ -18,6 +18,7 @@
 
 #include <climits>
 #include <QtGlobal>
+#include <QList>
 #include <QString>
 #include <QTextStream>
 #include "cpufreq.h"
@@ -34,6 +35,8 @@
 #include "argnode.h"
 #include "traceshark.h"
 #include "workthread.h"
+#include "workitem.h"
+#include "workqueue.h"
 
 bool FtraceParser::open(const QString &fileName)
 {
@@ -383,39 +386,67 @@ void FtraceParser::setCpuFreqScale(unsigned int cpu, double scale)
 	schedOffset[cpu] = scale;
 }
 
-void FtraceParser::scaleSched(unsigned int cpu)
+void FtraceParser::addCpuFreqWork(unsigned int cpu,
+				  QList<AbstractWorkItem*> &list)
+{
+	double scale = cpuFreqScale.value(cpu);
+	double offset = cpuFreqScale.value(cpu);
+	CpuFreq *freq = cpuFreq + cpu;
+	freq->scale = scale;
+	freq->offset = offset;
+	WorkItem<CpuFreq> *freqItem = new WorkItem<CpuFreq>
+		(freq, &CpuFreq::doScale);
+	list.append(freqItem);
+}
+
+void FtraceParser::addCpuIdleWork(unsigned int cpu,
+				  QList<AbstractWorkItem*> &list)
+{
+	double scale = cpuIdleScale.value(cpu);
+	double offset = cpuIdleOffset.value(cpu);
+	CpuIdle *idle = cpuIdle + cpu;
+	idle->scale = scale;
+	idle->offset = offset;
+	WorkItem<CpuIdle> *idleItem = new WorkItem<CpuIdle>
+		(idle, &CpuIdle::doScale);
+	list.append(idleItem);
+}
+
+void FtraceParser::addCpuSchedWork(unsigned int cpu,
+				  QList<AbstractWorkItem*> &list)
 {
 	double scale = schedScale.value(cpu);
 	double offset = schedOffset.value(cpu);
 	DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 	while (iter != cpuTaskMaps[cpu].end()) {
 		Task &task = iter.value();
-		int size = task.data.size();
-		task.scaledData.resize(size);
-		for (int i = 0; i < size; i++)
-			task.scaledData[i] = task.data.at(i) * scale + offset;
+		task.scale = scale;
+		task.offset = offset;
+		WorkItem<Task> *taskItem = new WorkItem<Task>
+			(&task, &Task::doScale);
+		list.append(taskItem);
 		iter++;
 	}
 }
 
-void FtraceParser::scaleCpuIdle(unsigned int cpu)
+void FtraceParser::doScale()
 {
-	double scale = cpuIdleScale.value(cpu);
-	double offset = cpuIdleOffset.value(cpu);
-	CpuIdle *idle = cpuIdle + cpu;
-	int size = idle->data.size();
+	QList<AbstractWorkItem*> workList;
+	unsigned int cpu;
+	int i, s;
 
-	for (int i = 0; i < size; i++)
-		idle->scaledData[i] = idle->data.at(i) * scale + offset;
-}
-
-void FtraceParser::scaleCpuFreq(unsigned int cpu)
-{
-	double scale = cpuFreqScale.value(cpu);
-	double offset = cpuFreqOffset.value(cpu);
-	CpuFreq *freq = cpuFreq + cpu;
-	int size = freq->data.size();
-
-	for (int i = 0; i < size; i++)
-		freq->scaledData[i] = freq->data.at(i) * scale + offset;
+	for (cpu = 0; cpu <= maxCPU; cpu++) {
+		/* CpuFreq items */
+		addCpuFreqWork(cpu, workList);
+		/* CpuIdle items */
+		addCpuIdleWork(cpu, workList);
+		/* Task items */
+		addCpuSchedWork(cpu, workList);
+	}
+	s = workList.size();
+	for (i = 0; i < s; i++)
+		scalingQueue.addWorkItem(workList[i]);
+	scalingQueue.start();
+	for (i = 0; i < s; i++)
+		delete workList[i];
 }

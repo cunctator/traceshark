@@ -31,6 +31,8 @@ class WorkQueue;
  */
 class AbstractWorkItem {
 	friend class WorkQueue;
+public:
+	virtual ~AbstractWorkItem() {}
 protected:
 	__always_inline bool __runWork();
 	virtual bool run() = 0;
