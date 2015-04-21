@@ -106,12 +106,18 @@ void FtraceParser::close()
 		delete traceFile;
 		traceFile = NULL;
 	}
-	if (cpuTaskMaps != NULL)
+	if (cpuTaskMaps != NULL) {
 		delete[] cpuTaskMaps;
-	if (cpuFreq != NULL)
+		cpuTaskMaps = NULL;
+	}
+	if (cpuFreq != NULL) {
 		delete[] cpuFreq;
-	if (cpuIdle != NULL)
+		cpuFreq = NULL;
+	}
+	if (cpuIdle != NULL) {
 		delete[] cpuIdle;
+		cpuIdle = NULL;
+	}
 	migrations.resize(0);
 }
 
