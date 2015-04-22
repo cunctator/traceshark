@@ -139,13 +139,20 @@ void MainWindow::computeLayout()
 	unsigned int cpu;
 	unsigned int nrCPUs;
 	unsigned int offset = schedSectionSpace;
+	QString label;
+	bottom = offset;
 
+	ticks.resize(0);
+	tickLabels.resize(0);
 	nrCPUs = parser->getNrCPUs();
 
 	/* Set the offset and scale of the scheduling graphs */
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
 		parser->setSchedOffset(cpu, offset);
 		parser->setSchedOffset(cpu, schedHeight);
+		label = QString("cpu") + QString::number(cpu);
+		ticks.append(offset);
+		tickLabels.append(label);
 		offset += schedHeight + schedSpacing;
 	}
 
@@ -156,10 +163,13 @@ void MainWindow::computeLayout()
 		parser->setCpuIdleOffset(cpu, offset);
 		parser->setCpuFreqScale(cpu, cpuHeight);
 		parser->setCpuIdleScale(cpu, cpuHeight);
+		label = QString("cpu") + QString::number(cpu);
+		ticks.append(offset);
+		tickLabels.append(label);
 		offset += cpuHeight + cpuSpacing;
 	}
 
-	totalHeight = offset;
+	top = offset;
 }
 
 void MainWindow::rescaleTrace()
@@ -169,6 +179,9 @@ void MainWindow::rescaleTrace()
 
 void MainWindow::showTrace()
 {
+	if (tracePlot != NULL)
+		delete tracePlot;
+	tracePlot = new QCustomPlot();
 }
 
 void MainWindow::closeTrace()

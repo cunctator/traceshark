@@ -20,6 +20,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QVector>
+#include <QString>
 #include "workitem.h"
 
 QT_BEGIN_NAMESPACE
@@ -90,7 +92,10 @@ private:
 	const double migrateHeight = 5000;
 	const double migratSectionOffset = 100;
 
-	double totalHeight;
+	double bottom;
+	double top;
+	QVector<double> ticks;
+	QVector<QString> tickLabels;
 };
 
 #endif /* MAINWINDOW_H */
