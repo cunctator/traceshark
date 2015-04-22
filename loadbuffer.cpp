@@ -30,7 +30,6 @@ LoadBuffer::LoadBuffer(char *buf, unsigned int size):
 
 LoadBuffer::~LoadBuffer()
 {
-	/* Prevent consumer from consuming empty newly created buffer */
 	productionComplete.unlock();
 }
 
