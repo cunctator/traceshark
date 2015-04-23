@@ -28,7 +28,7 @@
 #include "qcustomplot.h"
 
 MainWindow::MainWindow():
-	tracePlot(NULL)
+	customPlot(NULL)
 {
 	parser = new FtraceParser;
 
@@ -48,6 +48,10 @@ MainWindow::MainWindow():
 	workQueue->addDefaultWorkItem(schedItem);
 	workQueue->addDefaultWorkItem(migItem);
 	workQueue->addDefaultWorkItem(freqItem);
+
+	customPlot = new QCustomPlot();
+	customPlot->hide();
+	setCentralWidget(customPlot);
 }
 
 MainWindow::~MainWindow()
@@ -57,6 +61,7 @@ MainWindow::~MainWindow()
 	delete migItem;
 	delete freqItem;
 	delete workQueue;
+	delete customPlot;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -177,11 +182,42 @@ void MainWindow::rescaleTrace()
 	parser->doScale();
 }
 
+void MainWindow::clearPlot()
+{
+	customPlot->clearItems();
+	customPlot->clearPlottables();
+}
+
 void MainWindow::showTrace()
 {
-	if (tracePlot != NULL)
-		delete tracePlot;
-	tracePlot = new QCustomPlot();
+	unsigned int cpu;
+	double start, end;
+
+	start = parser->getStartTime();
+	end = parser->getEndTime();
+
+	clearPlot();
+	customPlot->yAxis->setRange(QCPRange(bottom, top));
+	customPlot->xAxis->setRange(QCPRange(start, end));
+	customPlot->yAxis->setTicks(false);
+	customPlot->yAxis->setAutoTicks(false);
+	customPlot->yAxis->setAutoTickLabels(false);
+	customPlot->yAxis->setTickVector(ticks);
+	customPlot->yAxis->setTickVectorLabels(tickLabels);
+	customPlot->yAxis->setTickLabels(true);
+	customPlot->yAxis->setTicks(true);
+
+	/* Show CPU frequency graphs */
+	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
+		QCPGraph *graph = new QCPGraph(customPlot->xAxis,
+					       customPlot->yAxis);
+		customPlot->addPlottable(graph);
+		graph->setLineStyle(QCPGraph::lsStepLeft);
+		graph->setData(parser->cpuFreq[cpu].timev,
+			       parser->cpuFreq[cpu].scaledData);
+	}
+
+	customPlot->show();
 }
 
 void MainWindow::closeTrace()

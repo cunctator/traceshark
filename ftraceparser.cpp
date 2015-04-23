@@ -373,7 +373,7 @@ void FtraceParser::setCpuIdleOffset(unsigned int cpu, double offset)
 
 void FtraceParser::setCpuIdleScale(unsigned int cpu, double scale)
 {
-	cpuIdleScale[cpu] = scale;
+	cpuIdleScale[cpu] = scale / maxIdleState;
 }
 
 void FtraceParser::setCpuFreqOffset(unsigned int cpu, double offset)
@@ -383,14 +383,14 @@ void FtraceParser::setCpuFreqOffset(unsigned int cpu, double offset)
 
 void FtraceParser::setCpuFreqScale(unsigned int cpu, double scale)
 {
-	schedOffset[cpu] = scale;
+	cpuFreqScale[cpu] = scale / maxFreq;
 }
 
 void FtraceParser::addCpuFreqWork(unsigned int cpu,
 				  QList<AbstractWorkItem*> &list)
 {
 	double scale = cpuFreqScale.value(cpu);
-	double offset = cpuFreqScale.value(cpu);
+	double offset = cpuFreqOffset.value(cpu);
 	CpuFreq *freq = cpuFreq + cpu;
 	freq->scale = scale;
 	freq->offset = offset;

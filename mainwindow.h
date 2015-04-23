@@ -55,8 +55,9 @@ private:
 	void processTrace();
 	void computeLayout();
 	void rescaleTrace();
+	void clearPlot();
 	void showTrace();
-	QCustomPlot *tracePlot;
+	QCustomPlot *customPlot;
 	QString traceFile;
 
 	void createActions();
