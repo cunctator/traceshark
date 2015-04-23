@@ -35,6 +35,9 @@
 #define TSMAX(A, B) ((A) >= (B) ? A:B)
 #define TSMIN(A, B) ((A) < (B) ? A:B)
 
+/*  1024 CPUs ought to be enough for anybody */
+#define HIGHEST_CPU_EVER (1023)
+
 /* C++ syntax for calling the pointer to a member function for an object */
 #define CALL_MEMBER_FN(ptrObject, ptrToMember) ((ptrObject)->*(ptrToMember))
 /* C++ syntax for declaring a pointer to a member function */

@@ -224,6 +224,7 @@ void FtraceParser::preparePreScan()
 	minIdleState = INT_MAX;
 	maxIdleState = INT_MIN;
 	nrMigrateEvents = 0;
+	startFreq.fill(-1, HIGHEST_CPU_EVER + 1);
 }
 
 void FtraceParser::finalizePreScan()
@@ -250,6 +251,7 @@ void FtraceParser::finalizePreScan()
 	cpuFreqOffset.resize(nrCPUs);
 	cpuFreqScale.resize(0);
 	cpuFreqScale.resize(nrCPUs);
+	startFreq.resize(nrCPUs);
 }
 
 void FtraceParser::preScan()
@@ -310,6 +312,13 @@ bool FtraceParser::processSched()
 bool FtraceParser::processCPUfreq()
 {
 	unsigned int i;
+	unsigned int cpu;
+	for (cpu = 0; cpu <= maxCPU; cpu++) {
+		if (startFreq[cpu] > 0) {
+			cpuFreq[cpu].timev.push_back(startTime);
+			cpuFreq[cpu].data.push_back(startFreq[cpu]);
+		}
+	}
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
 		/*
@@ -322,6 +331,13 @@ bool FtraceParser::processCPUfreq()
 		}
 		if (cpufreq_event(event))
 			processCPUfreqEvent(event);
+	}
+	for (cpu = 0; cpu <= maxCPU; cpu++) {
+		if (!cpuFreq[cpu].data.isEmpty()) {
+			double freq = cpuFreq[cpu].data.last();
+			cpuFreq[cpu].data.push_back(freq);
+			cpuFreq[cpu].timev.push_back(endTime);
+		}
 	}
 	return false;
 }

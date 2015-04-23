@@ -140,6 +140,7 @@ private:
 		       QList<AbstractWorkItem*> &list);
 	void addCpuSchedWork(unsigned int cpu,
 		       QList<AbstractWorkItem*> &list);
+	QVector<double> startFreq;
 };
 
 /* This parses a buffer */
@@ -192,6 +193,9 @@ __always_inline void FtraceParser::preScanEvent(TraceEvent &event)
 			minFreq = freq;
 		if (cpu > maxCPU)
 			maxCPU = cpu;
+		if (cpu <= HIGHEST_CPU_EVER && startFreq[cpu] < 0) {
+			startFreq[cpu] = freq;
+		}
 	} else if (sched_migrate(event)) {
 		unsigned int dest = sched_migrate_destCPU(event);
 		unsigned int orig = sched_migrate_origCPU(event);
