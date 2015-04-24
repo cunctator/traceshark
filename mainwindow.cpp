@@ -51,6 +51,14 @@ MainWindow::MainWindow():
 
 	customPlot = new QCustomPlot();
 	customPlot->hide();
+	customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
+				    QCP::iSelectAxes | QCP::iSelectLegend |
+				    QCP::iSelectPlottables);
+
+	tsconnect(customPlot, mouseWheel(QWheelEvent*), this, mouseWheel());
+	tsconnect(customPlot->xAxis, rangeChanged(QCPRange), customPlot->xAxis2,
+		  setRange(QCPRange));
+	tsconnect(customPlot, mousePress(QMouseEvent*), this, mousePress());
 	setCentralWidget(customPlot);
 }
 
@@ -274,6 +282,16 @@ void MainWindow::about()
 void MainWindow::license()
 {
 	// Figure out some way to display the whole GPL nicely here
+}
+
+void MainWindow::mouseWheel()
+{
+	customPlot->axisRect()->setRangeZoom(Qt::Horizontal);
+}
+
+void MainWindow::mousePress()
+{
+	customPlot->axisRect()->setRangeDrag(Qt::Horizontal);
 }
 
 void MainWindow::createActions()

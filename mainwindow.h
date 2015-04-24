@@ -50,6 +50,8 @@ private slots:
 	void closeTrace();
 	void about();
 	void license();
+	void mouseWheel();
+	void mousePress();
 
 private:
 	void processTrace();
