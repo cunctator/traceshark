@@ -17,13 +17,18 @@
  */
 
 #include <QApplication>
+#include <QtCore>
 #include "mainwindow.h"
 
 int main(int argc, char* argv[])
 {
 	QApplication app(argc, argv);
 	MainWindow mainWindow;
-	
+
+/* Set graphicssystem to opengl if we have old enough Qt */
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+	QApplication::setGraphicsSystem("opengl");
+#endif
 	app.setApplicationName("Traceshark");
 	
 	mainWindow.resize(1024,740);
