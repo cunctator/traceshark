@@ -66,6 +66,7 @@ bool TThread::isRunning()
 	return threadPtr->isRunning();
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
 bool TThread::isInterruptionRequested()
 {
 	return threadPtr->isInterruptionRequested();
@@ -75,6 +76,7 @@ void TThread::requestInterruption()
 {
 	threadPtr->requestInterruption();
 }
+#endif
 
 void TThread::setPriority(QThread::Priority priority)
 {

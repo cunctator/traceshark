@@ -18,7 +18,6 @@
 
 #include <QTextStream>
 #include <QDateTime>
-#include <QtWidgets>
 
 #include "ftraceparser.h"
 #include "mainwindow.h"

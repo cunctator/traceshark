@@ -24,6 +24,7 @@
  * templates since it inherits QObject, so here we go down the dirty road */
 
 #include <QThread> /* We are going to piggyback */
+#include <QtCore>
 
 class __TThread;
 
@@ -34,9 +35,11 @@ public:
 	virtual ~TThread();
 	void exit(int returnCode = 0);
 	bool isFinished();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
 	bool isInterruptionRequested();
-	bool isRunning();
 	void requestInterruption();
+#endif
+	bool isRunning();
 	void setPriority(QThread::Priority priority);
 	void setStackSize(uint stackSize);
 	uint stackSize();
