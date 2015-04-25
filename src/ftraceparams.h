@@ -19,7 +19,7 @@
 #ifndef FTRACEPARAMS_H
 #define FTRACEPARAMS_H
 
-#include "mempool.h"
+#include "mm/mempool.h"
 #include "traceevent.h"
 #include <cstring>
 #include <cstdint>

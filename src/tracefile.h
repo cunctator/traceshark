@@ -23,8 +23,8 @@
 #include <QVector>
 #include <QDebug>
 
-#include "loadbuffer.h"
-#include "mempool.h"
+#include "threads/loadbuffer.h"
+#include "mm/mempool.h"
 #include "traceline.h"
 
 class LoadThread;

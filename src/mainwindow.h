@@ -22,7 +22,7 @@
 #include <QMainWindow>
 #include <QVector>
 #include <QString>
-#include "workitem.h"
+#include "threads/workitem.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;

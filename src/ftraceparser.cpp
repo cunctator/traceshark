@@ -29,14 +29,14 @@
 #include "grammarroot.h"
 #include "namepidnode.h"
 #include "cpunode.h"
-#include "threadbuffer.h"
+#include "threads/threadbuffer.h"
 #include "timenode.h"
 #include "eventnode.h"
 #include "argnode.h"
 #include "traceshark.h"
-#include "workthread.h"
-#include "workitem.h"
-#include "workqueue.h"
+#include "threads/workthread.h"
+#include "threads/workitem.h"
+#include "threads/workqueue.h"
 
 bool FtraceParser::open(const QString &fileName)
 {

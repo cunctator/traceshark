@@ -20,7 +20,7 @@
 #define WORKTHREAD_H
 
 #include "tthread.h"
-#include "traceshark.h"
+#include "src/traceshark.h"
 
 template <class ObjType>
 class WorkThread : public TThread

@@ -18,8 +18,8 @@
 
 #include "tracefile.h"
 #include "traceline.h"
-#include "loadthread.h"
-#include "mempool.h"
+#include "threads/loadthread.h"
+#include "mm/mempool.h"
 #include <QtGlobal>
 #include <new>
 

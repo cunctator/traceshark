@@ -22,9 +22,9 @@
 #include "ftraceparser.h"
 #include "mainwindow.h"
 #include "traceshark.h"
-#include "workqueue.h"
-#include "workitem.h"
-#include "qcustomplot.h"
+#include "threads/workqueue.h"
+#include "threads/workitem.h"
+#include "qcustomplot/qcustomplot.h"
 
 MainWindow::MainWindow():
 	customPlot(NULL)

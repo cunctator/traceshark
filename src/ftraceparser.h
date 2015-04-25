@@ -29,17 +29,17 @@
 #include "cpufreq.h"
 #include "cpuidle.h"
 #include "ftraceparams.h"
-#include "mempool.h"
+#include "mm/mempool.h"
 #include "task.h"
 #include "tcolor.h"
 #include "traceevent.h"
 #include "traceline.h"
 #include "grammarnode.h"
 #include "migration.h"
-#include "threadbuffer.h"
+#include "threads/threadbuffer.h"
 #include "traceshark.h"
-#include "workthread.h"
-#include "workqueue.h"
+#include "threads/workthread.h"
+#include "threads/workqueue.h"
 
 using namespace TraceShark;
 
