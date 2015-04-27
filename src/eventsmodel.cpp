@@ -23,19 +23,17 @@
 #include "traceevent.h"
 
 
-EventsModel::EventsModel():
-	events(NULL)
+EventsModel::EventsModel(QObject *parent):
+	QAbstractTableModel(parent), events(NULL)
 {}
 
-EventsModel::EventsModel(QVector<TraceEvent> *e):
-	events(e)
+EventsModel::EventsModel(QVector<TraceEvent> *e, QObject *parent):
+	QAbstractTableModel(parent), events(e)
 {}
 
 void EventsModel::setEvents(QVector<TraceEvent> *e)
 {
-	beginResetModel();
 	events = e;
-	endResetModel();
 }
 
 int EventsModel::rowCount(const QModelIndex & /*parent*/) const
@@ -87,6 +85,12 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
+bool EventsModel::setData(const QModelIndex &/*index*/, const QVariant
+			  &/*value*/, int /*role*/)
+{
+	return false;
+}
+
 QVariant EventsModel::headerData(int section,
                                Qt::Orientation /* orientation */,
                                int role) const
@@ -108,6 +112,12 @@ QVariant EventsModel::headerData(int section,
 		}
 	}
 	return QVariant();
+}
+
+Qt::ItemFlags EventsModel::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags flags = QAbstractItemModel::flags(index);
+	return flags;
 }
 
 void EventsModel::beginResetModel()

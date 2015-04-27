@@ -28,8 +28,8 @@ class EventsWidget : public QDockWidget
 {
 	Q_OBJECT
 public:
-	EventsWidget();
-	EventsWidget(QVector<TraceEvent> *e);
+	EventsWidget(QWidget *parent = 0);
+	EventsWidget(QVector<TraceEvent> *e, QWidget *parent = 0);
 	virtual ~EventsWidget();
 	void setEvents(QVector<TraceEvent> *e);
 	void beginResetModel();

@@ -20,16 +20,18 @@
 #include "eventsmodel.h"
 #include "eventswidget.h"
 
-EventsWidget::EventsWidget()
+EventsWidget::EventsWidget(QWidget *parent):
+	QDockWidget(parent)
 {
-	tableView = new QTableView();
-	EventsModel *eventsModel = new EventsModel();
+	tableView = new QTableView(this);
+	EventsModel *eventsModel = new EventsModel(this);
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
 	tableView->show();
 }
 
-EventsWidget::EventsWidget(QVector<TraceEvent> *e)
+EventsWidget::EventsWidget(QVector<TraceEvent> *e, QWidget *parent):
+	QDockWidget(parent)
 {
 	tableView = new QTableView();
 	EventsModel *eventsModel = new EventsModel(e);
