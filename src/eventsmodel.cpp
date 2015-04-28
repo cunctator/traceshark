@@ -92,10 +92,10 @@ bool EventsModel::setData(const QModelIndex &/*index*/, const QVariant
 }
 
 QVariant EventsModel::headerData(int section,
-                               Qt::Orientation /* orientation */,
+                               Qt::Orientation orientation,
                                int role) const
 {
-	if (role == Qt::DisplayRole) {
+	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
 		switch(section) {
 		case 0:
 			return QString(tr("Task"));
