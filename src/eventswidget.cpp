@@ -24,7 +24,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 	QDockWidget(parent)
 {
 	tableView = new QTableView(this);
-	EventsModel *eventsModel = new EventsModel(this);
+	eventsModel = new EventsModel(tableView);
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
 	tableView->show();
@@ -34,7 +34,7 @@ EventsWidget::EventsWidget(QVector<TraceEvent> *e, QWidget *parent):
 	QDockWidget(parent)
 {
 	tableView = new QTableView(this);
-	EventsModel *eventsModel = new EventsModel(e, this);
+	eventsModel = new EventsModel(e, tableView);
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
 	tableView->show();
