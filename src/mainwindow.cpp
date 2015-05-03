@@ -19,6 +19,7 @@
 #include <QTextStream>
 #include <QDateTime>
 
+#include "eventswidget.h"
 #include "ftraceparser.h"
 #include "mainwindow.h"
 #include "traceshark.h"
@@ -59,6 +60,8 @@ MainWindow::MainWindow():
 		  setRange(QCPRange));
 	tsconnect(customPlot, mousePress(QMouseEvent*), this, mousePress());
 	setCentralWidget(customPlot);
+	eventsWidget = new EventsWidget(this);
+	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
 }
 
 MainWindow::~MainWindow()
@@ -82,6 +85,9 @@ void MainWindow::openTrace()
 {
 	QString name = QFileDialog::getOpenFileName(this);
 	if (!name.isEmpty()) {
+		eventsWidget->beginResetModel();
+		eventsWidget->setEvents(NULL);
+		eventsWidget->endResetModel();
 		if (parser->isOpen())
 			parser->close();
 		loadTraceFile(name);
@@ -113,6 +119,9 @@ void MainWindow::openTrace()
 		qout << "showTrace() took "
 		     << (double) (show - rescale) / 1000;
 		qout << " s\n";
+		eventsWidget->beginResetModel();
+		eventsWidget->setEvents(&parser->events);
+		eventsWidget->endResetModel();
 	}
 }
 

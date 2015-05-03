@@ -34,6 +34,7 @@ QT_END_NAMESPACE
 
 class FtraceParser;
 class WorkQueue;
+class EventsWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -60,6 +61,7 @@ private:
 	void clearPlot();
 	void showTrace();
 	QCustomPlot *customPlot;
+	EventsWidget *eventsWidget;
 	QString traceFile;
 
 	void createActions();
