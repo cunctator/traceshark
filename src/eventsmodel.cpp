@@ -46,7 +46,7 @@ int EventsModel::rowCount(const QModelIndex & /*parent*/) const
 
 int EventsModel::columnCount(const QModelIndex & /* parent */) const
 {
-	return 5;
+	return 6; /* Number from data() and headerData() */
 }
 
 QVariant EventsModel::data(const QModelIndex &index, int role) const
@@ -57,7 +57,6 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 	if (role == Qt::TextAlignmentRole) {
 		return int(Qt::AlignRight | Qt::AlignVCenter);
 	} else if (role == Qt::DisplayRole) {
-		QString str;
 		int row = index.row();
 		int column = index.column();
 
@@ -68,14 +67,16 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		case 0:
 			return QString(event.taskName->ptr);
 		case 1:
-			str = QString::number(event.cpu);
-			return str;
+			return QString::number(event.pid);
 		case 2:
-			str = QString::number(event.time, 'f', 6);
-			return str;
+			return QString("[") + QString::number(event.cpu) +
+				QString("]");
 		case 3:
-			return QString(event.eventName->ptr);
+			return QString::number(event.time, 'f', 6);
 		case 4:
+			return QString(event.eventName->ptr);
+		case 5:
+			QString str;
 			unsigned int i;
 			for (i = 0; i < event.argc; i++) {
 				str += QString(event.argv[i]->ptr);
@@ -103,12 +104,14 @@ QVariant EventsModel::headerData(int section,
 		case 0:
 			return QString(tr("Task"));
 		case 1:
-			return QString(tr("CPU"));
+			return QString(tr("PID(TID)"));
 		case 2:
-			return QString(tr("Time"));
+			return QString(tr("CPU"));
 		case 3:
-			return QString(tr("Event"));
+			return QString(tr("Time"));
 		case 4:
+			return QString(tr("Event"));
+		case 5:
 			return QString(tr("Info"));
 		default:
 			return QString(tr("Error in eventsmodel.cpp"));	
