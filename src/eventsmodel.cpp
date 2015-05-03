@@ -77,8 +77,11 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 			return QString(event.eventName->ptr);
 		case 4:
 			unsigned int i;
-			for (i = 0; i < event.argc; i++)
+			for (i = 0; i < event.argc; i++) {
 				str += QString(event.argv[i]->ptr);
+				if (i < event.argc - 1)
+					str += QString(tr(" "));
+			}
 			return str;
 		}
 	}
