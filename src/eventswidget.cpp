@@ -28,6 +28,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
 	tableView->horizontalHeader()->setStretchLastSection(true);
+	tableView->resizeColumnsToContents();
 	tableView->show();
 }
 
