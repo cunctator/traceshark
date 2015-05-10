@@ -73,7 +73,7 @@ public:
 	bool processMigration();
 	bool processSched();
 	bool processCPUfreq();
-	QVector<TraceEvent> events;
+	QList<TraceEvent> events;
 	__always_inline unsigned int getMaxCPU();
 	__always_inline unsigned int getNrCPUs();
 	__always_inline double getStartTime();

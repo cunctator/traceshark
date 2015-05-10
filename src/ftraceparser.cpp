@@ -104,8 +104,7 @@ bool FtraceParser::isOpen()
 void FtraceParser::close()
 {
 	if (traceFile != NULL) {
-		events.resize(0);
-		events.reserve(1);
+		events.clear();
 		delete traceFile;
 		traceFile = NULL;
 	}
@@ -199,8 +198,7 @@ void FtraceParser::parseThread()
 {
 	unsigned int i = 0;
 	preparePreScan();
-	events.resize(0);
-	events.reserve(80000000); /* Reserve for eight million events first */
+	events.clear();
 
 	while(true) {
 		if (parseBuffer(i))

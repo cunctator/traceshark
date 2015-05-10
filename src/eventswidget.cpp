@@ -30,7 +30,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 	tableView->show();
 }
 
-EventsWidget::EventsWidget(QVector<TraceEvent> *e, QWidget *parent):
+EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
 	QDockWidget(parent)
 {
 	tableView = new QTableView(this);
@@ -44,7 +44,7 @@ EventsWidget::~EventsWidget()
 {
 }
 
-void EventsWidget::setEvents(QVector<TraceEvent> *e)
+void EventsWidget::setEvents(QList<TraceEvent> *e)
 {
 	eventsModel->setEvents(e);
 }
