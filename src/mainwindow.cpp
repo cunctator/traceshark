@@ -170,7 +170,7 @@ void MainWindow::computeLayout()
 	/* Set the offset and scale of the scheduling graphs */
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
 		parser->setSchedOffset(cpu, offset);
-		parser->setSchedOffset(cpu, schedHeight);
+		parser->setSchedScale(cpu, schedHeight);
 		label = QString("cpu") + QString::number(cpu);
 		ticks.append(offset);
 		tickLabels.append(label);
@@ -231,6 +231,25 @@ void MainWindow::showTrace()
 		graph->setLineStyle(QCPGraph::lsStepLeft);
 		graph->setData(parser->cpuFreq[cpu].timev,
 			       parser->cpuFreq[cpu].scaledData);
+	}
+
+	/* Show scheduling graphs */
+	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
+		DEFINE_TASKMAP_ITERATOR(iter) = parser->
+			cpuTaskMaps[cpu].begin();
+		while(iter != parser->cpuTaskMaps[cpu].end()) {
+			Task &task = iter.value();
+			unsigned int pid = task.pid;
+			QCPCurve *curve = new QCPCurve(customPlot->xAxis,
+						       customPlot->yAxis);
+			QColor color = parser->getTaskColor(pid);
+			QPen pen = QPen();
+			pen.setColor(color);
+			curve->setPen(pen);
+			customPlot->addPlottable(curve);
+			curve->setData(task.t, task.timev, task.scaledData);
+			iter++;
+		}
 	}
 
 	customPlot->show();
