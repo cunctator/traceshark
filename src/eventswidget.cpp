@@ -27,6 +27,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 	eventsModel = new EventsModel(tableView);
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
+	tableView->horizontalHeader()->setStretchLastSection(true);
 	tableView->show();
 }
 
@@ -37,6 +38,8 @@ EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
 	eventsModel = new EventsModel(e, tableView);
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
+	tableView->horizontalHeader()->setStretchLastSection(true);
+	tableView->resizeColumnsToContents();
 	tableView->show();
 }
 
@@ -57,4 +60,5 @@ void EventsWidget::beginResetModel()
 void EventsWidget::endResetModel()
 {
 	eventsModel->endResetModel();
+	tableView->resizeColumnsToContents();
 }

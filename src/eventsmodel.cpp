@@ -55,7 +55,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 	
 	if (role == Qt::TextAlignmentRole) {
-		return int(Qt::AlignRight | Qt::AlignVCenter);
+		return int(Qt::AlignLeft | Qt::AlignVCenter);
 	} else if (role == Qt::DisplayRole) {
 		int row = index.row();
 		int column = index.column();
