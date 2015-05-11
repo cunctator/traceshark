@@ -352,7 +352,8 @@ skip:
 		/* A tasks woken up after startTime would have been created by
 		 * the wakeup event */
 		double delay = newtime - startTime;
-		delay = TSMAX(delay, FULLDELAY);
+		delay = TSMIN(delay, FULLDELAY);
+		delay = TSMAX(delay, 0);
 		double riser = MAXDELAY_RISER * delay / FULLDELAY;
 		riser += SCHED_HEIGHT;
 
@@ -383,7 +384,8 @@ skip:
 	} else {
 		unsigned long long lastT = task->lastT;
 		double delay = newtime - task->lastWakeUP;
-		delay = TSMAX(delay, FULLDELAY);
+		delay = TSMIN(delay, FULLDELAY);
+		delay = TSMAX(delay, 0);
 		double riser = MAXDELAY_RISER * delay / FULLDELAY;
 		riser += SCHED_HEIGHT;
 
