@@ -59,7 +59,13 @@ MainWindow::MainWindow():
 	tsconnect(customPlot->xAxis, rangeChanged(QCPRange), customPlot->xAxis2,
 		  setRange(QCPRange));
 	tsconnect(customPlot, mousePress(QMouseEvent*), this, mousePress());
-	setCentralWidget(customPlot);
+
+	plotWidget = new QWidget;
+	plotLayout = new QHBoxLayout;
+	plotWidget->setLayout(plotLayout);
+	setCentralWidget(plotWidget);
+	plotLayout->addWidget(customPlot);
+
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
 }
