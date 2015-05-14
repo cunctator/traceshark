@@ -19,6 +19,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QHBoxLayout>
 #include <QMainWindow>
 #include <QVector>
 #include <QString>
@@ -60,7 +61,10 @@ private:
 	void rescaleTrace();
 	void clearPlot();
 	void showTrace();
+
 	QCustomPlot *customPlot;
+	QWidget *plotWidget;
+	QHBoxLayout *plotLayout;
 	EventsWidget *eventsWidget;
 	QString traceFile;
 
