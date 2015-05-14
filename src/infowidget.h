@@ -16,6 +16,9 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef INFOWIDGET_H
+#define INFOWIDGET_H
+
 #include <QDockWidget>
 #include "traceshark.h"
 
@@ -27,3 +30,5 @@ public:
 	virtual ~InfoWidget();
 private:
 };
+
+#endif /* INFOWIDGET_H */

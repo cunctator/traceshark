@@ -16,6 +16,9 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef EVENTSMODEL_H
+#define EVENTSMODEL_H
+
 #include <QAbstractTableModel>
 #include <QList>
 #include "traceevent.h"
@@ -43,3 +46,5 @@ public:
 private:
 	QList<TraceEvent> *events;
 };
+
+#endif /* EVENTSMODEL_H */

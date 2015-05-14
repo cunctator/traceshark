@@ -16,6 +16,9 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef EVENTSWIDGET_H
+#define EVENTSWIDGET_H
+
 #include <QDockWidget>
 #include <QList>
 #include "traceevent.h"
@@ -39,4 +42,4 @@ private:
 	EventsModel *eventsModel;
 };
 
-
+#endif /* EVENTSWIDGET_H*/
