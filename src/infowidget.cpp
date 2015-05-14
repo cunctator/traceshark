@@ -17,10 +17,13 @@
  */
 
 #include "infowidget.h"
+#include <QVBoxLayout>
 
 InfoWidget::InfoWidget(QWidget *parent):
 	QDockWidget(parent)
 {
+	QVBoxLayout *mainLayout = new QVBoxLayout;
+	setLayout(mainLayout);
 }
 
 InfoWidget::~InfoWidget()
