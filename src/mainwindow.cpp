@@ -21,6 +21,7 @@
 
 #include "eventswidget.h"
 #include "ftraceparser.h"
+#include "infowidget.h"
 #include "mainwindow.h"
 #include "traceshark.h"
 #include "threads/workqueue.h"
@@ -68,6 +69,9 @@ MainWindow::MainWindow():
 
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
+
+	infoWidget = new InfoWidget();
+	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
 }
 
 MainWindow::~MainWindow()

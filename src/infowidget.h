@@ -21,6 +21,8 @@
 
 #include <QDockWidget>
 #include "traceshark.h"
+class CursorInfo;
+
 
 class InfoWidget : public QDockWidget
 {
@@ -29,6 +31,7 @@ public:
 	InfoWidget(QWidget *parent = 0);
 	virtual ~InfoWidget();
 private:
+	CursorInfo *cursorInfos[2];
 };
 
 #endif /* INFOWIDGET_H */

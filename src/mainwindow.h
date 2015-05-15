@@ -36,6 +36,7 @@ QT_END_NAMESPACE
 class FtraceParser;
 class WorkQueue;
 class EventsWidget;
+class InfoWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -66,6 +67,7 @@ private:
 	QWidget *plotWidget;
 	QHBoxLayout *plotLayout;
 	EventsWidget *eventsWidget;
+	InfoWidget *infoWidget;
 	QString traceFile;
 
 	void createActions();

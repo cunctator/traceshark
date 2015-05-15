@@ -17,13 +17,23 @@
  */
 
 #include "infowidget.h"
-#include <QVBoxLayout>
+#include "cursorinfo.h"
+#include <QHBoxLayout>
+#include <QWidget>
 
 InfoWidget::InfoWidget(QWidget *parent):
 	QDockWidget(parent)
 {
-	QVBoxLayout *mainLayout = new QVBoxLayout;
-	setLayout(mainLayout);
+	QWidget *widget = new QWidget;
+	QHBoxLayout *mainLayout = new QHBoxLayout;
+	widget->setLayout(mainLayout);
+	setWidget(widget);
+
+	cursorInfos[0] = new CursorInfo(1);
+	cursorInfos[1] = new CursorInfo(2);
+	mainLayout->addWidget(cursorInfos[0]);
+	mainLayout->addWidget(cursorInfos[1]);
+	mainLayout->addStretch();
 }
 
 InfoWidget::~InfoWidget()

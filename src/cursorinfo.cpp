@@ -18,7 +18,7 @@
 
 #include "cursorinfo.h"
 #include "traceshark.h"
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QString>
@@ -28,7 +28,7 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QWidget(parent)
 {
 	QString text = QString(tr("Cursor "));
-	QVBoxLayout *layout  = new QVBoxLayout;
+	QHBoxLayout *layout  = new QHBoxLayout;
 	line = new QLineEdit();
 	QPushButton *button;
 
