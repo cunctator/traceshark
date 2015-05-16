@@ -21,7 +21,7 @@
 #include "eventswidget.h"
 
 EventsWidget::EventsWidget(QWidget *parent):
-	QDockWidget(parent)
+	QDockWidget(parent), events(NULL)
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(tableView);
@@ -37,6 +37,7 @@ EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(e, tableView);
+	events = e;
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
 	tableView->horizontalHeader()->setStretchLastSection(true);
@@ -51,15 +52,37 @@ EventsWidget::~EventsWidget()
 void EventsWidget::setEvents(QList<TraceEvent> *e)
 {
 	eventsModel->setEvents(e);
+	events = e;
 }
 
 void EventsWidget::beginResetModel()
 {
 	eventsModel->beginResetModel();
+	events = NULL;
 }
 
 void EventsWidget::endResetModel()
 {
 	eventsModel->endResetModel();
 	tableView->resizeColumnsToContents();
+}
+
+void EventsWidget::scrollTo(double time)
+{
+	if (events != NULL) {
+		int n = binarySearch(time, 0, events->size() - 1);
+		tableView->selectRow(n);
+		tableView->resizeColumnsToContents();
+	}
+}
+
+int EventsWidget::binarySearch(double time, int start, int end)
+{
+	int pivot = (end + start) / 2;
+	if (pivot == start)
+		return pivot;
+	if (time < events->at(pivot).time)
+		return binarySearch(time, start, pivot);
+	else
+		return binarySearch(time, pivot, end);
 }

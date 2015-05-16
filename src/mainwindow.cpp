@@ -371,6 +371,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 		double pixel = (double) event->x();
 		double coord = customPlot->xAxis->pixelToCoord(pixel);
 		cursor->setPosition(coord);
+		eventsWidget->scrollTo(coord);
 	}
 }
 

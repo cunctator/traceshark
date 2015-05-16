@@ -37,9 +37,12 @@ public:
 	void setEvents(QList<TraceEvent> *e);
 	void beginResetModel();
 	void endResetModel();
+	void scrollTo(double time);
 private:
 	QTableView *tableView;
 	EventsModel *eventsModel;
+	QList<TraceEvent> *events;
+	int binarySearch(double time, int start, int end);
 };
 
 #endif /* EVENTSWIDGET_H*/
