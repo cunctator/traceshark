@@ -65,14 +65,14 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		TraceEvent &event = (*events)[row];
 		switch(column) {
 		case 0:
-			return QString(event.taskName->ptr);
+			return QString::number(event.time, 'f', 6);
 		case 1:
-			return QString::number(event.pid);
+			return QString(event.taskName->ptr);
 		case 2:
+			return QString::number(event.pid);
+		case 3:
 			return QString("[") + QString::number(event.cpu) +
 				QString("]");
-		case 3:
-			return QString::number(event.time, 'f', 6);
 		case 4:
 			return QString(event.eventName->ptr);
 		case 5:
@@ -102,13 +102,13 @@ QVariant EventsModel::headerData(int section,
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
 		switch(section) {
 		case 0:
-			return QString(tr("Task"));
-		case 1:
-			return QString(tr("PID(TID)"));
-		case 2:
-			return QString(tr("CPU"));
-		case 3:
 			return QString(tr("Time"));
+		case 1:
+			return QString(tr("Task"));
+		case 2:
+			return QString(tr("PID(TID)"));
+		case 3:
+			return QString(tr("CPU"));
 		case 4:
 			return QString(tr("Event"));
 		case 5:
