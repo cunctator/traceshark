@@ -18,8 +18,12 @@
 
 #include "infowidget.h"
 #include "cursorinfo.h"
+#include "traceshark.h"
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
 #include <QWidget>
+#include <cmath>
 
 InfoWidget::InfoWidget(QWidget *parent):
 	QDockWidget(parent)
@@ -29,13 +33,62 @@ InfoWidget::InfoWidget(QWidget *parent):
 	widget->setLayout(mainLayout);
 	setWidget(widget);
 
-	cursorInfos[0] = new CursorInfo(1);
-	cursorInfos[1] = new CursorInfo(2);
+	cursorInfos[0] = new CursorInfo(0);
+	cursorInfos[1] = new CursorInfo(1);
 	mainLayout->addWidget(cursorInfos[0]);
 	mainLayout->addWidget(cursorInfos[1]);
+
+	QLabel *diffLabel = new QLabel(tr("difference:"));
+	mainLayout->addWidget(diffLabel);
+
+	diffLine = new QLineEdit();
+	diffLine->setReadOnly(true);
+	diffLine->setText(QString::number((double) 0, 'f', 7));
+	diffLine->setMaxLength(18);
+	mainLayout->addWidget(diffLine);
+
 	mainLayout->addStretch();
+	sigconnect(cursorInfos[0], valueChanged(double, int), this,
+		   valueChanged(double, int));
+	sigconnect(cursorInfos[1], valueChanged(double, int), this,
+		   valueChanged(double, int));
+	tsconnect(cursorInfos[0], valueChanged(double, int), this,
+		  updateChange(double, int));
+	tsconnect(cursorInfos[0], valueChanged(double, int), this,
+		  updateChange(double, int));
 }
 
 InfoWidget::~InfoWidget()
 {
+}
+
+void InfoWidget::setTime(double time, int cursorIdx)
+{
+	if (cursorIdx == 0 || cursorIdx == 1) {
+		cursorInfos[cursorIdx]->updateValue(time);
+		cursorValues[cursorIdx] = time;
+		updateDifference();
+	}
+}
+
+
+void InfoWidget::updateChange(double value, int nr)
+{
+	if (nr == 0 || nr == 1) {
+		cursorValues[nr] = value;
+		updateDifference();
+	}
+}
+
+void InfoWidget::updateDifference()
+{
+	int precision = 7;
+	double extra = 0;
+	double diff = fabs(cursorValues[1] - cursorValues[0]);
+
+	if (diff >= 10)
+		extra = floor (log(diff) / log(10));
+
+	precision += (int) extra;
+	diffLine->setText(QString::number(diff, 'f', precision));
 }
