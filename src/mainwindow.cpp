@@ -357,17 +357,10 @@ void MainWindow::mousePress()
 
 void MainWindow::plotDoubleClicked(QMouseEvent *event)
 {
-	QTextStream qout(stdout);
-	qout.setRealNumberPrecision(6);
-	qout.setRealNumberNotation(QTextStream::FixedNotation);
-
 	Cursor *cursor = cursors[cursorIdx];
 	if (cursor != NULL) {
 		double pixel = (double) event->x();
 		double coord = customPlot->xAxis->pixelToCoord(pixel);
-		qout << __FUNCTION__ << "(): " << pixel << " " << coord
-		      << "\n";
-		qout.flush();
 		cursor->setPosition(coord);
 	}
 }
