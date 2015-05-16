@@ -221,6 +221,7 @@ void MainWindow::clearPlot()
 	cursors[1] = NULL;
 	customPlot->clearItems();
 	customPlot->clearPlottables();
+	customPlot->hide();
 }
 
 void MainWindow::showTrace()
