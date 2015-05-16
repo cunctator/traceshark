@@ -18,6 +18,7 @@
 
 #include <QTextStream>
 #include <QDateTime>
+#include <cmath>
 
 #include "cursor.h"
 #include "eventswidget.h"
@@ -228,13 +229,21 @@ void MainWindow::showTrace()
 {
 	unsigned int cpu;
 	double start, end;
+	int precision = 7;
+	double extra = 0;
 
 	start = parser->getStartTime();
 	end = parser->getEndTime();
 
+	if (end >= 10)
+		extra = floor (log(end) / log(10));
+
+	precision += (int) extra;
+
 	clearPlot();
 	customPlot->yAxis->setRange(QCPRange(bottom, top));
 	customPlot->xAxis->setRange(QCPRange(start, end));
+	customPlot->xAxis->setNumberPrecision(precision);
 	customPlot->yAxis->setTicks(false);
 	customPlot->yAxis->setAutoTicks(false);
 	customPlot->yAxis->setAutoTickLabels(false);
