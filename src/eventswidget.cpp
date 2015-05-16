@@ -17,6 +17,7 @@
  */
 
 #include <QTableView>
+#include <cmath>
 #include "eventsmodel.h"
 #include "eventswidget.h"
 
@@ -70,10 +71,69 @@ void EventsWidget::endResetModel()
 void EventsWidget::scrollTo(double time)
 {
 	if (events != NULL) {
-		int n = binarySearch(time, 0, events->size() - 1);
+		int n = findBestMatch(time);
 		tableView->selectRow(n);
 		tableView->resizeColumnsToContents();
 	}
+}
+
+/* This function checks the value at, before and after the value found 
+ * with binary search in order to determine the one with smallest difference
+ */
+int EventsWidget::findBestMatch(double time)
+{
+	int n = 0;
+	int c, next, prev;
+	int end;
+	int cand[3];
+	double diffs[3];
+	double best;
+	int bestN;
+	int i;
+
+	end = events->size() - 1;
+
+	if (end < 0)
+		return 0;
+
+	c =  binarySearch(time, 0, end);
+
+	cand[n] = c;
+	diffs[n] = fabs(events->at(c).time - time);
+	bestN = c;
+	best = diffs[n];
+	n++;
+
+	next = c + 1;
+	prev = c - 1;
+
+	if (next <= end) {
+		cand[n] = next;
+		diffs[n] = fabs(events->at(next).time - time);
+		n++;
+	}
+
+	if (prev >= 0) {
+		cand[n] = prev;
+		diffs[n] = fabs(events->at(prev).time - time);
+		n++;
+	}
+
+	for (i = 0; i < n; i++) {
+		if (diffs[i] < best) {
+			best = diffs[i];
+			bestN = cand[i];
+		}
+	}
+
+	/* Basic sanity in case the beginning or end has multiple events
+	 * with the same time */
+	if (time > events->at(end).time)
+		bestN = end;
+	if (time < events->at(0).time)
+		bestN = 0;
+
+	return bestN;
 }
 
 int EventsWidget::binarySearch(double time, int start, int end)

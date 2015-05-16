@@ -42,6 +42,7 @@ private:
 	QTableView *tableView;
 	EventsModel *eventsModel;
 	QList<TraceEvent> *events;
+	int findBestMatch(double time);
 	int binarySearch(double time, int start, int end);
 };
 
