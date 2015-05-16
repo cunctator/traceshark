@@ -30,6 +30,9 @@
 #define tsconnect(src, ssig, dest, dslot) \
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
 
+#define sigconnect(src, ssig, dest, dsig) \
+	connect(src, SIGNAL(ssig), dest, SIGNAL(dsig))
+
 #define lastfunc(myint) ((double) myint)
 
 #define DEFINE_TASKMAP_ITERATOR(name) \

@@ -28,14 +28,14 @@ class CursorInfo : public QWidget
 public:
 	CursorInfo(int nr, QWidget *parent = 0);
 	virtual ~CursorInfo();
-public slots:
 	void updateValue(double value);
 signals:
-	void valueChanged(double value);
+	void valueChanged(double value, int nr);
 private slots:
 	void buttonClicked();
 private:
 	QLineEdit *line;
+	int id;
 };
 
 #endif /* CURSORINFO_H */

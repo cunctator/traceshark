@@ -80,6 +80,8 @@ MainWindow::MainWindow():
 
 	tsconnect(customPlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
+	tsconnect(infoWidget, valueChanged(double, int),
+		  this, infoValueChanged(double, int));
 }
 
 MainWindow::~MainWindow()
@@ -231,6 +233,7 @@ void MainWindow::showTrace()
 	double start, end;
 	int precision = 7;
 	double extra = 0;
+	double p;
 
 	start = parser->getStartTime();
 	end = parser->getEndTime();
@@ -282,8 +285,12 @@ void MainWindow::showTrace()
 	}
 
 	setupCursors();
-	cursors[0]->setPosition((start + end) / 2);
-	cursors[1]->setPosition((start + end) / 2 + (end - start) / 10);
+	p = (start + end) / 2;
+	cursors[0]->setPosition(p);
+	infoWidget->setTime(p, 0);
+	p = (start + end) / 2 + (end - start) / 10;
+	cursors[1]->setPosition(p);
+	infoWidget->setTime(p, 1);
 	customPlot->show();
 }
 
@@ -372,6 +379,17 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 		double coord = customPlot->xAxis->pixelToCoord(pixel);
 		cursor->setPosition(coord);
 		eventsWidget->scrollTo(coord);
+		infoWidget->setTime(coord, cursorIdx);
+	}
+}
+
+void MainWindow::infoValueChanged(double value, int nr)
+{
+	Cursor *cursor;
+	if (nr == 0 || nr == 1) {
+		cursor = cursors[nr];
+		cursor->setPosition(value);
+		eventsWidget->scrollTo(value);
 	}
 }
 

@@ -25,7 +25,7 @@
 #include <cmath>
 
 CursorInfo::CursorInfo(int nr, QWidget *parent):
-	QWidget(parent)
+	QWidget(parent), id(nr)
 {
 	QString text = QString(tr("Cursor "));
 	QHBoxLayout *layout  = new QHBoxLayout;
@@ -66,5 +66,5 @@ void CursorInfo::updateValue(double value)
 void CursorInfo::buttonClicked()
 {
 	if (line->hasAcceptableInput())
-		emit valueChanged(line->text().toDouble());
+		emit valueChanged(line->text().toDouble(), id);
 }

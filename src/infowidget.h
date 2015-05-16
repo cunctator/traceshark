@@ -30,8 +30,16 @@ class InfoWidget : public QDockWidget
 public:
 	InfoWidget(QWidget *parent = 0);
 	virtual ~InfoWidget();
+	void setTime(double time, int cursorIdx);
+signals:
+	void valueChanged(double value, int nr);
+private slots:
+	void updateChange(double value, int nr);
 private:
 	CursorInfo *cursorInfos[2];
+	QLineEdit *diffLine;
+	double cursorValues[2];
+	void updateDifference();
 };
 
 #endif /* INFOWIDGET_H */

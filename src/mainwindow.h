@@ -57,6 +57,7 @@ private slots:
 	void mouseWheel();
 	void mousePress();
 	void plotDoubleClicked(QMouseEvent *event);
+	void infoValueChanged(double value, int nr);
 
 private:
 	void processTrace();
