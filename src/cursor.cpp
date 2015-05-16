@@ -40,6 +40,7 @@ void Cursor::setPosition(double pos)
 {
 	start->setCoords(pos, -10000000000000000);
 	end->setCoords(pos, +10000000000000000);
+	parentPlot()->replot();
 }
 
 void Cursor::setColor(const QColor &color)

@@ -37,6 +37,7 @@ class FtraceParser;
 class WorkQueue;
 class EventsWidget;
 class InfoWidget;
+class Cursor;
 
 class MainWindow : public QMainWindow
 {
@@ -55,6 +56,7 @@ private slots:
 	void license();
 	void mouseWheel();
 	void mousePress();
+	void plotDoubleClicked(QMouseEvent *event);
 
 private:
 	void processTrace();
@@ -62,6 +64,7 @@ private:
 	void rescaleTrace();
 	void clearPlot();
 	void showTrace();
+	void setupCursors();
 
 	QCustomPlot *customPlot;
 	QWidget *plotWidget;
@@ -107,6 +110,8 @@ private:
 	double top;
 	QVector<double> ticks;
 	QVector<QString> tickLabels;
+	Cursor *cursors[2];
+	int cursorIdx;
 };
 
 #endif /* MAINWINDOW_H */

@@ -19,6 +19,7 @@
 #include <QTextStream>
 #include <QDateTime>
 
+#include "cursor.h"
 #include "eventswidget.h"
 #include "ftraceparser.h"
 #include "infowidget.h"
@@ -29,7 +30,7 @@
 #include "qcustomplot/qcustomplot.h"
 
 MainWindow::MainWindow():
-	customPlot(NULL)
+	customPlot(NULL), cursorIdx(0)
 {
 	parser = new FtraceParser;
 
@@ -72,6 +73,12 @@ MainWindow::MainWindow():
 
 	infoWidget = new InfoWidget();
 	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
+
+	cursors[0] = NULL;
+	cursors[1] = NULL;
+
+	tsconnect(customPlot, mouseDoubleClick(QMouseEvent*),
+		  this, plotDoubleClicked(QMouseEvent*));
 }
 
 MainWindow::~MainWindow()
@@ -210,6 +217,8 @@ void MainWindow::rescaleTrace()
 
 void MainWindow::clearPlot()
 {
+	cursors[0] = NULL;
+	cursors[1] = NULL;
 	customPlot->clearItems();
 	customPlot->clearPlottables();
 }
@@ -262,7 +271,21 @@ void MainWindow::showTrace()
 		}
 	}
 
+	setupCursors();
+	cursors[0]->setPosition((start + end) / 2);
+	cursors[1]->setPosition((start + end) / 2 + (end - start) / 10);
 	customPlot->show();
+}
+
+void MainWindow::setupCursors()
+{
+	cursors[0] = new Cursor(customPlot);
+	cursors[1] = new Cursor(customPlot);
+	cursors[0]->setColor(Qt::red);
+	cursors[1]->setColor(Qt::blue);
+
+	customPlot->addItem(cursors[0]);
+	customPlot->addItem(cursors[1]);
 }
 
 void MainWindow::closeTrace()
@@ -329,6 +352,23 @@ void MainWindow::mouseWheel()
 void MainWindow::mousePress()
 {
 	customPlot->axisRect()->setRangeDrag(Qt::Horizontal);
+}
+
+void MainWindow::plotDoubleClicked(QMouseEvent *event)
+{
+	QTextStream qout(stdout);
+	qout.setRealNumberPrecision(6);
+	qout.setRealNumberNotation(QTextStream::FixedNotation);
+
+	Cursor *cursor = cursors[cursorIdx];
+	if (cursor != NULL) {
+		double pixel = (double) event->x();
+		double coord = customPlot->xAxis->pixelToCoord(pixel);
+		qout << __FUNCTION__ << "(): " << pixel << " " << coord
+		      << "\n";
+		qout.flush();
+		cursor->setPosition(coord);
+	}
 }
 
 void MainWindow::createActions()

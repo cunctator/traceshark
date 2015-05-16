@@ -25,7 +25,7 @@ class Cursor : public QCPItemLine
 {
 	Q_OBJECT
 public:
-	Cursor(QCustomPlot *parent = 0);
+	Cursor(QCustomPlot *parent);
 	virtual ~Cursor();
 	void setPosition(double pos);
 	void setColor(const QColor &color);
