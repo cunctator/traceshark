@@ -292,14 +292,18 @@ bool FtraceParser::processSched()
 
 	/* Add the "tail" to all tasks, i.e. extend them until endTime */
 	unsigned int cpu;
-	for (cpu = 0; i < nrCPUs; i++) {
+	for (cpu = 0; cpu < nrCPUs; cpu++) {
 		DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
 			Task &task = iter.value();
-			double d = task.data[task.data.size() - 1];
+			double d;
+			iter++;
+			/* Check if tail is necessary */
+			if (task.timev[task.timev.size() - 1] >= endTime)
+				continue;
+			d = task.data[task.data.size() - 1];
 			task.timev.push_back(endTime);
 			task.data.push_back(d);
-			iter++;
 		}
 	}
 	return false;
