@@ -43,7 +43,7 @@
 
 using namespace TraceShark;
 
-#define FAKE_DELTA ((double) 0.0000005)
+#define FAKE_DELTA ((double) 0.00000005)
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
