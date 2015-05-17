@@ -82,6 +82,8 @@ MainWindow::MainWindow():
 		  this, plotDoubleClicked(QMouseEvent*));
 	tsconnect(infoWidget, valueChanged(double, int),
 		  this, infoValueChanged(double, int));
+	tsconnect(eventsWidget, timeSelected(double), this,
+		  eventTimeSelected(double));
 }
 
 MainWindow::~MainWindow()
@@ -396,6 +398,21 @@ void MainWindow::infoValueChanged(double value, int nr)
 		cursor = cursors[nr];
 		cursor->setPosition(value);
 		eventsWidget->scrollTo(value);
+	}
+}
+
+void MainWindow::eventTimeSelected(double time)
+{
+	int cursorIdx;
+
+	cursorIdx = infoWidget->getCursorIdx();
+	if (cursorIdx != RED_CURSOR && cursorIdx != BLUE_CURSOR)
+		return;
+
+	Cursor *cursor = cursors[cursorIdx];
+	if (cursor != NULL) {
+		cursor->setPosition(time);
+		infoWidget->setTime(time, cursorIdx);
 	}
 }
 

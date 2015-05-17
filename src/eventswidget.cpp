@@ -20,6 +20,7 @@
 #include <cmath>
 #include "eventsmodel.h"
 #include "eventswidget.h"
+#include "traceshark.h"
 
 EventsWidget::EventsWidget(QWidget *parent):
 	QDockWidget(parent), events(NULL)
@@ -31,6 +32,8 @@ EventsWidget::EventsWidget(QWidget *parent):
 	tableView->horizontalHeader()->setStretchLastSection(true);
 	tableView->resizeColumnsToContents();
 	tableView->show();
+	tsconnect(tableView, clicked(const QModelIndex &),
+		  this, handleClick(const QModelIndex &));
 }
 
 EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
@@ -44,6 +47,8 @@ EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
 	tableView->horizontalHeader()->setStretchLastSection(true);
 	tableView->resizeColumnsToContents();
 	tableView->show();
+	tsconnect(tableView, clicked(const QModelIndex &),
+		  this, handleClick(const QModelIndex &));
 }
 
 EventsWidget::~EventsWidget()
@@ -145,4 +150,12 @@ int EventsWidget::binarySearch(double time, int start, int end)
 		return binarySearch(time, start, pivot);
 	else
 		return binarySearch(time, pivot, end);
+}
+
+void EventsWidget::handleClick(const QModelIndex &index)
+{
+	if (index.column() == 0) {
+		double time = events->at(index.row()).time;
+		emit timeSelected(time);
+	}
 }

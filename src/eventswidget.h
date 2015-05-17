@@ -38,6 +38,10 @@ public:
 	void beginResetModel();
 	void endResetModel();
 	void scrollTo(double time);
+signals:
+	void timeSelected(double time);
+private slots:
+	void handleClick(const QModelIndex &index);
 private:
 	QTableView *tableView;
 	EventsModel *eventsModel;

@@ -61,6 +61,7 @@ private slots:
 	void mousePress();
 	void plotDoubleClicked(QMouseEvent *event);
 	void infoValueChanged(double value, int nr);
+	void eventTimeSelected(double time);
 
 private:
 	void processTrace();
