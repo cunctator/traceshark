@@ -144,6 +144,8 @@ void MainWindow::openTrace()
 		eventsWidget->beginResetModel();
 		eventsWidget->setEvents(&parser->events);
 		eventsWidget->endResetModel();
+		setupCursors();
+		customPlot->show();
 	}
 }
 
@@ -235,7 +237,6 @@ void MainWindow::showTrace()
 	double start, end;
 	int precision = 7;
 	double extra = 0;
-	double p;
 
 	start = parser->getStartTime();
 	end = parser->getEndTime();
@@ -285,19 +286,15 @@ void MainWindow::showTrace()
 			iter++;
 		}
 	}
-
-	setupCursors();
-	p = (start + end) / 2;
-	cursors[RED_CURSOR]->setPosition(p);
-	infoWidget->setTime(p, 0);
-	p = (start + end) / 2 + (end - start) / 10;
-	cursors[BLUE_CURSOR]->setPosition(p);
-	infoWidget->setTime(p, 1);
-	customPlot->show();
 }
 
 void MainWindow::setupCursors()
 {
+	double start, end, red, blue;
+
+	start = parser->getStartTime();
+	end = parser->getEndTime();
+
 	cursors[RED_CURSOR] = new Cursor(customPlot);
 	cursors[BLUE_CURSOR] = new Cursor(customPlot);
 	cursors[RED_CURSOR]->setColor(Qt::red);
@@ -305,6 +302,21 @@ void MainWindow::setupCursors()
 
 	customPlot->addItem(cursors[RED_CURSOR]);
 	customPlot->addItem(cursors[BLUE_CURSOR]);
+
+	red = (start + end) / 2;
+	cursors[RED_CURSOR]->setPosition(red);
+	infoWidget->setTime(red, RED_CURSOR);
+	blue = (start + end) / 2 + (end - start) / 10;
+	cursors[BLUE_CURSOR]->setPosition(blue);
+	infoWidget->setTime(blue, BLUE_CURSOR);
+	/* Fixme:
+	 * For some reason the EventsWidget doesn't want to make its first 
+	 * scroll to somewhere in the middle of the trace. As a work around
+	 * we first scroll to the beginning and to the end, and then to 
+	 * where we want */
+	eventsWidget->scrollTo(start);
+	eventsWidget->scrollTo(end);
+	eventsWidget->scrollTo(red);
 }
 
 void MainWindow::closeTrace()
