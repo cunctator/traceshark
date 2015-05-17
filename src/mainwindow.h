@@ -102,11 +102,11 @@ private:
 
 	const double graphSpacing = 100;
 	const double schedSectionSpace = 100;
-	const double schedSpacing = 100;
-	const double schedHeight = 1000;
+	const double schedSpacing = 250;
+	const double schedHeight = 950;
 	const double cpuSectionOffset = 100;
 	const double cpuSpacing = 100;
-	const double cpuHeight = 1000;
+	const double cpuHeight = 800;
 	const double cpuIdleSkew = 0;
 	const double migrateHeight = 5000;
 	const double migratSectionOffset = 100;

@@ -275,14 +275,16 @@ void MainWindow::showTrace()
 		while(iter != parser->cpuTaskMaps[cpu].end()) {
 			Task &task = iter.value();
 			unsigned int pid = task.pid;
-			QCPCurve *curve = new QCPCurve(customPlot->xAxis,
+			QCPGraph *graph = new QCPGraph(customPlot->xAxis,
 						       customPlot->yAxis);
 			QColor color = parser->getTaskColor(pid);
 			QPen pen = QPen();
 			pen.setColor(color);
-			curve->setPen(pen);
-			customPlot->addPlottable(curve);
-			curve->setData(task.t, task.timev, task.scaledData);
+			graph->setPen(pen);
+			customPlot->addPlottable(graph);
+			graph->setLineStyle(QCPGraph::lsStepLeft);
+			graph->setAdaptiveSampling(true);
+			graph->setData(task.timev, task.scaledData);
 			iter++;
 		}
 	}

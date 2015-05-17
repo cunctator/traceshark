@@ -23,14 +23,19 @@
 
 class Task {
 public:
-	Task(): lastT(0) {}
+	Task(): isNew(true) {}
 	char *name;
 	unsigned int pid; /* is really tid as all other pids here */
 	QVector<double> timev;
 	QVector<double> data;
-	QVector<double> t;
 	QVector<double> scaledData;
-	unsigned long long lastT; /* Only used during extraction */
+	QVector<double> wakeTimev;
+	QVector<double> wakeData;
+	QVector<double> scaledWakeData;
+	QVector<double> runningTimev;
+	QVector<double> runningData;
+	QVector<double> scaledRunningData;
+	bool isNew; /* Only used during extraction */
 	double lastWakeUP;        /* Only used during extraction */
 	double offset;
 	double scale;

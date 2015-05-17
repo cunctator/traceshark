@@ -299,8 +299,6 @@ bool FtraceParser::processSched()
 			double d = task.data[task.data.size() - 1];
 			task.timev.push_back(endTime);
 			task.data.push_back(d);
-			task.t.push_back(task.lastT);
-			task.lastT += 1;
 			iter++;
 		}
 	}

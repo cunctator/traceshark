@@ -47,10 +47,8 @@ using namespace TraceShark;
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
-#define SCHED_HEIGHT ((double) 0.6)
-#define MAXDELAY_RISER  (FULL_HEIGHT - SCHED_HEIGHT)
-#define FLOOR_HEIGHT ((double) 0.1)
-#define SUBFLOOR_HEIGHT ((double) 0)
+#define SCHED_HEIGHT ((double) FULL_HEIGHT)
+#define FLOOR_HEIGHT ((double) 0)
 #define NR_TBUFFERS (3)
 #define TBUFSIZE (10000)
 
@@ -292,53 +290,28 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 
 	/* Handle the outgoing task */
 	task = &cpuTaskMaps[cpu][oldpid]; /* Modifiable reference */
-	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = 0ULL;
+	if (task->isNew) { /* true means task is newly constructed above */
 		task->pid = oldpid;
+		task->isNew = false;
 		char state = sched_switch_state(event);
 
 		/* Apparenly this task was on CPU when we started tracing */
 		task->timev.push_back(startTime);
 		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
 
-		task->timev.push_back(oldtime);
-		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		/* If task is still running we indicate it with a small 
-		 * "subfloor" spike */
 		if (state == 'R') {
-			task->timev.push_back(oldtime);
-			task->data.push_back(SUBFLOOR_HEIGHT);
-			task->t.push_back(lastfunc(lastT));
+			task->runningTimev.push_back(oldtime);
+			task->runningData.push_back(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
-			lastT++;
 		}
 
 		task->timev.push_back(oldtime);
 		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
 
-		task->lastT = lastT;
 		task->name = sched_switch_oldname_strdup(event, taskNamePool);
 	} else {
-		unsigned long long lastT = task->lastT;
-
-		task->timev.push_back(oldtime);
-		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
 		task->timev.push_back(oldtime);
 		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->lastT = lastT;
 	}
 
 skip:
@@ -347,64 +320,38 @@ skip:
 
 	/* Handle the incoming task */
 	task = &cpuTaskMaps[cpu][newpid]; /* Modifiable reference */
-	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = 0ULL;
+	if (task->isNew) { /* true means task is newly constructed above */
 		/* A tasks woken up after startTime would have been created by
 		 * the wakeup event */
 		double delay = newtime - startTime;
 		delay = TSMIN(delay, FULLDELAY);
 		delay = TSMAX(delay, 0);
-		double riser = MAXDELAY_RISER * delay / FULLDELAY;
-		riser += SCHED_HEIGHT;
+		double riser = SCHED_HEIGHT * delay / FULLDELAY;
 
 		task->pid = newpid;
+		task->isNew = false;
 
 		task->timev.push_back(startTime);
 		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
 
-		task->timev.push_back(newtime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(riser);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
+		task->wakeTimev.push_back(newtime);
+		task->wakeData.push_back(riser);
 
 		task->timev.push_back(newtime);
 		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
 
-		task->lastT = lastT;
 		task->name = sched_switch_newname_strdup(event, taskNamePool);
 	} else {
-		unsigned long long lastT = task->lastT;
 		double delay = newtime - task->lastWakeUP;
 		delay = TSMIN(delay, FULLDELAY);
 		delay = TSMAX(delay, 0);
-		double riser = MAXDELAY_RISER * delay / FULLDELAY;
-		riser += SCHED_HEIGHT;
+		double riser = SCHED_HEIGHT * delay / FULLDELAY;
 
-		task->timev.push_back(newtime);
-		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->timev.push_back(newtime);
-		task->data.push_back(riser);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
+		task->wakeTimev.push_back(newtime);
+		task->wakeData.push_back(riser);
 
 		task->timev.push_back(newtime);
 		task->data.push_back(SCHED_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
-
-		task->lastT = lastT;
 	}
 }
 
@@ -424,16 +371,13 @@ __always_inline void FtraceParser::processWakeupEvent(TraceEvent &event)
 	/* Handle the woken up task */
 	task = &cpuTaskMaps[cpu][pid]; /* Modifiable reference */
 
-	if (task->lastT == 0) { /* 0 means task is newly constructed above */
-		unsigned long long lastT = 0;
+	if (task->isNew) { /* true means task is newly constructed above */
 		task->pid = pid;
 
 		task->timev.push_back(startTime);
 		task->data.push_back(FLOOR_HEIGHT);
-		task->t.push_back(lastfunc(lastT));
-		lastT++;
 
-		task->lastT = lastT;
+		task->isNew = false;
 		task->name = sched_wakeup_name_strdup(event, taskNamePool);
 	}
 	task->lastWakeUP = time;
