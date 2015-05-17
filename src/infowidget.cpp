@@ -74,7 +74,7 @@ InfoWidget::~InfoWidget()
 
 void InfoWidget::setTime(double time, int cursorIdx)
 {
-	if (cursorIdx == 0 || cursorIdx == 1) {
+	if (cursorIdx == RED_CURSOR || cursorIdx == BLUE_CURSOR) {
 		cursorInfos[cursorIdx]->updateValue(time);
 		cursorValues[cursorIdx] = time;
 		updateDifference();
@@ -84,7 +84,7 @@ void InfoWidget::setTime(double time, int cursorIdx)
 
 void InfoWidget::updateChange(double value, int nr)
 {
-	if (nr == 0 || nr == 1) {
+	if (nr == RED_CURSOR || nr == BLUE_CURSOR) {
 		cursorValues[nr] = value;
 		updateDifference();
 	}
@@ -94,7 +94,8 @@ void InfoWidget::updateDifference()
 {
 	int precision = 7;
 	double extra = 0;
-	double diff = fabs(cursorValues[1] - cursorValues[0]);
+	double diff = fabs(cursorValues[RED_CURSOR]
+			   - cursorValues[BLUE_CURSOR]);
 
 	if (diff >= 10)
 		extra = floor (log(diff) / log(10));

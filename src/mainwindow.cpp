@@ -75,8 +75,8 @@ MainWindow::MainWindow():
 	infoWidget = new InfoWidget();
 	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
 
-	cursors[0] = NULL;
-	cursors[1] = NULL;
+	cursors[RED_CURSOR] = NULL;
+	cursors[BLUE_CURSOR] = NULL;
 
 	tsconnect(customPlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
@@ -220,8 +220,8 @@ void MainWindow::rescaleTrace()
 
 void MainWindow::clearPlot()
 {
-	cursors[0] = NULL;
-	cursors[1] = NULL;
+	cursors[RED_CURSOR] = NULL;
+	cursors[BLUE_CURSOR] = NULL;
 	customPlot->clearItems();
 	customPlot->clearPlottables();
 	customPlot->hide();
@@ -286,23 +286,23 @@ void MainWindow::showTrace()
 
 	setupCursors();
 	p = (start + end) / 2;
-	cursors[0]->setPosition(p);
+	cursors[RED_CURSOR]->setPosition(p);
 	infoWidget->setTime(p, 0);
 	p = (start + end) / 2 + (end - start) / 10;
-	cursors[1]->setPosition(p);
+	cursors[BLUE_CURSOR]->setPosition(p);
 	infoWidget->setTime(p, 1);
 	customPlot->show();
 }
 
 void MainWindow::setupCursors()
 {
-	cursors[0] = new Cursor(customPlot);
-	cursors[1] = new Cursor(customPlot);
-	cursors[0]->setColor(Qt::red);
-	cursors[1]->setColor(Qt::blue);
+	cursors[RED_CURSOR] = new Cursor(customPlot);
+	cursors[BLUE_CURSOR] = new Cursor(customPlot);
+	cursors[RED_CURSOR]->setColor(Qt::red);
+	cursors[BLUE_CURSOR]->setColor(Qt::blue);
 
-	customPlot->addItem(cursors[0]);
-	customPlot->addItem(cursors[1]);
+	customPlot->addItem(cursors[RED_CURSOR]);
+	customPlot->addItem(cursors[BLUE_CURSOR]);
 }
 
 void MainWindow::closeTrace()
@@ -376,7 +376,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 	int cursorIdx;
 
 	cursorIdx = infoWidget->getCursorIdx();
-	if (cursorIdx < 0 || cursorIdx > 1)
+	if (cursorIdx != RED_CURSOR && cursorIdx != BLUE_CURSOR)
 		return;
 
 	Cursor *cursor = cursors[cursorIdx];
@@ -392,7 +392,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 void MainWindow::infoValueChanged(double value, int nr)
 {
 	Cursor *cursor;
-	if (nr == 0 || nr == 1) {
+	if (nr == RED_CURSOR || nr == BLUE_CURSOR) {
 		cursor = cursors[nr];
 		cursor->setPosition(value);
 		eventsWidget->scrollTo(value);

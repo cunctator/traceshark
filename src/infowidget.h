@@ -21,6 +21,9 @@
 
 #include <QDockWidget>
 #include "traceshark.h"
+
+using namespace TraceShark;
+
 class CursorInfo;
 class QLineEdit;
 class QComboBox;
@@ -38,10 +41,10 @@ signals:
 private slots:
 	void updateChange(double value, int nr);
 private:
-	CursorInfo *cursorInfos[2];
+	CursorInfo *cursorInfos[NR_CURSORS];
 	QLineEdit *diffLine;
 	QComboBox *cursorComboBox;
-	double cursorValues[2];
+	double cursorValues[NR_CURSORS];
 	void updateDifference();
 };
 
