@@ -27,7 +27,7 @@
 CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QWidget(parent), id(nr)
 {
-	QString text = QString(tr("Cursor "));
+	QString text;
 	QHBoxLayout *layout  = new QHBoxLayout;
 	line = new QLineEdit();
 	QPushButton *button;
@@ -35,7 +35,17 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	line->setReadOnly(false);
 	line->setInputMask(QString("00000000000.0000000"));
 
-	text += QString::number(nr);
+	switch (nr) {
+	case 0:
+		text = QString(tr("Move Red"));
+		break;
+	case 1:
+		text = QString(tr("Move Blue"));
+		break;
+	default:
+		text = QString(tr("error in cursorinfo.cpp"));
+		break;
+	}
 
 	setLayout(layout);
 	layout->addWidget(line);
