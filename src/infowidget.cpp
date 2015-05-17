@@ -19,6 +19,7 @@
 #include "infowidget.h"
 #include "cursorinfo.h"
 #include "traceshark.h"
+#include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -46,6 +47,15 @@ InfoWidget::InfoWidget(QWidget *parent):
 	diffLine->setText(QString::number((double) 0, 'f', 7));
 	diffLine->setMaxLength(18);
 	mainLayout->addWidget(diffLine);
+
+	QLabel *comboLabel = new QLabel(tr("Active cursor:"));
+	mainLayout->addWidget(comboLabel);
+
+	cursorComboBox = new QComboBox;
+	cursorComboBox->addItem(QString(tr("Red")));
+	cursorComboBox->addItem(QString(tr("Blue")));
+	cursorComboBox->setCurrentIndex(0);
+	mainLayout->addWidget(cursorComboBox);
 
 	mainLayout->addStretch();
 	sigconnect(cursorInfos[0], valueChanged(double, int), this,
@@ -91,4 +101,9 @@ void InfoWidget::updateDifference()
 
 	precision += (int) extra;
 	diffLine->setText(QString::number(diff, 'f', precision));
+}
+
+int InfoWidget::getCursorIdx()
+{
+	return cursorComboBox->currentIndex();
 }

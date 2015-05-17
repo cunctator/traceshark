@@ -22,7 +22,8 @@
 #include <QDockWidget>
 #include "traceshark.h"
 class CursorInfo;
-
+class QLineEdit;
+class QComboBox;
 
 class InfoWidget : public QDockWidget
 {
@@ -31,6 +32,7 @@ public:
 	InfoWidget(QWidget *parent = 0);
 	virtual ~InfoWidget();
 	void setTime(double time, int cursorIdx);
+	int getCursorIdx();
 signals:
 	void valueChanged(double value, int nr);
 private slots:
@@ -38,6 +40,7 @@ private slots:
 private:
 	CursorInfo *cursorInfos[2];
 	QLineEdit *diffLine;
+	QComboBox *cursorComboBox;
 	double cursorValues[2];
 	void updateDifference();
 };

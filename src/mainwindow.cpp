@@ -31,7 +31,7 @@
 #include "qcustomplot/qcustomplot.h"
 
 MainWindow::MainWindow():
-	customPlot(NULL), cursorIdx(0)
+	customPlot(NULL)
 {
 	parser = new FtraceParser;
 
@@ -373,6 +373,12 @@ void MainWindow::mousePress()
 
 void MainWindow::plotDoubleClicked(QMouseEvent *event)
 {
+	int cursorIdx;
+
+	cursorIdx = infoWidget->getCursorIdx();
+	if (cursorIdx < 0 || cursorIdx > 1)
+		return;
+
 	Cursor *cursor = cursors[cursorIdx];
 	if (cursor != NULL) {
 		double pixel = (double) event->x();

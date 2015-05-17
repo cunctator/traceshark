@@ -112,7 +112,6 @@ private:
 	QVector<double> ticks;
 	QVector<QString> tickLabels;
 	Cursor *cursors[2];
-	int cursorIdx;
 };
 
 #endif /* MAINWINDOW_H */
