@@ -26,3 +26,21 @@ bool Task::doScale() {
 		scaledData[i] = data[i] * scale + offset;
 	return false; /* No error */
 }
+
+bool Task::doScaleWakeup() {
+	int i;
+	int s = wakeData.size();
+	scaledWakeData.resize(s);
+	for (i = 0; i < s; i++)
+		scaledWakeData[i] = wakeData[i] * scale + offset;
+	return false; /* No error */
+}
+
+bool Task::doScaleRunning() {
+	int i;
+	int s = runningData.size();
+	scaledRunningData.resize(s);
+	for (i = 0; i < s; i++)
+		scaledRunningData[i] = runningData[i] * scale + offset;
+	return false; /* No error */
+}

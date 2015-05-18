@@ -40,6 +40,8 @@ public:
 	double offset;
 	double scale;
 	bool doScale();
+	bool doScaleWakeup();
+	bool doScaleRunning();
 };
 
 #endif

@@ -441,6 +441,10 @@ void FtraceParser::addCpuSchedWork(unsigned int cpu,
 		WorkItem<Task> *taskItem = new WorkItem<Task>
 			(&task, &Task::doScale);
 		list.append(taskItem);
+		taskItem = new WorkItem<Task>(&task, &Task::doScaleWakeup);
+		list.append(taskItem);
+		taskItem = new WorkItem<Task>(&task, &Task::doScaleRunning);
+		list.append(taskItem);
 		iter++;
 	}
 }

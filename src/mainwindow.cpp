@@ -185,7 +185,7 @@ void MainWindow::computeLayout()
 	unsigned int nrCPUs;
 	unsigned int offset = schedSectionSpace;
 	QString label;
-	bottom = offset;
+	bottom = 0;
 
 	ticks.resize(0);
 	tickLabels.resize(0);
@@ -275,6 +275,9 @@ void MainWindow::showTrace()
 		while(iter != parser->cpuTaskMaps[cpu].end()) {
 			Task &task = iter.value();
 			unsigned int pid = task.pid;
+			iter++;
+
+			/* Add scheduling graph */
 			QCPGraph *graph = new QCPGraph(customPlot->xAxis,
 						       customPlot->yAxis);
 			QColor color = parser->getTaskColor(pid);
@@ -285,7 +288,34 @@ void MainWindow::showTrace()
 			graph->setLineStyle(QCPGraph::lsStepLeft);
 			graph->setAdaptiveSampling(true);
 			graph->setData(task.timev, task.scaledData);
-			iter++;
+
+			/* Add wakeup graph on top of scheduling */
+			graph = new QCPGraph(customPlot->xAxis,
+						       customPlot->yAxis);
+			customPlot->addPlottable(graph);
+			QCPScatterStyle style =
+				QCPScatterStyle(QCPScatterStyle::ssTriangle, 5);
+			pen.setColor(Qt::blue);
+			style.setPen(pen);
+			graph->setScatterStyle(style);
+			graph->setLineStyle(QCPGraph::lsNone);
+			graph->setAdaptiveSampling(true);
+			graph->setData(task.wakeTimev, task.scaledWakeData);
+
+			/* Add still running graph on top of the other two...*/
+			if (task.runningTimev.size() == 0)
+				continue;
+			graph = new QCPGraph(customPlot->xAxis,
+					     customPlot->yAxis);
+			customPlot->addPlottable(graph);
+			style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+			pen.setColor(Qt::red);
+			style.setPen(pen);
+			graph->setScatterStyle(style);
+			graph->setLineStyle(QCPGraph::lsNone);
+			graph->setAdaptiveSampling(true);
+			graph->setData(task.runningTimev,
+				       task.scaledRunningData);
 		}
 	}
 }

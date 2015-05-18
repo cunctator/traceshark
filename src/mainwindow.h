@@ -101,7 +101,7 @@ private:
 	WorkQueue *workQueue;
 
 	const double graphSpacing = 100;
-	const double schedSectionSpace = 100;
+	const double schedSectionSpace = 250;
 	const double schedSpacing = 250;
 	const double schedHeight = 950;
 	const double cpuSectionOffset = 100;

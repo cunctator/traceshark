@@ -310,8 +310,16 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 
 		task->name = sched_switch_oldname_strdup(event, taskNamePool);
 	} else {
+		char state = sched_switch_state(event);
+
 		task->timev.push_back(oldtime);
 		task->data.push_back(FLOOR_HEIGHT);
+
+		if (state == 'R') {
+			task->runningTimev.push_back(oldtime);
+			task->runningData.push_back(FLOOR_HEIGHT);
+			task->lastWakeUP = oldtime;
+		}
 	}
 
 skip:
