@@ -294,13 +294,16 @@ void MainWindow::showTrace()
 						       customPlot->yAxis);
 			customPlot->addPlottable(graph);
 			QCPScatterStyle style =
-				QCPScatterStyle(QCPScatterStyle::ssTriangle, 5);
-			pen.setColor(Qt::blue);
+				QCPScatterStyle(QCPScatterStyle::ssDot);
 			style.setPen(pen);
 			graph->setScatterStyle(style);
 			graph->setLineStyle(QCPGraph::lsNone);
 			graph->setAdaptiveSampling(true);
-			graph->setData(task.wakeTimev, task.scaledWakeData);
+			graph->setDataKeyError(task.wakeTimev, task.wakeHeight,
+					       task.wakeDelay, task.wakeZero);
+			graph->setErrorType(QCPGraph::etKey);
+			graph->setErrorBarSize(4);
+			graph->setErrorPen(pen);
 
 			/* Add still running graph on top of the other two...*/
 			if (task.runningTimev.size() == 0)

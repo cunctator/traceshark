@@ -30,8 +30,9 @@ public:
 	QVector<double> data;
 	QVector<double> scaledData;
 	QVector<double> wakeTimev;
-	QVector<double> wakeData;
-	QVector<double> scaledWakeData;
+	QVector<double> wakeDelay;
+	QVector<double> wakeHeight;
+	QVector<double> wakeZero;
 	QVector<double> runningTimev;
 	QVector<double> runningData;
 	QVector<double> scaledRunningData;

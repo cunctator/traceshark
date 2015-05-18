@@ -17,6 +17,7 @@
  */
 
 #include "task.h"
+#include "ftraceparser.h"
 
 bool Task::doScale() {
 	int i;
@@ -28,11 +29,10 @@ bool Task::doScale() {
 }
 
 bool Task::doScaleWakeup() {
-	int i;
-	int s = wakeData.size();
-	scaledWakeData.resize(s);
-	for (i = 0; i < s; i++)
-		scaledWakeData[i] = wakeData[i] * scale + offset;
+	int s = wakeDelay.size();
+	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
+	wakeZero.fill(0, s);
+	wakeHeight.fill(scaledHeight, s);
 	return false; /* No error */
 }
 

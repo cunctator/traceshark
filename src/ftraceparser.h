@@ -47,7 +47,8 @@ using namespace TraceShark;
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
-#define SCHED_HEIGHT ((double) FULL_HEIGHT)
+#define WAKEUP_HEIGHT ((double) 1)
+#define SCHED_HEIGHT ((double) 0.8)
 #define FLOOR_HEIGHT ((double) 0)
 #define NR_TBUFFERS (3)
 #define TBUFSIZE (10000)
@@ -332,9 +333,6 @@ skip:
 		/* A tasks woken up after startTime would have been created by
 		 * the wakeup event */
 		double delay = newtime - startTime;
-		delay = TSMIN(delay, FULLDELAY);
-		delay = TSMAX(delay, 0);
-		double riser = SCHED_HEIGHT * delay / FULLDELAY;
 
 		task->pid = newpid;
 		task->isNew = false;
@@ -343,7 +341,7 @@ skip:
 		task->data.push_back(FLOOR_HEIGHT);
 
 		task->wakeTimev.push_back(newtime);
-		task->wakeData.push_back(riser);
+		task->wakeDelay.push_back(delay);
 
 		task->timev.push_back(newtime);
 		task->data.push_back(SCHED_HEIGHT);
@@ -351,12 +349,9 @@ skip:
 		task->name = sched_switch_newname_strdup(event, taskNamePool);
 	} else {
 		double delay = newtime - task->lastWakeUP;
-		delay = TSMIN(delay, FULLDELAY);
-		delay = TSMAX(delay, 0);
-		double riser = SCHED_HEIGHT * delay / FULLDELAY;
 
 		task->wakeTimev.push_back(newtime);
-		task->wakeData.push_back(riser);
+		task->wakeDelay.push_back(delay);
 
 		task->timev.push_back(newtime);
 		task->data.push_back(SCHED_HEIGHT);
