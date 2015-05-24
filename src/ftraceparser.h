@@ -25,7 +25,9 @@
 #include <QVector>
 #include <QList>
 #include <QMap>
+#include <QtGlobal>
 
+#include "cpu.h"
 #include "cpufreq.h"
 #include "cpuidle.h"
 #include "ftraceparams.h"
@@ -100,6 +102,10 @@ private:
 	__always_inline bool parseBuffer(unsigned int index);
 	__always_inline void preScanEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
+	__always_inline void handleWrongTaskOnCPU(unsigned int cpu,
+						  CPU *eventCPU,
+						  unsigned int oldpid,
+						  double oldtime);
 	__always_inline void processSwitchEvent(TraceEvent &event);
 	__always_inline void processWakeupEvent(TraceEvent &event);
 	__always_inline void processCPUfreqEvent(TraceEvent &event);
@@ -133,6 +139,7 @@ private:
 	QVector<double> cpuIdleScale;
 	QVector<double> cpuFreqOffset;
 	QVector<double> cpuFreqScale;
+	CPU *CPUs;
 	void addCpuFreqWork(unsigned int cpu,
 		       QList<AbstractWorkItem*> &list);
 	void addCpuIdleWork(unsigned int cpu,
@@ -277,6 +284,36 @@ __always_inline QColor FtraceParser::getTaskColor(unsigned int pid)
 	return taskColor.toQColor();
 }
 
+__always_inline void FtraceParser::handleWrongTaskOnCPU(unsigned int cpu,
+							CPU *eventCPU,
+							unsigned int oldpid,
+							double oldtime)
+{
+	unsigned int epid = eventCPU->pidOnCPU;
+	double prevtime, faketime;
+	Task *task;
+
+	if (epid != 0) {
+		task = &cpuTaskMaps[cpu][epid];
+		Q_ASSERT(!task->isNew);
+		Q_ASSERT(!task->timev.isEmpty());
+		prevtime = task->timev.last();
+		faketime = prevtime + FAKE_DELTA;
+		task->timev.push_back(faketime);
+		task->data.push_back(FLOOR_HEIGHT);
+		task->lastWakeUP = faketime;
+	}
+
+	if (oldpid != 0) {
+		task = &cpuTaskMaps[cpu][oldpid];
+		if (task->isNew)
+			task->isNew = false;
+		faketime = oldtime - FAKE_DELTA;
+		task->timev.push_back(faketime);
+		task->data.push_back(SCHED_HEIGHT);
+	}
+}
+
 __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 {
 	unsigned int cpu = event.cpu;
@@ -285,6 +322,16 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 	unsigned int oldpid = sched_switch_oldpid(event);
 	unsigned int newpid = sched_switch_newpid(event);
 	Task *task;
+	CPU *eventCPU = &CPUs[cpu];
+
+	if (cpu > maxCPU)
+		return;
+
+	if (eventCPU->pidOnCPU != oldpid) {
+		if (eventCPU->hasBeenScheduled)
+			handleWrongTaskOnCPU(cpu, eventCPU, oldpid, oldtime);
+		/* else { do nothing, non scheduled CPU is handled below */
+	}
 
 	if (oldpid == 0) /* We don't care about the idle task */
 		goto skip;
@@ -325,7 +372,7 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 
 skip:
 	if (newpid == 0) /* We don't care about the idle task */
-		return;
+		goto out;
 
 	/* Handle the incoming task */
 	task = &cpuTaskMaps[cpu][newpid]; /* Modifiable reference */
@@ -356,6 +403,11 @@ skip:
 		task->timev.push_back(newtime);
 		task->data.push_back(SCHED_HEIGHT);
 	}
+out:
+	eventCPU->hasBeenScheduled = true;
+	eventCPU->pidOnCPU = newpid;
+	eventCPU->lastSched = newtime;
+	return;
 }
 
 __always_inline void FtraceParser::processWakeupEvent(TraceEvent &event)

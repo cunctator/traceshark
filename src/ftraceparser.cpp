@@ -120,6 +120,10 @@ void FtraceParser::close()
 		delete[] cpuIdle;
 		cpuIdle = NULL;
 	}
+	if (CPUs != NULL) {
+		delete[] CPUs;
+		CPUs = NULL;
+	}
 	migrations.resize(0);
 }
 
@@ -237,6 +241,7 @@ void FtraceParser::finalizePreScan()
 	cpuTaskMaps = new QMap<unsigned int, Task>[nrCPUs];
 	cpuFreq = new CpuFreq[nrCPUs];
 	cpuIdle = new CpuIdle[nrCPUs];
+	CPUs = new CPU[nrCPUs];
 	schedOffset.resize(0);
 	schedOffset.resize(nrCPUs);
 	schedScale.resize(0);

@@ -18,6 +18,7 @@
 #
 
 HEADERS       = src/argnode.h
+HEADERS      += src/cpu.h
 HEADERS      += src/cpufreq.h
 HEADERS      += src/cpuidle.h
 HEADERS      += src/cpunode.h
