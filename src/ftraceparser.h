@@ -379,7 +379,11 @@ skip:
 	if (task->isNew) { /* true means task is newly constructed above */
 		/* A tasks woken up after startTime would have been created by
 		 * the wakeup event */
-		double delay = newtime - startTime;
+		double delay;
+		if (!eventCPU->hasBeenScheduled)
+			delay = newtime - startTime;
+		else
+			delay = FAKE_DELTA; /* missing wakeup event */
 
 		task->pid = newpid;
 		task->isNew = false;
