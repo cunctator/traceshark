@@ -102,6 +102,10 @@ private:
 	__always_inline bool parseBuffer(unsigned int index);
 	__always_inline void preScanEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
+	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
+						 double startTime);
+	__always_inline double estimateWakeUp(Task *task, CPU *eventCPU,
+					      double newTime, double startTime);
 	__always_inline void handleWrongTaskOnCPU(unsigned int cpu,
 						  CPU *eventCPU,
 						  unsigned int oldpid,
@@ -238,6 +242,36 @@ __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 	return retval;
 }
 
+__always_inline double FtraceParser::estimateWakeUpNew(CPU *eventCPU,
+						       double newTime,
+						       double startTime)
+{
+	double delay;
+
+	if (!eventCPU->hasBeenScheduled)
+		goto regular;
+
+	if (eventCPU->lastEnterIdle < eventCPU->lastExitIdle)
+		return FAKE_DELTA;
+regular:
+	delay = newTime - startTime;
+	return delay;
+}
+
+__always_inline double FtraceParser::estimateWakeUp(Task *task, CPU *eventCPU,
+						    double newTime,
+						    double /* startTime */)
+{
+	double delay;
+
+	/* Is this reasonable ? */
+	if (task->lastWakeUP < eventCPU->lastEnterIdle)
+		return FAKE_DELTA;
+
+	delay = newTime - task->lastWakeUP;
+	return delay;
+}
+
 __always_inline unsigned int FtraceParser::getMaxCPU()
 {
 	return maxCPU;
@@ -333,8 +367,10 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 		/* else { do nothing, non scheduled CPU is handled below */
 	}
 
-	if (oldpid == 0) /* We don't care about the idle task */
-		goto skip;
+	if (oldpid == 0) {
+		eventCPU->lastExitIdle = oldtime;
+		goto skip;  /* We don't care about the idle task */
+	}
 
 	/* Handle the outgoing task */
 	task = &cpuTaskMaps[cpu][oldpid]; /* Modifiable reference */
@@ -371,8 +407,10 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 	}
 
 skip:
-	if (newpid == 0) /* We don't care about the idle task */
-		goto out;
+	if (newpid == 0) {
+		eventCPU->lastEnterIdle = newtime;
+		goto out; /* We don't care about the idle task */
+	}
 
 	/* Handle the incoming task */
 	task = &cpuTaskMaps[cpu][newpid]; /* Modifiable reference */
@@ -380,10 +418,8 @@ skip:
 		/* A tasks woken up after startTime would have been created by
 		 * the wakeup event */
 		double delay;
-		if (!eventCPU->hasBeenScheduled)
-			delay = newtime - startTime;
-		else
-			delay = FAKE_DELTA; /* missing wakeup event */
+
+		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
 
 		task->pid = newpid;
 		task->isNew = false;
@@ -399,7 +435,8 @@ skip:
 
 		task->name = sched_switch_newname_strdup(event, taskNamePool);
 	} else {
-		double delay = newtime - task->lastWakeUP;
+		double delay = estimateWakeUp(task, eventCPU, newtime,
+					      startTime);
 
 		task->wakeTimev.push_back(newtime);
 		task->wakeDelay.push_back(delay);

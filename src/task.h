@@ -23,7 +23,7 @@
 
 class Task {
 public:
-	Task(): isNew(true) {}
+	Task(): isNew(true), lastWakeUP(0) {}
 	char *name;
 	unsigned int pid; /* is really tid as all other pids here */
 	QVector<double> timev;
