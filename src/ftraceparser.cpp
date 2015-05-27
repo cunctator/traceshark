@@ -238,7 +238,7 @@ void FtraceParser::finalizePreScan()
 	}
 
 	nrCPUs = maxCPU + 1;
-	cpuTaskMaps = new QMap<unsigned int, Task>[nrCPUs];
+	cpuTaskMaps = new QMap<unsigned int, CPUTask>[nrCPUs];
 	cpuFreq = new CpuFreq[nrCPUs];
 	cpuIdle = new CpuIdle[nrCPUs];
 	CPUs = new CPU[nrCPUs];
@@ -300,7 +300,7 @@ bool FtraceParser::processSched()
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
 		DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
-			Task &task = iter.value();
+			CPUTask &task = iter.value();
 			double d;
 			iter++;
 			/* Check if tail is necessary */
@@ -367,7 +367,7 @@ void FtraceParser::colorizeTasks()
 	for (cpu = 0; cpu < maxCPU; cpu++) {
 		DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
-			Task &task = iter.value();
+			CPUTask &task = iter.value();
 			iter++;
 			if (colorMap.contains(task.pid))
 				continue;
@@ -440,15 +440,17 @@ void FtraceParser::addCpuSchedWork(unsigned int cpu,
 	double offset = schedOffset.value(cpu);
 	DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 	while (iter != cpuTaskMaps[cpu].end()) {
-		Task &task = iter.value();
+		CPUTask &task = iter.value();
 		task.scale = scale;
 		task.offset = offset;
-		WorkItem<Task> *taskItem = new WorkItem<Task>
-			(&task, &Task::doScale);
+		WorkItem<CPUTask> *taskItem = new WorkItem<CPUTask>
+			(&task, &CPUTask::doScale);
 		list.append(taskItem);
-		taskItem = new WorkItem<Task>(&task, &Task::doScaleWakeup);
+		taskItem = new WorkItem<CPUTask>(&task,
+						 &CPUTask::doScaleWakeup);
 		list.append(taskItem);
-		taskItem = new WorkItem<Task>(&task, &Task::doScaleRunning);
+		taskItem = new WorkItem<CPUTask>(&task,
+						 &CPUTask::doScaleRunning);
 		list.append(taskItem);
 		iter++;
 	}

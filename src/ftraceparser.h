@@ -32,7 +32,7 @@
 #include "cpuidle.h"
 #include "ftraceparams.h"
 #include "mm/mempool.h"
-#include "task.h"
+#include "cputask.h"
 #include "tcolor.h"
 #include "traceevent.h"
 #include "traceline.h"
@@ -92,7 +92,7 @@ public:
 	void setCpuFreqScale(unsigned int cpu, double scale);
 	void doScale();
 	void colorizeTasks();
-	QMap<unsigned int, Task> *cpuTaskMaps;
+	QMap<unsigned int, CPUTask> *cpuTaskMaps;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QVector<Migration> migrations;
@@ -104,7 +104,7 @@ private:
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
 	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
 						 double startTime);
-	__always_inline double estimateWakeUp(Task *task, CPU *eventCPU,
+	__always_inline double estimateWakeUp(CPUTask *task, CPU *eventCPU,
 					      double newTime, double startTime);
 	__always_inline void handleWrongTaskOnCPU(unsigned int cpu,
 						  CPU *eventCPU,
@@ -258,7 +258,7 @@ regular:
 	return delay;
 }
 
-__always_inline double FtraceParser::estimateWakeUp(Task *task, CPU *eventCPU,
+__always_inline double FtraceParser::estimateWakeUp(CPUTask *task, CPU *eventCPU,
 						    double newTime,
 						    double /* startTime */)
 {
@@ -325,7 +325,7 @@ __always_inline void FtraceParser::handleWrongTaskOnCPU(unsigned int cpu,
 {
 	unsigned int epid = eventCPU->pidOnCPU;
 	double prevtime, faketime;
-	Task *task;
+	CPUTask *task;
 
 	if (epid != 0) {
 		task = &cpuTaskMaps[cpu][epid];
@@ -355,7 +355,7 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 	double newtime = event.time + FAKE_DELTA;
 	unsigned int oldpid = sched_switch_oldpid(event);
 	unsigned int newpid = sched_switch_newpid(event);
-	Task *task;
+	CPUTask *task;
 	CPU *eventCPU = &CPUs[cpu];
 
 	if (cpu > maxCPU)
@@ -454,7 +454,7 @@ out:
 __always_inline void FtraceParser::processWakeupEvent(TraceEvent &event)
 {
 	unsigned int cpu, pid;
-	Task *task;
+	CPUTask *task;
 	double time;
 
 	if (!sched_wakeup_success(event)) /* Only interested in success */

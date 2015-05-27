@@ -16,33 +16,31 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#include "cputask.h"
+#include "ftraceparser.h"
 
-#include <QVector>
+bool CPUTask::doScale() {
+	int i;
+	int s = data.size();
+	scaledData.resize(s);
+	for (i = 0; i < s; i++)
+		scaledData[i] = data[i] * scale + offset;
+	return false; /* No error */
+}
 
-class Task {
-public:
-	Task(): isNew(true), lastWakeUP(0) {}
-	char *name;
-	unsigned int pid; /* is really tid as all other pids here */
-	QVector<double> timev;
-	QVector<double> data;
-	QVector<double> scaledData;
-	QVector<double> wakeTimev;
-	QVector<double> wakeDelay;
-	QVector<double> wakeHeight;
-	QVector<double> wakeZero;
-	QVector<double> runningTimev;
-	QVector<double> runningData;
-	QVector<double> scaledRunningData;
-	bool isNew; /* Only used during extraction */
-	double lastWakeUP;        /* Only used during extraction */
-	double offset;
-	double scale;
-	bool doScale();
-	bool doScaleWakeup();
-	bool doScaleRunning();
-};
+bool CPUTask::doScaleWakeup() {
+	int s = wakeDelay.size();
+	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
+	wakeZero.fill(0, s);
+	wakeHeight.fill(scaledHeight, s);
+	return false; /* No error */
+}
 
-#endif
+bool CPUTask::doScaleRunning() {
+	int i;
+	int s = runningData.size();
+	scaledRunningData.resize(s);
+	for (i = 0; i < s; i++)
+		scaledRunningData[i] = runningData[i] * scale + offset;
+	return false; /* No error */
+}

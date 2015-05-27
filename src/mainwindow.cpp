@@ -273,7 +273,7 @@ void MainWindow::showTrace()
 		DEFINE_TASKMAP_ITERATOR(iter) = parser->
 			cpuTaskMaps[cpu].begin();
 		while(iter != parser->cpuTaskMaps[cpu].end()) {
-			Task &task = iter.value();
+			CPUTask &task = iter.value();
 			unsigned int pid = task.pid;
 			iter++;
 
