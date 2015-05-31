@@ -41,8 +41,8 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 	lastPos = 0;
 	lastBuf = 0;
 	eof = false;
-	strPool = new MemPool(2048, 1);
-	ptrPool = new MemPool(256, sizeof(TString));
+	strPool = new MemPool(16384, 1);
+	ptrPool = new MemPool(16384, sizeof(TString));
 	memory = new char[NR_BUFFERS * bsize];
 	m = memory;
 	for (i = 0; i < NR_BUFFERS; i++) {
