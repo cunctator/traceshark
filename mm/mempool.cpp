@@ -64,7 +64,7 @@ void MemPool::reset()
 	int len = exhaustList.size();
 	for (i = 0; i < len; i++)
 		munmap(exhaustList[i], poolSize);
-	exhaustList.resize(0);
+	exhaustList.clear();
 	used = 0ULL;
 	next = memory;
 }

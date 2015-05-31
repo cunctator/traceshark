@@ -19,7 +19,7 @@
 #ifndef MEMPOOL_H
 #define MEMPOOL_H
 
-#include <QVector>
+#include <QList>
 #include <QTextStream>
 
 extern "C" {
@@ -49,7 +49,7 @@ private:
 	unsigned long long poolSize;
 	unsigned long long used;
 	unsigned long objSize;
-	QVector <void*> exhaustList;
+	QList <void*> exhaustList;
 	__always_inline bool newMap();
 	bool addMemory();
 };
