@@ -412,12 +412,34 @@ void MainWindow::license()
 
 void MainWindow::mouseWheel()
 {
-	customPlot->axisRect()->setRangeZoom(Qt::Horizontal);
+	bool xSelected = customPlot->yAxis->selectedParts().
+		testFlag(QCPAxis::spAxis);
+	bool ySelected = customPlot->yAxis->selectedParts().
+		testFlag(QCPAxis::spAxis);
+
+	if (xSelected && ySelected) /* This is not possible but would be cool */
+		customPlot->axisRect()->setRangeZoom(Qt::Vertical |
+						     Qt::Horizontal);
+	else if (ySelected)
+		customPlot->axisRect()->setRangeZoom(Qt::Vertical);
+	else
+		customPlot->axisRect()->setRangeZoom(Qt::Horizontal);
 }
 
 void MainWindow::mousePress()
 {
-	customPlot->axisRect()->setRangeDrag(Qt::Horizontal);
+	bool xSelected = customPlot->yAxis->selectedParts().
+		testFlag(QCPAxis::spAxis);
+	bool ySelected = customPlot->yAxis->selectedParts().
+		testFlag(QCPAxis::spAxis);
+
+	if (xSelected && ySelected) /* This is not possible but would be cool */
+		customPlot->axisRect()->setRangeDrag(Qt::Vertical |
+						     Qt::Horizontal);
+	else if (ySelected)
+		customPlot->axisRect()->setRangeDrag(Qt::Vertical);
+	else
+		customPlot->axisRect()->setRangeDrag(Qt::Horizontal);
 }
 
 void MainWindow::plotDoubleClicked(QMouseEvent *event)
