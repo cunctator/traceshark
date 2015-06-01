@@ -38,6 +38,7 @@
 #include "traceline.h"
 #include "grammarnode.h"
 #include "migration.h"
+#include "task.h"
 #include "threads/threadbuffer.h"
 #include "traceshark.h"
 #include "threads/workthread.h"
@@ -93,6 +94,7 @@ public:
 	void doScale();
 	void colorizeTasks();
 	QMap<unsigned int, CPUTask> *cpuTaskMaps;
+	QMap<unsigned int, Task> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QVector<Migration> migrations;
@@ -102,9 +104,10 @@ private:
 	__always_inline bool parseBuffer(unsigned int index);
 	__always_inline void preScanEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
+	__always_inline Task *getTask(unsigned int pid);
 	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
 						 double startTime);
-	__always_inline double estimateWakeUp(CPUTask *task, CPU *eventCPU,
+	__always_inline double estimateWakeUp(Task *task, CPU *eventCPU,
 					      double newTime, double startTime);
 	__always_inline void handleWrongTaskOnCPU(unsigned int cpu,
 						  CPU *eventCPU,
@@ -258,7 +261,8 @@ regular:
 	return delay;
 }
 
-__always_inline double FtraceParser::estimateWakeUp(CPUTask *task, CPU *eventCPU,
+__always_inline double FtraceParser::estimateWakeUp(Task *task,
+						    CPU *eventCPU,
 						    double newTime,
 						    double /* startTime */)
 {
@@ -318,6 +322,17 @@ __always_inline QColor FtraceParser::getTaskColor(unsigned int pid)
 	return taskColor.toQColor();
 }
 
+
+__always_inline Task *FtraceParser::getTask(unsigned int pid)
+{
+	Task *task = &taskMap[pid]; /* Modifiable reference */ ;
+	if (task->isNew) { /* true means task is newly constructed above */
+		task->pid = pid;
+		task->isNew = false;
+	}
+	return task;
+}
+
 __always_inline void FtraceParser::handleWrongTaskOnCPU(unsigned int cpu,
 							CPU *eventCPU,
 							unsigned int oldpid,
@@ -326,6 +341,7 @@ __always_inline void FtraceParser::handleWrongTaskOnCPU(unsigned int cpu,
 	unsigned int epid = eventCPU->pidOnCPU;
 	double prevtime, faketime;
 	CPUTask *cpuTask;
+	Task *task;
 
 	if (epid != 0) {
 		cpuTask = &cpuTaskMaps[cpu][epid];
@@ -335,7 +351,8 @@ __always_inline void FtraceParser::handleWrongTaskOnCPU(unsigned int cpu,
 		faketime = prevtime + FAKE_DELTA;
 		cpuTask->timev.push_back(faketime);
 		cpuTask->data.push_back(FLOOR_HEIGHT);
-		cpuTask->lastWakeUP = faketime;
+		task = getTask(epid);
+		task->lastWakeUP = faketime;
 	}
 
 	if (oldpid != 0) {
@@ -356,6 +373,8 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 	unsigned int oldpid = sched_switch_oldpid(event);
 	unsigned int newpid = sched_switch_newpid(event);
 	CPUTask *cpuTask;
+	Task *task;
+	double delay;
 	CPU *eventCPU = &CPUs[cpu];
 
 	if (cpu > maxCPU)
@@ -374,6 +393,7 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 
 	/* Handle the outgoing task */
 	cpuTask = &cpuTaskMaps[cpu][oldpid]; /* Modifiable reference */
+	task = getTask(oldpid);
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
@@ -386,7 +406,7 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 		if (state == 'R') {
 			cpuTask->runningTimev.push_back(oldtime);
 			cpuTask->runningData.push_back(FLOOR_HEIGHT);
-			cpuTask->lastWakeUP = oldtime;
+			task->lastWakeUP = oldtime;
 		}
 
 		cpuTask->timev.push_back(oldtime);
@@ -402,7 +422,7 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 		if (state == 'R') {
 			cpuTask->runningTimev.push_back(oldtime);
 			cpuTask->runningData.push_back(FLOOR_HEIGHT);
-			cpuTask->lastWakeUP = oldtime;
+			task->lastWakeUP = oldtime;
 		}
 	}
 
@@ -413,14 +433,16 @@ skip:
 	}
 
 	/* Handle the incoming task */
+	task = &taskMap[newpid]; /* Modifiable reference */
+	if (task->isNew) {
+		task->pid = newpid;
+		task->isNew = false;
+		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
+	} else
+		delay = estimateWakeUp(task, eventCPU, newtime, startTime);
+
 	cpuTask = &cpuTaskMaps[cpu][newpid]; /* Modifiable reference */
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
-		/* A tasks woken up after startTime would have been created by
-		 * the wakeup event */
-		double delay;
-
-		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
-
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
 
@@ -435,9 +457,6 @@ skip:
 
 		cpuTask->name = sched_switch_newname_strdup(event, taskNamePool);
 	} else {
-		double delay = estimateWakeUp(cpuTask, eventCPU, newtime,
-					      startTime);
-
 		cpuTask->wakeTimev.push_back(newtime);
 		cpuTask->wakeDelay.push_back(delay);
 
@@ -453,30 +472,19 @@ out:
 
 __always_inline void FtraceParser::processWakeupEvent(TraceEvent &event)
 {
-	unsigned int cpu, pid;
-	CPUTask *cpuTask;
+	unsigned int pid;
+	Task *task;
 	double time;
 
 	if (!sched_wakeup_success(event)) /* Only interested in success */
 		return;
 
 	time = event.time;
-	cpu = sched_wakeup_cpu(event);
 	pid = sched_wakeup_pid(event);
 
 	/* Handle the woken up task */
-	cpuTask = &cpuTaskMaps[cpu][pid]; /* Modifiable reference */
-
-	if (cpuTask->isNew) { /* true means task is newly constructed above */
-		cpuTask->pid = pid;
-
-		cpuTask->timev.push_back(startTime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
-
-		cpuTask->isNew = false;
-		cpuTask->name = sched_wakeup_name_strdup(event, taskNamePool);
-	}
-	cpuTask->lastWakeUP = time;
+	task = getTask(pid);
+	task->lastWakeUP = time;
 }
 
 __always_inline void FtraceParser::processCPUfreqEvent(TraceEvent &event)

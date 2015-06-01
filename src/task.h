@@ -16,32 +16,15 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPUTASK_H
-#define CPUTASK_H
+#ifndef TASK_H
+#define TASK_H
 
-#include <QVector>
-
-class CPUTask {
+class Task {
 public:
-	CPUTask(): isNew(true) {}
-	char *name;
+	Task(): isNew(true), lastWakeUP(0) {}
 	unsigned int pid; /* is really tid as all other pids here */
-	QVector<double> timev;
-	QVector<double> data;
-	QVector<double> scaledData;
-	QVector<double> wakeTimev;
-	QVector<double> wakeDelay;
-	QVector<double> wakeHeight;
-	QVector<double> wakeZero;
-	QVector<double> runningTimev;
-	QVector<double> runningData;
-	QVector<double> scaledRunningData;
-	bool isNew; /* Only used during extraction */
-	double offset;
-	double scale;
-	bool doScale();
-	bool doScaleWakeup();
-	bool doScaleRunning();
+	bool isNew;
+	double lastWakeUP;
 };
 
-#endif /* CPUTASK_H */
+#endif /* TASK_H */
