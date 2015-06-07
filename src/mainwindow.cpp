@@ -18,7 +18,6 @@
 
 #include <QTextStream>
 #include <QDateTime>
-#include <cmath>
 
 #include "cursor.h"
 #include "eventswidget.h"
