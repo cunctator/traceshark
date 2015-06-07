@@ -383,7 +383,7 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 	if (eventCPU->pidOnCPU != oldpid) {
 		if (eventCPU->hasBeenScheduled)
 			handleWrongTaskOnCPU(cpu, eventCPU, oldpid, oldtime);
-		/* else { do nothing, non scheduled CPU is handled below */
+		/* else { do nothing, non scheduled CPU is handled below } */
 	}
 
 	if (oldpid == 0) {
