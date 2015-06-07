@@ -290,7 +290,7 @@ void MainWindow::showTrace()
 
 			/* Add wakeup graph on top of scheduling */
 			graph = new QCPGraph(customPlot->xAxis,
-						       customPlot->yAxis);
+					     customPlot->yAxis);
 			customPlot->addPlottable(graph);
 			QCPScatterStyle style =
 				QCPScatterStyle(QCPScatterStyle::ssDot);
@@ -301,6 +301,24 @@ void MainWindow::showTrace()
 			graph->setDataKeyError(task.wakeTimev, task.wakeHeight,
 					       task.wakeDelay, task.wakeZero);
 			graph->setErrorType(QCPGraph::etKey);
+			graph->setErrorBarSize(4);
+			graph->setErrorPen(pen);
+
+			/* Add wakeup graph on top of scheduling */
+			graph = new QCPGraph(customPlot->xAxis,
+						       customPlot->yAxis);
+			customPlot->addPlottable(graph);
+			style =
+				QCPScatterStyle(QCPScatterStyle::ssDot);
+			style.setPen(pen);
+			graph->setScatterStyle(style);
+			graph->setLineStyle(QCPGraph::lsNone);
+			graph->setAdaptiveSampling(true);
+			graph->setDataValueError(task.wakeTimev,
+						 task.wakeHeight,
+						 task.wakeZero,
+						 task.verticalDelay);
+			graph->setErrorType(QCPGraph::etValue);
 			graph->setErrorBarSize(4);
 			graph->setErrorPen(pen);
 

@@ -50,8 +50,10 @@ using namespace TraceShark;
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
-#define WAKEUP_HEIGHT ((double) 1)
-#define SCHED_HEIGHT ((double) 0.8)
+#define WAKEUP_HEIGHT ((double) 0.6)
+#define WAKEUP_SIZE ((double) 0.4)
+#define VERT_WAKEUP_HEIGHT ((double) 0.6)
+#define SCHED_HEIGHT ((double) 0.5)
 #define FLOOR_HEIGHT ((double) 0)
 #define NR_TBUFFERS (3)
 #define TBUFSIZE (10000)

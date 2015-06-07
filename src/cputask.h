@@ -31,6 +31,7 @@ public:
 	QVector<double> scaledData;
 	QVector<double> wakeTimev;
 	QVector<double> wakeDelay;
+	QVector<double> verticalDelay;
 	QVector<double> wakeHeight;
 	QVector<double> wakeZero;
 	QVector<double> runningTimev;

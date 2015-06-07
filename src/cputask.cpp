@@ -19,6 +19,9 @@
 #include "cputask.h"
 #include "ftraceparser.h"
 
+/* This delays (20 ms) rerpresents the "full length" of the error */
+#define WAKEUP_MAX ((double) 0.020)
+
 bool CPUTask::doScale() {
 	int i;
 	int s = data.size();
@@ -30,9 +33,18 @@ bool CPUTask::doScale() {
 
 bool CPUTask::doScaleWakeup() {
 	int s = wakeDelay.size();
+	int i;
+	/* Create the dummy vector needed for horizontal display */
 	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
 	wakeZero.fill(0, s);
 	wakeHeight.fill(scaledHeight, s);
+	/* Compute a scaled delay vector needed for vertical display */
+	verticalDelay.resize(s);
+	double maxsize = WAKEUP_SIZE * scale;
+	double factor = maxsize / WAKEUP_MAX;
+	for (i = 0; i < s; i++)
+		verticalDelay[i] = TSMIN(factor * wakeDelay[i], maxsize);
+
 	return false; /* No error */
 }
 
