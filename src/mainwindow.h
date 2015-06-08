@@ -23,6 +23,7 @@
 #include <QMainWindow>
 #include <QVector>
 #include <QString>
+#include "setting.h"
 #include "threads/workitem.h"
 #include "traceshark.h"
 
@@ -41,6 +42,7 @@ class WorkQueue;
 class EventsWidget;
 class InfoWidget;
 class Cursor;
+class CPUTask;
 
 class MainWindow : public QMainWindow
 {
@@ -70,6 +72,12 @@ private:
 	void clearPlot();
 	void showTrace();
 	void setupCursors();
+	void setupSettings();
+
+	void addSchedGraph(CPUTask &task);
+	void addHorizontalWakeupGraph(CPUTask &task);
+	void addWakeupGraph(CPUTask &task);
+	void addStillRunningGraph(CPUTask &task);
 
 	QCustomPlot *customPlot;
 	QWidget *plotWidget;
@@ -116,6 +124,7 @@ private:
 	QVector<double> ticks;
 	QVector<QString> tickLabels;
 	Cursor *cursors[NR_CURSORS];
+	Setting settings[Setting::MAX_SETTINGS];
 };
 
 #endif /* MAINWINDOW_H */

@@ -83,6 +83,8 @@ MainWindow::MainWindow():
 		  this, infoValueChanged(double, int));
 	tsconnect(eventsWidget, timeSelected(double), this,
 		  eventTimeSelected(double));
+
+	setupSettings();
 }
 
 MainWindow::~MainWindow()
@@ -273,69 +275,12 @@ void MainWindow::showTrace()
 			cpuTaskMaps[cpu].begin();
 		while(iter != parser->cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
-			unsigned int pid = task.pid;
 			iter++;
 
-			/* Add scheduling graph */
-			QCPGraph *graph = new QCPGraph(customPlot->xAxis,
-						       customPlot->yAxis);
-			QColor color = parser->getTaskColor(pid);
-			QPen pen = QPen();
-			pen.setColor(color);
-			graph->setPen(pen);
-			customPlot->addPlottable(graph);
-			graph->setLineStyle(QCPGraph::lsStepLeft);
-			graph->setAdaptiveSampling(true);
-			graph->setData(task.timev, task.scaledData);
-
-			/* Add wakeup graph on top of scheduling */
-			graph = new QCPGraph(customPlot->xAxis,
-					     customPlot->yAxis);
-			customPlot->addPlottable(graph);
-			QCPScatterStyle style =
-				QCPScatterStyle(QCPScatterStyle::ssDot);
-			style.setPen(pen);
-			graph->setScatterStyle(style);
-			graph->setLineStyle(QCPGraph::lsNone);
-			graph->setAdaptiveSampling(true);
-			graph->setDataKeyError(task.wakeTimev, task.wakeHeight,
-					       task.wakeDelay, task.wakeZero);
-			graph->setErrorType(QCPGraph::etKey);
-			graph->setErrorBarSize(4);
-			graph->setErrorPen(pen);
-
-			/* Add wakeup graph on top of scheduling */
-			graph = new QCPGraph(customPlot->xAxis,
-						       customPlot->yAxis);
-			customPlot->addPlottable(graph);
-			style =
-				QCPScatterStyle(QCPScatterStyle::ssDot);
-			style.setPen(pen);
-			graph->setScatterStyle(style);
-			graph->setLineStyle(QCPGraph::lsNone);
-			graph->setAdaptiveSampling(true);
-			graph->setDataValueError(task.wakeTimev,
-						 task.wakeHeight,
-						 task.wakeZero,
-						 task.verticalDelay);
-			graph->setErrorType(QCPGraph::etValue);
-			graph->setErrorBarSize(4);
-			graph->setErrorPen(pen);
-
-			/* Add still running graph on top of the other two...*/
-			if (task.runningTimev.size() == 0)
-				continue;
-			graph = new QCPGraph(customPlot->xAxis,
-					     customPlot->yAxis);
-			customPlot->addPlottable(graph);
-			style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
-			pen.setColor(Qt::red);
-			style.setPen(pen);
-			graph->setScatterStyle(style);
-			graph->setLineStyle(QCPGraph::lsNone);
-			graph->setAdaptiveSampling(true);
-			graph->setData(task.runningTimev,
-				       task.scaledRunningData);
+			addSchedGraph(task);
+			addHorizontalWakeupGraph(task);
+			addWakeupGraph(task);
+			addStillRunningGraph(task);
 		}
 	}
 }
@@ -369,6 +314,91 @@ void MainWindow::setupCursors()
 	eventsWidget->scrollTo(start);
 	eventsWidget->scrollTo(end);
 	eventsWidget->scrollTo(red);
+}
+
+void MainWindow::setupSettings()
+{
+	settings[Setting::HORIZONTAL_WAKEUP].isEnabled = false;
+	settings[Setting::HORIZONTAL_WAKEUP].name =
+		tr("Show horizontal wakeup");
+}
+
+void MainWindow::addSchedGraph(CPUTask &task)
+{
+	/* Add scheduling graph */
+	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+	QColor color = parser->getTaskColor(task.pid);
+	QPen pen = QPen();
+
+	pen.setColor(color);
+	graph->setPen(pen);
+	customPlot->addPlottable(graph);
+	graph->setLineStyle(QCPGraph::lsStepLeft);
+	graph->setAdaptiveSampling(true);
+	graph->setData(task.timev, task.scaledData);
+}
+
+void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
+{
+	if (!settings[Setting::HORIZONTAL_WAKEUP].isEnabled)
+		return;
+
+	/* Add wakeup graph on top of scheduling */
+	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+	customPlot->addPlottable(graph);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
+	QColor color = parser->getTaskColor(task.pid);
+	QPen pen = QPen();
+
+	pen.setColor(color);
+	style.setPen(pen);
+	graph->setScatterStyle(style);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setDataKeyError(task.wakeTimev, task.wakeHeight,
+			       task.wakeDelay, task.wakeZero);
+	graph->setErrorType(QCPGraph::etKey);
+	graph->setErrorBarSize(4);
+	graph->setErrorPen(pen);
+}
+
+void MainWindow::addWakeupGraph(CPUTask &task)
+{
+	/* Add wakeup graph on top of scheduling */
+	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+	customPlot->addPlottable(graph);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
+	QColor color = parser->getTaskColor(task.pid);
+	QPen pen = QPen();
+
+	pen.setColor(color);
+	style.setPen(pen);
+	graph->setScatterStyle(style);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setDataValueError(task.wakeTimev, task.wakeHeight, task.wakeZero,
+				 task.verticalDelay);
+	graph->setErrorType(QCPGraph::etValue);
+	graph->setErrorBarSize(4);
+	graph->setErrorPen(pen);
+}
+
+void MainWindow::addStillRunningGraph(CPUTask &task)
+{
+	/* Add still running graph on top of the other two...*/
+	if (task.runningTimev.size() == 0)
+		return;
+	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+	customPlot->addPlottable(graph);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+	QPen pen = QPen();
+
+	pen.setColor(Qt::red);
+	style.setPen(pen);
+	graph->setScatterStyle(style);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setData(task.runningTimev, task.scaledRunningData);
 }
 
 void MainWindow::closeTrace()

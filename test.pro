@@ -39,6 +39,7 @@ HEADERS      += src/migration.h
 HEADERS      += src/namepidnode.h
 HEADERS      += mm/mempool.h
 HEADERS      += src/cputask.h
+HEADERS      += src/setting.h
 HEADERS      += src/task.h
 HEADERS      += src/tcolor.h
 HEADERS      += threads/threadbuffer.h
