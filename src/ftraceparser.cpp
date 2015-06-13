@@ -124,7 +124,7 @@ void FtraceParser::close()
 		delete[] CPUs;
 		CPUs = NULL;
 	}
-	migrations.resize(0);
+	migrations.clear();
 }
 
 FtraceParser::FtraceParser()

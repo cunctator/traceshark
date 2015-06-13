@@ -99,7 +99,7 @@ public:
 	QMap<unsigned int, Task> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
-	QVector<Migration> migrations;
+	QList<Migration> migrations;
 private:
 	void preparePreScan();
 	void finalizePreScan();
