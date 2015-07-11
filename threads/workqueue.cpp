@@ -52,15 +52,21 @@ void WorkQueue::setWorkItemsDefault()
 	queue = defaultQueue;
 }
 
-bool WorkQueue::start() {
+void WorkQueue::start()
+{
 	int i;
 	int qs = queue.size();
-	int nr;
 
-	nr = TSMIN(qs, nrThreads);
-	for (i = 0; i < nr; i++)
+	error = false;
+	nrStarted = TSMIN(qs, nrThreads);
+	for (i = 0; i < nrStarted; i++)
 		threads[i].start();
-	for (i = 0; i < nr; i++)
+}
+
+bool WorkQueue::wait()
+{
+	int i;
+	for (i = 0; i < nrStarted; i++)
 		threads[i].wait();
 	return error;
 }
@@ -80,7 +86,7 @@ void WorkQueue::ThreadRun() {
 			rval = current->__runWork();
 		if (rval) {
 			errorMutex.lock();
-			error = rval;
+			error |= rval;
 			errorMutex.unlock();
 		}
 	} while(!empty);

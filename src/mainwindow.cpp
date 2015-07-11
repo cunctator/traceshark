@@ -56,6 +56,7 @@ MainWindow::MainWindow():
 	customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
 				    QCP::iSelectAxes | QCP::iSelectLegend |
 				    QCP::iSelectPlottables);
+	parser->setQCustomPlot(customPlot);
 
 	tsconnect(customPlot, mouseWheel(QWheelEvent*), this, mouseWheel());
 	tsconnect(customPlot->xAxis, rangeChanged(QCPRange), customPlot->xAxis2,
@@ -164,6 +165,7 @@ void MainWindow::processTrace()
 
 	workQueue->setWorkItemsDefault();
 	workQueue->start();
+	workQueue->wait();
 
 	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -186,6 +188,7 @@ void MainWindow::computeLayout()
 	unsigned int nrCPUs;
 	unsigned int offset = schedSectionSpace;
 	QString label;
+	double inc;
 	bottom = 0;
 
 	ticks.resize(0);
@@ -214,6 +217,13 @@ void MainWindow::computeLayout()
 		tickLabels.append(label);
 		offset += cpuHeight + cpuSpacing;
 	}
+
+	offset += migrateSectionOffset;
+	parser->setMigrationOffset(offset);
+	inc = offset * 0.15;
+	parser->setMigrationScale(inc);
+	/* Fixme: add labels and lines here for the migration graph */
+	offset += inc;
 
 	top = offset;
 }

@@ -32,7 +32,8 @@ public:
 	void addWorkItem(AbstractWorkItem *item);
 	void addDefaultWorkItem(AbstractWorkItem *item);
 	void setWorkItemsDefault();
-	bool start();
+	void start();
+	bool wait();
 protected:
 	void ThreadRun();
 private:
@@ -43,6 +44,7 @@ private:
 	bool error;
 	WorkThread<WorkQueue> *threads;
 	int nrThreads;
+	int nrStarted;
 };
 
 #endif /* WORKQUEUE_H */

@@ -16,15 +16,16 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MIGRATION_H
-#define MIGRATION_H
+#include "migrationarrow.h"
 
-class Migration {
-public:
-	unsigned int pid;
-	int oldcpu;
-	int newcpu;
-	double time;
-};
-
-#endif /* MIGRATION */
+MigrationArrow::MigrationArrow(double start, double end, double time,
+			       QColor &color, QCustomPlot *parent):
+	QCPItemLine(parent)
+{
+	QPen pen;
+	QCPItemLine::start->setCoords(time, start);
+	QCPItemLine::end->setCoords(time, end);
+	pen.setColor(color);
+	setPen(pen);
+	setHead(QCPLineEnding::esFlatArrow);
+}

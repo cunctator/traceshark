@@ -117,7 +117,7 @@ private:
 	const double cpuHeight = 800;
 	const double cpuIdleSkew = 0;
 	const double migrateHeight = 5000;
-	const double migratSectionOffset = 100;
+	const double migrateSectionOffset = 100;
 
 	double bottom;
 	double top;

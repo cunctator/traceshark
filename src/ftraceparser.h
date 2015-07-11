@@ -38,9 +38,11 @@
 #include "traceline.h"
 #include "grammarnode.h"
 #include "migration.h"
+#include "migrationarrow.h"
 #include "task.h"
 #include "threads/threadbuffer.h"
 #include "traceshark.h"
+#include "threads/workitem.h"
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
 
@@ -61,6 +63,7 @@ using namespace TraceShark;
 #define FULLDELAY (0.02)
 
 class TraceFile;
+class QCustomPlot;
 
 class FtraceParser
 {
@@ -93,13 +96,17 @@ public:
 	void setCpuIdleScale(unsigned int cpu, double scale);
 	void setCpuFreqOffset(unsigned int cpu, double offset);
 	void setCpuFreqScale(unsigned int cpu, double scale);
+	void setMigrationOffset(double offset);
+	void setMigrationScale(double scale);
 	void doScale();
 	void colorizeTasks();
+	void setQCustomPlot(QCustomPlot *plot);
 	QMap<unsigned int, CPUTask> *cpuTaskMaps;
 	QMap<unsigned int, Task> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
+	QList<MigrationArrow*> migrationArrows;
 private:
 	void preparePreScan();
 	void finalizePreScan();
@@ -148,6 +155,8 @@ private:
 	QVector<double> cpuIdleScale;
 	QVector<double> cpuFreqOffset;
 	QVector<double> cpuFreqScale;
+	double migrationOffset;
+	double migrationScale;
 	CPU *CPUs;
 	void addCpuFreqWork(unsigned int cpu,
 		       QList<AbstractWorkItem*> &list);
@@ -155,7 +164,9 @@ private:
 		       QList<AbstractWorkItem*> &list);
 	void addCpuSchedWork(unsigned int cpu,
 		       QList<AbstractWorkItem*> &list);
+	void scaleMigration();
 	QVector<double> startFreq;
+	QCustomPlot *customPlot;
 };
 
 /* This parses a buffer */

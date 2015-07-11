@@ -16,15 +16,21 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MIGRATION_H
-#define MIGRATION_H
+#ifndef MIGRATIONARROW_H
+#define MIGRATIONARROW_H
 
-class Migration {
+#include <QColor>
+#include "qcustomplot/qcustomplot.h"
+
+class MigrationArrow : public QCPItemLine
+{
 public:
-	unsigned int pid;
-	int oldcpu;
-	int newcpu;
-	double time;
+	MigrationArrow(double start, double end, double time, QColor &color,
+		       QCustomPlot *parent);
+private:
+	QCPItemPosition *pos1;
+	QCPItemPosition *pos2;
+	QCPLineEnding head;
 };
 
-#endif /* MIGRATION */
+#endif /* MIGRATIONARROW_H */

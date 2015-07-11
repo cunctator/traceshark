@@ -125,6 +125,7 @@ void FtraceParser::close()
 		CPUs = NULL;
 	}
 	migrations.clear();
+	migrationArrows.clear();
 }
 
 FtraceParser::FtraceParser()
@@ -407,6 +408,21 @@ void FtraceParser::setCpuFreqScale(unsigned int cpu, double scale)
 	cpuFreqScale[cpu] = scale / maxFreq;
 }
 
+void FtraceParser::setMigrationOffset(double offset)
+{
+	migrationOffset = offset;
+}
+
+void FtraceParser::setMigrationScale(double scale)
+{
+	migrationScale = scale;
+}
+
+void FtraceParser::setQCustomPlot(QCustomPlot *plot)
+{
+	customPlot = plot;
+}
+
 void FtraceParser::addCpuFreqWork(unsigned int cpu,
 				  QList<AbstractWorkItem*> &list)
 {
@@ -456,6 +472,26 @@ void FtraceParser::addCpuSchedWork(unsigned int cpu,
 	}
 }
 
+/*
+ * This function must be called from the application mainthread because it
+ * creates objects that are children customPlot, which is created by the
+ * mainthread
+ */
+void FtraceParser::scaleMigration()
+{
+	MigrationArrow *a;
+	QList<Migration>::iterator iter;
+	double unit = migrationScale / nrCPUs;
+	for (iter = migrations.begin(); iter != migrations.end(); iter++) {
+		Migration &m = *iter;
+		double s = migrationOffset + (m.oldcpu + 1) * unit;
+		double e = migrationOffset + (m.newcpu + 1) * unit;
+		QColor color = getTaskColor(m.pid);
+		a = new MigrationArrow(s, e, m.time, color, customPlot);
+		migrationArrows.push_back(a);
+	}
+}
+
 void FtraceParser::doScale()
 {
 	QList<AbstractWorkItem*> workList;
@@ -474,6 +510,8 @@ void FtraceParser::doScale()
 	for (i = 0; i < s; i++)
 		scalingQueue.addWorkItem(workList[i]);
 	scalingQueue.start();
+	scaleMigration(); /* Migration scaling is done from the mainthread */
+	scalingQueue.wait();
 	for (i = 0; i < s; i++)
 		delete workList[i];
 }
