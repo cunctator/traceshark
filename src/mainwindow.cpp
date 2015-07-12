@@ -24,6 +24,7 @@
 #include "ftraceparser.h"
 #include "infowidget.h"
 #include "mainwindow.h"
+#include "migrationline.h"
 #include "traceshark.h"
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
@@ -188,7 +189,14 @@ void MainWindow::computeLayout()
 	unsigned int nrCPUs;
 	unsigned int offset = schedSectionSpace;
 	QString label;
-	double inc;
+	double inc, o, p;
+	double start, end;
+	MigrationLine *line;
+	QColor color;
+
+	start = parser->getStartTime();
+	end = parser->getEndTime();
+
 	bottom = 0;
 
 	ticks.resize(0);
@@ -222,7 +230,23 @@ void MainWindow::computeLayout()
 	parser->setMigrationOffset(offset);
 	inc = offset * 0.15;
 	parser->setMigrationScale(inc);
-	/* Fixme: add labels and lines here for the migration graph */
+	
+	/* add labels and lines here for the migration graph */
+	color = QColor(135, 206, 250); /* Light sky blue */
+	label = QString("fork/exit");
+	ticks.append(offset);
+	line = new MigrationLine(start, end, offset, color, customPlot);
+	tickLabels.append(label);
+	o = offset;
+	p = inc / nrCPUs ;
+	for (cpu = 0; cpu < nrCPUs; cpu++) {
+		o += p;
+		label = QString("cpu") + QString::number(cpu);
+		ticks.append(o);
+		tickLabels.append(label);
+		line = new MigrationLine(start, end, o, color, customPlot);
+	}
+
 	offset += inc;
 
 	top = offset;
@@ -248,6 +272,7 @@ void MainWindow::showTrace()
 	double start, end;
 	int precision = 7;
 	double extra = 0;
+	QColor color;
 
 	start = parser->getStartTime();
 	end = parser->getEndTime();
