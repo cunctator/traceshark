@@ -36,6 +36,8 @@ typedef enum {
 	SCHED_SWITCH,
 	SCHED_WAKEUP,
 	SCHED_WAKEUP_NEW,
+	SCHED_PROCESS_FORK,
+	SCHED_PROCESS_EXIT,
 	NR_EVENTS,
 } event_t;
 
@@ -95,6 +97,27 @@ static __always_inline unsigned int param_inside_braces(TraceEvent &event,
 	}
 
 	return ABSURD_UNSIGNED;
+}
+
+static __always_inline const char *substr_after_char(const char *str,
+					       unsigned int len,
+					       char c,
+					       unsigned int *sublen)
+{
+	unsigned int i;
+
+	for (i = 0; i < len; i++) {
+		if (*str == c) {
+			i++;
+			if (i == len)
+				return NULL;
+			str++;
+			*sublen = len - i;
+			return str;
+		}
+		str++;
+	}
+	return NULL;
 }
 
 #define cpufreq_event(EVENT) (is_this_event(CPU_FREQUENCY, EVENT) && \
@@ -391,5 +414,90 @@ static __always_inline char *__sched_wakeup_name_strdup(TraceEvent &event,
 }
 
 char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool);
+
+#define sched_process_fork(EVENT) \
+	(is_this_event(SCHED_PROCESS_FORK, EVENT) && EVENT.argc >= 4)
+#define sched_process_fork_childpid(EVENT) \
+	(param_after_char(param_after_char(EVENT, EVENT.arg - 1, '='));
+
+static __always_inline unsigned int sched_process_fork_parent_pid(
+	TraceEvent &event) {
+	unsigned int i;
+	unsigned int endidx;
+
+	if (event.argc < 4)
+		return ABSURD_UNSIGNED;
+
+	endidx = event.argc - 2;
+
+	for (i = endidx; i > 0; i--) {
+		if (strncmp(event.argv[i]->ptr, "child_comm=", 11) == 0 &&
+		    strncmp(event.argv[i - 1]->ptr, "pid=", 4) == 0)
+			break;
+	}
+	if (i < 2)
+		return ABSURD_UNSIGNED;
+
+	return param_after_char(event, i - 1, '=');
+}
+
+static __always_inline char *
+__sched_process_fork_childname_strdup(TraceEvent &event,
+				      MemPool *pool)
+{
+	unsigned int i;
+	const unsigned int endidx = event.argc - 2;
+	char *c;
+	char *retstr;
+	unsigned int len;
+	unsigned int sublen;
+
+	if (event.argc < 4)
+		return NULL;
+
+	for (i = 2; i <= endidx; i++) {
+		if (!strncmp(event.argv[i]->ptr, "child_comm=", 11))
+			goto found;
+	}
+	return NULL;
+
+found:
+	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
+	c = retstr;
+	len = 0;
+
+	const char *d = substr_after_char(event.argv[i]->ptr,
+					  event.argv[i]->len, '=', &sublen);
+	if (d == NULL || sublen > TASKNAME_MAXLEN)
+		return NULL;
+	strncpy(c, d, sublen);
+	i++;
+
+	for (;i <= endidx; i++) {
+		len += event.argv[i]->len;
+		if (len > TASKNAME_MAXLEN)
+			return NULL;
+		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
+		c += event.argv[i]->len;
+		if (i == endidx)
+			goto finalize;
+		*c = ' ';
+		len++;
+		c++;
+	}
+finalize:
+	/* Terminate the string */
+	*c  = '\0';
+	len++;
+	/* commmit the allocation */
+	if (pool->commitChars(len))
+		return retstr;
+	return NULL;
+}
+
+#define sched_process_exit(EVENT) \
+	(is_this_event(SCHED_PROCESS_EXIT, EVENT) && EVENT.argc >= 3)
+#define sched_process_exit_pid(EVENT) \
+	(param_after_char(param_after_char(EVENT, EVENT.arg - 2, '='));
 
 #endif

@@ -19,7 +19,7 @@
 #include "ftraceparams.h"
 
 /* Do not change the order of these without updating the enum in
- * ftraceevents.h */
+ * ftraceparams.h */
 
 static char cpufreqstr[] = "cpu_frequency";
 static char cpuidlestr[] = "cpu_idle";
@@ -27,6 +27,8 @@ static char migratestr[] = "sched_migrate_task";
 static char sswitchstr[] = "sched_switch";
 static char swakeupstr[] = "sched_wakeup";
 static char swaknewstr[] = "sched_wakeup_new";
+static char sprforkstr[] = "sched_process_fork";
+static char sprexitstr[] = "sched_process_exit";
 
 char *eventstrings[NR_EVENTS] = {
 	cpufreqstr,
@@ -35,6 +37,8 @@ char *eventstrings[NR_EVENTS] = {
 	sswitchstr,
 	swakeupstr,
 	swaknewstr,
+	sprforkstr,
+	sprexitstr
 };
 
 char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
@@ -47,4 +51,8 @@ char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
 
 char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool) {
 	return __sched_wakeup_name_strdup(event, pool);
+}
+
+char *sched_process_fork_childname_strdup(TraceEvent &event, MemPool *pool) {
+	return __sched_process_fork_childname_strdup(event, pool);
 }
