@@ -278,6 +278,20 @@ bool FtraceParser::processMigration()
 			m.newcpu = sched_migrate_destCPU(event);
 			m.time = event.time;
 			migrations.push_back(m);
+		} else if (sched_process_fork(event)) {
+			Migration m;
+			m.pid = sched_process_fork_childpid(event);
+			m.oldcpu = -1;
+			m.newcpu = event.cpu;
+			m.time = event.time;
+			migrations.push_back(m);
+		} else if (sched_process_exit(event)) {
+			Migration m;
+			m.pid = sched_process_exit_pid(event);
+			m.oldcpu = event.cpu;
+			m.newcpu = -1;
+			m.time = event.time;
+			migrations.push_back(m);
 		}
 	}
 	return false;
