@@ -248,6 +248,7 @@ void MainWindow::computeLayout()
 	}
 
 	offset += inc;
+	offset += p;
 
 	top = offset;
 }
