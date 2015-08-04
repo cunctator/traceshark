@@ -418,7 +418,7 @@ char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool);
 #define sched_process_fork(EVENT) \
 	(is_this_event(SCHED_PROCESS_FORK, EVENT) && EVENT.argc >= 4)
 #define sched_process_fork_childpid(EVENT) \
-	(param_after_char(param_after_char(EVENT, EVENT.arg - 1, '='));
+	(param_after_char(EVENT, EVENT.argc - 1, '='))
 
 static __always_inline unsigned int sched_process_fork_parent_pid(
 	TraceEvent &event) {
@@ -498,6 +498,6 @@ finalize:
 #define sched_process_exit(EVENT) \
 	(is_this_event(SCHED_PROCESS_EXIT, EVENT) && EVENT.argc >= 3)
 #define sched_process_exit_pid(EVENT) \
-	(param_after_char(param_after_char(EVENT, EVENT.arg - 2, '='));
+	(param_after_char(EVENT, EVENT.argc - 2, '='));
 
 #endif
