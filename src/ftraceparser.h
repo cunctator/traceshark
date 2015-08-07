@@ -254,8 +254,6 @@ __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 	for (i = 0; i < line->nStrings; i++)
 	{
 		TString *str = &line->strings[i];
-		if (node->nChildren == 0)
-			break;
 		for (j = 0; j < node->nChildren; j++) {
 			if (node->children[j]->match(str, event)) {
 				node = node->children[j];
