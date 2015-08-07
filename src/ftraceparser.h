@@ -26,6 +26,7 @@
 #include <QList>
 #include <QMap>
 #include <QtGlobal>
+#include <limits>
 
 #include "cpu.h"
 #include "cpufreq.h"
@@ -113,6 +114,7 @@ private:
 	__always_inline bool parseBuffer(unsigned int index);
 	__always_inline void preScanEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
+	bool parseLineBugFixup(TraceEvent* event, double prevtime);
 	__always_inline Task *getTask(unsigned int pid);
 	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
 						 double startTime);
@@ -173,6 +175,8 @@ private:
 __always_inline bool FtraceParser::parseBuffer(unsigned int index)
 {
 	unsigned int i, s;
+	double prevtime = std::numeric_limits<double>::lowest();
+
 	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
 	if (tbuf->beginConsumeBuffer()) {
 		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
@@ -187,6 +191,14 @@ __always_inline bool FtraceParser::parseBuffer(unsigned int index)
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
 		if (parseLine(line, &event)) {
+			/* Check if the timestamp of this event is affected by
+			 * the infamous ftrace timestamp rollover bug and
+			 * try to correct it */
+			if (event.time < prevtime) {
+				if (!parseLineBugFixup(&event, prevtime))
+					continue;
+			}
+			prevtime = event.time;
 			ptrPool->commitN(event.argc);
 			events.push_back(event);
 			nrEvents++;

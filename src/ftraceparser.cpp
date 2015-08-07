@@ -529,3 +529,17 @@ void FtraceParser::doScale()
 	for (i = 0; i < s; i++)
 		delete workList[i];
 }
+
+
+bool FtraceParser::parseLineBugFixup(TraceEvent* event, double prevtime)
+{
+	double corrtime = event->time + 0.9;
+	double delta = corrtime - prevtime;
+	bool retval = false;
+
+	if (delta >= (double)0 && delta < 0.00001) {
+		event->time = corrtime;
+		retval = true;
+	}
+	return retval;
+}
