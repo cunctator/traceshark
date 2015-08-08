@@ -53,6 +53,7 @@ private:
 	static const unsigned int NR_BUFFERS = 3;
 	LoadBuffer *buffers[NR_BUFFERS];
 	LoadThread *loadThread;
+	__always_inline unsigned int nextBufferIdx(unsigned int n);
 };
 
 __always_inline unsigned int TraceFile::ReadNextWord(char *word,
@@ -69,9 +70,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		lastPos++;
 		if (lastPos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf++;
-			if (lastBuf == NR_BUFFERS)
-				lastBuf = 0;
+			lastBuf = nextBufferIdx(lastBuf);
 			lastPos = 0;
 			e = buffers[lastBuf]->beginConsumeBuffer();
 			if (e) {
@@ -92,9 +91,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		pos++;
 		if (pos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf++;
-			if (lastBuf == NR_BUFFERS)
-				lastBuf = 0;
+			lastBuf = nextBufferIdx(lastBuf);
 			lastPos = 0;
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();
@@ -120,9 +117,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		pos++;
 		if (pos >= nRead) {
 			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf++;
-			if (lastBuf == NR_BUFFERS)
-				lastBuf = 0;
+			lastBuf = nextBufferIdx(lastBuf);
 			lastPos = 0;
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();
@@ -165,6 +160,14 @@ __always_inline unsigned int TraceFile::ReadLine(TraceLine* line)
 __always_inline bool TraceFile::atEnd()
 {
 	return eof;
+}
+
+__always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
+{
+	n++;
+	if (n == NR_BUFFERS)
+		n = 0;
+	return n;
 }
 
 #endif
