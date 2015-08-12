@@ -23,6 +23,7 @@
 
 class MigrationLine : public QCPItemLine
 {
+	Q_OBJECT
 public:
 	MigrationLine(double startTime, double endTime, double level,
 		      QColor &color, QCustomPlot *parent);

@@ -24,6 +24,7 @@
 
 class MigrationArrow : public QCPItemLine
 {
+	Q_OBJECT
 public:
 	MigrationArrow(double start, double end, double time, QColor &color,
 		       QCustomPlot *parent);
