@@ -30,8 +30,8 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QWidget(parent), id(nr)
 {
 	QString text;
-	QHBoxLayout *layout  = new QHBoxLayout;
-	line = new QLineEdit();
+	QHBoxLayout *layout  = new QHBoxLayout(this);
+	line = new QLineEdit(this);
 	QPushButton *button;
 
 	line->setReadOnly(false);
@@ -49,10 +49,9 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 		break;
 	}
 
-	setLayout(layout);
 	layout->addWidget(line);
 
-	button = new QPushButton(text);
+	button = new QPushButton(text, this);
 	layout->addWidget(button);
 
 	updateValue(0);
