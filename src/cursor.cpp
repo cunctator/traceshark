@@ -24,7 +24,6 @@ Cursor::Cursor(QCustomPlot *parent, const QColor &color):
 	QCPItemLine(parent)
 {
 	QPen pen;
-	pen.setColor(Qt::blue);
 	pen.setStyle(Qt::DashLine);
 	pen.setWidth(2);
 	pen.setColor(color);
