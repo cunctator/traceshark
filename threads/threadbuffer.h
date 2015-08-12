@@ -80,6 +80,7 @@ template<class T>
 ThreadBuffer<T>::~ThreadBuffer()
 {
 	productionComplete.unlock();
+	delete[] buffer;
 }
 
 /* This should be called from the producer thread
