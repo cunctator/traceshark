@@ -73,7 +73,7 @@ MainWindow::MainWindow():
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
 
-	infoWidget = new InfoWidget();
+	infoWidget = new InfoWidget(this);
 	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
 
 	cursors[RED_CURSOR] = NULL;

@@ -29,29 +29,28 @@
 InfoWidget::InfoWidget(QWidget *parent):
 	QDockWidget(parent)
 {
-	QWidget *widget = new QWidget;
-	QHBoxLayout *mainLayout = new QHBoxLayout;
-	widget->setLayout(mainLayout);
+	QWidget *widget = new QWidget(this);
+	QHBoxLayout *mainLayout = new QHBoxLayout(widget);
 	setWidget(widget);
 
-	cursorInfos[0] = new CursorInfo(0);
-	cursorInfos[1] = new CursorInfo(1);
+	cursorInfos[0] = new CursorInfo(0, widget);
+	cursorInfos[1] = new CursorInfo(1, widget);
 	mainLayout->addWidget(cursorInfos[0]);
 	mainLayout->addWidget(cursorInfos[1]);
 
-	QLabel *diffLabel = new QLabel(tr("difference:"));
+	QLabel *diffLabel = new QLabel(tr("difference:"), widget);
 	mainLayout->addWidget(diffLabel);
 
-	diffLine = new QLineEdit();
+	diffLine = new QLineEdit(widget);
 	diffLine->setReadOnly(true);
 	diffLine->setText(QString::number((double) 0, 'f', 7));
 	diffLine->setMaxLength(18);
 	mainLayout->addWidget(diffLine);
 
-	QLabel *comboLabel = new QLabel(tr("Active cursor:"));
+	QLabel *comboLabel = new QLabel(tr("Active cursor:"), widget);
 	mainLayout->addWidget(comboLabel);
 
-	cursorComboBox = new QComboBox;
+	cursorComboBox = new QComboBox(widget);
 	cursorComboBox->addItem(QString(tr("Red")));
 	cursorComboBox->addItem(QString(tr("Blue")));
 	cursorComboBox->setCurrentIndex(0);
