@@ -20,20 +20,16 @@
 #include <QPen>
 #include "src/cursor.h"
 
-Cursor::Cursor(QCustomPlot *parent):
+Cursor::Cursor(QCustomPlot *parent, const QColor &color):
 	QCPItemLine(parent)
 {
-	pen = new QPen();
-	pen->setColor(Qt::blue);
-	pen->setStyle(Qt::DashLine);
-	pen->setWidth(2);
-	setPen(*pen);
+	QPen pen;
+	pen.setColor(Qt::blue);
+	pen.setStyle(Qt::DashLine);
+	pen.setWidth(2);
+	pen.setColor(color);
+	setPen(pen);
 	setPosition(0);
-}
-
-Cursor::~Cursor()
-{
-	delete pen;
 }
 
 void Cursor::setPosition(double pos)
@@ -41,10 +37,4 @@ void Cursor::setPosition(double pos)
 	start->setCoords(pos, -10000000000000000);
 	end->setCoords(pos, +10000000000000000);
 	parentPlot()->replot();
-}
-
-void Cursor::setColor(const QColor &color)
-{
-	pen->setColor(color);
-	setPen(*pen);
 }

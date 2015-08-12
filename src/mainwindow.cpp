@@ -328,10 +328,8 @@ void MainWindow::setupCursors()
 	start = parser->getStartTime();
 	end = parser->getEndTime();
 
-	cursors[RED_CURSOR] = new Cursor(customPlot);
-	cursors[BLUE_CURSOR] = new Cursor(customPlot);
-	cursors[RED_CURSOR]->setColor(Qt::red);
-	cursors[BLUE_CURSOR]->setColor(Qt::blue);
+	cursors[RED_CURSOR] = new Cursor(customPlot, Qt::red);
+	cursors[BLUE_CURSOR] = new Cursor(customPlot, Qt::blue);
 
 	customPlot->addItem(cursors[RED_CURSOR]);
 	customPlot->addItem(cursors[BLUE_CURSOR]);
