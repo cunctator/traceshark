@@ -52,8 +52,14 @@ MainWindow::MainWindow():
 	workQueue->addDefaultWorkItem(migItem);
 	workQueue->addDefaultWorkItem(freqItem);
 
-	customPlot = new QCustomPlot();
+	plotWidget = new QWidget(this);
+	plotLayout = new QVBoxLayout(plotWidget);
+	setCentralWidget(plotWidget);
+
+	customPlot = new QCustomPlot(plotWidget);
 	customPlot->hide();
+	plotLayout->addWidget(customPlot);
+
 	customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
 				    QCP::iSelectAxes | QCP::iSelectLegend |
 				    QCP::iSelectPlottables);
@@ -63,12 +69,6 @@ MainWindow::MainWindow():
 	tsconnect(customPlot->xAxis, rangeChanged(QCPRange), customPlot->xAxis2,
 		  setRange(QCPRange));
 	tsconnect(customPlot, mousePress(QMouseEvent*), this, mousePress());
-
-	plotWidget = new QWidget;
-	plotLayout = new QHBoxLayout;
-	plotWidget->setLayout(plotLayout);
-	setCentralWidget(plotWidget);
-	plotLayout->addWidget(customPlot);
 
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);

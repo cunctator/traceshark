@@ -81,7 +81,7 @@ private:
 
 	QCustomPlot *customPlot;
 	QWidget *plotWidget;
-	QHBoxLayout *plotLayout;
+	QVBoxLayout *plotLayout;
 	EventsWidget *eventsWidget;
 	InfoWidget *infoWidget;
 	QString traceFile;
