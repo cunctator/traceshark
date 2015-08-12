@@ -29,6 +29,7 @@
 InfoWidget::InfoWidget(QWidget *parent):
 	QDockWidget(parent)
 {
+	unsigned int i;
 	QWidget *widget = new QWidget(this);
 	QHBoxLayout *mainLayout = new QHBoxLayout(widget);
 	setWidget(widget);
@@ -55,6 +56,9 @@ InfoWidget::InfoWidget(QWidget *parent):
 	cursorComboBox->addItem(QString(tr("Blue")));
 	cursorComboBox->setCurrentIndex(0);
 	mainLayout->addWidget(cursorComboBox);
+
+	for (i = 0; i < NR_CURSORS; i++)
+		cursorValues[i] = 0;
 
 	mainLayout->addStretch();
 	sigconnect(cursorInfos[0], valueChanged(double, int), this,
