@@ -19,7 +19,7 @@
 #include "migrationline.h"
 
 MigrationLine::MigrationLine(double startTime, double endTime, double level,
-			       QColor &color, QCustomPlot *parent):
+			     const QColor &color, QCustomPlot *parent):
 	QCPItemLine(parent)
 {
 	QPen pen;

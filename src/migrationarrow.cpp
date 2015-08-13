@@ -19,7 +19,7 @@
 #include "migrationarrow.h"
 
 MigrationArrow::MigrationArrow(double start, double end, double time,
-			       QColor &color, QCustomPlot *parent):
+			       const QColor &color, QCustomPlot *parent):
 	QCPItemLine(parent)
 {
 	QPen pen;
