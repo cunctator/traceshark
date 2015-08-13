@@ -128,6 +128,15 @@ private:
 	__always_inline void processWakeupEvent(TraceEvent &event);
 	__always_inline void processCPUfreqEvent(TraceEvent &event);
 	__always_inline void processCPUidleEvent(TraceEvent &event);
+	TColor getNewColor();
+	__always_inline bool checkColorMap(const TColor &color);
+	void addCpuFreqWork(unsigned int cpu,
+			    QList<AbstractWorkItem*> &list);
+	void addCpuIdleWork(unsigned int cpu,
+			    QList<AbstractWorkItem*> &list);
+	void addCpuSchedWork(unsigned int cpu,
+			     QList<AbstractWorkItem*> &list);
+	void scaleMigration();
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<FtraceParser> *parserThread;
 	WorkQueue scalingQueue;
@@ -149,8 +158,6 @@ private:
 	QMap <unsigned int, TColor> colorMap;
 	TColor black;
 	TColor white;
-	__always_inline bool checkColorMap(const TColor &color);
-	TColor getNewColor();
 	QVector<double> schedOffset;
 	QVector<double> schedScale;
 	QVector<double> cpuIdleOffset;
@@ -160,13 +167,6 @@ private:
 	double migrationOffset;
 	double migrationScale;
 	CPU *CPUs;
-	void addCpuFreqWork(unsigned int cpu,
-		       QList<AbstractWorkItem*> &list);
-	void addCpuIdleWork(unsigned int cpu,
-		       QList<AbstractWorkItem*> &list);
-	void addCpuSchedWork(unsigned int cpu,
-		       QList<AbstractWorkItem*> &list);
-	void scaleMigration();
 	QVector<double> startFreq;
 	QCustomPlot *customPlot;
 };

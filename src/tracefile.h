@@ -37,6 +37,9 @@ public:
 	__always_inline unsigned int ReadLine(TraceLine* line);
 	__always_inline bool atEnd();
 private:
+	__always_inline unsigned int nextBufferIdx(unsigned int n);
+	__always_inline unsigned int ReadNextWord(char *word,
+						  unsigned int maxstr);
 	int fd;
 	bool eof;
 	unsigned int nRead;
@@ -48,12 +51,9 @@ private:
 	MemPool *ptrPool;
 	static const unsigned int MAXPTR = 640;
 	static const unsigned int MAXSTR = 480;
-	__always_inline unsigned int ReadNextWord(char *word,
-						  unsigned int maxstr);
 	static const unsigned int NR_BUFFERS = 3;
 	LoadBuffer *buffers[NR_BUFFERS];
 	LoadThread *loadThread;
-	__always_inline unsigned int nextBufferIdx(unsigned int n);
 };
 
 __always_inline unsigned int TraceFile::ReadNextWord(char *word,
