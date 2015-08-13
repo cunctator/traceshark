@@ -123,6 +123,7 @@ void MainWindow::openTrace()
 		qout.setRealNumberNotation(QTextStream::FixedNotation);
 		quint64 start, process, layout, rescale, show;
 
+		clearPlot();
 		start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 		processTrace();
 		process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
@@ -236,6 +237,7 @@ void MainWindow::computeLayout()
 	label = QString("fork/exit");
 	ticks.append(offset);
 	line = new MigrationLine(start, end, offset, color, customPlot);
+	customPlot->addItem(line);
 	tickLabels.append(label);
 	o = offset;
 	p = inc / nrCPUs ;
@@ -245,6 +247,7 @@ void MainWindow::computeLayout()
 		ticks.append(o);
 		tickLabels.append(label);
 		line = new MigrationLine(start, end, o, color, customPlot);
+		customPlot->addItem(line);
 	}
 
 	offset += inc;
@@ -283,7 +286,6 @@ void MainWindow::showTrace()
 
 	precision += (int) extra;
 
-	clearPlot();
 	customPlot->yAxis->setRange(QCPRange(bottom, top));
 	customPlot->xAxis->setRange(QCPRange(start, end));
 	customPlot->xAxis->setNumberPrecision(precision);
