@@ -22,23 +22,13 @@
 #include "traceline.h"
 #include "tstring.h"
 
-typedef enum {
-	TASK_ARRIVE,
-	TASK_DEPART,
-	TASK_DEQUEUED,
-	TASK_QUEUED
-} EventType;
-
 class TraceEvent {
 public:
 	TString *taskName;
 	unsigned int pid;
-	TString *pidStr;
 	unsigned int cpu;
 	double time;
-	TString *timeStr;
 	TString *eventName;
-	EventType event;
 	TString **argv;
 	unsigned int argc;
 };
