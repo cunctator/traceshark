@@ -132,7 +132,7 @@ void FtraceParser::close()
 
 FtraceParser::FtraceParser()
 	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL), black(0, 0, 0),
-	  white(255, 255, 255)
+	  white(255, 255, 255), CPUs(NULL)
 {
 	NamePidNode *namePidNode;
 	CpuNode *cpuNode;
