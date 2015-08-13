@@ -126,6 +126,8 @@ void FtraceParser::close()
 	}
 	migrations.clear();
 	migrationArrows.clear();
+	ptrPool->reset();
+	taskNamePool->reset();
 }
 
 FtraceParser::FtraceParser()

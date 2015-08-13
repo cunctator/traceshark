@@ -439,6 +439,10 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 
 void MainWindow::closeTrace()
 {
+	eventsWidget->beginResetModel();
+	eventsWidget->setEvents(NULL);
+	eventsWidget->endResetModel();
+	clearPlot();
 	if(parser->isOpen())
 		parser->close();
 }
