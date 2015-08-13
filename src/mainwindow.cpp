@@ -268,6 +268,8 @@ void MainWindow::clearPlot()
 	customPlot->clearItems();
 	customPlot->clearPlottables();
 	customPlot->hide();
+	infoWidget->setTime(0, RED_CURSOR);
+	infoWidget->setTime(0, BLUE_CURSOR);
 }
 
 void MainWindow::showTrace()
