@@ -29,10 +29,13 @@ extern "C" {
 #include <fcntl.h>
 }
 
-TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
+TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize, unsigned int
+		     nrPoolsMAX)
+	: nrPools(nrPoolsMAX)
 {
 	unsigned int i;
 	char *m;
+
 	fd = open(name, O_RDONLY);
 	if (fd >= 0)
 		ok = true;
@@ -41,8 +44,14 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 	lastPos = 0;
 	lastBuf = 0;
 	eof = false;
-	strPool = new MemPool(16384, 1);
-	ptrPool = new MemPool(16384, sizeof(TString));
+	strPool = new MemPool*[nrPools];
+	ptrPool = new MemPool*[nrPools];
+
+	for (i = 0; i < nrPools; i++) {
+		strPool[i] = new MemPool(163840, 1);
+		ptrPool[i] = new MemPool(163840, sizeof(TString));
+	}
+
 	memory = new char[NR_BUFFERS * bsize];
 	m = memory;
 	for (i = 0; i < NR_BUFFERS; i++) {
@@ -63,8 +72,12 @@ TraceFile::~TraceFile()
 	loadThread->wait();
 	delete loadThread;
 	delete[] memory;
-	delete strPool;
-	delete ptrPool;
+	for (i = 0; i < nrPools; i++) {
+		delete strPool[i];
+		delete ptrPool[i];
+	}
+	delete[] strPool;
+	delete[] ptrPool;
 	for (i = 0; i < NR_BUFFERS; i++) {
 		delete buffers[i];
 	}

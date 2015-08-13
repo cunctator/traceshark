@@ -32,10 +32,13 @@ class LoadThread;
 class TraceFile
 {
 public:
-	TraceFile(char *name, bool &ok, unsigned int bsize = 1024*1024);
+	TraceFile(char *name, bool &ok, unsigned int bsize = 1024*1024,
+		  unsigned int nrPoolsMAX = 1);
 	~TraceFile();
-	__always_inline unsigned int ReadLine(TraceLine* line);
+	__always_inline unsigned int ReadLine(TraceLine* line,
+					      unsigned int pool);
 	__always_inline bool atEnd();
+	__always_inline void clearPool(unsigned int pool);
 private:
 	__always_inline unsigned int nextBufferIdx(unsigned int n);
 	__always_inline unsigned int ReadNextWord(char *word,
@@ -47,8 +50,9 @@ private:
 
 	unsigned lastBuf;
 	unsigned lastPos;
-	MemPool *strPool;
-	MemPool *ptrPool;
+	MemPool **strPool;
+	MemPool **ptrPool;
+	unsigned int nrPools;
 	static const unsigned int MAXPTR = 640;
 	static const unsigned int MAXSTR = 480;
 	static const unsigned int NR_BUFFERS = 3;
@@ -96,6 +100,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();
 			if (e) {
+				buffers[lastBuf]->endConsumeBuffer();
 				eof = e;
 				word[nchar] = '\0';
 			        nRead = 0;
@@ -122,6 +127,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 			pos = lastPos;
 			e = buffers[lastBuf]->beginConsumeBuffer();
 			if (e) {
+				buffers[lastBuf]->endConsumeBuffer();
 				eof = e;
 				word[nchar] = '\0';
 				nRead = 0;
@@ -136,23 +142,25 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 	return nchar;
 }
 
-__always_inline unsigned int TraceFile::ReadLine(TraceLine* line)
+__always_inline unsigned int TraceFile::ReadLine(TraceLine* line,
+						 unsigned int pool)
 {
 	unsigned int col;
 	unsigned int n;
 
-	line->strings = (TString*) ptrPool->preallocN(MAXPTR);
+	line->strings = (TString*) ptrPool[pool]->preallocN(MAXPTR);
 
 	for(col = 0; col < MAXPTR; col++) {
-		line->strings[col].ptr = (char*) strPool->preallocChars(MAXSTR);
+		line->strings[col].ptr = (char*)
+			strPool[pool]->preallocChars(MAXSTR);
 		n = ReadNextWord(line->strings[col].ptr, MAXSTR);
 		if (n == 0)
 			break;
-		strPool->commitChars(n + 1 ); // + 1 for null termination
+		strPool[pool]->commitChars(n + 1 ); // + 1 for null termination
 		line->strings[col].len = n;
 	}
 	if (col > 0)
-		ptrPool->commitN(col);
+		ptrPool[pool]->commitN(col);
 	line->nStrings = col;
 	return col;
 }
@@ -168,6 +176,12 @@ __always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
 	if (n == NR_BUFFERS)
 		n = 0;
 	return n;
+}
+
+__always_inline void TraceFile::clearPool(unsigned int pool)
+{
+	ptrPool[pool]->reset();
+	strPool[pool]->reset();
 }
 
 #endif

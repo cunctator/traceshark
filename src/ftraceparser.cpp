@@ -48,7 +48,8 @@ bool FtraceParser::open(const QString &fileName)
 	if (traceFile != NULL)
 		return ok;
 
-	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok, 1024*1024);
+	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok,
+				  1024*1024, 1);
 
 	if (!ok) {
 		delete traceFile;
@@ -65,7 +66,7 @@ bool FtraceParser::open(const QString &fileName)
 	tbuffers[curbuf]->beginProduceBuffer();
 	while(!traceFile->atEnd()) {
 		TraceLine *line = &tbuffers[curbuf]->buffer[i];
-		quint32 n = traceFile->ReadLine(line);
+		quint32 n = traceFile->ReadLine(line, 0);
 		nr += n;
 		i++;
 		if (i == (TBUFSIZE - 1)) {
