@@ -27,6 +27,7 @@ public:
 	GrammarRoot(const char* name)
 		: GrammarNode(name) {};
 	bool match(TString *str, TraceEvent *event);
+	void clearStringPool() {};
 };
 
 #endif

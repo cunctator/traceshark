@@ -49,7 +49,7 @@ bool FtraceParser::open(const QString &fileName)
 		return ok;
 
 	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok,
-				  1024*1024, 1);
+				  1024*1024, NR_TBUFFERS);
 
 	if (!ok) {
 		delete traceFile;
@@ -76,6 +76,7 @@ bool FtraceParser::open(const QString &fileName)
 				curbuf = 0;
 			i = 0;
 			tbuffers[curbuf]->beginProduceBuffer();
+			traceFile->clearPool(curbuf);
 		}
 	}
 	tbuffers[curbuf]->endProduceBuffer(i);
@@ -129,6 +130,7 @@ void FtraceParser::close()
 	migrationArrows.clear();
 	ptrPool->reset();
 	taskNamePool->reset();
+	clearGrammarPools(grammarRoot);
 }
 
 FtraceParser::FtraceParser()
@@ -546,4 +548,15 @@ bool FtraceParser::parseLineBugFixup(TraceEvent* event, double prevtime)
 		retval = true;
 	}
 	return retval;
+}
+
+void FtraceParser::clearGrammarPools(GrammarNode *tree)
+{
+	unsigned int i;
+	tree->clearStringPool();
+	for (i = 0; i < tree->nChildren; i++) {
+		/* Clear subtree unless it's a node being it's own child */
+		if (tree->children[i] != tree)
+			clearGrammarPools(tree->children[i]);
+	}
 }

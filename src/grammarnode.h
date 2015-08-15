@@ -32,9 +32,10 @@ protected:
 public:
 	GrammarNode(const char *name);
 	virtual ~GrammarNode();
+	virtual bool match(TString *str, TraceEvent *event) = 0;
+	virtual void clearStringPool() = 0;
 	unsigned int nChildren;
 	GrammarNode *children[MAXNODES];
-	virtual bool match(TString *str, TraceEvent *event) = 0;
 	bool isLeaf;
 	char *nameDebug;
 };

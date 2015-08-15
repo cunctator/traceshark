@@ -21,11 +21,17 @@
 
 #include "grammarnode.h"
 
+class StringPool;
+
 class ArgNode: public GrammarNode
 {
 public:
 	ArgNode(const char *name);
+	~ArgNode();
 	bool match(TString *str, TraceEvent *event);
+	void clearStringPool();
+private:
+	StringPool *argPool;
 };
 
 #endif

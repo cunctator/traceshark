@@ -17,18 +17,28 @@
  */
 
 #include "namepidnode.h"
+#include "mm/stringpool.h"
 #include "traceevent.h"
 #include "tstring.h"
 
 NamePidNode::NamePidNode(const char *name)
-	: GrammarNode(name) {}
+	: GrammarNode(name)
+{
+	namePool = new StringPool(1024, 65536);
+}
+
+NamePidNode::~NamePidNode()
+{
+	delete namePool;
+}
 
 bool NamePidNode::match(TString *str, TraceEvent *event)
 {
-
-	char *lastChr = str->ptr + str->len - 1;
+	char *nullChr = str->ptr + str->len;
+	char *lastChr = nullChr - 1;
 	char *c;
 	char *beginPid;
+	TString *newstr;
 	int pid;
 	int digit;
 
@@ -41,6 +51,7 @@ bool NamePidNode::match(TString *str, TraceEvent *event)
 	}
 	return false;
 found1:
+	str->len = str->len - (nullChr - c);
 	*c = '\0';
 	beginPid = c + 1;
 	
@@ -54,7 +65,17 @@ found1:
 			return false;
 	}
 
-	event->taskName = str;
+	/* This is the "magic" that saves a ton of string allocations
+	 * with exactly the same string */
+	newstr = namePool->allocString(str, StringHashFuncSimple32(str));
+	if (newstr == NULL)
+		return false;
+	event->taskName = newstr;
 	event->pid = pid;
 	return true;
+}
+
+void NamePidNode::clearStringPool()
+{
+	namePool->clear();
 }

@@ -26,6 +26,7 @@ class CpuNode: public GrammarNode
 public:
 	CpuNode(const char *name);
 	bool match(TString *str, TraceEvent *event);
+	void clearStringPool() {};
 };
 
 #endif

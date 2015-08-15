@@ -17,17 +17,35 @@
  */
 
 #include "argnode.h"
+#include "mm/stringpool.h"
 #include "traceevent.h"
 
 ArgNode::ArgNode(const char *name) 
-	: GrammarNode(name) {}
+	: GrammarNode(name)
+{
+	argPool = new StringPool(2048, 1024*1024);
+}
+
+ArgNode::~ArgNode()
+{
+	delete argPool;
+}
 
 bool ArgNode::match(TString *str, TraceEvent *event)
 {
+	TString *newstr;
 	if (event->argc < 255) {
-		event->argv[event->argc] = str;
+		newstr = argPool->allocString(str, StringHashFuncSimple32(str));
+		if (newstr == NULL)
+			return false;
+		event->argv[event->argc] = newstr;
 		event->argc++;
 		return true;
 	}
 	return false;
+}
+
+void ArgNode::clearStringPool()
+{
+	argPool->clear();
 }

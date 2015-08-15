@@ -17,22 +17,37 @@
  */
 
 #include "eventnode.h"
+#include "mm/stringpool.h"
 #include "traceevent.h"
 #include "tstring.h"
 
 EventNode::EventNode(const char *name)
-	: GrammarNode(name) {}
+	: GrammarNode(name)
+{
+	eventPool = new StringPool(8, 256);
+}
+
+EventNode::~EventNode()
+{
+	delete eventPool;
+}
 
 bool EventNode::match(TString *str, TraceEvent *event)
 {
 	char *lastChr = str->ptr + str->len - 1;
+	TString *newstr;
 
 	if (str->len < 1)
 		return false;
 
-	if (*lastChr == ':')
+	if (*lastChr == ':') {
 		*lastChr = '\0';
+		str->len--;
+	}
 
-	event->eventName = str;
+	newstr = eventPool->allocString(str, StringHashFuncSimple32(str));
+	if (newstr == NULL)
+		return false;
+	event->eventName = newstr;
 	return true;
 }

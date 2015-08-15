@@ -137,6 +137,7 @@ private:
 	void addCpuSchedWork(unsigned int cpu,
 			     QList<AbstractWorkItem*> &list);
 	void scaleMigration();
+	void clearGrammarPools(GrammarNode *tree);
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<FtraceParser> *parserThread;
 	WorkQueue scalingQueue;

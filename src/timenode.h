@@ -26,6 +26,7 @@ class TimeNode: public GrammarNode
 public:
 	TimeNode(const char *name);
 	bool match(TString *str, TraceEvent *event);
+	void clearStringPool() {};
 };
 
 #endif
