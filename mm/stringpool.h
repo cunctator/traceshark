@@ -23,11 +23,15 @@
 #include "mempool.h"
 #include "src/tstring.h"
 
+enum StringPoolColor { SP_RED, SP_BLACK };
+
 class StringPoolEntry {
 public:
 	StringPoolEntry *small;
 	StringPoolEntry *large;
+	StringPoolEntry *parent;
 	TString *str;
+	enum StringPoolColor color;
 };
 
 union value32 {
@@ -63,6 +67,8 @@ public:
 	__always_inline TString* allocString(const TString *str, uint32_t hval);
 	void clear();
 	void reset();
+	__always_inline void SwapEntries(StringPoolEntry *a,
+					 StringPoolEntry *b);
 private:
 	MemPool *strPool;
 	MemPool *charPool;
@@ -79,6 +85,9 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	TString *newstr;
 	StringPoolEntry **aentry;
 	StringPoolEntry *entry;
+	StringPoolEntry *parent = NULL;
+	StringPoolEntry *pSibling;
+	StringPoolEntry *grandParent;
 	int cmp;
 
 	hval = hval % hSize;
@@ -100,6 +109,79 @@ iterate:
 		bzero(entry, sizeof(StringPoolEntry));
 		entry->str = newstr;
 		*aentry = entry;
+		entry->parent = parent;
+		if (parent == NULL) {
+			/* Ok, this is the root node */
+			entry->color = SP_BLACK;
+			return newstr;
+		}
+		entry->color = SP_RED;
+		if (parent->color == SP_BLACK)
+			return newstr;
+		/* Now we now that the parent is red and we need to reshuffle */
+		grandParent = parent->parent;
+		pSibling = grandParent->small == parent ?
+			grandParent->large:grandParent->small;
+		if (pSibling == NULL || pSibling->color == SP_BLACK) {
+			/* Case 2a */
+			if (parent->small == entry &&
+			    grandParent->small == parent) {
+				/* Rehuffle */
+				SwapEntries(parent, grandParent);
+				grandParent->small = entry;
+				entry->parent = grandParent;               //
+				grandParent->large = parent;
+				parent->small = parent->large;
+				parent->large = pSibling;
+				if (pSibling != NULL)                      //
+					pSibling->parent = parent;         //
+				return newstr;
+			}
+			if (parent->large == entry &&
+			    grandParent->small == parent) {
+				/* Reshuffle */
+				SwapEntries(grandParent, entry);
+				parent->large = NULL;
+				grandParent->large = entry;
+				entry->parent = grandParent;              //
+				entry->large = pSibling;
+				if (pSibling != NULL)                     //
+					pSibling->parent = entry;         //
+				return newstr;
+			}
+			if (parent->large == entry &&
+			    grandParent->large == parent) {
+				/* Reshuffle */
+				SwapEntries(parent, grandParent);
+				grandParent->large = entry;
+				entry->parent = grandParent;             //
+				grandParent->small = parent;
+				parent->large = parent->small;
+				parent->small = pSibling;
+				if (pSibling != NULL)                    //
+					pSibling->parent = parent;       //
+				return newstr;
+			}
+			if (parent->small == entry &&
+			    grandParent->large == parent) {
+				/* Reshuffle */
+				SwapEntries(grandParent, entry);
+				parent->small = NULL;
+				grandParent->small = entry;
+				entry->parent = grandParent;            //
+				entry->small = pSibling;
+				if (pSibling != NULL)                   //
+					pSibling->parent = entry;       //
+				return newstr;
+			}
+		}
+		// Q_ASSERT(pSibling->color == SP_RED);
+		/* Do recolor */
+		/* Don't recolor grandParent if it's the root */
+		if (grandParent->parent != NULL)
+			grandParent->color = SP_RED;
+		parent->color = SP_BLACK;
+		pSibling->color = SP_BLACK;
 		return newstr;
 	}
 	/* Would be difficult to use strncmp here, string should be null
@@ -107,6 +189,7 @@ iterate:
 	cmp = strcmp(str->ptr, entry->str->ptr);
 	if (cmp == 0)
 		return entry->str;
+	parent = entry;
 	if (cmp < 0) {
 		aentry = &entry->small;
 		goto iterate;
@@ -114,6 +197,15 @@ iterate:
 	/*  cmp must be > 0, since not 0 and not < 0 */
 	aentry = &entry->large;
 	goto iterate;
+}
+
+__always_inline void StringPool::SwapEntries(StringPoolEntry *a,
+					     StringPoolEntry *b)
+{
+	TString *tmp;
+	tmp = a->str;
+	a->str = b->str;
+	b->str = tmp;
 }
 
 #endif /* STRINGPOOL_H */
