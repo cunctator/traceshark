@@ -63,8 +63,6 @@ public:
 	__always_inline TString* allocString(const TString *str, uint32_t hval);
 	void clear();
 	void reset();
-	__always_inline uint16_t hashFuncSimple(char *str, unsigned int len);
-	__always_inline uint16_t hashFunc(char *str, unsigned int len);
 private:
 	MemPool *strPool;
 	MemPool *charPool;
