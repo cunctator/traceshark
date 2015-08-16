@@ -124,56 +124,47 @@ iterate:
 			grandParent->large:grandParent->small;
 		if (pSibling == NULL || pSibling->color == SP_BLACK) {
 			/* Case 2a */
-			if (parent->small == entry &&
-			    grandParent->small == parent) {
-				/* Rehuffle */
-				SwapEntries(parent, grandParent);
-				grandParent->small = entry;
-				entry->parent = grandParent;               //
-				grandParent->large = parent;
-				parent->small = parent->large;
-				parent->large = pSibling;
-				if (pSibling != NULL)                      //
-					pSibling->parent = parent;         //
-				return newstr;
+			entry->parent = grandParent;
+			if (grandParent->small == parent) {
+				if (parent->small == entry) {
+					/* Rehuffle */
+					SwapEntries(parent, grandParent);
+					grandParent->small = entry;
+					grandParent->large = parent;
+					parent->small = parent->large;
+					parent->large = pSibling;
+					if (pSibling != NULL)
+						pSibling->parent = parent;
+				} else { /* parent->large == entry */
+					/* Reshuffle */
+					SwapEntries(grandParent, entry);
+					parent->large = NULL;
+					grandParent->large = entry;
+					entry->large = pSibling;
+					if (pSibling != NULL)
+						pSibling->parent = entry;
+				}
+			} else { /* grandParent->large == parent */
+				if (parent->small == entry) {
+					/* Reshuffle */
+					SwapEntries(grandParent, entry);
+					parent->small = NULL;
+					grandParent->small = entry;
+					entry->small = pSibling;
+					if (pSibling != NULL)
+						pSibling->parent = entry;
+				} else {  /* parent->large == entry */
+					/* Reshuffle */
+					SwapEntries(parent, grandParent);
+					grandParent->large = entry;
+					grandParent->small = parent;
+					parent->large = parent->small;
+					parent->small = pSibling;
+					if (pSibling != NULL)
+						pSibling->parent = parent;
+				}
 			}
-			if (parent->large == entry &&
-			    grandParent->small == parent) {
-				/* Reshuffle */
-				SwapEntries(grandParent, entry);
-				parent->large = NULL;
-				grandParent->large = entry;
-				entry->parent = grandParent;              //
-				entry->large = pSibling;
-				if (pSibling != NULL)                     //
-					pSibling->parent = entry;         //
-				return newstr;
-			}
-			if (parent->large == entry &&
-			    grandParent->large == parent) {
-				/* Reshuffle */
-				SwapEntries(parent, grandParent);
-				grandParent->large = entry;
-				entry->parent = grandParent;             //
-				grandParent->small = parent;
-				parent->large = parent->small;
-				parent->small = pSibling;
-				if (pSibling != NULL)                    //
-					pSibling->parent = parent;       //
-				return newstr;
-			}
-			if (parent->small == entry &&
-			    grandParent->large == parent) {
-				/* Reshuffle */
-				SwapEntries(grandParent, entry);
-				parent->small = NULL;
-				grandParent->small = entry;
-				entry->parent = grandParent;            //
-				entry->small = pSibling;
-				if (pSibling != NULL)                   //
-					pSibling->parent = entry;       //
-				return newstr;
-			}
+			return newstr;
 		}
 		// Q_ASSERT(pSibling->color == SP_RED);
 		/* Do recolor */
