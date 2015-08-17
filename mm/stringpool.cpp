@@ -24,7 +24,7 @@
 
 StringPool::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 {
-	unsigned int entryPages;
+	unsigned int entryPages, strPages;
 
 	if (hSizeP == 0)
 		hSize = 1;
@@ -33,9 +33,10 @@ StringPool::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 
 	entryPages = 2 * hSize * sizeof(StringPoolEntry) / 4096;
 	entryPages = MAX(1, entryPages);
+	strPages = 2* hSize * sizeof(TString) / 4096;
+	strPages = MAX(16, strPages);
 
-	strPool = new MemPool(2* hSize * sizeof(TString) / 4096,
-			      sizeof(TString));
+	strPool = new MemPool(strPages, sizeof(TString));
 	charPool = new MemPool(nr_pages, 1);
 	entryPool = new MemPool(entryPages, sizeof(StringPoolEntry));
 
