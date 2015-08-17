@@ -124,10 +124,10 @@ iterate:
 			grandParent->large:grandParent->small;
 		if (pSibling == NULL || pSibling->color == SP_BLACK) {
 			/* Case 2a */
+			/* Reshuffle */
 			entry->parent = grandParent;
 			if (grandParent->small == parent) {
 				if (parent->small == entry) {
-					/* Rehuffle */
 					SwapEntries(parent, grandParent);
 					grandParent->small = entry;
 					grandParent->large = parent;
@@ -136,7 +136,6 @@ iterate:
 					if (pSibling != NULL)
 						pSibling->parent = parent;
 				} else { /* parent->large == entry */
-					/* Reshuffle */
 					SwapEntries(grandParent, entry);
 					parent->large = NULL;
 					grandParent->large = entry;
@@ -146,7 +145,6 @@ iterate:
 				}
 			} else { /* grandParent->large == parent */
 				if (parent->small == entry) {
-					/* Reshuffle */
 					SwapEntries(grandParent, entry);
 					parent->small = NULL;
 					grandParent->small = entry;
@@ -154,7 +152,6 @@ iterate:
 					if (pSibling != NULL)
 						pSibling->parent = entry;
 				} else {  /* parent->large == entry */
-					/* Reshuffle */
 					SwapEntries(parent, grandParent);
 					grandParent->large = entry;
 					grandParent->small = parent;
