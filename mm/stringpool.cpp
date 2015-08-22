@@ -62,6 +62,7 @@ void StringPool::clear()
 	clearTable();
 	strPool->reset();
 	entryPool->reset();
+	charPool->reset();
 }
 
 void StringPool::reset()
