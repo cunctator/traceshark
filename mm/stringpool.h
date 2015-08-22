@@ -118,6 +118,7 @@ iterate:
 		entry->color = SP_RED;
 		if (parent->color == SP_BLACK)
 			return newstr;
+	recheck:
 		/* Now we now that the parent is red and we need to reshuffle */
 		grandParent = parent->parent;
 		pSibling = grandParent->small == parent ?
@@ -165,11 +166,18 @@ iterate:
 		}
 		// Q_ASSERT(pSibling->color == SP_RED);
 		/* Do recolor */
-		/* Don't recolor grandParent if it's the root */
-		if (grandParent->parent != NULL)
-			grandParent->color = SP_RED;
 		parent->color = SP_BLACK;
 		pSibling->color = SP_BLACK;
+		/* Don't recolor grandParent if it's the root */
+		if (grandParent->parent != NULL) {
+			grandParent->color = SP_RED;
+			if (grandParent->parent->color == SP_RED) {
+				/* Ok, we have created a red violation */
+				entry = grandParent;
+				parent = entry->parent;
+				goto recheck;
+			}
+		}
 		return newstr;
 	}
 	/* Would be difficult to use strncmp here, string should be null
