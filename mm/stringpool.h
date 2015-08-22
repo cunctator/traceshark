@@ -138,7 +138,10 @@ iterate:
 						pSibling->parent = parent;
 				} else { /* parent->large == entry */
 					SwapEntries(grandParent, entry);
-					parent->large = NULL;
+					parent->large = entry->small;
+					if (parent->large != NULL)
+						parent->large->parent = parent;
+					entry->small = entry->large;
 					grandParent->large = entry;
 					entry->large = pSibling;
 					if (pSibling != NULL)
@@ -147,7 +150,10 @@ iterate:
 			} else { /* grandParent->large == parent */
 				if (parent->small == entry) {
 					SwapEntries(grandParent, entry);
-					parent->small = NULL;
+					parent->small = entry->large;
+					if (parent->small != NULL)
+						parent->small->parent = parent;
+					entry->large = entry->small;
 					grandParent->small = entry;
 					entry->small = pSibling;
 					if (pSibling != NULL)
