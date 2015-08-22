@@ -55,7 +55,7 @@ __always_inline uint32_t StringHashFuncSimple32(const TString *str)
 	uvalue.word8[1] = str->ptr[str->len / 2];
 	uvalue.word8[2] = str->ptr[str->len / 3];
 	uvalue.word8[4] = str->ptr[str->len / 4];
-	//uvalue.word32 = SPROL32(uvalue.word32, len % 32);
+	uvalue.word32 = SPROL32(uvalue.word32, str->len % 32);
 	return uvalue.word32;
 }
 
