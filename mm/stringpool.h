@@ -73,7 +73,8 @@ private:
 	MemPool *strPool;
 	MemPool *charPool;
 	MemPool *entryPool;
-	StringPoolEntry** hashTable;
+	StringPoolEntry **hashTable;
+	unsigned int *usageTable;
 	unsigned int hSize;
 	char *curPtr;
 	void clearTable();
@@ -91,10 +92,23 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	int cmp;
 
 	hval = hval % hSize;
+	if (usageTable[hval] > 50) {
+		newstr = (TString*) strPool->allocObj();
+		if (newstr == NULL)
+			return NULL;
+		newstr->len = str->len;
+		newstr->ptr = (char*) charPool->allocChars(str->len + 1);
+		if (newstr->ptr == NULL)
+			return NULL;
+		strncpy(newstr->ptr, str->ptr, str->len + 1);
+		return newstr;
+	}
+
 	aentry = hashTable + hval;
 iterate:
 	entry = *aentry;
 	if (entry == NULL) {
+		usageTable[hval]++;
 		newstr = (TString*) strPool->allocObj();
 		if (newstr == NULL)
 			return NULL;

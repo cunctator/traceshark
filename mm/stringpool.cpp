@@ -40,7 +40,8 @@ StringPool::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 	charPool = new MemPool(nr_pages, 1);
 	entryPool = new MemPool(entryPages, sizeof(StringPoolEntry));
 
-	hashTable = new StringPoolEntry*[hSize];	
+	hashTable = new StringPoolEntry*[hSize];
+	usageTable = new unsigned int[hSize];
 	clearTable();
 }
 
@@ -55,6 +56,7 @@ StringPool::~StringPool()
 void StringPool::clearTable()
 {
 	bzero(hashTable, hSize * sizeof(StringPoolEntry*));
+	bzero(usageTable, hSize * sizeof(unsigned int));
 }
 
 void StringPool::clear()
