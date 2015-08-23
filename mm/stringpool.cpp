@@ -51,6 +51,7 @@ StringPool::~StringPool()
 	delete strPool;
 	delete entryPool;
 	delete[] hashTable;
+	delete[] usageTable;
 }
 
 void StringPool::clearTable()
