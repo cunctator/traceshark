@@ -19,7 +19,7 @@
 #ifndef TSTRING_H
 #define TSTRING_H
 
-struct TString {
+class TString {
 public:
 	char *ptr;
 	unsigned int len;
