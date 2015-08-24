@@ -451,9 +451,16 @@ void MainWindow::closeTrace()
 
 void MainWindow::about()
 {
-	QMessageBox::about(this, tr("About Traceshark"),
-            tr("<h1>Traceshark</h1>"
-               "<p>Copyright &copy; 2014-2015 Viktor Rosendahl"
+	QString textAboutCaption;
+	QString textAbout;
+
+	textAboutCaption = QMessageBox::tr(
+	       "<h1>About Traceshark</h1>"
+	       "<p>This is version %1.</p>"
+		).arg(QLatin1String(TRACESHARK_VERSION_STRING));
+	textAbout = QMessageBox::tr(
+	       "<h1>Traceshark</h1>"
+	       "<p>Copyright &copy; 2014-2015 Viktor Rosendahl"
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below."
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; select \"License\" under the \"Help\""
@@ -491,7 +498,17 @@ void MainWindow::about()
 	       "law that most closely approximates an absolute waiver of all "
 	       "civil liability in connection with the Program, unless a "
 	       "warranty or assumption of liability accompanies a copy of the "
-	       "Program in return for a fee."));
+	       "Program in return for a fee.");
+	QMessageBox *msgBox = new QMessageBox(this);
+	msgBox->setAttribute(Qt::WA_DeleteOnClose);
+	msgBox->setWindowTitle(tr("About Traceshark"));
+	msgBox->setText(textAboutCaption);
+	msgBox->setInformativeText(textAbout);
+
+	QPixmap pm(QLatin1String(":/traceshark/images/shark.png"));
+	if (!pm.isNull())
+		msgBox->setIconPixmap(pm);
+	msgBox->show();
 }
 
 void MainWindow::license()

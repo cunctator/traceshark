@@ -19,6 +19,8 @@
 #ifndef TRACESHARK_H
 #define TRACESHARK_H
 
+#define TRACESHARK_VERSION_STRING "0.01"
+
 #include <QtCore>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

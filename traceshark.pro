@@ -97,3 +97,5 @@ QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -g -std=c++11
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99
 QMAKE_LFLAGS_RELEASE =
 CONFIG += DEBUG
+
+RESOURCES     = traceshark.qrc
