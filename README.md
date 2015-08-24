@@ -17,6 +17,7 @@ The program can be built by doing something like this, assuming that you have
 Qt4 development packages installed:
 
 qmake-qt4
+
 make -j5
 
 You can get a trace to view by doing the following:
