@@ -23,6 +23,7 @@
 #include "eventswidget.h"
 #include "ftraceparser.h"
 #include "infowidget.h"
+#include "licensedialog.h"
 #include "mainwindow.h"
 #include "migrationline.h"
 #include "traceshark.h"
@@ -78,6 +79,8 @@ MainWindow::MainWindow():
 
 	cursors[RED_CURSOR] = NULL;
 	cursors[BLUE_CURSOR] = NULL;
+
+	licenseDialog = new LicenseDialog();
 
 	tsconnect(customPlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
@@ -514,6 +517,7 @@ void MainWindow::about()
 void MainWindow::license()
 {
 	// Figure out some way to display the whole GPL nicely here
+	licenseDialog->show();
 }
 
 void MainWindow::mouseWheel()

@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/traceshark">
-    <file>images/shark.png</file>
+  <file>images/shark.png</file>
+  <file>LICENSE</file>
 </qresource>
 </RCC>

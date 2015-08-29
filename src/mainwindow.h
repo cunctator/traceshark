@@ -43,6 +43,7 @@ class EventsWidget;
 class InfoWidget;
 class Cursor;
 class CPUTask;
+class LicenseDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -107,6 +108,8 @@ private:
 	WorkItem<FtraceParser> *migItem;
 	WorkItem<FtraceParser> *freqItem;
 	WorkQueue *workQueue;
+
+	LicenseDialog *licenseDialog;
 
 	const double graphSpacing = 100;
 	const double schedSectionSpace = 250;
