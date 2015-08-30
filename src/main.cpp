@@ -26,16 +26,20 @@ int main(int argc, char* argv[])
 	MainWindow mainWindow;
 	QPixmap pm(QLatin1String(":/traceshark/images/shark.png"));
 	QIcon icon;
+	QString appname = QLatin1String("Traceshark");
 
 /* Set graphicssystem to opengl if we have old enough Qt */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 	QApplication::setGraphicsSystem("opengl");
 #endif
-	app.setApplicationName("Traceshark");
+	app.setApplicationName(appname);
 	icon.addPixmap(pm);
 	app.setWindowIcon(icon);
 	
 	mainWindow.resize(1024,740);
+	mainWindow.setWindowIconText(appname);
+	mainWindow.setWindowTitle(appname);
+
 	mainWindow.show();
 	return app.exec();
 }
