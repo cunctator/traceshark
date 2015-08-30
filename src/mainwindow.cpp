@@ -100,6 +100,7 @@ MainWindow::~MainWindow()
 	delete freqItem;
 	delete workQueue;
 	delete customPlot;
+	delete licenseDialog;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
