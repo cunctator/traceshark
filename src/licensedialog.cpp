@@ -53,7 +53,7 @@ LicenseDialog::LicenseDialog(QWidget *parent)
 	vlayout->addLayout(hlayout);
 	hlayout->addStretch();
 
-	QPushButton *button = new QPushButton(tr("Close"));
+	QPushButton *button = new QPushButton(tr("OK"));
 	hlayout->addWidget(button);
 
 	hlayout->addStretch();
@@ -71,7 +71,7 @@ void LicenseDialog::updateSize()
 	int wscreen;
 	int hscreen;
 	int width = 640;
-	int height = 480;
+	int height = 700;
 
 	screenSize = QApplication::desktop()->availableGeometry(QCursor::pos())
 		.size();
@@ -79,8 +79,8 @@ void LicenseDialog::updateSize()
 	wscreen = screenSize.width();
 	hscreen = screenSize.height();
 
-	width = TSMIN(640, wscreen);
-	height = TSMIN(480, hscreen);
+	width = TSMIN(width, wscreen);
+	height = TSMIN(height, hscreen);
 
 	setGeometry(wscreen / 2 - width / 2, hscreen / 2 - height / 2,
 		    width, height);
