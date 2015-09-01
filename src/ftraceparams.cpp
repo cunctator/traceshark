@@ -29,6 +29,8 @@ static char swakeupstr[] = "sched_wakeup";
 static char swaknewstr[] = "sched_wakeup_new";
 static char sprforkstr[] = "sched_process_fork";
 static char sprexitstr[] = "sched_process_exit";
+static char irqhdlrent[] = "irq_handler_entry";
+static char irqhdlrext[] = "irq_handler_exit";
 
 char *eventstrings[NR_EVENTS] = {
 	cpufreqstr,
@@ -38,7 +40,9 @@ char *eventstrings[NR_EVENTS] = {
 	swakeupstr,
 	swaknewstr,
 	sprforkstr,
-	sprexitstr
+	sprexitstr,
+	irqhdlrent,
+	irqhdlrext
 };
 
 char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {

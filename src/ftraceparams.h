@@ -38,6 +38,8 @@ typedef enum {
 	SCHED_WAKEUP_NEW,
 	SCHED_PROCESS_FORK,
 	SCHED_PROCESS_EXIT,
+	IRQ_HANDLER_ENTRY,
+	IRQ_HANDLER_EXIT,
 	NR_EVENTS,
 } event_t;
 
@@ -499,5 +501,21 @@ finalize:
 	(is_this_event(SCHED_PROCESS_EXIT, EVENT) && EVENT.argc >= 3)
 #define sched_process_exit_pid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 2, '='));
+
+#define irq_handler_entry(EVENT) \
+	(is_this_event(IRQ_HANDLER_ENTRY, EVENT) && EVENT.argc >= 2)
+#define irq_handler_entry_irq(EVENT) \
+	(param_after_char(EVENT, 0, '='))
+#define irq_handler_entry_name(EVENT, LEN_UINTPTR) \
+	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
+
+#define irq_handler_exit(EVENT)	\
+	(is_this_event(IRQ_HANDLER_EXIT, EVENT) && EVENT.argc >= 2)
+#define irq_handler_exit_irq(EVENT) \
+	(param_after_char(EVENT, 0, '='))
+#define irq_handler_exit_handled(EVENT) \
+	(strncmp(EVENT.argv[1]->ptr, "ret=handled", EVENT.argv[1]->len) == 0)
+#define irq_handler_exit_ret(EVENT, LEN_UINTPTR) \
+	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
 #endif
