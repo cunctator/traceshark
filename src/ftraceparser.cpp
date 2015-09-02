@@ -309,8 +309,7 @@ bool FtraceParser::processSched()
 		TraceEvent &event = events[i];
 		if (sched_switch(event)) {
 			processSwitchEvent(event);
-		}
-		if (sched_wakeup(event)) {
+		} else if (sched_wakeup(event)) {
 			processWakeupEvent(event);
 		}
 	}
@@ -350,11 +349,9 @@ bool FtraceParser::processCPUfreq()
 		 * I expect this loop to be so fast in comparison
 		 * to the other functions that will be running in parallel
 		 * that it's acceptable to piggy back cpuidle events here */
-		if (cpuidle_event(event)) {
+		if (cpuidle_event(event))
 			processCPUidleEvent(event);
-			continue;
-		}
-		if (cpufreq_event(event))
+		else if (cpufreq_event(event))
 			processCPUfreqEvent(event);
 	}
 	for (cpu = 0; cpu <= maxCPU; cpu++) {
