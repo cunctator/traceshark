@@ -22,8 +22,6 @@
 #include "traceevent.h"
 #include "tstring.h"
 
-#include <QTextStream>
-
 EventNode::EventNode(const char *name)
 	: GrammarNode(name)
 {
@@ -75,20 +73,8 @@ void EventNode::setupTree()
 	for (t = 0; t < NR_EVENTS; t++) {
 		str.ptr = eventstrings[t];
 		str.len = strlen(eventstrings[t]);
-		eventTree->searchAllocString(&str, StringHashFuncSimple32(&str),
+		eventTree->searchAllocString(&str,
+					     StringHashFuncSimple32(&str),
 					     &dummy, (event_t) t);
 	}
-
-	str.ptr = "sched_process_exit";
-	str.len = strlen(str.ptr);
-
-	eventTree->searchAllocString(&str, StringHashFuncSimple32(&str),
-				     &dummy, EVENT_UNKNOWN);
-
-	if (dummy == SCHED_PROCESS_EXIT)
-		qout << "setupTree() success\n";
-	else
-		qout << "setupTree() failure\n";
-
-	qout.flush();
 }
