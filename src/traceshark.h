@@ -22,6 +22,8 @@
 #define TRACESHARK_VERSION_STRING "0.01-alpha"
 
 #include <QtCore>
+#include <cstdint>
+#include "tstring.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include <QtGui>
@@ -54,6 +56,9 @@
 /* C++ syntax for declaring a pointer to a member function */
 #define DEFINE_MEMBER_FN(returntype, className, name) \
 	returntype (className::* name)()
+
+#define SPROL32(VALUE, N) \
+	((VALUE << N) | (VALUE >> (32 - N)))
 
 namespace TraceShark {
 
@@ -115,6 +120,28 @@ namespace TraceShark {
 	error:
 	        ok = false;
 		return 0;
+	}
+
+	union value32 {
+		uint32_t word32;
+		uint8_t word8[4];
+	};
+
+	/* This is totally mumbo jumbo, should probably be replaced with
+	 * something more scientific */
+	__always_inline uint32_t StringHashFuncSimple32(const TString *str)
+	{
+		union value32 uvalue;
+
+		if (str->len < 1)
+			return 0;
+
+		uvalue.word8[0] = str->ptr[str->len - 1];
+		uvalue.word8[1] = str->ptr[str->len / 2];
+		uvalue.word8[2] = str->ptr[str->len / 3];
+		uvalue.word8[4] = str->ptr[str->len / 4];
+		uvalue.word32 = SPROL32(uvalue.word32, str->len % 32);
+		return uvalue.word32;
 	}
 }
 

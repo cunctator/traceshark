@@ -17,25 +17,30 @@
  */
 
 #include "eventnode.h"
-#include "mm/stringpool.h"
+#include "mm/stringtree.h"
+#include "ftraceparams.h"
 #include "traceevent.h"
 #include "tstring.h"
+
+#include <QTextStream>
 
 EventNode::EventNode(const char *name)
 	: GrammarNode(name)
 {
-	eventPool = new StringPool(8, 256);
+	eventTree = new StringTree(8, 256);
+	setupTree();
 }
 
 EventNode::~EventNode()
 {
-	delete eventPool;
+	delete eventTree;
 }
 
 bool EventNode::match(TString *str, TraceEvent *event)
 {
 	char *lastChr = str->ptr + str->len - 1;
 	TString *newstr;
+	event_t type;
 
 	if (str->len < 1)
 		return false;
@@ -45,9 +50,45 @@ bool EventNode::match(TString *str, TraceEvent *event)
 		str->len--;
 	}
 
-	newstr = eventPool->allocString(str, StringHashFuncSimple32(str));
+	newstr = eventTree->searchAllocString(str, StringHashFuncSimple32(str),
+					      &type, EVENT_UNKNOWN);
 	if (newstr == NULL)
 		return false;
 	event->eventName = newstr;
+	event->type = type;
 	return true;
+}
+
+void EventNode::clearStringPool()
+{
+	eventTree->clear();
+	setupTree();
+}
+
+void EventNode::setupTree()
+{
+	int t;
+	event_t dummy;
+	TString str;
+	QTextStream qout(stdout);
+
+	for (t = 0; t < NR_EVENTS; t++) {
+		str.ptr = eventstrings[t];
+		str.len = strlen(eventstrings[t]);
+		eventTree->searchAllocString(&str, StringHashFuncSimple32(&str),
+					     &dummy, (event_t) t);
+	}
+
+	str.ptr = "sched_process_exit";
+	str.len = strlen(str.ptr);
+
+	eventTree->searchAllocString(&str, StringHashFuncSimple32(&str),
+				     &dummy, EVENT_UNKNOWN);
+
+	if (dummy == SCHED_PROCESS_EXIT)
+		qout << "setupTree() success\n";
+	else
+		qout << "setupTree() failure\n";
+
+	qout.flush();
 }

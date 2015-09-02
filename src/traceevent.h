@@ -22,6 +22,22 @@
 #include "traceline.h"
 #include "tstring.h"
 
+typedef enum {
+	CPU_FREQUENCY = 0,
+	CPU_IDLE,
+	SCHED_MIGRATE_TASK,
+	SCHED_SWITCH,
+	SCHED_WAKEUP,
+	SCHED_WAKEUP_NEW,
+	SCHED_PROCESS_FORK,
+	SCHED_PROCESS_EXIT,
+	IRQ_HANDLER_ENTRY,
+	IRQ_HANDLER_EXIT,
+	NR_EVENTS,
+} event_t;
+
+#define EVENT_UNKNOWN (NR_EVENTS)
+
 class TraceEvent {
 public:
 	TString *taskName;
@@ -29,6 +45,7 @@ public:
 	unsigned int cpu;
 	double time;
 	TString *eventName;
+	event_t type;
 	TString **argv;
 	unsigned int argc;
 };

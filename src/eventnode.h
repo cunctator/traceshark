@@ -21,7 +21,7 @@
 
 #include "grammarnode.h"
 
-class StringPool;
+class StringTree;
 
 class EventNode: public GrammarNode
 {
@@ -29,9 +29,10 @@ public:
 	EventNode(const char *name);
 	~EventNode();
 	bool match(TString *str, TraceEvent *event);
-	void clearStringPool() {};
+	void clearStringPool();
 private:
-	StringPool *eventPool;
+	StringTree *eventTree;
+	void setupTree();
 };
 
 #endif

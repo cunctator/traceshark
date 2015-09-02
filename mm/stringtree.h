@@ -16,77 +16,78 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGPOOL_H
-#define STRINGPOOL_H
+#ifndef STRINGTREE_H
+#define STRINGTREE_H
 
 #include <cstdint>
 #include "mempool.h"
 #include "src/traceshark.h"
 #include "src/tstring.h"
+#include "src/traceevent.h"
+
+enum StringTreeColor { SP_RED, SP_BLACK };
+
+class StringTreeEntry {
+public:
+	StringTreeEntry *small;
+	StringTreeEntry *large;
+	StringTreeEntry *parent;
+	TString *str;
+	event_t eventType;
+	enum StringTreeColor color;
+};
 
 using namespace TraceShark;
 
-enum StringPoolColor { SP_RED, SP_BLACK };
-
-class StringPoolEntry {
-public:
-	StringPoolEntry *small;
-	StringPoolEntry *large;
-	StringPoolEntry *parent;
-	TString *str;
-	enum StringPoolColor color;
-};
-
-class StringPool
+class StringTree
 {
 public:
-	StringPool(unsigned int nr_pages = 256*10, unsigned int hSizeP = 256);
-	~StringPool();
-	__always_inline TString* allocString(const TString *str, uint32_t hval);
+	StringTree(unsigned int nr_pages = 256*10, unsigned int hSizeP = 256);
+	~StringTree();
+	__always_inline TString* searchAllocString(const TString *str,
+						   uint32_t hval,
+						   event_t *foundval,
+						   event_t newval);
 	void clear();
 	void reset();
-	__always_inline void SwapEntries(StringPoolEntry *a,
-					 StringPoolEntry *b);
+	__always_inline void SwapEntries(StringTreeEntry *a,
+					 StringTreeEntry *b);
 private:
 	MemPool *strPool;
 	MemPool *charPool;
 	MemPool *entryPool;
-	StringPoolEntry **hashTable;
-	unsigned int *usageTable;
+	StringTreeEntry **hashTable;
 	unsigned int hSize;
 	char *curPtr;
 	void clearTable();
 };
 
-__always_inline TString* StringPool::allocString(const TString *str,
-						 uint32_t hval)
+/* For now this will use the RB-tree that is copied from the StringPool 
+ * class but over time it would make sense to change this to an AVL-tree,
+ * since this data structure is meant to store event names and the number
+ * of event names is extremely small compared to the total number of events.
+ * Events are only inserted once, meaning that the number of events names 
+ * equals the number of inserts and the number of events equals the number
+ * of lookups */
+__always_inline TString* StringTree::searchAllocString(const TString *str,
+						       uint32_t hval,
+						       event_t *foundval,
+						       event_t newval)
 {
 	TString *newstr;
-	StringPoolEntry **aentry;
-	StringPoolEntry *entry;
-	StringPoolEntry *parent = NULL;
-	StringPoolEntry *pSibling;
-	StringPoolEntry *grandParent;
+	StringTreeEntry **aentry;
+	StringTreeEntry *entry;
+	StringTreeEntry *parent = NULL;
+	StringTreeEntry *pSibling;
+	StringTreeEntry *grandParent;
 	int cmp;
-
+	
+	*foundval = newval;
 	hval = hval % hSize;
-	if (usageTable[hval] > 50) {
-		newstr = (TString*) strPool->allocObj();
-		if (newstr == NULL)
-			return NULL;
-		newstr->len = str->len;
-		newstr->ptr = (char*) charPool->allocChars(str->len + 1);
-		if (newstr->ptr == NULL)
-			return NULL;
-		strncpy(newstr->ptr, str->ptr, str->len + 1);
-		return newstr;
-	}
-
 	aentry = hashTable + hval;
 iterate:
 	entry = *aentry;
 	if (entry == NULL) {
-		usageTable[hval]++;
 		newstr = (TString*) strPool->allocObj();
 		if (newstr == NULL)
 			return NULL;
@@ -95,11 +96,12 @@ iterate:
 		if (newstr->ptr == NULL)
 			return NULL;
 		strncpy(newstr->ptr, str->ptr, str->len + 1);
-		entry = (StringPoolEntry*) entryPool->allocObj();
+		entry = (StringTreeEntry*) entryPool->allocObj();
 		if (entry == NULL)
 			return NULL;
-		bzero(entry, sizeof(StringPoolEntry));
+		bzero(entry, sizeof(StringTreeEntry));
 		entry->str = newstr;
+		entry->eventType = newval;
 		*aentry = entry;
 		entry->parent = parent;
 		if (parent == NULL) {
@@ -181,8 +183,10 @@ iterate:
 	/* Would be difficult to use strncmp here, string should be null
 	 * terminated... */
 	cmp = strcmp(str->ptr, entry->str->ptr);
-	if (cmp == 0)
+	if (cmp == 0) {
+		*foundval = entry->eventType;
 		return entry->str;
+	}
 	parent = entry;
 	if (cmp < 0) {
 		aentry = &entry->small;
@@ -193,13 +197,17 @@ iterate:
 	goto iterate;
 }
 
-__always_inline void StringPool::SwapEntries(StringPoolEntry *a,
-					     StringPoolEntry *b)
+__always_inline void StringTree::SwapEntries(StringTreeEntry *a,
+					     StringTreeEntry *b)
 {
 	TString *tmp;
+	event_t et;
 	tmp = a->str;
+	et = a->eventType;
 	a->str = b->str;
+	a->eventType = b->eventType;
 	b->str = tmp;
+	b->eventType = et;
 }
 
-#endif /* STRINGPOOL_H */
+#endif /* STRINGTREE_H */

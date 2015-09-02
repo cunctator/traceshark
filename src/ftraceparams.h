@@ -29,24 +29,9 @@
 
 extern char *eventstrings[];
 
-typedef enum {
-	CPU_FREQUENCY = 0,
-	CPU_IDLE,
-	SCHED_MIGRATE_TASK,
-	SCHED_SWITCH,
-	SCHED_WAKEUP,
-	SCHED_WAKEUP_NEW,
-	SCHED_PROCESS_FORK,
-	SCHED_PROCESS_EXIT,
-	IRQ_HANDLER_ENTRY,
-	IRQ_HANDLER_EXIT,
-	NR_EVENTS,
-} event_t;
-
 #define ABSURD_UNSIGNED (2147483647)
 
-#define is_this_event(EVENTNAME, EVENT) (strcmp(eventstrings[EVENTNAME], \
-						 EVENT.eventName->ptr) == 0)
+#define is_this_event(EVENTNAME, EVENT) (EVENT.type == EVENTNAME)
 
 static __always_inline unsigned int param_after_char(const TraceEvent &event,
 					    int n_param, char ch)

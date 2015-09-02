@@ -19,7 +19,7 @@
 #include "ftraceparams.h"
 
 /* Do not change the order of these without updating the enum in
- * ftraceparams.h */
+ * traceevent.h */
 
 static char cpufreqstr[] = "cpu_frequency";
 static char cpuidlestr[] = "cpu_idle";
