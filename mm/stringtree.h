@@ -180,7 +180,9 @@ iterate:
 		}
 		return newstr;
 	}
-	cmp = TSstrcmp(str, entry->str);
+	/* Using strncmp here would lose performance and we know that the
+	 * strings are null terminated */
+	cmp = strcmp(str->ptr, entry->str->ptr);
 	if (cmp == 0) {
 		*foundval = entry->eventType;
 		return entry->str;
