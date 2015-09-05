@@ -180,7 +180,7 @@ iterate:
 	}
 	/* Would be difficult to use strncmp here, string should be null
 	 * terminated... */
-	cmp = strcmp(str->ptr, entry->str->ptr);
+	cmp = TSstrcmp(str, entry->str);
 	if (cmp == 0)
 		return entry->str;
 	parent = entry;

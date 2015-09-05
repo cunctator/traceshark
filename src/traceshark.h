@@ -143,6 +143,22 @@ namespace TraceShark {
 		uvalue.word32 = SPROL32(uvalue.word32, str->len % 32);
 		return uvalue.word32;
 	}
+
+	__always_inline int TSstrcmp(const TString *strA, const TString *strB) {
+		int rval = (int) strA->len - (int) strB->len;
+		int cval;
+		int imax = rval < 0 ? strA->len:strB->len;
+		int i;
+
+		for (i = 0; i < imax; i++) {
+			cval = strA->ptr[i] - strB->ptr[i];
+			if (cval == 0)
+				continue;
+			else
+				return cval;
+		}
+		return rval;
+	}
 }
 
 #endif /* TRACESHARK_H */

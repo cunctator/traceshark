@@ -32,6 +32,9 @@ static char sprexitstr[] = "sched_process_exit";
 static char irqhdlrent[] = "irq_handler_entry";
 static char irqhdlrext[] = "irq_handler_exit";
 
+static char arrowcstr[] = "==>";
+TString arrowstr = { arrowcstr, 3 };
+
 char *eventstrings[NR_EVENTS] = {
 	cpufreqstr,
 	cpuidlestr,

@@ -21,6 +21,7 @@
 
 #include "mm/mempool.h"
 #include "traceevent.h"
+#include "traceshark.h"
 #include <cstring>
 #include <cstdint>
 
@@ -28,6 +29,9 @@
 				 than about 16 */
 
 extern char *eventstrings[];
+extern TString arrowstr;
+
+using namespace TraceShark;
 
 #define ABSURD_UNSIGNED (2147483647)
 
@@ -145,7 +149,7 @@ static __always_inline char sched_switch_state(TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 3; i < event.argc; i++) {
-		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+		if (TSstrcmp(event.argv[i], &arrowstr) == 0)
 			break;
 	}
 	if (i < event.argc)
@@ -157,7 +161,7 @@ static __always_inline unsigned int sched_switch_oldprio(TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 3; i < event.argc; i++) {
-		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+		if (TSstrcmp(event.argv[i], &arrowstr) == 0)
 			break;
 	}
 	if (i < event.argc)
@@ -169,7 +173,7 @@ static __always_inline unsigned int sched_switch_oldpid(TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 3; i < event.argc; i++) {
-		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+		if (TSstrcmp(event.argv[i], &arrowstr) == 0)
 			break;
 	}
 	if (i < event.argc)
@@ -190,7 +194,7 @@ static __always_inline char * __sched_switch_oldname_strdup(TraceEvent &event,
 
 	/* Find the index of the '==>' */
 	for (i = 3; i < event.argc; i++) {
-		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+		if (TSstrcmp(event.argv[i], &arrowstr) == 0)
 			break;
 	}
 	if (!(i < event.argc))
@@ -263,7 +267,7 @@ static __always_inline char * __sched_switch_newname_strdup(TraceEvent &event,
 
 	/* Find the index of the '==>' */
 	for (i = 3; i < event.argc; i++) {
-		if (strcmp(event.argv[i]->ptr, "==>") == 0)
+		if (TSstrcmp(event.argv[i], &arrowstr) == 0)
 			break;
 	}
 	if (!(i < event.argc))
