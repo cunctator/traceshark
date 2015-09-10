@@ -47,6 +47,7 @@
 
 #define TSMAX(A, B) ((A) >= (B) ? A:B)
 #define TSMIN(A, B) ((A) < (B) ? A:B)
+#define TSABS(A) ((A) >= 0 ? A:-A)
 
 /*  1024 CPUs ought to be enough for anybody */
 #define HIGHEST_CPU_EVER (1023)
