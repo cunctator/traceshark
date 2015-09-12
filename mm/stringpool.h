@@ -34,7 +34,10 @@ public:
 	StringPoolEntry *large;
 	StringPoolEntry *parent;
 	TString *str;
-	enum StringPoolColor color;
+	int height;
+	__always_inline void stealParent(StringPoolEntry *newChild,
+					 StringPoolEntry **rootptr);
+	__always_inline void setHeightFromChildren();
 };
 
 class StringPool
@@ -63,11 +66,17 @@ __always_inline TString* StringPool::allocString(const TString *str,
 {
 	TString *newstr;
 	StringPoolEntry **aentry;
+	StringPoolEntry **rootptr;
 	StringPoolEntry *entry;
 	StringPoolEntry *parent = NULL;
-	StringPoolEntry *pSibling;
+	StringPoolEntry *sibling;
 	StringPoolEntry *grandParent;
+	StringPoolEntry *smallChild;
+	StringPoolEntry *largeChild;
 	int cmp;
+	int diff;
+	int smallH;
+	int largeH;
 
 	hval = hval % hSize;
 	if (usageTable[hval] > 50) {
@@ -83,6 +92,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	}
 
 	aentry = hashTable + hval;
+	rootptr = aentry;
 iterate:
 	entry = *aentry;
 	if (entry == NULL) {
@@ -100,81 +110,109 @@ iterate:
 			return NULL;
 		bzero(entry, sizeof(StringPoolEntry));
 		entry->str = newstr;
-		*aentry = entry;
+		*aentry = entry; /* aentry is equal to &parent->[large|small] */
+
 		entry->parent = parent;
-		if (parent == NULL) {
-			/* Ok, this is the root node */
-			entry->color = SP_BLACK;
-			return newstr;
-		}
-		entry->color = SP_RED;
-		if (parent->color == SP_BLACK)
-			return newstr;
-	recheck:
-		/* Now we now that the parent is red and we need to reshuffle */
+		entry->height = 0;
+		if (parent == NULL)
+			return newstr; /* Ok, this is the root node */
+		if (parent->height > 0)
+			return newstr; /* parent already has another node */
+		parent->height = 1;
 		grandParent = parent->parent;
-		pSibling = grandParent->small == parent ?
-			grandParent->large:grandParent->small;
-		if (pSibling == NULL || pSibling->color == SP_BLACK) {
-			/* Case 2a */
-			/* Reshuffle */
-			entry->parent = grandParent;
-			if (grandParent->small == parent) {
-				if (parent->small == entry) {
-					SwapEntries(parent, grandParent);
-					grandParent->small = entry;
-					grandParent->large = parent;
-					parent->small = parent->large;
-					parent->large = pSibling;
-					if (pSibling != NULL)
-						pSibling->parent = parent;
-				} else { /* parent->large == entry */
-					SwapEntries(grandParent, entry);
-					parent->large = entry->small;
-					if (parent->large != NULL)
-						parent->large->parent = parent;
-					entry->small = entry->large;
-					grandParent->large = entry;
-					entry->large = pSibling;
-					if (pSibling != NULL)
-						pSibling->parent = entry;
-				}
-			} else { /* grandParent->large == parent */
-				if (parent->small == entry) {
-					SwapEntries(grandParent, entry);
-					parent->small = entry->large;
-					if (parent->small != NULL)
-						parent->small->parent = parent;
-					entry->large = entry->small;
-					grandParent->small = entry;
-					entry->small = pSibling;
-					if (pSibling != NULL)
-						pSibling->parent = entry;
-				} else {  /* parent->large == entry */
-					SwapEntries(parent, grandParent);
-					grandParent->large = entry;
-					grandParent->small = parent;
-					parent->large = parent->small;
-					parent->small = pSibling;
-					if (pSibling != NULL)
-						pSibling->parent = parent;
-				}
-			}
-			return newstr;
+		if (grandParent == NULL)
+			return newstr; /* Ok, too shallow to have a violation */
+		/* update heights and find offending node */
+		do {
+			smallH = grandParent->small == NULL ?
+				-1 : grandParent->small->height;
+			largeH = grandParent->large == NULL ?
+				-1 : grandParent->large->height;
+			diff = smallH - largeH;
+			if (diff == 0)
+				break;
+			if (diff > 1)
+				goto rebalanceSmall;
+			if (diff < -1)
+				goto rebalanceLarge;
+			grandParent->height = parent->height + 1;
+			entry = parent;
+			parent = grandParent;
+			grandParent = grandParent->parent;
+		} while(grandParent != NULL);
+		return newstr;
+	rebalanceSmall:
+		/* Do small rebalance here (case 1 and case 2) */
+		if (entry == parent->small) {
+			/* Case 1 */
+			sibling = parent->large;
+
+			grandParent->stealParent(parent, rootptr);
+			parent->large = grandParent;
+			grandParent->parent = parent;
+			grandParent->small = sibling;
+			grandParent->height--;
+			if (sibling != NULL)
+				sibling->parent = grandParent;
+		} else {
+			/* Case 2 */
+			smallChild = entry->small;
+			largeChild = entry->large;
+
+			grandParent->stealParent(entry, rootptr);
+			entry->small = parent;
+			entry->large = grandParent;
+			entry->height = grandParent->height;
+
+			grandParent->parent = entry;
+			grandParent->small = largeChild;
+			grandParent->setHeightFromChildren(); // Fixme: faster
+
+			parent->parent = entry;
+			parent->large = smallChild;
+			parent->setHeightFromChildren();
+
+			if (largeChild != NULL)
+				largeChild->parent = grandParent;
+			if (smallChild != NULL)
+				smallChild->parent = parent;
 		}
-		// Q_ASSERT(pSibling->color == SP_RED);
-		/* Do recolor */
-		parent->color = SP_BLACK;
-		pSibling->color = SP_BLACK;
-		/* Don't recolor grandParent if it's the root */
-		if (grandParent->parent != NULL) {
-			grandParent->color = SP_RED;
-			if (grandParent->parent->color == SP_RED) {
-				/* Ok, we have created a red violation */
-				entry = grandParent;
-				parent = entry->parent;
-				goto recheck;
-			}
+		return newstr;
+	rebalanceLarge:
+		/* Do large rebalance here */
+		if (entry == parent->small) {
+			/* Case 3 */
+			smallChild = entry->small;
+			largeChild = entry->large;
+
+			grandParent->stealParent(entry, rootptr);
+			entry->small = grandParent;
+			entry->large = parent;
+			entry->height = grandParent->height;
+
+			grandParent->parent = entry;
+			grandParent->large = smallChild;
+			grandParent->setHeightFromChildren(); // Fixme: faster
+
+			parent->parent = entry;
+			parent->small = largeChild;
+			parent->setHeightFromChildren();
+
+			if (largeChild != NULL)
+				largeChild->parent = parent;
+			if (smallChild != NULL)
+				smallChild->parent = grandParent;
+		} else {
+			/* Case 4 */
+			sibling = parent->small;
+
+			grandParent->stealParent(parent, rootptr);
+			parent->small = grandParent;
+			grandParent->parent = parent;
+			grandParent->large = sibling;
+			grandParent->height--;
+			if (sibling != NULL)
+				sibling->parent = grandParent;
 		}
 		return newstr;
 	}
@@ -197,9 +235,39 @@ __always_inline void StringPool::SwapEntries(StringPoolEntry *a,
 					     StringPoolEntry *b)
 {
 	TString *tmp;
+	int height;
 	tmp = a->str;
+	height = a->height;
 	a->str = b->str;
+	a->height = b->height;
 	b->str = tmp;
+	b->height = height;
 }
+
+__always_inline void StringPoolEntry::stealParent(StringPoolEntry *newChild,
+						  StringPoolEntry **rootptr)
+{
+	newChild->parent = parent;
+	if (parent == NULL) {
+		/* Oops this is a root node */
+		*rootptr = newChild;
+		return;
+	}
+	if (parent->small == this)
+		parent->small = newChild;
+	else
+		parent->large = newChild;
+}
+
+__always_inline void StringPoolEntry::setHeightFromChildren()
+{
+	int lh;
+	int rh;
+
+	lh = (small != NULL) ? (small->height) : -1;
+	rh = (large != NULL) ? (large->height) : -1;
+	height = TSMAX(lh, rh) + 1;
+}
+
 
 #endif /* STRINGPOOL_H */
