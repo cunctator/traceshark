@@ -26,8 +26,6 @@
 
 using namespace TraceShark;
 
-enum StringPoolColor { SP_RED, SP_BLACK };
-
 class StringPoolEntry {
 public:
 	StringPoolEntry *small;
@@ -35,9 +33,8 @@ public:
 	StringPoolEntry *parent;
 	TString *str;
 	int height;
-	__always_inline void stealParent(StringPoolEntry *newChild,
-					 StringPoolEntry **rootptr);
 	__always_inline void setHeightFromChildren();
+	__always_inline void swapEntries(StringPoolEntry *entry);
 };
 
 class StringPool
@@ -48,8 +45,6 @@ public:
 	__always_inline TString* allocString(const TString *str, uint32_t hval);
 	void clear();
 	void reset();
-	__always_inline void SwapEntries(StringPoolEntry *a,
-					 StringPoolEntry *b);
 private:
 	MemPool *strPool;
 	MemPool *charPool;
@@ -66,10 +61,8 @@ __always_inline TString* StringPool::allocString(const TString *str,
 {
 	TString *newstr;
 	StringPoolEntry **aentry;
-	StringPoolEntry **rootptr;
 	StringPoolEntry *entry;
 	StringPoolEntry *parent = NULL;
-	StringPoolEntry *sibling;
 	StringPoolEntry *grandParent;
 	StringPoolEntry *smallChild;
 	StringPoolEntry *largeChild;
@@ -77,9 +70,11 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	int diff;
 	int smallH;
 	int largeH;
+	int gHeight;
 
 	hval = hval % hSize;
-	if (usageTable[hval] > 50) {
+
+	if (usageTable[hval] > 100) {
 		newstr = (TString*) strPool->allocObj();
 		if (newstr == NULL)
 			return NULL;
@@ -92,7 +87,6 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	}
 
 	aentry = hashTable + hval;
-	rootptr = aentry;
 iterate:
 	entry = *aentry;
 	if (entry == NULL) {
@@ -145,37 +139,43 @@ iterate:
 		/* Do small rebalance here (case 1 and case 2) */
 		if (entry == parent->small) {
 			/* Case 1 */
-			sibling = parent->large;
+			grandParent->small = entry;
+			entry->parent = grandParent;
 
-			grandParent->stealParent(parent, rootptr);
-			parent->large = grandParent;
-			grandParent->parent = parent;
-			grandParent->small = sibling;
-			grandParent->height--;
-			if (sibling != NULL)
-				sibling->parent = grandParent;
+			parent->small = parent->large;
+			parent->height--;
+
+			parent->large = grandParent->large;
+			if (parent->large != NULL)
+				parent->large->parent = parent;
+
+			grandParent->large = parent;
+			parent->swapEntries(grandParent);
 		} else {
 			/* Case 2 */
 			smallChild = entry->small;
 			largeChild = entry->large;
+			gHeight = 0;
+			if (grandParent->large != NULL) {
+				gHeight = grandParent->large->height + 1;
+				grandParent->large->parent = entry;
+			}
 
-			grandParent->stealParent(entry, rootptr);
-			entry->small = parent;
-			entry->large = grandParent;
-			entry->height = grandParent->height;
-
-			grandParent->parent = entry;
-			grandParent->small = largeChild;
-			grandParent->setHeightFromChildren(); // Fixme: faster
-
-			parent->parent = entry;
 			parent->large = smallChild;
-			parent->setHeightFromChildren();
-
-			if (largeChild != NULL)
-				largeChild->parent = grandParent;
 			if (smallChild != NULL)
 				smallChild->parent = parent;
+			parent->height = grandParent->height - 1;
+
+			entry->large = grandParent->large;
+			entry->small = largeChild;
+			if (largeChild != NULL)
+				largeChild->parent = entry;
+
+			grandParent->large = entry;
+			entry->parent = grandParent;
+
+			entry->height = gHeight;
+			entry->swapEntries(grandParent);
 		}
 		return newstr;
 	rebalanceLarge:
@@ -184,35 +184,41 @@ iterate:
 			/* Case 3 */
 			smallChild = entry->small;
 			largeChild = entry->large;
+			gHeight = 0;
+			if (grandParent->small != NULL) {
+			        gHeight = grandParent->small->height + 1;
+				grandParent->small->parent = entry;
+			}
 
-			grandParent->stealParent(entry, rootptr);
-			entry->small = grandParent;
-			entry->large = parent;
-			entry->height = grandParent->height;
-
-			grandParent->parent = entry;
-			grandParent->large = smallChild;
-			grandParent->setHeightFromChildren(); // Fixme: faster
-
-			parent->parent = entry;
 			parent->small = largeChild;
-			parent->setHeightFromChildren();
-
 			if (largeChild != NULL)
 				largeChild->parent = parent;
+			parent->height = grandParent->height - 1;
+
+			entry->small = grandParent->small;
+			entry->large = smallChild;
 			if (smallChild != NULL)
-				smallChild->parent = grandParent;
+				smallChild->parent = entry;
+
+			grandParent->small = entry;
+			entry->parent = grandParent;
+
+			entry->height = gHeight;
+			entry->swapEntries(grandParent);
 		} else {
 			/* Case 4 */
-			sibling = parent->small;
+			grandParent->large = entry;
+			entry->parent = grandParent;
 
-			grandParent->stealParent(parent, rootptr);
-			parent->small = grandParent;
-			grandParent->parent = parent;
-			grandParent->large = sibling;
-			grandParent->height--;
-			if (sibling != NULL)
-				sibling->parent = grandParent;
+			parent->large = parent->small;
+			parent->height--;
+
+			parent->small = grandParent->small;
+			if (parent->small != NULL)
+				parent->small->parent = parent;
+
+			grandParent->small = parent;
+			parent->swapEntries(grandParent);
 		}
 		return newstr;
 	}
@@ -231,32 +237,12 @@ iterate:
 	goto iterate;
 }
 
-__always_inline void StringPool::SwapEntries(StringPoolEntry *a,
-					     StringPoolEntry *b)
+__always_inline void StringPoolEntry::swapEntries(StringPoolEntry *entry)
 {
 	TString *tmp;
-	int height;
-	tmp = a->str;
-	height = a->height;
-	a->str = b->str;
-	a->height = b->height;
-	b->str = tmp;
-	b->height = height;
-}
-
-__always_inline void StringPoolEntry::stealParent(StringPoolEntry *newChild,
-						  StringPoolEntry **rootptr)
-{
-	newChild->parent = parent;
-	if (parent == NULL) {
-		/* Oops this is a root node */
-		*rootptr = newChild;
-		return;
-	}
-	if (parent->small == this)
-		parent->small = newChild;
-	else
-		parent->large = newChild;
+	tmp = entry->str;
+	entry->str = str;
+	str = tmp;
 }
 
 __always_inline void StringPoolEntry::setHeightFromChildren()
@@ -268,6 +254,7 @@ __always_inline void StringPoolEntry::setHeightFromChildren()
 	rh = (large != NULL) ? (large->height) : -1;
 	height = TSMAX(lh, rh) + 1;
 }
+
 
 
 #endif /* STRINGPOOL_H */
