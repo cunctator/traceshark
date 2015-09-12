@@ -118,10 +118,8 @@ iterate:
 			return newstr; /* parent already has another node */
 		parent->height = 1;
 		grandParent = parent->parent;
-		if (grandParent == NULL)
-			return newstr; /* Ok, too shallow to have a violation */
 		/* update heights and find offending node */
-		do {
+		while(grandParent != NULL) {
 			smallH = grandParent->small == NULL ?
 				-1 : grandParent->small->height;
 			largeH = grandParent->large == NULL ?
@@ -137,7 +135,7 @@ iterate:
 			entry = parent;
 			parent = grandParent;
 			grandParent = grandParent->parent;
-		} while(grandParent != NULL);
+		}
 		return newstr;
 	rebalanceSmall:
 		/* Do small rebalance here (case 1 and case 2) */
