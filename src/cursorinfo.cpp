@@ -24,8 +24,6 @@
 #include <QString>
 #include <cmath>
 
-using namespace TraceShark;
-
 CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QWidget(parent), id(nr)
 {
@@ -38,10 +36,10 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	line->setInputMask(QString("00000000000.0000000"));
 
 	switch (nr) {
-	case RED_CURSOR:
+	case TShark::RED_CURSOR:
 		text = QString(tr("Move Red"));
 		break;
-	case BLUE_CURSOR:
+	case TShark::BLUE_CURSOR:
 		text = QString(tr("Move Blue"));
 		break;
 	default:

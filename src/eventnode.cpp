@@ -48,7 +48,7 @@ bool EventNode::match(TString *str, TraceEvent *event)
 		str->len--;
 	}
 
-	newstr = eventTree->searchAllocString(str, StringHashFuncSimple32(str),
+	newstr = eventTree->searchAllocString(str, TShark::StrHash32(str),
 					      &type, EVENT_UNKNOWN);
 	if (newstr == NULL)
 		return false;
@@ -73,8 +73,7 @@ void EventNode::setupTree()
 	for (t = 0; t < NR_EVENTS; t++) {
 		str.ptr = eventstrings[t];
 		str.len = strlen(eventstrings[t]);
-		eventTree->searchAllocString(&str,
-					     StringHashFuncSimple32(&str),
+		eventTree->searchAllocString(&str, TShark::StrHash32(&str),
 					     &dummy, (event_t) t);
 	}
 }

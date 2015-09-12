@@ -77,8 +77,8 @@ MainWindow::MainWindow():
 	infoWidget = new InfoWidget(this);
 	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
 
-	cursors[RED_CURSOR] = NULL;
-	cursors[BLUE_CURSOR] = NULL;
+	cursors[TShark::RED_CURSOR] = NULL;
+	cursors[TShark::BLUE_CURSOR] = NULL;
 
 	licenseDialog = new LicenseDialog();
 
@@ -267,13 +267,13 @@ void MainWindow::rescaleTrace()
 
 void MainWindow::clearPlot()
 {
-	cursors[RED_CURSOR] = NULL;
-	cursors[BLUE_CURSOR] = NULL;
+	cursors[TShark::RED_CURSOR] = NULL;
+	cursors[TShark::BLUE_CURSOR] = NULL;
 	customPlot->clearItems();
 	customPlot->clearPlottables();
 	customPlot->hide();
-	infoWidget->setTime(0, RED_CURSOR);
-	infoWidget->setTime(0, BLUE_CURSOR);
+	infoWidget->setTime(0, TShark::RED_CURSOR);
+	infoWidget->setTime(0, TShark::BLUE_CURSOR);
 }
 
 void MainWindow::showTrace()
@@ -336,18 +336,18 @@ void MainWindow::setupCursors()
 	start = parser->getStartTime();
 	end = parser->getEndTime();
 
-	cursors[RED_CURSOR] = new Cursor(customPlot, Qt::red);
-	cursors[BLUE_CURSOR] = new Cursor(customPlot, Qt::blue);
+	cursors[TShark::RED_CURSOR] = new Cursor(customPlot, Qt::red);
+	cursors[TShark::BLUE_CURSOR] = new Cursor(customPlot, Qt::blue);
 
-	customPlot->addItem(cursors[RED_CURSOR]);
-	customPlot->addItem(cursors[BLUE_CURSOR]);
+	customPlot->addItem(cursors[TShark::RED_CURSOR]);
+	customPlot->addItem(cursors[TShark::BLUE_CURSOR]);
 
 	red = (start + end) / 2;
-	cursors[RED_CURSOR]->setPosition(red);
-	infoWidget->setTime(red, RED_CURSOR);
+	cursors[TShark::RED_CURSOR]->setPosition(red);
+	infoWidget->setTime(red, TShark::RED_CURSOR);
 	blue = (start + end) / 2 + (end - start) / 10;
-	cursors[BLUE_CURSOR]->setPosition(blue);
-	infoWidget->setTime(blue, BLUE_CURSOR);
+	cursors[TShark::BLUE_CURSOR]->setPosition(blue);
+	infoWidget->setTime(blue, TShark::BLUE_CURSOR);
 	/* Fixme:
 	 * For some reason the EventsWidget doesn't want to make its first 
 	 * scroll to somewhere in the middle of the trace. As a work around
@@ -557,7 +557,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 	int cursorIdx;
 
 	cursorIdx = infoWidget->getCursorIdx();
-	if (cursorIdx != RED_CURSOR && cursorIdx != BLUE_CURSOR)
+	if (cursorIdx != TShark::RED_CURSOR && cursorIdx != TShark::BLUE_CURSOR)
 		return;
 
 	Cursor *cursor = cursors[cursorIdx];
@@ -573,7 +573,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 void MainWindow::infoValueChanged(double value, int nr)
 {
 	Cursor *cursor;
-	if (nr == RED_CURSOR || nr == BLUE_CURSOR) {
+	if (nr == TShark::RED_CURSOR || nr == TShark::BLUE_CURSOR) {
 		cursor = cursors[nr];
 		cursor->setPosition(value);
 		eventsWidget->scrollTo(value);
@@ -585,7 +585,7 @@ void MainWindow::eventTimeSelected(double time)
 	int cursorIdx;
 
 	cursorIdx = infoWidget->getCursorIdx();
-	if (cursorIdx != RED_CURSOR && cursorIdx != BLUE_CURSOR)
+	if (cursorIdx != TShark::RED_CURSOR && cursorIdx != TShark::BLUE_CURSOR)
 		return;
 
 	Cursor *cursor = cursors[cursorIdx];

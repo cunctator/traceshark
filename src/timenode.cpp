@@ -30,7 +30,7 @@ bool TimeNode::match(TString *str, TraceEvent *event)
 {
 	bool rval;
 	/* atof() and sscanf() are buggy */
-	event->time = TraceShark::strToDouble(str->ptr, rval);
+	event->time = TShark::strToDouble(str->ptr, rval);
 	return rval;
 }
 

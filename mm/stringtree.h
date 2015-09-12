@@ -38,8 +38,6 @@ public:
 	__always_inline void setHeightFromChildren();
 };
 
-using namespace TraceShark;
-
 class StringTree
 {
 public:

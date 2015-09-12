@@ -61,7 +61,7 @@
 #define SPROL32(VALUE, N) \
 	((VALUE << N) | (VALUE >> (32 - N)))
 
-namespace TraceShark {
+namespace TShark {
 
 	enum CursorIdx {RED_CURSOR, BLUE_CURSOR, NR_CURSORS};
 
@@ -130,7 +130,7 @@ namespace TraceShark {
 
 	/* This is totally mumbo jumbo, should probably be replaced with
 	 * something more scientific */
-	__always_inline uint32_t StringHashFuncSimple32(const TString *str)
+	__always_inline uint32_t StrHash32(const TString *str)
 	{
 		union value32 uvalue;
 

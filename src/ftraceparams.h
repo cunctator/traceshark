@@ -30,8 +30,6 @@
 
 extern char *eventstrings[];
 
-using namespace TraceShark;
-
 #define ABSURD_UNSIGNED (2147483647)
 
 #define is_this_event(EVENTNAME, EVENT) (EVENT.type == EVENTNAME)

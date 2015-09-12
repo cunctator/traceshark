@@ -24,8 +24,6 @@
 #include "src/traceshark.h"
 #include "src/tstring.h"
 
-using namespace TraceShark;
-
 class StringPoolEntry {
 public:
 	StringPoolEntry *small;

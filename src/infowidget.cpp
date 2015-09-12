@@ -57,7 +57,7 @@ InfoWidget::InfoWidget(QWidget *parent):
 	cursorComboBox->setCurrentIndex(0);
 	mainLayout->addWidget(cursorComboBox);
 
-	for (i = 0; i < NR_CURSORS; i++)
+	for (i = 0; i < TShark::NR_CURSORS; i++)
 		cursorValues[i] = 0;
 
 	mainLayout->addStretch();
@@ -77,7 +77,8 @@ InfoWidget::~InfoWidget()
 
 void InfoWidget::setTime(double time, int cursorIdx)
 {
-	if (cursorIdx == RED_CURSOR || cursorIdx == BLUE_CURSOR) {
+	if (cursorIdx == TShark::RED_CURSOR ||
+	    cursorIdx == TShark::BLUE_CURSOR) {
 		cursorInfos[cursorIdx]->updateValue(time);
 		cursorValues[cursorIdx] = time;
 		updateDifference();
@@ -87,7 +88,7 @@ void InfoWidget::setTime(double time, int cursorIdx)
 
 void InfoWidget::updateChange(double value, int nr)
 {
-	if (nr == RED_CURSOR || nr == BLUE_CURSOR) {
+	if (nr == TShark::RED_CURSOR || nr == TShark::BLUE_CURSOR) {
 		cursorValues[nr] = value;
 		updateDifference();
 	}
@@ -97,8 +98,8 @@ void InfoWidget::updateDifference()
 {
 	int precision = 7;
 	double extra = 0;
-	double diff = fabs(cursorValues[RED_CURSOR]
-			   - cursorValues[BLUE_CURSOR]);
+	double diff = fabs(cursorValues[TShark::RED_CURSOR]
+			   - cursorValues[TShark::BLUE_CURSOR]);
 
 	if (diff >= 10)
 		extra = floor (log(diff) / log(10));

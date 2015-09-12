@@ -27,8 +27,6 @@
 #include "threads/workitem.h"
 #include "traceshark.h"
 
-using namespace TraceShark;
-
 QT_BEGIN_NAMESPACE
 class QAction;
 class QLabel;
@@ -126,7 +124,7 @@ private:
 	double top;
 	QVector<double> ticks;
 	QVector<QString> tickLabels;
-	Cursor *cursors[NR_CURSORS];
+	Cursor *cursors[TShark::NR_CURSORS];
 	Setting settings[Setting::MAX_SETTINGS];
 };
 

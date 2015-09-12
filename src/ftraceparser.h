@@ -47,8 +47,6 @@
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
 
-using namespace TraceShark;
-
 #define FAKE_DELTA ((double) 0.00000005)
 
 /* Macros for the heights of the scheduling graph */

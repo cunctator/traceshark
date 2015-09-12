@@ -35,7 +35,7 @@ bool ArgNode::match(TString *str, TraceEvent *event)
 {
 	TString *newstr;
 	if (event->argc < 255) {
-		newstr = argPool->allocString(str, StringHashFuncSimple32(str));
+		newstr = argPool->allocString(str, TShark::StrHash32(str));
 		if (newstr == NULL)
 			return false;
 		event->argv[event->argc] = newstr;
