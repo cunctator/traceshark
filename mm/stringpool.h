@@ -40,7 +40,8 @@ class StringPool
 public:
 	StringPool(unsigned int nr_pages = 256*10, unsigned int hSizeP = 256);
 	~StringPool();
-	__always_inline TString* allocString(const TString *str, uint32_t hval);
+	__always_inline TString* allocString(const TString *str, uint32_t hval,
+					     uint32_t cutoff);
 	void clear();
 	void reset();
 private:
@@ -55,7 +56,8 @@ private:
 };
 
 __always_inline TString* StringPool::allocString(const TString *str,
-						 uint32_t hval)
+						 uint32_t hval,
+						 uint32_t cutoff)
 {
 	TString *newstr;
 	StringPoolEntry **aentry;
@@ -72,7 +74,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 
 	hval = hval % hSize;
 
-	if (usageTable[hval] > 100) {
+	if (usageTable[hval] > cutoff) {
 		newstr = (TString*) strPool->allocObj();
 		if (newstr == NULL)
 			return NULL;

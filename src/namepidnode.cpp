@@ -67,7 +67,7 @@ found1:
 
 	/* This is the "magic" that saves a ton of string allocations
 	 * with exactly the same string */
-	newstr = namePool->allocString(str, TShark::StrHash32(str));
+	newstr = namePool->allocString(str, TShark::StrHash32(str), 65536);
 	if (newstr == NULL)
 		return false;
 	event->taskName = newstr;
