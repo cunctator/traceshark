@@ -89,142 +89,144 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 	hval = hval % hSize;
 	aentry = hashTable + hval;
 	rootptr = aentry;
-iterate:
 	entry = *aentry;
-	if (entry == NULL) {
-		newstr = (TString*) strPool->allocObj();
-		if (newstr == NULL)
-			return NULL;
-		newstr->len = str->len;
-		newstr->ptr = (char*) charPool->allocChars(str->len + 1);
-		if (newstr->ptr == NULL)
-			return NULL;
-		strncpy(newstr->ptr, str->ptr, str->len + 1);
-		entry = (StringTreeEntry*) entryPool->allocObj();
-		if (entry == NULL)
-			return NULL;
-		bzero(entry, sizeof(StringTreeEntry));
-		entry->str = newstr;
-		entry->eventType = newval;
-		*aentry = entry; /* aentry is equal to &parent->[large|small] */
 
-		entry->parent = parent;
-		entry->height = 0;
-		if (parent == NULL)
-			return newstr; /* Ok, this is the root node */
-		if (parent->height > 0)
-			return newstr; /* parent already has another node */
-		parent->height = 1;
-		grandParent = parent->parent;
-		/* update heights and find offending node */
-		while(grandParent != NULL) {
-			smallH = grandParent->small == NULL ?
-				-1 : grandParent->small->height;
-			largeH = grandParent->large == NULL ?
-				-1 : grandParent->large->height;
-			diff = smallH - largeH;
-			if (diff == 0)
-				break;
-			if (diff > 1)
-				goto rebalanceSmall;
-			if (diff < -1)
-				goto rebalanceLarge;
-			grandParent->height = parent->height + 1;
-			entry = parent;
-			parent = grandParent;
-			grandParent = grandParent->parent;
+	while (entry != NULL) {
+		/* Using strncmp here would lose performance and we know that
+		 * the strings are null terminated */
+		cmp = strcmp(str->ptr, entry->str->ptr);
+		if (cmp == 0) {
+			*foundval = entry->eventType;
+			return entry->str;
 		}
-		return newstr;
-	rebalanceSmall:
-		/* Do small rebalance here (case 1 and case 2) */
-		if (entry == parent->small) {
-			/* Case 1 */
-			sibling = parent->large;
-
-			grandParent->stealParent(parent, rootptr);
-			parent->large = grandParent;
-			grandParent->parent = parent;
-			grandParent->small = sibling;
-			grandParent->height--;
-			if (sibling != NULL)
-				sibling->parent = grandParent;
-		} else {
-			/* Case 2 */
-			smallChild = entry->small;
-			largeChild = entry->large;
-
-			grandParent->stealParent(entry, rootptr);
-			entry->small = parent;
-			entry->large = grandParent;
-			entry->height = grandParent->height;
-
-			grandParent->parent = entry;
-			grandParent->small = largeChild;
-			grandParent->setHeightFromChildren(); // Fixme: faster
-
-			parent->parent = entry;
-			parent->large = smallChild;
-			parent->setHeightFromChildren();
-
-			if (largeChild != NULL)
-				largeChild->parent = grandParent;
-			if (smallChild != NULL)
-				smallChild->parent = parent;
+		parent = entry;
+		if (cmp < 0) {
+			aentry = &entry->small;
+			entry = *aentry;
+			continue;
 		}
-		return newstr;
-	rebalanceLarge:
-		/* Do large rebalance here */
-		if (entry == parent->small) {
-			/* Case 3 */
-			smallChild = entry->small;
-			largeChild = entry->large;
-
-			grandParent->stealParent(entry, rootptr);
-			entry->small = grandParent;
-			entry->large = parent;
-			entry->height = grandParent->height;
-
-			grandParent->parent = entry;
-			grandParent->large = smallChild;
-			grandParent->setHeightFromChildren(); // Fixme: faster
-
-			parent->parent = entry;
-			parent->small = largeChild;
-			parent->setHeightFromChildren();
-
-			if (largeChild != NULL)
-				largeChild->parent = parent;
-			if (smallChild != NULL)
-				smallChild->parent = grandParent;
-		} else {
-			/* Case 4 */
-			sibling = parent->small;
-
-			grandParent->stealParent(parent, rootptr);
-			parent->small = grandParent;
-			grandParent->parent = parent;
-			grandParent->large = sibling;
-			grandParent->height--;
-			if (sibling != NULL)
-				sibling->parent = grandParent;
-		}
-		return newstr;
+		/*  cmp must be > 0, since not 0 and not < 0 */
+		aentry = &entry->large;
+		entry = *aentry;
 	}
-	/* Using strncmp here would lose performance and we know that the
-	 * strings are null terminated */
-	cmp = strcmp(str->ptr, entry->str->ptr);
-	if (cmp == 0) {
-		*foundval = entry->eventType;
-		return entry->str;
+
+	newstr = (TString*) strPool->allocObj();
+	if (newstr == NULL)
+		return NULL;
+	newstr->len = str->len;
+	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
+	if (newstr->ptr == NULL)
+		return NULL;
+	strncpy(newstr->ptr, str->ptr, str->len + 1);
+	entry = (StringTreeEntry*) entryPool->allocObj();
+	if (entry == NULL)
+		return NULL;
+	bzero(entry, sizeof(StringTreeEntry));
+	entry->str = newstr;
+	entry->eventType = newval;
+	*aentry = entry; /* aentry is equal to &parent->[large|small] */
+
+	entry->parent = parent;
+	entry->height = 0;
+	if (parent == NULL)
+		return newstr; /* Ok, this is the root node */
+	if (parent->height > 0)
+		return newstr; /* parent already has another node */
+	parent->height = 1;
+	grandParent = parent->parent;
+	/* update heights and find offending node */
+	while(grandParent != NULL) {
+		smallH = grandParent->small == NULL ?
+			-1 : grandParent->small->height;
+		largeH = grandParent->large == NULL ?
+			-1 : grandParent->large->height;
+		diff = smallH - largeH;
+		if (diff == 0)
+			break;
+		if (diff > 1)
+			goto rebalanceSmall;
+		if (diff < -1)
+			goto rebalanceLarge;
+		grandParent->height = parent->height + 1;
+		entry = parent;
+		parent = grandParent;
+		grandParent = grandParent->parent;
 	}
-	parent = entry;
-	if (cmp < 0) {
-		aentry = &entry->small;
-		goto iterate;
+	return newstr;
+rebalanceSmall:
+	/* Do small rebalance here (case 1 and case 2) */
+	if (entry == parent->small) {
+		/* Case 1 */
+		sibling = parent->large;
+
+		grandParent->stealParent(parent, rootptr);
+		parent->large = grandParent;
+		grandParent->parent = parent;
+		grandParent->small = sibling;
+		grandParent->height--;
+		if (sibling != NULL)
+			sibling->parent = grandParent;
+	} else {
+		/* Case 2 */
+		smallChild = entry->small;
+		largeChild = entry->large;
+
+		grandParent->stealParent(entry, rootptr);
+		entry->small = parent;
+		entry->large = grandParent;
+		entry->height = grandParent->height;
+
+		grandParent->parent = entry;
+		grandParent->small = largeChild;
+		grandParent->setHeightFromChildren(); // Fixme: faster
+
+		parent->parent = entry;
+		parent->large = smallChild;
+		parent->setHeightFromChildren();
+
+		if (largeChild != NULL)
+			largeChild->parent = grandParent;
+		if (smallChild != NULL)
+			smallChild->parent = parent;
 	}
-	/*  cmp must be > 0, since not 0 and not < 0 */
-	aentry = &entry->large;
-	goto iterate;
+	return newstr;
+rebalanceLarge:
+	/* Do large rebalance here */
+	if (entry == parent->small) {
+		/* Case 3 */
+		smallChild = entry->small;
+		largeChild = entry->large;
+
+		grandParent->stealParent(entry, rootptr);
+		entry->small = grandParent;
+		entry->large = parent;
+		entry->height = grandParent->height;
+
+		grandParent->parent = entry;
+		grandParent->large = smallChild;
+		grandParent->setHeightFromChildren(); // Fixme: faster
+
+		parent->parent = entry;
+		parent->small = largeChild;
+		parent->setHeightFromChildren();
+
+		if (largeChild != NULL)
+			largeChild->parent = parent;
+		if (smallChild != NULL)
+			smallChild->parent = grandParent;
+	} else {
+		/* Case 4 */
+		sibling = parent->small;
+
+		grandParent->stealParent(parent, rootptr);
+		parent->small = grandParent;
+		grandParent->parent = parent;
+		grandParent->large = sibling;
+		grandParent->height--;
+		if (sibling != NULL)
+			sibling->parent = grandParent;
+	}
+	return newstr;
 }
 
 __always_inline void StringTree::SwapEntries(StringTreeEntry *a,
