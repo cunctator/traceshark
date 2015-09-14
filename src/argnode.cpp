@@ -23,7 +23,7 @@
 ArgNode::ArgNode(const char *name) 
 	: GrammarNode(name)
 {
-	argPool = new StringPool(2048, 1024*1024);
+	argPool = new StringPool(2048, 1024 * 1024);
 }
 
 ArgNode::~ArgNode()
