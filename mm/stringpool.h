@@ -45,6 +45,7 @@ public:
 	void clear();
 	void reset();
 private:
+	__always_inline TString* allocUniqueString(const TString *str);
 	MemPool *strPool;
 	MemPool *charPool;
 	MemPool *entryPool;
@@ -75,14 +76,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	hval = hval % hSize;
 
 	if (usageTable[hval] > cutoff) {
-		newstr = (TString*) strPool->allocObj();
-		if (newstr == NULL)
-			return NULL;
-		newstr->len = str->len;
-		newstr->ptr = (char*) charPool->allocChars(str->len + 1);
-		if (newstr->ptr == NULL)
-			return NULL;
-		strncpy(newstr->ptr, str->ptr, str->len + 1);
+		newstr = allocUniqueString(str);
 		return newstr;
 	}
 
@@ -106,15 +100,9 @@ __always_inline TString* StringPool::allocString(const TString *str,
 		entry = *aentry;
 	}
 
+	newstr = allocUniqueString(str);
 	usageTable[hval]++;
-	newstr = (TString*) strPool->allocObj();
-	if (newstr == NULL)
-		return NULL;
-	newstr->len = str->len;
-	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
-	if (newstr->ptr == NULL)
-		return NULL;
-	strncpy(newstr->ptr, str->ptr, str->len + 1);
+
 	entry = (StringPoolEntry*) entryPool->allocObj();
 	if (entry == NULL)
 		return NULL;
@@ -149,7 +137,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 		grandParent = grandParent->parent;
 	}
 	return newstr;
-	rebalanceSmall:
+rebalanceSmall:
 	/* Do small rebalance here (case 1 and case 2) */
 	if (entry == parent->small) {
 		/* Case 1 */
@@ -234,6 +222,21 @@ rebalanceLarge:
 		grandParent->small = parent;
 		parent->swapEntries(grandParent);
 	}
+	return newstr;
+}
+
+__always_inline TString* StringPool::allocUniqueString(const TString *str)
+{
+	TString *newstr;
+
+	newstr = (TString*) strPool->allocObj();
+	if (newstr == NULL)
+		return NULL;
+	newstr->len = str->len;
+	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
+	if (newstr->ptr == NULL)
+		return NULL;
+	strncpy(newstr->ptr, str->ptr, str->len + 1);
 	return newstr;
 }
 
