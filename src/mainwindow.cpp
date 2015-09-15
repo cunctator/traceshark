@@ -467,7 +467,7 @@ void MainWindow::about()
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below."
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; select \"License\" under the \"Help\""
-	       "menu for details."
+	       " menu for details."
 
 	       "<h2>15. Disclaimer of Warranty.</h2>"
 	       "<p>THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT "
