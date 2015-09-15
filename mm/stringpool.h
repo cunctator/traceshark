@@ -101,6 +101,8 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	}
 
 	newstr = allocUniqueString(str);
+	if (newstr == NULL)
+		return newstr;
 	usageTable[hval]++;
 
 	entry = (StringPoolEntry*) entryPool->allocObj();
