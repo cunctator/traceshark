@@ -133,15 +133,16 @@ namespace TShark {
 	__always_inline uint32_t StrHash32(const TString *str)
 	{
 		union value32 uvalue;
-
+		uvalue.word32 = 0;
 		if (str->len < 1)
 			return 0;
-
-		uvalue.word8[0] = str->ptr[str->len - 1];
-		uvalue.word8[1] = str->ptr[str->len / 2];
-		uvalue.word8[2] = str->ptr[str->len / 3];
-		uvalue.word8[4] = str->ptr[str->len / 4];
-		uvalue.word32 = SPROL32(uvalue.word32, str->len % 32);
+		uvalue.word8[0] = str->ptr[0];
+		if (str->len < 4)
+			return uvalue.word32;
+		uvalue.word8[1] = str->ptr[1];
+		uvalue.word8[2] = str->ptr[2];
+		uvalue.word8[3] = str->ptr[3];
+		//uvalue.word32 = SPROL32(uvalue.word32, str->len % 32);
 		return uvalue.word32;
 	}
 }
