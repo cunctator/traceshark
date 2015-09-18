@@ -72,6 +72,10 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	int smallH;
 	int largeH;
 	int gHeight;
+	unsigned short eqn;
+	unsigned short largeEqn;
+	unsigned short smallEqn;
+	unsigned short skip = 0;
 
 	hval = hval % hSize;
 
@@ -86,16 +90,20 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	while(entry != NULL) {
 		/* Using strncmp here would lose performance and we know that
 		 * the strings are null terminated */
-		cmp = TString::strcmp(str, entry->str);
+		cmp = TString::Tstrcmp(str, entry->str, skip, &eqn);
 		if (cmp == 0)
 			return entry->str;
 		parent = entry;
 		if (cmp < 0) {
+			smallEqn = eqn;
+			skip = TSMAX(smallEqn, largeEqn);
 			aentry = &entry->small;
 			entry = *aentry;
 			continue;
 		}
 		/*  cmp must be > 0, since not 0 and not < 0 */
+		largeEqn = eqn;
+		skip = TSMAX(smallEqn, largeEqn);
 		aentry = &entry->large;
 		entry = *aentry;
 	}
