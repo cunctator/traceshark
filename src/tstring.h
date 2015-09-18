@@ -19,10 +19,27 @@
 #ifndef TSTRING_H
 #define TSTRING_H
 
+#include <cstring>
+
 class TString {
 public:
 	char *ptr;
 	unsigned int len;
+	static __always_inline int strcmp(const TString *a, const TString *b);
 };
+
+__always_inline int TString::strcmp(const TString *a, const TString *b) {
+	unsigned int clen;
+	int rval;
+	int diff;
+
+	diff = a->len - b->len;
+	clen = diff < 0 ? a->len : b->len;
+	rval = memcmp(a->ptr, b->ptr, clen);
+	if (rval == 0)
+		return diff;
+	else
+		return rval;
+}
 
 #endif

@@ -86,7 +86,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	while(entry != NULL) {
 		/* Using strncmp here would lose performance and we know that
 		 * the strings are null terminated */
-		cmp = strcmp(str->ptr, entry->str->ptr);
+		cmp = TString::strcmp(str, entry->str);
 		if (cmp == 0)
 			return entry->str;
 		parent = entry;
