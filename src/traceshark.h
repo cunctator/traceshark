@@ -128,8 +128,6 @@ namespace TShark {
 		uint8_t word8[4];
 	};
 
-	/* This is totally mumbo jumbo, should probably be replaced with
-	 * something more scientific */
 	__always_inline uint32_t StrHash32(const TString *str)
 	{
 		union value32 uvalue;
@@ -142,7 +140,6 @@ namespace TShark {
 		uvalue.word8[1] = str->ptr[1];
 		uvalue.word8[2] = str->ptr[2];
 		uvalue.word8[3] = str->ptr[3];
-		//uvalue.word32 = SPROL32(uvalue.word32, str->len % 32);
 		return uvalue.word32;
 	}
 }
