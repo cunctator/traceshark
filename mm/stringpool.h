@@ -73,8 +73,8 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	int largeH;
 	int gHeight;
 	unsigned short eqn;
-	unsigned short largeEqn;
-	unsigned short smallEqn;
+	unsigned short largeEqn = 0;
+	unsigned short smallEqn = 0;
 	unsigned short skip = 0;
 
 	hval = hval % hSize;
