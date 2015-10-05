@@ -39,8 +39,11 @@
 
 #define lastfunc(myint) ((double) myint)
 
-#define DEFINE_TASKMAP_ITERATOR(name) \
+#define DEFINE_CPUTASKMAP_ITERATOR(name) \
 	QMap<unsigned int, CPUTask>::iterator name
+
+#define DEFINE_TASKMAP_ITERATOR(name) \
+	QMap<unsigned int, Task>::iterator name
 
 #define DEFINE_COLORMAP_ITERATOR(name) \
 	QMap<unsigned int, TColor>::iterator name

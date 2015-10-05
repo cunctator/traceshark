@@ -70,6 +70,8 @@ MainWindow::MainWindow():
 	tsconnect(customPlot->xAxis, rangeChanged(QCPRange), customPlot->xAxis2,
 		  setRange(QCPRange));
 	tsconnect(customPlot, mousePress(QMouseEvent*), this, mousePress());
+	tsconnect(customPlot,selectionChangedByUser() , this,
+		  selectionChanged());
 
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
@@ -315,7 +317,7 @@ void MainWindow::showTrace()
 
 	/* Show scheduling graphs */
 	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
-		DEFINE_TASKMAP_ITERATOR(iter) = parser->
+		DEFINE_CPUTASKMAP_ITERATOR(iter) = parser->
 			cpuTaskMaps[cpu].begin();
 		while(iter != parser->cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
@@ -378,6 +380,7 @@ void MainWindow::addSchedGraph(CPUTask &task)
 	graph->setLineStyle(QCPGraph::lsStepLeft);
 	graph->setAdaptiveSampling(true);
 	graph->setData(task.timev, task.scaledData);
+	task.graph = graph; /* Save a pointer to the graph object in the task */
 }
 
 void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
@@ -689,5 +692,43 @@ void MainWindow::loadTraceFile(QString &fileName)
 		}
 		qout << "\n";
         }
+#endif
+}
+
+void MainWindow::selectionChanged()
+{
+	unsigned int cpu;
+	QTextStream qout(stdout);
+
+	qout.setRealNumberPrecision(6);
+	qout.setRealNumberNotation(QTextStream::FixedNotation);
+
+	CPUTask *cpuTask = NULL;
+
+	/* Search all scheduling graphs */
+	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
+		DEFINE_CPUTASKMAP_ITERATOR(iter) = parser->
+			cpuTaskMaps[cpu].begin();
+		while(iter != parser->cpuTaskMaps[cpu].end()) {
+			CPUTask &iTask = iter.value();
+			iter++;
+
+			if (iTask.graph->selected()) {
+				cpuTask = &iTask;
+				break;
+			}
+		}
+	}
+#if 0
+	if (cpuTask != NULL)
+		qout << "pid: " << cpuTask->pid << ", cpu: " << cpu
+		     << ", name: " << cpuTask->name << "\n";
+	else
+		qout << "None selected!\n";
+#else
+	if (cpuTask != NULL)
+		infoWidget->setInfo(cpuTask->pid, cpuTask->name);
+	else
+		infoWidget->removeInfo();
 #endif
 }

@@ -100,6 +100,7 @@ public:
 	void doScale();
 	void colorizeTasks();
 	void setQCustomPlot(QCustomPlot *plot);
+	__always_inline Task *findTask(unsigned int pid);
 	QMap<unsigned int, CPUTask> *cpuTaskMaps;
 	QMap<unsigned int, Task> taskMap;
 	CpuFreq *cpuFreq;
@@ -118,7 +119,8 @@ private:
 						 double startTime);
 	__always_inline double estimateWakeUp(Task *task, CPU *eventCPU,
 					      double newTime, double startTime);
-	__always_inline void handleWrongTaskOnCPU(unsigned int cpu,
+	__always_inline void handleWrongTaskOnCPU(TraceEvent &event,
+						  unsigned int cpu,
 						  CPU *eventCPU,
 						  unsigned int oldpid,
 						  double oldtime);
@@ -355,7 +357,17 @@ __always_inline Task *FtraceParser::getTask(unsigned int pid)
 	return task;
 }
 
-__always_inline void FtraceParser::handleWrongTaskOnCPU(unsigned int cpu,
+__always_inline Task *FtraceParser::findTask(unsigned int pid)
+{
+	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.find(pid);
+	if (iter == taskMap.end())
+		return NULL;
+	else
+		return &iter.value();
+}
+
+__always_inline void FtraceParser::handleWrongTaskOnCPU(TraceEvent &event,
+							unsigned int cpu,
 							CPU *eventCPU,
 							unsigned int oldpid,
 							double oldtime)
@@ -379,8 +391,12 @@ __always_inline void FtraceParser::handleWrongTaskOnCPU(unsigned int cpu,
 
 	if (oldpid != 0) {
 		cpuTask = &cpuTaskMaps[cpu][oldpid];
-		if (cpuTask->isNew)
-			cpuTask->isNew = false;
+		if (cpuTask->isNew) {
+			cpuTask->pid = oldpid;
+			cpuTask->name = sched_switch_oldname_strdup(event,
+								    taskNamePool);
+		}
+		cpuTask->isNew = false;
 		faketime = oldtime - FAKE_DELTA;
 		cpuTask->timev.push_back(faketime);
 		cpuTask->data.push_back(SCHED_HEIGHT);
@@ -404,7 +420,8 @@ __always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
 
 	if (eventCPU->pidOnCPU != oldpid) {
 		if (eventCPU->hasBeenScheduled)
-			handleWrongTaskOnCPU(cpu, eventCPU, oldpid, oldtime);
+			handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid,
+					     oldtime);
 		/* else { do nothing, non scheduled CPU is handled below } */
 	}
 

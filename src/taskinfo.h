@@ -16,38 +16,30 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INFOWIDGET_H
-#define INFOWIDGET_H
+#ifndef TASKINFO_H
+#define TASKINFO_H
 
-#include <QDockWidget>
-#include "traceshark.h"
-
-class CursorInfo;
-class TaskInfo;
+#include <QWidget>
 class QLineEdit;
-class QComboBox;
 
-class InfoWidget : public QDockWidget
+class TaskInfo : public QWidget
 {
 	Q_OBJECT
 public:
-	InfoWidget(QWidget *parent = 0);
-	virtual ~InfoWidget();
-	void setTime(double time, int cursorIdx);
-	int getCursorIdx();
+	TaskInfo(QWidget *parent = 0);
+	virtual ~TaskInfo();
+
 	void setInfo(unsigned int pid, const char *name);
 	void removeInfo();
 signals:
-	void valueChanged(double value, int nr);
+	void addTask(unsigned int pid);
 private slots:
-	void updateChange(double value, int nr);
+	void addClicked();
 private:
-	CursorInfo *cursorInfos[TShark::NR_CURSORS];
-	QLineEdit *diffLine;
-	QComboBox *cursorComboBox;
-	TaskInfo *taskInfo;
-	double cursorValues[TShark::NR_CURSORS];
-	void updateDifference();
+	QLineEdit *pidLine;
+	QLineEdit *nameLine;
+	unsigned int currentPid;
+	char *name;
 };
 
-#endif /* INFOWIDGET_H */
+#endif /* TASKINFO_H */

@@ -222,18 +222,18 @@ static __always_inline char * __sched_switch_oldname_strdup(TraceEvent &event,
 	}
 
 	/*
-	 * Localize the separing '-' in the final string. The final
+	 * Localize the separing ':' in the final string. The final
 	 * string is the only sting in case of no spaces in the task name.
-	 * we are searching backwards because we are interested in the last '-',
-	 * since the task name can contain '-' characters
+	 * we are searching backwards because we are interested in the last ':',
+	 * since the task name can contain ':' characters
 	 */
 	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
 	     end > event.argv[endidx]->ptr; end--) {
-		if (*end == '-')
+		if (*end == ':')
 			break;
 	}
 
-	/* Copy the final portion up to the '-' we found previously */
+	/* Copy the final portion up to the ':' we found previously */
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)
@@ -295,18 +295,18 @@ static __always_inline char * __sched_switch_newname_strdup(TraceEvent &event,
 	}
 
 	/*
-	 * Localize the separing '-' in the final string. The final
+	 * Localize the separing ':' in the final string. The final
 	 * string is the only sting in case of no spaces in the task name.
-	 * we are searching backwards because we are interested in the last '-',
-	 * since the task name can contain '-' characters
+	 * we are searching backwards because we are interested in the last ':',
+	 * since the task name can contain ':' characters
 	 */
 	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
 	     end > event.argv[endidx]->ptr; end--) {
-		if (*end == '-')
+		if (*end == ':')
 			break;
 	}
 
-	/* Copy the final portion up to the '-' we found previously */
+	/* Copy the final portion up to the ':' we found previously */
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)

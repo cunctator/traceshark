@@ -317,7 +317,7 @@ bool FtraceParser::processSched()
 	/* Add the "tail" to all tasks, i.e. extend them until endTime */
 	unsigned int cpu;
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
-		DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
+		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
 			double d;
@@ -382,7 +382,7 @@ void FtraceParser::colorizeTasks()
 {
 	unsigned int cpu;
 	for (cpu = 0; cpu < maxCPU; cpu++) {
-		DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
+		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
 			iter++;
@@ -470,7 +470,7 @@ void FtraceParser::addCpuSchedWork(unsigned int cpu,
 {
 	double scale = schedScale.value(cpu);
 	double offset = schedOffset.value(cpu);
-	DEFINE_TASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
+	DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 	while (iter != cpuTaskMaps[cpu].end()) {
 		CPUTask &task = iter.value();
 		task.scale = scale;

@@ -21,9 +21,11 @@
 
 #include <QVector>
 
+class QCPGraph;
+
 class CPUTask {
 public:
-	CPUTask(): isNew(true) {}
+	CPUTask(): isNew(true), graph(NULL) {}
 	char *name;
 	unsigned int pid; /* is really tid as all other pids here */
 	QVector<double> timev;
@@ -40,6 +42,7 @@ public:
 	bool isNew; /* Only used during extraction */
 	double offset;
 	double scale;
+	QCPGraph *graph;
 	bool doScale();
 	bool doScaleWakeup();
 	bool doScaleRunning();

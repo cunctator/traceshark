@@ -18,6 +18,7 @@
 
 #include "infowidget.h"
 #include "cursorinfo.h"
+#include "taskinfo.h"
 #include "traceshark.h"
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -56,6 +57,9 @@ InfoWidget::InfoWidget(QWidget *parent):
 	cursorComboBox->addItem(QString(tr("Blue")));
 	cursorComboBox->setCurrentIndex(0);
 	mainLayout->addWidget(cursorComboBox);
+
+	taskInfo = new TaskInfo(widget);
+	mainLayout->addWidget(taskInfo);
 
 	for (i = 0; i < TShark::NR_CURSORS; i++)
 		cursorValues[i] = 0;
@@ -111,4 +115,14 @@ void InfoWidget::updateDifference()
 int InfoWidget::getCursorIdx()
 {
 	return cursorComboBox->currentIndex();
+}
+
+void InfoWidget::setInfo(unsigned int pid, const char *name)
+{
+	taskInfo->setInfo(pid, name);
+}
+
+void InfoWidget::removeInfo()
+{
+	taskInfo->removeInfo();
 }
