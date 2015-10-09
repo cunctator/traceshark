@@ -25,7 +25,7 @@
 #include <QString>
 
 TaskInfo::TaskInfo(QWidget *parent):
-	QWidget(parent)
+	QWidget(parent), valid(false)
 {
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	QLabel *colonLabel = new QLabel(tr(":"));
@@ -43,7 +43,6 @@ TaskInfo::TaskInfo(QWidget *parent):
 	layout->addWidget(pidLine);
 	layout->addWidget(button);
 
-	hide();
 	tsconnect(button, clicked(), this, addClicked());
 }
 
@@ -59,17 +58,18 @@ void TaskInfo::setInfo(unsigned int pid, const char *name)
 	nameLine->setText(nameStr);
 	pidLine->setText(pidStr);
 	currentPid = pid;
-	show();
+	valid = true;
 }
 
 void TaskInfo::removeInfo()
 {
+	valid = false;
 	nameLine->setText(tr(""));
 	pidLine->setText(tr(""));
-	hide();
 }
 
 void TaskInfo::addClicked()
 {
-	emit addTask(currentPid);
+	if (valid)
+		emit addTask(currentPid);
 }

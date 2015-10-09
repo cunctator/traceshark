@@ -40,6 +40,7 @@ private:
 	QLineEdit *nameLine;
 	unsigned int currentPid;
 	char *name;
+	bool valid;
 };
 
 #endif /* TASKINFO_H */
