@@ -128,8 +128,6 @@ private:
 	__always_inline void processWakeupEvent(TraceEvent &event);
 	__always_inline void processCPUfreqEvent(TraceEvent &event);
 	__always_inline void processCPUidleEvent(TraceEvent &event);
-	TColor getNewColor();
-	__always_inline bool checkColorMap(const TColor &color);
 	void addCpuFreqWork(unsigned int cpu,
 			    QList<AbstractWorkItem*> &list);
 	void addCpuIdleWork(unsigned int cpu,
@@ -544,24 +542,6 @@ __always_inline void FtraceParser::processCPUidleEvent(TraceEvent &event)
 
 	cpuIdle[cpu].timev.push_back(time);
 	cpuIdle[cpu].data.push_back((double) state);
-}
-
-__always_inline bool FtraceParser::checkColorMap(const TColor &color)
-{
-	if (black.SqDistance(color) < 500)
-		return false;
-	if (white.SqDistance(color) < 500)
-		return false;
-
-	DEFINE_COLORMAP_ITERATOR(iter) = colorMap.begin();
-
-	while (iter != colorMap.end()) {
-		TColor c = iter.value();
-		if (c.SqDistance(color) < 500)
-			return false;
-		iter++;
-	}
-	return true;
 }
 
 #endif

@@ -17,6 +17,7 @@
  */
 
 #include <climits>
+#include <cstdlib>
 #include <QtGlobal>
 #include <QList>
 #include <QString>
@@ -364,23 +365,24 @@ bool FtraceParser::processCPUfreq()
 	return false;
 }
 
-TColor FtraceParser::getNewColor()
-{
-	TColor color;
-	bool ok;
-	int retries = 0;
-	do {
-		color = TColor::getRandomColor();
-		ok = checkColorMap(color);
-		retries++;
-	}
-	while(!ok && retries < 200);
-	return color;
-}
-
 void FtraceParser::colorizeTasks()
 {
 	unsigned int cpu;
+	double nf;
+	unsigned int n;
+	unsigned int ncolor;
+	double s;
+	int step;
+	int red;
+	int green;
+	int blue;
+	unsigned int seed = 290876;
+	unsigned int i, j;
+	QList<TColor> colorList;
+	const TColor black(0, 0, 0);
+	const TColor white(255, 255, 255);
+	TColor tmp;
+
 	for (cpu = 0; cpu < maxCPU; cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
@@ -388,9 +390,55 @@ void FtraceParser::colorizeTasks()
 			iter++;
 			if (colorMap.contains(task.pid))
 				continue;
-			TColor color = getNewColor();
+			TColor color;
 			colorMap.insert(task.pid, color);
 		}
+	}
+
+	n = colorMap.size();
+	nf = (double) n;
+	s = cbrt( (1 / nf) * (255 * 255 * 255 ));
+retry:
+	step = (unsigned int) s;
+	for (red = 0; red < 256; red += step) {
+		for (green = 0; green < 256; green += step)  {
+			for (blue = 0; blue < 256; blue += step) {
+				TColor color(red, green, blue);
+				if (color.SqDistance(black) < 1000)
+					continue;
+				if (color.SqDistance(white) < 1000)
+					continue;
+				colorList.push_back(color);
+			}
+		}
+	}
+
+	ncolor = colorList.size();
+	if (ncolor < n) {
+		s = s * 0.9;
+		if (s >= 1) {
+			colorList.clear();
+			goto retry;
+		}
+	}
+
+	/* Randomize the order by swapping every element with a random
+	 * element */
+	for (i = 0; i < ncolor; i++) {
+		j = rand_r(&seed) % ncolor;
+		tmp = colorList[j];
+		colorList[j] = colorList[i];
+		colorList[i] = tmp;
+	}
+
+	i = 0;
+
+	DEFINE_COLORMAP_ITERATOR(iter) = colorMap.begin();
+	while (iter != colorMap.end()) {
+		TColor &color = iter.value();
+		iter++;
+		color = colorList.at(i % ncolor);
+		i++;
 	}
 }
 
