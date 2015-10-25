@@ -16,40 +16,22 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INFOWIDGET_H
-#define INFOWIDGET_H
+#ifndef TASKGRAPH_H
+#define TASKGRAPH_H
 
-#include <QDockWidget>
-#include "traceshark.h"
+#include <QString>
+#include "qcustomplot/qcustomplot.h"
+#include "cputask.h"
 
-class CursorInfo;
-class TaskInfo;
-class QLineEdit;
-class QComboBox;
-class TaskGraph;
-
-class InfoWidget : public QDockWidget
+class TaskGraph : public QCPGraph
 {
 	Q_OBJECT
 public:
-	InfoWidget(QWidget *parent = 0);
-	virtual ~InfoWidget();
-	void setTime(double time, int cursorIdx);
-	int getCursorIdx();
-	void setTaskGraph(TaskGraph *graph);
-	void removeTaskGraph();
-	void checkGraphSelection();
-signals:
-	void valueChanged(double value, int nr);
-private slots:
-	void updateChange(double value, int nr);
+	TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
+	void setTask(CPUTask *task);
+	CPUTask *getTask();
 private:
-	CursorInfo *cursorInfos[TShark::NR_CURSORS];
-	QLineEdit *diffLine;
-	QComboBox *cursorComboBox;
-	TaskInfo *taskInfo;
-	double cursorValues[TShark::NR_CURSORS];
-	void updateDifference();
+	CPUTask *task;
 };
 
-#endif /* INFOWIDGET_H */
+#endif /* TASKGRAPH_H */

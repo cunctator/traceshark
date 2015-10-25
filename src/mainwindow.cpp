@@ -26,6 +26,7 @@
 #include "licensedialog.h"
 #include "mainwindow.h"
 #include "migrationline.h"
+#include "taskgraph.h"
 #include "traceshark.h"
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
@@ -58,6 +59,7 @@ MainWindow::MainWindow():
 	setCentralWidget(plotWidget);
 
 	customPlot = new QCustomPlot(plotWidget);
+	customPlot->setAutoAddPlottableToLegend(false);
 	customPlot->hide();
 	plotLayout->addWidget(customPlot);
 
@@ -72,6 +74,9 @@ MainWindow::MainWindow():
 	tsconnect(customPlot, mousePress(QMouseEvent*), this, mousePress());
 	tsconnect(customPlot,selectionChangedByUser() , this,
 		  selectionChanged());
+	tsconnect(customPlot, plottableClick(QCPAbstractPlottable *,
+					     QMouseEvent *), this,
+		  plottableClicked(QCPAbstractPlottable*, QMouseEvent*));
 
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
@@ -156,6 +161,7 @@ void MainWindow::openTrace()
 		eventsWidget->endResetModel();
 		setupCursors();
 		customPlot->show();
+		customPlot->legend->setVisible(true);
 	}
 }
 
@@ -309,6 +315,8 @@ void MainWindow::showTrace()
 	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
 		QCPGraph *graph = new QCPGraph(customPlot->xAxis,
 					       customPlot->yAxis);
+		QString name = QString(tr("cpu")) + QString::number(cpu);
+		graph->setName(name);
 		customPlot->addPlottable(graph);
 		graph->setLineStyle(QCPGraph::lsStepLeft);
 		graph->setData(parser->cpuFreq[cpu].timev,
@@ -370,12 +378,13 @@ void MainWindow::setupSettings()
 void MainWindow::addSchedGraph(CPUTask &task)
 {
 	/* Add scheduling graph */
-	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+	TaskGraph *graph = new TaskGraph(customPlot->xAxis, customPlot->yAxis);
 	QColor color = parser->getTaskColor(task.pid);
 	QPen pen = QPen();
 
 	pen.setColor(color);
 	graph->setPen(pen);
+	graph->setTask(&task);
 	customPlot->addPlottable(graph);
 	graph->setLineStyle(QCPGraph::lsStepLeft);
 	graph->setAdaptiveSampling(true);
@@ -434,6 +443,8 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	if (task.runningTimev.size() == 0)
 		return;
 	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+	QString name = QString(tr("is runnable"));
+	graph->setName(name);
 	customPlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	QPen pen = QPen();
@@ -695,40 +706,21 @@ void MainWindow::loadTraceFile(QString &fileName)
 #endif
 }
 
+void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,
+				  QMouseEvent * /* event */)
+{
+	TaskGraph *graph;
+
+	graph = qobject_cast<TaskGraph *>(plottable);
+	if (graph == NULL)
+		return;
+	if (graph->selected())
+		infoWidget->setTaskGraph(graph);
+	else
+		infoWidget->removeTaskGraph();
+}
+
 void MainWindow::selectionChanged()
 {
-	unsigned int cpu;
-	QTextStream qout(stdout);
-
-	qout.setRealNumberPrecision(6);
-	qout.setRealNumberNotation(QTextStream::FixedNotation);
-
-	CPUTask *cpuTask = NULL;
-
-	/* Search all scheduling graphs */
-	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
-		DEFINE_CPUTASKMAP_ITERATOR(iter) = parser->
-			cpuTaskMaps[cpu].begin();
-		while(iter != parser->cpuTaskMaps[cpu].end()) {
-			CPUTask &iTask = iter.value();
-			iter++;
-
-			if (iTask.graph->selected()) {
-				cpuTask = &iTask;
-				break;
-			}
-		}
-	}
-#if 0
-	if (cpuTask != NULL)
-		qout << "pid: " << cpuTask->pid << ", cpu: " << cpu
-		     << ", name: " << cpuTask->name << "\n";
-	else
-		qout << "None selected!\n";
-#else
-	if (cpuTask != NULL)
-		infoWidget->setInfo(cpuTask->pid, cpuTask->name);
-	else
-		infoWidget->removeInfo();
-#endif
+	infoWidget->checkGraphSelection();
 }

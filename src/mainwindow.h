@@ -32,7 +32,7 @@ class QAction;
 class QLabel;
 class QMenu;
 class QPlainTextEdit;
-class QCustomPlot;
+class QMouseEvent;
 QT_END_NAMESPACE
 
 class FtraceParser;
@@ -42,6 +42,9 @@ class InfoWidget;
 class Cursor;
 class CPUTask;
 class LicenseDialog;
+class QCPAbstractPlottable;
+class QCPGraph;
+class QCustomPlot;
 
 class MainWindow : public QMainWindow
 {
@@ -64,7 +67,8 @@ private slots:
 	void infoValueChanged(double value, int nr);
 	void eventTimeSelected(double time);
 	void selectionChanged();
-
+	void plottableClicked(QCPAbstractPlottable *plottable,
+			      QMouseEvent *event);
 private:
 	void processTrace();
 	void computeLayout();

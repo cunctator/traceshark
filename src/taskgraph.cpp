@@ -16,40 +16,20 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INFOWIDGET_H
-#define INFOWIDGET_H
+#include "taskgraph.h"
 
-#include <QDockWidget>
-#include "traceshark.h"
+TaskGraph::TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis):
+	QCPGraph(keyAxis, valueAxis), task(NULL) {}
 
-class CursorInfo;
-class TaskInfo;
-class QLineEdit;
-class QComboBox;
-class TaskGraph;
-
-class InfoWidget : public QDockWidget
+void TaskGraph::setTask(CPUTask *newtask)
 {
-	Q_OBJECT
-public:
-	InfoWidget(QWidget *parent = 0);
-	virtual ~InfoWidget();
-	void setTime(double time, int cursorIdx);
-	int getCursorIdx();
-	void setTaskGraph(TaskGraph *graph);
-	void removeTaskGraph();
-	void checkGraphSelection();
-signals:
-	void valueChanged(double value, int nr);
-private slots:
-	void updateChange(double value, int nr);
-private:
-	CursorInfo *cursorInfos[TShark::NR_CURSORS];
-	QLineEdit *diffLine;
-	QComboBox *cursorComboBox;
-	TaskInfo *taskInfo;
-	double cursorValues[TShark::NR_CURSORS];
-	void updateDifference();
-};
+	QString name = QString(newtask->name) + QString(":") +
+		QString::number(newtask->pid);
+	QCPGraph::setName(name);
+	task = newtask;
+}	
 
-#endif /* INFOWIDGET_H */
+CPUTask *TaskGraph::getTask()
+{
+	return task;
+}

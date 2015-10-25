@@ -117,12 +117,17 @@ int InfoWidget::getCursorIdx()
 	return cursorComboBox->currentIndex();
 }
 
-void InfoWidget::setInfo(unsigned int pid, const char *name)
+void InfoWidget::setTaskGraph(TaskGraph *graph)
 {
-	taskInfo->setInfo(pid, name);
+	taskInfo->setTaskGraph(graph);
 }
 
-void InfoWidget::removeInfo()
+void InfoWidget::removeTaskGraph()
 {
-	taskInfo->removeInfo();
+	taskInfo->removeTaskGraph();
+}
+
+void InfoWidget::checkGraphSelection()
+{
+	taskInfo->checkGraphSelection();
 }

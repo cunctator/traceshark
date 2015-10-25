@@ -16,8 +16,11 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "cputask.h"
+#include "taskgraph.h"
 #include "taskinfo.h"
 #include "traceshark.h"
+#include "qcustomplot/qcustomplot.h"
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLabel>
@@ -25,7 +28,7 @@
 #include <QString>
 
 TaskInfo::TaskInfo(QWidget *parent):
-	QWidget(parent), valid(false)
+	QWidget(parent), taskGraph(NULL)
 {
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	QLabel *colonLabel = new QLabel(tr(":"));
@@ -51,25 +54,43 @@ TaskInfo::~TaskInfo()
 }
 
 
-void TaskInfo::setInfo(unsigned int pid, const char *name)
+void TaskInfo::setTaskGraph(TaskGraph *graph)
 {
-	QString nameStr = QLatin1String(name);
-	QString pidStr = QString::number(pid);
+	CPUTask *task = graph->getTask();
+	if (task == NULL)
+		return;
+	QString nameStr = QString(task->name);
+	QString pidStr = QString::number(task->pid);
 	nameLine->setText(nameStr);
 	pidLine->setText(pidStr);
-	currentPid = pid;
-	valid = true;
+	taskGraph = graph;
 }
 
-void TaskInfo::removeInfo()
+void TaskInfo::removeTaskGraph()
 {
-	valid = false;
+	taskGraph = NULL;
 	nameLine->setText(tr(""));
 	pidLine->setText(tr(""));
 }
 
 void TaskInfo::addClicked()
 {
-	if (valid)
-		emit addTask(currentPid);
+	QObject *obj;
+	QCustomPlot *plot;
+	if (taskGraph != NULL) {
+		taskGraph->addToLegend();
+		obj = taskGraph->parent();
+		plot = qobject_cast<QCustomPlot *>(obj);
+		if (plot != NULL)
+			plot->replot();
+	}
+}
+
+void TaskInfo::checkGraphSelection()
+{
+	if (taskGraph == NULL)
+		return;
+	if (taskGraph->selected())
+		return;
+	removeTaskGraph();
 }

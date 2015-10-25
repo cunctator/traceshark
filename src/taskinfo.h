@@ -21,6 +21,7 @@
 
 #include <QWidget>
 class QLineEdit;
+class TaskGraph;
 
 class TaskInfo : public QWidget
 {
@@ -29,18 +30,15 @@ public:
 	TaskInfo(QWidget *parent = 0);
 	virtual ~TaskInfo();
 
-	void setInfo(unsigned int pid, const char *name);
-	void removeInfo();
-signals:
-	void addTask(unsigned int pid);
+	void setTaskGraph(TaskGraph *graph);
+	void removeTaskGraph();
+	void checkGraphSelection();
 private slots:
 	void addClicked();
 private:
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
-	unsigned int currentPid;
-	char *name;
-	bool valid;
+	TaskGraph *taskGraph;
 };
 
 #endif /* TASKINFO_H */
