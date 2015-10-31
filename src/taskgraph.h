@@ -23,6 +23,8 @@
 #include "qcustomplot/qcustomplot.h"
 #include "cputask.h"
 
+class LegendGraph;
+
 class TaskGraph : public QCPGraph
 {
 	Q_OBJECT
@@ -35,7 +37,7 @@ public:
 	bool addToLegend();
 private:
 	CPUTask *task;
-	QCPGraph *legendGraph;
+	LegendGraph *legendGraph;
 };
 
 #endif /* TASKGRAPH_H */

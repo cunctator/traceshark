@@ -16,44 +16,21 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "legendgraph.h"
-#include "taskgraph.h"
+#ifndef LEGENDGRAPH_H
+#define LEGENDGRAPH_H
 
-TaskGraph::TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis):
-	QCPGraph(keyAxis, valueAxis), task(NULL)
+#include "qcustomplot/qcustomplot.h"
+
+class LegendGraph : public QCPGraph
 {
-	legendGraph = new LegendGraph(keyAxis, valueAxis, this);
-}
+	Q_OBJECT
+public:
+	LegendGraph(QCPAxis *keyAxis, QCPAxis *valueAxis, QCPAbstractPlottable
+		    *p);
+	virtual ~LegendGraph() {}
+	QCPAbstractPlottable *getPlottable();
+private:
+	QCPAbstractPlottable *plottable;
+};
 
-TaskGraph::~TaskGraph()
-{
-	delete legendGraph;
-}
-
-void TaskGraph::setTask(CPUTask *newtask)
-{
-	QString name = QString(newtask->name) + QString(":") +
-		QString::number(newtask->pid);
-	QCPGraph::setName(name);
-	legendGraph->setName(name);
-	task = newtask;
-}	
-
-CPUTask *TaskGraph::getTask()
-{
-	return task;
-}
-
-void TaskGraph::setPen(const QPen &pen)
-{
-	QCPGraph::setPen(pen);
-
-	QPen legendPen(pen);
-	legendPen.setWidth(5);
-	legendGraph->setPen(legendPen);
-}
-
-bool TaskGraph::addToLegend()
-{
-	return legendGraph->addToLegend();
-}
+#endif /* LEGENDGRAPH_H */
