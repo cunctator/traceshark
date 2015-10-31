@@ -44,7 +44,9 @@ class CPUTask;
 class LicenseDialog;
 class QCPAbstractPlottable;
 class QCPGraph;
+class QCPLegend;
 class QCustomPlot;
+class QCPAbstractLegendItem;
 
 class MainWindow : public QMainWindow
 {
@@ -69,6 +71,8 @@ private slots:
 	void selectionChanged();
 	void plottableClicked(QCPAbstractPlottable *plottable,
 			      QMouseEvent *event);
+	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
+			       *abstractItem);
 private:
 	void processTrace();
 	void computeLayout();

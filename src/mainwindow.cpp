@@ -23,6 +23,7 @@
 #include "eventswidget.h"
 #include "ftraceparser.h"
 #include "infowidget.h"
+#include "legendgraph.h"
 #include "licensedialog.h"
 #include "mainwindow.h"
 #include "migrationline.h"
@@ -77,7 +78,10 @@ MainWindow::MainWindow():
 	tsconnect(customPlot, plottableClick(QCPAbstractPlottable *,
 					     QMouseEvent *), this,
 		  plottableClicked(QCPAbstractPlottable*, QMouseEvent*));
-
+	tsconnect(customPlot, legendDoubleClick(QCPLegend*,
+						QCPAbstractLegendItem*,
+						QMouseEvent*), this,
+		  legendDoubleClick(QCPLegend*, QCPAbstractLegendItem*));
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
 
@@ -723,4 +727,21 @@ void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,
 void MainWindow::selectionChanged()
 {
 	infoWidget->checkGraphSelection();
+}
+
+void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
+				   QCPAbstractLegendItem *abstractItem)
+{
+	QCPPlottableLegendItem *plottableItem;
+	QCPAbstractPlottable *plottable;
+	LegendGraph *legendGraph;
+
+	plottableItem = qobject_cast<QCPPlottableLegendItem*>(abstractItem);
+	if (plottableItem == NULL)
+		return;
+	plottable = plottableItem->plottable();
+	legendGraph = qobject_cast<LegendGraph*>(plottable);
+	if (legendGraph == NULL)
+		return;
+	legendGraph->removeFromLegend();
 }
