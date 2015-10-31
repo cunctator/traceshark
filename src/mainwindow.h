@@ -47,6 +47,7 @@ class QCPGraph;
 class QCPLegend;
 class QCustomPlot;
 class QCPAbstractLegendItem;
+class TracePlot;
 
 class MainWindow : public QMainWindow
 {
@@ -87,7 +88,7 @@ private:
 	void addWakeupGraph(CPUTask &task);
 	void addStillRunningGraph(CPUTask &task);
 
-	QCustomPlot *customPlot;
+	TracePlot *tracePlot;
 	QWidget *plotWidget;
 	QVBoxLayout *plotLayout;
 	EventsWidget *eventsWidget;

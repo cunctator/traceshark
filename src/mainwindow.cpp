@@ -28,13 +28,14 @@
 #include "mainwindow.h"
 #include "migrationline.h"
 #include "taskgraph.h"
+#include "traceplot.h"
 #include "traceshark.h"
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
 #include "qcustomplot/qcustomplot.h"
 
 MainWindow::MainWindow():
-	customPlot(NULL)
+	tracePlot(NULL)
 {
 	parser = new FtraceParser;
 
@@ -59,28 +60,28 @@ MainWindow::MainWindow():
 	plotLayout = new QVBoxLayout(plotWidget);
 	setCentralWidget(plotWidget);
 
-	customPlot = new QCustomPlot(plotWidget);
-	customPlot->setAutoAddPlottableToLegend(false);
-	customPlot->hide();
-	plotLayout->addWidget(customPlot);
+	tracePlot = new TracePlot(plotWidget);
+	tracePlot->setAutoAddPlottableToLegend(false);
+	tracePlot->hide();
+	plotLayout->addWidget(tracePlot);
 
-	customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
-				    QCP::iSelectAxes | QCP::iSelectLegend |
-				    QCP::iSelectPlottables);
-	parser->setQCustomPlot(customPlot);
+	tracePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
+				   QCP::iSelectAxes | QCP::iSelectLegend |
+				   QCP::iSelectPlottables);
+	parser->setQCustomPlot(tracePlot);
 
-	tsconnect(customPlot, mouseWheel(QWheelEvent*), this, mouseWheel());
-	tsconnect(customPlot->xAxis, rangeChanged(QCPRange), customPlot->xAxis2,
+	tsconnect(tracePlot, mouseWheel(QWheelEvent*), this, mouseWheel());
+	tsconnect(tracePlot->xAxis, rangeChanged(QCPRange), tracePlot->xAxis2,
 		  setRange(QCPRange));
-	tsconnect(customPlot, mousePress(QMouseEvent*), this, mousePress());
-	tsconnect(customPlot,selectionChangedByUser() , this,
+	tsconnect(tracePlot, mousePress(QMouseEvent*), this, mousePress());
+	tsconnect(tracePlot,selectionChangedByUser() , this,
 		  selectionChanged());
-	tsconnect(customPlot, plottableClick(QCPAbstractPlottable *,
-					     QMouseEvent *), this,
+	tsconnect(tracePlot, plottableClick(QCPAbstractPlottable *,
+					    QMouseEvent *), this,
 		  plottableClicked(QCPAbstractPlottable*, QMouseEvent*));
-	tsconnect(customPlot, legendDoubleClick(QCPLegend*,
-						QCPAbstractLegendItem*,
-						QMouseEvent*), this,
+	tsconnect(tracePlot, legendDoubleClick(QCPLegend*,
+					       QCPAbstractLegendItem*,
+					       QMouseEvent*), this,
 		  legendDoubleClick(QCPLegend*, QCPAbstractLegendItem*));
 	eventsWidget = new EventsWidget(this);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
@@ -93,7 +94,7 @@ MainWindow::MainWindow():
 
 	licenseDialog = new LicenseDialog();
 
-	tsconnect(customPlot, mouseDoubleClick(QMouseEvent*),
+	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
 	tsconnect(infoWidget, valueChanged(double, int),
 		  this, infoValueChanged(double, int));
@@ -110,7 +111,7 @@ MainWindow::~MainWindow()
 	delete migItem;
 	delete freqItem;
 	delete workQueue;
-	delete customPlot;
+	delete tracePlot;
 	delete licenseDialog;
 }
 
@@ -164,8 +165,8 @@ void MainWindow::openTrace()
 		eventsWidget->setEvents(&parser->events);
 		eventsWidget->endResetModel();
 		setupCursors();
-		customPlot->show();
-		customPlot->legend->setVisible(true);
+		tracePlot->show();
+		tracePlot->legend->setVisible(true);
 	}
 }
 
@@ -252,8 +253,8 @@ void MainWindow::computeLayout()
 	color = QColor(135, 206, 250); /* Light sky blue */
 	label = QString("fork/exit");
 	ticks.append(offset);
-	line = new MigrationLine(start, end, offset, color, customPlot);
-	customPlot->addItem(line);
+	line = new MigrationLine(start, end, offset, color, tracePlot);
+	tracePlot->addItem(line);
 	tickLabels.append(label);
 	o = offset;
 	p = inc / nrCPUs ;
@@ -262,8 +263,8 @@ void MainWindow::computeLayout()
 		label = QString("cpu") + QString::number(cpu);
 		ticks.append(o);
 		tickLabels.append(label);
-		line = new MigrationLine(start, end, o, color, customPlot);
-		customPlot->addItem(line);
+		line = new MigrationLine(start, end, o, color, tracePlot);
+		tracePlot->addItem(line);
 	}
 
 	offset += inc;
@@ -281,9 +282,9 @@ void MainWindow::clearPlot()
 {
 	cursors[TShark::RED_CURSOR] = NULL;
 	cursors[TShark::BLUE_CURSOR] = NULL;
-	customPlot->clearItems();
-	customPlot->clearPlottables();
-	customPlot->hide();
+	tracePlot->clearItems();
+	tracePlot->clearPlottables();
+	tracePlot->hide();
 	infoWidget->setTime(0, TShark::RED_CURSOR);
 	infoWidget->setTime(0, TShark::BLUE_CURSOR);
 }
@@ -304,24 +305,24 @@ void MainWindow::showTrace()
 
 	precision += (int) extra;
 
-	customPlot->yAxis->setRange(QCPRange(bottom, top));
-	customPlot->xAxis->setRange(QCPRange(start, end));
-	customPlot->xAxis->setNumberPrecision(precision);
-	customPlot->yAxis->setTicks(false);
-	customPlot->yAxis->setAutoTicks(false);
-	customPlot->yAxis->setAutoTickLabels(false);
-	customPlot->yAxis->setTickVector(ticks);
-	customPlot->yAxis->setTickVectorLabels(tickLabels);
-	customPlot->yAxis->setTickLabels(true);
-	customPlot->yAxis->setTicks(true);
+	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+	tracePlot->xAxis->setRange(QCPRange(start, end));
+	tracePlot->xAxis->setNumberPrecision(precision);
+	tracePlot->yAxis->setTicks(false);
+	tracePlot->yAxis->setAutoTicks(false);
+	tracePlot->yAxis->setAutoTickLabels(false);
+	tracePlot->yAxis->setTickVector(ticks);
+	tracePlot->yAxis->setTickVectorLabels(tickLabels);
+	tracePlot->yAxis->setTickLabels(true);
+	tracePlot->yAxis->setTicks(true);
 
 	/* Show CPU frequency graphs */
 	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
-		QCPGraph *graph = new QCPGraph(customPlot->xAxis,
-					       customPlot->yAxis);
+		QCPGraph *graph = new QCPGraph(tracePlot->xAxis,
+					       tracePlot->yAxis);
 		QString name = QString(tr("cpu")) + QString::number(cpu);
 		graph->setName(name);
-		customPlot->addPlottable(graph);
+		tracePlot->addPlottable(graph);
 		graph->setLineStyle(QCPGraph::lsStepLeft);
 		graph->setData(parser->cpuFreq[cpu].timev,
 			       parser->cpuFreq[cpu].scaledData);
@@ -350,11 +351,11 @@ void MainWindow::setupCursors()
 	start = parser->getStartTime();
 	end = parser->getEndTime();
 
-	cursors[TShark::RED_CURSOR] = new Cursor(customPlot, Qt::red);
-	cursors[TShark::BLUE_CURSOR] = new Cursor(customPlot, Qt::blue);
+	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot, Qt::red);
+	cursors[TShark::BLUE_CURSOR] = new Cursor(tracePlot, Qt::blue);
 
-	customPlot->addItem(cursors[TShark::RED_CURSOR]);
-	customPlot->addItem(cursors[TShark::BLUE_CURSOR]);
+	tracePlot->addItem(cursors[TShark::RED_CURSOR]);
+	tracePlot->addItem(cursors[TShark::BLUE_CURSOR]);
 
 	red = (start + end) / 2;
 	cursors[TShark::RED_CURSOR]->setPosition(red);
@@ -382,14 +383,14 @@ void MainWindow::setupSettings()
 void MainWindow::addSchedGraph(CPUTask &task)
 {
 	/* Add scheduling graph */
-	TaskGraph *graph = new TaskGraph(customPlot->xAxis, customPlot->yAxis);
+	TaskGraph *graph = new TaskGraph(tracePlot->xAxis, tracePlot->yAxis);
 	QColor color = parser->getTaskColor(task.pid);
 	QPen pen = QPen();
 
 	pen.setColor(color);
 	graph->setPen(pen);
 	graph->setTask(&task);
-	customPlot->addPlottable(graph);
+	tracePlot->addPlottable(graph);
 	graph->setLineStyle(QCPGraph::lsStepLeft);
 	graph->setAdaptiveSampling(true);
 	graph->setData(task.timev, task.scaledData);
@@ -402,8 +403,8 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 		return;
 
 	/* Add wakeup graph on top of scheduling */
-	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
-	customPlot->addPlottable(graph);
+	QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
+	tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
 	QColor color = parser->getTaskColor(task.pid);
 	QPen pen = QPen();
@@ -423,8 +424,8 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 void MainWindow::addWakeupGraph(CPUTask &task)
 {
 	/* Add wakeup graph on top of scheduling */
-	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
-	customPlot->addPlottable(graph);
+	QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
+	tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
 	QColor color = parser->getTaskColor(task.pid);
 	QPen pen = QPen();
@@ -446,10 +447,10 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	/* Add still running graph on top of the other two...*/
 	if (task.runningTimev.size() == 0)
 		return;
-	QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+	QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	QString name = QString(tr("is runnable"));
 	graph->setName(name);
-	customPlot->addPlottable(graph);
+	tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	QPen pen = QPen();
 
@@ -540,39 +541,56 @@ void MainWindow::license()
 
 void MainWindow::mouseWheel()
 {
-	bool xSelected = customPlot->yAxis->selectedParts().
+	bool xSelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
-	bool ySelected = customPlot->yAxis->selectedParts().
+	bool ySelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
 
 	if (xSelected && ySelected) /* This is not possible but would be cool */
-		customPlot->axisRect()->setRangeZoom(Qt::Vertical |
-						     Qt::Horizontal);
+		tracePlot->axisRect()->setRangeZoom(Qt::Vertical |
+						    Qt::Horizontal);
 	else if (ySelected)
-		customPlot->axisRect()->setRangeZoom(Qt::Vertical);
+		tracePlot->axisRect()->setRangeZoom(Qt::Vertical);
 	else
-		customPlot->axisRect()->setRangeZoom(Qt::Horizontal);
+		tracePlot->axisRect()->setRangeZoom(Qt::Horizontal);
 }
 
 void MainWindow::mousePress()
 {
-	bool xSelected = customPlot->yAxis->selectedParts().
+	bool xSelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
-	bool ySelected = customPlot->yAxis->selectedParts().
+	bool ySelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
 
 	if (xSelected && ySelected) /* This is not possible but would be cool */
-		customPlot->axisRect()->setRangeDrag(Qt::Vertical |
-						     Qt::Horizontal);
+		tracePlot->axisRect()->setRangeDrag(Qt::Vertical |
+						    Qt::Horizontal);
 	else if (ySelected)
-		customPlot->axisRect()->setRangeDrag(Qt::Vertical);
+		tracePlot->axisRect()->setRangeDrag(Qt::Vertical);
 	else
-		customPlot->axisRect()->setRangeDrag(Qt::Horizontal);
+		tracePlot->axisRect()->setRangeDrag(Qt::Horizontal);
 }
 
 void MainWindow::plotDoubleClicked(QMouseEvent *event)
 {
 	int cursorIdx;
+	QVariant details;
+	QCPLayerable *clickedLayerable;
+	QCPLegend *legend;
+	QCPAbstractLegendItem *legendItem;
+
+	/* Let's filter out double clicks on the legend or its items */
+	clickedLayerable = tracePlot->getLayerableAt(event->pos(), false,
+						     &details);
+	if (clickedLayerable != NULL) {
+		legend = qobject_cast<QCPLegend*>(clickedLayerable);
+		if (legend != NULL)
+			return;
+		legendItem = qobject_cast<QCPAbstractLegendItem*>
+			(clickedLayerable);
+		if (legendItem != NULL)
+			return;
+	}
 
 	cursorIdx = infoWidget->getCursorIdx();
 	if (cursorIdx != TShark::RED_CURSOR && cursorIdx != TShark::BLUE_CURSOR)
@@ -581,7 +599,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 	Cursor *cursor = cursors[cursorIdx];
 	if (cursor != NULL) {
 		double pixel = (double) event->x();
-		double coord = customPlot->xAxis->pixelToCoord(pixel);
+		double coord = tracePlot->xAxis->pixelToCoord(pixel);
 		cursor->setPosition(coord);
 		eventsWidget->scrollTo(coord);
 		infoWidget->setTime(coord, cursorIdx);

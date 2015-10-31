@@ -56,6 +56,7 @@ HEADERS      += src/timenode.h
 HEADERS      += src/traceevent.h
 HEADERS      += src/tracefile.h
 HEADERS      += src/traceline.h
+HEADERS      += src/traceplot.h
 HEADERS      += src/traceshark.h
 HEADERS      += src/tstring.h
 HEADERS      += threads/workitem.h
@@ -96,6 +97,7 @@ SOURCES      += src/taskgraph.cpp
 SOURCES      += src/taskinfo.cpp
 SOURCES      += src/timenode.cpp
 SOURCES      += src/tracefile.cpp
+SOURCES      += src/traceplot.cpp
 SOURCES      += threads/workqueue.cpp
 SOURCES      += qcustomplot/qcustomplot.cpp
 
