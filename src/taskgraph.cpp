@@ -19,17 +19,40 @@
 #include "taskgraph.h"
 
 TaskGraph::TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis):
-	QCPGraph(keyAxis, valueAxis), task(NULL) {}
+	QCPGraph(keyAxis, valueAxis), task(NULL)
+{
+	legendGraph = new QCPGraph(keyAxis, valueAxis);
+}
+
+TaskGraph::~TaskGraph()
+{
+	delete legendGraph;
+}
 
 void TaskGraph::setTask(CPUTask *newtask)
 {
 	QString name = QString(newtask->name) + QString(":") +
 		QString::number(newtask->pid);
 	QCPGraph::setName(name);
+	legendGraph->setName(name);
 	task = newtask;
 }	
 
 CPUTask *TaskGraph::getTask()
 {
 	return task;
+}
+
+void TaskGraph::setPen(const QPen &pen)
+{
+	QCPGraph::setPen(pen);
+
+	QPen legendPen(pen);
+	legendPen.setWidth(5);
+	legendGraph->setPen(legendPen);
+}
+
+bool TaskGraph::addToLegend()
+{
+	return legendGraph->addToLegend();
 }

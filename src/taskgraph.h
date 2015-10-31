@@ -28,10 +28,14 @@ class TaskGraph : public QCPGraph
 	Q_OBJECT
 public:
 	TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
+	virtual ~TaskGraph();
 	void setTask(CPUTask *task);
 	CPUTask *getTask();
+	void setPen(const QPen &pen);
+	bool addToLegend();
 private:
 	CPUTask *task;
+	QCPGraph *legendGraph;
 };
 
 #endif /* TASKGRAPH_H */
