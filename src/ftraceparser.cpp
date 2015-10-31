@@ -406,7 +406,7 @@ retry:
 				TColor color(red, green, blue);
 				if (color.SqDistance(black) < 1000)
 					continue;
-				if (color.SqDistance(white) < 1000)
+				if (color.SqDistance(white) < 10000)
 					continue;
 				colorList.push_back(color);
 			}
@@ -415,7 +415,7 @@ retry:
 
 	ncolor = colorList.size();
 	if (ncolor < n) {
-		s = s * 0.9;
+		s = s * 0.95;
 		if (s >= 1) {
 			colorList.clear();
 			goto retry;
