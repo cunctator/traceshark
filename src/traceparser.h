@@ -112,7 +112,8 @@ private:
 	void finalizePreScan();
 	__always_inline bool parseBuffer(unsigned int index);
 	__always_inline void preScanEvent(TraceEvent &event);
-	__always_inline bool parseLine(TraceLine* line, TraceEvent* event);
+	__always_inline bool parseLine(TraceLine* line, TraceEvent* event,
+				       GrammarNode *root);
 	bool parseLineBugFixup(TraceEvent* event, double prevtime);
 	__always_inline Task *getTask(unsigned int pid);
 	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
@@ -139,7 +140,7 @@ private:
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<TraceParser> *parserThread;
 	WorkQueue scalingQueue;
-	GrammarNode *grammarRoot;
+	GrammarNode *ftraceGrammarRoot;
 	TraceFile *traceFile;
 	MemPool *ptrPool;
 	MemPool *taskNamePool;
@@ -189,7 +190,7 @@ __always_inline bool TraceParser::parseBuffer(unsigned int index)
 		TraceEvent event;
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
-		if (parseLine(line, &event)) {
+		if (parseLine(line, &event, ftraceGrammarRoot)) {
 			/* Check if the timestamp of this event is affected by
 			 * the infamous ftrace timestamp rollover bug and
 			 * try to correct it */
@@ -244,11 +245,12 @@ __always_inline void TraceParser::preScanEvent(TraceEvent &event)
 	}
 }
 
-__always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event)
+__always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
+					    GrammarNode *root)
 {
 	unsigned int i,j;
-	GrammarNode *node = grammarRoot;
-	bool retval = grammarRoot->isLeaf;
+	GrammarNode *node = root;
+	bool retval = root->isLeaf;
 
 	for (i = 0; i < line->nStrings; i++)
 	{

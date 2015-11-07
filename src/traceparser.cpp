@@ -131,52 +131,52 @@ void TraceParser::close()
 	migrationArrows.clear();
 	ptrPool->reset();
 	taskNamePool->reset();
-	clearGrammarPools(grammarRoot);
+	clearGrammarPools(ftraceGrammarRoot);
 }
 
 TraceParser::TraceParser()
 	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL), black(0, 0, 0),
 	  white(255, 255, 255), CPUs(NULL)
 {
-	NamePidNode *namePidNode;
-	CpuNode *cpuNode;
-	TimeNode *timeNode;
-	EventNode *eventNode;
-	ArgNode *argNode;
+	NamePidNode *ftraceNamePidNode;
+	CpuNode *ftraceCpuNode;
+	TimeNode *ftraceTimeNode;
+	EventNode *ftraceEventNode;
+	ArgNode *ftraceArgNode;
 
 	traceFile = NULL;
 	ptrPool = new MemPool(16384, sizeof(TString*));
 	taskNamePool = new MemPool(16384, sizeof(char));
 
-	argNode = new ArgNode("argnode");
-	argNode->nChildren = 1;
-	argNode->children[0] = argNode;
-	argNode->isLeaf = true;
+	ftraceArgNode = new ArgNode("ftraceArgNode");
+	ftraceArgNode->nChildren = 1;
+	ftraceArgNode->children[0] = ftraceArgNode;
+	ftraceArgNode->isLeaf = true;
 
-	eventNode = new EventNode("eventnode");
-	eventNode->nChildren = 1;
-	eventNode->children[0] = argNode;
-	eventNode->isLeaf = true;
+	ftraceEventNode = new EventNode("ftraceEventnode");
+	ftraceEventNode->nChildren = 1;
+	ftraceEventNode->children[0] = ftraceArgNode;
+	ftraceEventNode->isLeaf = true;
 
-	timeNode = new TimeNode("timenode");
-	timeNode->nChildren = 1;
-	timeNode->children[0] = eventNode;
-	timeNode->isLeaf = false;
+	ftraceTimeNode = new TimeNode("ftraceTimenode");
+	ftraceTimeNode->nChildren = 1;
+	ftraceTimeNode->children[0] = ftraceEventNode;
+	ftraceTimeNode->isLeaf = false;
 
-	cpuNode = new CpuNode("cpunode");
-	cpuNode->nChildren = 1;
-	cpuNode->children[0] = timeNode;
-	cpuNode->isLeaf = false;
+	ftraceCpuNode = new CpuNode("ftraceCpunode");
+	ftraceCpuNode->nChildren = 1;
+	ftraceCpuNode->children[0] = ftraceTimeNode;
+	ftraceCpuNode->isLeaf = false;
 
-	namePidNode = new NamePidNode("namepidnode");
-	namePidNode->nChildren = 1;
-	namePidNode->children[0] = cpuNode;
-	namePidNode->isLeaf = false;
+	ftraceNamePidNode = new NamePidNode("ftraceNamePidNode");
+	ftraceNamePidNode->nChildren = 1;
+	ftraceNamePidNode->children[0] = ftraceCpuNode;
+	ftraceNamePidNode->isLeaf = false;
 
-	grammarRoot = new GrammarRoot("rootnode");
-	grammarRoot->nChildren = 1;
-	grammarRoot->children[0] = namePidNode;
-	grammarRoot->isLeaf = false;
+	ftraceGrammarRoot = new GrammarRoot("ftraceRootNode");
+	ftraceGrammarRoot->nChildren = 1;
+	ftraceGrammarRoot->children[0] = ftraceNamePidNode;
+	ftraceGrammarRoot->isLeaf = false;
 
 	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
 	parserThread = new WorkThread<TraceParser>
@@ -186,7 +186,7 @@ TraceParser::TraceParser()
 TraceParser::~TraceParser()
 {
 	TraceParser::close();
-	DeleteGrammarTree(grammarRoot);
+	DeleteGrammarTree(ftraceGrammarRoot);
 	delete ptrPool;
 	delete taskNamePool;
 	delete[] tbuffers;
