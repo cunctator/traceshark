@@ -17,7 +17,7 @@
  */
 
 #include "cputask.h"
-#include "ftraceparser.h"
+#include "traceparser.h"
 
 /* This delays (20 ms) rerpresents the "full length" of the error */
 #define WAKEUP_MAX ((double) 0.020)

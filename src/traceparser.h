@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FTRACEPARSER_H
-#define FTRACEPARSER_H
+#ifndef TRACEPARSER_H
+#define TRACEPARSER_H
 
 #include <QColor>
 #include <QString>
@@ -64,11 +64,11 @@
 class TraceFile;
 class QCustomPlot;
 
-class FtraceParser
+class TraceParser
 {
 public:
-	FtraceParser();
-	~FtraceParser();
+	TraceParser();
+	~TraceParser();
 	void DeleteGrammarTree(GrammarNode* node);
 	bool open(const QString &fileName);
 	bool isOpen();
@@ -137,7 +137,7 @@ private:
 	void scaleMigration();
 	void clearGrammarPools(GrammarNode *tree);
 	ThreadBuffer<TraceLine> **tbuffers;
-	WorkThread<FtraceParser> *parserThread;
+	WorkThread<TraceParser> *parserThread;
 	WorkQueue scalingQueue;
 	GrammarNode *grammarRoot;
 	TraceFile *traceFile;
@@ -171,7 +171,7 @@ private:
 };
 
 /* This parses a buffer */
-__always_inline bool FtraceParser::parseBuffer(unsigned int index)
+__always_inline bool TraceParser::parseBuffer(unsigned int index)
 {
 	unsigned int i, s;
 	double prevtime = std::numeric_limits<double>::lowest();
@@ -208,7 +208,7 @@ __always_inline bool FtraceParser::parseBuffer(unsigned int index)
 	return false;
 }
 
-__always_inline void FtraceParser::preScanEvent(TraceEvent &event)
+__always_inline void TraceParser::preScanEvent(TraceEvent &event)
 {
 	if (event.cpu > maxCPU)
 		maxCPU = event.cpu;
@@ -244,7 +244,7 @@ __always_inline void FtraceParser::preScanEvent(TraceEvent &event)
 	}
 }
 
-__always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
+__always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event)
 {
 	unsigned int i,j;
 	GrammarNode *node = grammarRoot;
@@ -267,7 +267,7 @@ __always_inline bool FtraceParser::parseLine(TraceLine* line, TraceEvent* event)
 	return retval;
 }
 
-__always_inline double FtraceParser::estimateWakeUpNew(CPU *eventCPU,
+__always_inline double TraceParser::estimateWakeUpNew(CPU *eventCPU,
 						       double newTime,
 						       double startTime)
 {
@@ -283,7 +283,7 @@ regular:
 	return delay;
 }
 
-__always_inline double FtraceParser::estimateWakeUp(Task *task,
+__always_inline double TraceParser::estimateWakeUp(Task *task,
 						    CPU *eventCPU,
 						    double newTime,
 						    double /* startTime */)
@@ -298,54 +298,54 @@ __always_inline double FtraceParser::estimateWakeUp(Task *task,
 	return delay;
 }
 
-__always_inline unsigned int FtraceParser::getMaxCPU()
+__always_inline unsigned int TraceParser::getMaxCPU()
 {
 	return maxCPU;
 }
 
-__always_inline unsigned int FtraceParser::getNrCPUs()
+__always_inline unsigned int TraceParser::getNrCPUs()
 {
 	return nrCPUs;;
 }
 
-__always_inline double  FtraceParser::getStartTime()
+__always_inline double  TraceParser::getStartTime()
 {
 	return startTime;
 }
 
-__always_inline double FtraceParser::getEndTime()
+__always_inline double TraceParser::getEndTime()
 {
 	return endTime;
 }
 
-__always_inline unsigned long int FtraceParser::getNrEvents()
+__always_inline unsigned long int TraceParser::getNrEvents()
 {
 	return nrEvents;
 }
 
-__always_inline int FtraceParser::getMinIdleState()
+__always_inline int TraceParser::getMinIdleState()
 {
 	return minIdleState;
 }
 
-__always_inline int FtraceParser::getMaxIdleState()
+__always_inline int TraceParser::getMaxIdleState()
 {
 	return minIdleState;
 }
 
-__always_inline int FtraceParser::getNrMigrateEvents()
+__always_inline int TraceParser::getNrMigrateEvents()
 {
 	return nrMigrateEvents;
 }
 
-__always_inline QColor FtraceParser::getTaskColor(unsigned int pid)
+__always_inline QColor TraceParser::getTaskColor(unsigned int pid)
 {
 	TColor taskColor = colorMap.value(pid, black);
 	return taskColor.toQColor();
 }
 
 
-__always_inline Task *FtraceParser::getTask(unsigned int pid)
+__always_inline Task *TraceParser::getTask(unsigned int pid)
 {
 	Task *task = &taskMap[pid]; /* Modifiable reference */ ;
 	if (task->isNew) { /* true means task is newly constructed above */
@@ -355,7 +355,7 @@ __always_inline Task *FtraceParser::getTask(unsigned int pid)
 	return task;
 }
 
-__always_inline Task *FtraceParser::findTask(unsigned int pid)
+__always_inline Task *TraceParser::findTask(unsigned int pid)
 {
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.find(pid);
 	if (iter == taskMap.end())
@@ -364,7 +364,7 @@ __always_inline Task *FtraceParser::findTask(unsigned int pid)
 		return &iter.value();
 }
 
-__always_inline void FtraceParser::handleWrongTaskOnCPU(TraceEvent &event,
+__always_inline void TraceParser::handleWrongTaskOnCPU(TraceEvent &event,
 							unsigned int cpu,
 							CPU *eventCPU,
 							unsigned int oldpid,
@@ -401,7 +401,7 @@ __always_inline void FtraceParser::handleWrongTaskOnCPU(TraceEvent &event,
 	}
 }
 
-__always_inline void FtraceParser::processSwitchEvent(TraceEvent &event)
+__always_inline void TraceParser::processSwitchEvent(TraceEvent &event)
 {
 	unsigned int cpu = event.cpu;
 	double oldtime = event.time - FAKE_DELTA;
@@ -507,7 +507,7 @@ out:
 	return;
 }
 
-__always_inline void FtraceParser::processWakeupEvent(TraceEvent &event)
+__always_inline void TraceParser::processWakeupEvent(TraceEvent &event)
 {
 	unsigned int pid;
 	Task *task;
@@ -524,7 +524,7 @@ __always_inline void FtraceParser::processWakeupEvent(TraceEvent &event)
 	task->lastWakeUP = time;
 }
 
-__always_inline void FtraceParser::processCPUfreqEvent(TraceEvent &event)
+__always_inline void TraceParser::processCPUfreqEvent(TraceEvent &event)
 {
 	unsigned int cpu = cpufreq_cpu(event);
 	double time = event.time;
@@ -534,7 +534,7 @@ __always_inline void FtraceParser::processCPUfreqEvent(TraceEvent &event)
 	cpuFreq[cpu].data.push_back((double) freq);
 }
 
-__always_inline void FtraceParser::processCPUidleEvent(TraceEvent &event)
+__always_inline void TraceParser::processCPUidleEvent(TraceEvent &event)
 {
 	unsigned int cpu = cpuidle_cpu(event);
 	double time = event.time;

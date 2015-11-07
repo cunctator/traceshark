@@ -35,7 +35,7 @@ class QPlainTextEdit;
 class QMouseEvent;
 QT_END_NAMESPACE
 
-class FtraceParser;
+class TraceParser;
 class WorkQueue;
 class EventsWidget;
 class InfoWidget;
@@ -111,10 +111,10 @@ private:
 	QAction *licenseAction;
 	QAction *aboutQtAction;
 
-	FtraceParser *parser;
-	WorkItem<FtraceParser> *schedItem;
-	WorkItem<FtraceParser> *migItem;
-	WorkItem<FtraceParser> *freqItem;
+	TraceParser *parser;
+	WorkItem<TraceParser> *schedItem;
+	WorkItem<TraceParser> *migItem;
+	WorkItem<TraceParser> *freqItem;
 	WorkQueue *workQueue;
 
 	LicenseDialog *licenseDialog;

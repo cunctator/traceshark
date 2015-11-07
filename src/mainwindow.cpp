@@ -21,7 +21,7 @@
 
 #include "cursor.h"
 #include "eventswidget.h"
-#include "ftraceparser.h"
+#include "traceparser.h"
 #include "infowidget.h"
 #include "legendgraph.h"
 #include "licensedialog.h"
@@ -37,7 +37,7 @@
 MainWindow::MainWindow():
 	tracePlot(NULL)
 {
-	parser = new FtraceParser;
+	parser = new TraceParser;
 
 	//setCentralWidget(traceLabel);
 
@@ -45,12 +45,12 @@ MainWindow::MainWindow():
 	createToolBars();
 	createMenus();
 
-	schedItem = new WorkItem<FtraceParser> (parser,
-						&FtraceParser::processSched);
-	migItem = new WorkItem<FtraceParser> (parser,
-					      &FtraceParser::processMigration);
-	freqItem = new WorkItem<FtraceParser> (parser,
-					       &FtraceParser::processCPUfreq);
+	schedItem = new WorkItem<TraceParser> (parser,
+					       &TraceParser::processSched);
+	migItem = new WorkItem<TraceParser> (parser,
+					     &TraceParser::processMigration);
+	freqItem = new WorkItem<TraceParser> (parser,
+					      &TraceParser::processCPUfreq);
 	workQueue = new WorkQueue();
 	workQueue->addDefaultWorkItem(schedItem);
 	workQueue->addDefaultWorkItem(migItem);

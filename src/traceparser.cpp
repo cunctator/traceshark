@@ -25,7 +25,7 @@
 #include "cpufreq.h"
 #include "cpuidle.h"
 #include "ftraceparams.h"
-#include "ftraceparser.h"
+#include "traceparser.h"
 #include "tracefile.h"
 #include "grammarroot.h"
 #include "namepidnode.h"
@@ -39,7 +39,7 @@
 #include "threads/workitem.h"
 #include "threads/workqueue.h"
 
-bool FtraceParser::open(const QString &fileName)
+bool TraceParser::open(const QString &fileName)
 {
 	unsigned long long nr = 0;
 	unsigned int i = 0;
@@ -99,12 +99,12 @@ bool FtraceParser::open(const QString &fileName)
 	return true;
 }
 
-bool FtraceParser::isOpen()
+bool TraceParser::isOpen()
 {
 	return (traceFile != NULL);
 }
 
-void FtraceParser::close()
+void TraceParser::close()
 {
 	if (traceFile != NULL) {
 		events.clear();
@@ -134,7 +134,7 @@ void FtraceParser::close()
 	clearGrammarPools(grammarRoot);
 }
 
-FtraceParser::FtraceParser()
+TraceParser::TraceParser()
 	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL), black(0, 0, 0),
 	  white(255, 255, 255), CPUs(NULL)
 {
@@ -179,13 +179,13 @@ FtraceParser::FtraceParser()
 	grammarRoot->isLeaf = false;
 
 	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
-	parserThread = new WorkThread<FtraceParser>
-		(this, &FtraceParser::parseThread);
+	parserThread = new WorkThread<TraceParser>
+		(this, &TraceParser::parseThread);
 }
 
-FtraceParser::~FtraceParser()
+TraceParser::~TraceParser()
 {
-	FtraceParser::close();
+	TraceParser::close();
 	DeleteGrammarTree(grammarRoot);
 	delete ptrPool;
 	delete taskNamePool;
@@ -193,7 +193,7 @@ FtraceParser::~FtraceParser()
 	delete parserThread;
 }
 
-void FtraceParser::DeleteGrammarTree(GrammarNode* node) {
+void TraceParser::DeleteGrammarTree(GrammarNode* node) {
 	unsigned int i;
 	for (i = 0; i < node->nChildren; i++) {
 		/* Delete subtree unless it's a node being it's own child */
@@ -205,7 +205,7 @@ void FtraceParser::DeleteGrammarTree(GrammarNode* node) {
 
 /* This function does prescanning as well, to determine number of events,
  * number of CPUs, max/min CPU frequency etc */
-void FtraceParser::parseThread()
+void TraceParser::parseThread()
 {
 	unsigned int i = 0;
 	preparePreScan();
@@ -222,7 +222,7 @@ void FtraceParser::parseThread()
 	finalizePreScan();
 }
 
-void FtraceParser::preparePreScan()
+void TraceParser::preparePreScan()
 {
 	nrEvents = 0;
 	maxCPU = 0;
@@ -236,7 +236,7 @@ void FtraceParser::preparePreScan()
 	startFreq.fill(-1, HIGHEST_CPU_EVER + 1);
 }
 
-void FtraceParser::finalizePreScan()
+void TraceParser::finalizePreScan()
 {
 	lastEvent = nrEvents - 1;
 	if (nrEvents >= 2) {
@@ -264,15 +264,15 @@ void FtraceParser::finalizePreScan()
 	startFreq.resize(nrCPUs);
 }
 
-void FtraceParser::preScan()
+void TraceParser::preScan()
 {
 }
 
-void FtraceParser::parse()
+void TraceParser::parse()
 {
 }
 
-bool FtraceParser::processMigration()
+bool TraceParser::processMigration()
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
@@ -303,7 +303,7 @@ bool FtraceParser::processMigration()
 	return false;
 }
 
-bool FtraceParser::processSched()
+bool TraceParser::processSched()
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
@@ -334,7 +334,7 @@ bool FtraceParser::processSched()
 	return false;
 }
 
-bool FtraceParser::processCPUfreq()
+bool TraceParser::processCPUfreq()
 {
 	unsigned int i;
 	unsigned int cpu;
@@ -365,7 +365,7 @@ bool FtraceParser::processCPUfreq()
 	return false;
 }
 
-void FtraceParser::colorizeTasks()
+void TraceParser::colorizeTasks()
 {
 	unsigned int cpu;
 	double nf;
@@ -442,52 +442,52 @@ retry:
 	}
 }
 
-void FtraceParser::setSchedOffset(unsigned int cpu, double offset)
+void TraceParser::setSchedOffset(unsigned int cpu, double offset)
 {
 	schedOffset[cpu] = offset;
 }
 
-void FtraceParser::setSchedScale(unsigned int cpu, double scale)
+void TraceParser::setSchedScale(unsigned int cpu, double scale)
 {
 	schedScale[cpu] = scale;
 }
 
-void FtraceParser::setCpuIdleOffset(unsigned int cpu, double offset)
+void TraceParser::setCpuIdleOffset(unsigned int cpu, double offset)
 {
 	cpuIdleOffset[cpu] = offset;
 }
 
-void FtraceParser::setCpuIdleScale(unsigned int cpu, double scale)
+void TraceParser::setCpuIdleScale(unsigned int cpu, double scale)
 {
 	cpuIdleScale[cpu] = scale / maxIdleState;
 }
 
-void FtraceParser::setCpuFreqOffset(unsigned int cpu, double offset)
+void TraceParser::setCpuFreqOffset(unsigned int cpu, double offset)
 {
 	cpuFreqOffset[cpu] = offset;
 }
 
-void FtraceParser::setCpuFreqScale(unsigned int cpu, double scale)
+void TraceParser::setCpuFreqScale(unsigned int cpu, double scale)
 {
 	cpuFreqScale[cpu] = scale / maxFreq;
 }
 
-void FtraceParser::setMigrationOffset(double offset)
+void TraceParser::setMigrationOffset(double offset)
 {
 	migrationOffset = offset;
 }
 
-void FtraceParser::setMigrationScale(double scale)
+void TraceParser::setMigrationScale(double scale)
 {
 	migrationScale = scale;
 }
 
-void FtraceParser::setQCustomPlot(QCustomPlot *plot)
+void TraceParser::setQCustomPlot(QCustomPlot *plot)
 {
 	customPlot = plot;
 }
 
-void FtraceParser::addCpuFreqWork(unsigned int cpu,
+void TraceParser::addCpuFreqWork(unsigned int cpu,
 				  QList<AbstractWorkItem*> &list)
 {
 	double scale = cpuFreqScale.value(cpu);
@@ -500,7 +500,7 @@ void FtraceParser::addCpuFreqWork(unsigned int cpu,
 	list.append(freqItem);
 }
 
-void FtraceParser::addCpuIdleWork(unsigned int cpu,
+void TraceParser::addCpuIdleWork(unsigned int cpu,
 				  QList<AbstractWorkItem*> &list)
 {
 	double scale = cpuIdleScale.value(cpu);
@@ -513,7 +513,7 @@ void FtraceParser::addCpuIdleWork(unsigned int cpu,
 	list.append(idleItem);
 }
 
-void FtraceParser::addCpuSchedWork(unsigned int cpu,
+void TraceParser::addCpuSchedWork(unsigned int cpu,
 				  QList<AbstractWorkItem*> &list)
 {
 	double scale = schedScale.value(cpu);
@@ -541,7 +541,7 @@ void FtraceParser::addCpuSchedWork(unsigned int cpu,
  * creates objects that are children customPlot, which is created by the
  * mainthread
  */
-void FtraceParser::scaleMigration()
+void TraceParser::scaleMigration()
 {
 	MigrationArrow *a;
 	QList<Migration>::iterator iter;
@@ -557,7 +557,7 @@ void FtraceParser::scaleMigration()
 	}
 }
 
-void FtraceParser::doScale()
+void TraceParser::doScale()
 {
 	QList<AbstractWorkItem*> workList;
 	unsigned int cpu;
@@ -582,7 +582,7 @@ void FtraceParser::doScale()
 }
 
 
-bool FtraceParser::parseLineBugFixup(TraceEvent* event, double prevtime)
+bool TraceParser::parseLineBugFixup(TraceEvent* event, double prevtime)
 {
 	double corrtime = event->time + 0.9;
 	double delta = corrtime - prevtime;
@@ -595,7 +595,7 @@ bool FtraceParser::parseLineBugFixup(TraceEvent* event, double prevtime)
 	return retval;
 }
 
-void FtraceParser::clearGrammarPools(GrammarNode *tree)
+void TraceParser::clearGrammarPools(GrammarNode *tree)
 {
 	unsigned int i;
 	tree->clearStringPool();
