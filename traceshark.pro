@@ -46,6 +46,7 @@ HEADERS      += mm/stringpool.h
 HEADERS      += mm/stringtree.h
 HEADERS      += src/cputask.h
 HEADERS      += src/setting.h
+HEADERS      += src/paramhelpers.h
 HEADERS      += src/task.h
 HEADERS      += src/taskgraph.h
 HEADERS      += src/tcolor.h

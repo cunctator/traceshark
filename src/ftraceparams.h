@@ -21,96 +21,12 @@
 
 #include "mm/mempool.h"
 #include "traceevent.h"
+#include "paramhelpers.h"
 #include "traceshark.h"
 #include <cstring>
 #include <cstdint>
 
-#define TASKNAME_MAXLEN (128) /* Should be enough, I wouldn't expect more
-				 than about 16 */
-
 extern char *eventstrings[];
-
-#define ABSURD_UNSIGNED (2147483647)
-
-#define is_this_event(EVENTNAME, EVENT) (EVENT.type == EVENTNAME)
-
-#define isArrowStr(str) (str->len == 3 && str->ptr[0] == '=' && \
-			 str->ptr[1] == '=' && str->ptr[2] == '>')
-
-
-static __always_inline unsigned int param_after_char(const TraceEvent &event,
-					    int n_param, char ch)
-{
-	char *last;
-	char *first;
-	char *c;
-	bool found = false;
-	unsigned int param = 0;
-	unsigned int digit;
-
-
-	last = event.argv[n_param]->ptr + event.argv[n_param]->len - 1;
-	first = event.argv[n_param]->ptr;
-	for (c = last; c >= first; c--) {
-		if (*c == ch) {
-			found = true;
-			break;
-		}
-	}
-	if (!found)
-		return ABSURD_UNSIGNED; /* return absurd if error */
-	c++;
-	for (; c <= last; c++) {
-		digit = *c - '0';
-		param *= 10;
-		param += digit;
-	}
-	return param;
-}
-
-static __always_inline unsigned int param_inside_braces(TraceEvent &event,
-					       unsigned int n_param)
-{
-	unsigned int len = event.argv[n_param]->len;
-	char *first = event.argv[n_param]->ptr;
-	char *end = first + len - 1; /* now pointing to the final ']' */
-	char *c;
-	unsigned int digit, param = 0;
-
-	first++; /* Skipt the leading '[' */
-
-	if (len > 2) {
-		for (c = first; c < end; c++) {
-			digit = *c - '0';
-			param *= 10;
-			param += digit;
-		}
-		return param;
-	}
-
-	return ABSURD_UNSIGNED;
-}
-
-static __always_inline const char *substr_after_char(const char *str,
-					       unsigned int len,
-					       char c,
-					       unsigned int *sublen)
-{
-	unsigned int i;
-
-	for (i = 0; i < len; i++) {
-		if (*str == c) {
-			i++;
-			if (i == len)
-				return NULL;
-			str++;
-			*sublen = len - i;
-			return str;
-		}
-		str++;
-	}
-	return NULL;
-}
 
 #define cpufreq_event(EVENT) (is_this_event(CPU_FREQUENCY, EVENT) && \
 			      EVENT.argc >= 2)
