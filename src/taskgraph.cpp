@@ -36,6 +36,7 @@ void TaskGraph::setTask(CPUTask *newtask)
 		QString::number(newtask->pid);
 	QCPGraph::setName(name);
 	legendGraph->setName(name);
+	legendGraph->pid = newtask->pid;
 	task = newtask;
 }	
 

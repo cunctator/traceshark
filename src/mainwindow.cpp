@@ -471,6 +471,7 @@ void MainWindow::closeTrace()
 	clearPlot();
 	if(parser->isOpen())
 		parser->close();
+	infoWidget->clear();
 }
 
 void MainWindow::about()
@@ -764,4 +765,10 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	if (legendGraph == NULL)
 		return;
 	legendGraph->removeFromLegend();
+	/* Inform the TaskInfo class (inside InfoWidget) that the pid has
+	 * been removed. This is needed because InfoWidget keeps track of this
+	 * for the purpose of preventing the same pid being added twice from
+	 * different LegendGraphs, there might be "identical" LegendGraphs
+	 * when the same pid has migrated between CPUs */
+	infoWidget->pidRemoved(legendGraph->pid);
 }

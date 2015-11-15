@@ -22,6 +22,7 @@
 #include "traceshark.h"
 #include "qcustomplot/qcustomplot.h"
 #include <QHBoxLayout>
+#include <QMap>
 #include <QPushButton>
 #include <QLabel>
 #include <QLineEdit>
@@ -73,17 +74,40 @@ void TaskInfo::removeTaskGraph()
 	pidLine->setText(tr(""));
 }
 
+void TaskInfo::clear()
+{
+	removeTaskGraph();
+	legendPidMap.clear();
+}
+
 void TaskInfo::addClicked()
 {
 	QObject *obj;
 	QCustomPlot *plot;
-	if (taskGraph != NULL) {
-		taskGraph->addToLegend();
-		obj = taskGraph->parent();
-		plot = qobject_cast<QCustomPlot *>(obj);
-		if (plot != NULL)
-			plot->replot();
-	}
+	CPUTask *task;
+
+	if (taskGraph == NULL)
+		return;
+
+	task = taskGraph->getTask();
+	if (task == NULL)
+		return;
+
+	/* We use the legendPidMap to keep track of pids that have been added
+	 * to the legend, otherwise it could happen that someone added the same
+	 * task multiple times to the legend and that looks a bit crazy. While
+	 * QCustomPlot prevents the same the same LegendGraph object being
+	 * added twice we can have multiple identical objects, since tasks can
+	 * migrate between CPUs */
+	if (legendPidMap.contains(task->pid))
+		return;
+
+	legendPidMap[task->pid] = 1; /* Value could be anything */
+	taskGraph->addToLegend();
+	obj = taskGraph->parent();
+	plot = qobject_cast<QCustomPlot *>(obj);
+	if (plot != NULL)
+		plot->replot();
 }
 
 void TaskInfo::checkGraphSelection()
@@ -93,4 +117,9 @@ void TaskInfo::checkGraphSelection()
 	if (taskGraph->selected())
 		return;
 	removeTaskGraph();
+}
+
+void TaskInfo::pidRemoved(unsigned int pid)
+{
+	legendPidMap.remove(pid);
 }

@@ -20,7 +20,7 @@
 
 LegendGraph::LegendGraph(QCPAxis *keyAxis, QCPAxis *valueAxis,
 		       QCPAbstractPlottable *p):
-	QCPGraph(keyAxis, valueAxis), plottable(p)
+	QCPGraph(keyAxis, valueAxis), plottable(p), pid(0)
 {}
 
 QCPAbstractPlottable *LegendGraph::getPlottable()

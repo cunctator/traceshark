@@ -39,6 +39,8 @@ public:
 	void setTaskGraph(TaskGraph *graph);
 	void removeTaskGraph();
 	void checkGraphSelection();
+	void pidRemoved(unsigned int pid);
+	void clear();
 signals:
 	void valueChanged(double value, int nr);
 private slots:

@@ -131,3 +131,13 @@ void InfoWidget::checkGraphSelection()
 {
 	taskInfo->checkGraphSelection();
 }
+
+void InfoWidget::pidRemoved(unsigned int pid)
+{
+	taskInfo->pidRemoved(pid);
+}
+
+void InfoWidget::clear()
+{
+	taskInfo->clear();
+}

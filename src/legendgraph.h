@@ -29,6 +29,7 @@ public:
 		    *p);
 	virtual ~LegendGraph() {}
 	QCPAbstractPlottable *getPlottable();
+	unsigned int pid;
 private:
 	QCPAbstractPlottable *plottable;
 };

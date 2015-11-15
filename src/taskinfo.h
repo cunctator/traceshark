@@ -20,7 +20,12 @@
 #define TASKINFO_H
 
 #include <QWidget>
+#include <QMap>
+
+QT_BEGIN_NAMESPACE
 class QLineEdit;
+QT_END_NAMESPACE
+
 class TaskGraph;
 
 class TaskInfo : public QWidget
@@ -33,12 +38,15 @@ public:
 	void setTaskGraph(TaskGraph *graph);
 	void removeTaskGraph();
 	void checkGraphSelection();
+	void clear();
+	void pidRemoved(unsigned int pid);
 private slots:
 	void addClicked();
 private:
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
 	TaskGraph *taskGraph;
+	QMap <unsigned int, int> legendPidMap;
 };
 
 #endif /* TASKINFO_H */
