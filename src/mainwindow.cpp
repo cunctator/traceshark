@@ -611,7 +611,8 @@ void MainWindow::infoValueChanged(double value, int nr)
 	Cursor *cursor;
 	if (nr == TShark::RED_CURSOR || nr == TShark::BLUE_CURSOR) {
 		cursor = cursors[nr];
-		cursor->setPosition(value);
+		if (cursor != NULL)
+			cursor->setPosition(value);
 		eventsWidget->scrollTo(value);
 	}
 }
