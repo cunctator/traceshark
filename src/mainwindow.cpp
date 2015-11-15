@@ -106,6 +106,7 @@ MainWindow::MainWindow():
 
 MainWindow::~MainWindow()
 {
+	closeTrace();
 	delete parser;
 	delete schedItem;
 	delete migItem;
