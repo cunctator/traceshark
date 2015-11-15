@@ -16,20 +16,31 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ftraceparams.h"
+#include "traceevent.h"
 
-char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_oldname_strdup(event, pool);
-}
+/* Do not change the order of these without updating the enum in
+ * traceevent.h */
 
-char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_newname_strdup(event, pool);
-}
+static char cpufreqstr[] = "cpu_frequency";
+static char cpuidlestr[] = "cpu_idle";
+static char migratestr[] = "sched_migrate_task";
+static char sswitchstr[] = "sched_switch";
+static char swakeupstr[] = "sched_wakeup";
+static char swaknewstr[] = "sched_wakeup_new";
+static char sprforkstr[] = "sched_process_fork";
+static char sprexitstr[] = "sched_process_exit";
+static char irqhdlrent[] = "irq_handler_entry";
+static char irqhdlrext[] = "irq_handler_exit";
 
-char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_wakeup_name_strdup(event, pool);
-}
-
-char *sched_process_fork_childname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_process_fork_childname_strdup(event, pool);
-}
+char *eventstrings[NR_EVENTS] = {
+	cpufreqstr,
+	cpuidlestr,
+	migratestr,
+	sswitchstr,
+	swakeupstr,
+	swaknewstr,
+	sprforkstr,
+	sprexitstr,
+	irqhdlrent,
+	irqhdlrext
+};

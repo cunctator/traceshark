@@ -16,20 +16,19 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ftraceparams.h"
+#ifndef PIDNODE_H
+#define PIDNODE_H
 
-char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_oldname_strdup(event, pool);
-}
+#include "grammarnode.h"
 
-char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_newname_strdup(event, pool);
-}
+class StringPool;
 
-char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_wakeup_name_strdup(event, pool);
-}
+class PidNode: public GrammarNode
+{
+public:
+	PidNode(const char *name);
+	bool match(TString *str, TraceEvent *event);
+	void clearStringPool() {};
+};
 
-char *sched_process_fork_childname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_process_fork_childname_strdup(event, pool);
-}
+#endif

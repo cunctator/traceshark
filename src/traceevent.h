@@ -50,4 +50,6 @@ public:
 	unsigned int argc;
 };
 
+extern char *eventstrings[];
+
 #endif

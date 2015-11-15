@@ -32,6 +32,81 @@
 			 str->ptr[1] == '=' && str->ptr[2] == '>')
 
 
+/* + 1 needed for null termination */
+#define taskname_prealloc(POOL) \
+	((char*) POOL->preallocChars(TASKNAME_MAXLEN + 1))
+
+/* Warning, this function does not null terminate the string!
+ * This function copies everything after the delim char into the cstring
+ * pointed to by c and adds the length to len */
+static __always_inline void __copy_tstring_after_char(TString *str,
+						      char delim,
+						      char *&dest,
+						      unsigned int &len,
+						      unsigned int maxlen,
+						      bool &ok)
+{
+	unsigned int i;
+	unsigned int flen;
+	char *src;
+	ok = true;
+	/* Find the char 'delim' in the string */
+	for (i = 0; i < str->len; i++) {
+		if (str->ptr[i] == delim)
+			break;
+	}
+	if (i >= str->len)
+		goto err;
+	/* ...then copy everything after the delim char into the name, if there
+	 * is anything to copy */
+	i++;
+	if (i < str->len) {
+		flen = str->len - i;
+		if (flen > maxlen)
+			goto err;
+		src = str->ptr + i;
+		strncpy(dest, src, flen);
+		len += flen;
+		dest += flen;
+		return;
+	}
+err:
+	ok = false;
+	return;
+}
+
+/* This function will merge event arguments from beginidx to endix into
+ * a cstring. Such cases exists because tasknames that contains spaces have
+ * been split into several arguments due to parsing with space as delimiter */
+static __always_inline void merge_args_into_cstring(TraceEvent &event,
+						    unsigned int beginidx,
+						    unsigned int endidx,
+						    char *&c,
+						    unsigned int &len,
+						    unsigned int maxlen,
+						    bool &ok)
+{
+	unsigned int i;
+	ok = true;
+
+	for (i = beginidx; i <= endidx; i++) {
+		len += event.argv[i]->len;
+		len++;
+		if (len > maxlen) {
+			ok = false;
+			return;
+		}
+		*c = ' ';
+		c++;
+		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
+		c += event.argv[i]->len;
+	}
+	/* Terminate the string, it's assumed that maxlen is maximum length
+	 * *excluding* terminating null character :) */
+	c = '\0';
+	len++;
+}
+
 static __always_inline unsigned int param_after_char(const TraceEvent &event,
 					    int n_param, char ch)
 {

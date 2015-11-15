@@ -16,64 +16,36 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eventnode.h"
-#include "mm/stringtree.h"
+#include "namenode.h"
+#include "mm/stringpool.h"
 #include "traceevent.h"
 #include "tstring.h"
 
-EventNode::EventNode(const char *name)
+NameNode::NameNode(const char *name)
 	: GrammarNode(name)
 {
-	eventTree = new StringTree(8, 256);
-	setupTree();
+	namePool = new StringPool(1024, 65536);
 }
 
-EventNode::~EventNode()
+NameNode::~NameNode()
 {
-	delete eventTree;
+	delete namePool;
 }
 
-bool EventNode::match(TString *str, TraceEvent *event)
+bool NameNode::match(TString *str, TraceEvent *event)
 {
-	char *lastChr = str->ptr + str->len - 1;
 	TString *newstr;
-	event_t type;
 
-	if (str->len < 1)
-		return false;
-
-	if (*lastChr == ':') {
-		*lastChr = '\0';
-		str->len--;
-	} else
-		return false;
-
-	newstr = eventTree->searchAllocString(str, TShark::StrHash32(str),
-					      &type, EVENT_UNKNOWN);
+	/* This is the "magic" that saves a ton of string allocations
+	 * with exactly the same string */
+	newstr = namePool->allocString(str, TShark::StrHash32(str), 65536);
 	if (newstr == NULL)
 		return false;
-	event->eventName = newstr;
-	event->type = type;
+	event->taskName = newstr;
 	return true;
 }
 
-void EventNode::clearStringPool()
+void NameNode::clearStringPool()
 {
-	eventTree->clear();
-	setupTree();
-}
-
-void EventNode::setupTree()
-{
-	int t;
-	event_t dummy;
-	TString str;
-	QTextStream qout(stdout);
-
-	for (t = 0; t < NR_EVENTS; t++) {
-		str.ptr = eventstrings[t];
-		str.len = strlen(eventstrings[t]);
-		eventTree->searchAllocString(&str, TShark::StrHash32(&str),
-					     &dummy, (event_t) t);
-	}
+	namePool->clear();
 }

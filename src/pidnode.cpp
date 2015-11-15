@@ -16,64 +16,34 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eventnode.h"
-#include "mm/stringtree.h"
+#include "pidnode.h"
 #include "traceevent.h"
 #include "tstring.h"
 
-EventNode::EventNode(const char *name)
+PidNode::PidNode(const char *name)
 	: GrammarNode(name)
-{
-	eventTree = new StringTree(8, 256);
-	setupTree();
-}
+{}
 
-EventNode::~EventNode()
-{
-	delete eventTree;
-}
-
-bool EventNode::match(TString *str, TraceEvent *event)
+bool PidNode::match(TString *str, TraceEvent *event)
 {
 	char *lastChr = str->ptr + str->len - 1;
-	TString *newstr;
-	event_t type;
+	int pid;
+	int digit;
+	char *c;
 
-	if (str->len < 1)
+	if (str->len < 1 || str->len > 10)
 		return false;
 
-	if (*lastChr == ':') {
-		*lastChr = '\0';
-		str->len--;
-	} else
-		return false;
-
-	newstr = eventTree->searchAllocString(str, TShark::StrHash32(str),
-					      &type, EVENT_UNKNOWN);
-	if (newstr == NULL)
-		return false;
-	event->eventName = newstr;
-	event->type = type;
-	return true;
-}
-
-void EventNode::clearStringPool()
-{
-	eventTree->clear();
-	setupTree();
-}
-
-void EventNode::setupTree()
-{
-	int t;
-	event_t dummy;
-	TString str;
-	QTextStream qout(stdout);
-
-	for (t = 0; t < NR_EVENTS; t++) {
-		str.ptr = eventstrings[t];
-		str.len = strlen(eventstrings[t]);
-		eventTree->searchAllocString(&str, TShark::StrHash32(&str),
-					     &dummy, (event_t) t);
+	pid = 0;
+	for (c = str->ptr; c <= lastChr; c++) {
+		pid *= 10;
+		digit = *c - '0';
+		if (digit <= 9 && digit >= 0)
+			pid += digit;
+		else
+			return false;
 	}
+
+	event->pid = pid;
+	return true;
 }

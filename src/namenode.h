@@ -16,20 +16,22 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ftraceparams.h"
+#ifndef NAMENODE_H
+#define NAMENODE_H
 
-char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_oldname_strdup(event, pool);
-}
+#include "grammarnode.h"
 
-char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_newname_strdup(event, pool);
-}
+class StringPool;
 
-char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_wakeup_name_strdup(event, pool);
-}
+class NameNode: public GrammarNode
+{
+public:
+	NameNode(const char *name);
+	~NameNode();
+	bool match(TString *str, TraceEvent *event);
+	void clearStringPool();
+private:
+	StringPool *namePool;
+};
 
-char *sched_process_fork_childname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_process_fork_childname_strdup(event, pool);
-}
+#endif /* NAMENODE_H */

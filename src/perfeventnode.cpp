@@ -16,27 +16,30 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eventnode.h"
+#include "perfeventnode.h"
 #include "mm/stringtree.h"
+#include "ftraceparams.h"
 #include "traceevent.h"
 #include "tstring.h"
 
-EventNode::EventNode(const char *name)
+PerfEventNode::PerfEventNode(const char *name)
 	: GrammarNode(name)
 {
 	eventTree = new StringTree(8, 256);
 	setupTree();
 }
 
-EventNode::~EventNode()
+PerfEventNode::~PerfEventNode()
 {
 	delete eventTree;
 }
 
-bool EventNode::match(TString *str, TraceEvent *event)
+bool PerfEventNode::match(TString *str, TraceEvent *event)
 {
 	char *lastChr = str->ptr + str->len - 1;
+	char *c = str->ptr;
 	TString *newstr;
+	TString tmpstr;
 	event_t type;
 
 	if (str->len < 1)
@@ -48,7 +51,21 @@ bool EventNode::match(TString *str, TraceEvent *event)
 	} else
 		return false;
 
-	newstr = eventTree->searchAllocString(str, TShark::StrHash32(str),
+	do {
+		if (c >= lastChr)
+			return false;
+		if (*c == ':')
+			break;
+		c++;
+	} while(true);
+
+	tmpstr.ptr = c + 1;
+	if (tmpstr.ptr >= lastChr)
+		return false;
+	tmpstr.len = lastChr - tmpstr.ptr;
+
+	newstr = eventTree->searchAllocString(&tmpstr,
+					      TShark::StrHash32(&tmpstr),
 					      &type, EVENT_UNKNOWN);
 	if (newstr == NULL)
 		return false;
@@ -57,13 +74,13 @@ bool EventNode::match(TString *str, TraceEvent *event)
 	return true;
 }
 
-void EventNode::clearStringPool()
+void PerfEventNode::clearStringPool()
 {
 	eventTree->clear();
 	setupTree();
 }
 
-void EventNode::setupTree()
+void PerfEventNode::setupTree()
 {
 	int t;
 	event_t dummy;

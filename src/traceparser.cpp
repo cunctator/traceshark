@@ -34,6 +34,9 @@
 #include "timenode.h"
 #include "eventnode.h"
 #include "argnode.h"
+#include "namenode.h"
+#include "pidnode.h"
+#include "perfeventnode.h"
 #include "traceshark.h"
 #include "threads/workthread.h"
 #include "threads/workitem.h"
@@ -132,21 +135,33 @@ void TraceParser::close()
 	ptrPool->reset();
 	taskNamePool->reset();
 	clearGrammarPools(ftraceGrammarRoot);
+	traceType = TRACE_TYPE_NONE;
 }
 
 TraceParser::TraceParser()
-	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL), black(0, 0, 0),
-	  white(255, 255, 255), CPUs(NULL)
+	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL),
+	  traceType(TRACE_TYPE_NONE), black(0, 0, 0), white(255, 255, 255),
+	  CPUs(NULL)
 {
-	NamePidNode *ftraceNamePidNode;
-	CpuNode *ftraceCpuNode;
-	TimeNode *ftraceTimeNode;
-	EventNode *ftraceEventNode;
-	ArgNode *ftraceArgNode;
-
 	traceFile = NULL;
 	ptrPool = new MemPool(16384, sizeof(TString*));
 	taskNamePool = new MemPool(16384, sizeof(char));
+
+	createFtraceGrammarTree();
+	createPerfGrammarTree();
+
+	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
+	parserThread = new WorkThread<TraceParser>
+		(this, &TraceParser::parseThread);
+}
+
+void TraceParser::createFtraceGrammarTree()
+{
+	ArgNode *ftraceArgNode;
+	EventNode *ftraceEventNode;
+	TimeNode *ftraceTimeNode;
+	CpuNode *ftraceCpuNode;
+	NamePidNode *ftraceNamePidNode;
 
 	ftraceArgNode = new ArgNode("ftraceArgNode");
 	ftraceArgNode->nChildren = 1;
@@ -158,12 +173,12 @@ TraceParser::TraceParser()
 	ftraceEventNode->children[0] = ftraceArgNode;
 	ftraceEventNode->isLeaf = true;
 
-	ftraceTimeNode = new TimeNode("ftraceTimenode");
+	ftraceTimeNode = new TimeNode("ftraceTimeNode");
 	ftraceTimeNode->nChildren = 1;
 	ftraceTimeNode->children[0] = ftraceEventNode;
 	ftraceTimeNode->isLeaf = false;
 
-	ftraceCpuNode = new CpuNode("ftraceCpunode");
+	ftraceCpuNode = new CpuNode("ftraceCpuNode");
 	ftraceCpuNode->nChildren = 1;
 	ftraceCpuNode->children[0] = ftraceTimeNode;
 	ftraceCpuNode->isLeaf = false;
@@ -177,16 +192,58 @@ TraceParser::TraceParser()
 	ftraceGrammarRoot->nChildren = 1;
 	ftraceGrammarRoot->children[0] = ftraceNamePidNode;
 	ftraceGrammarRoot->isLeaf = false;
+}
 
-	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
-	parserThread = new WorkThread<TraceParser>
-		(this, &TraceParser::parseThread);
+void TraceParser::createPerfGrammarTree()
+{
+	ArgNode *perfArgNode;
+	PerfEventNode *perfEventNode;
+	TimeNode *perfTimeNode;
+	CpuNode *perfCpuNode;
+	PidNode *perfPidNode;
+	NameNode *perfNameNode;
+
+	perfArgNode = new ArgNode("perfArgNode");
+	perfArgNode->nChildren = 1;
+	perfArgNode->children[0] = perfArgNode;
+	perfArgNode->isLeaf = true;
+
+	perfEventNode = new PerfEventNode("perfEventNode");
+	perfEventNode->nChildren = 1;
+	perfEventNode->children[0] = perfArgNode;
+	perfEventNode->isLeaf = true;
+
+	perfTimeNode = new TimeNode("perfTimeNode");
+	perfTimeNode->nChildren = 1;
+	perfTimeNode->children[0] = perfEventNode;
+	perfTimeNode->isLeaf = false;
+
+	perfCpuNode = new CpuNode("perfCpuNode");
+	perfCpuNode->nChildren = 1;
+	perfCpuNode->children[0] = perfTimeNode;
+	perfCpuNode->isLeaf = false;
+
+	perfPidNode = new PidNode("perfPidNode");
+	perfPidNode->nChildren = 1;
+	perfPidNode->children[0] = perfCpuNode;
+	perfPidNode->isLeaf = false;
+
+	perfNameNode = new NameNode("perfNameNode");
+	perfNameNode->nChildren = 1;
+	perfNameNode->children[0] = perfPidNode;
+	perfNameNode->isLeaf = false;
+
+	perfGrammarRoot = new GrammarRoot("perfNameNode");
+	perfGrammarRoot->nChildren = 1;
+	perfGrammarRoot->children[0] = perfNameNode;
+	perfGrammarRoot->isLeaf = false;
 }
 
 TraceParser::~TraceParser()
 {
 	TraceParser::close();
 	DeleteGrammarTree(ftraceGrammarRoot);
+	DeleteGrammarTree(perfGrammarRoot);
 	delete ptrPool;
 	delete taskNamePool;
 	delete[] tbuffers;
@@ -217,14 +274,49 @@ void TraceParser::parseThread()
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
+		determineTraceType();
+		if (traceType == TRACE_TYPE_FTRACE) {
+			goto ftrace;
+		}
+		if (traceType == TRACE_TYPE_PERF) {
+			goto perf;
+		}
 	}
+	/* Something went wrong if we get here, we better pretend that
+	 * we were not able to read any events */
+	nrEvents = 0;
+	events.clear();
+	return;
 
+	/* The purpose of jumping to these loops is to  be able to use the
+	 * (hopefully faster) specialized parse functions */
+ftrace:
+	while(true) {
+		if (parseFtraceBuffer(i))
+			break;
+		i++;
+		if (i == NR_TBUFFERS)
+			i = 0;
+	}
+	finalizePreScan();
+	return;
+
+perf:
+	while(true) {
+		if (parsePerfBuffer(i))
+			break;
+		i++;
+		if (i == NR_TBUFFERS)
+			i = 0;
+	}
 	finalizePreScan();
 }
 
 void TraceParser::preparePreScan()
 {
 	nrEvents = 0;
+	nrFtraceEvents = 0;
+	nrPerfEvents = 0;
 	maxCPU = 0;
 	startTime = 0;
 	endTime = 0;
@@ -272,7 +364,69 @@ void TraceParser::parse()
 {
 }
 
+/* This parses a buffer regardless if it's perf or ftrace */
+bool TraceParser::parseBuffer(unsigned int index)
+{
+	unsigned int i, s;
+	double prevtime = std::numeric_limits<double>::lowest();
+
+	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
+	if (tbuf->beginConsumeBuffer()) {
+		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
+		return true;
+	}
+
+	s = tbuf->nRead;
+
+	for(i = 0; i < s; i++) {
+		TraceLine *line = &tbuf->buffer[i];
+		TraceEvent event;
+		event.argc = 0;
+		event.argv = (TString**) ptrPool->preallocN(256);
+		if (parseLine(line, &event, ftraceGrammarRoot)) {
+			/* Check if the timestamp of this event is affected by
+			 * the infamous ftrace timestamp rollover bug and
+			 * try to correct it */
+			if (event.time < prevtime) {
+				if (!parseLineBugFixup(&event, prevtime))
+					continue;
+			}
+			prevtime = event.time;
+			ptrPool->commitN(event.argc);
+			events.push_back(event);
+			nrFtraceEvents++;
+			preScanFtraceEvent(event);
+		}
+		if (parseLine(line, &event, perfGrammarRoot)) {
+			/* Check if the timestamp of this event is affected by
+			 * the infamous ftrace timestamp rollover bug and
+			 * try to correct it */
+			if (event.time < prevtime) {
+				if (!parseLineBugFixup(&event, prevtime))
+					continue;
+			}
+			prevtime = event.time;
+			ptrPool->commitN(event.argc);
+			events.push_back(event);
+			nrPerfEvents++;
+			preScanPerfEvent(event);
+		}
+	}
+	tbuf->endConsumeBuffer();
+	return false;
+}
+
 bool TraceParser::processMigration()
+{
+	if (traceType == TRACE_TYPE_FTRACE) {
+		processMigrationFtrace();
+	} else if (traceType == TRACE_TYPE_PERF) {
+		processMigrationPerf();
+	}
+	return false;
+}
+
+void TraceParser::processMigrationFtrace()
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
@@ -300,21 +454,78 @@ bool TraceParser::processMigration()
 			migrations.push_back(m);
 		}
 	}
-	return false;
+}
+
+void TraceParser::processMigrationPerf()
+{
+	unsigned long i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		if (perf_sched_migrate(event)) {
+			Migration m;
+			m.pid = perf_sched_migrate_pid(event);
+			m.oldcpu = perf_sched_migrate_origCPU(event);
+			m.newcpu = perf_sched_migrate_destCPU(event);
+			m.time = event.time;
+			migrations.push_back(m);
+		} else if (perf_sched_process_fork(event)) {
+			Migration m;
+			m.pid = perf_sched_process_fork_childpid(event);
+			m.oldcpu = -1;
+			m.newcpu = event.cpu;
+			m.time = event.time;
+			migrations.push_back(m);
+		} else if (perf_sched_process_exit(event)) {
+			Migration m;
+			m.pid = perf_sched_process_exit_pid(event);
+			m.oldcpu = event.cpu;
+			m.newcpu = -1;
+			m.time = event.time;
+			migrations.push_back(m);
+		}
+	}
 }
 
 bool TraceParser::processSched()
+{
+	if (traceType == TRACE_TYPE_FTRACE) {
+		processSchedFtrace();
+	} else if (traceType == TRACE_TYPE_PERF) {
+		processSchedPerf();
+	}
+	return false;
+}
+
+void TraceParser::processSchedFtrace()
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
 		if (sched_switch(event)) {
-			processSwitchEvent(event);
+			processFtraceSwitchEvent(event);
 		} else if (sched_wakeup(event)) {
-			processWakeupEvent(event);
+			processFtraceWakeupEvent(event);
 		}
 	}
+	processSchedAddTail();
+}
 
+void TraceParser::processSchedPerf()
+{
+	unsigned long i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		if (perf_sched_switch(event)) {
+			processPerfSwitchEvent(event);
+		} else if (sched_wakeup(event)) {
+			processPerfWakeupEvent(event);
+		}
+	}
+	processSchedAddTail();
+}
+
+void TraceParser::processSchedAddTail()
+{
 	/* Add the "tail" to all tasks, i.e. extend them until endTime */
 	unsigned int cpu;
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
@@ -331,30 +542,30 @@ bool TraceParser::processSched()
 			task.data.push_back(d);
 		}
 	}
-	return false;
 }
 
 bool TraceParser::processCPUfreq()
 {
-	unsigned int i;
 	unsigned int cpu;
+
+	if (traceType == TRACE_TYPE_NONE)
+		return true;
+
+	if (traceType != TRACE_TYPE_FTRACE && traceType != TRACE_TYPE_PERF)
+		return false;
+
 	for (cpu = 0; cpu <= maxCPU; cpu++) {
 		if (startFreq[cpu] > 0) {
 			cpuFreq[cpu].timev.push_back(startTime);
 			cpuFreq[cpu].data.push_back(startFreq[cpu]);
 		}
 	}
-	for (i = 0; i < nrEvents; i++) {
-		TraceEvent &event = events[i];
-		/*
-		 * I expect this loop to be so fast in comparison
-		 * to the other functions that will be running in parallel
-		 * that it's acceptable to piggy back cpuidle events here */
-		if (cpuidle_event(event))
-			processCPUidleEvent(event);
-		else if (cpufreq_event(event))
-			processCPUfreqEvent(event);
-	}
+
+	if (traceType == TRACE_TYPE_FTRACE)
+		_processCPUfreqFtrace();
+	else
+		_processCPUfreqPerf();
+
 	for (cpu = 0; cpu <= maxCPU; cpu++) {
 		if (!cpuFreq[cpu].data.isEmpty()) {
 			double freq = cpuFreq[cpu].data.last();
@@ -363,6 +574,38 @@ bool TraceParser::processCPUfreq()
 		}
 	}
 	return false;
+}
+
+void TraceParser::_processCPUfreqFtrace()
+{
+	unsigned int i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		/*
+		 * I expect this loop to be so fast in comparison
+		 * to the other functions that will be running in parallel
+		 * that it's acceptable to piggy back cpuidle events here */
+		if (cpuidle_event(event))
+			processFtraceCPUidleEvent(event);
+		else if (cpufreq_event(event))
+			processFtraceCPUfreqEvent(event);
+	}
+}
+
+void TraceParser::_processCPUfreqPerf()
+{
+	unsigned int i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		/*
+		 * I expect this loop to be so fast in comparison
+		 * to the other functions that will be running in parallel
+		 * that it's acceptable to piggy back cpuidle events here */
+		if (perf_cpuidle_event(event))
+			processPerfCPUidleEvent(event);
+		else if (perf_cpufreq_event(event))
+			processPerfCPUfreqEvent(event);
+	}
 }
 
 void TraceParser::colorizeTasks()
@@ -488,7 +731,7 @@ void TraceParser::setQCustomPlot(QCustomPlot *plot)
 }
 
 void TraceParser::addCpuFreqWork(unsigned int cpu,
-				  QList<AbstractWorkItem*> &list)
+				 QList<AbstractWorkItem*> &list)
 {
 	double scale = cpuFreqScale.value(cpu);
 	double offset = cpuFreqOffset.value(cpu);
@@ -501,7 +744,7 @@ void TraceParser::addCpuFreqWork(unsigned int cpu,
 }
 
 void TraceParser::addCpuIdleWork(unsigned int cpu,
-				  QList<AbstractWorkItem*> &list)
+				 QList<AbstractWorkItem*> &list)
 {
 	double scale = cpuIdleScale.value(cpu);
 	double offset = cpuIdleOffset.value(cpu);
@@ -581,7 +824,6 @@ void TraceParser::doScale()
 		delete workList[i];
 }
 
-
 bool TraceParser::parseLineBugFixup(TraceEvent* event, double prevtime)
 {
 	double corrtime = event->time + 0.9;
@@ -604,4 +846,16 @@ void TraceParser::clearGrammarPools(GrammarNode *tree)
 		if (tree->children[i] != tree)
 			clearGrammarPools(tree->children[i]);
 	}
+}
+
+void TraceParser::determineTraceType()
+{
+	if (nrFtraceEvents > 0 && nrPerfEvents == 0) {
+		traceType = TRACE_TYPE_FTRACE;
+		return;
+	} else if (nrFtraceEvents  == 0 && nrPerfEvents > 0) {
+		traceType = TRACE_TYPE_PERF;
+		return;
+	}
+	traceType = TRACE_TYPE_NONE;
 }

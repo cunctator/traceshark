@@ -16,20 +16,25 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ftraceparams.h"
+#include "perfparams.h"
 
-char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_oldname_strdup(event, pool);
+char *perf_sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool)
+{
+	return __perf_sched_switch_oldname_strdup(event, pool);
 }
 
-char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_newname_strdup(event, pool);
+char *perf_sched_switch_newname_strdup(TraceEvent &event, MemPool *pool)
+{
+	return __perf_sched_switch_newname_strdup(event, pool);
 }
 
-char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_wakeup_name_strdup(event, pool);
+char *perf_sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool)
+{
+	return __perf_sched_wakeup_name_strdup(event, pool);
 }
 
-char *sched_process_fork_childname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_process_fork_childname_strdup(event, pool);
+char *perf_sched_process_fork_childname_strdup(TraceEvent &event,
+					       MemPool *pool)
+{
+	return __perf_sched_process_fork_childname_strdup(event, pool);
 }

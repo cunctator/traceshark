@@ -26,8 +26,6 @@
 #include <cstring>
 #include <cstdint>
 
-extern char *eventstrings[];
-
 #define cpufreq_event(EVENT) (is_this_event(CPU_FREQUENCY, EVENT) && \
 			      EVENT.argc >= 2)
 #define cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
