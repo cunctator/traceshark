@@ -27,6 +27,7 @@ TaskGraph::TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis):
 
 TaskGraph::~TaskGraph()
 {
+	legendGraph->removeFromLegend();
 	delete legendGraph;
 }
 
