@@ -134,11 +134,9 @@ private:
 						 double startTime);
 	__always_inline double estimateWakeUp(Task *task, CPU *eventCPU,
 					      double newTime, double startTime);
-	__always_inline void handleWrongTaskOnCPU(TraceEvent &event,
-						  unsigned int cpu,
-						  CPU *eventCPU,
-						  unsigned int oldpid,
-						  double oldtime);
+	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
+				  CPU *eventCPU, unsigned int oldpid,
+				  double oldtime);
 	void processMigrationFtrace();
 	void processMigrationPerf();
 	__always_inline void processFtraceSwitchEvent(TraceEvent &event);
@@ -468,50 +466,6 @@ __always_inline Task *TraceParser::findTask(unsigned int pid)
 		return NULL;
 	else
 		return &iter.value();
-}
-
-__always_inline void TraceParser::handleWrongTaskOnCPU(TraceEvent &event,
-						       unsigned int cpu,
-						       CPU *eventCPU,
-						       unsigned int oldpid,
-						       double oldtime)
-{
-	unsigned int epid = eventCPU->pidOnCPU;
-	double prevtime, faketime;
-	CPUTask *cpuTask;
-	Task *task;
-
-	if (epid != 0) {
-		cpuTask = &cpuTaskMaps[cpu][epid];
-		Q_ASSERT(!cpuTask->isNew);
-		Q_ASSERT(!cpuTask->timev.isEmpty());
-		prevtime = cpuTask->timev.last();
-		faketime = prevtime + FAKE_DELTA;
-		cpuTask->timev.push_back(faketime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
-		task = getTask(epid);
-		task->lastWakeUP = faketime;
-	}
-
-	if (oldpid != 0) {
-		cpuTask = &cpuTaskMaps[cpu][oldpid];
-		if (cpuTask->isNew) {
-			cpuTask->pid = oldpid;
-			if (traceType == TRACE_TYPE_FTRACE) {
-				cpuTask->name = sched_switch_oldname_strdup(
-					event,
-					taskNamePool);
-			} else {
-				cpuTask->name =
-					perf_sched_switch_oldname_strdup(event,
-									 taskNamePool);
-			}
-		}
-		cpuTask->isNew = false;
-		faketime = oldtime - FAKE_DELTA;
-		cpuTask->timev.push_back(faketime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
-	}
 }
 
 __always_inline void TraceParser::processFtraceSwitchEvent(TraceEvent &event)
