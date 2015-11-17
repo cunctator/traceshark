@@ -35,6 +35,7 @@ public:
 	CPUTask *getTask();
 	void setPen(const QPen &pen);
 	bool addToLegend();
+	bool removeFromLegend();
 private:
 	CPUTask *task;
 	LegendGraph *legendGraph;

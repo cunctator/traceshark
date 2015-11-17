@@ -28,12 +28,16 @@
 #include <QLineEdit>
 #include <QString>
 
+#define DEFINE_PIDMAP_ITERATOR(name) \
+	QMap<unsigned int, TaskGraph*>::iterator name
+
 TaskInfo::TaskInfo(QWidget *parent):
 	QWidget(parent), taskGraph(NULL)
 {
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	QLabel *colonLabel = new QLabel(tr(":"));
-	QPushButton *button = new QPushButton(tr("Add to legend"), this);
+	QPushButton *addButton = new QPushButton(tr("Add to legend"), this);
+	QPushButton *clearButton = new QPushButton(tr("Clear"), this);
 
 	nameLine = new QLineEdit(this);
 	pidLine = new QLineEdit(this);
@@ -45,9 +49,12 @@ TaskInfo::TaskInfo(QWidget *parent):
 	layout->addWidget(nameLine);
 	layout->addWidget(colonLabel);
 	layout->addWidget(pidLine);
-	layout->addWidget(button);
+	layout->addWidget(addButton);
+	layout->addWidget(clearButton);
+	layout->addStretch();
 
-	tsconnect(button, clicked(), this, addClicked());
+	tsconnect(addButton, clicked(), this, addClicked());
+	tsconnect(clearButton, clicked(), this, clearClicked());
 }
 
 TaskInfo::~TaskInfo()
@@ -102,12 +109,31 @@ void TaskInfo::addClicked()
 	if (legendPidMap.contains(task->pid))
 		return;
 
-	legendPidMap[task->pid] = 1; /* Value could be anything */
+	legendPidMap[task->pid] = taskGraph;
 	taskGraph->addToLegend();
 	obj = taskGraph->parent();
 	plot = qobject_cast<QCustomPlot *>(obj);
 	if (plot != NULL)
 		plot->replot();
+}
+
+void TaskInfo::clearClicked()
+{
+	QCustomPlot *plot = NULL;
+	QObject *obj;
+	DEFINE_PIDMAP_ITERATOR(iter) = legendPidMap.begin();
+	while(iter != legendPidMap.end()) {
+		TaskGraph *&graph = iter.value();
+		graph->removeFromLegend();
+		if (plot == NULL) {
+			obj = graph->parent();
+			plot = qobject_cast<QCustomPlot *>(obj);
+		}
+		iter++;
+	}
+	if (plot != NULL)
+		plot->replot();
+	legendPidMap.clear();
 }
 
 void TaskInfo::checkGraphSelection()

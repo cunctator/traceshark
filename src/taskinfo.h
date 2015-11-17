@@ -42,11 +42,12 @@ public:
 	void pidRemoved(unsigned int pid);
 private slots:
 	void addClicked();
+	void clearClicked();
 private:
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
 	TaskGraph *taskGraph;
-	QMap <unsigned int, int> legendPidMap;
+	QMap <unsigned int, TaskGraph*> legendPidMap;
 };
 
 #endif /* TASKINFO_H */
