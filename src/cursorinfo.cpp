@@ -33,7 +33,7 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QPushButton *button;
 
 	line->setReadOnly(false);
-	line->setInputMask(QString("00000000000.0000000"));
+	line->setInputMask(QString("0000000.0000000"));
 
 	switch (nr) {
 	case TShark::RED_CURSOR:
