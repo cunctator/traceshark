@@ -25,13 +25,14 @@ class TString {
 public:
 	char *ptr;
 	unsigned int len;
+	static __always_inline int cmp(const TString *a, const TString *b);
 	static __always_inline int strcmp(const TString *a, const TString *b);
 	static __always_inline int strcmp(const TString *a, const TString *b,
 					  unsigned short skip,
 					  unsigned short *neq);
 };
 
-__always_inline int TString::strcmp(const TString *a, const TString *b) {
+__always_inline int TString::cmp(const TString *a, const TString *b) {
 	unsigned int clen;
 	int rval;
 	int diff;
@@ -53,13 +54,30 @@ __always_inline int TString::strcmp(const TString *a, const TString *b,
 	int imax = rval < 0 ? a->len : b->len;
 	int i;
 
-	*eqn = 0;
+	*eqn = skip;
 	for (i = skip; i < imax; i++) {
 		cval = a->ptr[i] - b->ptr[i];
 		if (cval == 0) {
-			continue;
 			(*eqn)++;
-		}
+			continue;
+		} else
+			return cval;
+	}
+	return rval;
+}
+
+/* This seems to be the fastest now, at least for stringpool */
+__always_inline int TString::strcmp(const TString *a, const TString *b)
+{
+	int rval = (int) a->len - (int)  b->len;
+	int cval;
+	int imax = rval < 0 ? a->len : b->len;
+	int i;
+
+	for (i = 0; i < imax; i++) {
+		cval = a->ptr[i] - b->ptr[i];
+		if (cval == 0)
+			continue;
 		else
 			return cval;
 	}

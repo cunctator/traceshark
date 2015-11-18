@@ -72,10 +72,6 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	int smallH;
 	int largeH;
 	int gHeight;
-	unsigned short eqn;
-	unsigned short largeEqn = 0;
-	unsigned short smallEqn = 0;
-	unsigned short skip = 0;
 
 	hval = hval % hSize;
 
@@ -88,20 +84,16 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	entry = *aentry;
 
 	while(entry != NULL) {
-		cmp = TString::strcmp(str, entry->str, skip, &eqn);
+		cmp = TString::strcmp(str, entry->str);
 		if (cmp == 0)
 			return entry->str;
 		parent = entry;
 		if (cmp < 0) {
-			smallEqn = eqn;
-			skip = TSMAX(smallEqn, largeEqn);
 			aentry = &entry->small;
 			entry = *aentry;
 			continue;
 		}
 		/*  cmp must be > 0, since not 0 and not < 0 */
-		largeEqn = eqn;
-		skip = TSMAX(smallEqn, largeEqn);
 		aentry = &entry->large;
 		entry = *aentry;
 	}
