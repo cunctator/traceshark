@@ -70,7 +70,7 @@ bool TraceParser::open(const QString &fileName)
 	tbuffers[curbuf]->beginProduceBuffer();
 	while(!traceFile->atEnd()) {
 		TraceLine *line = &tbuffers[curbuf]->buffer[i];
-		quint32 n = traceFile->ReadLine(line, 0);
+		quint32 n = traceFile->ReadLine(line, curbuf);
 		nr += n;
 		i++;
 		if (i == (TBUFSIZE - 1)) {
