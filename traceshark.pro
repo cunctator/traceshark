@@ -115,6 +115,10 @@ QT           += core
 QT           += widgets
 QT           += printsupport
 
+#DESTDIR=bin #Target file directory
+OBJECTS_DIR=obj
+MOC_DIR=obj
+
 QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -g -std=c++11
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99
 QMAKE_LFLAGS_RELEASE =
