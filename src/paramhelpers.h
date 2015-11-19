@@ -103,7 +103,7 @@ static __always_inline void merge_args_into_cstring(TraceEvent &event,
 	}
 	/* Terminate the string, it's assumed that maxlen is maximum length
 	 * *excluding* terminating null character :) */
-	c = '\0';
+	*c = '\0';
 	len++;
 }
 
