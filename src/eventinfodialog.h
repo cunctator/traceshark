@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENTDIALOG_H
-#define EVENTDIALOG_H
+#ifndef EVENTINFODIALOG_H
+#define EVENTINFODIALOG_H
 
 #include <QDialog>
 
@@ -27,15 +27,15 @@ QT_END_NAMESPACE
 
 class TraceEvent;
 
-class EventDialog : public QDialog {
+class EventInfoDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	EventDialog(QWidget *parent = 0);
+	EventInfoDialog(QWidget *parent = 0);
 	void show(const TraceEvent &event);
 private:
 	QPlainTextEdit *textEdit;
 	void updateSize();
 };
 
-#endif /* EVENTDIALOG_H */
+#endif /* EVENTINFODIALOG_H */

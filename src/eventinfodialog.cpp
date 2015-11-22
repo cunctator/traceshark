@@ -17,7 +17,7 @@
  */
 
 #include "traceshark.h"
-#include "eventdialog.h"
+#include "eventinfodialog.h"
 #include "traceevent.h"
 
 #include <QByteArray>
@@ -30,7 +30,7 @@
 #include <QHBoxLayout>
 
 
-EventDialog::EventDialog(QWidget *parent)
+EventInfoDialog::EventInfoDialog(QWidget *parent)
 	:QDialog(parent, Qt::WindowCloseButtonHint)
 {
 	textEdit = new QPlainTextEdit();
@@ -59,7 +59,7 @@ EventDialog::EventDialog(QWidget *parent)
 	tsconnect(button, clicked(), this, hide());
 }
 
-void EventDialog::updateSize()
+void EventInfoDialog::updateSize()
 {
 	QTextStream qout(stdout);
 	QSize screenSize;
@@ -83,7 +83,7 @@ void EventDialog::updateSize()
 	setFixedHeight(height);
 }
 
-void EventDialog::show(const TraceEvent &event)
+void EventInfoDialog::show(const TraceEvent &event)
 {
 	QByteArray array(event.postEventInfo->ptr, event.postEventInfo->len);
 	QString text(array);
