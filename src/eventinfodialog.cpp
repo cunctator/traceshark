@@ -85,7 +85,12 @@ void EventInfoDialog::updateSize()
 
 void EventInfoDialog::show(const TraceEvent &event)
 {
-	QByteArray array(event.postEventInfo->ptr, event.postEventInfo->len);
+	QByteArray array;
+	if (event.postEventInfo != NULL && event.postEventInfo->len > 0)
+		array = QByteArray(event.postEventInfo->ptr,
+				   event.postEventInfo->len);
+	else
+		array = QByteArray();
 	QString text(array);
 	textEdit->setPlainText(text);
 	QDialog::show();
