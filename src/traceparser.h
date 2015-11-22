@@ -236,7 +236,7 @@ __always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
 			event.postEventInfo = NULL;
-			events.push_back(event);
+			events.append(event);
 			nrEvents++;
 			preScanFtraceEvent(event);
 		}
@@ -284,7 +284,7 @@ __always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 				prevEvent->postEventInfo = str;
 				prevLineIsEvent = true;
 			}
-			events.push_back(event);
+			events.append(event);
 			prevEvent = &events.last();
 			nrEvents++;
 			preScanPerfEvent(event);
@@ -528,28 +528,28 @@ __always_inline void TraceParser::processFtraceSwitchEvent(TraceEvent &event)
 		char state = sched_switch_state(event);
 
 		/* Apparenly this task was on CPU when we started tracing */
-		cpuTask->timev.push_back(startTime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
+		cpuTask->timev.append(startTime);
+		cpuTask->data.append(SCHED_HEIGHT);
 
 		if (state == 'R') {
-			cpuTask->runningTimev.push_back(oldtime);
-			cpuTask->runningData.push_back(FLOOR_HEIGHT);
+			cpuTask->runningTimev.append(oldtime);
+			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
 		}
 
-		cpuTask->timev.push_back(oldtime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
+		cpuTask->timev.append(oldtime);
+		cpuTask->data.append(FLOOR_HEIGHT);
 		cpuTask->name = sched_switch_oldname_strdup(event,
 							    taskNamePool);
 	} else {
 		char state = sched_switch_state(event);
 
-		cpuTask->timev.push_back(oldtime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
+		cpuTask->timev.append(oldtime);
+		cpuTask->data.append(FLOOR_HEIGHT);
 
 		if (state == 'R') {
-			cpuTask->runningTimev.push_back(oldtime);
-			cpuTask->runningData.push_back(FLOOR_HEIGHT);
+			cpuTask->runningTimev.append(oldtime);
+			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
 		}
 	}
@@ -574,22 +574,22 @@ skip:
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
 
-		cpuTask->timev.push_back(startTime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
+		cpuTask->timev.append(startTime);
+		cpuTask->data.append(FLOOR_HEIGHT);
 
-		cpuTask->wakeTimev.push_back(newtime);
-		cpuTask->wakeDelay.push_back(delay);
+		cpuTask->wakeTimev.append(newtime);
+		cpuTask->wakeDelay.append(delay);
 
-		cpuTask->timev.push_back(newtime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
+		cpuTask->timev.append(newtime);
+		cpuTask->data.append(SCHED_HEIGHT);
 
 		cpuTask->name = sched_switch_newname_strdup(event, taskNamePool);
 	} else {
-		cpuTask->wakeTimev.push_back(newtime);
-		cpuTask->wakeDelay.push_back(delay);
+		cpuTask->wakeTimev.append(newtime);
+		cpuTask->wakeDelay.append(delay);
 
-		cpuTask->timev.push_back(newtime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
+		cpuTask->timev.append(newtime);
+		cpuTask->data.append(SCHED_HEIGHT);
 	}
 out:
 	eventCPU->hasBeenScheduled = true;
@@ -634,28 +634,28 @@ __always_inline void TraceParser::processPerfSwitchEvent(TraceEvent &event)
 		char state = perf_sched_switch_state(event);
 
 		/* Apparenly this task was on CPU when we started tracing */
-		cpuTask->timev.push_back(startTime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
+		cpuTask->timev.append(startTime);
+		cpuTask->data.append(SCHED_HEIGHT);
 
 		if (state == 'R') {
-			cpuTask->runningTimev.push_back(oldtime);
-			cpuTask->runningData.push_back(FLOOR_HEIGHT);
+			cpuTask->runningTimev.append(oldtime);
+			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
 		}
 
-		cpuTask->timev.push_back(oldtime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
+		cpuTask->timev.append(oldtime);
+		cpuTask->data.append(FLOOR_HEIGHT);
 		cpuTask->name = perf_sched_switch_oldname_strdup(event,
 								 taskNamePool);
 	} else {
 		char state = perf_sched_switch_state(event);
 
-		cpuTask->timev.push_back(oldtime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
+		cpuTask->timev.append(oldtime);
+		cpuTask->data.append(FLOOR_HEIGHT);
 
 		if (state == 'R') {
-			cpuTask->runningTimev.push_back(oldtime);
-			cpuTask->runningData.push_back(FLOOR_HEIGHT);
+			cpuTask->runningTimev.append(oldtime);
+			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
 		}
 	}
@@ -680,23 +680,23 @@ skip:
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
 
-		cpuTask->timev.push_back(startTime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
+		cpuTask->timev.append(startTime);
+		cpuTask->data.append(FLOOR_HEIGHT);
 
-		cpuTask->wakeTimev.push_back(newtime);
-		cpuTask->wakeDelay.push_back(delay);
+		cpuTask->wakeTimev.append(newtime);
+		cpuTask->wakeDelay.append(delay);
 
-		cpuTask->timev.push_back(newtime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
+		cpuTask->timev.append(newtime);
+		cpuTask->data.append(SCHED_HEIGHT);
 
 		cpuTask->name = perf_sched_switch_newname_strdup(event,
 								 taskNamePool);
 	} else {
-		cpuTask->wakeTimev.push_back(newtime);
-		cpuTask->wakeDelay.push_back(delay);
+		cpuTask->wakeTimev.append(newtime);
+		cpuTask->wakeDelay.append(delay);
 
-		cpuTask->timev.push_back(newtime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
+		cpuTask->timev.append(newtime);
+		cpuTask->data.append(SCHED_HEIGHT);
 	}
 out:
 	eventCPU->hasBeenScheduled = true;
@@ -745,8 +745,8 @@ __always_inline void TraceParser::processFtraceCPUfreqEvent(TraceEvent &event)
 	double time = event.time;
 	unsigned int freq = cpufreq_freq(event);
 
-	cpuFreq[cpu].timev.push_back(time);
-	cpuFreq[cpu].data.push_back((double) freq);
+	cpuFreq[cpu].timev.append(time);
+	cpuFreq[cpu].data.append((double) freq);
 }
 
 __always_inline void TraceParser::processPerfCPUfreqEvent(TraceEvent &event)
@@ -755,8 +755,8 @@ __always_inline void TraceParser::processPerfCPUfreqEvent(TraceEvent &event)
 	double time = event.time;
 	unsigned int freq = perf_cpufreq_freq(event);
 
-	cpuFreq[cpu].timev.push_back(time);
-	cpuFreq[cpu].data.push_back((double) freq);
+	cpuFreq[cpu].timev.append(time);
+	cpuFreq[cpu].data.append((double) freq);
 }
 
 __always_inline void TraceParser::processFtraceCPUidleEvent(TraceEvent &event)
@@ -765,8 +765,8 @@ __always_inline void TraceParser::processFtraceCPUidleEvent(TraceEvent &event)
 	double time = event.time;
 	unsigned int state = cpuidle_state(event);
 
-	cpuIdle[cpu].timev.push_back(time);
-	cpuIdle[cpu].data.push_back((double) state);
+	cpuIdle[cpu].timev.append(time);
+	cpuIdle[cpu].data.append((double) state);
 }
 
 __always_inline void TraceParser::processPerfCPUidleEvent(TraceEvent &event)
@@ -775,8 +775,8 @@ __always_inline void TraceParser::processPerfCPUidleEvent(TraceEvent &event)
 	double time = event.time;
 	unsigned int state = perf_cpuidle_state(event);
 
-	cpuIdle[cpu].timev.push_back(time);
-	cpuIdle[cpu].data.push_back((double) state);
+	cpuIdle[cpu].timev.append(time);
+	cpuIdle[cpu].data.append((double) state);
 }
 
 #endif /* TRACEPARSER_H */

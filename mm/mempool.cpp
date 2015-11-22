@@ -54,7 +54,7 @@ bool MemPool::addMemory()
 	exhaustList.append(memory);
 	if (newMap())
 		return true;
-	exhaustList.pop_back();
+	exhaustList.removeLast();
 	return false;
 }
 

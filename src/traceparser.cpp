@@ -377,7 +377,7 @@ void TraceParser::fixLastEvent()
 	/* Only perf traces will have backtraces after events, I think */
 	if (traceType != TRACE_TYPE_PERF)
 		return;
-	TraceEvent &lastEvent = events.back();
+	TraceEvent &lastEvent = events.last();
 	if (prevLineIsEvent) {
 		lastEvent.postEventInfo = NULL;
 	} else {
@@ -428,7 +428,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
 			event.postEventInfo = NULL;
-			events.push_back(event);
+			events.append(event);
 			nrFtraceEvents++;
 			preScanFtraceEvent(event);
 		} else if (parseLine(line, &event, perfGrammarRoot)) {
@@ -451,7 +451,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 				prevEvent->postEventInfo = str;
 				prevLineIsEvent = true;
 			}
-			events.push_back(event);
+			events.append(event);
 			prevEvent = &events.last();
 			nrPerfEvents++;
 			preScanPerfEvent(event);
@@ -487,21 +487,21 @@ void TraceParser::processMigrationFtrace()
 			m.oldcpu = sched_migrate_origCPU(event);
 			m.newcpu = sched_migrate_destCPU(event);
 			m.time = event.time;
-			migrations.push_back(m);
+			migrations.append(m);
 		} else if (sched_process_fork(event)) {
 			Migration m;
 			m.pid = sched_process_fork_childpid(event);
 			m.oldcpu = -1;
 			m.newcpu = event.cpu;
 			m.time = event.time;
-			migrations.push_back(m);
+			migrations.append(m);
 		} else if (sched_process_exit(event)) {
 			Migration m;
 			m.pid = sched_process_exit_pid(event);
 			m.oldcpu = event.cpu;
 			m.newcpu = -1;
 			m.time = event.time;
-			migrations.push_back(m);
+			migrations.append(m);
 		}
 	}
 }
@@ -517,21 +517,21 @@ void TraceParser::processMigrationPerf()
 			m.oldcpu = perf_sched_migrate_origCPU(event);
 			m.newcpu = perf_sched_migrate_destCPU(event);
 			m.time = event.time;
-			migrations.push_back(m);
+			migrations.append(m);
 		} else if (perf_sched_process_fork(event)) {
 			Migration m;
 			m.pid = perf_sched_process_fork_childpid(event);
 			m.oldcpu = -1;
 			m.newcpu = event.cpu;
 			m.time = event.time;
-			migrations.push_back(m);
+			migrations.append(m);
 		} else if (perf_sched_process_exit(event)) {
 			Migration m;
 			m.pid = perf_sched_process_exit_pid(event);
 			m.oldcpu = event.cpu;
 			m.newcpu = -1;
 			m.time = event.time;
-			migrations.push_back(m);
+			migrations.append(m);
 		}
 	}
 }
@@ -588,8 +588,8 @@ void TraceParser::processSchedAddTail()
 			if (task.timev[task.timev.size() - 1] >= endTime)
 				continue;
 			d = task.data[task.data.size() - 1];
-			task.timev.push_back(endTime);
-			task.data.push_back(d);
+			task.timev.append(endTime);
+			task.data.append(d);
 		}
 	}
 }
@@ -609,8 +609,8 @@ void TraceParser::handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 		Q_ASSERT(!cpuTask->timev.isEmpty());
 		prevtime = cpuTask->timev.last();
 		faketime = prevtime + FAKE_DELTA;
-		cpuTask->timev.push_back(faketime);
-		cpuTask->data.push_back(FLOOR_HEIGHT);
+		cpuTask->timev.append(faketime);
+		cpuTask->data.append(FLOOR_HEIGHT);
 		task = getTask(epid);
 		task->lastWakeUP = faketime;
 	}
@@ -631,8 +631,8 @@ void TraceParser::handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 		}
 		cpuTask->isNew = false;
 		faketime = oldtime - FAKE_DELTA;
-		cpuTask->timev.push_back(faketime);
-		cpuTask->data.push_back(SCHED_HEIGHT);
+		cpuTask->timev.append(faketime);
+		cpuTask->data.append(SCHED_HEIGHT);
 	}
 }
 
@@ -648,8 +648,8 @@ bool TraceParser::processCPUfreq()
 
 	for (cpu = 0; cpu <= maxCPU; cpu++) {
 		if (startFreq[cpu] > 0) {
-			cpuFreq[cpu].timev.push_back(startTime);
-			cpuFreq[cpu].data.push_back(startFreq[cpu]);
+			cpuFreq[cpu].timev.append(startTime);
+			cpuFreq[cpu].data.append(startFreq[cpu]);
 		}
 	}
 
@@ -661,8 +661,8 @@ bool TraceParser::processCPUfreq()
 	for (cpu = 0; cpu <= maxCPU; cpu++) {
 		if (!cpuFreq[cpu].data.isEmpty()) {
 			double freq = cpuFreq[cpu].data.last();
-			cpuFreq[cpu].data.push_back(freq);
-			cpuFreq[cpu].timev.push_back(endTime);
+			cpuFreq[cpu].data.append(freq);
+			cpuFreq[cpu].timev.append(endTime);
 		}
 	}
 	return false;
@@ -743,7 +743,7 @@ retry:
 					continue;
 				if (color.SqDistance(white) < 10000)
 					continue;
-				colorList.push_back(color);
+				colorList.append(color);
 			}
 		}
 	}
@@ -888,7 +888,7 @@ void TraceParser::scaleMigration()
 		QColor color = getTaskColor(m.pid);
 		a = new MigrationArrow(s, e, m.time, color, customPlot);
 		customPlot->addItem(a);
-		migrationArrows.push_back(a);
+		migrationArrows.append(a);
 	}
 }
 
