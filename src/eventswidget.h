@@ -20,7 +20,7 @@
 #define EVENTSWIDGET_H
 
 #include <QDockWidget>
-#include <QList>
+#include "tlist.h"
 #include "traceevent.h"
 #include "traceshark.h"
 
@@ -32,9 +32,9 @@ class EventsWidget : public QDockWidget
 	Q_OBJECT
 public:
 	EventsWidget(QWidget *parent = 0);
-	EventsWidget(QList<TraceEvent> *e, QWidget *parent = 0);
+	EventsWidget(TList<TraceEvent> *e, QWidget *parent = 0);
 	virtual ~EventsWidget();
-	void setEvents(QList<TraceEvent> *e);
+	void setEvents(TList<TraceEvent> *e);
 	void beginResetModel();
 	void endResetModel();
 	void scrollTo(double time);
@@ -47,7 +47,7 @@ private slots:
 private:
 	QTableView *tableView;
 	EventsModel *eventsModel;
-	QList<TraceEvent> *events;
+	TList<TraceEvent> *events;
 	int findBestMatch(double time);
 	int binarySearch(double time, int start, int end);
 };

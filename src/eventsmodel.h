@@ -20,7 +20,7 @@
 #define EVENTSMODEL_H
 
 #include <QAbstractTableModel>
-#include <QList>
+#include "tlist.h"
 #include "traceevent.h"
 
 //class TraceEvent;
@@ -31,8 +31,8 @@ class EventsModel : public QAbstractTableModel
 	Q_OBJECT
 public:
 	EventsModel(QObject *parent = 0);
-	EventsModel(QList<TraceEvent> *e, QObject *parent = 0);
-	void setEvents(QList<TraceEvent> *e);
+	EventsModel(TList<TraceEvent> *e, QObject *parent = 0);
+	void setEvents(TList<TraceEvent> *e);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
@@ -44,7 +44,7 @@ public:
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
-	QList<TraceEvent> *events;
+	TList<TraceEvent> *events;
 };
 
 #endif /* EVENTSMODEL_H */

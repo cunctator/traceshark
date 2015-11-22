@@ -414,7 +414,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 
 	for(i = 0; i < s; i++) {
 		TraceLine *line = &tbuf->buffer[i];
-		TraceEvent event;
+		TraceEvent &event = events.preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
 		if (parseLine(line, &event, ftraceGrammarRoot)) {
@@ -428,9 +428,12 @@ bool TraceParser::parseBuffer(unsigned int index)
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
 			event.postEventInfo = NULL;
-			events.append(event);
+			events.commit();
 			nrFtraceEvents++;
 			preScanFtraceEvent(event);
+			/* probably not necessary because ftrace traces doesn't
+			 * have backtraces and stuff but do it anyway */
+			prevLineIsEvent = true;
 		} else if (parseLine(line, &event, perfGrammarRoot)) {
 			/* Check if the timestamp of this event is affected by
 			 * the infamous ftrace timestamp rollover bug and
@@ -451,8 +454,8 @@ bool TraceParser::parseBuffer(unsigned int index)
 				prevEvent->postEventInfo = str;
 				prevLineIsEvent = true;
 			}
-			events.append(event);
-			prevEvent = &events.last();
+			events.commit();
+			prevEvent = &event;
 			nrPerfEvents++;
 			preScanPerfEvent(event);
 		} else {

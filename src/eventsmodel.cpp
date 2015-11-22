@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QList>
+#include "tlist.h"
 #include <QVariant>
 #include <QString>
 #include "eventsmodel.h"
@@ -27,11 +27,11 @@ EventsModel::EventsModel(QObject *parent):
 	QAbstractTableModel(parent), events(NULL)
 {}
 
-EventsModel::EventsModel(QList<TraceEvent> *e, QObject *parent):
+EventsModel::EventsModel(TList<TraceEvent> *e, QObject *parent):
 	QAbstractTableModel(parent), events(e)
 {}
 
-void EventsModel::setEvents(QList<TraceEvent> *e)
+void EventsModel::setEvents(TList<TraceEvent> *e)
 {
 	events = e;
 }

@@ -47,6 +47,7 @@
 #include "threads/workitem.h"
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
+#include "tlist.h"
 
 #define FAKE_DELTA ((double) 0.00000005)
 
@@ -90,7 +91,7 @@ public:
 	bool processMigration();
 	bool processSched();
 	bool processCPUfreq();
-	QList<TraceEvent> events;
+	TList<TraceEvent> events;
 	__always_inline unsigned int getMaxCPU();
 	__always_inline unsigned int getNrCPUs();
 	__always_inline double getStartTime();
@@ -222,7 +223,7 @@ __always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 
 	for(i = 0; i < s; i++) {
 		TraceLine *line = &tbuf->buffer[i];
-		TraceEvent event;
+		TraceEvent &event = events.preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
 		if (parseLine(line, &event, ftraceGrammarRoot)) {
@@ -236,7 +237,7 @@ __always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
 			event.postEventInfo = NULL;
-			events.append(event);
+			events.commit();
 			nrEvents++;
 			preScanFtraceEvent(event);
 		}
@@ -261,7 +262,7 @@ __always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 
 	for(i = 0; i < s; i++) {
 		TraceLine *line = &tbuf->buffer[i];
-		TraceEvent event;
+		TraceEvent &event = events.preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
 		if (parseLine(line, &event, perfGrammarRoot)) {
@@ -284,8 +285,8 @@ __always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 				prevEvent->postEventInfo = str;
 				prevLineIsEvent = true;
 			}
-			events.append(event);
-			prevEvent = &events.last();
+			events.commit();
+			prevEvent = &event;
 			nrEvents++;
 			preScanPerfEvent(event);
 		} else {

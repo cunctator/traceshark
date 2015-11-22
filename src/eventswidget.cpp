@@ -38,7 +38,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 		  this, handleDoubleClick(const QModelIndex &));
 }
 
-EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
+EventsWidget::EventsWidget(TList<TraceEvent> *e, QWidget *parent):
 	QDockWidget(parent)
 {
 	tableView = new QTableView(this);
@@ -59,7 +59,7 @@ EventsWidget::~EventsWidget()
 {
 }
 
-void EventsWidget::setEvents(QList<TraceEvent> *e)
+void EventsWidget::setEvents(TList<TraceEvent> *e)
 {
 	eventsModel->setEvents(e);
 	events = e;

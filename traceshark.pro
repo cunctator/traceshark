@@ -58,6 +58,7 @@ HEADERS      += threads/threadbuffer.h
 HEADERS      += threads/tthread.h
 HEADERS      += src/taskinfo.h
 HEADERS      += src/timenode.h
+HEADERS      += src/tlist.h
 HEADERS      += src/traceevent.h
 HEADERS      += src/tracefile.h
 HEADERS      += src/traceline.h
