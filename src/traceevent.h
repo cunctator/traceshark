@@ -48,6 +48,12 @@ public:
 	event_t type;
 	TString **argv;
 	unsigned int argc;
+	/* postEventInfo most likely will contain a backtrace that will occur
+	 * in perf traces after the event. Note that this TString will have a
+	 * pointer to the read-only mapping of the trace file and thus it
+	 * cannot be null terminated, instead we will have to rely on the len
+	 * field to determine the length when using  this TString */
+	TString *postEventInfo;
 };
 
 extern char *eventstrings[];

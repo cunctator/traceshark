@@ -146,6 +146,7 @@ TraceParser::TraceParser()
 	traceFile = NULL;
 	ptrPool = new MemPool(16384, sizeof(TString*));
 	taskNamePool = new MemPool(16384, sizeof(char));
+	postEventPool = new MemPool(16384, sizeof(TString));
 
 	createFtraceGrammarTree();
 	createPerfGrammarTree();
@@ -246,6 +247,7 @@ TraceParser::~TraceParser()
 	DeleteGrammarTree(perfGrammarRoot);
 	delete ptrPool;
 	delete taskNamePool;
+	delete postEventPool;
 	delete[] tbuffers;
 	delete parserThread;
 }
@@ -282,10 +284,10 @@ void TraceParser::parseThread()
 			goto perf;
 		}
 	}
-	/* Something went wrong if we get here, we better pretend that
-	 * we were not able to read any events */
-	nrEvents = 0;
-	events.clear();
+	/* Must have been a short trace or a lot of unknown garbage in the
+	 * trace if we end up here */
+	fixLastEvent();
+	finalizePreScan();
 	return;
 
 	/* The purpose of jumping to these loops is to  be able to use the
@@ -298,6 +300,7 @@ ftrace:
 		if (i == NR_TBUFFERS)
 			i = 0;
 	}
+	fixLastEvent();
 	finalizePreScan();
 	return;
 
@@ -309,12 +312,18 @@ perf:
 		if (i == NR_TBUFFERS)
 			i = 0;
 	}
+	fixLastEvent();
 	finalizePreScan();
 }
 
 void TraceParser::preparePreScan()
 {
 	nrEvents = 0;
+	infoBegin = traceFile->mappedFile;
+	prevLineIsEvent = true;
+	fakePostEventInfo.ptr = traceFile->mappedFile;
+	fakeEvent.postEventInfo = &fakePostEventInfo;
+	prevEvent = &fakeEvent;
 	nrFtraceEvents = 0;
 	nrPerfEvents = 0;
 	maxCPU = 0;
@@ -356,6 +365,31 @@ void TraceParser::finalizePreScan()
 	startFreq.resize(nrCPUs);
 }
 
+/*
+ * This function is to be called after the parsing of all the events, it's
+ * for fixing the postEventInfo pointer of the last event, because that info is
+ * normally set when processing the next event in the
+ * parse[Ftrace|Perf]Buffer() functions and for the last event there will of
+ * course not be any next event.
+ */
+void TraceParser::fixLastEvent()
+{
+	/* Only perf traces will have backtraces after events, I think */
+	if (traceType != TRACE_TYPE_PERF)
+		return;
+	TraceEvent &lastEvent = events.back();
+	if (prevLineIsEvent) {
+		lastEvent.postEventInfo = NULL;
+	} else {
+		TString *str = (TString*) postEventPool->
+			allocObj();
+		str->ptr = infoBegin;
+		str->len = traceFile->mappedFile + traceFile->fileSize
+			- infoBegin;
+		lastEvent.postEventInfo = str;
+	}
+}
+
 void TraceParser::preScan()
 {
 }
@@ -393,11 +427,11 @@ bool TraceParser::parseBuffer(unsigned int index)
 			}
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
+			event.postEventInfo = NULL;
 			events.push_back(event);
 			nrFtraceEvents++;
 			preScanFtraceEvent(event);
-		}
-		if (parseLine(line, &event, perfGrammarRoot)) {
+		} else if (parseLine(line, &event, perfGrammarRoot)) {
 			/* Check if the timestamp of this event is affected by
 			 * the infamous ftrace timestamp rollover bug and
 			 * try to correct it */
@@ -407,9 +441,25 @@ bool TraceParser::parseBuffer(unsigned int index)
 			}
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
+			if (prevLineIsEvent) {
+				prevEvent->postEventInfo = NULL;
+			} else {
+				TString *str = (TString*) postEventPool->
+					allocObj();
+				str->ptr = infoBegin;
+				str->len = line->begin - infoBegin;
+				prevEvent->postEventInfo = str;
+				prevLineIsEvent = true;
+			}
 			events.push_back(event);
+			prevEvent = &events.last();
 			nrPerfEvents++;
 			preScanPerfEvent(event);
+		} else {
+			if (prevLineIsEvent) {
+				infoBegin = line->begin;
+				prevLineIsEvent = false;
+			}
 		}
 	}
 	tbuf->endConsumeBuffer();

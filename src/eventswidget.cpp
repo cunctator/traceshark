@@ -34,6 +34,8 @@ EventsWidget::EventsWidget(QWidget *parent):
 	tableView->show();
 	tsconnect(tableView, clicked(const QModelIndex &),
 		  this, handleClick(const QModelIndex &));
+	tsconnect(tableView, doubleClicked(const QModelIndex &),
+		  this, handleDoubleClick(const QModelIndex &));
 }
 
 EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
@@ -49,6 +51,8 @@ EventsWidget::EventsWidget(QList<TraceEvent> *e, QWidget *parent):
 	tableView->show();
 	tsconnect(tableView, clicked(const QModelIndex &),
 		  this, handleClick(const QModelIndex &));
+	tsconnect(tableView, doubleClicked(const QModelIndex &),
+		  this, handleDoubleClick(const QModelIndex &));
 }
 
 EventsWidget::~EventsWidget()
@@ -157,5 +161,13 @@ void EventsWidget::handleClick(const QModelIndex &index)
 	if (index.column() == 0) {
 		double time = events->at(index.row()).time;
 		emit timeSelected(time);
+	}
+}
+
+void EventsWidget::handleDoubleClick(const QModelIndex &index)
+{
+	if (index.column() == 5) {
+		const TraceEvent &event = events->at(index.row());
+		emit infoDoubleClicked(event);
 	}
 }

@@ -19,16 +19,19 @@
 #include "loadbuffer.h"
 #include "loadthread.h"
 
-LoadThread::LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd)
-	: loadBuffers(buffers), nBuffers(nBuf), fd(myfd)
+LoadThread::LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
+		       char *map)
+	: loadBuffers(buffers), nBuffers(nBuf), fd(myfd), mappedFile(map)
 {}
 
 void LoadThread::run()
 {
 	unsigned int i = 0;
 	bool eof;
+	char *filePos = mappedFile;
+
 	do {
-		eof = loadBuffers[i]->produceBuffer(fd);
+		eof = loadBuffers[i]->produceBuffer(fd, &filePos);
 		i++;
 		if (i == nBuffers)
 			i = 0;

@@ -20,6 +20,7 @@
 #include <QDateTime>
 
 #include "cursor.h"
+#include "eventdialog.h"
 #include "eventswidget.h"
 #include "traceparser.h"
 #include "infowidget.h"
@@ -93,6 +94,7 @@ MainWindow::MainWindow():
 	cursors[TShark::BLUE_CURSOR] = NULL;
 
 	licenseDialog = new LicenseDialog();
+	eventDialog = new EventDialog();
 
 	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
@@ -100,6 +102,8 @@ MainWindow::MainWindow():
 		  this, infoValueChanged(double, int));
 	tsconnect(eventsWidget, timeSelected(double), this,
 		  eventTimeSelected(double));
+	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
+		  this, showEventInfo(const TraceEvent &));
 
 	setupSettings();
 }
@@ -114,6 +118,7 @@ MainWindow::~MainWindow()
 	delete workQueue;
 	delete tracePlot;
 	delete licenseDialog;
+	delete eventDialog;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -632,6 +637,11 @@ void MainWindow::eventTimeSelected(double time)
 		cursor->setPosition(time);
 		infoWidget->setTime(time, cursorIdx);
 	}
+}
+
+void MainWindow::showEventInfo(const TraceEvent &event)
+{
+	eventDialog->show(event);
 }
 
 void MainWindow::createActions()

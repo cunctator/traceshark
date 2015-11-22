@@ -121,6 +121,7 @@ public:
 private:
 	void preparePreScan();
 	void finalizePreScan();
+	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
 	__always_inline bool parseFtraceBuffer(unsigned int index);
 	__always_inline bool parsePerfBuffer(unsigned int index);
@@ -169,6 +170,7 @@ private:
 	TraceFile *traceFile;
 	MemPool *ptrPool;
 	MemPool *taskNamePool;
+	MemPool *postEventPool;
 	unsigned int maxCPU;
 	unsigned int nrCPUs;
 	double startTime;
@@ -176,6 +178,11 @@ private:
 	unsigned long nrEvents;
 	unsigned long nrFtraceEvents;
 	unsigned long nrPerfEvents;
+	TraceEvent fakeEvent;
+	TString fakePostEventInfo;
+	TraceEvent *prevEvent;
+	char *infoBegin;
+	bool prevLineIsEvent;
 	tracetype_t traceType;
 	unsigned long lastEvent;
 	unsigned int maxFreq;
@@ -228,6 +235,7 @@ __always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 			}
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
+			event.postEventInfo = NULL;
 			events.push_back(event);
 			nrEvents++;
 			preScanFtraceEvent(event);
@@ -266,9 +274,25 @@ __always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 			}
 			prevtime = event.time;
 			ptrPool->commitN(event.argc);
+			if (prevLineIsEvent) {
+				prevEvent->postEventInfo = NULL;
+			} else {
+				TString *str = (TString*) postEventPool->
+					allocObj();
+				str->ptr = infoBegin;
+				str->len = line->begin - infoBegin;
+				prevEvent->postEventInfo = str;
+				prevLineIsEvent = true;
+			}
 			events.push_back(event);
+			prevEvent = &events.last();
 			nrEvents++;
 			preScanPerfEvent(event);
+		} else {
+			if (prevLineIsEvent) {
+				infoBegin = line->begin;
+				prevLineIsEvent = false;
+			}
 		}
 	}
 	tbuf->endConsumeBuffer();

@@ -35,12 +35,14 @@ LoadBuffer::~LoadBuffer()
 
 /* This function should be called from the IO thread 
  * until the function returns true */
-bool LoadBuffer::produceBuffer(int fd) {
+bool LoadBuffer::produceBuffer(int fd, char** filePosPtr) {
 	waitForConsumptionComplete();
+	filePos = *filePosPtr;
 	nRead = read(fd, buffer, bufSize);
 	completeProduction();
 	if (nRead <= 0)
 		return true;
+	*filePosPtr += nRead;
 	return false;
 }
 

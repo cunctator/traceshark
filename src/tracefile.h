@@ -39,6 +39,8 @@ public:
 					      unsigned int pool);
 	__always_inline bool atEnd();
 	__always_inline void clearPool(unsigned int pool);
+	char *mappedFile;
+	unsigned long fileSize;
 private:
 	__always_inline unsigned int nextBufferIdx(unsigned int n);
 	__always_inline unsigned int ReadNextWord(char *word,
@@ -103,7 +105,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 				buffers[lastBuf]->endConsumeBuffer();
 				eof = e;
 				word[nchar] = '\0';
-			        nRead = 0;
+				nRead = 0;
 				return nchar;
 			}
 			nRead = (unsigned int) buffers[lastBuf]->nRead;
@@ -149,6 +151,7 @@ __always_inline unsigned int TraceFile::ReadLine(TraceLine* line,
 	unsigned int n;
 
 	line->strings = (TString*) ptrPool[pool]->preallocN(MAXPTR);
+	line->begin = buffers[lastBuf]->filePos + lastPos;
 
 	for(col = 0; col < MAXPTR; col++) {
 		line->strings[col].ptr = (char*)

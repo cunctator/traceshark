@@ -24,23 +24,41 @@
 #include <new>
 
 extern "C" {
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 }
 
 TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize, unsigned int
 		     nrPoolsMAX)
-	: nrPools(nrPoolsMAX)
+	: mappedFile(NULL), fileSize(0), nrPools(nrPoolsMAX)
 {
 	unsigned int i;
 	char *m;
+	struct stat sbuf;
 
 	fd = open(name, O_RDONLY);
 	if (fd >= 0)
 		ok = true;
 	else
 		ok = false;
+
+	if (ok) {
+		if (fstat(fd, &sbuf) != 0)
+			ok = false;
+		else {
+			fileSize = sbuf.st_size;
+			mappedFile = (char*) mmap(NULL, fileSize, PROT_READ,
+						  MAP_PRIVATE, fd, 0);
+			if (mappedFile == MAP_FAILED) {
+				ok = false;
+				mappedFile = NULL;
+			}
+		}
+	}
+
 	lastPos = 0;
 	lastBuf = 0;
 	eof = false;
@@ -58,9 +76,11 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize, unsigned int
 		buffers[i] = new LoadBuffer(m, bsize);
 		m += bsize;
 	}
-	loadThread = new LoadThread(buffers, NR_BUFFERS, fd);
-	if (fd < 0) /* Don't start thread if open() failed earlier, we go*/
-		return; /* this far in order to avoid problems in destructor */
+	loadThread = new LoadThread(buffers, NR_BUFFERS, fd, mappedFile);
+	/* Don't start thread if something failed earlier, we go this far in
+	 * order to avoid problems in the destructor */
+	if (!ok)
+		return;
 	loadThread->start();
 	eof = buffers[0]->beginConsumeBuffer();
 	nRead = buffers[0]->nRead;
@@ -81,4 +101,6 @@ TraceFile::~TraceFile()
 	for (i = 0; i < NR_BUFFERS; i++) {
 		delete buffers[i];
 	}
+	if (mappedFile != NULL)
+		munmap(mappedFile, fileSize);
 }

@@ -25,6 +25,7 @@ class TraceLine {
 public:
 	TString *strings;
 	unsigned int nStrings;
+	char *begin;
 };
 
 #endif

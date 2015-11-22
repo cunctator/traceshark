@@ -36,7 +36,8 @@ public:
 	char *buffer;
 	size_t bufSize;
 	ssize_t nRead;
-	bool produceBuffer(int fd);
+	char *filePos;
+	bool produceBuffer(int fd, char ** filePosPtr);
 	bool beginConsumeBuffer();
 	void endConsumeBuffer();
 private:

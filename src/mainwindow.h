@@ -42,12 +42,14 @@ class InfoWidget;
 class Cursor;
 class CPUTask;
 class LicenseDialog;
+class EventDialog;
 class QCPAbstractPlottable;
 class QCPGraph;
 class QCPLegend;
 class QCustomPlot;
 class QCPAbstractLegendItem;
 class TracePlot;
+class TraceEvent;
 
 class MainWindow : public QMainWindow
 {
@@ -69,6 +71,7 @@ private slots:
 	void plotDoubleClicked(QMouseEvent *event);
 	void infoValueChanged(double value, int nr);
 	void eventTimeSelected(double time);
+	void showEventInfo(const TraceEvent &event);
 	void selectionChanged();
 	void plottableClicked(QCPAbstractPlottable *plottable,
 			      QMouseEvent *event);
@@ -118,6 +121,7 @@ private:
 	WorkQueue *workQueue;
 
 	LicenseDialog *licenseDialog;
+	EventDialog *eventDialog;
 
 	const double graphSpacing = 100;
 	const double schedSectionSpace = 250;

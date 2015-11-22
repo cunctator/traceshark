@@ -27,13 +27,15 @@ class LoadThread : public QThread
 {
 	Q_OBJECT
 public:
-	LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd);
+	LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
+		   char *fileStart);
 protected:
 	void run();
 private:
 	LoadBuffer **loadBuffers;
 	unsigned int nBuffers;
 	int fd;
+	char *mappedFile;
 };
 
 #endif /* LOADTHREAD */
