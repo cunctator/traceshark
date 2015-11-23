@@ -30,4 +30,8 @@ If you prefer Perf, the trace can be obtained by doing something like this:
 
 perf record -e power:cpu_frequency -e power:cpu_idle -e sched:sched_kthread_stop -e sched:sched_kthread_stop_ret -e sched:sched_migrate_task -e sched:sched_move_numa -e sched:sched_pi_setprio -e sched:sched_process_exec -e sched:sched_process_exit -e sched:sched_process_fork -e sched:sched_process_free -e sched:sched_process_hang -e sched:sched_process_wait -e sched:sched_stick_numa -e sched:sched_swap_numa -e sched:sched_switch -e sched:sched_wait_task -e sched:sched_wake_idle_without_ipi -e sched:sched_wakeup -e sched:sched_wakeup_new -a
 
+Append the '-g' flag to the end of previous command, if you want to get stack
+traces for your events. The stack trace of an event will be displayed by
+traceshark if you double click on the event's info field in the events view.
+
 perf script -f > file_to_open_with_traceshark.asc
