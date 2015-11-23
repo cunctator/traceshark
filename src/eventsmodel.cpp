@@ -21,6 +21,7 @@
 #include <QString>
 #include "eventsmodel.h"
 #include "traceevent.h"
+#include "traceshark.h"
 
 
 EventsModel::EventsModel(QObject *parent):
@@ -57,8 +58,8 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 	if (role == Qt::TextAlignmentRole) {
 		return int(Qt::AlignLeft | Qt::AlignVCenter);
 	} else if (role == Qt::DisplayRole) {
-		int row = index.row();
-		int column = index.column();
+		unsigned int row = TSMAX(0, index.row());
+		unsigned int column = TSMAX(0, index.column());
 
 		if (events == NULL || row >= events->size())
 			return QVariant();
