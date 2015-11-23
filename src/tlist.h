@@ -19,15 +19,39 @@
 #ifndef TLIST_H
 #define TLIST_H
 
-#include "traceshark.h"
+#include <climits>
+
+#define TLIST_MAX(A, B) ((A) >= (B) ? A:B)
+#define TLIST_MIN(A, B) ((A) < (B) ? A:B)
 
 extern "C" {
 #include <sys/mman.h>
 }
 
+/* Here we assume that UINT_MAX can be expressed as 2^N - 1
+ * This is a bit theoretical, if we have for example 64-bit unsigned ints, then
+ * the idea is that we want to keep the array of pointers at a size of no more
+ * than one million elements, in order to avoid execessive use of address space
+ * and overcommit of memory, or rather address space
+ */
+#define TLIST_INDEX_MAX (TLIST_MIN(0xffffffffff, UINT_MAX))
+
+/* This code is needed in order to take into account platforms with small
+ * unsigned ints, since it's not guaranteed to be more than 2^16 -1, although
+ * I have to say that I don't think traceshark would run well on a platform with
+ * 16-bit ints */
+#if UINT_MAX > 0x100000
+/* This is the normal case */
 #define TLIST_MAP_NR_ELEMENTS (0x100000)
+#define TLIST_MAP_SHIFT (20) /* Number of zero bits above */
+#else
+/* Ouch, we are probably on a 16-bit platform! */
+#define TLIST_MAP_NR_ELEMENTS (0x100)
+#define TLIST_MAP_SHIFT (8) /* Number of zero bits above */
+#endif
+
 #define TLIST_MAP_ELEMENT_MASK (TLIST_MAP_NR_ELEMENTS - 1)
-#define TLIST_MAP_MASK (0xffffffff - TLIST_MAP_ELEMENT_MASK)
+#define TLIST_MAP_MASK (TLIST_INDEX_MAX - TLIST_MAP_ELEMENT_MASK)
 
 template<class T>
 class TList
@@ -73,7 +97,7 @@ TList<T>::~TList()
 template<class T>
 __always_inline unsigned int TList<T>::mapFromIndex(unsigned int index)
 {
-	return (index >> 20);
+	return (index >> TLIST_MAP_SHIFT);
 }
 
 template<class T>
@@ -86,22 +110,22 @@ template<class T>
 void TList<T>::setupMem()
 {
 	unsigned int maxNrMaps = mapFromIndex(TLIST_MAP_MASK) + 1;
-	mapArray = (T**) mmap(NULL, (size_t) maxNrMaps * sizeof(T*),
+	mapArray = (T**) mmap(nullptr, (size_t) maxNrMaps * sizeof(T*),
 			     PROT_READ | PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (mapArray == MAP_FAILED)
-		mapArray = NULL; /* let's die from null pointer if failed */
+		mapArray = nullptr; /* let's die from null pointer if failed */
 	addMem();
 }
 
 template<class T>
 void TList<T>::addMem()
 {
-	mapArray[nrMaps] = (T*) mmap(NULL, (size_t) TLIST_MAP_NR_ELEMENTS *
+	mapArray[nrMaps] = (T*) mmap(nullptr, (size_t) TLIST_MAP_NR_ELEMENTS *
 				sizeof(T), PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (mapArray[nrMaps] == MAP_FAILED)
-		mapArray[nrMaps] = NULL; /* let's die from null pointer if...*/
+		mapArray[nrMaps] = nullptr; /* let's die from null pointer...*/
 	nrMaps++;
 }
 
