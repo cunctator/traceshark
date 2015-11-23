@@ -46,7 +46,7 @@ extern "C" {
 #define TLIST_MAP_SHIFT (20) /* Number of zero bits above */
 #else
 /* Ouch, we are probably on a 16-bit platform! */
-#define TLIST_MAP_NR_ELEMENTS (0x100)
+#define TLIST_MAP_NR_ELEMENTS (0x1000)
 #define TLIST_MAP_SHIFT (8) /* Number of zero bits above */
 #endif
 
