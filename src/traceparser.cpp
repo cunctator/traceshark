@@ -736,6 +736,8 @@ void TraceParser::colorizeTasks()
 	n = colorMap.size();
 	nf = (double) n;
 	s = cbrt( (1 / nf) * (255 * 255 * 255 ));
+	s = TSMIN(s, 128.0);
+	s = TSMAX(s, 1.0);
 retry:
 	step = (unsigned int) s;
 	for (red = 0; red < 256; red += step) {
