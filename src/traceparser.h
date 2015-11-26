@@ -59,7 +59,7 @@
 #define SCHED_HEIGHT ((double) 0.5)
 #define FLOOR_HEIGHT ((double) 0)
 #define NR_TBUFFERS (3)
-#define TBUFSIZE (10000)
+#define TBUFSIZE (256)
 
 #define FULLDELAY (0.02)
 
