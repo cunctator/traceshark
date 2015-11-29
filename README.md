@@ -35,3 +35,7 @@ traces for your events. The stack trace of an event will be displayed by
 traceshark if you double click on the event's info field in the events view.
 
 perf script -f > file_to_open_with_traceshark.asc
+
+NB: Your perf program need to be recent enough to work with traceshark, that is
+compiled from a the kernel sources of a recent kernel, rather than the one
+supplied with your Linux distro.
