@@ -721,7 +721,7 @@ void TraceParser::colorizeTasks()
 	const TColor white(255, 255, 255);
 	TColor tmp;
 
-	for (cpu = 0; cpu < maxCPU; cpu++) {
+	for (cpu = 0; cpu <= maxCPU; cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
