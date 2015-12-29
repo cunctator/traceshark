@@ -110,7 +110,6 @@ bool TraceParser::isOpen()
 void TraceParser::close()
 {
 	if (traceFile != NULL) {
-		events.clear();
 		delete traceFile;
 		traceFile = NULL;
 	}
@@ -130,12 +129,14 @@ void TraceParser::close()
 		delete[] CPUs;
 		CPUs = NULL;
 	}
+	events.clear();
 	migrations.clear();
 	migrationArrows.clear();
 	ptrPool->reset();
 	taskNamePool->reset();
 	clearGrammarPools(ftraceGrammarRoot);
 	traceType = TRACE_TYPE_NONE;
+	colorMap.clear();
 }
 
 TraceParser::TraceParser()
