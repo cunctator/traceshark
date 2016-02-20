@@ -26,12 +26,11 @@
 #include <cstring>
 #include <cstdint>
 
-#define cpufreq_event(EVENT) (is_this_event(CPU_FREQUENCY, EVENT) && \
-			      EVENT.argc >= 2)
+#define cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
 #define cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
 #define cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '='))
 
-#define cpuidle_event(EVENT) (is_this_event(CPU_IDLE, EVENT) && EVENT.argc >= 2)
+#define cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
 #define cpuidle_cpu(EVENT) (param_after_char(EVENT, 1, '='))
 static __always_inline int cpuidle_state(const TraceEvent &event)
 {
@@ -43,8 +42,7 @@ static __always_inline int cpuidle_state(const TraceEvent &event)
 	return state;
 }
 
-#define sched_migrate(EVENT) \
-	(is_this_event(SCHED_MIGRATE_TASK, EVENT) && EVENT.argc >= 5)
+#define sched_migrate_args_ok(EVENT) (EVENT.argc >= 5)
 #define sched_migrate_destCPU(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
 						       '='))
 #define sched_migrate_origCPU(EVENT) (param_after_char(EVENT, EVENT.argc - 2, \
@@ -54,8 +52,7 @@ static __always_inline int cpuidle_state(const TraceEvent &event)
 #define sched_migrate_pid(EVENT) (param_after_char(EVENT, EVENT.argc - 4, \
 						   '='))
 
-#define sched_switch(EVENT) \
-	(is_this_event(SCHED_SWITCH, EVENT) && EVENT.argc >= 6)
+#define sched_switch_args_ok(EVENT) (EVENT.argc >= 6)
 #define sched_switch_newprio(EVENT) (param_inside_braces(EVENT, EVENT.argc - 1))
 #define sched_switch_newpid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 2, ':'))
@@ -239,8 +236,7 @@ static __always_inline char * __sched_switch_newname_strdup(TraceEvent &event,
 
 char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool);
 
-#define sched_wakeup(EVENT) \
-	(is_this_event(SCHED_WAKEUP, EVENT) && EVENT.argc >= 4)
+#define sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 #define sched_wakeup_cpu(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
 						  ':'))
 
@@ -321,8 +317,7 @@ static __always_inline char *__sched_wakeup_name_strdup(TraceEvent &event,
 
 char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool);
 
-#define sched_process_fork(EVENT) \
-	(is_this_event(SCHED_PROCESS_FORK, EVENT) && EVENT.argc >= 4)
+#define sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define sched_process_fork_childpid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 1, '='))
 
@@ -401,20 +396,17 @@ finalize:
 	return NULL;
 }
 
-#define sched_process_exit(EVENT) \
-	(is_this_event(SCHED_PROCESS_EXIT, EVENT) && EVENT.argc >= 3)
+#define sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define sched_process_exit_pid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 2, '='));
 
-#define irq_handler_entry(EVENT) \
-	(is_this_event(IRQ_HANDLER_ENTRY, EVENT) && EVENT.argc >= 2)
+#define irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
 #define irq_handler_entry_irq(EVENT) \
 	(param_after_char(EVENT, 0, '='))
 #define irq_handler_entry_name(EVENT, LEN_UINTPTR) \
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
-#define irq_handler_exit(EVENT)	\
-	(is_this_event(IRQ_HANDLER_EXIT, EVENT) && EVENT.argc >= 2)
+#define irq_handler_exit_args_ok(EVENT)	(EVENT.argc >= 2)
 #define irq_handler_exit_irq(EVENT) \
 	(param_after_char(EVENT, 0, '='))
 #define irq_handler_exit_handled(EVENT) \

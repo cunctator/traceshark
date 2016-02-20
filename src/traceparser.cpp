@@ -483,29 +483,39 @@ bool TraceParser::processMigration()
 void TraceParser::processMigrationFtrace()
 {
 	unsigned long i;
+	Migration m;
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
-		if (sched_migrate(event)) {
-			Migration m;
+		switch (event.type) {
+		case SCHED_MIGRATE_TASK:
+			if (!sched_migrate_args_ok(event))
+				break;
 			m.pid = sched_migrate_pid(event);
 			m.oldcpu = sched_migrate_origCPU(event);
 			m.newcpu = sched_migrate_destCPU(event);
 			m.time = event.time;
 			migrations.append(m);
-		} else if (sched_process_fork(event)) {
-			Migration m;
+			break;
+		case SCHED_PROCESS_FORK:
+			if (!sched_process_fork_args_ok(event))
+				break;
 			m.pid = sched_process_fork_childpid(event);
 			m.oldcpu = -1;
 			m.newcpu = event.cpu;
 			m.time = event.time;
 			migrations.append(m);
-		} else if (sched_process_exit(event)) {
-			Migration m;
+			break;
+		case SCHED_PROCESS_EXIT:
+			if (!sched_process_exit_args_ok(event))
+				break;
 			m.pid = sched_process_exit_pid(event);
 			m.oldcpu = event.cpu;
 			m.newcpu = -1;
 			m.time = event.time;
 			migrations.append(m);
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -571,10 +581,18 @@ void TraceParser::processSchedFtrace()
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
-		if (sched_switch(event)) {
-			processFtraceSwitchEvent(event);
-		} else if (sched_wakeup(event)) {
-			processFtraceWakeupEvent(event);
+		switch (event.type) {
+		case  SCHED_SWITCH:
+			if (sched_switch_args_ok(event))
+				processFtraceSwitchEvent(event);
+			break;
+		case SCHED_WAKEUP:
+		case SCHED_WAKEUP_NEW:
+			if (sched_wakeup_args_ok(event))
+				processFtraceWakeupEvent(event);
+			break;
+		default:
+			break;
 		}
 	}
 	processSchedAddTail();
@@ -707,10 +725,18 @@ void TraceParser::_processCPUfreqFtrace()
 		 * I expect this loop to be so fast in comparison
 		 * to the other functions that will be running in parallel
 		 * that it's acceptable to piggy back cpuidle events here */
-		if (cpuidle_event(event))
-			processFtraceCPUidleEvent(event);
-		else if (cpufreq_event(event))
-			processFtraceCPUfreqEvent(event);
+		switch (event.type) {
+		case CPU_IDLE:
+			if (cpufreq_args_ok(event))
+				processFtraceCPUidleEvent(event);
+			break;
+		case CPU_FREQUENCY:
+			if (perf_cpuidle_args_ok(event))
+				processFtraceCPUfreqEvent(event);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
