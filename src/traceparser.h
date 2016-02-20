@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -338,20 +338,33 @@ __always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
 
 __always_inline void TraceParser::preScanPerfEvent(TraceEvent &event)
 {
+	int state;
+	unsigned int cpu;
+	unsigned int freq;
+	unsigned int dest;
+	unsigned int orig;
+
 	if (event.cpu > maxCPU)
 		maxCPU = event.cpu;
-	if (perf_cpuidle_event(event)) {
-		int state = perf_cpuidle_state(event);
-		unsigned int cpu = perf_cpuidle_cpu(event);
+
+	switch (event.type) {
+	case CPU_IDLE:
+		if (!perf_cpuidle_args_ok(event))
+			break;
+		state = perf_cpuidle_state(event);
+		cpu = perf_cpuidle_cpu(event);
 		if (cpu > maxCPU)
 			maxCPU = cpu;
 		if (state < minIdleState)
 			minIdleState = state;
 		if (state > maxIdleState)
 			maxIdleState = state;
-	} else if (perf_cpufreq_event(event)) {
-		unsigned int cpu = perf_cpufreq_cpu(event);
-		unsigned int freq = perf_cpufreq_freq(event);
+		break;
+	case CPU_FREQUENCY:
+		if (!perf_cpufreq_args_ok(event))
+			break;
+		cpu = perf_cpufreq_cpu(event);
+		freq = perf_cpufreq_freq(event);
 		if (freq > maxFreq)
 			maxFreq = freq;
 		if (freq < minFreq)
@@ -361,14 +374,19 @@ __always_inline void TraceParser::preScanPerfEvent(TraceEvent &event)
 		if (cpu <= HIGHEST_CPU_EVER && startFreq[cpu] < 0) {
 			startFreq[cpu] = freq;
 		}
-	} else if (sched_migrate(event)) {
-		unsigned int dest = perf_sched_migrate_destCPU(event);
-		unsigned int orig = perf_sched_migrate_origCPU(event);
+		break;
+	case SCHED_MIGRATE_TASK:
+		if (!perf_sched_migrate_args_ok(event))
+			break;
+		dest = perf_sched_migrate_destCPU(event);
+		orig = perf_sched_migrate_origCPU(event);
 		if (dest > maxCPU)
 			maxCPU = dest;
 		if (orig > maxCPU)
 			maxCPU = dest;
-		nrMigrateEvents++;
+		break;
+	default:
+		break;
 	}
 }
 

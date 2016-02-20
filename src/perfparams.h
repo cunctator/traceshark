@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -26,12 +26,11 @@
 #include <cstring>
 #include <cstdint>
 
-#define perf_cpufreq_event(EVENT) (is_this_event(CPU_FREQUENCY, EVENT) && \
-			      EVENT.argc >= 2)
+#define perf_cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
 #define perf_cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '='))
 
-#define perf_cpuidle_event(EVENT) (is_this_event(CPU_IDLE, EVENT) && EVENT.argc >= 2)
+#define perf_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_cpuidle_cpu(EVENT) (param_after_char(EVENT, 1, '='))
 static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 {
@@ -43,8 +42,7 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 	return state;
 }
 
-#define perf_sched_migrate(EVENT) \
-	(is_this_event(SCHED_MIGRATE_TASK, EVENT) && EVENT.argc >= 5)
+#define perf_sched_migrate_args_ok(EVENT) (EVENT.argc >= 5)
 #define perf_sched_migrate_destCPU(EVENT) (param_after_char(EVENT, EVENT.argc \
 							    - 1, '='))
 #define perf_sched_migrate_origCPU(EVENT) (param_after_char(EVENT, EVENT.argc \
@@ -54,8 +52,7 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 #define perf_sched_migrate_pid(EVENT) (param_after_char(EVENT, EVENT.argc - 4, \
 							'='))
 
-#define perf_sched_switch(EVENT) \
-	(is_this_event(SCHED_SWITCH, EVENT) && EVENT.argc >= 8)
+#define perf_sched_switch_args_ok(EVENT) (EVENT.argc >= 8)
 #define perf_sched_switch_newprio(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 1, '='))
 #define perf_sched_switch_newpid(EVENT) \
@@ -230,8 +227,7 @@ static __always_inline char * __perf_sched_switch_newname_strdup(TraceEvent
 
 char *perf_sched_switch_newname_strdup(TraceEvent &event, MemPool *pool);
 
-#define perf_sched_wakeup(EVENT)				\
-	(is_this_event(SCHED_WAKEUP, EVENT) && EVENT.argc >= 5)
+#define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 5)
 #define perf_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
 						       '='))
 
@@ -307,8 +303,7 @@ static __always_inline char *__perf_sched_wakeup_name_strdup(TraceEvent &event,
 
 char *perf_sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool);
 
-#define perf_sched_process_fork(EVENT) \
-	(is_this_event(SCHED_PROCESS_FORK, EVENT) && EVENT.argc >= 4)
+#define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define perf_sched_process_fork_childpid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 1, '='))
 
@@ -375,20 +370,17 @@ __perf_sched_process_fork_childname_strdup(TraceEvent &event,
 	return NULL;
 }
 
-#define perf_sched_process_exit(EVENT) \
-	(is_this_event(SCHED_PROCESS_EXIT, EVENT) && EVENT.argc >= 3)
+#define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define perf_sched_process_exit_pid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 2, '='));
 
-#define perf_irq_handler_entry(EVENT) \
-	(is_this_event(IRQ_HANDLER_ENTRY, EVENT) && EVENT.argc >= 2)
+#define perf_irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_irq_handler_entry_irq(EVENT) \
 	(param_after_char(EVENT, 0, '='))
 #define perf_irq_handler_entry_name(EVENT, LEN_UINTPTR)			\
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
-#define perf_irq_handler_exit(EVENT)					\
-	(is_this_event(IRQ_HANDLER_EXIT, EVENT) && EVENT.argc >= 2)
+#define perf_irq_handler_exit_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_irq_handler_exit_irq(EVENT) \
 	(param_after_char(EVENT, 0, '='))
 #define perf_irq_handler_exit_handled(EVENT) \

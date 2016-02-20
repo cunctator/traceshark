@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -513,39 +513,55 @@ void TraceParser::processMigrationFtrace()
 void TraceParser::processMigrationPerf()
 {
 	unsigned long i;
+	Migration m;
+
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
-		if (perf_sched_migrate(event)) {
-			Migration m;
+		switch (event.type) {
+		case SCHED_MIGRATE_TASK:
+			if (!perf_sched_migrate_args_ok(event))
+				break;
 			m.pid = perf_sched_migrate_pid(event);
 			m.oldcpu = perf_sched_migrate_origCPU(event);
 			m.newcpu = perf_sched_migrate_destCPU(event);
 			m.time = event.time;
 			migrations.append(m);
-		} else if (perf_sched_process_fork(event)) {
-			Migration m;
+			break;
+		case SCHED_PROCESS_FORK:
+			if (perf_sched_process_fork_args_ok(event))
+				break;
 			m.pid = perf_sched_process_fork_childpid(event);
 			m.oldcpu = -1;
 			m.newcpu = event.cpu;
 			m.time = event.time;
 			migrations.append(m);
-		} else if (perf_sched_process_exit(event)) {
-			Migration m;
+			break;
+		case SCHED_PROCESS_EXIT:
+			if (perf_sched_process_exit_args_ok(event))
+				break;
 			m.pid = perf_sched_process_exit_pid(event);
 			m.oldcpu = event.cpu;
 			m.newcpu = -1;
 			m.time = event.time;
 			migrations.append(m);
+			break;
+		default:
+			break;
 		}
 	}
 }
 
 bool TraceParser::processSched()
 {
-	if (traceType == TRACE_TYPE_FTRACE) {
+	switch (traceType) {
+	case TRACE_TYPE_FTRACE:
 		processSchedFtrace();
-	} else if (traceType == TRACE_TYPE_PERF) {
+		break;
+	case TRACE_TYPE_PERF:
 		processSchedPerf();
+		break;
+	default:
+		break;
 	}
 	return false;
 }
@@ -569,10 +585,20 @@ void TraceParser::processSchedPerf()
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
 		TraceEvent &event = events[i];
-		if (perf_sched_switch(event)) {
-			processPerfSwitchEvent(event);
-		} else if (sched_wakeup(event)) {
-			processPerfWakeupEvent(event);
+		switch(event.type) {
+		case SCHED_SWITCH:
+			if (perf_sched_switch_args_ok(event))
+				processPerfSwitchEvent(event);
+			break;
+			/* sched_wakeup_new and sched_wakeup both have the same
+			 * argument structure */
+		case SCHED_WAKEUP:
+		case SCHED_WAKEUP_NEW:
+			if (perf_sched_wakeup_args_ok(event))
+				processPerfWakeupEvent(event);
+			break;
+		default:
+			break;
 		}
 	}
 	processSchedAddTail();
@@ -697,10 +723,18 @@ void TraceParser::_processCPUfreqPerf()
 		 * I expect this loop to be so fast in comparison
 		 * to the other functions that will be running in parallel
 		 * that it's acceptable to piggy back cpuidle events here */
-		if (perf_cpuidle_event(event))
-			processPerfCPUidleEvent(event);
-		else if (perf_cpufreq_event(event))
-			processPerfCPUfreqEvent(event);
+		switch (event.type) {
+		case CPU_IDLE:
+			if (perf_cpufreq_args_ok(event))
+				processPerfCPUidleEvent(event);
+			break;
+		case CPU_FREQUENCY:
+			if (perf_cpuidle_args_ok(event))
+				processPerfCPUfreqEvent(event);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
