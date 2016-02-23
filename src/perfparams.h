@@ -227,26 +227,77 @@ static __always_inline char * __perf_sched_switch_newname_strdup(TraceEvent
 
 char *perf_sched_switch_newname_strdup(TraceEvent &event, MemPool *pool);
 
-#define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 5)
+/*
+ * These functions for sched_wakeup assumes that the format is either the "old"
+ * or "new", that
+ * is:
+ * Xorg   829 [003]  2726.130986: sched:sched_wakeup: comm=spotify pid=9288 \
+ * prio=120 success=1 target_cpu=000
+ *
+ * ..or:
+ * Xorg   829 [003]  2726.130986: sched:sched_wakeup: comm=spotify pid=9288 \
+ * prio=120 target_cpu=000
+ *
+ */
+
+#define WAKE_SUCC_PFIX "success="
+#define WAKE_PID_PFIX  "pid="
+#define WAKE_PRIO_PFIX "prio="
+#define WAKE_TCPU_PFIX "target_cpu="
+
+#define WAKE_SUCC_PFIX_LEN (sizeof(WAKE_SUCC_PFIX) / sizeof(char) - 1)
+#define WAKE_PID_PFIX_LEN  (sizeof(WAKE_PID_PFIX)  / sizeof(char) - 1)
+#define WAKE_PRIO_PFIX_LEN (sizeof(WAKE_PRIO_PFIX) / sizeof(char) - 1)
+#define WAKE_TCPU_PFIX_LEN (sizeof(WAKE_TCPU_PFIX) / sizeof(char) - 1)
+
+#define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
+
+/* The last argument is target_cpu, regardless of old or new */
 #define perf_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
 						       '='))
 
 static __always_inline bool perf_sched_wakeup_success(TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
-	char *last = ss->ptr + ss->len - 1; /* Empty string should not be 
-					       produced by parser */
+
+	/* Assume that wakeup is successful if no success field is found*/
+	if (strncmp(ss->ptr, WAKE_SUCC_PFIX,WAKE_SUCC_PFIX_LEN) != 0)
+		return true;
+
+	/* Empty string should not be produced by parser */
+	char *last = ss->ptr + ss->len - 1;
 	return *last == '1';
 }
 
-#define perf_sched_wakeup_prio(EVENT) (param_after_char(EVENT, EVENT.argc - 3, \
-							'='))
-#define perf_sched_wakeup_pid(EVENT) (param_after_char(EVENT, EVENT.argc - 4, \
-						       '='))
-#define WAKE_PID_PFIX  "pid="
-#define WAKE_PRIO_PFIX "prio="
-#define WAKE_SUCC_PFIX "success="
-#define WAKE_TCPU_PFIX "target_cpu="
+static __always_inline unsigned int perf_sched_wakeup_prio(TraceEvent &event)
+{
+	unsigned int newidx = event.argc - 2;
+	unsigned int oldidx;
+	/* Check if we are on the new format */
+	if (!strncmp(event.argv[newidx]->ptr, WAKE_PRIO_PFIX,
+		     WAKE_PRIO_PFIX_LEN)) {
+		return param_after_char(event, newidx, '=');
+	}
+
+	/* Assume that this is the old format */
+	oldidx = event.argc - 3;
+	return param_after_char(event, oldidx, '=');
+}
+
+static __always_inline unsigned int perf_sched_wakeup_pid(TraceEvent &event)
+{
+	unsigned int newidx = event.argc - 3;
+	unsigned int oldidx;
+	/* Check if we are on the new format */
+	if (!strncmp(event.argv[newidx]->ptr, WAKE_PID_PFIX,
+		     WAKE_PID_PFIX_LEN)) {
+		return param_after_char(event, newidx, '=');
+	}
+
+	/* Assume that this is the old format */
+	oldidx = event.argc - 4;
+	return param_after_char(event, oldidx, '=');
+}
 
 static __always_inline char *__perf_sched_wakeup_name_strdup(TraceEvent &event,
 							     MemPool *pool)
@@ -260,20 +311,15 @@ static __always_inline char *__perf_sched_wakeup_name_strdup(TraceEvent &event,
 	TString *first;
 	bool ok;
 
-	/* Find the index of the pid=... that is followed by:
-	 * prio=... success=... target_cpu=... */
-	for (i = 1; i <= event.argc - 4; i++) {
+	/* Find the index of the pid=... that is followed by prio= */
+	for (i = 1; i <= event.argc - 2; i++) {
 		char *c1 = event.argv[i + 0]->ptr;
 		char *c2 = event.argv[i + 1]->ptr;
-		char *c3 = event.argv[i + 2]->ptr;
-		char *c4 = event.argv[i + 3]->ptr;
-		if (!strncmp(c1, WAKE_PID_PFIX, strlen(WAKE_PID_PFIX)) &&
-		    !strncmp(c2, WAKE_PRIO_PFIX, strlen(WAKE_PRIO_PFIX)) &&
-		    !strncmp(c3, WAKE_SUCC_PFIX, strlen(WAKE_SUCC_PFIX)) &&
-		    !strncmp(c4, WAKE_TCPU_PFIX, strlen(WAKE_TCPU_PFIX)))
+		if (!strncmp(c1, WAKE_PID_PFIX, WAKE_PID_PFIX_LEN) &&
+		    !strncmp(c2, WAKE_PRIO_PFIX, WAKE_PRIO_PFIX_LEN))
 			break;
 	}
-	if (!(i <= event.argc - 4))
+	if (!(i <= event.argc - 2))
 		return NULL;
 	beginidx = 1;
 	endidx = i - 1;
