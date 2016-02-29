@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,36 +16,19 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "namenode.h"
-#include "mm/stringpool.h"
-#include "traceevent.h"
-#include "tstring.h"
+#ifndef STORENODE_H
+#define STORENODE_H
 
-NameNode::NameNode(const char *name)
-	: GrammarNode(name)
+#include "grammarnode.h"
+
+class StringPool;
+
+class StoreNode: public GrammarNode
 {
-	namePool = new StringPool(1024, 65536);
-}
+public:
+	StoreNode(const char *name);
+	bool match(TString *str, TraceEvent *event);
+	void clearStringPool() {};
+};
 
-NameNode::~NameNode()
-{
-	delete namePool;
-}
-
-bool NameNode::match(TString *str, TraceEvent *event)
-{
-	TString *newstr;
-
-	/* This is the "magic" that saves a ton of string allocations
-	 * with exactly the same string */
-	newstr = namePool->allocString(str, TShark::StrHash32(str), 65536);
-	if (newstr == NULL)
-		return false;
-	event->taskName = newstr;
-	return true;
-}
-
-void NameNode::clearStringPool()
-{
-	namePool->clear();
-}
+#endif /* STORENODE_H */

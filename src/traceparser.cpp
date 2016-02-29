@@ -28,15 +28,15 @@
 #include "traceparser.h"
 #include "tracefile.h"
 #include "grammarroot.h"
-#include "namepidnode.h"
 #include "cpunode.h"
 #include "threads/threadbuffer.h"
+#include "perftimenode.h"
 #include "timenode.h"
 #include "eventnode.h"
 #include "argnode.h"
-#include "namenode.h"
 #include "pidnode.h"
 #include "perfeventnode.h"
+#include "storenode.h"
 #include "traceshark.h"
 #include "threads/workthread.h"
 #include "threads/workitem.h"
@@ -163,7 +163,7 @@ void TraceParser::createFtraceGrammarTree()
 	EventNode *ftraceEventNode;
 	TimeNode *ftraceTimeNode;
 	CpuNode *ftraceCpuNode;
-	NamePidNode *ftraceNamePidNode;
+	StoreNode *ftraceNamePidNode;
 
 	ftraceArgNode = new ArgNode("ftraceArgNode");
 	ftraceArgNode->nChildren = 1;
@@ -181,29 +181,35 @@ void TraceParser::createFtraceGrammarTree()
 	ftraceTimeNode->isLeaf = false;
 
 	ftraceCpuNode = new CpuNode("ftraceCpuNode");
-	ftraceCpuNode->nChildren = 1;
+	ftraceCpuNode->nChildren = 2;
 	ftraceCpuNode->children[0] = ftraceTimeNode;
+	// ftraceCpuNode->children[1] = ftraceNamePidNode;
 	ftraceCpuNode->isLeaf = false;
 
-	ftraceNamePidNode = new NamePidNode("ftraceNamePidNode");
-	ftraceNamePidNode->nChildren = 1;
+	ftraceNamePidNode = new StoreNode("ftraceNamePidNode");
+	ftraceNamePidNode->nChildren = 2;
 	ftraceNamePidNode->children[0] = ftraceCpuNode;
+	ftraceNamePidNode->children[1] = ftraceNamePidNode;
 	ftraceNamePidNode->isLeaf = false;
 
 	ftraceGrammarRoot = new GrammarRoot("ftraceRootNode");
 	ftraceGrammarRoot->nChildren = 1;
 	ftraceGrammarRoot->children[0] = ftraceNamePidNode;
 	ftraceGrammarRoot->isLeaf = false;
+
+	/* This is the commented out line being executed here because of the
+	 * loop structure */
+	ftraceCpuNode->children[1] = ftraceNamePidNode;
 }
 
 void TraceParser::createPerfGrammarTree()
 {
 	ArgNode *perfArgNode;
 	PerfEventNode *perfEventNode;
-	TimeNode *perfTimeNode;
+	PerfTimeNode *perfTimeNode;
 	CpuNode *perfCpuNode;
-	PidNode *perfPidNode;
-	NameNode *perfNameNode;
+	StoreNode *perfPidNode;
+	StoreNode *perfNameNode;
 
 	perfArgNode = new ArgNode("perfArgNode");
 	perfArgNode->nChildren = 1;
@@ -215,30 +221,36 @@ void TraceParser::createPerfGrammarTree()
 	perfEventNode->children[0] = perfArgNode;
 	perfEventNode->isLeaf = true;
 
-	perfTimeNode = new TimeNode("perfTimeNode");
+	perfTimeNode = new PerfTimeNode("perfTimeNode");
 	perfTimeNode->nChildren = 1;
 	perfTimeNode->children[0] = perfEventNode;
 	perfTimeNode->isLeaf = false;
 
 	perfCpuNode = new CpuNode("perfCpuNode");
-	perfCpuNode->nChildren = 1;
+	perfCpuNode->nChildren = 2;
 	perfCpuNode->children[0] = perfTimeNode;
+	// perfCpuNode->children[1] = perfPidNode;
 	perfCpuNode->isLeaf = false;
 
-	perfPidNode = new PidNode("perfPidNode");
-	perfPidNode->nChildren = 1;
+	perfPidNode = new StoreNode("perfPidNode");
+	perfPidNode->nChildren = 2;
 	perfPidNode->children[0] = perfCpuNode;
+	perfPidNode->children[1] = perfPidNode;
 	perfPidNode->isLeaf = false;
 
-	perfNameNode = new NameNode("perfNameNode");
+	perfNameNode = new StoreNode("perfNameNode");
 	perfNameNode->nChildren = 1;
 	perfNameNode->children[0] = perfPidNode;
 	perfNameNode->isLeaf = false;
 
-	perfGrammarRoot = new GrammarRoot("perfNameNode");
+	perfGrammarRoot = new GrammarRoot("perfRootNode");
 	perfGrammarRoot->nChildren = 1;
 	perfGrammarRoot->children[0] = perfNameNode;
 	perfGrammarRoot->isLeaf = false;
+
+	/* This is the commented out line being executed here because of the
+	 * loop structure */
+	perfCpuNode->children[1] = perfPidNode;
 }
 
 TraceParser::~TraceParser()
@@ -255,9 +267,10 @@ TraceParser::~TraceParser()
 
 void TraceParser::DeleteGrammarTree(GrammarNode* node) {
 	unsigned int i;
+	node->reaped = true;
 	for (i = 0; i < node->nChildren; i++) {
-		/* Delete subtree unless it's a node being it's own child */
-		if (node->children[i] != node)
+		/* Delete subtree if it has not been visited */
+		if (!node->children[i]->reaped)
 			DeleteGrammarTree(node->children[i]);
 	}
 	delete node;
@@ -416,7 +429,6 @@ bool TraceParser::parseBuffer(unsigned int index)
 	for(i = 0; i < s; i++) {
 		TraceLine *line = &tbuf->buffer[i];
 		TraceEvent &event = events.preAlloc();
-		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
 		if (parseLine(line, &event, ftraceGrammarRoot)) {
 			/* Check if the timestamp of this event is affected by
@@ -995,15 +1007,34 @@ bool TraceParser::parseLineBugFixup(TraceEvent* event, double prevtime)
 	return retval;
 }
 
-void TraceParser::clearGrammarPools(GrammarNode *tree)
+void TraceParser::_clearGrammarPools(GrammarNode *tree)
 {
 	unsigned int i;
+	tree->reaped = true;
 	tree->clearStringPool();
 	for (i = 0; i < tree->nChildren; i++) {
-		/* Clear subtree unless it's a node being it's own child */
-		if (tree->children[i] != tree)
-			clearGrammarPools(tree->children[i]);
+		/* Clear subtree if it hasn't been visited */
+		if (!tree->children[i]->reaped)
+			_clearGrammarPools(tree->children[i]);
 	}
+}
+
+void TraceParser::resetGrammarReapedFlag(GrammarNode *tree)
+{
+	unsigned int i;
+	tree->reaped = false;
+	for (i = 0; i < tree->nChildren; i++) {
+		/* Reset subtree if it hasn't been visited, N.B. since we are
+		 * resetting, reaped flag will be false for visited nodes */
+		if (tree->children[i]->reaped)
+			resetGrammarReapedFlag(tree->children[i]);
+	}
+}
+
+void TraceParser::clearGrammarPools(GrammarNode *tree)
+{
+	_clearGrammarPools(tree);
+	resetGrammarReapedFlag(tree);
 }
 
 void TraceParser::determineTraceType()

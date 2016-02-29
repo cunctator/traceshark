@@ -1,7 +1,7 @@
 #
 #
 #  Traceshark - a visualizer for visualizing ftrace and perf traces
-#  Copyright (C) 2014, 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,8 +40,6 @@ HEADERS      += src/mainwindow.h
 HEADERS      += src/migration.h
 HEADERS      += src/migrationarrow.h
 HEADERS      += src/migrationline.h
-HEADERS      += src/namenode.h
-HEADERS      += src/namepidnode.h
 HEADERS      += mm/mempool.h
 HEADERS      += mm/stringpool.h
 HEADERS      += mm/stringtree.h
@@ -50,7 +48,9 @@ HEADERS      += src/setting.h
 HEADERS      += src/paramhelpers.h
 HEADERS      += src/perfeventnode.h
 HEADERS      += src/perfparams.h
+HEADERS      += src/perftimenode.h
 HEADERS      += src/pidnode.h
+HEADERS      += src/storenode.h
 HEADERS      += src/task.h
 HEADERS      += src/taskgraph.h
 HEADERS      += src/tcolor.h
@@ -96,11 +96,11 @@ SOURCES      += src/migrationline.cpp
 SOURCES      += mm/mempool.cpp
 SOURCES      += src/perfeventnode.cpp
 SOURCES      += src/perfparams.cpp
+SOURCES      += src/perftimenode.cpp
 SOURCES      += src/pidnode.cpp
+SOURCES      += src/storenode.cpp
 SOURCES      += mm/stringpool.cpp
 SOURCES      += mm/stringtree.cpp
-SOURCES      += src/namenode.cpp
-SOURCES      += src/namepidnode.cpp
 SOURCES      += src/cputask.cpp
 SOURCES      += src/tcolor.cpp
 SOURCES      += threads/tthread.cpp

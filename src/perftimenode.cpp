@@ -20,22 +20,22 @@
 #include <cstring>
 
 #include "mm/stringpool.h"
-#include "timenode.h"
+#include "perftimenode.h"
 #include "traceevent.h"
 #include "traceshark.h"
 
-TimeNode::TimeNode(const char *name)
+PerfTimeNode::PerfTimeNode(const char *name)
 	: GrammarNode(name)
 {
 	namePool = new StringPool(1024, 65536);
 }
 
-TimeNode::~TimeNode()
+PerfTimeNode::~PerfTimeNode()
 {
 	delete namePool;
 }
 
-bool TimeNode::match(TString *str, TraceEvent *event)
+bool PerfTimeNode::match(TString *str, TraceEvent *event)
 {
 	bool rval;
 	TString namestr;
@@ -43,51 +43,44 @@ bool TimeNode::match(TString *str, TraceEvent *event)
 	char cstr[256];
 	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
 	unsigned int i;
+	int pid;
+	uint32_t hash;
 
 	namestr.ptr = cstr;
 	namestr.len = 0;
 
-	/* atof() and sscanf() are not up to the task because they are
-	 * too slow and get confused by locality issues */
+	/* atof() and sscanf() are buggy */
 	event->time = TShark::timeStrToDouble(str->ptr, rval);
 
 	/* This is the time field, if it is successful we need to assemble
 	 * the name and pid strings that has been temporarily stored in
 	 * argv/argc */
 	if (rval) {
-		if (event->argc < 2)
+		if (event->argc < 3)
 			return false;
 
+		pid = pidFromString(*event->argv[event->argc - 2]);
+		if (pid < 0)
+			return false;
+		event->pid = pid;
 
-		i = 0;
-		if (event->argc > 2) {
+		if (event->argc > 3) {
 			namestr.set(event->argv[0], maxlen);
-			/* This will assemble broken up parts of the process
-			 * name; those that have been broken up by spaces in
-			 * the name */
 			for (i = 1; i < event->argc - 2; i++) {
 				if (!namestr.merge(event->argv[i], maxlen))
 					return false;
 			}
+
+			hash = TShark::StrHash32(&namestr);
+			newname = namePool->allocString(&namestr, hash, 65536);
+		} else {
+			hash = TShark::StrHash32(event->argv[0]);
+			newname = namePool->allocString(event->argv[0], hash,
+							65536);
 		}
-
-		/* Extract the final portion of the name from event->argv[i]
-		 * and the pid. */
-		if (!extractNameAndPid(namestr, event->pid,
-				       *event->argv[i],
-				       maxlen))
-			return false;
-
-
-		newname = namePool->allocString(&namestr,
-						TShark::StrHash32(&namestr),
-						65536);
 		if (newname == nullptr)
 			return false;
 		event->taskName = newname;
-		/* Need to reset the arguments because the real arguments
-		 * will be stored after the succesful completion of the next
-		 * node */
 		event->argc = 0;
 	}
 	return rval;

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@ public:
 	static __always_inline int strcmp(const TString *a, const TString *b,
 					  unsigned short skip,
 					  unsigned short *neq);
+	__always_inline bool merge(const TString *s, unsigned int maxlen);
+	__always_inline bool set(const TString *s, unsigned int maxlen);
 };
 
 __always_inline int TString::cmp(const TString *a, const TString *b) {
@@ -82,6 +84,30 @@ __always_inline int TString::strcmp(const TString *a, const TString *b)
 			return cval;
 	}
 	return rval;
+}
+
+__always_inline bool TString::merge(const TString *s, unsigned int maxlen)
+{
+	unsigned int newlen;
+
+	newlen = len + 1 + s->len;
+	if (newlen > maxlen)
+		return false;
+	ptr[len] = ' ';
+	strncpy(ptr + len + 1, s->ptr, s->len);
+	len = newlen;
+	ptr[len] = '\0';
+	return true;
+}
+
+__always_inline bool TString::set(const TString *s, unsigned int maxlen)
+{
+	if (s->len > maxlen)
+		return false;
+	strncpy(ptr, s->ptr, s->len);
+	len = s->len;
+	ptr[len] = '\0';
+	return true;
 }
 
 #endif

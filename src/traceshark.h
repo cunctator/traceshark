@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ namespace TShark {
 	 * For example, 123.456: is ok. 123.456X is not ok if
 	 * X is not a digit between 0-9 or a ':'
 	 */
-	static __always_inline double strToDouble(char* str, bool &ok)
+	static __always_inline double timeStrToDouble(char* str, bool &ok)
 	{
 		char *c;
 		double r;
@@ -114,7 +114,7 @@ namespace TShark {
 			r += base / div;
 		}
 
-		if (*c != ':' && *c != '\0')
+		if (*c != ':')
 			goto error;
 
 		if (isNeg)

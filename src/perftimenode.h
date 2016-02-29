@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,22 +16,45 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NAMENODE_H
-#define NAMENODE_H
+#ifndef PERFTIMENODE_H
+#define PERFTIMENODE_H
 
 #include "grammarnode.h"
 
 class StringPool;
 
-class NameNode: public GrammarNode
+class PerfTimeNode: public GrammarNode
 {
 public:
-	NameNode(const char *name);
-	~NameNode();
+	PerfTimeNode(const char *name);
+	~PerfTimeNode();
 	bool match(TString *str, TraceEvent *event);
-	void clearStringPool();
+	void clearStringPool() {};
 private:
+	__always_inline int pidFromString(const TString &str);
 	StringPool *namePool;
 };
 
-#endif /* NAMENODE_H */
+__always_inline int PerfTimeNode::pidFromString(const TString &str)
+{
+	char *lastChr = str.ptr + str.len - 1;
+	int pid;
+	int digit;
+	char *c;
+
+	if (str.len < 1 || str.len > 10)
+		return false;
+
+	pid = 0;
+	for (c = str.ptr; c <= lastChr; c++) {
+		pid *= 10;
+		digit = *c - '0';
+		if (digit <= 9 && digit >= 0)
+			pid += digit;
+		else
+			return -1;
+	}
+	return pid;
+}
+
+#endif

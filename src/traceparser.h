@@ -156,6 +156,8 @@ private:
 	void addCpuSchedWork(unsigned int cpu,
 			     QList<AbstractWorkItem*> &list);
 	void scaleMigration();
+	void _clearGrammarPools(GrammarNode *tree);
+	void resetGrammarReapedFlag(GrammarNode *tree);
 	void clearGrammarPools(GrammarNode *tree);
 	void determineTraceType();
 	void processSchedFtrace();
@@ -224,7 +226,6 @@ __always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 	for(i = 0; i < s; i++) {
 		TraceLine *line = &tbuf->buffer[i];
 		TraceEvent &event = events.preAlloc();
-		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
 		if (parseLine(line, &event, ftraceGrammarRoot)) {
 			/* Check if the timestamp of this event is affected by
@@ -413,6 +414,7 @@ __always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
 	unsigned int i,j;
 	GrammarNode *node = root;
 	bool retval = root->isLeaf;
+	event->argc = 0;
 
 	for (i = 0; i < line->nStrings; i++)
 	{

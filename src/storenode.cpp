@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,22 +16,24 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NAMEPIDNODE_H
-#define NAMEPIDNODE_H
+#include "storenode.h"
+#include "traceevent.h"
+#include "tstring.h"
 
-#include "grammarnode.h"
+StoreNode::StoreNode(const char *name)
+	: GrammarNode(name) {}
 
-class StringPool;
-
-class NamePidNode: public GrammarNode
+bool StoreNode::match(TString *str, TraceEvent *event)
 {
-public:
-	NamePidNode(const char *name);
-	~NamePidNode();
-	bool match(TString *str, TraceEvent *event);
-	void clearStringPool();
-private:
-	StringPool *namePool;
-};
-
-#endif
+	/* We temporarily store the process name string(s) into the
+	 * argv/argc fields of the event, because we don't know how many
+	 * strings the process name will be split into. It may have been
+	 * split into several strings due to the process name containing
+	 * spaces. We will then consume this stored information in the
+	 * TimeNode class */
+	if (event->argc >= 256)
+		return false;
+	event->argv[event->argc] = str;
+	event->argc++;
+	return true;
+}
