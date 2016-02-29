@@ -106,16 +106,26 @@ static __always_inline unsigned int ___perf_sched_switch_find_arrow(TraceEvent
 	return i;
 }
 
-static __always_inline char perf_sched_switch_state(TraceEvent &event)
+static __always_inline taskstate_t perf_sched_switch_state(TraceEvent &event)
 {
 	unsigned int i;
+	unsigned int j;
+	taskstate_t state = TASK_STATE_UNKNOWN;
 
 	i = ___perf_sched_switch_find_arrow(event);
-	if (i != 0) {
+	if (i != 0 && event.argv[i - 1]->len > 2) {
 		TString *stateStr = event.argv[i - 1];
-		return stateStr->ptr[stateStr->len - 1];
+		for (j = stateStr->len - 2; j > 0; j--) {
+			if (stateStr->ptr[j] == '=') {
+				if (stateStr->ptr[j + 1] == 'R')
+					state = TASK_STATE_RUNNABLE;
+				else
+					state = TASK_STATE_NOT_RUNNABLE;
+				break;
+			}
+		}
 	}
-	return '\0';
+	return state;
 }
 
 static __always_inline unsigned int perf_sched_switch_oldprio(TraceEvent &event)

@@ -563,13 +563,13 @@ __always_inline void TraceParser::processFtraceSwitchEvent(TraceEvent &event)
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
-		char state = sched_switch_state(event);
+		taskstate_t state = sched_switch_state(event);
 
 		/* Apparenly this task was on CPU when we started tracing */
 		cpuTask->timev.append(startTime);
 		cpuTask->data.append(SCHED_HEIGHT);
 
-		if (state == 'R') {
+		if (state == TASK_STATE_RUNNABLE) {
 			cpuTask->runningTimev.append(oldtime);
 			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
@@ -580,12 +580,12 @@ __always_inline void TraceParser::processFtraceSwitchEvent(TraceEvent &event)
 		cpuTask->name = sched_switch_oldname_strdup(event,
 							    taskNamePool);
 	} else {
-		char state = sched_switch_state(event);
+		taskstate_t state = sched_switch_state(event);
 
 		cpuTask->timev.append(oldtime);
 		cpuTask->data.append(FLOOR_HEIGHT);
 
-		if (state == 'R') {
+		if (state == TASK_STATE_RUNNABLE) {
 			cpuTask->runningTimev.append(oldtime);
 			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
@@ -669,13 +669,13 @@ __always_inline void TraceParser::processPerfSwitchEvent(TraceEvent &event)
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
-		char state = perf_sched_switch_state(event);
+		taskstate_t state = perf_sched_switch_state(event);
 
 		/* Apparenly this task was on CPU when we started tracing */
 		cpuTask->timev.append(startTime);
 		cpuTask->data.append(SCHED_HEIGHT);
 
-		if (state == 'R') {
+		if (state == TASK_STATE_RUNNABLE) {
 			cpuTask->runningTimev.append(oldtime);
 			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;
@@ -686,12 +686,12 @@ __always_inline void TraceParser::processPerfSwitchEvent(TraceEvent &event)
 		cpuTask->name = perf_sched_switch_oldname_strdup(event,
 								 taskNamePool);
 	} else {
-		char state = perf_sched_switch_state(event);
+		taskstate_t state = perf_sched_switch_state(event);
 
 		cpuTask->timev.append(oldtime);
 		cpuTask->data.append(FLOOR_HEIGHT);
 
-		if (state == 'R') {
+		if (state == TASK_STATE_RUNNABLE) {
 			cpuTask->runningTimev.append(oldtime);
 			cpuTask->runningData.append(FLOOR_HEIGHT);
 			task->lastWakeUP = oldtime;

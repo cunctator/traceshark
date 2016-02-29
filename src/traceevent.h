@@ -23,6 +23,12 @@
 #include "tstring.h"
 
 typedef enum {
+	TASK_STATE_UNKNOWN = 0,
+	TASK_STATE_RUNNABLE,
+	TASK_STATE_NOT_RUNNABLE,
+} taskstate_t;
+
+typedef enum {
 	CPU_FREQUENCY = 0,
 	CPU_IDLE,
 	SCHED_MIGRATE_TASK,
