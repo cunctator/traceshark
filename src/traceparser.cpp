@@ -855,6 +855,79 @@ retry:
 	}
 }
 
+
+int TraceParser::binarySearch(double time, int start, int end)
+{
+	int pivot = (end + start) / 2;
+	if (pivot == start)
+		return pivot;
+	if (time < events.at(pivot).time)
+		return binarySearch(time, start, pivot);
+	else
+		return binarySearch(time, pivot, end);
+}
+
+int TraceParser::findIndexBefore(double time)
+{
+	if (events.size() < 1)
+		return -1;
+
+	int end = events.size() - 1;
+
+	/* Basic sanity checks */
+	if (time > events.at(end).time)
+		return end;
+	if (time < events.at(0).time)
+		return 0;
+
+	int c = binarySearch(time, 0, end);
+
+	if (events.at(c).time >= time)
+		c--;
+	return c;
+}
+
+TraceEvent *TraceParser::findPreviousSchedEvent(double time,
+						unsigned int pid)
+{
+	int index = findIndexBefore(time);
+	int i;
+
+	if (index < 0)
+		return nullptr;
+
+	for (i = index; i >= 0; i--) {
+		TraceEvent &event = events[i];
+		if (event.type == SCHED_SWITCH  &&
+		    generic_sched_switch_newpid(event) == pid) {
+			return &event;
+		}
+	}
+	return nullptr;
+}
+
+TraceEvent *TraceParser::findPreviousWakeupEvent(double time,
+						 unsigned int pid)
+{
+	int index = findIndexBefore(time);
+	int i;
+
+	if (index < 0)
+		return nullptr;
+
+	for (i = index; i >= 0; i--) {
+		TraceEvent &event = events[i];
+		if ((event.type == SCHED_WAKEUP ||
+		     event.type == SCHED_WAKEUP_NEW) &&
+		    generic_sched_wakeup_pid(event) == pid) {
+			return &event;
+		}
+	}
+	return nullptr;
+}
+
+
+
 void TraceParser::setSchedOffset(unsigned int cpu, double offset)
 {
 	schedOffset[cpu] = offset;

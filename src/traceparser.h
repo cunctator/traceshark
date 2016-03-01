@@ -92,6 +92,8 @@ public:
 	bool processSched();
 	bool processCPUfreq();
 	TList<TraceEvent> events;
+	TraceEvent *findPreviousSchedEvent(double time, unsigned int pid);
+	TraceEvent *findPreviousWakeupEvent(double time, unsigned int pid);
 	__always_inline unsigned int getMaxCPU();
 	__always_inline unsigned int getNrCPUs();
 	__always_inline double getStartTime();
@@ -120,10 +122,16 @@ public:
 	QList<Migration> migrations;
 	QList<MigrationArrow*> migrationArrows;
 private:
+	int binarySearch(double time, int start, int end);
+	int findIndexBefore(double time);
 	void preparePreScan();
 	void finalizePreScan();
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
+	__always_inline unsigned int generic_sched_switch_newpid(TraceEvent
+								 &event);
+	__always_inline unsigned int generic_sched_wakeup_pid(TraceEvent
+							      &event);
 	__always_inline bool parseFtraceBuffer(unsigned int index);
 	__always_inline bool parsePerfBuffer(unsigned int index);
 	__always_inline void preScanFtraceEvent(TraceEvent &event);
@@ -462,6 +470,28 @@ __always_inline double TraceParser::estimateWakeUp(Task *task,
 
 	delay = newTime - task->lastWakeUP;
 	return delay;
+}
+
+__always_inline unsigned int TraceParser::generic_sched_switch_newpid(TraceEvent
+								      &event)
+{
+	if (traceType == TRACE_TYPE_PERF) {
+		return perf_sched_switch_newpid(event);
+	} else if (traceType == TRACE_TYPE_FTRACE) {
+		return sched_switch_newpid(event);
+	}
+	return UINT_MAX;
+}
+
+__always_inline unsigned int TraceParser::generic_sched_wakeup_pid(TraceEvent
+								   &event)
+{
+	if (traceType == TRACE_TYPE_PERF) {
+		return perf_sched_wakeup_pid(event);
+	} else if (traceType == TRACE_TYPE_FTRACE) {
+		return sched_wakeup_pid(event);
+	}
+	return UINT_MAX;
 }
 
 __always_inline unsigned int TraceParser::getMaxCPU()

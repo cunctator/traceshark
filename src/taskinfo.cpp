@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ TaskInfo::TaskInfo(QWidget *parent):
 	QLabel *colonLabel = new QLabel(tr(":"));
 	QPushButton *addButton = new QPushButton(tr("Add to legend"), this);
 	QPushButton *clearButton = new QPushButton(tr("Clear"), this);
+	QPushButton *findButton = new QPushButton(tr("Find wakeup"), this);
 
 	nameLine = new QLineEdit(this);
 	pidLine = new QLineEdit(this);
@@ -51,10 +52,12 @@ TaskInfo::TaskInfo(QWidget *parent):
 	layout->addWidget(pidLine);
 	layout->addWidget(addButton);
 	layout->addWidget(clearButton);
+	layout->addWidget(findButton);
 	layout->addStretch();
 
 	tsconnect(addButton, clicked(), this, addClicked());
 	tsconnect(clearButton, clicked(), this, clearClicked());
+	tsconnect(findButton, clicked(), this, findClicked());
 }
 
 TaskInfo::~TaskInfo()
@@ -134,6 +137,20 @@ void TaskInfo::clearClicked()
 	if (plot != NULL)
 		plot->replot();
 	legendPidMap.clear();
+}
+
+void TaskInfo::findClicked()
+{
+	CPUTask *task;
+
+	if (taskGraph == NULL)
+		return;
+
+	task = taskGraph->getTask();
+	if (task == NULL)
+		return;
+
+	emit findWakeup(task->pid);
 }
 
 void TaskInfo::checkGraphSelection()

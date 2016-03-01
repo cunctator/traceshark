@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -40,9 +40,12 @@ public:
 	void checkGraphSelection();
 	void clear();
 	void pidRemoved(unsigned int pid);
+signals:
+	void findWakeup(unsigned int pid);
 private slots:
 	void addClicked();
 	void clearClicked();
+	void findClicked();
 private:
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;

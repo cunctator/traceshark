@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 #include "migrationline.h"
 #include "taskgraph.h"
+#include "traceevent.h"
 #include "traceplot.h"
 #include "traceshark.h"
 #include "threads/workqueue.h"
@@ -36,7 +37,7 @@
 #include "qcustomplot/qcustomplot.h"
 
 MainWindow::MainWindow():
-	tracePlot(NULL)
+	tracePlot(nullptr)
 {
 	parser = new TraceParser;
 
@@ -90,8 +91,8 @@ MainWindow::MainWindow():
 	infoWidget = new InfoWidget(this);
 	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
 
-	cursors[TShark::RED_CURSOR] = NULL;
-	cursors[TShark::BLUE_CURSOR] = NULL;
+	cursors[TShark::RED_CURSOR] = nullptr;
+	cursors[TShark::BLUE_CURSOR] = nullptr;
 
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
@@ -100,6 +101,8 @@ MainWindow::MainWindow():
 		  this, plotDoubleClicked(QMouseEvent*));
 	tsconnect(infoWidget, valueChanged(double, int),
 		  this, infoValueChanged(double, int));
+	tsconnect(infoWidget, findWakeup(unsigned int), this,
+		  showWakeup(unsigned int));
 	tsconnect(eventsWidget, timeSelected(double), this,
 		  moveActiveCursor(double));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
@@ -133,7 +136,7 @@ void MainWindow::openTrace()
 	QString name = QFileDialog::getOpenFileName(this);
 	if (!name.isEmpty()) {
 		eventsWidget->beginResetModel();
-		eventsWidget->setEvents(NULL);
+		eventsWidget->setEvents(nullptr);
 		eventsWidget->endResetModel();
 		if (parser->isOpen())
 			parser->close();
@@ -286,8 +289,8 @@ void MainWindow::rescaleTrace()
 
 void MainWindow::clearPlot()
 {
-	cursors[TShark::RED_CURSOR] = NULL;
-	cursors[TShark::BLUE_CURSOR] = NULL;
+	cursors[TShark::RED_CURSOR] = nullptr;
+	cursors[TShark::BLUE_CURSOR] = nullptr;
 	tracePlot->clearItems();
 	tracePlot->clearPlottables();
 	tracePlot->hide();
@@ -471,7 +474,7 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 void MainWindow::closeTrace()
 {
 	eventsWidget->beginResetModel();
-	eventsWidget->setEvents(NULL);
+	eventsWidget->setEvents(nullptr);
 	eventsWidget->endResetModel();
 	clearPlot();
 	if(parser->isOpen())
@@ -589,13 +592,13 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 	/* Let's filter out double clicks on the legend or its items */
 	clickedLayerable = tracePlot->getLayerableAt(event->pos(), false,
 						     &details);
-	if (clickedLayerable != NULL) {
+	if (clickedLayerable != nullptr) {
 		legend = qobject_cast<QCPLegend*>(clickedLayerable);
-		if (legend != NULL)
+		if (legend != nullptr)
 			return;
 		legendItem = qobject_cast<QCPAbstractLegendItem*>
 			(clickedLayerable);
-		if (legendItem != NULL)
+		if (legendItem != nullptr)
 			return;
 	}
 
@@ -604,7 +607,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 		return;
 
 	Cursor *cursor = cursors[cursorIdx];
-	if (cursor != NULL) {
+	if (cursor != nullptr) {
 		double pixel = (double) event->x();
 		double coord = tracePlot->xAxis->pixelToCoord(pixel);
 		cursor->setPosition(coord);
@@ -618,7 +621,7 @@ void MainWindow::infoValueChanged(double value, int nr)
 	Cursor *cursor;
 	if (nr == TShark::RED_CURSOR || nr == TShark::BLUE_CURSOR) {
 		cursor = cursors[nr];
-		if (cursor != NULL)
+		if (cursor != nullptr)
 			cursor->setPosition(value);
 		eventsWidget->scrollTo(value);
 	}
@@ -633,7 +636,7 @@ void MainWindow::moveActiveCursor(double time)
 		return;
 
 	Cursor *cursor = cursors[cursorIdx];
-	if (cursor != NULL) {
+	if (cursor != nullptr) {
 		cursor->setPosition(time);
 		infoWidget->setTime(time, cursorIdx);
 	}
@@ -747,7 +750,7 @@ void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,
 	TaskGraph *graph;
 
 	graph = qobject_cast<TaskGraph *>(plottable);
-	if (graph == NULL)
+	if (graph == nullptr)
 		return;
 	if (graph->selected())
 		infoWidget->setTaskGraph(graph);
@@ -768,11 +771,11 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	LegendGraph *legendGraph;
 
 	plottableItem = qobject_cast<QCPPlottableLegendItem*>(abstractItem);
-	if (plottableItem == NULL)
+	if (plottableItem == nullptr)
 		return;
 	plottable = plottableItem->plottable();
 	legendGraph = qobject_cast<LegendGraph*>(plottable);
-	if (legendGraph == NULL)
+	if (legendGraph == nullptr)
 		return;
 	legendGraph->removeFromLegend();
 	/* Inform the TaskInfo class (inside InfoWidget) that the pid has
@@ -781,4 +784,46 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	 * different LegendGraphs, there might be "identical" LegendGraphs
 	 * when the same pid has migrated between CPUs */
 	infoWidget->pidRemoved(legendGraph->pid);
+}
+
+void MainWindow::showWakeup(unsigned int pid)
+{
+	int activeIdx = infoWidget->getCursorIdx();
+	int inactiveIdx;
+
+	if (activeIdx != TShark::RED_CURSOR &&
+	    activeIdx != TShark::BLUE_CURSOR) {
+		return;
+	}
+
+	inactiveIdx = TShark::RED_CURSOR;
+	if (activeIdx == inactiveIdx)
+		inactiveIdx = TShark::BLUE_CURSOR;
+
+	Cursor *activeCursor = cursors[activeIdx];
+	Cursor *inactiveCursor = cursors[inactiveIdx];
+
+	if (activeCursor == nullptr || inactiveCursor == nullptr)
+		return;
+
+	/* The time of the active cursor is taken to be the time that the
+	 * user is interested in, i.e. finding the previous wake up event
+	 * relative to */
+	double zerotime = activeCursor->getPosition();
+	TraceEvent *schedevent = parser->findPreviousSchedEvent(zerotime, pid);
+	if (schedevent == nullptr)
+		return;
+
+	double schedtime = schedevent->time;
+	TraceEvent *wakeupevent = parser->findPreviousWakeupEvent(schedtime,
+								  pid);
+	if (wakeupevent == nullptr)
+		return;
+	/* This is what we do, we move the *inactive* cursor to the wakeup
+	 * event, move the *active* cursor to the scheduling event and then
+	 * finally scroll the events widget to the same time */
+	inactiveCursor->setPosition(wakeupevent->time);
+	activeCursor->setPosition(schedevent->time);
+	infoWidget->setTime(wakeupevent->time, inactiveIdx);
+	eventsWidget->scrollTo(wakeupevent->time);
 }

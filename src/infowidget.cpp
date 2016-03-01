@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -69,6 +69,8 @@ InfoWidget::InfoWidget(QWidget *parent):
 		   valueChanged(double, int));
 	sigconnect(cursorInfos[1], valueChanged(double, int), this,
 		   valueChanged(double, int));
+	sigconnect(taskInfo, findWakeup(unsigned int), this,
+		   findWakeup(unsigned int));
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
 		  updateChange(double, int));
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
