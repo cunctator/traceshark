@@ -790,6 +790,7 @@ void MainWindow::showWakeup(unsigned int pid)
 {
 	int activeIdx = infoWidget->getCursorIdx();
 	int inactiveIdx;
+	int wakeUpIndex;
 
 	if (activeIdx != TShark::RED_CURSOR &&
 	    activeIdx != TShark::BLUE_CURSOR) {
@@ -810,13 +811,15 @@ void MainWindow::showWakeup(unsigned int pid)
 	 * user is interested in, i.e. finding the previous wake up event
 	 * relative to */
 	double zerotime = activeCursor->getPosition();
-	TraceEvent *schedevent = parser->findPreviousSchedEvent(zerotime, pid);
+	TraceEvent *schedevent = parser->findPreviousSchedEvent(zerotime, pid,
+								nullptr);
 	if (schedevent == nullptr)
 		return;
 
 	double schedtime = schedevent->time;
 	TraceEvent *wakeupevent = parser->findPreviousWakeupEvent(schedtime,
-								  pid);
+								  pid,
+								  &wakeUpIndex);
 	if (wakeupevent == nullptr)
 		return;
 	/* This is what we do, we move the *inactive* cursor to the wakeup
@@ -825,5 +828,5 @@ void MainWindow::showWakeup(unsigned int pid)
 	inactiveCursor->setPosition(wakeupevent->time);
 	activeCursor->setPosition(schedevent->time);
 	infoWidget->setTime(wakeupevent->time, inactiveIdx);
-	eventsWidget->scrollTo(wakeupevent->time);
+	eventsWidget->scrollTo(wakeUpIndex);
 }

@@ -92,8 +92,10 @@ public:
 	bool processSched();
 	bool processCPUfreq();
 	TList<TraceEvent> events;
-	TraceEvent *findPreviousSchedEvent(double time, unsigned int pid);
-	TraceEvent *findPreviousWakeupEvent(double time, unsigned int pid);
+	TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
+					   int *index);
+	TraceEvent *findPreviousWakeupEvent(double time, unsigned int pid,
+					    int *index);
 	__always_inline unsigned int getMaxCPU();
 	__always_inline unsigned int getNrCPUs();
 	__always_inline double getStartTime();

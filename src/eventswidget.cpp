@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include "traceshark.h"
 
 EventsWidget::EventsWidget(QWidget *parent):
-	QDockWidget(parent), events(NULL)
+	QDockWidget(parent), events(nullptr)
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(tableView);
@@ -68,7 +68,7 @@ void EventsWidget::setEvents(TList<TraceEvent> *e)
 void EventsWidget::beginResetModel()
 {
 	eventsModel->beginResetModel();
-	events = NULL;
+	events = nullptr;
 }
 
 void EventsWidget::endResetModel()
@@ -79,9 +79,20 @@ void EventsWidget::endResetModel()
 
 void EventsWidget::scrollTo(double time)
 {
-	if (events != NULL) {
+	if (events != nullptr) {
 		int n = findBestMatch(time);
 		tableView->selectRow(n);
+		tableView->resizeColumnsToContents();
+	}
+}
+
+void EventsWidget::scrollTo(int n)
+{
+	if (n < 0 || events == nullptr)
+		return;
+	unsigned int index = (unsigned int) n;
+	if (index < events->size()) {
+		tableView->selectRow(index);
 		tableView->resizeColumnsToContents();
 	}
 }

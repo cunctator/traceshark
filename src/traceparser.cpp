@@ -888,18 +888,21 @@ int TraceParser::findIndexBefore(double time)
 }
 
 TraceEvent *TraceParser::findPreviousSchedEvent(double time,
-						unsigned int pid)
+						unsigned int pid,
+						int *index)
 {
-	int index = findIndexBefore(time);
+	int start = findIndexBefore(time);
 	int i;
 
-	if (index < 0)
+	if (start < 0)
 		return nullptr;
 
-	for (i = index; i >= 0; i--) {
+	for (i = start; i >= 0; i--) {
 		TraceEvent &event = events[i];
 		if (event.type == SCHED_SWITCH  &&
 		    generic_sched_switch_newpid(event) == pid) {
+			if (index != nullptr)
+				*index = i;
 			return &event;
 		}
 	}
@@ -907,19 +910,22 @@ TraceEvent *TraceParser::findPreviousSchedEvent(double time,
 }
 
 TraceEvent *TraceParser::findPreviousWakeupEvent(double time,
-						 unsigned int pid)
+						 unsigned int pid,
+						 int *index)
 {
-	int index = findIndexBefore(time);
+	int start = findIndexBefore(time);
 	int i;
 
-	if (index < 0)
+	if (start < 0)
 		return nullptr;
 
-	for (i = index; i >= 0; i--) {
+	for (i = start; i >= 0; i--) {
 		TraceEvent &event = events[i];
 		if ((event.type == SCHED_WAKEUP ||
 		     event.type == SCHED_WAKEUP_NEW) &&
 		    generic_sched_wakeup_pid(event) == pid) {
+			if (index != nullptr)
+				*index = i;
 			return &event;
 		}
 	}
