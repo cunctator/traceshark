@@ -909,17 +909,16 @@ TraceEvent *TraceParser::findPreviousSchedEvent(double time,
 	return nullptr;
 }
 
-TraceEvent *TraceParser::findPreviousWakeupEvent(double time,
+TraceEvent *TraceParser::findPreviousWakeupEvent(int startidx,
 						 unsigned int pid,
 						 int *index)
 {
-	int start = findIndexBefore(time);
 	int i;
 
-	if (start < 0)
+	if (startidx < 0 || startidx >= events.size())
 		return nullptr;
 
-	for (i = start; i >= 0; i--) {
+	for (i = startidx; i >= 0; i--) {
 		TraceEvent &event = events[i];
 		if ((event.type == SCHED_WAKEUP ||
 		     event.type == SCHED_WAKEUP_NEW) &&

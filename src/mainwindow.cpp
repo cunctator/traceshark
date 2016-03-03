@@ -791,6 +791,7 @@ void MainWindow::showWakeup(unsigned int pid)
 	int activeIdx = infoWidget->getCursorIdx();
 	int inactiveIdx;
 	int wakeUpIndex;
+	int schedIndex;
 
 	if (activeIdx != TShark::RED_CURSOR &&
 	    activeIdx != TShark::BLUE_CURSOR) {
@@ -812,12 +813,12 @@ void MainWindow::showWakeup(unsigned int pid)
 	 * relative to */
 	double zerotime = activeCursor->getPosition();
 	TraceEvent *schedevent = parser->findPreviousSchedEvent(zerotime, pid,
-								nullptr);
+								&schedIndex);
 	if (schedevent == nullptr)
 		return;
 
 	double schedtime = schedevent->time;
-	TraceEvent *wakeupevent = parser->findPreviousWakeupEvent(schedtime,
+	TraceEvent *wakeupevent = parser->findPreviousWakeupEvent(schedIndex,
 								  pid,
 								  &wakeUpIndex);
 	if (wakeupevent == nullptr)

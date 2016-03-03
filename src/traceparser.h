@@ -94,7 +94,7 @@ public:
 	TList<TraceEvent> events;
 	TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
 					   int *index);
-	TraceEvent *findPreviousWakeupEvent(double time, unsigned int pid,
+	TraceEvent *findPreviousWakeupEvent(int startidx, unsigned int pid,
 					    int *index);
 	__always_inline unsigned int getMaxCPU();
 	__always_inline unsigned int getNrCPUs();
