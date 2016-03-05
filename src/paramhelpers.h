@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -78,13 +78,14 @@ err:
 /* This function will merge event arguments from beginidx to endix into
  * a cstring. Such cases exists because tasknames that contains spaces have
  * been split into several arguments due to parsing with space as delimiter */
-static __always_inline void merge_args_into_cstring(TraceEvent &event,
-						    unsigned int beginidx,
-						    unsigned int endidx,
-						    char *&c,
-						    unsigned int &len,
-						    unsigned int maxlen,
-						    bool &ok)
+static __always_inline void
+merge_args_into_cstring(const TraceEvent &event,
+			unsigned int beginidx,
+			unsigned int endidx,
+			char *&c,
+			unsigned int &len,
+			unsigned int maxlen,
+			bool &ok)
 {
 	unsigned int i;
 	ok = true;
@@ -137,8 +138,8 @@ static __always_inline unsigned int param_after_char(const TraceEvent &event,
 	return param;
 }
 
-static __always_inline unsigned int param_inside_braces(TraceEvent &event,
-					       unsigned int n_param)
+static __always_inline unsigned int param_inside_braces(const TraceEvent &event,
+							unsigned int n_param)
 {
 	unsigned int len = event.argv[n_param]->len;
 	char *first = event.argv[n_param]->ptr;
@@ -161,9 +162,9 @@ static __always_inline unsigned int param_inside_braces(TraceEvent &event,
 }
 
 static __always_inline const char *substr_after_char(const char *str,
-					       unsigned int len,
-					       char c,
-					       unsigned int *sublen)
+						     unsigned int len,
+						     char c,
+						     unsigned int *sublen)
 {
 	unsigned int i;
 

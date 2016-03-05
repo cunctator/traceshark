@@ -29,6 +29,7 @@ HEADERS      += src/eventnode.h
 HEADERS      += src/eventsmodel.h
 HEADERS      += src/eventswidget.h
 HEADERS      += src/ftraceparams.h
+HEADERS      += src/genericparams.h
 HEADERS      += src/grammarnode.h
 HEADERS      += src/grammarroot.h
 HEADERS      += src/infowidget.h

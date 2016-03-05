@@ -31,7 +31,7 @@
 #include "cpu.h"
 #include "cpufreq.h"
 #include "cpuidle.h"
-#include "ftraceparams.h"
+#include "genericparams.h"
 #include "mm/mempool.h"
 #include "cputask.h"
 #include "tcolor.h"
@@ -40,7 +40,6 @@
 #include "grammarnode.h"
 #include "migration.h"
 #include "migrationarrow.h"
-#include "perfparams.h"
 #include "task.h"
 #include "threads/threadbuffer.h"
 #include "traceshark.h"
@@ -65,14 +64,6 @@
 
 class TraceFile;
 class QCustomPlot;
-
-typedef enum {
-	TRACE_TYPE_FTRACE = 0,
-	TRACE_TYPE_PERF,
-	TRACE_TYPE_MAX
-} tracetype_t;
-
-#define TRACE_TYPE_NONE (TRACE_TYPE_MAX)
 
 class TraceParser
 {
@@ -134,13 +125,20 @@ private:
 								 &event);
 	__always_inline unsigned int generic_sched_wakeup_pid(TraceEvent
 							      &event);
+	__always_inline bool __parseBuffer(tracetype_t ttppe,
+					   unsigned int index);
 	__always_inline bool parseFtraceBuffer(unsigned int index);
 	__always_inline bool parsePerfBuffer(unsigned int index);
+	__always_inline void __preScanEvent(tracetype_t ttype,
+					    TraceEvent &event);
 	__always_inline void preScanFtraceEvent(TraceEvent &event);
 	__always_inline void preScanPerfEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event,
 				       GrammarNode *root);
-	bool parseLineBugFixup(TraceEvent* event, double prevtime);
+	__always_inline bool parseLineFtrace(TraceLine* line,
+					     TraceEvent &event);
+	__always_inline bool parseLinePerf(TraceLine *line, TraceEvent &event);
+	bool parseLineBugFixup(TraceEvent* event);
 	__always_inline Task *getTask(unsigned int pid);
 	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
 						 double startTime);
@@ -149,14 +147,17 @@ private:
 	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, unsigned int oldpid,
 				  double oldtime);
+	__always_inline void __processMigrationGeneric(tracetype_t ttype);
 	void processMigrationFtrace();
 	void processMigrationPerf();
-	__always_inline void processFtraceSwitchEvent(TraceEvent &event);
-	__always_inline void processFtraceWakeupEvent(TraceEvent &event);
-	__always_inline void processFtraceCPUfreqEvent(TraceEvent &event);
-	__always_inline void processFtraceCPUidleEvent(TraceEvent &event);
-	__always_inline void processPerfSwitchEvent(TraceEvent &event);
-	__always_inline void processPerfWakeupEvent(TraceEvent &event);
+	__always_inline void __processSwitchEvent(tracetype_t ttype,
+						  TraceEvent &event);
+	__always_inline void __processWakeupEvent(tracetype_t ttype,
+						  TraceEvent &event);
+	__always_inline void processCPUfreqEvent(tracetype_t ttype,
+						 TraceEvent &event);
+	__always_inline void processCPUidleEvent(tracetype_t ttype,
+						 TraceEvent &event);
 	__always_inline void processPerfCPUfreqEvent(TraceEvent &event);
 	__always_inline void processPerfCPUidleEvent(TraceEvent &event);
 	void addCpuFreqWork(unsigned int cpu,
@@ -170,11 +171,13 @@ private:
 	void resetGrammarReapedFlag(GrammarNode *tree);
 	void clearGrammarPools(GrammarNode *tree);
 	void determineTraceType();
+	__always_inline void __processSchedGeneric(tracetype_t ttype);
 	void processSchedFtrace();
 	void processSchedPerf();
 	void processSchedAddTail();
-	void _processCPUfreqFtrace();
-	void _processCPUfreqPerf();
+	__always_inline void __processCPUfreq(tracetype_t ttype);
+	void processCPUfreqFtrace();
+	void processCPUfreqPerf();
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<TraceParser> *parserThread;
 	WorkQueue scalingQueue;
@@ -196,6 +199,7 @@ private:
 	TraceEvent *prevEvent;
 	char *infoBegin;
 	bool prevLineIsEvent;
+	double prevTime;
 	tracetype_t traceType;
 	unsigned long lastEvent;
 	unsigned int maxFreq;
@@ -222,46 +226,20 @@ private:
 /* This parses a buffer */
 __always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 {
-	unsigned int i, s;
-	double prevtime = std::numeric_limits<double>::lowest();
-
-	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
-	if (tbuf->beginConsumeBuffer()) {
-		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
-		return true;
-	}
-
-	s = tbuf->nRead;
-
-	for(i = 0; i < s; i++) {
-		TraceLine *line = &tbuf->buffer[i];
-		TraceEvent &event = events.preAlloc();
-		event.argv = (TString**) ptrPool->preallocN(256);
-		if (parseLine(line, &event, ftraceGrammarRoot)) {
-			/* Check if the timestamp of this event is affected by
-			 * the infamous ftrace timestamp rollover bug and
-			 * try to correct it */
-			if (event.time < prevtime) {
-				if (!parseLineBugFixup(&event, prevtime))
-					continue;
-			}
-			prevtime = event.time;
-			ptrPool->commitN(event.argc);
-			event.postEventInfo = NULL;
-			events.commit();
-			nrEvents++;
-			preScanFtraceEvent(event);
-		}
-	}
-	tbuf->endConsumeBuffer();
-	return false;
+	return __parseBuffer(TRACE_TYPE_FTRACE, index);
 }
 
 /* This parses a buffer */
 __always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 {
+	return __parseBuffer(TRACE_TYPE_PERF, index);
+}
+
+/* This parses a buffer */
+__always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
+						unsigned int index)
+{
 	unsigned int i, s;
-	double prevtime = std::numeric_limits<double>::lowest();
 
 	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
 	if (tbuf->beginConsumeBuffer()) {
@@ -276,42 +254,17 @@ __always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 		TraceEvent &event = events.preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
-		if (parseLine(line, &event, perfGrammarRoot)) {
-			/* Check if the timestamp of this event is affected by
-			 * the infamous ftrace timestamp rollover bug and
-			 * try to correct it */
-			if (event.time < prevtime) {
-				if (!parseLineBugFixup(&event, prevtime))
-					continue;
-			}
-			prevtime = event.time;
-			ptrPool->commitN(event.argc);
-			if (prevLineIsEvent) {
-				prevEvent->postEventInfo = NULL;
-			} else {
-				TString *str = (TString*) postEventPool->
-					allocObj();
-				str->ptr = infoBegin;
-				str->len = line->begin - infoBegin;
-				prevEvent->postEventInfo = str;
-				prevLineIsEvent = true;
-			}
-			events.commit();
-			prevEvent = &event;
-			nrEvents++;
-			preScanPerfEvent(event);
-		} else {
-			if (prevLineIsEvent) {
-				infoBegin = line->begin;
-				prevLineIsEvent = false;
-			}
-		}
+		if (ttype == TRACE_TYPE_FTRACE)
+			parseLineFtrace(line, event);
+		else if (ttype == TRACE_TYPE_PERF)
+			parseLinePerf(line, event);
 	}
 	tbuf->endConsumeBuffer();
 	return false;
 }
-
-__always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
+		
+__always_inline void TraceParser::__preScanEvent(tracetype_t ttype,
+						 TraceEvent &event)
 {
 	int state;
 	unsigned int cpu;
@@ -324,10 +277,10 @@ __always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
 
 	switch (event.type) {
 	case CPU_IDLE:
-		if (!cpuidle_args_ok(event))
+		if (!cpuidle_args_ok(ttype, event))
 			break;
-		state = cpuidle_state(event);
-		cpu = cpuidle_cpu(event);
+		state = cpuidle_state(ttype, event);
+		cpu = cpuidle_cpu(ttype, event);
 		if (cpu > maxCPU)
 			maxCPU = cpu;
 		if (state < minIdleState)
@@ -336,10 +289,10 @@ __always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
 			maxIdleState = state;
 		break;
 	case CPU_FREQUENCY:
-		if (!cpufreq_args_ok(event))
+		if (!cpufreq_args_ok(ttype, event))
 			break;
-		cpu = cpufreq_cpu(event);
-		freq = cpufreq_freq(event);
+		cpu = cpufreq_cpu(ttype, event);
+		freq = cpufreq_freq(ttype, event);
 		if (freq > maxFreq)
 			maxFreq = freq;
 		if (freq < minFreq)
@@ -351,8 +304,8 @@ __always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
 		}
 		break;
 	case SCHED_MIGRATE_TASK:
-		dest = sched_migrate_destCPU(event);
-		orig = sched_migrate_origCPU(event);
+		dest = sched_migrate_destCPU(ttype, event);
+		orig = sched_migrate_origCPU(ttype, event);
 		if (dest > maxCPU)
 			maxCPU = dest;
 		if (orig > maxCPU)
@@ -364,58 +317,14 @@ __always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
 	}
 }
 
+__always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
+{
+	__preScanEvent(TRACE_TYPE_FTRACE, event);
+}
+
 __always_inline void TraceParser::preScanPerfEvent(TraceEvent &event)
 {
-	int state;
-	unsigned int cpu;
-	unsigned int freq;
-	unsigned int dest;
-	unsigned int orig;
-
-	if (event.cpu > maxCPU)
-		maxCPU = event.cpu;
-
-	switch (event.type) {
-	case CPU_IDLE:
-		if (!perf_cpuidle_args_ok(event))
-			break;
-		state = perf_cpuidle_state(event);
-		cpu = perf_cpuidle_cpu(event);
-		if (cpu > maxCPU)
-			maxCPU = cpu;
-		if (state < minIdleState)
-			minIdleState = state;
-		if (state > maxIdleState)
-			maxIdleState = state;
-		break;
-	case CPU_FREQUENCY:
-		if (!perf_cpufreq_args_ok(event))
-			break;
-		cpu = perf_cpufreq_cpu(event);
-		freq = perf_cpufreq_freq(event);
-		if (freq > maxFreq)
-			maxFreq = freq;
-		if (freq < minFreq)
-			minFreq = freq;
-		if (cpu > maxCPU)
-			maxCPU = cpu;
-		if (cpu <= HIGHEST_CPU_EVER && startFreq[cpu] < 0) {
-			startFreq[cpu] = freq;
-		}
-		break;
-	case SCHED_MIGRATE_TASK:
-		if (!perf_sched_migrate_args_ok(event))
-			break;
-		dest = perf_sched_migrate_destCPU(event);
-		orig = perf_sched_migrate_origCPU(event);
-		if (dest > maxCPU)
-			maxCPU = dest;
-		if (orig > maxCPU)
-			maxCPU = dest;
-		break;
-	default:
-		break;
-	}
+	__preScanEvent(TRACE_TYPE_PERF, event);
 }
 
 __always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
@@ -441,6 +350,68 @@ __always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
 		continue;
 	}
 	return retval;
+}
+
+__always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
+						  TraceEvent &event)
+{
+	if (parseLine(line, &event, ftraceGrammarRoot)) {
+		/* Check if the timestamp of this event is affected by
+		 * the infamous ftrace timestamp rollover bug and
+		 * try to correct it */
+		if (event.time < prevTime) {
+			if (!parseLineBugFixup(&event))
+				return true;
+		}
+		prevTime = event.time;
+		ptrPool->commitN(event.argc);
+		event.postEventInfo = NULL;
+		events.commit();
+		nrFtraceEvents++;
+		preScanFtraceEvent(event);
+		/* probably not necessary because ftrace traces doesn't
+		 * have backtraces and stuff but do it anyway */
+		prevLineIsEvent = true;
+		return true;
+	}
+	return false;
+}
+
+__always_inline bool TraceParser::parseLinePerf(TraceLine* line,
+						TraceEvent & event)
+{
+	if (parseLine(line, &event, perfGrammarRoot)) {
+		/* Check if the timestamp of this event is affected by
+		 * the infamous ftrace timestamp rollover bug and
+		 * try to correct it */
+		if (event.time < prevTime) {
+			if (!parseLineBugFixup(&event))
+				return true;
+		}
+		prevTime = event.time;
+		ptrPool->commitN(event.argc);
+		if (prevLineIsEvent) {
+			prevEvent->postEventInfo = NULL;
+		} else {
+			TString *str = (TString*) postEventPool->
+				allocObj();
+			str->ptr = infoBegin;
+			str->len = line->begin - infoBegin;
+			prevEvent->postEventInfo = str;
+			prevLineIsEvent = true;
+		}
+		events.commit();
+		prevEvent = &event;
+		nrPerfEvents++;
+		preScanPerfEvent(event);
+		return true;
+	} else {
+		if (prevLineIsEvent) {
+			infoBegin = line->begin;
+			prevLineIsEvent = false;
+		}
+		return false;
+	}
 }
 
 __always_inline double TraceParser::estimateWakeUpNew(CPU *eventCPU,
@@ -477,23 +448,17 @@ __always_inline double TraceParser::estimateWakeUp(Task *task,
 __always_inline unsigned int TraceParser::generic_sched_switch_newpid(TraceEvent
 								      &event)
 {
-	if (traceType == TRACE_TYPE_PERF) {
-		return perf_sched_switch_newpid(event);
-	} else if (traceType == TRACE_TYPE_FTRACE) {
-		return sched_switch_newpid(event);
-	}
-	return UINT_MAX;
+	if (!tracetype_is_valid(traceType))
+		return UINT_MAX;
+	return sched_switch_newpid(traceType, event);
 }
 
 __always_inline unsigned int TraceParser::generic_sched_wakeup_pid(TraceEvent
 								   &event)
 {
-	if (traceType == TRACE_TYPE_PERF) {
-		return perf_sched_wakeup_pid(event);
-	} else if (traceType == TRACE_TYPE_FTRACE) {
-		return sched_wakeup_pid(event);
-	}
-	return UINT_MAX;
+	if (!tracetype_is_valid(traceType))
+		return UINT_MAX;
+	return sched_wakeup_pid(traceType, event);
 }
 
 __always_inline unsigned int TraceParser::getMaxCPU()
@@ -562,13 +527,56 @@ __always_inline Task *TraceParser::findTask(unsigned int pid)
 		return &iter.value();
 }
 
-__always_inline void TraceParser::processFtraceSwitchEvent(TraceEvent &event)
+__always_inline void TraceParser::__processMigrationGeneric(tracetype_t ttype)
+{
+	unsigned long i;
+	Migration m;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		switch (event.type) {
+		case SCHED_MIGRATE_TASK:
+			if (!sched_migrate_args_ok(ttype, event))
+				break;
+			m.pid = sched_migrate_pid(ttype, event);
+			m.oldcpu = sched_migrate_origCPU(ttype, event);
+			m.newcpu = sched_migrate_destCPU(ttype, event);
+			m.time = event.time;
+			migrations.append(m);
+			break;
+		case SCHED_PROCESS_FORK:
+			if (!sched_process_fork_args_ok(ttype, event))
+				break;
+			m.pid = sched_process_fork_childpid(ttype, event);
+			m.oldcpu = -1;
+			m.newcpu = event.cpu;
+			m.time = event.time;
+			migrations.append(m);
+			break;
+		case SCHED_PROCESS_EXIT:
+			if (!sched_process_exit_args_ok(ttype, event))
+				break;
+			m.pid = sched_process_exit_pid(ttype, event);
+			m.oldcpu = event.cpu;
+			m.newcpu = -1;
+			m.time = event.time;
+			migrations.append(m);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+
+
+__always_inline void TraceParser::__processSwitchEvent(tracetype_t ttype,
+						       TraceEvent &event)
 {
 	unsigned int cpu = event.cpu;
 	double oldtime = event.time - FAKE_DELTA;
 	double newtime = event.time + FAKE_DELTA;
-	unsigned int oldpid = sched_switch_oldpid(event);
-	unsigned int newpid = sched_switch_newpid(event);
+	unsigned int oldpid = sched_switch_oldpid(ttype, event);
+	unsigned int newpid = sched_switch_newpid(ttype, event);
 	CPUTask *cpuTask;
 	Task *task;
 	double delay;
@@ -595,7 +603,7 @@ __always_inline void TraceParser::processFtraceSwitchEvent(TraceEvent &event)
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
-		taskstate_t state = sched_switch_state(event);
+		taskstate_t state = sched_switch_state(ttype, event);
 
 		/* Apparenly this task was on CPU when we started tracing */
 		cpuTask->timev.append(startTime);
@@ -609,10 +617,10 @@ __always_inline void TraceParser::processFtraceSwitchEvent(TraceEvent &event)
 
 		cpuTask->timev.append(oldtime);
 		cpuTask->data.append(FLOOR_HEIGHT);
-		cpuTask->name = sched_switch_oldname_strdup(event,
+		cpuTask->name = sched_switch_oldname_strdup(ttype, event,
 							    taskNamePool);
 	} else {
-		taskstate_t state = sched_switch_state(event);
+		taskstate_t state = sched_switch_state(ttype, event);
 
 		cpuTask->timev.append(oldtime);
 		cpuTask->data.append(FLOOR_HEIGHT);
@@ -653,7 +661,8 @@ skip:
 		cpuTask->timev.append(newtime);
 		cpuTask->data.append(SCHED_HEIGHT);
 
-		cpuTask->name = sched_switch_newname_strdup(event, taskNamePool);
+		cpuTask->name = sched_switch_newname_strdup(ttype, event,
+							    taskNamePool);
 	} else {
 		cpuTask->wakeTimev.append(newtime);
 		cpuTask->wakeDelay.append(delay);
@@ -668,185 +677,91 @@ out:
 	return;
 }
 
-__always_inline void TraceParser::processPerfSwitchEvent(TraceEvent &event)
-{
-	unsigned int cpu = event.cpu;
-	double oldtime = event.time - FAKE_DELTA;
-	double newtime = event.time + FAKE_DELTA;
-	unsigned int oldpid = perf_sched_switch_oldpid(event);
-	unsigned int newpid = perf_sched_switch_newpid(event);
-	CPUTask *cpuTask;
-	Task *task;
-	double delay;
-	CPU *eventCPU = &CPUs[cpu];
-
-	if (cpu > maxCPU)
-		return;
-
-	if (eventCPU->pidOnCPU != oldpid) {
-		if (eventCPU->hasBeenScheduled)
-			handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid,
-					     oldtime);
-		/* else { do nothing, non scheduled CPU is handled below } */
-	}
-
-	if (oldpid == 0) {
-		eventCPU->lastExitIdle = oldtime;
-		goto skip;  /* We don't care about the idle task */
-	}
-
-	/* Handle the outgoing task */
-	cpuTask = &cpuTaskMaps[cpu][oldpid]; /* Modifiable reference */
-	task = getTask(oldpid);
-	if (cpuTask->isNew) { /* true means task is newly constructed above */
-		cpuTask->pid = oldpid;
-		cpuTask->isNew = false;
-		taskstate_t state = perf_sched_switch_state(event);
-
-		/* Apparenly this task was on CPU when we started tracing */
-		cpuTask->timev.append(startTime);
-		cpuTask->data.append(SCHED_HEIGHT);
-
-		if (state == TASK_STATE_RUNNABLE) {
-			cpuTask->runningTimev.append(oldtime);
-			cpuTask->runningData.append(FLOOR_HEIGHT);
-			task->lastWakeUP = oldtime;
-		}
-
-		cpuTask->timev.append(oldtime);
-		cpuTask->data.append(FLOOR_HEIGHT);
-		cpuTask->name = perf_sched_switch_oldname_strdup(event,
-								 taskNamePool);
-	} else {
-		taskstate_t state = perf_sched_switch_state(event);
-
-		cpuTask->timev.append(oldtime);
-		cpuTask->data.append(FLOOR_HEIGHT);
-
-		if (state == TASK_STATE_RUNNABLE) {
-			cpuTask->runningTimev.append(oldtime);
-			cpuTask->runningData.append(FLOOR_HEIGHT);
-			task->lastWakeUP = oldtime;
-		}
-	}
-
-skip:
-	if (newpid == 0) {
-		eventCPU->lastEnterIdle = newtime;
-		goto out; /* We don't care about the idle task */
-	}
-
-	/* Handle the incoming task */
-	task = &taskMap[newpid]; /* Modifiable reference */
-	if (task->isNew) {
-		task->pid = newpid;
-		task->isNew = false;
-		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
-	} else
-		delay = estimateWakeUp(task, eventCPU, newtime, startTime);
-
-	cpuTask = &cpuTaskMaps[cpu][newpid]; /* Modifiable reference */
-	if (cpuTask->isNew) { /* true means task is newly constructed above */
-		cpuTask->pid = newpid;
-		cpuTask->isNew = false;
-
-		cpuTask->timev.append(startTime);
-		cpuTask->data.append(FLOOR_HEIGHT);
-
-		cpuTask->wakeTimev.append(newtime);
-		cpuTask->wakeDelay.append(delay);
-
-		cpuTask->timev.append(newtime);
-		cpuTask->data.append(SCHED_HEIGHT);
-
-		cpuTask->name = perf_sched_switch_newname_strdup(event,
-								 taskNamePool);
-	} else {
-		cpuTask->wakeTimev.append(newtime);
-		cpuTask->wakeDelay.append(delay);
-
-		cpuTask->timev.append(newtime);
-		cpuTask->data.append(SCHED_HEIGHT);
-	}
-out:
-	eventCPU->hasBeenScheduled = true;
-	eventCPU->pidOnCPU = newpid;
-	eventCPU->lastSched = newtime;
-	return;
-}
-
-__always_inline void TraceParser::processFtraceWakeupEvent(TraceEvent &event)
+__always_inline void TraceParser::__processWakeupEvent(tracetype_t ttype,
+						     TraceEvent &event)
 {
 	unsigned int pid;
 	Task *task;
 	double time;
 
-	if (!sched_wakeup_success(event)) /* Only interested in success */
+	/* Only interested in success */
+	if (!sched_wakeup_success(ttype, event))
 		return;
 
 	time = event.time;
-	pid = sched_wakeup_pid(event);
+	pid = sched_wakeup_pid(ttype, event);
 
 	/* Handle the woken up task */
 	task = getTask(pid);
 	task->lastWakeUP = time;
 }
 
-__always_inline void TraceParser::processPerfWakeupEvent(TraceEvent &event)
+__always_inline void TraceParser::processCPUfreqEvent(tracetype_t ttype,
+						      TraceEvent &event)
 {
-	unsigned int pid;
-	Task *task;
-	double time;
-
-	if (!perf_sched_wakeup_success(event)) /* Only interested in success */
-		return;
-
-	time = event.time;
-	pid = perf_sched_wakeup_pid(event);
-
-	/* Handle the woken up task */
-	task = getTask(pid);
-	task->lastWakeUP = time;
-}
-
-__always_inline void TraceParser::processFtraceCPUfreqEvent(TraceEvent &event)
-{
-	unsigned int cpu = cpufreq_cpu(event);
+	unsigned int cpu = cpufreq_cpu(ttype, event);
 	double time = event.time;
-	unsigned int freq = cpufreq_freq(event);
+	unsigned int freq = cpufreq_freq(ttype, event);
 
 	cpuFreq[cpu].timev.append(time);
 	cpuFreq[cpu].data.append((double) freq);
 }
 
-__always_inline void TraceParser::processPerfCPUfreqEvent(TraceEvent &event)
+__always_inline void TraceParser::processCPUidleEvent(tracetype_t ttype,
+						      TraceEvent &event)
 {
-	unsigned int cpu = perf_cpufreq_cpu(event);
+	unsigned int cpu = cpuidle_cpu(ttype, event);
 	double time = event.time;
-	unsigned int freq = perf_cpufreq_freq(event);
-
-	cpuFreq[cpu].timev.append(time);
-	cpuFreq[cpu].data.append((double) freq);
-}
-
-__always_inline void TraceParser::processFtraceCPUidleEvent(TraceEvent &event)
-{
-	unsigned int cpu = cpuidle_cpu(event);
-	double time = event.time;
-	unsigned int state = cpuidle_state(event);
+	unsigned int state = cpuidle_state(ttype, event);
 
 	cpuIdle[cpu].timev.append(time);
 	cpuIdle[cpu].data.append((double) state);
 }
 
-__always_inline void TraceParser::processPerfCPUidleEvent(TraceEvent &event)
+__always_inline void TraceParser::__processSchedGeneric(tracetype_t ttype)
 {
-	unsigned int cpu = perf_cpuidle_cpu(event);
-	double time = event.time;
-	unsigned int state = perf_cpuidle_state(event);
+	unsigned long i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		switch (event.type) {
+		case SCHED_SWITCH:
+			if (sched_switch_args_ok(ttype, event))
+				__processSwitchEvent(ttype, event);
+			break;
+		case SCHED_WAKEUP:
+		case SCHED_WAKEUP_NEW:
+			if (sched_wakeup_args_ok(ttype, event))
+				__processWakeupEvent(ttype, event);
+			break;
+		default:
+			break;
+		}
+	}
+	processSchedAddTail();
+}
 
-	cpuIdle[cpu].timev.append(time);
-	cpuIdle[cpu].data.append((double) state);
+__always_inline void TraceParser::__processCPUfreq(tracetype_t ttype)
+{
+	unsigned int i;
+	for (i = 0; i < nrEvents; i++) {
+		TraceEvent &event = events[i];
+		/*
+		 * I expect this loop to be so fast in comparison
+		 * to the other functions that will be running in parallel
+		 * that it's acceptable to piggy back cpuidle events here */
+		switch (event.type) {
+		case CPU_IDLE:
+			if (cpufreq_args_ok(ttype, event))
+				processCPUidleEvent(ttype, event);
+			break;
+		case CPU_FREQUENCY:
+			if (cpuidle_args_ok(ttype, event))
+				processCPUfreqEvent(ttype, event);
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 #endif /* TRACEPARSER_H */

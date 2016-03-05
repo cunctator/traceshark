@@ -26,13 +26,13 @@
 #include <cstring>
 #include <cstdint>
 
-#define cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
-#define cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
-#define cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '='))
+#define ftrace_cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
+#define ftrace_cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
+#define ftrace_cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '='))
 
-#define cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
-#define cpuidle_cpu(EVENT) (param_after_char(EVENT, 1, '='))
-static __always_inline int cpuidle_state(const TraceEvent &event)
+#define ftrace_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
+#define ftrace_cpuidle_cpu(EVENT) (param_after_char(EVENT, 1, '='))
+static __always_inline int ftrace_cpuidle_state(const TraceEvent &event)
 {
 	int32_t state;
 	uint32_t ustate;
@@ -42,22 +42,28 @@ static __always_inline int cpuidle_state(const TraceEvent &event)
 	return state;
 }
 
-#define sched_migrate_args_ok(EVENT) (EVENT.argc >= 5)
-#define sched_migrate_destCPU(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
-						       '='))
-#define sched_migrate_origCPU(EVENT) (param_after_char(EVENT, EVENT.argc - 2, \
-						       '='))
-#define sched_migrate_prio(EVENT) (param_after_char(EVENT, EVENT.argc - 3, \
-						    '='))
-#define sched_migrate_pid(EVENT) (param_after_char(EVENT, EVENT.argc - 4, \
-						   '='))
+#define ftrace_sched_migrate_args_ok(EVENT) (EVENT.argc >= 5)
+#define ftrace_sched_migrate_destCPU(EVENT) (param_after_char(EVENT, \
+							      EVENT.argc - 1, \
+							      '='))
+#define ftrace_sched_migrate_origCPU(EVENT) (param_after_char(EVENT, \
+							      EVENT.argc - 2, \
+							      '='))
+#define ftrace_sched_migrate_prio(EVENT) (param_after_char(EVENT, \
+							   EVENT.argc - 3, \
+							   '='))
+#define ftrace_sched_migrate_pid(EVENT) (param_after_char(EVENT, \
+							  EVENT.argc - 4, \
+							  '='))
 
-#define sched_switch_args_ok(EVENT) (EVENT.argc >= 6)
-#define sched_switch_newprio(EVENT) (param_inside_braces(EVENT, EVENT.argc - 1))
-#define sched_switch_newpid(EVENT) \
+#define ftrace_sched_switch_args_ok(EVENT) (EVENT.argc >= 6)
+#define ftrace_sched_switch_newprio(EVENT) (param_inside_braces(EVENT, \
+								EVENT.argc - 1))
+#define ftrace_sched_switch_newpid(EVENT)  \
 	(param_after_char(EVENT, EVENT.argc - 2, ':'))
 
-static __always_inline taskstate_t sched_switch_state(TraceEvent &event)
+static __always_inline taskstate_t
+	ftrace_sched_switch_state(const TraceEvent &event)
 {
 	unsigned int i;
 	taskstate_t state = TASK_STATE_UNKNOWN;
@@ -75,7 +81,8 @@ static __always_inline taskstate_t sched_switch_state(TraceEvent &event)
 	return state;
 }
 
-static __always_inline unsigned int sched_switch_oldprio(TraceEvent &event)
+static __always_inline unsigned int
+ftrace_sched_switch_oldprio(const TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 3; i < event.argc; i++) {
@@ -87,7 +94,8 @@ static __always_inline unsigned int sched_switch_oldprio(TraceEvent &event)
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline unsigned int sched_switch_oldpid(TraceEvent &event)
+static __always_inline unsigned int
+ftrace_sched_switch_oldpid(const TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 3; i < event.argc; i++) {
@@ -99,8 +107,8 @@ static __always_inline unsigned int sched_switch_oldpid(TraceEvent &event)
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline char * __sched_switch_oldname_strdup(TraceEvent &event,
-	MemPool *pool)
+static __always_inline char
+*__ftrace_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 {
 	unsigned int i;
 	unsigned int endidx;
@@ -167,11 +175,12 @@ static __always_inline char * __sched_switch_oldname_strdup(TraceEvent &event,
 	return NULL;
 }
 
-char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool);
+char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
+					 MemPool *pool);
 
 /* TODO: Check what code could be shared between this and the above function */
-static __always_inline char * __sched_switch_newname_strdup(TraceEvent &event,
-	MemPool *pool)
+static __always_inline char
+*__ftrace_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 {
 	unsigned int i;
 	unsigned int startidx, endidx;
@@ -240,13 +249,14 @@ static __always_inline char * __sched_switch_newname_strdup(TraceEvent &event,
 	return NULL;
 }
 
-char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool);
+char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
+					 MemPool *pool);
 
-#define sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
-#define sched_wakeup_cpu(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
-						  ':'))
+#define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
+#define ftrace_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, \
+							 EVENT.argc - 1, ':'))
 
-static __always_inline bool sched_wakeup_success(TraceEvent &event)
+static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
 	char *last = ss->ptr + ss->len - 1; /* Empty string should not be 
@@ -254,12 +264,14 @@ static __always_inline bool sched_wakeup_success(TraceEvent &event)
 	return *last == '1';
 }
 
-#define sched_wakeup_prio(EVENT) (param_inside_braces(EVENT, EVENT.argc - 3))
-#define sched_wakeup_pid(EVENT) (param_after_char(EVENT, EVENT.argc - 4, \
-						  ':'))
+#define ftrace_sched_wakeup_prio(EVENT) (param_inside_braces(EVENT, \
+							     EVENT.argc - 3))
+#define ftrace_sched_wakeup_pid(EVENT) (param_after_char(EVENT, \
+							 EVENT.argc - 4, \
+							 ':'))
 /* Todo, code could be shrared with the other two *_strup() functions */
-static __always_inline char *__sched_wakeup_name_strdup(TraceEvent &event,
-	MemPool *pool)
+static __always_inline char
+*__ftrace_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 {
 	unsigned int i;
 	char *c, *retstr;
@@ -321,14 +333,14 @@ static __always_inline char *__sched_wakeup_name_strdup(TraceEvent &event,
 	return NULL;
 }
 
-char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool);
+char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool);
 
-#define sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
-#define sched_process_fork_childpid(EVENT) \
+#define ftrace_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
+#define ftrace_sched_process_fork_childpid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 1, '='))
 
-static __always_inline unsigned int sched_process_fork_parent_pid(
-	TraceEvent &event) {
+static __always_inline unsigned int
+ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 	unsigned int i;
 	unsigned int endidx;
 
@@ -349,8 +361,8 @@ static __always_inline unsigned int sched_process_fork_parent_pid(
 }
 
 static __always_inline char *
-__sched_process_fork_childname_strdup(TraceEvent &event,
-				      MemPool *pool)
+__ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
+					     MemPool *pool)
 {
 	unsigned int i;
 	const unsigned int endidx = event.argc - 2;
@@ -402,22 +414,25 @@ finalize:
 	return NULL;
 }
 
-#define sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
-#define sched_process_exit_pid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 2, '='));
+char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
+						 MemPool *pool);
 
-#define irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
-#define irq_handler_entry_irq(EVENT) \
+#define ftrace_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
+#define ftrace_sched_process_exit_pid(EVENT) \
+	(param_after_char(EVENT, EVENT.argc - 2, '='))
+
+#define ftrace_irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
+#define ftrace_irq_handler_entry_irq(EVENT) \
 	(param_after_char(EVENT, 0, '='))
-#define irq_handler_entry_name(EVENT, LEN_UINTPTR) \
+#define ftrace_irq_handler_entry_name(EVENT, LEN_UINTPTR) \
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
-#define irq_handler_exit_args_ok(EVENT)	(EVENT.argc >= 2)
-#define irq_handler_exit_irq(EVENT) \
+#define ftrace_irq_handler_exit_args_ok(EVENT)	(EVENT.argc >= 2)
+#define ftrace_irq_handler_exit_irq(EVENT) \
 	(param_after_char(EVENT, 0, '='))
-#define irq_handler_exit_handled(EVENT) \
+#define ftrace_irq_handler_exit_handled(EVENT) \
 	(strncmp(EVENT.argv[1]->ptr, "ret=handled", EVENT.argv[1]->len) == 0)
-#define irq_handler_exit_ret(EVENT, LEN_UINTPTR) \
+#define ftrace_irq_handler_exit_ret(EVENT, LEN_UINTPTR) \
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
 #endif

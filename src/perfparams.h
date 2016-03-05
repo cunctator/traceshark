@@ -84,8 +84,8 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
  *
  * In a nutshell, this protects us against weirdos but not against lunatics :)
  */
-static __always_inline unsigned int ___perf_sched_switch_find_arrow(TraceEvent
-								    &event)
+static __always_inline unsigned int
+___perf_sched_switch_find_arrow(const TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 4; i < event.argc - 3; i++) {
@@ -106,7 +106,8 @@ static __always_inline unsigned int ___perf_sched_switch_find_arrow(TraceEvent
 	return i;
 }
 
-static __always_inline taskstate_t perf_sched_switch_state(TraceEvent &event)
+static __always_inline taskstate_t
+perf_sched_switch_state(const TraceEvent &event)
 {
 	unsigned int i;
 	unsigned int j;
@@ -128,7 +129,8 @@ static __always_inline taskstate_t perf_sched_switch_state(TraceEvent &event)
 	return state;
 }
 
-static __always_inline unsigned int perf_sched_switch_oldprio(TraceEvent &event)
+static __always_inline unsigned int
+perf_sched_switch_oldprio(const TraceEvent &event)
 {
 	unsigned int i;
 
@@ -138,7 +140,8 @@ static __always_inline unsigned int perf_sched_switch_oldprio(TraceEvent &event)
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline unsigned int perf_sched_switch_oldpid(TraceEvent &event)
+static __always_inline unsigned int
+perf_sched_switch_oldpid(const TraceEvent &event)
 {
 	unsigned int i;
 
@@ -148,9 +151,8 @@ static __always_inline unsigned int perf_sched_switch_oldpid(TraceEvent &event)
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline char * __perf_sched_switch_oldname_strdup(TraceEvent
-								 &event,
-								 MemPool *pool)
+static __always_inline char *
+__perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 {
 	unsigned int i;
 	unsigned int beginidx;
@@ -190,11 +192,10 @@ static __always_inline char * __perf_sched_switch_oldname_strdup(TraceEvent
 	return NULL;
 }
 
-char *perf_sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool);
+char *perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool);
 
-static __always_inline char * __perf_sched_switch_newname_strdup(TraceEvent
-								 &event,
-								 MemPool *pool)
+static __always_inline char *
+__perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 {
 	unsigned int i;
 	unsigned int beginidx;
@@ -235,7 +236,7 @@ static __always_inline char * __perf_sched_switch_newname_strdup(TraceEvent
 	return NULL;
 }
 
-char *perf_sched_switch_newname_strdup(TraceEvent &event, MemPool *pool);
+char *perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool);
 
 /*
  * These functions for sched_wakeup assumes that the format is either the "old"
@@ -266,7 +267,7 @@ char *perf_sched_switch_newname_strdup(TraceEvent &event, MemPool *pool);
 #define perf_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
 						       '='))
 
-static __always_inline bool perf_sched_wakeup_success(TraceEvent &event)
+static __always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
 
@@ -279,7 +280,8 @@ static __always_inline bool perf_sched_wakeup_success(TraceEvent &event)
 	return *last == '1';
 }
 
-static __always_inline unsigned int perf_sched_wakeup_prio(TraceEvent &event)
+static __always_inline unsigned int
+perf_sched_wakeup_prio(const TraceEvent &event)
 {
 	unsigned int newidx = event.argc - 2;
 	unsigned int oldidx;
@@ -294,7 +296,8 @@ static __always_inline unsigned int perf_sched_wakeup_prio(TraceEvent &event)
 	return param_after_char(event, oldidx, '=');
 }
 
-static __always_inline unsigned int perf_sched_wakeup_pid(TraceEvent &event)
+static __always_inline unsigned int
+perf_sched_wakeup_pid(const TraceEvent &event)
 {
 	unsigned int newidx = event.argc - 3;
 	unsigned int oldidx;
@@ -309,8 +312,8 @@ static __always_inline unsigned int perf_sched_wakeup_pid(TraceEvent &event)
 	return param_after_char(event, oldidx, '=');
 }
 
-static __always_inline char *__perf_sched_wakeup_name_strdup(TraceEvent &event,
-							     MemPool *pool)
+static __always_inline char *
+__perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 {
 	unsigned int i;
 	unsigned int beginidx;
@@ -357,14 +360,14 @@ static __always_inline char *__perf_sched_wakeup_name_strdup(TraceEvent &event,
 	return NULL;
 }
 
-char *perf_sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool);
+char *perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool);
 
 #define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define perf_sched_process_fork_childpid(EVENT) \
 	(param_after_char(EVENT, EVENT.argc - 1, '='))
 
-static __always_inline unsigned int perf_sched_process_fork_parent_pid(
-	TraceEvent &event) {
+static __always_inline unsigned int
+perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 	unsigned int i;
 	unsigned int endidx;
 
@@ -382,7 +385,7 @@ static __always_inline unsigned int perf_sched_process_fork_parent_pid(
 }
 
 static __always_inline char *
-__perf_sched_process_fork_childname_strdup(TraceEvent &event,
+__perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 					   MemPool *pool)
 {
 	unsigned int i;
@@ -425,6 +428,9 @@ __perf_sched_process_fork_childname_strdup(TraceEvent &event,
 		return retstr;
 	return NULL;
 }
+
+char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
+					       MemPool *pool);
 
 #define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define perf_sched_process_exit_pid(EVENT) \

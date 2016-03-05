@@ -18,22 +18,22 @@
 
 #include "perfparams.h"
 
-char *perf_sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool)
+char *perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 {
 	return __perf_sched_switch_oldname_strdup(event, pool);
 }
 
-char *perf_sched_switch_newname_strdup(TraceEvent &event, MemPool *pool)
+char *perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 {
 	return __perf_sched_switch_newname_strdup(event, pool);
 }
 
-char *perf_sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool)
+char *perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 {
 	return __perf_sched_wakeup_name_strdup(event, pool);
 }
 
-char *perf_sched_process_fork_childname_strdup(TraceEvent &event,
+char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 					       MemPool *pool)
 {
 	return __perf_sched_process_fork_childname_strdup(event, pool);

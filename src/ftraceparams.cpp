@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,18 +18,22 @@
 
 #include "ftraceparams.h"
 
-char *sched_switch_oldname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_oldname_strdup(event, pool);
+char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
+					 MemPool *pool) {
+	return __ftrace_sched_switch_oldname_strdup(event, pool);
 }
 
-char *sched_switch_newname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_switch_newname_strdup(event, pool);
+char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
+					 MemPool *pool) {
+	return __ftrace_sched_switch_newname_strdup(event, pool);
 }
 
-char *sched_wakeup_name_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_wakeup_name_strdup(event, pool);
+char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
+				      MemPool *pool) {
+	return __ftrace_sched_wakeup_name_strdup(event, pool);
 }
 
-char *sched_process_fork_childname_strdup(TraceEvent &event, MemPool *pool) {
-	return __sched_process_fork_childname_strdup(event, pool);
+char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
+						 MemPool *pool) {
+	return __ftrace_sched_process_fork_childname_strdup(event, pool);
 }
