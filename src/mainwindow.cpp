@@ -817,7 +817,6 @@ void MainWindow::showWakeup(unsigned int pid)
 	if (schedevent == nullptr)
 		return;
 
-	double schedtime = schedevent->time;
 	TraceEvent *wakeupevent = parser->findPreviousWakeupEvent(schedIndex,
 								  pid,
 								  &wakeUpIndex);
