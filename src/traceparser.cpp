@@ -697,7 +697,7 @@ TraceEvent *TraceParser::findPreviousWakeupEvent(int startidx,
 {
 	int i;
 
-	if (startidx < 0 || startidx >= events.size())
+	if (startidx < 0 || startidx >= (int) events.size())
 		return nullptr;
 
 	for (i = startidx; i >= 0; i--) {
