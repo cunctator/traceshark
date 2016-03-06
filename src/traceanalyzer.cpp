@@ -26,93 +26,75 @@
 #include "cpuidle.h"
 #include "genericparams.h"
 #include "traceanalyzer.h"
-#include "tracefile.h"
-#include "grammarroot.h"
 #include "cpunode.h"
-#include "threads/threadbuffer.h"
-#include "perftimenode.h"
-#include "timenode.h"
-#include "eventnode.h"
-#include "argnode.h"
-#include "pidnode.h"
-#include "perfeventnode.h"
-#include "storenode.h"
+#include "traceparser.h"
 #include "traceshark.h"
 #include "threads/workthread.h"
 #include "threads/workitem.h"
 #include "threads/workqueue.h"
+#include "tlist.h"
+
+TraceAnalyzer::TraceAnalyzer()
+	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL),
+	  black(0, 0, 0), white(255, 255, 255),
+	  CPUs(NULL)
+{
+	taskNamePool = new MemPool(16384, sizeof(char));
+	schedItem = new WorkItem<TraceAnalyzer> (this,
+					       &TraceAnalyzer::processSched);
+	migItem = new WorkItem<TraceAnalyzer> (this,
+					     &TraceAnalyzer::processMigration);
+	freqItem = new WorkItem<TraceAnalyzer> (this,
+					      &TraceAnalyzer::processCPUfreq);
+	processingQueue.addDefaultWorkItem(schedItem);
+	processingQueue.addDefaultWorkItem(migItem);
+	processingQueue.addDefaultWorkItem(freqItem);
+	parser = new TraceParser(&events);
+}
+
+TraceAnalyzer::~TraceAnalyzer()
+{
+	TraceAnalyzer::close();
+	delete parser;
+	delete taskNamePool;
+}
 
 bool TraceAnalyzer::open(const QString &fileName)
 {
-	unsigned long long nr = 0;
-	unsigned int i = 0;
-	unsigned int curbuf = 0;
-	bool ok = false;
+	bool retval = parser->open(fileName);
+	if (retval)
+		prepareDataStructures();
+	return retval;
+}
 
-	if (traceFile != NULL)
-		return ok;
-
-	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok,
-				  1024*1024, NR_TBUFFERS);
-
-	if (!ok) {
-		delete traceFile;
-		traceFile = NULL;
-		return ok;
-	}
-
-	for (i = 0; i < NR_TBUFFERS; i++)
-		tbuffers[i] = new ThreadBuffer<TraceLine>(TBUFSIZE,
-							  NR_TBUFFERS);
-	parserThread->start();
-
-	i = 0;
-	tbuffers[curbuf]->beginProduceBuffer();
-	while(!traceFile->atEnd()) {
-		TraceLine *line = &tbuffers[curbuf]->buffer[i];
-		quint32 n = traceFile->ReadLine(line, curbuf);
-		nr += n;
-		i++;
-		if (i == (TBUFSIZE - 1)) {
-			tbuffers[curbuf]->endProduceBuffer(i);
-			curbuf++;
-			if (curbuf == NR_TBUFFERS)
-				curbuf = 0;
-			i = 0;
-			tbuffers[curbuf]->beginProduceBuffer();
-			traceFile->clearPool(curbuf);
-		}
-	}
-	tbuffers[curbuf]->endProduceBuffer(i);
-	/* We must send an empty buffer at the end to signal that we are EOF */
-	if (i != 0) {
-		curbuf++;
-		if (curbuf == NR_TBUFFERS)
-			curbuf = 0;
-		tbuffers[curbuf]->beginProduceBuffer();
-		tbuffers[curbuf]->endProduceBuffer(0);
-	}
-
-	parserThread->wait();
-
-	for (i = 0; i < NR_TBUFFERS; i++)
-		delete tbuffers[i];
-
-	QTextStream(stdout) << nr << "\n";
-	return true;
+void TraceAnalyzer::prepareDataStructures()
+{
+	unsigned int nrCPUs = getNrCPUs();
+	cpuTaskMaps = new QMap<unsigned int, CPUTask>[nrCPUs];
+	cpuFreq = new CpuFreq[nrCPUs];
+	cpuIdle = new CpuIdle[nrCPUs];
+	CPUs = new CPU[nrCPUs];
+	schedOffset.resize(0);
+	schedOffset.resize(nrCPUs);
+	schedScale.resize(0);
+	schedScale.resize(nrCPUs);
+	cpuIdleOffset.resize(0);
+	cpuIdleOffset.resize(nrCPUs);
+	cpuIdleScale.resize(0);
+	cpuIdleScale.resize(nrCPUs);
+	cpuFreqOffset.resize(0);
+	cpuFreqOffset.resize(nrCPUs);
+	cpuFreqScale.resize(0);
+	cpuFreqScale.resize(nrCPUs);
 }
 
 bool TraceAnalyzer::isOpen()
 {
-	return (traceFile != NULL);
+	return parser->isOpen();
 }
 
 void TraceAnalyzer::close()
 {
-	if (traceFile != NULL) {
-		delete traceFile;
-		traceFile = NULL;
-	}
 	if (cpuTaskMaps != NULL) {
 		delete[] cpuTaskMaps;
 		cpuTaskMaps = NULL;
@@ -132,288 +114,9 @@ void TraceAnalyzer::close()
 	events.clear();
 	migrations.clear();
 	migrationArrows.clear();
-	ptrPool->reset();
-	taskNamePool->reset();
-	clearGrammarPools(ftraceGrammarRoot);
-	traceType = TRACE_TYPE_NONE;
 	colorMap.clear();
-}
-
-TraceAnalyzer::TraceAnalyzer()
-	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL),
-	  traceType(TRACE_TYPE_NONE), black(0, 0, 0), white(255, 255, 255),
-	  CPUs(NULL)
-{
-	traceFile = NULL;
-	ptrPool = new MemPool(16384, sizeof(TString*));
-	taskNamePool = new MemPool(16384, sizeof(char));
-	postEventPool = new MemPool(16384, sizeof(TString));
-
-	createFtraceGrammarTree();
-	createPerfGrammarTree();
-
-	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
-	parserThread = new WorkThread<TraceAnalyzer>
-		(this, &TraceAnalyzer::parseThread);
-
-	schedItem = new WorkItem<TraceAnalyzer> (this,
-					       &TraceAnalyzer::processSched);
-	migItem = new WorkItem<TraceAnalyzer> (this,
-					     &TraceAnalyzer::processMigration);
-	freqItem = new WorkItem<TraceAnalyzer> (this,
-					      &TraceAnalyzer::processCPUfreq);
-	processingQueue.addDefaultWorkItem(schedItem);
-	processingQueue.addDefaultWorkItem(migItem);
-	processingQueue.addDefaultWorkItem(freqItem);
-}
-
-void TraceAnalyzer::createFtraceGrammarTree()
-{
-	ArgNode *ftraceArgNode;
-	EventNode *ftraceEventNode;
-	TimeNode *ftraceTimeNode;
-	CpuNode *ftraceCpuNode;
-	StoreNode *ftraceNamePidNode;
-
-	ftraceArgNode = new ArgNode("ftraceArgNode");
-	ftraceArgNode->nChildren = 1;
-	ftraceArgNode->children[0] = ftraceArgNode;
-	ftraceArgNode->isLeaf = true;
-
-	ftraceEventNode = new EventNode("ftraceEventnode");
-	ftraceEventNode->nChildren = 1;
-	ftraceEventNode->children[0] = ftraceArgNode;
-	ftraceEventNode->isLeaf = true;
-
-	ftraceTimeNode = new TimeNode("ftraceTimeNode");
-	ftraceTimeNode->nChildren = 1;
-	ftraceTimeNode->children[0] = ftraceEventNode;
-	ftraceTimeNode->isLeaf = false;
-
-	ftraceCpuNode = new CpuNode("ftraceCpuNode");
-	ftraceCpuNode->nChildren = 2;
-	ftraceCpuNode->children[0] = ftraceTimeNode;
-	// ftraceCpuNode->children[1] = ftraceNamePidNode;
-	ftraceCpuNode->isLeaf = false;
-
-	ftraceNamePidNode = new StoreNode("ftraceNamePidNode");
-	ftraceNamePidNode->nChildren = 2;
-	ftraceNamePidNode->children[0] = ftraceCpuNode;
-	ftraceNamePidNode->children[1] = ftraceNamePidNode;
-	ftraceNamePidNode->isLeaf = false;
-
-	ftraceGrammarRoot = new GrammarRoot("ftraceRootNode");
-	ftraceGrammarRoot->nChildren = 1;
-	ftraceGrammarRoot->children[0] = ftraceNamePidNode;
-	ftraceGrammarRoot->isLeaf = false;
-
-	/* This is the commented out line being executed here because of the
-	 * loop structure */
-	ftraceCpuNode->children[1] = ftraceNamePidNode;
-}
-
-void TraceAnalyzer::createPerfGrammarTree()
-{
-	ArgNode *perfArgNode;
-	PerfEventNode *perfEventNode;
-	PerfTimeNode *perfTimeNode;
-	CpuNode *perfCpuNode;
-	StoreNode *perfPidNode;
-	StoreNode *perfNameNode;
-
-	perfArgNode = new ArgNode("perfArgNode");
-	perfArgNode->nChildren = 1;
-	perfArgNode->children[0] = perfArgNode;
-	perfArgNode->isLeaf = true;
-
-	perfEventNode = new PerfEventNode("perfEventNode");
-	perfEventNode->nChildren = 1;
-	perfEventNode->children[0] = perfArgNode;
-	perfEventNode->isLeaf = true;
-
-	perfTimeNode = new PerfTimeNode("perfTimeNode");
-	perfTimeNode->nChildren = 1;
-	perfTimeNode->children[0] = perfEventNode;
-	perfTimeNode->isLeaf = false;
-
-	perfCpuNode = new CpuNode("perfCpuNode");
-	perfCpuNode->nChildren = 2;
-	perfCpuNode->children[0] = perfTimeNode;
-	// perfCpuNode->children[1] = perfPidNode;
-	perfCpuNode->isLeaf = false;
-
-	perfPidNode = new StoreNode("perfPidNode");
-	perfPidNode->nChildren = 2;
-	perfPidNode->children[0] = perfCpuNode;
-	perfPidNode->children[1] = perfPidNode;
-	perfPidNode->isLeaf = false;
-
-	perfNameNode = new StoreNode("perfNameNode");
-	perfNameNode->nChildren = 1;
-	perfNameNode->children[0] = perfPidNode;
-	perfNameNode->isLeaf = false;
-
-	perfGrammarRoot = new GrammarRoot("perfRootNode");
-	perfGrammarRoot->nChildren = 1;
-	perfGrammarRoot->children[0] = perfNameNode;
-	perfGrammarRoot->isLeaf = false;
-
-	/* This is the commented out line being executed here because of the
-	 * loop structure */
-	perfCpuNode->children[1] = perfPidNode;
-}
-
-TraceAnalyzer::~TraceAnalyzer()
-{
-	TraceAnalyzer::close();
-	DeleteGrammarTree(ftraceGrammarRoot);
-	DeleteGrammarTree(perfGrammarRoot);
-	delete ptrPool;
-	delete taskNamePool;
-	delete postEventPool;
-	delete[] tbuffers;
-	delete parserThread;
-}
-
-void TraceAnalyzer::DeleteGrammarTree(GrammarNode* node) {
-	unsigned int i;
-	node->reaped = true;
-	for (i = 0; i < node->nChildren; i++) {
-		/* Delete subtree if it has not been visited */
-		if (!node->children[i]->reaped)
-			DeleteGrammarTree(node->children[i]);
-	}
-	delete node;
-}
-
-/* This function does prescanning as well, to determine number of events,
- * number of CPUs, max/min CPU frequency etc */
-void TraceAnalyzer::parseThread()
-{
-	unsigned int i = 0;
-	preparePreScan();
-	events.clear();
-	prevTime = std::numeric_limits<double>::lowest();
-
-	while(true) {
-		if (parseBuffer(i))
-			break;
-		i++;
-		if (i == NR_TBUFFERS)
-			i = 0;
-		determineTraceType();
-		if (traceType == TRACE_TYPE_FTRACE) {
-			goto ftrace;
-		}
-		if (traceType == TRACE_TYPE_PERF) {
-			goto perf;
-		}
-	}
-	/* Must have been a short trace or a lot of unknown garbage in the
-	 * trace if we end up here */
-	fixLastEvent();
-	finalizePreScan();
-	return;
-
-	/* The purpose of jumping to these loops is to  be able to use the
-	 * (hopefully faster) specialized parse functions */
-ftrace:
-	while(true) {
-		if (parseFtraceBuffer(i))
-			break;
-		i++;
-		if (i == NR_TBUFFERS)
-			i = 0;
-	}
-	fixLastEvent();
-	finalizePreScan();
-	return;
-
-perf:
-	while(true) {
-		if (parsePerfBuffer(i))
-			break;
-		i++;
-		if (i == NR_TBUFFERS)
-			i = 0;
-	}
-	fixLastEvent();
-	finalizePreScan();
-}
-
-void TraceAnalyzer::preparePreScan()
-{
-	nrEvents = 0;
-	infoBegin = traceFile->mappedFile;
-	prevLineIsEvent = true;
-	fakePostEventInfo.ptr = traceFile->mappedFile;
-	fakeEvent.postEventInfo = &fakePostEventInfo;
-	prevEvent = &fakeEvent;
-	nrFtraceEvents = 0;
-	nrPerfEvents = 0;
-	maxCPU = 0;
-	startTime = 0;
-	endTime = 0;
-	minFreq = UINT_MAX;
-	maxFreq = 0;
-	minIdleState = INT_MAX;
-	maxIdleState = INT_MIN;
-	nrMigrateEvents = 0;
-	startFreq.fill(-1, HIGHEST_CPU_EVER + 1);
-}
-
-void TraceAnalyzer::finalizePreScan()
-{
-	nrEvents = events.size();
-	lastEvent = nrEvents - 1;
-	if (nrEvents >= 2) {
-		startTime = events[0].time;
-		endTime = events[lastEvent].time;
-	}
-
-	nrCPUs = maxCPU + 1;
-	cpuTaskMaps = new QMap<unsigned int, CPUTask>[nrCPUs];
-	cpuFreq = new CpuFreq[nrCPUs];
-	cpuIdle = new CpuIdle[nrCPUs];
-	CPUs = new CPU[nrCPUs];
-	schedOffset.resize(0);
-	schedOffset.resize(nrCPUs);
-	schedScale.resize(0);
-	schedScale.resize(nrCPUs);
-	cpuIdleOffset.resize(0);
-	cpuIdleOffset.resize(nrCPUs);
-	cpuIdleScale.resize(0);
-	cpuIdleScale.resize(nrCPUs);
-	cpuFreqOffset.resize(0);
-	cpuFreqOffset.resize(nrCPUs);
-	cpuFreqScale.resize(0);
-	cpuFreqScale.resize(nrCPUs);
-	startFreq.resize(nrCPUs);
-}
-
-/*
- * This function is to be called after the parsing of all the events, it's
- * for fixing the postEventInfo pointer of the last event, because that info is
- * normally set when processing the next event in the
- * parse[Ftrace|Perf]Buffer() functions and for the last event there will of
- * course not be any next event.
- */
-void TraceAnalyzer::fixLastEvent()
-{
-	/* Only perf traces will have backtraces after events, I think */
-	if (traceType != TRACE_TYPE_PERF)
-		return;
-	TraceEvent &lastEvent = events.last();
-	if (prevLineIsEvent) {
-		lastEvent.postEventInfo = NULL;
-	} else {
-		TString *str = (TString*) postEventPool->
-			allocObj();
-		str->ptr = infoBegin;
-		str->len = traceFile->mappedFile + traceFile->fileSize
-			- infoBegin;
-		lastEvent.postEventInfo = str;
-	}
+	parser->close();
+	taskNamePool->reset();
 }
 
 void TraceAnalyzer::processTrace()
@@ -444,39 +147,11 @@ void TraceAnalyzer::processTrace()
 		" s\n";
 }
 
-/* This parses a buffer regardless if it's perf or ftrace */
-bool TraceAnalyzer::parseBuffer(unsigned int index)
-{
-	unsigned int i, s;
-
-	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
-	if (tbuf->beginConsumeBuffer()) {
-		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
-		return true;
-	}
-
-	s = tbuf->nRead;
-
-	for(i = 0; i < s; i++) {
-		TraceLine *line = &tbuf->buffer[i];
-		TraceEvent &event = events.preAlloc();
-		event.argc = 0;
-		event.argv = (TString**) ptrPool->preallocN(256);
-		if (parseLineFtrace(line, event))
-			continue;
-		else {
-			parseLinePerf(line, event);
-		}
-	}
-	tbuf->endConsumeBuffer();
-	return false;
-}
-
 bool TraceAnalyzer::processMigration()
 {
-	if (traceType == TRACE_TYPE_FTRACE) {
+	if (getTraceType() == TRACE_TYPE_FTRACE) {
 		processMigrationFtrace();
-	} else if (traceType == TRACE_TYPE_PERF) {
+	} else if (getTraceType() == TRACE_TYPE_PERF) {
 		processMigrationPerf();
 	}
 	return false;
@@ -484,7 +159,7 @@ bool TraceAnalyzer::processMigration()
 
 bool TraceAnalyzer::processSched()
 {
-	switch (traceType) {
+	switch (getTraceType()) {
 	case TRACE_TYPE_FTRACE:
 		processSchedFtrace();
 		break;
@@ -501,17 +176,17 @@ void TraceAnalyzer::processSchedAddTail()
 {
 	/* Add the "tail" to all tasks, i.e. extend them until endTime */
 	unsigned int cpu;
-	for (cpu = 0; cpu < nrCPUs; cpu++) {
+	for (cpu = 0; cpu < getNrCPUs(); cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
 			double d;
 			iter++;
 			/* Check if tail is necessary */
-			if (task.timev[task.timev.size() - 1] >= endTime)
+			if (task.timev[task.timev.size() - 1] >= getEndTime())
 				continue;
 			d = task.data[task.data.size() - 1];
-			task.timev.append(endTime);
+			task.timev.append(getEndTime());
 			task.data.append(d);
 		}
 	}
@@ -545,7 +220,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 		if (cpuTask->isNew) {
 			cpuTask->pid = oldpid;
 			cpuTask->name =
-				sched_switch_oldname_strdup(traceType,
+				sched_switch_oldname_strdup(getTraceType(),
 							    event,
 							    taskNamePool);
 		}
@@ -560,29 +235,29 @@ bool TraceAnalyzer::processCPUfreq()
 {
 	unsigned int cpu;
 
-	if (traceType == TRACE_TYPE_NONE)
+	if (getTraceType() == TRACE_TYPE_NONE)
 		return true;
 
-	if (!tracetype_is_valid(traceType))
+	if (!tracetype_is_valid(getTraceType()))
 		return false;
 
-	for (cpu = 0; cpu <= maxCPU; cpu++) {
-		if (startFreq[cpu] > 0) {
-			cpuFreq[cpu].timev.append(startTime);
-			cpuFreq[cpu].data.append(startFreq[cpu]);
+	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
+		if (parser->startFreq[cpu] > 0) {
+			cpuFreq[cpu].timev.append(getStartTime());
+			cpuFreq[cpu].data.append(parser->startFreq[cpu]);
 		}
 	}
 
-	if (traceType == TRACE_TYPE_FTRACE)
+	if (getTraceType() == TRACE_TYPE_FTRACE)
 		processCPUfreqFtrace();
 	else
 		processCPUfreqPerf();
 
-	for (cpu = 0; cpu <= maxCPU; cpu++) {
+	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
 		if (!cpuFreq[cpu].data.isEmpty()) {
 			double freq = cpuFreq[cpu].data.last();
 			cpuFreq[cpu].data.append(freq);
-			cpuFreq[cpu].timev.append(endTime);
+			cpuFreq[cpu].timev.append(getEndTime());
 		}
 	}
 	return false;
@@ -606,7 +281,7 @@ void TraceAnalyzer::colorizeTasks()
 	const TColor white(255, 255, 255);
 	TColor tmp;
 
-	for (cpu = 0; cpu <= maxCPU; cpu++) {
+	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
@@ -712,7 +387,7 @@ TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
 	for (i = start; i >= 0; i--) {
 		TraceEvent &event = events[i];
 		if (event.type == SCHED_SWITCH  &&
-				generic_sched_switch_newpid(event) == pid) {
+		    generic_sched_switch_newpid(event) == pid) {
 			if (index != nullptr)
 				*index = i;
 			return &event;
@@ -762,7 +437,7 @@ void TraceAnalyzer::setCpuIdleOffset(unsigned int cpu, double offset)
 
 void TraceAnalyzer::setCpuIdleScale(unsigned int cpu, double scale)
 {
-	cpuIdleScale[cpu] = scale / maxIdleState;
+	cpuIdleScale[cpu] = scale / getMaxIdleState();
 }
 
 void TraceAnalyzer::setCpuFreqOffset(unsigned int cpu, double offset)
@@ -772,7 +447,7 @@ void TraceAnalyzer::setCpuFreqOffset(unsigned int cpu, double offset)
 
 void TraceAnalyzer::setCpuFreqScale(unsigned int cpu, double scale)
 {
-	cpuFreqScale[cpu] = scale / maxFreq;
+	cpuFreqScale[cpu] = scale / parser->maxFreq;
 }
 
 void TraceAnalyzer::setMigrationOffset(double offset)
@@ -848,7 +523,7 @@ void TraceAnalyzer::scaleMigration()
 {
 	MigrationArrow *a;
 	QList<Migration>::iterator iter;
-	double unit = migrationScale / nrCPUs;
+	double unit = migrationScale / getNrCPUs();
 	for (iter = migrations.begin(); iter != migrations.end(); iter++) {
 		Migration &m = *iter;
 		double s = migrationOffset + (m.oldcpu + 1) * unit;
@@ -866,7 +541,7 @@ void TraceAnalyzer::doScale()
 	unsigned int cpu;
 	int i, s;
 
-	for (cpu = 0; cpu <= maxCPU; cpu++) {
+	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
 		/* CpuFreq items */
 		addCpuFreqWork(cpu, workList);
 		/* CpuIdle items */
@@ -882,61 +557,6 @@ void TraceAnalyzer::doScale()
 	scalingQueue.wait();
 	for (i = 0; i < s; i++)
 		delete workList[i];
-}
-
-bool TraceAnalyzer::parseLineBugFixup(TraceEvent* event)
-{
-	double corrtime = event->time + 0.9;
-	double delta = corrtime - prevTime;
-	bool retval = false;
-
-	if (delta >= (double)0 && delta < 0.00001) {
-		event->time = corrtime;
-		retval = true;
-	}
-	return retval;
-}
-
-void TraceAnalyzer::_clearGrammarPools(GrammarNode *tree)
-{
-	unsigned int i;
-	tree->reaped = true;
-	tree->clearStringPool();
-	for (i = 0; i < tree->nChildren; i++) {
-		/* Clear subtree if it hasn't been visited */
-		if (!tree->children[i]->reaped)
-			_clearGrammarPools(tree->children[i]);
-	}
-}
-
-void TraceAnalyzer::resetGrammarReapedFlag(GrammarNode *tree)
-{
-	unsigned int i;
-	tree->reaped = false;
-	for (i = 0; i < tree->nChildren; i++) {
-		/* Reset subtree if it hasn't been visited, N.B. since we are
-		 * resetting, reaped flag will be false for visited nodes */
-		if (tree->children[i]->reaped)
-			resetGrammarReapedFlag(tree->children[i]);
-	}
-}
-
-void TraceAnalyzer::clearGrammarPools(GrammarNode *tree)
-{
-	_clearGrammarPools(tree);
-	resetGrammarReapedFlag(tree);
-}
-
-void TraceAnalyzer::determineTraceType()
-{
-	if (nrFtraceEvents > 0 && nrPerfEvents == 0) {
-		traceType = TRACE_TYPE_FTRACE;
-		return;
-	} else if (nrFtraceEvents  == 0 && nrPerfEvents > 0) {
-		traceType = TRACE_TYPE_PERF;
-		return;
-	}
-	traceType = TRACE_TYPE_NONE;
 }
 
 void TraceAnalyzer::processSchedFtrace()
