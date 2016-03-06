@@ -24,7 +24,7 @@
 #include <QTextStream>
 #include "cpufreq.h"
 #include "cpuidle.h"
-#include "ftraceparams.h"
+#include "genericparams.h"
 #include "traceparser.h"
 #include "tracefile.h"
 #include "grammarroot.h"
