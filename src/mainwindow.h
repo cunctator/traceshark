@@ -35,7 +35,7 @@ class QPlainTextEdit;
 class QMouseEvent;
 QT_END_NAMESPACE
 
-class TraceParser;
+class TraceAnalyzer;
 class EventsWidget;
 class InfoWidget;
 class Cursor;
@@ -114,7 +114,7 @@ private:
 	QAction *licenseAction;
 	QAction *aboutQtAction;
 
-	TraceParser *parser;
+	TraceAnalyzer *analyzer;
 
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;

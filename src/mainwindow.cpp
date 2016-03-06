@@ -22,7 +22,7 @@
 #include "cursor.h"
 #include "eventinfodialog.h"
 #include "eventswidget.h"
-#include "traceparser.h"
+#include "traceanalyzer.h"
 #include "infowidget.h"
 #include "legendgraph.h"
 #include "licensedialog.h"
@@ -39,7 +39,7 @@
 MainWindow::MainWindow():
 	tracePlot(nullptr)
 {
-	parser = new TraceParser;
+	analyzer = new TraceAnalyzer;
 
 	//setCentralWidget(traceLabel);
 
@@ -59,7 +59,7 @@ MainWindow::MainWindow():
 	tracePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
 				   QCP::iSelectAxes | QCP::iSelectLegend |
 				   QCP::iSelectPlottables);
-	parser->setQCustomPlot(tracePlot);
+	analyzer->setQCustomPlot(tracePlot);
 
 	tsconnect(tracePlot, mouseWheel(QWheelEvent*), this, mouseWheel());
 	tsconnect(tracePlot->xAxis, rangeChanged(QCPRange), tracePlot->xAxis2,
@@ -103,7 +103,7 @@ MainWindow::MainWindow():
 MainWindow::~MainWindow()
 {
 	closeTrace();
-	delete parser;
+	delete analyzer;
 	delete tracePlot;
 	delete licenseDialog;
 	delete eventInfoDialog;
@@ -123,11 +123,11 @@ void MainWindow::openTrace()
 		eventsWidget->beginResetModel();
 		eventsWidget->setEvents(nullptr);
 		eventsWidget->endResetModel();
-		if (parser->isOpen())
-			parser->close();
+		if (analyzer->isOpen())
+			analyzer->close();
 		loadTraceFile(name);
 	}
-	if (parser->isOpen()) {
+	if (analyzer->isOpen()) {
 		QTextStream qout(stdout);
 		qout.setRealNumberPrecision(6);
 		qout.setRealNumberNotation(QTextStream::FixedNotation);
@@ -156,7 +156,7 @@ void MainWindow::openTrace()
 		     << (double) (show - rescale) / 1000;
 		qout << " s\n";
 		eventsWidget->beginResetModel();
-		eventsWidget->setEvents(&parser->events);
+		eventsWidget->setEvents(&analyzer->events);
 		eventsWidget->endResetModel();
 		setupCursors();
 		tracePlot->show();
@@ -166,7 +166,7 @@ void MainWindow::openTrace()
 
 void MainWindow::processTrace()
 {
-	parser->processTrace();
+	analyzer->processTrace();
 }
 
 void MainWindow::computeLayout()
@@ -180,19 +180,19 @@ void MainWindow::computeLayout()
 	MigrationLine *line;
 	QColor color;
 
-	start = parser->getStartTime();
-	end = parser->getEndTime();
+	start = analyzer->getStartTime();
+	end = analyzer->getEndTime();
 
 	bottom = 0;
 
 	ticks.resize(0);
 	tickLabels.resize(0);
-	nrCPUs = parser->getNrCPUs();
+	nrCPUs = analyzer->getNrCPUs();
 
 	/* Set the offset and scale of the scheduling graphs */
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
-		parser->setSchedOffset(cpu, offset);
-		parser->setSchedScale(cpu, schedHeight);
+		analyzer->setSchedOffset(cpu, offset);
+		analyzer->setSchedScale(cpu, schedHeight);
 		label = QString("cpu") + QString::number(cpu);
 		ticks.append(offset);
 		tickLabels.append(label);
@@ -202,10 +202,10 @@ void MainWindow::computeLayout()
 	offset += cpuSectionOffset;
 
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
-		parser->setCpuFreqOffset(cpu, offset);
-		parser->setCpuIdleOffset(cpu, offset);
-		parser->setCpuFreqScale(cpu, cpuHeight);
-		parser->setCpuIdleScale(cpu, cpuHeight);
+		analyzer->setCpuFreqOffset(cpu, offset);
+		analyzer->setCpuIdleOffset(cpu, offset);
+		analyzer->setCpuFreqScale(cpu, cpuHeight);
+		analyzer->setCpuIdleScale(cpu, cpuHeight);
 		label = QString("cpu") + QString::number(cpu);
 		ticks.append(offset);
 		tickLabels.append(label);
@@ -213,9 +213,9 @@ void MainWindow::computeLayout()
 	}
 
 	offset += migrateSectionOffset;
-	parser->setMigrationOffset(offset);
+	analyzer->setMigrationOffset(offset);
 	inc = offset * 0.15;
-	parser->setMigrationScale(inc);
+	analyzer->setMigrationScale(inc);
 	
 	/* add labels and lines here for the migration graph */
 	color = QColor(135, 206, 250); /* Light sky blue */
@@ -243,7 +243,7 @@ void MainWindow::computeLayout()
 
 void MainWindow::rescaleTrace()
 {
-	parser->doScale();
+	analyzer->doScale();
 }
 
 void MainWindow::clearPlot()
@@ -265,8 +265,8 @@ void MainWindow::showTrace()
 	double extra = 0;
 	QColor color;
 
-	start = parser->getStartTime();
-	end = parser->getEndTime();
+	start = analyzer->getStartTime();
+	end = analyzer->getEndTime();
 
 	if (end >= 10)
 		extra = floor (log(end) / log(10));
@@ -285,22 +285,22 @@ void MainWindow::showTrace()
 	tracePlot->yAxis->setTicks(true);
 
 	/* Show CPU frequency graphs */
-	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
+	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
 		QCPGraph *graph = new QCPGraph(tracePlot->xAxis,
 					       tracePlot->yAxis);
 		QString name = QString(tr("cpu")) + QString::number(cpu);
 		graph->setName(name);
 		tracePlot->addPlottable(graph);
 		graph->setLineStyle(QCPGraph::lsStepLeft);
-		graph->setData(parser->cpuFreq[cpu].timev,
-			       parser->cpuFreq[cpu].scaledData);
+		graph->setData(analyzer->cpuFreq[cpu].timev,
+			       analyzer->cpuFreq[cpu].scaledData);
 	}
 
 	/* Show scheduling graphs */
-	for (cpu = 0; cpu <= parser->getMaxCPU(); cpu++) {
-		DEFINE_CPUTASKMAP_ITERATOR(iter) = parser->
+	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
+		DEFINE_CPUTASKMAP_ITERATOR(iter) = analyzer->
 			cpuTaskMaps[cpu].begin();
-		while(iter != parser->cpuTaskMaps[cpu].end()) {
+		while(iter != analyzer->cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
 			iter++;
 
@@ -316,8 +316,8 @@ void MainWindow::setupCursors()
 {
 	double start, end, red, blue;
 
-	start = parser->getStartTime();
-	end = parser->getEndTime();
+	start = analyzer->getStartTime();
+	end = analyzer->getEndTime();
 
 	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot, Qt::red);
 	cursors[TShark::BLUE_CURSOR] = new Cursor(tracePlot, Qt::blue);
@@ -352,7 +352,7 @@ void MainWindow::addSchedGraph(CPUTask &task)
 {
 	/* Add scheduling graph */
 	TaskGraph *graph = new TaskGraph(tracePlot->xAxis, tracePlot->yAxis);
-	QColor color = parser->getTaskColor(task.pid);
+	QColor color = analyzer->getTaskColor(task.pid);
 	QPen pen = QPen();
 
 	pen.setColor(color);
@@ -374,7 +374,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 	QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
-	QColor color = parser->getTaskColor(task.pid);
+	QColor color = analyzer->getTaskColor(task.pid);
 	QPen pen = QPen();
 
 	pen.setColor(color);
@@ -395,7 +395,7 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
-	QColor color = parser->getTaskColor(task.pid);
+	QColor color = analyzer->getTaskColor(task.pid);
 	QPen pen = QPen();
 
 	pen.setColor(color);
@@ -436,8 +436,8 @@ void MainWindow::closeTrace()
 	eventsWidget->setEvents(nullptr);
 	eventsWidget->endResetModel();
 	clearPlot();
-	if(parser->isOpen())
-		parser->close();
+	if(analyzer->isOpen())
+		analyzer->close();
 	infoWidget->clear();
 }
 
@@ -668,7 +668,7 @@ void MainWindow::loadTraceFile(QString &fileName)
 	qout << "opening " << fileName << "\n";
 	
 	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-	if (!parser->open(fileName)) {
+	if (!analyzer->open(fileName)) {
 		qout << "failed to open " << fileName << "\n";
 	}
 	stop = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
@@ -680,9 +680,9 @@ void MainWindow::loadTraceFile(QString &fileName)
 #if 0
 	int i, s;
 	unsigned int j;
-	s = parser->events.size();
+	s = analyzer->events.size();
 	for (i = 0; i < s; i++) {
-		TraceEvent &event = parser->events[i];
+		TraceEvent &event = analyzer->events[i];
 		qout << event.taskName->ptr << " " << event.pid << " " <<
 			event.time << " " << event.eventName->ptr;
 		for (j = 0; j < event.argc; j++) {
@@ -761,12 +761,12 @@ void MainWindow::showWakeup(unsigned int pid)
 	 * user is interested in, i.e. finding the previous wake up event
 	 * relative to */
 	double zerotime = activeCursor->getPosition();
-	TraceEvent *schedevent = parser->findPreviousSchedEvent(zerotime, pid,
+	TraceEvent *schedevent = analyzer->findPreviousSchedEvent(zerotime, pid,
 								&schedIndex);
 	if (schedevent == nullptr)
 		return;
 
-	TraceEvent *wakeupevent = parser->findPreviousWakeupEvent(schedIndex,
+	TraceEvent *wakeupevent = analyzer->findPreviousWakeupEvent(schedIndex,
 								  pid,
 								  &wakeUpIndex);
 	if (wakeupevent == nullptr)

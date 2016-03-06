@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRACEPARSER_H
-#define TRACEPARSER_H
+#ifndef TRACEANALYZER_H
+#define TRACEANALYZER_H
 
 #include <QColor>
 #include <QString>
@@ -65,11 +65,11 @@
 class TraceFile;
 class QCustomPlot;
 
-class TraceParser
+class TraceAnalyzer
 {
 public:
-	TraceParser();
-	~TraceParser();
+	TraceAnalyzer();
+	~TraceAnalyzer();
 	void createFtraceGrammarTree();
 	void createPerfGrammarTree();
 	void DeleteGrammarTree(GrammarNode* node);
@@ -178,10 +178,10 @@ private:
 	void processCPUfreqFtrace();
 	void processCPUfreqPerf();
 	ThreadBuffer<TraceLine> **tbuffers;
-	WorkThread<TraceParser> *parserThread;
-	WorkItem<TraceParser> *schedItem;
-	WorkItem<TraceParser> *migItem;
-	WorkItem<TraceParser> *freqItem;
+	WorkThread<TraceAnalyzer> *parserThread;
+	WorkItem<TraceAnalyzer> *schedItem;
+	WorkItem<TraceAnalyzer> *migItem;
+	WorkItem<TraceAnalyzer> *freqItem;
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	GrammarNode *ftraceGrammarRoot;
@@ -227,19 +227,19 @@ private:
 };
 
 /* This parses a buffer */
-__always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
+__always_inline bool TraceAnalyzer::parseFtraceBuffer(unsigned int index)
 {
 	return __parseBuffer(TRACE_TYPE_FTRACE, index);
 }
 
 /* This parses a buffer */
-__always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
+__always_inline bool TraceAnalyzer::parsePerfBuffer(unsigned int index)
 {
 	return __parseBuffer(TRACE_TYPE_PERF, index);
 }
 
 /* This parses a buffer */
-__always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
+__always_inline bool TraceAnalyzer::__parseBuffer(tracetype_t ttype,
 						unsigned int index)
 {
 	unsigned int i, s;
@@ -266,7 +266,7 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 	return false;
 }
 		
-__always_inline void TraceParser::__preScanEvent(tracetype_t ttype,
+__always_inline void TraceAnalyzer::__preScanEvent(tracetype_t ttype,
 						 TraceEvent &event)
 {
 	int state;
@@ -320,17 +320,17 @@ __always_inline void TraceParser::__preScanEvent(tracetype_t ttype,
 	}
 }
 
-__always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
+__always_inline void TraceAnalyzer::preScanFtraceEvent(TraceEvent &event)
 {
 	__preScanEvent(TRACE_TYPE_FTRACE, event);
 }
 
-__always_inline void TraceParser::preScanPerfEvent(TraceEvent &event)
+__always_inline void TraceAnalyzer::preScanPerfEvent(TraceEvent &event)
 {
 	__preScanEvent(TRACE_TYPE_PERF, event);
 }
 
-__always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
+__always_inline bool TraceAnalyzer::parseLine(TraceLine* line, TraceEvent* event,
 					    GrammarNode *root)
 {
 	unsigned int i,j;
@@ -355,7 +355,7 @@ __always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
 	return retval;
 }
 
-__always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
+__always_inline bool TraceAnalyzer::parseLineFtrace(TraceLine* line,
 						  TraceEvent &event)
 {
 	if (parseLine(line, &event, ftraceGrammarRoot)) {
@@ -380,7 +380,7 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
 	return false;
 }
 
-__always_inline bool TraceParser::parseLinePerf(TraceLine* line,
+__always_inline bool TraceAnalyzer::parseLinePerf(TraceLine* line,
 						TraceEvent & event)
 {
 	if (parseLine(line, &event, perfGrammarRoot)) {
@@ -417,7 +417,7 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine* line,
 	}
 }
 
-__always_inline double TraceParser::estimateWakeUpNew(CPU *eventCPU,
+__always_inline double TraceAnalyzer::estimateWakeUpNew(CPU *eventCPU,
 						       double newTime,
 						       double startTime)
 {
@@ -433,7 +433,7 @@ regular:
 	return delay;
 }
 
-__always_inline double TraceParser::estimateWakeUp(Task *task,
+__always_inline double TraceAnalyzer::estimateWakeUp(Task *task,
 						    CPU *eventCPU,
 						    double newTime,
 						    double /* startTime */)
@@ -448,7 +448,7 @@ __always_inline double TraceParser::estimateWakeUp(Task *task,
 	return delay;
 }
 
-__always_inline unsigned int TraceParser::generic_sched_switch_newpid(TraceEvent
+__always_inline unsigned int TraceAnalyzer::generic_sched_switch_newpid(TraceEvent
 								      &event)
 {
 	if (!tracetype_is_valid(traceType))
@@ -456,7 +456,7 @@ __always_inline unsigned int TraceParser::generic_sched_switch_newpid(TraceEvent
 	return sched_switch_newpid(traceType, event);
 }
 
-__always_inline unsigned int TraceParser::generic_sched_wakeup_pid(TraceEvent
+__always_inline unsigned int TraceAnalyzer::generic_sched_wakeup_pid(TraceEvent
 								   &event)
 {
 	if (!tracetype_is_valid(traceType))
@@ -464,54 +464,54 @@ __always_inline unsigned int TraceParser::generic_sched_wakeup_pid(TraceEvent
 	return sched_wakeup_pid(traceType, event);
 }
 
-__always_inline unsigned int TraceParser::getMaxCPU()
+__always_inline unsigned int TraceAnalyzer::getMaxCPU()
 {
 	return maxCPU;
 }
 
-__always_inline unsigned int TraceParser::getNrCPUs()
+__always_inline unsigned int TraceAnalyzer::getNrCPUs()
 {
 	return nrCPUs;;
 }
 
-__always_inline double  TraceParser::getStartTime()
+__always_inline double  TraceAnalyzer::getStartTime()
 {
 	return startTime;
 }
 
-__always_inline double TraceParser::getEndTime()
+__always_inline double TraceAnalyzer::getEndTime()
 {
 	return endTime;
 }
 
-__always_inline unsigned long int TraceParser::getNrEvents()
+__always_inline unsigned long int TraceAnalyzer::getNrEvents()
 {
 	return nrEvents;
 }
 
-__always_inline int TraceParser::getMinIdleState()
+__always_inline int TraceAnalyzer::getMinIdleState()
 {
 	return minIdleState;
 }
 
-__always_inline int TraceParser::getMaxIdleState()
+__always_inline int TraceAnalyzer::getMaxIdleState()
 {
 	return minIdleState;
 }
 
-__always_inline int TraceParser::getNrMigrateEvents()
+__always_inline int TraceAnalyzer::getNrMigrateEvents()
 {
 	return nrMigrateEvents;
 }
 
-__always_inline QColor TraceParser::getTaskColor(unsigned int pid)
+__always_inline QColor TraceAnalyzer::getTaskColor(unsigned int pid)
 {
 	TColor taskColor = colorMap.value(pid, black);
 	return taskColor.toQColor();
 }
 
 
-__always_inline Task *TraceParser::getTask(unsigned int pid)
+__always_inline Task *TraceAnalyzer::getTask(unsigned int pid)
 {
 	Task *task = &taskMap[pid]; /* Modifiable reference */ ;
 	if (task->isNew) { /* true means task is newly constructed above */
@@ -521,7 +521,7 @@ __always_inline Task *TraceParser::getTask(unsigned int pid)
 	return task;
 }
 
-__always_inline Task *TraceParser::findTask(unsigned int pid)
+__always_inline Task *TraceAnalyzer::findTask(unsigned int pid)
 {
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.find(pid);
 	if (iter == taskMap.end())
@@ -530,7 +530,7 @@ __always_inline Task *TraceParser::findTask(unsigned int pid)
 		return &iter.value();
 }
 
-__always_inline void TraceParser::__processMigrationGeneric(tracetype_t ttype)
+__always_inline void TraceAnalyzer::__processMigrationGeneric(tracetype_t ttype)
 {
 	unsigned long i;
 	Migration m;
@@ -572,7 +572,7 @@ __always_inline void TraceParser::__processMigrationGeneric(tracetype_t ttype)
 
 
 
-__always_inline void TraceParser::__processSwitchEvent(tracetype_t ttype,
+__always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 						       TraceEvent &event)
 {
 	unsigned int cpu = event.cpu;
@@ -680,7 +680,7 @@ out:
 	return;
 }
 
-__always_inline void TraceParser::__processWakeupEvent(tracetype_t ttype,
+__always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 						     TraceEvent &event)
 {
 	unsigned int pid;
@@ -699,7 +699,7 @@ __always_inline void TraceParser::__processWakeupEvent(tracetype_t ttype,
 	task->lastWakeUP = time;
 }
 
-__always_inline void TraceParser::processCPUfreqEvent(tracetype_t ttype,
+__always_inline void TraceAnalyzer::processCPUfreqEvent(tracetype_t ttype,
 						      TraceEvent &event)
 {
 	unsigned int cpu = cpufreq_cpu(ttype, event);
@@ -710,7 +710,7 @@ __always_inline void TraceParser::processCPUfreqEvent(tracetype_t ttype,
 	cpuFreq[cpu].data.append((double) freq);
 }
 
-__always_inline void TraceParser::processCPUidleEvent(tracetype_t ttype,
+__always_inline void TraceAnalyzer::processCPUidleEvent(tracetype_t ttype,
 						      TraceEvent &event)
 {
 	unsigned int cpu = cpuidle_cpu(ttype, event);
@@ -721,7 +721,7 @@ __always_inline void TraceParser::processCPUidleEvent(tracetype_t ttype,
 	cpuIdle[cpu].data.append((double) state);
 }
 
-__always_inline void TraceParser::__processSchedGeneric(tracetype_t ttype)
+__always_inline void TraceAnalyzer::__processSchedGeneric(tracetype_t ttype)
 {
 	unsigned long i;
 	for (i = 0; i < nrEvents; i++) {
@@ -743,7 +743,7 @@ __always_inline void TraceParser::__processSchedGeneric(tracetype_t ttype)
 	processSchedAddTail();
 }
 
-__always_inline void TraceParser::__processCPUfreq(tracetype_t ttype)
+__always_inline void TraceAnalyzer::__processCPUfreq(tracetype_t ttype)
 {
 	unsigned int i;
 	for (i = 0; i < nrEvents; i++) {
@@ -767,4 +767,4 @@ __always_inline void TraceParser::__processCPUfreq(tracetype_t ttype)
 	}
 }
 
-#endif /* TRACEPARSER_H */
+#endif /* TRACEANALYZER_H */
