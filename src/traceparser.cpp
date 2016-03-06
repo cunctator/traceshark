@@ -155,6 +155,16 @@ TraceParser::TraceParser()
 	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
 	parserThread = new WorkThread<TraceParser>
 		(this, &TraceParser::parseThread);
+
+	schedItem = new WorkItem<TraceParser> (this,
+					       &TraceParser::processSched);
+	migItem = new WorkItem<TraceParser> (this,
+					     &TraceParser::processMigration);
+	freqItem = new WorkItem<TraceParser> (this,
+					      &TraceParser::processCPUfreq);
+	processingQueue.addDefaultWorkItem(schedItem);
+	processingQueue.addDefaultWorkItem(migItem);
+	processingQueue.addDefaultWorkItem(freqItem);
 }
 
 void TraceParser::createFtraceGrammarTree()
@@ -406,12 +416,32 @@ void TraceParser::fixLastEvent()
 	}
 }
 
-void TraceParser::preScan()
+void TraceParser::processTrace()
 {
-}
+	QTextStream qout(stdout);
+	quint64 start, process, colorize;
 
-void TraceParser::parse()
-{
+	qout.setRealNumberPrecision(6);
+	qout.setRealNumberNotation(QTextStream::FixedNotation);
+
+	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	processingQueue.setWorkItemsDefault();
+	processingQueue.start();
+	processingQueue.wait();
+
+	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	qout << "processing took " << (double) (process - start) / 1000 <<
+		" s\n";
+	qout.flush();
+
+	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+	colorizeTasks();
+	colorize = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	qout << "colorize() took " << (double) (colorize - start) / 1000 <<
+		" s\n";
 }
 
 /* This parses a buffer regardless if it's perf or ftrace */

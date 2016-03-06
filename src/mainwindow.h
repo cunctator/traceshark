@@ -36,7 +36,6 @@ class QMouseEvent;
 QT_END_NAMESPACE
 
 class TraceParser;
-class WorkQueue;
 class EventsWidget;
 class InfoWidget;
 class Cursor;
@@ -116,10 +115,6 @@ private:
 	QAction *aboutQtAction;
 
 	TraceParser *parser;
-	WorkItem<TraceParser> *schedItem;
-	WorkItem<TraceParser> *migItem;
-	WorkItem<TraceParser> *freqItem;
-	WorkQueue *workQueue;
 
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;

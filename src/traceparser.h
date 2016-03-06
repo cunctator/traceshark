@@ -76,12 +76,8 @@ public:
 	bool open(const QString &fileName);
 	bool isOpen();
 	void close();
-	void parse();
 	void parseThread();
-	void preScan();
-	bool processMigration();
-	bool processSched();
-	bool processCPUfreq();
+	void processTrace();
 	TList<TraceEvent> events;
 	TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
 					   int *index);
@@ -105,7 +101,6 @@ public:
 	void setMigrationOffset(double offset);
 	void setMigrationScale(double scale);
 	void doScale();
-	void colorizeTasks();
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(unsigned int pid);
 	QMap<unsigned int, CPUTask> *cpuTaskMaps;
@@ -115,7 +110,11 @@ public:
 	QList<Migration> migrations;
 	QList<MigrationArrow*> migrationArrows;
 private:
+	bool processMigration();
+	bool processSched();
+	bool processCPUfreq();
 	int binarySearch(double time, int start, int end);
+	void colorizeTasks();
 	int findIndexBefore(double time);
 	void preparePreScan();
 	void finalizePreScan();
@@ -180,6 +179,10 @@ private:
 	void processCPUfreqPerf();
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<TraceParser> *parserThread;
+	WorkItem<TraceParser> *schedItem;
+	WorkItem<TraceParser> *migItem;
+	WorkItem<TraceParser> *freqItem;
+	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	GrammarNode *ftraceGrammarRoot;
 	GrammarNode *perfGrammarRoot;

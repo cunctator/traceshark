@@ -47,17 +47,6 @@ MainWindow::MainWindow():
 	createToolBars();
 	createMenus();
 
-	schedItem = new WorkItem<TraceParser> (parser,
-					       &TraceParser::processSched);
-	migItem = new WorkItem<TraceParser> (parser,
-					     &TraceParser::processMigration);
-	freqItem = new WorkItem<TraceParser> (parser,
-					      &TraceParser::processCPUfreq);
-	workQueue = new WorkQueue();
-	workQueue->addDefaultWorkItem(schedItem);
-	workQueue->addDefaultWorkItem(migItem);
-	workQueue->addDefaultWorkItem(freqItem);
-
 	plotWidget = new QWidget(this);
 	plotLayout = new QVBoxLayout(plotWidget);
 	setCentralWidget(plotWidget);
@@ -115,10 +104,6 @@ MainWindow::~MainWindow()
 {
 	closeTrace();
 	delete parser;
-	delete schedItem;
-	delete migItem;
-	delete freqItem;
-	delete workQueue;
 	delete tracePlot;
 	delete licenseDialog;
 	delete eventInfoDialog;
@@ -181,33 +166,7 @@ void MainWindow::openTrace()
 
 void MainWindow::processTrace()
 {
-	QTextStream qout(stdout);
-	quint64 start, pre, process, colorize;
-
-	qout.setRealNumberPrecision(6);
-	qout.setRealNumberNotation(QTextStream::FixedNotation);
-
-	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-	parser->preScan();
-	pre = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
-	workQueue->setWorkItemsDefault();
-	workQueue->start();
-	workQueue->wait();
-
-	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
-	qout << "preScan() took " << (double) (pre - start) / 1000 << " s\n";
-	qout << "processing took " << (double) (process - pre) / 1000 << 
-		" s\n";
-	qout.flush();
-
-	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-	parser->colorizeTasks();
-	colorize = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
-	qout << "colorize() took " << (double) (colorize - start) / 1000 <<
-		" s\n";
+	parser->processTrace();
 }
 
 void MainWindow::computeLayout()
@@ -718,16 +677,6 @@ void MainWindow::loadTraceFile(QString &fileName)
 
 	qout << "Loading took " << (double) stop / 1000 << " s\n";
 	qout.flush();
-
-	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-	parser->parse();
-	stop = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
-	stop = stop - start;
-
-	qout << "Parsing took " << (double) stop / 1000 << " s\n";
-	qout.flush();
-
 #if 0
 	int i, s;
 	unsigned int j;
