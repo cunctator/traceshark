@@ -22,6 +22,7 @@
 #include <QVector>
 
 #include "genericparams.h"
+#include "grammar.h"
 #include "grammarnode.h"
 #include "mm/mempool.h"
 #include "traceline.h"
@@ -46,9 +47,6 @@ class TraceParser
 public:
 	TraceParser(TList<TraceEvent> *analyzerEvents);
 	~TraceParser();
-	void createFtraceGrammarTree();
-	void createPerfGrammarTree();
-	void DeleteGrammarTree(GrammarNode* node);
 	bool open(const QString &fileName);
 	bool isOpen();
 	void close();
@@ -69,9 +67,6 @@ protected:
 	unsigned long lastEvent;
 	tracetype_t traceType;
 private:
-	void _clearGrammarPools(GrammarNode *tree);
-	void resetGrammarReapedFlag(GrammarNode *tree);
-	void clearGrammarPools(GrammarNode *tree);
 	void determineTraceType();
 	__always_inline bool __parseBuffer(tracetype_t ttppe,
 					   unsigned int index);
@@ -96,8 +91,8 @@ private:
 	MemPool *postEventPool;
 	TraceEvent fakeEvent;
 	TString fakePostEventInfo;
-	GrammarNode *ftraceGrammarRoot;
-	GrammarNode *perfGrammarRoot;
+	Grammar *ftraceGrammar;
+	Grammar *perfGrammar;
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<TraceParser> *parserThread;
 	char *infoBegin;
@@ -240,7 +235,7 @@ __always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
 __always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
 						  TraceEvent &event)
 {
-	if (parseLine(line, &event, ftraceGrammarRoot)) {
+	if (parseLine(line, &event, ftraceGrammar->root)) {
 		/* Check if the timestamp of this event is affected by
 		 * the infamous ftrace timestamp rollover bug and
 		 * try to correct it */
@@ -265,7 +260,7 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
 __always_inline bool TraceParser::parseLinePerf(TraceLine* line,
 						TraceEvent & event)
 {
-	if (parseLine(line, &event, perfGrammarRoot)) {
+	if (parseLine(line, &event, perfGrammar->root)) {
 		/* Check if the timestamp of this event is affected by
 		 * the infamous ftrace timestamp rollover bug and
 		 * try to correct it */

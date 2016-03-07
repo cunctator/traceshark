@@ -19,6 +19,7 @@
 #ifndef TIMENODE_H
 #define TIMENODE_H
 
+#include "tstring.h"
 #include "grammarnode.h"
 
 class StringPool;

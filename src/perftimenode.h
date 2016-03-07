@@ -19,6 +19,7 @@
 #ifndef PERFTIMENODE_H
 #define PERFTIMENODE_H
 
+#include "tstring.h"
 #include "grammarnode.h"
 
 class StringPool;
