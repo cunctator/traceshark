@@ -26,7 +26,6 @@
 #include "cpuidle.h"
 #include "genericparams.h"
 #include "traceanalyzer.h"
-#include "cpunode.h"
 #include "traceparser.h"
 #include "traceshark.h"
 #include "threads/workthread.h"
