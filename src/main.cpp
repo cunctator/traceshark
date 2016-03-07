@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 	icon.addPixmap(pm);
 	app.setWindowIcon(icon);
 	
-	mainWindow.resize(1280, 740);
+	mainWindow.resize(1500, 900);
 	mainWindow.setWindowIconText(appname);
 	mainWindow.setWindowTitle(appname);
 
