@@ -20,9 +20,11 @@
 #define THREADBUFFER_H
 
 #include <QMutex>
+#include <QWaitCondition>
 
 /* This class is a load buffer for two threads where one is a producer and the
- * other is a consumer.
+ * other is a consumer. The synchronization functions have not been designed
+ * for scenarios with multiple consumers or producers
  */
 template<class T>
 class ThreadBuffer
@@ -43,43 +45,56 @@ private:
 	__always_inline void completeProduction();
 	__always_inline void waitForConsumptionComplete();
 	__always_inline void completeConsumption();
-	QMutex consumptionComplete; /* I hate when userspace polls a mutex */
-	QMutex productionComplete;  /* so let's use two of them */
+	bool isEmpty;
+	QMutex mutex;
+	QWaitCondition consumptionComplete;
+	QWaitCondition productionComplete;
 };
 
 template<class T>
 __always_inline void ThreadBuffer<T>::waitForProductionComplete() {
-	productionComplete.lock();
+	mutex.lock();
+	while(isEmpty) {
+		/* Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting */
+		productionComplete.wait(&mutex);
+	}
 }
 
 template<class T>
 __always_inline void ThreadBuffer<T>::completeProduction() {
-	productionComplete.unlock();
+	isEmpty = false;
+	productionComplete.wakeOne();
+	mutex.unlock();
 }
 
 template<class T>
 __always_inline void ThreadBuffer<T>::waitForConsumptionComplete() {
-	consumptionComplete.lock();
+	mutex.lock();
+	while(!isEmpty) {
+		/* Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting */
+		consumptionComplete.wait(&mutex);
+	}
 }
 
 template<class T>
 __always_inline void ThreadBuffer<T>::completeConsumption() {
-	consumptionComplete.unlock();
+	isEmpty = true;
+	consumptionComplete.wakeOne();
+	mutex.unlock();
 }
 
 template<class T>
 ThreadBuffer<T>::ThreadBuffer(unsigned int bufsize, unsigned int nr):
-	bufSize(bufsize), nrBuffers(nr), nRead(0)
+bufSize(bufsize), nrBuffers(nr), nRead(0), isEmpty(true)
 {
 	buffer = new T[bufsize];
-	/* Prevent consumer from consuming empty newly created buffer */
-	productionComplete.lock();
 }
 
 template<class T>
 ThreadBuffer<T>::~ThreadBuffer()
 {
-	productionComplete.unlock();
 	delete[] buffer;
 }
 
