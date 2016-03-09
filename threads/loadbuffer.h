@@ -20,19 +20,21 @@
 #define LOADBUFFER_H
 
 #include <QMutex>
+#include <QWaitCondition>
 
 extern "C" {
 #include <unistd.h>
 }
 
 /* This class is a load buffer for two threads where one is a producer, i.e.
- * IO thread, and the other is a consumer, i.e. data processing thread.
+ * IO thread, and the other is a consumer, i.e. data processing thread. The
+ * synchronization functions have not been designed for scenarios with multiple
+ * consumers or producers
  */
 class LoadBuffer
 {
 public:
 	LoadBuffer(char *buf, unsigned int size);
-	~LoadBuffer();
 	char *buffer;
 	size_t bufSize;
 	ssize_t nRead;
@@ -45,24 +47,40 @@ private:
 	__always_inline void completeProduction();
 	__always_inline void waitForConsumptionComplete();
 	__always_inline void completeConsumption();
-	QMutex consumptionComplete; /* I hate when userspace polls a mutex */
-	QMutex productionComplete;  /* so let's use two of them */
+	bool isEmpty;
+	QMutex mutex;
+	QWaitCondition consumptionComplete;
+	QWaitCondition productionComplete;
 };
 
 __always_inline void LoadBuffer::waitForProductionComplete() {
-	productionComplete.lock();
+	mutex.lock();
+	while(isEmpty) {
+		/* Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting */
+		productionComplete.wait(&mutex);
+	}
 }
 
 __always_inline void LoadBuffer::completeProduction() {
-	productionComplete.unlock();
+	isEmpty = false;
+	productionComplete.wakeOne();
+	mutex.unlock();
 }
 
 __always_inline void LoadBuffer::waitForConsumptionComplete() {
-	consumptionComplete.lock();
+	mutex.lock();
+	while(!isEmpty) {
+		/* Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting */
+		consumptionComplete.wait(&mutex);
+	}
 }
 
 __always_inline void LoadBuffer::completeConsumption() {
-	consumptionComplete.unlock();
+	isEmpty = true;
+	consumptionComplete.wakeOne();
+	mutex.unlock();
 }
 
 #endif /* LOADBUFFER */

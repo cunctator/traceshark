@@ -23,15 +23,7 @@ extern "C" {
 }
 
 LoadBuffer::LoadBuffer(char *buf, unsigned int size):
-	buffer(buf), bufSize(size) {
-	/* Prevent consumer from consuming empty newly created buffer */
-	productionComplete.lock();
-}
-
-LoadBuffer::~LoadBuffer()
-{
-	productionComplete.unlock();
-}
+	buffer(buf), bufSize(size), isEmpty(true) {}
 
 /* This function should be called from the IO thread 
  * until the function returns true */
