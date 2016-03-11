@@ -145,26 +145,24 @@ void TraceParser::parseThread()
 	preparePreScan();
 	events->clear();
 	prevTime = std::numeric_limits<double>::lowest();
+	bool eof;
 
 	while(true) {
-		if (parseBuffer(i))
+		eof = parseBuffer(i);
+		determineTraceType();
+		if (eof)
 			break;
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
-		determineTraceType();
-		if (traceType == TRACE_TYPE_FTRACE) {
+		if (traceType == TRACE_TYPE_FTRACE)
 			goto ftrace;
-		}
-		if (traceType == TRACE_TYPE_PERF) {
+		if (traceType == TRACE_TYPE_PERF)
 			goto perf;
-		}
 	}
 	/* Must have been a short trace or a lot of unknown garbage in the
 	 * trace if we end up here */
-	fixLastEvent();
-	finalizePreScan();
-	return;
+	goto out;
 
 	/* The purpose of jumping to these loops is to  be able to use the
 	 * (hopefully faster) specialized parse functions */
@@ -176,9 +174,7 @@ ftrace:
 		if (i == NR_TBUFFERS)
 			i = 0;
 	}
-	fixLastEvent();
-	finalizePreScan();
-	return;
+	goto out;
 
 perf:
 	while(true) {
@@ -188,6 +184,7 @@ perf:
 		if (i == NR_TBUFFERS)
 			i = 0;
 	}
+out:
 	fixLastEvent();
 	finalizePreScan();
 }
