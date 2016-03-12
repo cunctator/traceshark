@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -26,8 +26,7 @@ class WorkQueue;
 
 /****************************** AbstractWorkItem ******************************
  * This class must be a virtual class, because it can't be a template, that 
- * would drag the WorkItemContainer and WorkQueue classes into the container
- * business.
+ * would drag the WorkQueue class into the template business.
  */
 class AbstractWorkItem {
 	friend class WorkQueue;
@@ -45,7 +44,7 @@ __always_inline bool AbstractWorkItem::__runWork() {
 /****************************** WorkItem **************************************
  * This class needs to be a template to be able to call functions in different
  * classes. The WorkQueue uses it through the AbstractWorkItem class interface
- * in order to avoid dealing with containers.
+ * in order to avoid dealing with templates.
  */
 template <class W>
 class WorkItem : public AbstractWorkItem {
