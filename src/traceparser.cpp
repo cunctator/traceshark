@@ -49,7 +49,7 @@ TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
 	readerThread = new WorkThread<TraceParser>
 		(this, &TraceParser::threadReader);
 	events = analyzerEvents;
-	eventsWatcher = new IndexWatcher;
+	eventsWatcher = new IndexWatcher(10000);
 	traceTypeWatcher = new IndexWatcher;
 }
 
