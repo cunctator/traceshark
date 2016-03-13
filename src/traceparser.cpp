@@ -30,6 +30,7 @@
 #include "tracefile.h"
 #include "traceparser.h"
 #include "traceshark.h"
+#include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
 
 TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
@@ -44,8 +45,12 @@ TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
 
 	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
 	parserThread = new WorkThread<TraceParser>
-		(this, &TraceParser::parseThread);
+		(this, &TraceParser::threadParser);
+	readerThread = new WorkThread<TraceParser>
+		(this, &TraceParser::threadReader);
 	events = analyzerEvents;
+	eventsWatcher = new IndexWatcher;
+	traceTypeWatcher = new IndexWatcher;
 }
 
 TraceParser::~TraceParser()
@@ -56,14 +61,15 @@ TraceParser::~TraceParser()
 	delete postEventPool;
 	delete[] tbuffers;
 	delete parserThread;
+	delete readerThread;
+	delete eventsWatcher;
+	delete traceTypeWatcher;
 }
 
 bool TraceParser::open(const QString &fileName)
 {
-	unsigned long long nr = 0;
-	unsigned int i = 0;
-	unsigned int curbuf = 0;
 	bool ok = false;
+	unsigned int i;
 
 	if (traceFile != NULL)
 		return ok;
@@ -77,12 +83,42 @@ bool TraceParser::open(const QString &fileName)
 		return ok;
 	}
 
+	/* These buffers will be deleted by the parserThread */
 	for (i = 0; i < NR_TBUFFERS; i++)
 		tbuffers[i] = new ThreadBuffer<TraceLine>(TBUFSIZE,
 							  NR_TBUFFERS);
+	eventsWatcher->reset();
+	traceTypeWatcher->reset();
+	readerThread->start();
 	parserThread->start();
 
-	i = 0;
+	return true;
+}
+
+bool TraceParser::isOpen()
+{
+	return (traceFile != NULL);
+}
+
+void TraceParser::close()
+{
+	if (traceFile != NULL) {
+		delete traceFile;
+		traceFile = NULL;
+	}
+	ptrPool->reset();
+	perfGrammar->clearPools();
+	ftraceGrammar->clearPools();
+	traceType = TRACE_TYPE_NONE;
+}
+
+
+void TraceParser::threadReader()
+{
+	unsigned long long nr = 0;
+	unsigned int i = 0;
+	unsigned int curbuf = 0;
+
 	tbuffers[curbuf]->beginProduceBuffer();
 	while(!traceFile->atEnd()) {
 		TraceLine *line = &tbuffers[curbuf]->buffer[i];
@@ -109,49 +145,24 @@ bool TraceParser::open(const QString &fileName)
 		tbuffers[curbuf]->endProduceBuffer(0);
 	}
 
-	parserThread->wait();
-
-	for (i = 0; i < NR_TBUFFERS; i++)
-		delete tbuffers[i];
-
 	QTextStream(stdout) << nr << "\n";
-	return true;
 }
-
-bool TraceParser::isOpen()
-{
-	return (traceFile != NULL);
-}
-
-void TraceParser::close()
-{
-	if (traceFile != NULL) {
-		delete traceFile;
-		traceFile = NULL;
-	}
-	ptrPool->reset();
-	perfGrammar->clearPools();
-	ftraceGrammar->clearPools();
-	traceType = TRACE_TYPE_NONE;
-}
-
 
 
 /* This function does prescanning as well, to determine number of events,
  * number of CPUs, max/min CPU frequency etc */
-void TraceParser::parseThread()
+void TraceParser::threadParser()
 {
 	unsigned int i = 0;
-	preparePreScan();
-	events->clear();
-	prevTime = std::numeric_limits<double>::lowest();
 	bool eof;
 
+	prepareParse();
 	while(true) {
 		eof = parseBuffer(i);
 		determineTraceType();
 		if (eof)
 			break;
+		eventsWatcher->sendNextIndex(events->size());
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
@@ -170,6 +181,7 @@ ftrace:
 	while(true) {
 		if (parseFtraceBuffer(i))
 			break;
+		eventsWatcher->sendNextIndex(events->size());
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
@@ -180,18 +192,39 @@ perf:
 	while(true) {
 		if (parsePerfBuffer(i))
 			break;
+		eventsWatcher->sendNextIndex(events->size());
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
 	}
 out:
+	/* Make sure that the processing thread can continue even if no trace
+	 * type was detected, otherwise it would wait forever in
+	 * waitForTraceType() */
+	sendTraceType();
+	eventsWatcher->sendNextIndex(events->size());
+	eventsWatcher->sendEOF();
+	for (i = 0; i < NR_TBUFFERS; i++)
+		delete tbuffers[i];
+
 	fixLastEvent();
-	finalizePreScan();
 }
 
-void TraceParser::preparePreScan()
+void TraceParser::waitForTraceType()
 {
-	nrEvents = 0;
+	int index;
+	bool eof = false;
+	while (!eof)
+		traceTypeWatcher->waitForNextBatch(eof, index);
+}
+
+void TraceParser::sendTraceType()
+{
+	traceTypeWatcher->sendEOF();
+}
+
+void TraceParser::prepareParse()
+{
 	infoBegin = traceFile->mappedFile;
 	prevLineIsEvent = true;
 	fakePostEventInfo.ptr = traceFile->mappedFile;
@@ -199,28 +232,8 @@ void TraceParser::preparePreScan()
 	prevEvent = &fakeEvent;
 	nrFtraceEvents = 0;
 	nrPerfEvents = 0;
-	maxCPU = 0;
-	startTime = 0;
-	endTime = 0;
-	minFreq = UINT_MAX;
-	maxFreq = 0;
-	minIdleState = INT_MAX;
-	maxIdleState = INT_MIN;
-	nrMigrateEvents = 0;
-	startFreq.fill(-1, HIGHEST_CPU_EVER + 1);
-}
-
-void TraceParser::finalizePreScan()
-{
-	nrEvents = events->size();
-	lastEvent = nrEvents - 1;
-	if (nrEvents >= 2) {
-		startTime = events->at(0).time;
-		endTime = events->last().time;
-	}
-
-	nrCPUs = maxCPU + 1;
-	startFreq.resize(nrCPUs);
+	events->clear();
+	prevTime = std::numeric_limits<double>::lowest();
 }
 
 /*
@@ -265,9 +278,11 @@ void TraceParser::determineTraceType()
 {
 	if (nrFtraceEvents > 0 && nrPerfEvents == 0) {
 		traceType = TRACE_TYPE_FTRACE;
+		sendTraceType();
 		return;
 	} else if (nrFtraceEvents  == 0 && nrPerfEvents > 0) {
 		traceType = TRACE_TYPE_PERF;
+		sendTraceType();
 		return;
 	}
 	traceType = TRACE_TYPE_NONE;

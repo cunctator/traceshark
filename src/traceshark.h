@@ -52,8 +52,9 @@
 #define TSMIN(A, B) ((A) < (B) ? A:B)
 #define TSABS(A) ((A) >= 0 ? A:-A)
 
-/*  1024 CPUs ought to be enough for anybody */
-#define HIGHEST_CPU_EVER (1023)
+/*  Don't increase this number, buy a system with fewer CPUs instead */
+#define NR_CPUS_ALLOWED (256)
+#define isValidCPU(CPU) (CPU < NR_CPUS_ALLOWED)
 
 /* C++ syntax for calling the pointer to a member function for an object */
 #define CALL_MEMBER_FN(ptrObject, ptrToMember) ((ptrObject)->*(ptrToMember))

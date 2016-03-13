@@ -39,15 +39,6 @@ TraceAnalyzer::TraceAnalyzer()
 	  CPUs(NULL)
 {
 	taskNamePool = new MemPool(16384, sizeof(char));
-	schedItem = new WorkItem<TraceAnalyzer> (this,
-					       &TraceAnalyzer::processSched);
-	migItem = new WorkItem<TraceAnalyzer> (this,
-					     &TraceAnalyzer::processMigration);
-	freqItem = new WorkItem<TraceAnalyzer> (this,
-					      &TraceAnalyzer::processCPUfreq);
-	processingQueue.addDefaultWorkItem(schedItem);
-	processingQueue.addDefaultWorkItem(migItem);
-	processingQueue.addDefaultWorkItem(freqItem);
 	parser = new TraceParser(&events);
 }
 
@@ -68,23 +59,22 @@ bool TraceAnalyzer::open(const QString &fileName)
 
 void TraceAnalyzer::prepareDataStructures()
 {
-	unsigned int nrCPUs = getNrCPUs();
-	cpuTaskMaps = new QMap<unsigned int, CPUTask>[nrCPUs];
-	cpuFreq = new CpuFreq[nrCPUs];
-	cpuIdle = new CpuIdle[nrCPUs];
-	CPUs = new CPU[nrCPUs];
+	cpuTaskMaps = new QMap<unsigned int, CPUTask>[NR_CPUS_ALLOWED];
+	cpuFreq = new CpuFreq[NR_CPUS_ALLOWED];
+	cpuIdle = new CpuIdle[NR_CPUS_ALLOWED];
+	CPUs = new CPU[NR_CPUS_ALLOWED];
 	schedOffset.resize(0);
-	schedOffset.resize(nrCPUs);
+	schedOffset.resize(NR_CPUS_ALLOWED);
 	schedScale.resize(0);
-	schedScale.resize(nrCPUs);
+	schedScale.resize(NR_CPUS_ALLOWED);
 	cpuIdleOffset.resize(0);
-	cpuIdleOffset.resize(nrCPUs);
+	cpuIdleOffset.resize(NR_CPUS_ALLOWED);
 	cpuIdleScale.resize(0);
-	cpuIdleScale.resize(nrCPUs);
+	cpuIdleScale.resize(NR_CPUS_ALLOWED);
 	cpuFreqOffset.resize(0);
-	cpuFreqOffset.resize(nrCPUs);
+	cpuFreqOffset.resize(NR_CPUS_ALLOWED);
 	cpuFreqScale.resize(0);
-	cpuFreqScale.resize(nrCPUs);
+	cpuFreqScale.resize(NR_CPUS_ALLOWED);
 }
 
 bool TraceAnalyzer::isOpen()
@@ -118,6 +108,17 @@ void TraceAnalyzer::close()
 	taskNamePool->reset();
 }
 
+void TraceAnalyzer::resetProperties()
+{
+	maxCPU = 0;
+	startTime = 0;
+	endTime = 0;
+	minFreq = UINT_MAX;
+	maxFreq = 0;
+	minIdleState = INT_MAX;
+	maxIdleState = INT_MIN;
+}
+
 void TraceAnalyzer::processTrace()
 {
 	QTextStream qout(stdout);
@@ -128,9 +129,10 @@ void TraceAnalyzer::processTrace()
 
 	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-	processingQueue.setWorkItemsDefault();
-	processingQueue.start();
-	processingQueue.wait();
+	resetProperties();
+	/* We do the processing from the main thread, since otherwise
+	 * we would have to wait for it */
+	threadProcess();
 
 	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -146,29 +148,21 @@ void TraceAnalyzer::processTrace()
 		" s\n";
 }
 
-bool TraceAnalyzer::processMigration()
+void TraceAnalyzer::threadProcess()
 {
-	if (getTraceType() == TRACE_TYPE_FTRACE) {
-		processMigrationFtrace();
-	} else if (getTraceType() == TRACE_TYPE_PERF) {
-		processMigrationPerf();
-	}
-	return false;
-}
-
-bool TraceAnalyzer::processSched()
-{
+	parser->waitForTraceType();
 	switch (getTraceType()) {
 	case TRACE_TYPE_FTRACE:
-		processSchedFtrace();
+		processFtrace();
 		break;
 	case TRACE_TYPE_PERF:
-		processSchedPerf();
+		processPerf();
 		break;
 	default:
 		break;
 	}
-	return false;
+	processSchedAddTail();
+	processFreqAddTail();
 }
 
 void TraceAnalyzer::processSchedAddTail()
@@ -187,6 +181,19 @@ void TraceAnalyzer::processSchedAddTail()
 			d = task.data[task.data.size() - 1];
 			task.timev.append(getEndTime());
 			task.data.append(d);
+		}
+	}
+}
+
+void TraceAnalyzer::processFreqAddTail()
+{
+	unsigned int cpu;
+
+	for (cpu = 0; cpu <= maxCPU; cpu++) {
+		if (!cpuFreq[cpu].data.isEmpty()) {
+			double freq = cpuFreq[cpu].data.last();
+			cpuFreq[cpu].data.append(freq);
+			cpuFreq[cpu].timev.append(endTime);
 		}
 	}
 }
@@ -228,38 +235,6 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 		cpuTask->timev.append(faketime);
 		cpuTask->data.append(SCHED_HEIGHT);
 	}
-}
-
-bool TraceAnalyzer::processCPUfreq()
-{
-	unsigned int cpu;
-
-	if (getTraceType() == TRACE_TYPE_NONE)
-		return true;
-
-	if (!tracetype_is_valid(getTraceType()))
-		return false;
-
-	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
-		if (parser->startFreq[cpu] > 0) {
-			cpuFreq[cpu].timev.append(getStartTime());
-			cpuFreq[cpu].data.append(parser->startFreq[cpu]);
-		}
-	}
-
-	if (getTraceType() == TRACE_TYPE_FTRACE)
-		processCPUfreqFtrace();
-	else
-		processCPUfreqPerf();
-
-	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
-		if (!cpuFreq[cpu].data.isEmpty()) {
-			double freq = cpuFreq[cpu].data.last();
-			cpuFreq[cpu].data.append(freq);
-			cpuFreq[cpu].timev.append(getEndTime());
-		}
-	}
-	return false;
 }
 
 void TraceAnalyzer::colorizeTasks()
@@ -436,7 +411,7 @@ void TraceAnalyzer::setCpuIdleOffset(unsigned int cpu, double offset)
 
 void TraceAnalyzer::setCpuIdleScale(unsigned int cpu, double scale)
 {
-	cpuIdleScale[cpu] = scale / getMaxIdleState();
+	cpuIdleScale[cpu] = scale / maxIdleState;
 }
 
 void TraceAnalyzer::setCpuFreqOffset(unsigned int cpu, double offset)
@@ -446,7 +421,7 @@ void TraceAnalyzer::setCpuFreqOffset(unsigned int cpu, double offset)
 
 void TraceAnalyzer::setCpuFreqScale(unsigned int cpu, double scale)
 {
-	cpuFreqScale[cpu] = scale / parser->maxFreq;
+	cpuFreqScale[cpu] = scale / maxFreq;
 }
 
 void TraceAnalyzer::setMigrationOffset(double offset)
@@ -558,32 +533,12 @@ void TraceAnalyzer::doScale()
 		delete workList[i];
 }
 
-void TraceAnalyzer::processSchedFtrace()
+void TraceAnalyzer::processFtrace()
 {
-	__processSchedGeneric(TRACE_TYPE_FTRACE);
+	__processGeneric(TRACE_TYPE_FTRACE);
 }
 
-void TraceAnalyzer::processSchedPerf()
+void TraceAnalyzer::processPerf()
 {
-	__processSchedGeneric(TRACE_TYPE_PERF);
-}
-
-void TraceAnalyzer::processCPUfreqFtrace()
-{
-	__processCPUfreq(TRACE_TYPE_FTRACE);
-}
-
-void TraceAnalyzer::processCPUfreqPerf()
-{
-	__processCPUfreq(TRACE_TYPE_PERF);
-}
-
-void TraceAnalyzer::processMigrationFtrace()
-{
-	__processMigrationGeneric(TRACE_TYPE_FTRACE);
-}
-
-void TraceAnalyzer::processMigrationPerf()
-{
-	__processMigrationGeneric(TRACE_TYPE_PERF);
+	__processGeneric(TRACE_TYPE_PERF);
 }

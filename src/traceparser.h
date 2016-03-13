@@ -29,6 +29,7 @@
 #include "traceevent.h"
 #include "tlist.h"
 #include "traceshark.h"
+#include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
 #include "threads/workitem.h"
 #include "threads/workthread.h"
@@ -50,32 +51,22 @@ public:
 	bool open(const QString &fileName);
 	bool isOpen();
 	void close();
-	void parseThread();
+	void threadParser();
+	void threadReader();
 protected:
-	unsigned long nrEvents;
 	unsigned long nrFtraceEvents;
 	unsigned long nrPerfEvents;
-	unsigned int nrMigrateEvents;
-	unsigned int maxCPU;
-	unsigned int nrCPUs;
-	double endTime;
-	double startTime;
-	unsigned int maxFreq;
-	unsigned int minFreq;
-	int maxIdleState;
-	int minIdleState;
-	unsigned long lastEvent;
 	tracetype_t traceType;
+	__always_inline void waitForNextBatch(bool &eof, int &index);
+	void waitForTraceType();
 private:
 	void determineTraceType();
+	void sendTraceType();
+	void prepareParse();
 	__always_inline bool __parseBuffer(tracetype_t ttppe,
 					   unsigned int index);
 	__always_inline bool parseFtraceBuffer(unsigned int index);
 	__always_inline bool parsePerfBuffer(unsigned int index);
-	__always_inline void __preScanEvent(tracetype_t ttype,
-					    TraceEvent &event);
-	__always_inline void preScanFtraceEvent(TraceEvent &event);
-	__always_inline void preScanPerfEvent(TraceEvent &event);
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event,
 				       GrammarNode *root);
 	__always_inline bool parseLineFtrace(TraceLine* line,
@@ -84,8 +75,6 @@ private:
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
 	bool parseLineBugFixup(TraceEvent* event);
-	void preparePreScan();
-	void finalizePreScan();
 	TraceFile *traceFile;
 	MemPool *ptrPool;
 	MemPool *postEventPool;
@@ -95,13 +84,22 @@ private:
 	Grammar *perfGrammar;
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<TraceParser> *parserThread;
+	WorkThread<TraceParser> *readerThread;
 	char *infoBegin;
 	bool prevLineIsEvent;
 	double prevTime;
 	TraceEvent *prevEvent;
-	QVector<double> startFreq;
 	TList<TraceEvent> *events;
+	IndexWatcher *eventsWatcher;
+	/* This IndexWatcher isn't really watching an index, it's to synchronize
+	 * when traceType has been determined in the parser thread */
+	IndexWatcher *traceTypeWatcher;
 };
+
+__always_inline void TraceParser::waitForNextBatch(bool &eof, int &index)
+{
+	eventsWatcher->waitForNextBatch(eof, index);
+}
 
 /* This parses a buffer */
 __always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
@@ -143,69 +141,7 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 	return false;
 }
 		
-__always_inline void TraceParser::__preScanEvent(tracetype_t ttype,
-						 TraceEvent &event)
-{
-	int state;
-	unsigned int cpu;
-	unsigned int freq;
-	unsigned int dest;
-	unsigned int orig;
 
-	if (event.cpu > maxCPU)
-		maxCPU = event.cpu;
-
-	switch (event.type) {
-	case CPU_IDLE:
-		if (!cpuidle_args_ok(ttype, event))
-			break;
-		state = cpuidle_state(ttype, event);
-		cpu = cpuidle_cpu(ttype, event);
-		if (cpu > maxCPU)
-			maxCPU = cpu;
-		if (state < minIdleState)
-			minIdleState = state;
-		if (state > maxIdleState)
-			maxIdleState = state;
-		break;
-	case CPU_FREQUENCY:
-		if (!cpufreq_args_ok(ttype, event))
-			break;
-		cpu = cpufreq_cpu(ttype, event);
-		freq = cpufreq_freq(ttype, event);
-		if (freq > maxFreq)
-			maxFreq = freq;
-		if (freq < minFreq)
-			minFreq = freq;
-		if (cpu > maxCPU)
-			maxCPU = cpu;
-		if (cpu <= HIGHEST_CPU_EVER && startFreq[cpu] < 0) {
-			startFreq[cpu] = freq;
-		}
-		break;
-	case SCHED_MIGRATE_TASK:
-		dest = sched_migrate_destCPU(ttype, event);
-		orig = sched_migrate_origCPU(ttype, event);
-		if (dest > maxCPU)
-			maxCPU = dest;
-		if (orig > maxCPU)
-			maxCPU = dest;
-		nrMigrateEvents++;
-		break;
-	default:
-		break;
-	}
-}
-
-__always_inline void TraceParser::preScanFtraceEvent(TraceEvent &event)
-{
-	__preScanEvent(TRACE_TYPE_FTRACE, event);
-}
-
-__always_inline void TraceParser::preScanPerfEvent(TraceEvent &event)
-{
-	__preScanEvent(TRACE_TYPE_PERF, event);
-}
 
 __always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
 					    GrammarNode *root)
@@ -248,7 +184,6 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
 		event.postEventInfo = NULL;
 		events->commit();
 		nrFtraceEvents++;
-		preScanFtraceEvent(event);
 		/* probably not necessary because ftrace traces doesn't
 		 * have backtraces and stuff but do it anyway */
 		prevLineIsEvent = true;
@@ -283,7 +218,6 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine* line,
 		events->commit();
 		prevEvent = &event;
 		nrPerfEvents++;
-		preScanPerfEvent(event);
 		return true;
 	} else {
 		if (prevLineIsEvent) {
