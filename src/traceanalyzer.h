@@ -547,7 +547,7 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 
 	startTime = events[0].time;
 
-	while(!eof) {
+	while(true) {
 		for (i = prevIndex; i < indexReady; i++) {
 			TraceEvent &event = events[i];
 			if (!isValidCPU(event.cpu))
@@ -587,6 +587,8 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 				break;
 			}
 		}
+		if (eof)
+			break;
 		prevIndex = indexReady;
 		parser->waitForNextBatch(eof, indexReady);
 	}
