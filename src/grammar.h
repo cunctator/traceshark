@@ -25,7 +25,7 @@ class Grammar
 {
 public:
 	Grammar();
-	virtual ~Grammar();	
+	virtual ~Grammar();
 	GrammarNode *root;
 	void clearPools();
 private:

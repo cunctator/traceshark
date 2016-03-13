@@ -31,7 +31,7 @@ public:
 	__always_inline void sendNextIndex(int index);
 	void sendEOF();
 	void reset();
-private:	
+private:
 	int batchSize;
 	bool isEOF;
 	/* This is the highest index posted by the producer */
