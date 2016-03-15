@@ -21,7 +21,6 @@
 #include <QtGlobal>
 #include <QList>
 #include <QString>
-#include <QTextStream>
 #include "cpufreq.h"
 #include "cpuidle.h"
 #include "genericparams.h"
@@ -121,31 +120,11 @@ void TraceAnalyzer::resetProperties()
 
 void TraceAnalyzer::processTrace()
 {
-	QTextStream qout(stdout);
-	quint64 start, process, colorize;
-
-	qout.setRealNumberPrecision(6);
-	qout.setRealNumberNotation(QTextStream::FixedNotation);
-
-	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
 	resetProperties();
 	/* We do the processing from the main thread, since otherwise
 	 * we would have to wait for it */
 	threadProcess();
-
-	process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
-	qout << "processing took " << (double) (process - start) / 1000 <<
-		" s\n";
-	qout.flush();
-
-	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 	colorizeTasks();
-	colorize = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
-	qout << "colorize() took " << (double) (colorize - start) / 1000 <<
-		" s\n";
 }
 
 void TraceAnalyzer::threadProcess()

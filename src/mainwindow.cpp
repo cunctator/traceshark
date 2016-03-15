@@ -131,18 +131,35 @@ void MainWindow::openTrace()
 		QTextStream qout(stdout);
 		qout.setRealNumberPrecision(6);
 		qout.setRealNumberNotation(QTextStream::FixedNotation);
-		quint64 start, process, layout, rescale, show;
+		quint64 start, process, layout, rescale, showt, eventsw;
+		quint64 scursor, tshow;
 
 		clearPlot();
 		start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 		processTrace();
 		process = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 		computeLayout();
 		layout = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 		rescaleTrace();
 		rescale = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 		showTrace();
-		show = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+		showt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+		eventsWidget->beginResetModel();
+		eventsWidget->setEvents(&analyzer->events);
+		eventsWidget->endResetModel();
+		eventsw = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+		setupCursors();
+		scursor = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+		tracePlot->show();
+		tshow = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 		qout << "processTrace() took "
 		     << (double) (process - start) / 1000;
 		qout << " s\n";
@@ -153,13 +170,17 @@ void MainWindow::openTrace()
 		     << (double) (rescale - layout) / 1000;
 		qout << " s\n";
 		qout << "showTrace() took "
-		     << (double) (show - rescale) / 1000;
+		     << (double) (showt - rescale) / 1000;
 		qout << " s\n";
-		eventsWidget->beginResetModel();
-		eventsWidget->setEvents(&analyzer->events);
-		eventsWidget->endResetModel();
-		setupCursors();
-		tracePlot->show();
+		qout << "updating EventsWidget took "
+		     << (double) (eventsw - showt) / 1000;
+		qout << " s\n";
+		qout << "setupCursors() took "
+		     << (double) (scursor - eventsw) / 1000;
+		qout << " s\n";
+		qout << "tracePlot->show() took "
+		     << (double) (tshow - scursor) / 1000;
+		qout << " s\n";
 		tracePlot->legend->setVisible(true);
 	}
 }
