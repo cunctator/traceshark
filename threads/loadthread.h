@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,13 +19,12 @@
 #ifndef LOADTHREAD_H
 #define LOADTHREAD_H
 
-#include <QThread>
+#include "tthread.h"
 
 class LoadBuffer;
 
-class LoadThread : public QThread
+class LoadThread : public TThread
 {
-	Q_OBJECT
 public:
 	LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
 		   char *fileStart);

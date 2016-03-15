@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,18 +22,29 @@
 #include <QThread>
 #include "tthread.h"
 
+extern "C" {
+#include <sys/prctl.h>
+}
 
-__TThread::__TThread(TThread *thr):
-	tThread(thr) {}
+__TThread::__TThread(TThread *thr, const QString &name):
+	tThread(thr), threadName(name) {}
 
 void __TThread::run()
 {
+	prctl(PR_SET_NAME, (unsigned long) threadName.toLocal8Bit().data(), 0,
+	      0, 0);
 	tThread->run();
 }
 
 TThread::TThread()
 {
-	threadPtr = new __TThread(this);
+	const QString name("TThread");
+	threadPtr = new __TThread(this, name);
+}
+
+TThread::TThread(const QString &name)
+{
+	threadPtr = new __TThread(this, name);
 }
 
 TThread::~TThread()

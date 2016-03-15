@@ -45,9 +45,9 @@ TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
 
 	tbuffers = new ThreadBuffer<TraceLine>*[NR_TBUFFERS];
 	parserThread = new WorkThread<TraceParser>
-		(this, &TraceParser::threadParser);
+		(QString("parserThread"), this, &TraceParser::threadParser);
 	readerThread = new WorkThread<TraceParser>
-		(this, &TraceParser::threadReader);
+		(QString("readerThread"), this, &TraceParser::threadReader);
 	events = analyzerEvents;
 	eventsWatcher = new IndexWatcher(10000);
 	traceTypeWatcher = new IndexWatcher;

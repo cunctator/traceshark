@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 
 #include <QThread> /* We are going to piggyback */
 #include <QtCore>
+#include <QString>
 
 class __TThread;
 
@@ -32,6 +33,7 @@ class TThread {
 	friend class __TThread;
 public:
 	TThread();
+	TThread(const QString &name);
 	virtual ~TThread();
 	void exit(int returnCode = 0);
 	bool isFinished();
@@ -56,11 +58,12 @@ private:
 class __TThread : public QThread {
 	Q_OBJECT
 public:
-	__TThread(TThread *thr);
+	__TThread(TThread *thr, const QString &name);
 protected:
 	void run();
 private:
 	TThread *tThread;
+	QString threadName;
 };
 
 #endif /* TTHREAD_H */

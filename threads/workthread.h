@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,15 +19,21 @@
 #ifndef WORKTHREAD_H
 #define WORKTHREAD_H
 
+#include <QString>
 #include "tthread.h"
 #include "src/traceshark.h"
+
+#define WORKTHREAD_DEFAULTNAME "WorkThread"
 
 template <class ObjType>
 class WorkThread : public TThread
 {
 public:
-	WorkThread() {};
+	WorkThread();
+	WorkThread(const QString &name);
 	WorkThread(ObjType *p, DEFINE_MEMBER_FN(void, ObjType, oF));
+	WorkThread(const QString &name, ObjType *p,
+		   DEFINE_MEMBER_FN(void, ObjType, oF));
 	~WorkThread();
 	void setObjFn(ObjType *p, DEFINE_MEMBER_FN(void, ObjType, oF));
 protected:
@@ -38,9 +44,23 @@ private:
 };
 
 template <class ObjType>
+WorkThread<ObjType>::WorkThread():
+TThread(QString(WORKTHREAD_DEFAULTNAME)), workObject(nullptr),
+	objectFunc(nullptr) {}
+
+template <class ObjType>
+WorkThread<ObjType>::WorkThread(const QString &name):
+TThread(name), workObject(nullptr), objectFunc(nullptr) {}
+
+template <class ObjType>
 WorkThread<ObjType>::WorkThread(ObjType *p,
 				DEFINE_MEMBER_FN(void, ObjType, oF)):
-workObject(p), objectFunc(oF) {}
+TThread(QString(WORKTHREAD_DEFAULTNAME)), workObject(p), objectFunc(oF) {}
+
+template <class ObjType>
+WorkThread<ObjType>::WorkThread(const QString &name, ObjType *p,
+				DEFINE_MEMBER_FN(void, ObjType, oF)):
+TThread(name), workObject(p), objectFunc(oF) {}
 
 
 template <class ObjType>
