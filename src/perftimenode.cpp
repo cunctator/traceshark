@@ -72,11 +72,15 @@ bool PerfTimeNode::match(TString *str, TraceEvent *event)
 			}
 
 			hash = TShark::StrHash32(&namestr);
-			newname = namePool->allocString(&namestr, hash, 65536);
+			/* We must allocate names with a cutoff of 0 (infinity)
+			 * because the checkName() function in the Task class
+			 * compares addresses for string comparison */
+			newname = namePool->allocString(&namestr, hash, 0);
 		} else {
 			hash = TShark::StrHash32(event->argv[0]);
+			/* cutoff must be 0 here too */
 			newname = namePool->allocString(event->argv[0], hash,
-							65536);
+							0);
 		}
 		if (newname == nullptr)
 			return false;

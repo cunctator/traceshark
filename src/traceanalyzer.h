@@ -82,6 +82,7 @@ public:
 	__always_inline double getEndTime();
 	__always_inline int getMinIdleState();
 	__always_inline int getMaxIdleState();
+	__always_inline Task *getTask(unsigned int pid);
 	__always_inline QColor getTaskColor(unsigned int pid);
 	__always_inline tracetype_t getTraceType();
 	void setSchedOffset(unsigned int cpu, double offset);
@@ -113,7 +114,6 @@ private:
 								 &event);
 	__always_inline unsigned int generic_sched_wakeup_pid(TraceEvent
 							      &event);
-	__always_inline Task *getTask(unsigned int pid);
 	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
 						 double startTime);
 	__always_inline double estimateWakeUp(Task *task, CPU *eventCPU,
@@ -351,6 +351,12 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	if (!isValidCPU(cpu))
 		return;
 
+	task = &taskMap[event.pid];
+	if (task->isNew) {
+		task->pid = event.pid;
+	}
+	task->checkName(event.taskName->ptr);
+
 	if (eventCPU->pidOnCPU != oldpid) {
 		if (eventCPU->hasBeenScheduled)
 			handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid,
@@ -383,8 +389,6 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 		cpuTask->timev.append(oldtime);
 		cpuTask->data.append(FLOOR_HEIGHT);
-		cpuTask->name = sched_switch_oldname_strdup(ttype, event,
-							    taskNamePool);
 	} else {
 		taskstate_t state = sched_switch_state(ttype, event);
 
@@ -426,9 +430,6 @@ skip:
 
 		cpuTask->timev.append(newtime);
 		cpuTask->data.append(SCHED_HEIGHT);
-
-		cpuTask->name = sched_switch_newname_strdup(ttype, event,
-							    taskNamePool);
 	} else {
 		cpuTask->wakeTimev.append(newtime);
 		cpuTask->wakeDelay.append(delay);

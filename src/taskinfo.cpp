@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cputask.h"
+#include "task.h"
 #include "taskgraph.h"
 #include "taskinfo.h"
 #include "traceshark.h"
@@ -67,10 +67,12 @@ TaskInfo::~TaskInfo()
 
 void TaskInfo::setTaskGraph(TaskGraph *graph)
 {
-	CPUTask *task = graph->getTask();
+	Task *task = graph->getTask();
 	if (task == NULL)
 		return;
-	QString nameStr = QString(task->name);
+	QString nameStr;
+	if (task->taskName != nullptr)
+		nameStr += QString(task->taskName->str);
 	QString pidStr = QString::number(task->pid);
 	nameLine->setText(nameStr);
 	pidLine->setText(pidStr);
@@ -94,7 +96,7 @@ void TaskInfo::addClicked()
 {
 	QObject *obj;
 	QCustomPlot *plot;
-	CPUTask *task;
+	Task *task;
 
 	if (taskGraph == NULL)
 		return;
@@ -141,7 +143,7 @@ void TaskInfo::clearClicked()
 
 void TaskInfo::findClicked()
 {
-	CPUTask *task;
+	Task *task;
 
 	if (taskGraph == NULL)
 		return;

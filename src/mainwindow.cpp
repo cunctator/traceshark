@@ -369,11 +369,12 @@ void MainWindow::setupSettings()
 		tr("Show horizontal wakeup");
 }
 
-void MainWindow::addSchedGraph(CPUTask &task)
+void MainWindow::addSchedGraph(CPUTask &cpuTask)
 {
 	/* Add scheduling graph */
 	TaskGraph *graph = new TaskGraph(tracePlot->xAxis, tracePlot->yAxis);
-	QColor color = analyzer->getTaskColor(task.pid);
+	QColor color = analyzer->getTaskColor(cpuTask.pid);
+	Task &task = *analyzer->getTask(cpuTask.pid);
 	QPen pen = QPen();
 
 	pen.setColor(color);
@@ -382,8 +383,8 @@ void MainWindow::addSchedGraph(CPUTask &task)
 	tracePlot->addPlottable(graph);
 	graph->setLineStyle(QCPGraph::lsStepLeft);
 	graph->setAdaptiveSampling(true);
-	graph->setData(task.timev, task.scaledData);
-	task.graph = graph; /* Save a pointer to the graph object in the task */
+	graph->setData(cpuTask.timev, cpuTask.scaledData);
+	cpuTask.graph = graph; /* Save a pointer to the graph object in the task */
 }
 
 void MainWindow::addHorizontalWakeupGraph(CPUTask &task)

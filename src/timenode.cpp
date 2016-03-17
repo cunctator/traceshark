@@ -79,9 +79,11 @@ bool TimeNode::match(TString *str, TraceEvent *event)
 			return false;
 
 
+		/* We must allocate names with a cutoff of 0 (infinity) because
+		 * the checkName() function in the Task class compares addresses
+		 * for string comparison */
 		newname = namePool->allocString(&namestr,
-						TShark::StrHash32(&namestr),
-						65536);
+						TShark::StrHash32(&namestr), 0);
 		if (newname == nullptr)
 			return false;
 		event->taskName = newname;

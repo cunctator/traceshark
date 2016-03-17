@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #include "legendgraph.h"
 #include "taskgraph.h"
+#include "task.h"
 
 TaskGraph::TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis):
 	QCPGraph(keyAxis, valueAxis), task(NULL)
@@ -31,17 +32,19 @@ TaskGraph::~TaskGraph()
 	delete legendGraph;
 }
 
-void TaskGraph::setTask(CPUTask *newtask)
+void TaskGraph::setTask(Task *newtask)
 {
-	QString name = QString(newtask->name) + QString(":") +
-		QString::number(newtask->pid);
+	QString name;
+	if (newtask->taskName != nullptr)
+		name += QString(newtask->taskName->str);
+	name += QString(":") + QString::number(newtask->pid);
 	QCPGraph::setName(name);
 	legendGraph->setName(name);
 	legendGraph->pid = newtask->pid;
 	task = newtask;
 }	
 
-CPUTask *TaskGraph::getTask()
+Task *TaskGraph::getTask()
 {
 	return task;
 }

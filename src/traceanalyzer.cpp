@@ -37,7 +37,6 @@ TraceAnalyzer::TraceAnalyzer()
 	  black(0, 0, 0), white(255, 255, 255),
 	  CPUs(NULL)
 {
-	taskNamePool = new MemPool(16384, sizeof(char));
 	parser = new TraceParser(&events);
 }
 
@@ -45,7 +44,6 @@ TraceAnalyzer::~TraceAnalyzer()
 {
 	TraceAnalyzer::close();
 	delete parser;
-	delete taskNamePool;
 }
 
 bool TraceAnalyzer::open(const QString &fileName)
@@ -104,7 +102,6 @@ void TraceAnalyzer::close()
 	migrationArrows.clear();
 	colorMap.clear();
 	parser->close();
-	taskNamePool->reset();
 }
 
 void TraceAnalyzer::resetProperties()
@@ -179,9 +176,10 @@ void TraceAnalyzer::processFreqAddTail()
 
 /* This function is supposed to be called seldom, thus it's ok to not have it
  * as optimized as the other functions, e.g. in terms of inlining */
-void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
-				       CPU *eventCPU, unsigned int oldpid,
-				       double oldtime)
+void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
+					 unsigned int cpu,
+					 CPU *eventCPU, unsigned int oldpid,
+					 double oldtime)
 {
 	unsigned int epid = eventCPU->pidOnCPU;
 	double prevtime, faketime;
@@ -204,10 +202,6 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 		cpuTask = &cpuTaskMaps[cpu][oldpid];
 		if (cpuTask->isNew) {
 			cpuTask->pid = oldpid;
-			cpuTask->name =
-				sched_switch_oldname_strdup(getTraceType(),
-							    event,
-							    taskNamePool);
 		}
 		cpuTask->isNew = false;
 		faketime = oldtime - FAKE_DELTA;

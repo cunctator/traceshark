@@ -112,6 +112,7 @@ SOURCES      += src/storenode.cpp
 SOURCES      += mm/stringpool.cpp
 SOURCES      += mm/stringtree.cpp
 SOURCES      += src/cputask.cpp
+SOURCES      += src/task.cpp
 SOURCES      += src/tcolor.cpp
 SOURCES      += threads/tthread.cpp
 SOURCES      += src/taskgraph.cpp

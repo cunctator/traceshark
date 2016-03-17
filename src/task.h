@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,12 +19,37 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <cstring>
+
+class TaskName {
+public:
+	TaskName();
+	char *str;
+	TaskName *prev;
+};
+
 class Task {
 public:
-	Task(): isNew(true), lastWakeUP(0) {}
+	Task();
+	~Task();
+	void addName(char *name);
+	__always_inline void checkName(char *name);
 	unsigned int pid; /* is really tid as all other pids here */
+	TaskName *taskName;
 	bool isNew;
 	double lastWakeUP;
 };
+
+
+__always_inline void Task::checkName(char *name)
+{
+	/* It's here assumed that all name strings are allocated by the
+	 * StringPool with a cutoff of 0, i.e. infinity, so that we know
+	 * that identical names will be only allocated once. Thus, we don't 
+	 * need to run an expensive strcmp() function here, we just check
+	 * if the addresses differ */
+	if (taskName == nullptr || taskName->str != name)
+		addName(name);
+}
 
 #endif /* TASK_H */

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ema *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef STRINGPOOL_H
@@ -75,7 +75,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 
 	hval = hval % hSize;
 
-	if (usageTable[hval] > cutoff) {
+	if (cutoff != 0 && usageTable[hval] > cutoff) {
 		newstr = allocUniqueString(str);
 		return newstr;
 	}
@@ -101,7 +101,8 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	newstr = allocUniqueString(str);
 	if (newstr == NULL)
 		return newstr;
-	usageTable[hval]++;
+	if (cutoff != 0)
+		usageTable[hval]++;
 
 	entry = (StringPoolEntry*) entryPool->allocObj();
 	if (entry == NULL)

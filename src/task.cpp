@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,29 +16,31 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TASKGRAPH_H
-#define TASKGRAPH_H
+#include "task.h"
 
-#include <QString>
-#include "qcustomplot/qcustomplot.h"
+TaskName::TaskName():
+	str(nullptr), prev(nullptr)
+{}
 
-class LegendGraph;
-class Task;
+Task::Task():
+	taskName(nullptr), isNew(true), lastWakeUP(0)
+{}
 
-class TaskGraph : public QCPGraph
+Task::~Task()
 {
-	Q_OBJECT
-public:
-	TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
-	virtual ~TaskGraph();
-	void setTask(Task *task);
-	Task *getTask();
-	void setPen(const QPen &pen);
-	bool addToLegend();
-	bool removeFromLegend();
-private:
-	Task *task;
-	LegendGraph *legendGraph;
-};
+	TaskName *prev;
+	TaskName *current = taskName;
+	while(current != nullptr) {
+		prev = current->prev;
+		delete current;
+		current = prev;
+	}
+}
 
-#endif /* TASKGRAPH_H */
+void Task::addName(char *name)
+{
+	TaskName *newName = new TaskName();
+	newName->str = name;
+	newName->prev = taskName;
+	taskName = newName;
+}
