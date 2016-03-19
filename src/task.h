@@ -48,7 +48,7 @@ __always_inline void Task::checkName(char *name)
 	 * that identical names will be only allocated once. Thus, we don't 
 	 * need to run an expensive strcmp() function here, we just check
 	 * if the addresses differ */
-	if (taskName == nullptr || taskName->str != name)
+	if (taskName == nullptr || strcmp(taskName->str, name) != 0)
 		addName(name);
 }
 

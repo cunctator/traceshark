@@ -37,6 +37,7 @@ TraceAnalyzer::TraceAnalyzer()
 	  black(0, 0, 0), white(255, 255, 255),
 	  CPUs(NULL)
 {
+	taskNamePool = new MemPool(16384, sizeof(char));
 	parser = new TraceParser(&events);
 }
 
@@ -44,6 +45,7 @@ TraceAnalyzer::~TraceAnalyzer()
 {
 	TraceAnalyzer::close();
 	delete parser;
+	delete taskNamePool;
 }
 
 bool TraceAnalyzer::open(const QString &fileName)

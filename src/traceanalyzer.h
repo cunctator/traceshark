@@ -351,11 +351,10 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	if (!isValidCPU(cpu))
 		return;
 
+	/* This is done to update the names of existing tasks */
 	task = &taskMap[event.pid];
-	if (task->isNew) {
-		task->pid = event.pid;
-	}
-	task->checkName(event.taskName->ptr);
+	if (!task->isNew)
+		task->checkName(event.taskName->ptr);
 
 	if (eventCPU->pidOnCPU != oldpid) {
 		if (eventCPU->hasBeenScheduled)
@@ -371,7 +370,13 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 	/* Handle the outgoing task */
 	cpuTask = &cpuTaskMaps[cpu][oldpid]; /* Modifiable reference */
-	task = getTask(oldpid);
+	task = &taskMap[oldpid];
+	if (task->isNew) {
+		task->pid = oldpid;
+		task->isNew = false;
+		task->checkName(sched_switch_oldname_strdup(ttype, event,
+							    taskNamePool));
+	}
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
@@ -413,6 +418,8 @@ skip:
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
+		task->checkName(sched_switch_newname_strdup(ttype, event,
+							    taskNamePool));
 		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
 	} else
 		delay = estimateWakeUp(task, eventCPU, newtime, startTime);
@@ -459,8 +466,15 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	pid = sched_wakeup_pid(ttype, event);
 
 	/* Handle the woken up task */
-	task = getTask(pid);
+	task = &taskMap[pid];
 	task->lastWakeUP = time;
+	if (task->isNew) {
+		task->pid = pid;
+		task->isNew = false;
+		char *name = sched_wakeup_name_strdup(ttype, event,
+						      taskNamePool);
+		task->checkName(name);
+	}
 }
 
 __always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
