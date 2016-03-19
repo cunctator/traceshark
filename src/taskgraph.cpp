@@ -32,16 +32,14 @@ TaskGraph::~TaskGraph()
 	delete legendGraph;
 }
 
-void TaskGraph::setTask(Task *newtask)
+void TaskGraph::setTask(Task *newTask)
 {
-	QString name;
-	if (newtask->taskName != nullptr)
-		name += QString(newtask->taskName->str);
-	name += QString(":") + QString::number(newtask->pid);
+	QString name = newTask->getDisplayName();
+	name += QString(":") + QString::number(newTask->pid);
 	QCPGraph::setName(name);
 	legendGraph->setName(name);
-	legendGraph->pid = newtask->pid;
-	task = newtask;
+	legendGraph->pid = newTask->pid;
+	task = newTask;
 }	
 
 Task *TaskGraph::getTask()

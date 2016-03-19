@@ -31,7 +31,7 @@ class TaskGraph : public QCPGraph
 public:
 	TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
 	virtual ~TaskGraph();
-	void setTask(Task *task);
+	void setTask(Task *newTask);
 	Task *getTask();
 	void setPen(const QPen &pen);
 	bool addToLegend();

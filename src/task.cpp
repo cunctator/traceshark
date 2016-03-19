@@ -44,3 +44,29 @@ void Task::addName(char *name)
 	newName->prev = taskName;
 	taskName = newName;
 }
+
+QString Task::getDisplayName()
+{
+	QString nameStr;
+
+	if (taskName != nullptr) {
+		nameStr += QString(taskName->str);
+		if (taskName->prev != nullptr) {
+			nameStr += QString("(")
+				+ QString(taskName->prev->str)
+				+ QString(")");
+			if (taskName->prev->prev != nullptr)
+				nameStr += QString("...");
+		}
+	}
+	return nameStr;
+}
+
+QString Task::getLastName()
+{
+	QString empty;
+
+	if (taskName != nullptr)
+		return QString(taskName->str);
+	return empty;
+}

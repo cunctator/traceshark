@@ -70,9 +70,7 @@ void TaskInfo::setTaskGraph(TaskGraph *graph)
 	Task *task = graph->getTask();
 	if (task == NULL)
 		return;
-	QString nameStr;
-	if (task->taskName != nullptr)
-		nameStr += QString(task->taskName->str);
+	QString nameStr = task->getLastName();
 	QString pidStr = QString::number(task->pid);
 	nameLine->setText(nameStr);
 	pidLine->setText(pidStr);
