@@ -52,16 +52,20 @@ int EventsModel::columnCount(const QModelIndex & /* parent */) const
 
 QVariant EventsModel::data(const QModelIndex &index, int role) const
 {
+	QString str;
+	unsigned int i;
+
 	if (!index.isValid())
 		return QVariant();
 	
 	if (role == Qt::TextAlignmentRole) {
 		return int(Qt::AlignLeft | Qt::AlignVCenter);
 	} else if (role == Qt::DisplayRole) {
-		unsigned int row = TSMAX(0, index.row());
-		unsigned int column = TSMAX(0, index.column());
+		int row = index.row();
+		int column = index.column();
+		int size = (int) TSMIN(INT_MAX, events->size());
 
-		if (events == NULL || row >= events->size())
+		if (events == NULL || row >= size || row < 0)
 			return QVariant();
 		TraceEvent &event = (*events)[row];
 		switch(column) {
@@ -77,14 +81,14 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		case 4:
 			return QString(event.eventName->ptr);
 		case 5:
-			QString str;
-			unsigned int i;
 			for (i = 0; i < event.argc; i++) {
 				str += QString(event.argv[i]->ptr);
 				if (i < event.argc - 1)
 					str += QString(tr(" "));
 			}
 			return str;
+		default:
+			break;
 		}
 	}
 	return QVariant();
