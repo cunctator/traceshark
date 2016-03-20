@@ -143,6 +143,9 @@ void MainWindow::openTrace()
 		computeLayout();
 		layout = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
+		setupCursors();
+		scursor = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 		rescaleTrace();
 		rescale = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -154,9 +157,6 @@ void MainWindow::openTrace()
 		eventsWidget->endResetModel();
 		eventsw = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-		setupCursors();
-		scursor = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-
 		tracePlot->show();
 		tshow = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -166,8 +166,11 @@ void MainWindow::openTrace()
 		qout << "computeLayout() took "
 		     << (double) (layout - process) / 1000;
 		qout << " s\n";
+		qout << "setupCursors() took "
+		     << (double) (scursor - process) / 1000;
+		qout << " s\n";
 		qout << "rescaleTrace() took "
-		     << (double) (rescale - layout) / 1000;
+		     << (double) (rescale - scursor) / 1000;
 		qout << " s\n";
 		qout << "showTrace() took "
 		     << (double) (showt - rescale) / 1000;
@@ -175,11 +178,8 @@ void MainWindow::openTrace()
 		qout << "updating EventsWidget took "
 		     << (double) (eventsw - showt) / 1000;
 		qout << " s\n";
-		qout << "setupCursors() took "
-		     << (double) (scursor - eventsw) / 1000;
-		qout << " s\n";
 		qout << "tracePlot->show() took "
-		     << (double) (tshow - scursor) / 1000;
+		     << (double) (tshow - eventsw) / 1000;
 		qout << " s\n";
 		tracePlot->legend->setVisible(true);
 	}
