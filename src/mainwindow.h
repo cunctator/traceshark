@@ -44,6 +44,7 @@ class LicenseDialog;
 class EventInfoDialog;
 class QCPAbstractPlottable;
 class QCPGraph;
+class QCPLayer;
 class QCPLegend;
 class QCustomPlot;
 class QCPAbstractLegendItem;
@@ -92,6 +93,7 @@ private:
 	void addStillRunningGraph(CPUTask &task);
 
 	TracePlot *tracePlot;
+	QCPLayer *cursorLayer;
 	QWidget *plotWidget;
 	QVBoxLayout *plotLayout;
 	EventsWidget *eventsWidget;
@@ -101,6 +103,7 @@ private:
 	void createActions();
 	void createToolBars();
 	void createMenus();
+	void createTracePlot();
 	void loadTraceFile(QString &);
 
 	QMenu *fileMenu;

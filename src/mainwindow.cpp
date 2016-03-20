@@ -51,15 +51,8 @@ MainWindow::MainWindow():
 	plotLayout = new QVBoxLayout(plotWidget);
 	setCentralWidget(plotWidget);
 
-	tracePlot = new TracePlot(plotWidget);
-	tracePlot->setAutoAddPlottableToLegend(false);
-	tracePlot->hide();
-	plotLayout->addWidget(tracePlot);
-
-	tracePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
-				   QCP::iSelectAxes | QCP::iSelectLegend |
-				   QCP::iSelectPlottables);
-	analyzer->setQCustomPlot(tracePlot);
+	/* createTracePlot needs to have plotWidget created */
+	createTracePlot();
 
 	tsconnect(tracePlot, mouseWheel(QWheelEvent*), this, mouseWheel());
 	tsconnect(tracePlot->xAxis, rangeChanged(QCPRange), tracePlot->xAxis2,
@@ -98,6 +91,32 @@ MainWindow::MainWindow():
 		  this, showEventInfo(const TraceEvent &));
 
 	setupSettings();
+}
+
+void MainWindow::createTracePlot()
+{
+	QString mainLayerName = QString("main");
+	QString cursorLayerName = QString("cursor");
+	QCPLayer *mainLayer;
+
+	tracePlot = new TracePlot(plotWidget);
+
+	mainLayer = tracePlot->layer(mainLayerName);
+
+	tracePlot->addLayer(cursorLayerName, mainLayer, QCustomPlot::limAbove);
+	cursorLayer = tracePlot->layer(cursorLayerName);
+
+	tracePlot->setCurrentLayer(mainLayerName);
+
+	tracePlot->setAutoAddPlottableToLegend(false);
+	tracePlot->hide();
+	plotLayout->addWidget(tracePlot);
+
+	tracePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
+				   QCP::iSelectAxes | QCP::iSelectLegend |
+				   QCP::iSelectPlottables);
+
+	analyzer->setQCustomPlot(tracePlot);
 }
 
 MainWindow::~MainWindow()
@@ -345,6 +364,9 @@ void MainWindow::setupCursors()
 
 	tracePlot->addItem(cursors[TShark::RED_CURSOR]);
 	tracePlot->addItem(cursors[TShark::BLUE_CURSOR]);
+
+	cursors[TShark::RED_CURSOR]->setLayer(cursorLayer);
+	cursors[TShark::BLUE_CURSOR]->setLayer(cursorLayer);
 
 	red = (start + end) / 2;
 	cursors[TShark::RED_CURSOR]->setPosition(red);
