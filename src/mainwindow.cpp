@@ -806,13 +806,12 @@ void MainWindow::showWakeup(unsigned int pid)
 	 * relative to */
 	double zerotime = activeCursor->getPosition();
 	TraceEvent *schedevent = analyzer->findPreviousSchedEvent(zerotime, pid,
-								&schedIndex);
+								  &schedIndex);
 	if (schedevent == nullptr)
 		return;
 
-	TraceEvent *wakeupevent = analyzer->findPreviousWakeupEvent(schedIndex,
-								  pid,
-								  &wakeUpIndex);
+	TraceEvent *wakeupevent = analyzer->
+		findPreviousWakeupEvent(schedIndex, pid, &wakeUpIndex);
 	if (wakeupevent == nullptr)
 		return;
 	/* This is what we do, we move the *inactive* cursor to the wakeup
