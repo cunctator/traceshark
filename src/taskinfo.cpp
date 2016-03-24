@@ -37,17 +37,22 @@ TaskInfo::TaskInfo(QWidget *parent):
 	QWidget(parent), taskGraph(NULL)
 {
 	QPixmap addPM(QLatin1String(":/traceshark/images/addtolegend30x30.png"));
+	QPixmap clearPM(QLatin1String(":/traceshark/images/clearlegend30x30.png"));
 	QPixmap findPM(QLatin1String(":/traceshark/images/wakeup30x30.png"));
 	QIcon findIcon(findPM);
 	QIcon addIcon(addPM);
+	QIcon clearIcon(clearPM);
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	QLabel *colonLabel = new QLabel(tr(":"));
 	QPushButton *addButton = new QPushButton(addIcon, tr(""), this);
-	QPushButton *clearButton = new QPushButton(tr("Clear"), this);
+	QPushButton *clearButton = new QPushButton(clearIcon, tr(""), this);
 	QPushButton *findButton = new QPushButton(findIcon, tr(""), this);
 
 	addButton->setToolTip(tr("Add to legend"));
 	addButton->setIconSize(addPM.size());
+
+	clearButton->setToolTip(tr("Clear the legend"));
+	clearButton->setIconSize(clearPM.size());
 
 	findButton->setToolTip(tr("Find previous wakeup"));
 	findButton->setIconSize(findPM.size());
