@@ -43,11 +43,11 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 
 	switch (nr) {
 	case TShark::RED_CURSOR:
-		text = QString(tr("Move Red Cursor"));
+		text = QString(tr("Move the red cursor"));
 		qresource = QLatin1String(RED_CURSOR_RESOURCE);
 		break;
 	case TShark::BLUE_CURSOR:
-		text = QString(tr("Move Blue Cursor"));
+		text = QString(tr("Move the blue cursor"));
 		qresource = QLatin1String(BLUE_CURSOR_RESOURCE);
 		break;
 	default:
