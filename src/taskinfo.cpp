@@ -33,12 +33,16 @@
 #define DEFINE_PIDMAP_ITERATOR(name) \
 	QMap<unsigned int, TaskGraph*>::iterator name
 
+#define ADD_TO_LEGEND_RESOURCE ":/traceshark/images/addtolegend30x30.png"
+#define CLEAR_LEGEND_RESOURCE ":/traceshark/images/clearlegend30x30.png"
+#define FIND_WAKEUP_RESOURCE ":/traceshark/images/wakeup30x30.png"
+
 TaskInfo::TaskInfo(QWidget *parent):
 	QWidget(parent), taskGraph(NULL)
 {
-	QPixmap addPM(QLatin1String(":/traceshark/images/addtolegend30x30.png"));
-	QPixmap clearPM(QLatin1String(":/traceshark/images/clearlegend30x30.png"));
-	QPixmap findPM(QLatin1String(":/traceshark/images/wakeup30x30.png"));
+	QPixmap addPM(QLatin1String(ADD_TO_LEGEND_RESOURCE));
+	QPixmap clearPM(QLatin1String(CLEAR_LEGEND_RESOURCE));
+	QPixmap findPM(QLatin1String(FIND_WAKEUP_RESOURCE));
 	QIcon findIcon(findPM);
 	QIcon addIcon(addPM);
 	QIcon clearIcon(clearPM);
