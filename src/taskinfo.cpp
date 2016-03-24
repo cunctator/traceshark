@@ -22,10 +22,12 @@
 #include "traceshark.h"
 #include "qcustomplot/qcustomplot.h"
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QMap>
 #include <QPushButton>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPixmap>
 #include <QString>
 
 #define DEFINE_PIDMAP_ITERATOR(name) \
@@ -34,15 +36,19 @@
 TaskInfo::TaskInfo(QWidget *parent):
 	QWidget(parent), taskGraph(NULL)
 {
+	QPixmap findPM(QLatin1String(":/traceshark/images/wakeup30x30.png"));
+	QIcon findIcon(findPM);
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	QLabel *colonLabel = new QLabel(tr(":"));
 	QPushButton *addButton = new QPushButton(tr("Add to legend"), this);
 	QPushButton *clearButton = new QPushButton(tr("Clear"), this);
-	QPushButton *findButton = new QPushButton(tr("Find wakeup"), this);
+	QPushButton *findButton = new QPushButton(findIcon, tr(""), this);
+
+	findButton->setToolTip(tr("Find previous wakeup"));
+	findButton->setIconSize(findPM.size());
 
 	nameLine = new QLineEdit(this);
 	pidLine = new QLineEdit(this);
-
 
 	nameLine->setReadOnly(true);
 	pidLine->setReadOnly(true);
