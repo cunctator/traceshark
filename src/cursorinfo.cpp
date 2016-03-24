@@ -28,6 +28,8 @@
 
 #define RED_CURSOR_RESOURCE ":/traceshark/images/movered30x30.png"
 #define BLUE_CURSOR_RESOURCE ":/traceshark/images/moveblue30x30.png"
+#define RED_CURSOR_TOOLTIP "Move the red cursor to the specified time"
+#define BLUE_CURSOR_TOOLTIP "Move the blue cursor to the specified time"
 
 CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QWidget(parent), id(nr)
@@ -43,11 +45,11 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 
 	switch (nr) {
 	case TShark::RED_CURSOR:
-		text = QString(tr("Move the red cursor"));
+		text = QString(tr(RED_CURSOR_TOOLTIP));
 		qresource = QLatin1String(RED_CURSOR_RESOURCE);
 		break;
 	case TShark::BLUE_CURSOR:
-		text = QString(tr("Move the blue cursor"));
+		text = QString(tr(BLUE_CURSOR_TOOLTIP));
 		qresource = QLatin1String(BLUE_CURSOR_RESOURCE);
 		break;
 	default:
