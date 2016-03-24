@@ -213,7 +213,7 @@ void MainWindow::computeLayout()
 {
 	unsigned int cpu;
 	unsigned int nrCPUs;
-	unsigned int offset = schedSectionSpace;
+	unsigned int offset = migrateSectionOffset;
 	QString label;
 	double inc, o, p;
 	double start, end;
@@ -228,6 +228,33 @@ void MainWindow::computeLayout()
 	ticks.resize(0);
 	tickLabels.resize(0);
 	nrCPUs = analyzer->getNrCPUs();
+
+	analyzer->setMigrationOffset(offset);
+	inc = nrCPUs * 315 + 67.5;
+	analyzer->setMigrationScale(inc);
+
+	/* add labels and lines here for the migration graph */
+	color = QColor(135, 206, 250); /* Light sky blue */
+	label = QString("fork/exit");
+	ticks.append(offset);
+	line = new MigrationLine(start, end, offset, color, tracePlot);
+	tracePlot->addItem(line);
+	tickLabels.append(label);
+	o = offset;
+	p = inc / nrCPUs ;
+	for (cpu = 0; cpu < nrCPUs; cpu++) {
+		o += p;
+		label = QString("cpu") + QString::number(cpu);
+		ticks.append(o);
+		tickLabels.append(label);
+		line = new MigrationLine(start, end, o, color, tracePlot);
+		tracePlot->addItem(line);
+	}
+
+	offset += inc;
+	offset += p;
+
+	offset += schedSectionOffset;
 
 	/* Set the offset and scale of the scheduling graphs */
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
@@ -251,32 +278,6 @@ void MainWindow::computeLayout()
 		tickLabels.append(label);
 		offset += cpuHeight + cpuSpacing;
 	}
-
-	offset += migrateSectionOffset;
-	analyzer->setMigrationOffset(offset);
-	inc = offset * 0.15;
-	analyzer->setMigrationScale(inc);
-	
-	/* add labels and lines here for the migration graph */
-	color = QColor(135, 206, 250); /* Light sky blue */
-	label = QString("fork/exit");
-	ticks.append(offset);
-	line = new MigrationLine(start, end, offset, color, tracePlot);
-	tracePlot->addItem(line);
-	tickLabels.append(label);
-	o = offset;
-	p = inc / nrCPUs ;
-	for (cpu = 0; cpu < nrCPUs; cpu++) {
-		o += p;
-		label = QString("cpu") + QString::number(cpu);
-		ticks.append(o);
-		tickLabels.append(label);
-		line = new MigrationLine(start, end, o, color, tracePlot);
-		tracePlot->addItem(line);
-	}
-
-	offset += inc;
-	offset += p;
 
 	top = offset;
 }

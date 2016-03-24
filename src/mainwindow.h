@@ -122,16 +122,15 @@ private:
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;
 
-	const double graphSpacing = 100;
-	const double schedSectionSpace = 250;
+	const double schedSectionOffset = 100;
 	const double schedSpacing = 250;
 	const double schedHeight = 950;
 	const double cpuSectionOffset = 100;
 	const double cpuSpacing = 100;
 	const double cpuHeight = 800;
-	const double cpuIdleSkew = 0;
-	const double migrateHeight = 5000;
-	const double migrateSectionOffset = 100;
+	/* const double migrateHeight doesn't exist. The value used is the
+	 * dynamically calculated inc variable in MainWindow::computeLayout()*/
+	const double migrateSectionOffset = 250;
 
 	double bottom;
 	double top;
