@@ -37,6 +37,9 @@
 #define CLEAR_LEGEND_RESOURCE ":/traceshark/images/clearlegend30x30.png"
 #define FIND_WAKEUP_RESOURCE ":/traceshark/images/wakeup30x30.png"
 
+#define FIND_TOOLTIP \
+	"Find the wakeup of this task that precedes the active cursor"
+
 TaskInfo::TaskInfo(QWidget *parent):
 	QWidget(parent), taskGraph(NULL)
 {
@@ -52,13 +55,13 @@ TaskInfo::TaskInfo(QWidget *parent):
 	QPushButton *clearButton = new QPushButton(clearIcon, tr(""), this);
 	QPushButton *findButton = new QPushButton(findIcon, tr(""), this);
 
-	addButton->setToolTip(tr("Add to legend"));
+	addButton->setToolTip(tr("Add this task to the legend"));
 	addButton->setIconSize(addPM.size());
 
-	clearButton->setToolTip(tr("Clear the legend"));
+	clearButton->setToolTip(tr("Remove all tasks from the legend"));
 	clearButton->setIconSize(clearPM.size());
 
-	findButton->setToolTip(tr("Find previous wakeup"));
+	findButton->setToolTip(tr(FIND_TOOLTIP));
 	findButton->setIconSize(findPM.size());
 
 	nameLine = new QLineEdit(this);
