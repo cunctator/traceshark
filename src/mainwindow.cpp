@@ -260,7 +260,7 @@ void MainWindow::computeLayout()
 	for (cpu = 0; cpu < nrCPUs; cpu++) {
 		analyzer->setSchedOffset(cpu, offset);
 		analyzer->setSchedScale(cpu, schedHeight);
-		label = QString("sched") + QString::number(cpu);
+		label = QString("cpu") + QString::number(cpu);
 		ticks.append(offset);
 		tickLabels.append(label);
 		offset += schedHeight + schedSpacing;
