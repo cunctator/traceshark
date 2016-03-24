@@ -18,16 +18,22 @@
 
 #include "cursorinfo.h"
 #include "traceshark.h"
+#include <QIcon>
 #include <QHBoxLayout>
+#include <QPixmap>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QString>
 #include <cmath>
 
+#define RED_CURSOR_RESOURCE ":/traceshark/images/movered30x30.png"
+#define BLUE_CURSOR_RESOURCE ":/traceshark/images/moveblue30x30.png"
+
 CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QWidget(parent), id(nr)
 {
 	QString text;
+	QString qresource;
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	line = new QLineEdit(this);
 	QPushButton *button;
@@ -37,10 +43,12 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 
 	switch (nr) {
 	case TShark::RED_CURSOR:
-		text = QString(tr("Move Red"));
+		text = QString(tr("Move Red Cursor"));
+		qresource = QLatin1String(RED_CURSOR_RESOURCE);
 		break;
 	case TShark::BLUE_CURSOR:
-		text = QString(tr("Move Blue"));
+		text = QString(tr("Move Blue Cursor"));
+		qresource = QLatin1String(BLUE_CURSOR_RESOURCE);
 		break;
 	default:
 		text = QString(tr("error in cursorinfo.cpp"));
@@ -49,7 +57,12 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 
 	layout->addWidget(line);
 
-	button = new QPushButton(text, this);
+	QPixmap buttonPM(qresource);
+	QIcon buttonIcon(buttonPM);
+
+	button = new QPushButton(buttonIcon, tr(""), this);
+	button->setToolTip(text);
+	button->setIconSize(buttonPM.size());
 	layout->addWidget(button);
 
 	updateValue(0);
