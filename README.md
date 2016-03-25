@@ -1,8 +1,8 @@
 traceshark
 ==========
 
-This is an early version of a visualizer for Ftrace and Perf events that can
-be captured by the Linux kernel. It visualizes the following events:
+This is an early version of a graphical viewer for Ftrace and Perf events that
+can be captured by the Linux kernel. It visualizes the following events:
 cpu_frequency
 sched_migrate_task
 sched_process_exit
