@@ -152,13 +152,15 @@ void TraceAnalyzer::processSchedAddTail()
 		while (iter != cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
 			double d;
+			double lastTime;
 			iter++;
 			/* Check if tail is necessary */
-			if (task.timev[task.timev.size() - 1] >= getEndTime())
+			lastTime = task.schedTimev[task.schedTimev.size() - 1];
+			if (lastTime >= getEndTime())
 				continue;
-			d = task.data[task.data.size() - 1];
-			task.timev.append(getEndTime());
-			task.data.append(d);
+			d = task.schedData[task.schedData.size() - 1];
+			task.schedTimev.append(getEndTime());
+			task.schedData.append(d);
 		}
 	}
 }
@@ -191,11 +193,11 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 	if (epid != 0) {
 		cpuTask = &cpuTaskMaps[cpu][epid];
 		Q_ASSERT(!cpuTask->isNew);
-		Q_ASSERT(!cpuTask->timev.isEmpty());
-		prevtime = cpuTask->timev.last();
+		Q_ASSERT(!cpuTask->schedTimev.isEmpty());
+		prevtime = cpuTask->schedTimev.last();
 		faketime = prevtime + FAKE_DELTA;
-		cpuTask->timev.append(faketime);
-		cpuTask->data.append(FLOOR_HEIGHT);
+		cpuTask->schedTimev.append(faketime);
+		cpuTask->schedData.append(FLOOR_HEIGHT);
 		task = getTask(epid);
 		task->lastWakeUP = faketime;
 	}
@@ -207,8 +209,8 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		}
 		cpuTask->isNew = false;
 		faketime = oldtime - FAKE_DELTA;
-		cpuTask->timev.append(faketime);
-		cpuTask->data.append(SCHED_HEIGHT);
+		cpuTask->schedTimev.append(faketime);
+		cpuTask->schedData.append(SCHED_HEIGHT);
 	}
 }
 

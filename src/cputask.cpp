@@ -24,10 +24,10 @@
 
 bool CPUTask::doScale() {
 	int i;
-	int s = data.size();
-	scaledData.resize(s);
+	int s = schedData.size();
+	scaledSchedData.resize(s);
 	for (i = 0; i < s; i++)
-		scaledData[i] = data[i] * scale + offset;
+		scaledSchedData[i] = schedData[i] * scale + offset;
 	return false; /* No error */
 }
 

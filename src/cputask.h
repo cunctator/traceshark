@@ -27,9 +27,9 @@ class CPUTask {
 public:
 	CPUTask(): isNew(true), graph(NULL) {}
 	unsigned int pid; /* is really tid as all other pids here */
-	QVector<double> timev;
-	QVector<double> data;
-	QVector<double> scaledData;
+	QVector<double> schedTimev;
+	QVector<double> schedData;
+	QVector<double> scaledSchedData;
 	QVector<double> wakeTimev;
 	QVector<double> wakeDelay;
 	QVector<double> verticalDelay;

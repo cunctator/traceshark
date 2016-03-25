@@ -407,7 +407,7 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask)
 	tracePlot->addPlottable(graph);
 	graph->setLineStyle(QCPGraph::lsStepLeft);
 	graph->setAdaptiveSampling(true);
-	graph->setData(cpuTask.timev, cpuTask.scaledData);
+	graph->setData(cpuTask.schedTimev, cpuTask.scaledSchedData);
 	cpuTask.graph = graph; /* Save a pointer to the graph object in the task */
 }
 

@@ -383,8 +383,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		taskstate_t state = sched_switch_state(ttype, event);
 
 		/* Apparenly this task was on CPU when we started tracing */
-		cpuTask->timev.append(startTime);
-		cpuTask->data.append(SCHED_HEIGHT);
+		cpuTask->schedTimev.append(startTime);
+		cpuTask->schedData.append(SCHED_HEIGHT);
 
 		if (state == TASK_STATE_RUNNABLE) {
 			cpuTask->runningTimev.append(oldtime);
@@ -392,13 +392,13 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 			task->lastWakeUP = oldtime;
 		}
 
-		cpuTask->timev.append(oldtime);
-		cpuTask->data.append(FLOOR_HEIGHT);
+		cpuTask->schedTimev.append(oldtime);
+		cpuTask->schedData.append(FLOOR_HEIGHT);
 	} else {
 		taskstate_t state = sched_switch_state(ttype, event);
 
-		cpuTask->timev.append(oldtime);
-		cpuTask->data.append(FLOOR_HEIGHT);
+		cpuTask->schedTimev.append(oldtime);
+		cpuTask->schedData.append(FLOOR_HEIGHT);
 
 		if (state == TASK_STATE_RUNNABLE) {
 			cpuTask->runningTimev.append(oldtime);
@@ -429,20 +429,20 @@ skip:
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
 
-		cpuTask->timev.append(startTime);
-		cpuTask->data.append(FLOOR_HEIGHT);
+		cpuTask->schedTimev.append(startTime);
+		cpuTask->schedData.append(FLOOR_HEIGHT);
 
 		cpuTask->wakeTimev.append(newtime);
 		cpuTask->wakeDelay.append(delay);
 
-		cpuTask->timev.append(newtime);
-		cpuTask->data.append(SCHED_HEIGHT);
+		cpuTask->schedTimev.append(newtime);
+		cpuTask->schedData.append(SCHED_HEIGHT);
 	} else {
 		cpuTask->wakeTimev.append(newtime);
 		cpuTask->wakeDelay.append(delay);
 
-		cpuTask->timev.append(newtime);
-		cpuTask->data.append(SCHED_HEIGHT);
+		cpuTask->schedTimev.append(newtime);
+		cpuTask->schedData.append(SCHED_HEIGHT);
 	}
 out:
 	eventCPU->hasBeenScheduled = true;
