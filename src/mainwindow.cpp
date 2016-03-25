@@ -351,6 +351,7 @@ void MainWindow::showTrace()
 			addStillRunningGraph(task);
 		}
 	}
+	tracePlot->replot();
 }
 
 void MainWindow::setupCursors()
