@@ -153,9 +153,15 @@ void TraceAnalyzer::processSchedAddTail()
 			CPUTask &task = iter.value();
 			double d;
 			double lastTime;
+			int lastIndex = task.schedTimev.size() - 1;
 			iter++;
+			/* I think that this should not happen, there should
+			 * always be some data in a CPUTask at this point but
+			 * check anyway */
+			if (lastIndex < 0)
+				continue;
 			/* Check if tail is necessary */
-			lastTime = task.schedTimev[task.schedTimev.size() - 1];
+			lastTime = task.schedTimev[lastIndex];
 			if (lastTime >= getEndTime())
 				continue;
 			d = task.schedData[task.schedData.size() - 1];
