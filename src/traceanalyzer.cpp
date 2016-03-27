@@ -169,6 +169,20 @@ void TraceAnalyzer::processSchedAddTail()
 			task.schedData.append(d);
 		}
 	}
+
+	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.begin();
+	while (iter != taskMap.end()) {
+		Task &task = iter.value();
+		double d;
+		double lastTime;
+		iter++;
+		lastTime = task.schedTimev[task.schedTimev.size() - 1];
+		if (lastTime >= getEndTime() || task.exitStatus == STATUS_FINAL)
+			continue;
+		d = task.schedData[task.schedData.size() - 1];
+		task.schedTimev.append(getEndTime());
+		task.schedData.append(d);
+	}
 }
 
 void TraceAnalyzer::processFreqAddTail()
@@ -204,8 +218,11 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		faketime = prevtime + FAKE_DELTA;
 		cpuTask->schedTimev.append(faketime);
 		cpuTask->schedData.append(FLOOR_HEIGHT);
-		task = getTask(epid);
+		task = findTask(epid);
+		Q_ASSERT(task != nullptr);
 		task->lastWakeUP = faketime;
+		task->schedTimev.append(faketime);
+		task->schedData.append(FLOOR_HEIGHT);
 	}
 
 	if (oldpid != 0) {
@@ -217,6 +234,10 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		faketime = oldtime - FAKE_DELTA;
 		cpuTask->schedTimev.append(faketime);
 		cpuTask->schedData.append(SCHED_HEIGHT);
+		task = findTask(epid);
+		Q_ASSERT(task != nullptr);
+		task->schedTimev.append(faketime);
+		task->schedData.append(SCHED_HEIGHT);
 	}
 }
 

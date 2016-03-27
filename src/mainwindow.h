@@ -50,6 +50,7 @@ class QCustomPlot;
 class QCPAbstractLegendItem;
 class TracePlot;
 class TraceEvent;
+class TaskRangeAllocator;
 
 class MainWindow : public QMainWindow
 {
@@ -77,6 +78,8 @@ private slots:
 			      QMouseEvent *event);
 	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
 			       *abstractItem);
+	void addTaskGraph(unsigned int pid);
+	void removeTaskGraph(unsigned int pid);
 	void showWakeup(unsigned int pid);
 private:
 	void processTrace();
@@ -93,6 +96,7 @@ private:
 	void addStillRunningGraph(CPUTask &task);
 
 	TracePlot *tracePlot;
+	TaskRangeAllocator *taskRangeAllocator;
 	QCPLayer *cursorLayer;
 	QWidget *plotWidget;
 	QVBoxLayout *plotLayout;
@@ -122,6 +126,7 @@ private:
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;
 
+	const double bugWorkAroundOffset = 100;
 	const double schedSectionOffset = 100;
 	const double schedSpacing = 250;
 	const double schedHeight = 950;

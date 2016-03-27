@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 #include "migrationline.h"
 #include "taskgraph.h"
+#include "taskrangeallocator.h"
 #include "traceevent.h"
 #include "traceplot.h"
 #include "traceshark.h"
@@ -83,8 +84,12 @@ MainWindow::MainWindow():
 		  this, plotDoubleClicked(QMouseEvent*));
 	tsconnect(infoWidget, valueChanged(double, int),
 		  this, infoValueChanged(double, int));
+	tsconnect(infoWidget, addTaskGraph(unsigned int), this,
+		  addTaskGraph(unsigned int));
 	tsconnect(infoWidget, findWakeup(unsigned int), this,
 		  showWakeup(unsigned int));
+	tsconnect(infoWidget, removeTaskGraph(unsigned int), this,
+		  removeTaskGraph(unsigned int));
 	tsconnect(eventsWidget, timeSelected(double), this,
 		  moveActiveCursor(double));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
@@ -100,6 +105,9 @@ void MainWindow::createTracePlot()
 	QCPLayer *mainLayer;
 
 	tracePlot = new TracePlot(plotWidget);
+	taskRangeAllocator = new TaskRangeAllocator(schedHeight
+						    + schedSpacing);
+	taskRangeAllocator->setStart(bugWorkAroundOffset);
 
 	mainLayer = tracePlot->layer(mainLayerName);
 
@@ -124,6 +132,7 @@ MainWindow::~MainWindow()
 	closeTrace();
 	delete analyzer;
 	delete tracePlot;
+	delete taskRangeAllocator;
 	delete licenseDialog;
 	delete eventInfoDialog;
 }
@@ -223,7 +232,7 @@ void MainWindow::computeLayout()
 	start = analyzer->getStartTime();
 	end = analyzer->getEndTime();
 
-	bottom = 0;
+	bottom = bugWorkAroundOffset;
 
 	ticks.resize(0);
 	tickLabels.resize(0);
@@ -294,6 +303,7 @@ void MainWindow::clearPlot()
 	tracePlot->clearItems();
 	tracePlot->clearPlottables();
 	tracePlot->hide();
+	taskRangeAllocator->clearAll();
 	infoWidget->setTime(0, TShark::RED_CURSOR);
 	infoWidget->setTime(0, TShark::BLUE_CURSOR);
 }
@@ -398,12 +408,12 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask)
 	/* Add scheduling graph */
 	TaskGraph *graph = new TaskGraph(tracePlot->xAxis, tracePlot->yAxis);
 	QColor color = analyzer->getTaskColor(cpuTask.pid);
-	Task &task = *analyzer->getTask(cpuTask.pid);
+	Task *task = analyzer->findTask(cpuTask.pid);
 	QPen pen = QPen();
 
 	pen.setColor(color);
 	graph->setPen(pen);
-	graph->setTask(&task);
+	graph->setTask(task);
 	tracePlot->addPlottable(graph);
 	graph->setLineStyle(QCPGraph::lsStepLeft);
 	graph->setAdaptiveSampling(true);
@@ -779,6 +789,126 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	 * different LegendGraphs, there might be "identical" LegendGraphs
 	 * when the same pid has migrated between CPUs */
 	infoWidget->pidRemoved(legendGraph->pid);
+}
+
+void MainWindow::addTaskGraph(unsigned int pid)
+{
+	/* Add a unified scheduling graph for pid */
+	bool isNew;
+	TaskRange *taskRange;
+	TaskGraph *taskGraph;
+	unsigned int cpu;
+	CPUTask *cpuTask;
+
+	taskRange = taskRangeAllocator->getTaskRange(pid, isNew);
+
+	if (!isNew || taskRange == nullptr)
+		return;
+
+	Task *task = analyzer->findTask(pid);
+	QColor color = analyzer->getTaskColor(pid);
+
+	if (task == nullptr) {
+		taskRangeAllocator->putTaskRange(taskRange);
+		return;
+	}
+
+	for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
+		cpuTask = analyzer->findCPUTask(pid, cpu);
+		if (cpuTask != nullptr)
+			break;
+	}
+	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
+		taskRangeAllocator->putTaskRange(taskRange);
+		return;
+	}
+
+	bottom = taskRangeAllocator->getBottom();
+
+	taskGraph = new TaskGraph(tracePlot->xAxis, tracePlot->yAxis);
+	taskGraph->setTaskGraphForLegend(cpuTask->graph);
+	QPen pen = QPen();
+
+	pen.setColor(color);
+	taskGraph->setPen(pen);
+	taskGraph->setTask(task);
+	tracePlot->addPlottable(taskGraph);
+	taskGraph->setLineStyle(QCPGraph::lsStepLeft);
+	taskGraph->setAdaptiveSampling(true);
+
+	task->offset = taskRange->lower;
+	task->scale = schedHeight;
+	task->doScale();
+	task->doScaleWakeup();
+	task->doScaleRunning();
+
+	taskGraph->setData(task->schedTimev, task->scaledSchedData);
+	task->graph = taskGraph;
+
+	/* Add the horizontal wakeup graph as well */
+	QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
+	tracePlot->addPlottable(graph);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
+	style.setPen(pen);
+	graph->setScatterStyle(style);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setDataKeyError(task->wakeTimev, task->wakeHeight,
+			       task->wakeDelay, task->wakeZero);
+	graph->setErrorType(QCPGraph::etKey);
+	graph->setErrorBarSize(4);
+	graph->setErrorPen(pen);
+	task->wakeUpGraph = graph;
+
+	/* Add the still running graph on top of the other two... */
+	QString name = QString(tr("is runnable"));
+	QCPScatterStyle rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+	if (task->runningTimev.size() == 0) {
+		task->runningGraph = nullptr;
+		goto out;
+	}
+	graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
+	graph->setName(name);
+	tracePlot->addPlottable(graph);
+
+	pen.setColor(Qt::red);
+	rstyle.setPen(pen);
+	graph->setScatterStyle(rstyle);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setData(task->runningTimev, task->scaledRunningData);
+	task->runningGraph = graph;
+out:
+	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+	tracePlot->replot();
+}
+
+void MainWindow::removeTaskGraph(unsigned int pid)
+{
+	Task *task = analyzer->findTask(pid);
+
+	if (task == nullptr)
+		return;
+
+	if (task->graph != nullptr) {
+		tracePlot->removePlottable(task->graph);
+		task->graph = nullptr;
+	}
+
+	if (task->wakeUpGraph != nullptr) {
+		tracePlot->removePlottable(task->wakeUpGraph);
+		task->wakeUpGraph = nullptr;
+	}
+
+	if (task->runningGraph != nullptr) {
+		tracePlot->removePlottable(task->runningGraph);
+		task->runningGraph = nullptr;
+	}
+
+	taskRangeAllocator->putTaskRange(pid);
+	bottom = taskRangeAllocator->getBottom();
+	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+	tracePlot->replot();
 }
 
 void MainWindow::showWakeup(unsigned int pid)

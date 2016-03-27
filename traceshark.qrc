@@ -3,8 +3,10 @@
   <file>images/shark.png</file>
   <file>images/addtolegend30x30.png</file>
   <file>images/clearlegend30x30.png</file>
+  <file>images/addtask30x30.png</file>
   <file>images/moveblue30x30.png</file>
   <file>images/movered30x30.png</file>
+  <file>images/removetask30x30.png</file>
   <file>images/wakeup30x30.png</file>
   <file>LICENSE</file>
 </qresource>

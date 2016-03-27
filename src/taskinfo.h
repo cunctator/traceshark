@@ -42,10 +42,14 @@ public:
 	void pidRemoved(unsigned int pid);
 signals:
 	void findWakeup(unsigned int pid);
+	void addTaskGraph(unsigned int pid);
+	void removeTaskGraph(unsigned int pid);
 private slots:
-	void addClicked();
+	void addTaskGraphClicked();
+	void addToLegendClicked();
 	void clearClicked();
 	void findClicked();
+	void removeTaskGraphClicked();
 private:
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;

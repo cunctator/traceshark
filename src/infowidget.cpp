@@ -71,6 +71,10 @@ InfoWidget::InfoWidget(QWidget *parent):
 		   valueChanged(double, int));
 	sigconnect(taskInfo, findWakeup(unsigned int), this,
 		   findWakeup(unsigned int));
+	sigconnect(taskInfo, addTaskGraph(unsigned int), this,
+		   addTaskGraph(unsigned int));
+	sigconnect(taskInfo, removeTaskGraph(unsigned int), this,
+		   removeTaskGraph(unsigned int));
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
 		  updateChange(double, int));
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,

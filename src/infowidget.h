@@ -44,6 +44,8 @@ public:
 signals:
 	void valueChanged(double value, int nr);
 	void findWakeup(unsigned int);
+	void addTaskGraph(unsigned int pid);
+	void removeTaskGraph(unsigned int pid);
 private slots:
 	void updateChange(double value, int nr);
 private:

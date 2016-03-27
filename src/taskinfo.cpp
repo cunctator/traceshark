@@ -34,35 +34,52 @@
 	QMap<unsigned int, TaskGraph*>::iterator name
 
 #define ADD_TO_LEGEND_RESOURCE ":/traceshark/images/addtolegend30x30.png"
+#define ADD_TASK_RESOURCE ":/traceshark/images/addtask30x30.png"
 #define CLEAR_LEGEND_RESOURCE ":/traceshark/images/clearlegend30x30.png"
 #define FIND_WAKEUP_RESOURCE ":/traceshark/images/wakeup30x30.png"
+#define REMOVE_TASK_RESOURCE ":/traceshark/images/removetask30x30.png"
 
 #define FIND_TOOLTIP \
 	"Find the wakeup of this task that precedes the active cursor"
+#define REMOVE_TASK_TOOLTIP \
+	"Remove the unified graph for this task"
 
 TaskInfo::TaskInfo(QWidget *parent):
 	QWidget(parent), taskGraph(NULL)
 {
 	QPixmap addPM(QLatin1String(ADD_TO_LEGEND_RESOURCE));
+	QPixmap addTaskPM(QLatin1String(ADD_TASK_RESOURCE));
 	QPixmap clearPM(QLatin1String(CLEAR_LEGEND_RESOURCE));
 	QPixmap findPM(QLatin1String(FIND_WAKEUP_RESOURCE));
+	QPixmap removeTaskPM(QLatin1String(REMOVE_TASK_RESOURCE));
 	QIcon findIcon(findPM);
 	QIcon addIcon(addPM);
+	QIcon addTaskIcon(addTaskPM);
 	QIcon clearIcon(clearPM);
+	QIcon removeTaskIcon(removeTaskPM);
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	QLabel *colonLabel = new QLabel(tr(":"));
 	QPushButton *addButton = new QPushButton(addIcon, tr(""), this);
+	QPushButton *addTaskButton = new QPushButton(addTaskIcon, tr(""), this);
 	QPushButton *clearButton = new QPushButton(clearIcon, tr(""), this);
 	QPushButton *findButton = new QPushButton(findIcon, tr(""), this);
+	QPushButton *removeTaskButton = new QPushButton(removeTaskIcon, tr(""),
+							this);
 
 	addButton->setToolTip(tr("Add this task to the legend"));
 	addButton->setIconSize(addPM.size());
+
+	addTaskButton->setToolTip(tr("Add a unified graph for this task"));
+	addTaskButton->setIconSize(addTaskPM.size());
 
 	clearButton->setToolTip(tr("Remove all tasks from the legend"));
 	clearButton->setIconSize(clearPM.size());
 
 	findButton->setToolTip(tr(FIND_TOOLTIP));
 	findButton->setIconSize(findPM.size());
+
+	removeTaskButton->setToolTip(tr(REMOVE_TASK_TOOLTIP));
+	removeTaskButton->setIconSize(removeTaskPM.size());
 
 	nameLine = new QLineEdit(this);
 	pidLine = new QLineEdit(this);
@@ -76,9 +93,13 @@ TaskInfo::TaskInfo(QWidget *parent):
 	layout->addWidget(addButton);
 	layout->addWidget(clearButton);
 	layout->addWidget(findButton);
+	layout->addWidget(addTaskButton);
+	layout->addWidget(removeTaskButton);
 	layout->addStretch();
 
-	tsconnect(addButton, clicked(), this, addClicked());
+	tsconnect(addButton, clicked(), this, addToLegendClicked());
+	tsconnect(addTaskButton, clicked(), this, addTaskGraphClicked());
+	tsconnect(removeTaskButton, clicked(), this, removeTaskGraphClicked());
 	tsconnect(clearButton, clicked(), this, clearClicked());
 	tsconnect(findButton, clicked(), this, findClicked());
 }
@@ -90,6 +111,7 @@ TaskInfo::~TaskInfo()
 
 void TaskInfo::setTaskGraph(TaskGraph *graph)
 {
+	TaskGraph *legendGraph;
 	Task *task = graph->getTask();
 	if (task == NULL)
 		return;
@@ -97,7 +119,14 @@ void TaskInfo::setTaskGraph(TaskGraph *graph)
 	QString pidStr = QString::number(task->pid);
 	nameLine->setText(nameStr);
 	pidLine->setText(pidStr);
-	taskGraph = graph;
+	/* taskGraph will be used for displaying the legend in case the user
+	 * pushes that button. For that reason we will check if this TaskGraph
+	 * has a pointer to another TaskGraph that is to be used for legend
+	 * displaying purposes. In practice this happens when a unfied TaskGraph
+	 * is set here, because that one might get deleted by user action, it
+	 * instead has a pointer to a per CPU TaskGraph */
+	legendGraph = graph->getTaskGraphForLegend();
+	taskGraph = legendGraph != nullptr ? legendGraph : graph;
 }
 
 void TaskInfo::removeTaskGraph()
@@ -113,7 +142,7 @@ void TaskInfo::clear()
 	legendPidMap.clear();
 }
 
-void TaskInfo::addClicked()
+void TaskInfo::addToLegendClicked()
 {
 	QObject *obj;
 	QCustomPlot *plot;
@@ -174,6 +203,34 @@ void TaskInfo::findClicked()
 		return;
 
 	emit findWakeup(task->pid);
+}
+
+void TaskInfo::addTaskGraphClicked()
+{
+	Task *task;
+
+	if (taskGraph == NULL)
+		return;
+
+	task = taskGraph->getTask();
+	if (task == NULL)
+		return;
+
+	emit addTaskGraph(task->pid);
+}
+
+void TaskInfo::removeTaskGraphClicked()
+{
+	Task *task;
+
+	if (taskGraph == NULL)
+		return;
+
+	task = taskGraph->getTask();
+	if (task == NULL)
+		return;
+
+	emit removeTaskGraph(task->pid);
 }
 
 void TaskInfo::checkGraphSelection()

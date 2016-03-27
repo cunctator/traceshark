@@ -21,11 +21,11 @@
 
 #include <QVector>
 
-class QCPGraph;
+class TaskGraph;
 
 class CPUTask {
 public:
-	CPUTask(): isNew(true), graph(NULL) {}
+	CPUTask(): isNew(true), graph(nullptr) {}
 	unsigned int pid; /* is really tid as all other pids here */
 	QVector<double> schedTimev;
 	QVector<double> schedData;
@@ -41,7 +41,7 @@ public:
 	bool isNew; /* Only used during extraction */
 	double offset;
 	double scale;
-	QCPGraph *graph;
+	TaskGraph *graph;
 	bool doScale();
 	bool doScaleWakeup();
 	bool doScaleRunning();

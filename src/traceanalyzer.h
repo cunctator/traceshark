@@ -82,7 +82,8 @@ public:
 	__always_inline double getEndTime();
 	__always_inline int getMinIdleState();
 	__always_inline int getMaxIdleState();
-	__always_inline Task *getTask(unsigned int pid);
+	__always_inline CPUTask *findCPUTask(unsigned int pid,
+					     unsigned int cpu);
 	__always_inline QColor getTaskColor(unsigned int pid);
 	__always_inline tracetype_t getTraceType();
 	void setSchedOffset(unsigned int cpu, double offset);
@@ -266,15 +267,13 @@ __always_inline QColor TraceAnalyzer::getTaskColor(unsigned int pid)
 	return taskColor.toQColor();
 }
 
-
-__always_inline Task *TraceAnalyzer::getTask(unsigned int pid)
+__always_inline CPUTask *TraceAnalyzer::findCPUTask(unsigned int pid,
+						 unsigned int cpu)
 {
-	Task *task = &taskMap[pid]; /* Modifiable reference */ ;
-	if (task->isNew) { /* true means task is newly constructed above */
-		task->pid = pid;
-		task->isNew = false;
-	}
-	return task;
+	if (cpuTaskMaps[cpu].contains(pid))
+		return &cpuTaskMaps[cpu][pid];
+	else
+		return nullptr;
 }
 
 __always_inline tracetype_t TraceAnalyzer::getTraceType()
@@ -286,7 +285,7 @@ __always_inline Task *TraceAnalyzer::findTask(unsigned int pid)
 {
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.find(pid);
 	if (iter == taskMap.end())
-		return NULL;
+		return nullptr;
 	else
 		return &iter.value();
 }
@@ -333,6 +332,12 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 	m.newcpu = -1;
 	m.time = event.time;
 	migrations.append(m);
+
+	/* I think we don't need to handle isNew here, although it could happen
+	 * that we have a new task here, that case will be handled automagically
+	 * by the processing of the sched_switch events */
+	Task *task = &taskMap[m.pid];
+	task->exitStatus = STATUS_EXITCALLED;
 }
 
 __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
@@ -347,14 +352,19 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	Task *task;
 	double delay;
 	CPU *eventCPU = &CPUs[cpu];
+	taskstate_t state;
 
 	if (!isValidCPU(cpu))
 		return;
 
 	/* This is done to update the names of existing tasks */
-	task = &taskMap[event.pid];
-	if (!task->isNew)
-		task->checkName(event.taskName->ptr);
+	if (event.pid != 0) {
+		task = &taskMap[event.pid];
+		if (!task->isNew)
+			task->checkName(event.taskName->ptr);
+		else
+			task->pid = event.pid;
+	}
 
 	if (eventCPU->pidOnCPU != oldpid) {
 		if (eventCPU->hasBeenScheduled)
@@ -370,41 +380,47 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 	/* Handle the outgoing task */
 	cpuTask = &cpuTaskMaps[cpu][oldpid]; /* Modifiable reference */
-	task = &taskMap[oldpid];
-	if (task->isNew) {
+	task = &taskMap[oldpid];             /* Modifiable reference */
+	state = sched_switch_state(ttype, event);
+
+	/* First handle the global task */
+	if (task->isNew) { /* true means task is newly constructed above */
 		task->pid = oldpid;
 		task->isNew = false;
 		task->checkName(sched_switch_oldname_strdup(ttype, event,
 							    taskNamePool));
+
+		/* Apparently this task was running when we started tracing */
+		task->schedTimev.append(startTime);
+		task->schedData.append(SCHED_HEIGHT);
+
+		task->schedTimev.append(oldtime);
+		task->schedData.append(FLOOR_HEIGHT);
 	}
+	if (task->exitStatus == STATUS_EXITCALLED)
+		task->exitStatus = STATUS_FINAL;
+	task->schedTimev.append(oldtime);
+	task->schedData.append(FLOOR_HEIGHT);
+	if (state == TASK_STATE_RUNNABLE) {
+		task->runningTimev.append(oldtime);
+		task->runningData.append(FLOOR_HEIGHT);
+		task->lastWakeUP = oldtime;
+	}
+
+	/* ... then handle the per CPU task */
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
-		taskstate_t state = sched_switch_state(ttype, event);
 
-		/* Apparenly this task was on CPU when we started tracing */
+		/* Apparently this task was on CPU when we started tracing */
 		cpuTask->schedTimev.append(startTime);
 		cpuTask->schedData.append(SCHED_HEIGHT);
-
-		if (state == TASK_STATE_RUNNABLE) {
-			cpuTask->runningTimev.append(oldtime);
-			cpuTask->runningData.append(FLOOR_HEIGHT);
-			task->lastWakeUP = oldtime;
-		}
-
-		cpuTask->schedTimev.append(oldtime);
-		cpuTask->schedData.append(FLOOR_HEIGHT);
-	} else {
-		taskstate_t state = sched_switch_state(ttype, event);
-
-		cpuTask->schedTimev.append(oldtime);
-		cpuTask->schedData.append(FLOOR_HEIGHT);
-
-		if (state == TASK_STATE_RUNNABLE) {
-			cpuTask->runningTimev.append(oldtime);
-			cpuTask->runningData.append(FLOOR_HEIGHT);
-			task->lastWakeUP = oldtime;
-		}
+	}
+	cpuTask->schedTimev.append(oldtime);
+	cpuTask->schedData.append(FLOOR_HEIGHT);
+	if (state == TASK_STATE_RUNNABLE) {
+		cpuTask->runningTimev.append(oldtime);
+		cpuTask->runningData.append(FLOOR_HEIGHT);
 	}
 
 skip:
@@ -421,8 +437,17 @@ skip:
 		task->checkName(sched_switch_newname_strdup(ttype, event,
 							    taskNamePool));
 		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
+
+		task->schedTimev.append(startTime);
+		task->schedData.append(FLOOR_HEIGHT);
 	} else
 		delay = estimateWakeUp(task, eventCPU, newtime, startTime);
+
+	task->wakeTimev.append(newtime);
+	task->wakeDelay.append(delay);
+
+	task->schedTimev.append(newtime);
+	task->schedData.append(SCHED_HEIGHT);
 
 	cpuTask = &cpuTaskMaps[cpu][newpid]; /* Modifiable reference */
 	if (cpuTask->isNew) { /* true means task is newly constructed above */
@@ -431,19 +456,14 @@ skip:
 
 		cpuTask->schedTimev.append(startTime);
 		cpuTask->schedData.append(FLOOR_HEIGHT);
-
-		cpuTask->wakeTimev.append(newtime);
-		cpuTask->wakeDelay.append(delay);
-
-		cpuTask->schedTimev.append(newtime);
-		cpuTask->schedData.append(SCHED_HEIGHT);
-	} else {
-		cpuTask->wakeTimev.append(newtime);
-		cpuTask->wakeDelay.append(delay);
-
-		cpuTask->schedTimev.append(newtime);
-		cpuTask->schedData.append(SCHED_HEIGHT);
 	}
+
+	cpuTask->wakeTimev.append(newtime);
+	cpuTask->wakeDelay.append(delay);
+
+	cpuTask->schedTimev.append(newtime);
+	cpuTask->schedData.append(SCHED_HEIGHT);
+
 out:
 	eventCPU->hasBeenScheduled = true;
 	eventCPU->pidOnCPU = newpid;
@@ -474,6 +494,8 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 		char *name = sched_wakeup_name_strdup(ttype, event,
 						      taskNamePool);
 		task->checkName(name);
+		task->schedTimev.append(time);
+		task->schedData.append(FLOOR_HEIGHT);
 	}
 }
 
