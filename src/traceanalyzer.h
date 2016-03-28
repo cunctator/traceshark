@@ -320,6 +320,15 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 	m.newcpu = event.cpu;
 	m.time = event.time;
 	migrations.append(m);
+
+	Task *task = &taskMap[m.pid];
+	if (task->isNew) {
+		/* This should be very likely for task that just forked !*/
+		task->isNew = false;
+		task->pid = m.pid;
+		task->schedTimev.append(event.time);
+		task->schedData.append(FLOOR_HEIGHT);
+	}
 }
 
 __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
@@ -333,10 +342,9 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 	m.time = event.time;
 	migrations.append(m);
 
-	/* I think we don't need to handle isNew here, although it could happen
-	 * that we have a new task here, that case will be handled automagically
-	 * by the processing of the sched_switch events */
 	Task *task = &taskMap[m.pid];
+	if (task->isNew)
+		task->pid = m.pid;
 	task->exitStatus = STATUS_EXITCALLED;
 }
 
@@ -494,7 +502,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 		char *name = sched_wakeup_name_strdup(ttype, event,
 						      taskNamePool);
 		task->checkName(name);
-		task->schedTimev.append(time);
+		task->schedTimev.append(startTime);
 		task->schedData.append(FLOOR_HEIGHT);
 	}
 }
