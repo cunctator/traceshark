@@ -165,13 +165,13 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i == 0)
-		return NULL;
+		return nullptr;
 	beginidx = 1;
 	endidx = i - 4;
 
 	retstr = taskname_prealloc(pool);
-	if (retstr == NULL)
-		return NULL;
+	if (retstr == nullptr)
+		return nullptr;
 	c = retstr;
 
 	/* This will copy the first part of the name, that is the portion
@@ -179,17 +179,17 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 	first = event.argv[0];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	merge_args_into_cstring(event, beginidx, endidx, c, len,
 				TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool);
@@ -208,14 +208,14 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i == 0)
-		return NULL;
+		return nullptr;
 	beginidx = i + 2;
 	endidx = event.argc - 3;
 
 	/* + 1 needed for null termination */
 	retstr = taskname_prealloc(pool);
-	if (retstr == NULL)
-		return NULL;
+	if (retstr == nullptr)
+		return nullptr;
 	c = retstr;
 
 	/* This will copy the first part of the name, that is the portion
@@ -223,17 +223,17 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 	first = event.argv[i + 1];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	merge_args_into_cstring(event, beginidx, endidx, c, len,
 				TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool);
@@ -333,13 +333,13 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 			break;
 	}
 	if (!(i <= event.argc - 2))
-		return NULL;
+		return nullptr;
 	beginidx = 1;
 	endidx = i - 1;
 
 	retstr = taskname_prealloc(pool);
-	if (retstr == NULL)
-		return NULL;
+	if (retstr == nullptr)
+		return nullptr;
 	c = retstr;
 
 	/* This will copy the first part of the name, that is the portion
@@ -347,17 +347,17 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 	first = event.argv[0];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	merge_args_into_cstring(event, beginidx, endidx, c, len,
 				TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool);
@@ -403,12 +403,12 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 			break;
 	}
 	if (i > endidx)
-		return NULL;
+		return nullptr;
 	beginidx = i + 1;
 
 	retstr = taskname_prealloc(pool);
-	if (retstr == NULL)
-		return NULL;
+	if (retstr == nullptr)
+		return nullptr;
 	c = retstr;
 	
 	/* This will copy the first part of the name, that is the portion
@@ -416,17 +416,17 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	first = event.argv[i];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	merge_args_into_cstring(event, beginidx, endidx, c, len,
 				TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return NULL;
+		return nullptr;
 
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,

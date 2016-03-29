@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ MemPool::MemPool(unsigned int nr_pages, unsigned long objsize)
 {
 	poolSize = nr_pages * sysconf(_SC_PAGESIZE);
 	objSize = objsize;
-	next = NULL;
-	memory = NULL;
+	next = nullptr;
+	memory = nullptr;
 	if (!newMap()) {
 		used = 0;
 		poolSize = 0;
@@ -45,7 +45,7 @@ MemPool::~MemPool()
 	for (i = 0; i < len; i++) {
 		munmap(exhaustList[i], poolSize);
 	}
-	if (memory != NULL)
+	if (memory != nullptr)
 		munmap(memory, poolSize);
 }
 

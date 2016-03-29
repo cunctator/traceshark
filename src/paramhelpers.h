@@ -172,14 +172,14 @@ static __always_inline const char *substr_after_char(const char *str,
 		if (*str == c) {
 			i++;
 			if (i == len)
-				return NULL;
+				return nullptr;
 			str++;
 			*sublen = len - i;
 			return str;
 		}
 		str++;
 	}
-	return NULL;
+	return nullptr;
 }
 
 #endif /* PARAMHELPERS_H */

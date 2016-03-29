@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ bool PerfEventNode::match(TString *str, TraceEvent *event)
 	newstr = eventTree->searchAllocString(&tmpstr,
 					      TShark::StrHash32(&tmpstr),
 					      &type, EVENT_UNKNOWN);
-	if (newstr == NULL)
+	if (newstr == nullptr)
 		return false;
 	event->eventName = newstr;
 	event->type = type;

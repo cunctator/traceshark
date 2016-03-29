@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ bool ArgNode::match(TString *str, TraceEvent *event)
 	TString *newstr;
 	if (event->argc < 255) {
 		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
-		if (newstr == NULL)
+		if (newstr == nullptr)
 			return false;
 		event->argv[event->argc] = newstr;
 		event->argc++;

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ void EventInfoDialog::updateSize()
 void EventInfoDialog::show(const TraceEvent &event)
 {
 	QByteArray array;
-	if (event.postEventInfo != NULL && event.postEventInfo->len > 0)
+	if (event.postEventInfo != nullptr && event.postEventInfo->len > 0)
 		array = QByteArray(event.postEventInfo->ptr,
 				   event.postEventInfo->len);
 	else

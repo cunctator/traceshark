@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 	StringTreeEntry **aentry;
 	StringTreeEntry **rootptr;
 	StringTreeEntry *entry;
-	StringTreeEntry *parent = NULL;
+	StringTreeEntry *parent = nullptr;
 	StringTreeEntry *sibling;
 	StringTreeEntry *grandParent;
 	StringTreeEntry *smallChild;
@@ -91,7 +91,7 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 	rootptr = aentry;
 	entry = *aentry;
 
-	while (entry != NULL) {
+	while (entry != nullptr) {
 		/* Using strncmp here would lose performance and we know that
 		 * the strings are null terminated */
 		cmp = strcmp(str->ptr, entry->str->ptr);
@@ -111,16 +111,16 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 	}
 
 	newstr = (TString*) strPool->allocObj();
-	if (newstr == NULL)
-		return NULL;
+	if (newstr == nullptr)
+		return nullptr;
 	newstr->len = str->len;
 	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
-	if (newstr->ptr == NULL)
-		return NULL;
+	if (newstr->ptr == nullptr)
+		return nullptr;
 	strncpy(newstr->ptr, str->ptr, str->len + 1);
 	entry = (StringTreeEntry*) entryPool->allocObj();
-	if (entry == NULL)
-		return NULL;
+	if (entry == nullptr)
+		return nullptr;
 	bzero(entry, sizeof(StringTreeEntry));
 	entry->str = newstr;
 	entry->eventType = newval;
@@ -128,17 +128,17 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 
 	entry->parent = parent;
 	entry->height = 0;
-	if (parent == NULL)
+	if (parent == nullptr)
 		return newstr; /* Ok, this is the root node */
 	if (parent->height > 0)
 		return newstr; /* parent already has another node */
 	parent->height = 1;
 	grandParent = parent->parent;
 	/* update heights and find offending node */
-	while(grandParent != NULL) {
-		smallH = grandParent->small == NULL ?
+	while(grandParent != nullptr) {
+		smallH = grandParent->small == nullptr ?
 			-1 : grandParent->small->height;
-		largeH = grandParent->large == NULL ?
+		largeH = grandParent->large == nullptr ?
 			-1 : grandParent->large->height;
 		diff = smallH - largeH;
 		if (diff == 0)
@@ -164,7 +164,7 @@ rebalanceSmall:
 		grandParent->parent = parent;
 		grandParent->small = sibling;
 		grandParent->height--;
-		if (sibling != NULL)
+		if (sibling != nullptr)
 			sibling->parent = grandParent;
 	} else {
 		/* Case 2 */
@@ -184,9 +184,9 @@ rebalanceSmall:
 		parent->large = smallChild;
 		parent->setHeightFromChildren();
 
-		if (largeChild != NULL)
+		if (largeChild != nullptr)
 			largeChild->parent = grandParent;
-		if (smallChild != NULL)
+		if (smallChild != nullptr)
 			smallChild->parent = parent;
 	}
 	return newstr;
@@ -210,9 +210,9 @@ rebalanceLarge:
 		parent->small = largeChild;
 		parent->setHeightFromChildren();
 
-		if (largeChild != NULL)
+		if (largeChild != nullptr)
 			largeChild->parent = parent;
-		if (smallChild != NULL)
+		if (smallChild != nullptr)
 			smallChild->parent = grandParent;
 	} else {
 		/* Case 4 */
@@ -223,7 +223,7 @@ rebalanceLarge:
 		grandParent->parent = parent;
 		grandParent->large = sibling;
 		grandParent->height--;
-		if (sibling != NULL)
+		if (sibling != nullptr)
 			sibling->parent = grandParent;
 	}
 	return newstr;
@@ -250,7 +250,7 @@ __always_inline void StringTreeEntry::stealParent(StringTreeEntry *newChild,
 						  StringTreeEntry **rootptr)
 {
 	newChild->parent = parent;
-	if (parent == NULL) {
+	if (parent == nullptr) {
 		/* Oops this is a root node */
 		*rootptr = newChild;
 		return;
@@ -266,8 +266,8 @@ __always_inline void StringTreeEntry::setHeightFromChildren()
 	int lh;
 	int rh;
 
-	lh = (small != NULL) ? (small->height) : -1;
-	rh = (large != NULL) ? (large->height) : -1;
+	lh = (small != nullptr) ? (small->height) : -1;
+	rh = (large != nullptr) ? (large->height) : -1;
 	height = TSMAX(lh, rh) + 1;
 }
 

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -68,10 +68,10 @@ __always_inline void* MemPool::allocObj()
 		}
 		used -= objSize;
 		if (used == 0 || !addMemory())
-			return NULL;
+			return nullptr;
 		retries++;
 	} while(retries < 2);
-	return NULL;
+	return nullptr;
 }
 
 __always_inline void* MemPool::allocN(unsigned long n)
@@ -89,10 +89,10 @@ __always_inline void* MemPool::allocN(unsigned long n)
 		}
 		used -= chunk;
 		if (used == 0 || !addMemory())
-			return NULL;
+			return nullptr;
 		retries++;
 	} while(retries < 2);
-	return NULL;
+	return nullptr;
 }
 
 __always_inline void* MemPool::preallocN(unsigned long n)
@@ -105,13 +105,13 @@ __always_inline void* MemPool::preallocN(unsigned long n)
 		if (maxused < poolSize)
 			return next;
 		if (used == 0)
-			return NULL;
+			return nullptr;
 		if (!addMemory())
-			return NULL;
+			return nullptr;
 		maxused = chunk; /* used will be 0 here */
 		retries++;
 	} while(retries < 2);
-	return NULL;
+	return nullptr;
 }
 
 __always_inline bool MemPool::commitN(unsigned long n)
@@ -120,7 +120,7 @@ __always_inline bool MemPool::commitN(unsigned long n)
 
 	used += chunk;
 	if (used >= poolSize) {
-		next = NULL;
+		next = nullptr;
 		return false;
 	}
 	next += chunk;
@@ -141,10 +141,10 @@ __always_inline void* MemPool::allocBytes(unsigned int bytes)
 		}
 		used -= bytes;
 		if (used == 0 || !addMemory())
-			return NULL;
+			return nullptr;
 		retries++;
 	} while(retries < 2);
-	return NULL;
+	return nullptr;
 }
 
 __always_inline void* MemPool::allocChars(unsigned int chars)
@@ -161,20 +161,20 @@ __always_inline void* MemPool::preallocBytes(unsigned int bytes)
 		if (maxused < poolSize)
 			return next;
 		if (used == 0)
-			return NULL;
+			return nullptr;
 		if (!addMemory())
-			return NULL;
+			return nullptr;
 		maxused = bytes; /* used will be 0 here */
 		retries++;
 	} while(retries < 2);
-	return NULL;
+	return nullptr;
 }
 
 __always_inline bool MemPool::commitBytes(unsigned int bytes)
 {
 	used += bytes;
 	if (used >= poolSize) {
-		next = NULL;
+		next = nullptr;
 		return false;
 	}
 	next += bytes;
@@ -194,7 +194,7 @@ __always_inline bool MemPool::commitChars(unsigned int chars)
 __always_inline bool MemPool::newMap()
 {
 	quint8 *ptr;
-	ptr = (quint8*) mmap(NULL, (size_t) poolSize, PROT_READ|PROT_WRITE,
+	ptr = (quint8*) mmap(nullptr, (size_t) poolSize, PROT_READ|PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (ptr != MAP_FAILED) {
 		memory = ptr;

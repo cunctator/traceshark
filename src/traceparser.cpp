@@ -36,7 +36,7 @@
 TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
 	: traceType(TRACE_TYPE_NONE)
 {
-	traceFile = NULL;
+	traceFile = nullptr;
 	ptrPool = new MemPool(16384, sizeof(TString*));
 	postEventPool = new MemPool(16384, sizeof(TString));
 
@@ -71,7 +71,7 @@ bool TraceParser::open(const QString &fileName)
 	bool ok = false;
 	unsigned int i;
 
-	if (traceFile != NULL)
+	if (traceFile != nullptr)
 		return ok;
 
 	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok,
@@ -79,7 +79,7 @@ bool TraceParser::open(const QString &fileName)
 
 	if (!ok) {
 		delete traceFile;
-		traceFile = NULL;
+		traceFile = nullptr;
 		return ok;
 	}
 
@@ -97,14 +97,14 @@ bool TraceParser::open(const QString &fileName)
 
 bool TraceParser::isOpen()
 {
-	return (traceFile != NULL);
+	return (traceFile != nullptr);
 }
 
 void TraceParser::close()
 {
-	if (traceFile != NULL) {
+	if (traceFile != nullptr) {
 		delete traceFile;
-		traceFile = NULL;
+		traceFile = nullptr;
 	}
 	ptrPool->reset();
 	perfGrammar->clearPools();
@@ -250,7 +250,7 @@ void TraceParser::fixLastEvent()
 		return;
 	TraceEvent &lastEvent = events->last();
 	if (prevLineIsEvent) {
-		lastEvent.postEventInfo = NULL;
+		lastEvent.postEventInfo = nullptr;
 	} else {
 		TString *str = (TString*) postEventPool->
 			allocObj();

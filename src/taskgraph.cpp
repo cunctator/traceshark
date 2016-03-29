@@ -21,7 +21,7 @@
 #include "task.h"
 
 TaskGraph::TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis):
-	QCPGraph(keyAxis, valueAxis), task(NULL), taskGraph(nullptr)
+	QCPGraph(keyAxis, valueAxis), task(nullptr), taskGraph(nullptr)
 {
 	legendGraph = new LegendGraph(keyAxis, valueAxis, this);
 }

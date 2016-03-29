@@ -63,7 +63,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	TString *newstr;
 	StringPoolEntry **aentry;
 	StringPoolEntry *entry;
-	StringPoolEntry *parent = NULL;
+	StringPoolEntry *parent = nullptr;
 	StringPoolEntry *grandParent;
 	StringPoolEntry *smallChild;
 	StringPoolEntry *largeChild;
@@ -83,7 +83,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	aentry = hashTable + hval;
 	entry = *aentry;
 
-	while(entry != NULL) {
+	while(entry != nullptr) {
 		cmp = TString::strcmp(str, entry->str);
 		if (cmp == 0)
 			return entry->str;
@@ -99,31 +99,31 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	}
 
 	newstr = allocUniqueString(str);
-	if (newstr == NULL)
+	if (newstr == nullptr)
 		return newstr;
 	if (cutoff != 0)
 		usageTable[hval]++;
 
 	entry = (StringPoolEntry*) entryPool->allocObj();
-	if (entry == NULL)
-		return NULL;
+	if (entry == nullptr)
+		return nullptr;
 	bzero(entry, sizeof(StringPoolEntry));
 	entry->str = newstr;
 	*aentry = entry; /* aentry is equal to &parent->[large|small] */
 
 	entry->parent = parent;
 	entry->height = 0;
-	if (parent == NULL)
+	if (parent == nullptr)
 		return newstr; /* Ok, this is the root node */
 	if (parent->height > 0)
 		return newstr; /* parent already has another node */
 	parent->height = 1;
 	grandParent = parent->parent;
 	/* update heights and find offending node */
-	while(grandParent != NULL) {
-		smallH = grandParent->small == NULL ?
+	while(grandParent != nullptr) {
+		smallH = grandParent->small == nullptr ?
 			-1 : grandParent->small->height;
-		largeH = grandParent->large == NULL ?
+		largeH = grandParent->large == nullptr ?
 			-1 : grandParent->large->height;
 		diff = smallH - largeH;
 		if (diff == 0)
@@ -149,7 +149,7 @@ rebalanceSmall:
 		parent->height--;
 
 		parent->large = grandParent->large;
-		if (parent->large != NULL)
+		if (parent->large != nullptr)
 			parent->large->parent = parent;
 
 		grandParent->large = parent;
@@ -159,19 +159,19 @@ rebalanceSmall:
 		smallChild = entry->small;
 		largeChild = entry->large;
 		gHeight = 0;
-		if (grandParent->large != NULL) {
+		if (grandParent->large != nullptr) {
 			gHeight = grandParent->large->height + 1;
 			grandParent->large->parent = entry;
 		}
 
 		parent->large = smallChild;
-		if (smallChild != NULL)
+		if (smallChild != nullptr)
 			smallChild->parent = parent;
 		parent->height = grandParent->height - 1;
 
 		entry->large = grandParent->large;
 		entry->small = largeChild;
-		if (largeChild != NULL)
+		if (largeChild != nullptr)
 			largeChild->parent = entry;
 
 		grandParent->large = entry;
@@ -188,19 +188,19 @@ rebalanceLarge:
 		smallChild = entry->small;
 		largeChild = entry->large;
 		gHeight = 0;
-		if (grandParent->small != NULL) {
+		if (grandParent->small != nullptr) {
 			gHeight = grandParent->small->height + 1;
 			grandParent->small->parent = entry;
 		}
 
 		parent->small = largeChild;
-		if (largeChild != NULL)
+		if (largeChild != nullptr)
 			largeChild->parent = parent;
 		parent->height = grandParent->height - 1;
 
 		entry->small = grandParent->small;
 		entry->large = smallChild;
-		if (smallChild != NULL)
+		if (smallChild != nullptr)
 			smallChild->parent = entry;
 
 		grandParent->small = entry;
@@ -217,7 +217,7 @@ rebalanceLarge:
 		parent->height--;
 
 		parent->small = grandParent->small;
-		if (parent->small != NULL)
+		if (parent->small != nullptr)
 			parent->small->parent = parent;
 
 		grandParent->small = parent;
@@ -231,12 +231,12 @@ __always_inline TString* StringPool::allocUniqueString(const TString *str)
 	TString *newstr;
 
 	newstr = (TString*) strPool->allocObj();
-	if (newstr == NULL)
-		return NULL;
+	if (newstr == nullptr)
+		return nullptr;
 	newstr->len = str->len;
 	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
-	if (newstr->ptr == NULL)
-		return NULL;
+	if (newstr->ptr == nullptr)
+		return nullptr;
 	strncpy(newstr->ptr, str->ptr, str->len + 1);
 	return newstr;
 }
@@ -254,8 +254,8 @@ __always_inline void StringPoolEntry::setHeightFromChildren()
 	int lh;
 	int rh;
 
-	lh = (small != NULL) ? (small->height) : -1;
-	rh = (large != NULL) ? (large->height) : -1;
+	lh = (small != nullptr) ? (small->height) : -1;
+	rh = (large != nullptr) ? (large->height) : -1;
 	height = TSMAX(lh, rh) + 1;
 }
 

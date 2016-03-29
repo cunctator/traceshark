@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ extern "C" {
 
 TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize, unsigned int
 		     nrPoolsMAX)
-	: mappedFile(NULL), fileSize(0), nrPools(nrPoolsMAX)
+	: mappedFile(nullptr), fileSize(0), nrPools(nrPoolsMAX)
 {
 	unsigned int i;
 	char *m;
@@ -50,11 +50,11 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize, unsigned int
 			ok = false;
 		else {
 			fileSize = sbuf.st_size;
-			mappedFile = (char*) mmap(NULL, fileSize, PROT_READ,
+			mappedFile = (char*) mmap(nullptr, fileSize, PROT_READ,
 						  MAP_PRIVATE, fd, 0);
 			if (mappedFile == MAP_FAILED) {
 				ok = false;
-				mappedFile = NULL;
+				mappedFile = nullptr;
 			}
 		}
 	}
@@ -101,6 +101,6 @@ TraceFile::~TraceFile()
 	for (i = 0; i < NR_BUFFERS; i++) {
 		delete buffers[i];
 	}
-	if (mappedFile != NULL)
+	if (mappedFile != nullptr)
 		munmap(mappedFile, fileSize);
 }

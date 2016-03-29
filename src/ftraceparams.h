@@ -124,7 +124,7 @@ static __always_inline char
 			break;
 	}
 	if (!(i < event.argc))
-		return NULL;
+		return nullptr;
 	endidx = i - 3;
 
 	/* + 1 needed for null termination */
@@ -138,7 +138,7 @@ static __always_inline char
 	for (i = 0; i < endidx; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return NULL;
+			return nullptr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		*c = ' ';
@@ -162,7 +162,7 @@ static __always_inline char
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)
-			return NULL;
+			return nullptr;
 		*c = *d;
 		c++;
 	}
@@ -172,7 +172,7 @@ static __always_inline char
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
@@ -198,7 +198,7 @@ static __always_inline char
 			break;
 	}
 	if (!(i < event.argc))
-		return NULL;
+		return nullptr;
 	startidx = i + 1;
 
 	/* + 1 needed for null termination */
@@ -212,7 +212,7 @@ static __always_inline char
 	for (i = startidx; i < endidx; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return NULL;
+			return nullptr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		*c = ' ';
@@ -236,7 +236,7 @@ static __always_inline char
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)
-			return NULL;
+			return nullptr;
 		*c = *d;
 		c++;
 	}
@@ -246,7 +246,7 @@ static __always_inline char
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
@@ -281,7 +281,7 @@ static __always_inline char
 	unsigned int len = 0;
 
 	if (event.argc < 4)
-		return NULL;
+		return nullptr;
 
 	endidx = event.argc - 4;
 
@@ -295,7 +295,7 @@ static __always_inline char
 	for(i = 0; i < event.argc - 4; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return NULL;
+			return nullptr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		*c = ' ';
@@ -319,7 +319,7 @@ static __always_inline char
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)
-			return NULL;
+			return nullptr;
 		*c = *d;
 		c++;
 	}
@@ -330,7 +330,7 @@ static __always_inline char
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool);
@@ -372,13 +372,13 @@ __ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 	unsigned int sublen;
 
 	if (event.argc < 4)
-		return NULL;
+		return nullptr;
 
 	for (i = 2; i <= endidx; i++) {
 		if (!strncmp(event.argv[i]->ptr, "child_comm=", 11))
 			goto found;
 	}
-	return NULL;
+	return nullptr;
 
 found:
 	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
@@ -387,15 +387,15 @@ found:
 
 	const char *d = substr_after_char(event.argv[i]->ptr,
 					  event.argv[i]->len, '=', &sublen);
-	if (d == NULL || sublen > TASKNAME_MAXLEN)
-		return NULL;
+	if (d == nullptr || sublen > TASKNAME_MAXLEN)
+		return nullptr;
 	strncpy(c, d, sublen);
 	i++;
 
 	for (;i <= endidx; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return NULL;
+			return nullptr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		if (i == endidx)
@@ -411,7 +411,7 @@ finalize:
 	/* commmit the allocation */
 	if (pool->commitChars(len))
 		return retstr;
-	return NULL;
+	return nullptr;
 }
 
 char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,

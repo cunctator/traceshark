@@ -181,7 +181,7 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
 		}
 		prevTime = event.time;
 		ptrPool->commitN(event.argc);
-		event.postEventInfo = NULL;
+		event.postEventInfo = nullptr;
 		events->commit();
 		nrFtraceEvents++;
 		/* probably not necessary because ftrace traces doesn't
@@ -206,7 +206,7 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine* line,
 		prevTime = event.time;
 		ptrPool->commitN(event.argc);
 		if (prevLineIsEvent) {
-			prevEvent->postEventInfo = NULL;
+			prevEvent->postEventInfo = nullptr;
 		} else {
 			TString *str = (TString*) postEventPool->
 				allocObj();

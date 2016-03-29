@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 
 EventsModel::EventsModel(QObject *parent):
-	QAbstractTableModel(parent), events(NULL)
+	QAbstractTableModel(parent), events(nullptr)
 {}
 
 EventsModel::EventsModel(TList<TraceEvent> *e, QObject *parent):
@@ -39,7 +39,7 @@ void EventsModel::setEvents(TList<TraceEvent> *e)
 
 int EventsModel::rowCount(const QModelIndex & /*parent*/) const
 {
-	if (events != NULL)
+	if (events != nullptr)
 		return events->size();
 	else 
 		return 0;
@@ -65,7 +65,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		int column = index.column();
 		int size = (int) TSMIN(INT_MAX, events->size());
 
-		if (events == NULL || row >= size || row < 0)
+		if (events == nullptr || row >= size || row < 0)
 			return QVariant();
 		TraceEvent &event = (*events)[row];
 		switch(column) {

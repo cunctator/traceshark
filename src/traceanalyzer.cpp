@@ -33,9 +33,9 @@
 #include "tlist.h"
 
 TraceAnalyzer::TraceAnalyzer()
-	: cpuTaskMaps(NULL), cpuFreq(NULL), cpuIdle(NULL),
+	: cpuTaskMaps(nullptr), cpuFreq(nullptr), cpuIdle(nullptr),
 	  black(0, 0, 0), white(255, 255, 255),
-	  CPUs(NULL)
+	  CPUs(nullptr)
 {
 	taskNamePool = new MemPool(16384, sizeof(char));
 	parser = new TraceParser(&events);
@@ -83,21 +83,21 @@ bool TraceAnalyzer::isOpen()
 
 void TraceAnalyzer::close()
 {
-	if (cpuTaskMaps != NULL) {
+	if (cpuTaskMaps != nullptr) {
 		delete[] cpuTaskMaps;
-		cpuTaskMaps = NULL;
+		cpuTaskMaps = nullptr;
 	}
-	if (cpuFreq != NULL) {
+	if (cpuFreq != nullptr) {
 		delete[] cpuFreq;
-		cpuFreq = NULL;
+		cpuFreq = nullptr;
 	}
-	if (cpuIdle != NULL) {
+	if (cpuIdle != nullptr) {
 		delete[] cpuIdle;
-		cpuIdle = NULL;
+		cpuIdle = nullptr;
 	}
-	if (CPUs != NULL) {
+	if (CPUs != nullptr) {
 		delete[] CPUs;
-		CPUs = NULL;
+		CPUs = nullptr;
 	}
 	events.clear();
 	migrations.clear();

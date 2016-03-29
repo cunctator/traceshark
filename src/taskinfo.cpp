@@ -45,7 +45,7 @@
 	"Remove the unified graph for this task"
 
 TaskInfo::TaskInfo(QWidget *parent):
-	QWidget(parent), taskGraph(NULL)
+	QWidget(parent), taskGraph(nullptr)
 {
 	QPixmap addPM(QLatin1String(ADD_TO_LEGEND_RESOURCE));
 	QPixmap addTaskPM(QLatin1String(ADD_TASK_RESOURCE));
@@ -113,7 +113,7 @@ void TaskInfo::setTaskGraph(TaskGraph *graph)
 {
 	TaskGraph *legendGraph;
 	Task *task = graph->getTask();
-	if (task == NULL)
+	if (task == nullptr)
 		return;
 	QString nameStr = task->getLastName();
 	QString pidStr = QString::number(task->pid);
@@ -131,7 +131,7 @@ void TaskInfo::setTaskGraph(TaskGraph *graph)
 
 void TaskInfo::removeTaskGraph()
 {
-	taskGraph = NULL;
+	taskGraph = nullptr;
 	nameLine->setText(tr(""));
 	pidLine->setText(tr(""));
 }
@@ -148,11 +148,11 @@ void TaskInfo::addToLegendClicked()
 	QCustomPlot *plot;
 	Task *task;
 
-	if (taskGraph == NULL)
+	if (taskGraph == nullptr)
 		return;
 
 	task = taskGraph->getTask();
-	if (task == NULL)
+	if (task == nullptr)
 		return;
 
 	/* We use the legendPidMap to keep track of pids that have been added
@@ -168,25 +168,25 @@ void TaskInfo::addToLegendClicked()
 	taskGraph->addToLegend();
 	obj = taskGraph->parent();
 	plot = qobject_cast<QCustomPlot *>(obj);
-	if (plot != NULL)
+	if (plot != nullptr)
 		plot->replot();
 }
 
 void TaskInfo::clearClicked()
 {
-	QCustomPlot *plot = NULL;
+	QCustomPlot *plot = nullptr;
 	QObject *obj;
 	DEFINE_PIDMAP_ITERATOR(iter) = legendPidMap.begin();
 	while(iter != legendPidMap.end()) {
 		TaskGraph *&graph = iter.value();
 		graph->removeFromLegend();
-		if (plot == NULL) {
+		if (plot == nullptr) {
 			obj = graph->parent();
 			plot = qobject_cast<QCustomPlot *>(obj);
 		}
 		iter++;
 	}
-	if (plot != NULL)
+	if (plot != nullptr)
 		plot->replot();
 	legendPidMap.clear();
 }
@@ -195,11 +195,11 @@ void TaskInfo::findClicked()
 {
 	Task *task;
 
-	if (taskGraph == NULL)
+	if (taskGraph == nullptr)
 		return;
 
 	task = taskGraph->getTask();
-	if (task == NULL)
+	if (task == nullptr)
 		return;
 
 	emit findWakeup(task->pid);
@@ -209,11 +209,11 @@ void TaskInfo::addTaskGraphClicked()
 {
 	Task *task;
 
-	if (taskGraph == NULL)
+	if (taskGraph == nullptr)
 		return;
 
 	task = taskGraph->getTask();
-	if (task == NULL)
+	if (task == nullptr)
 		return;
 
 	emit addTaskGraph(task->pid);
@@ -223,11 +223,11 @@ void TaskInfo::removeTaskGraphClicked()
 {
 	Task *task;
 
-	if (taskGraph == NULL)
+	if (taskGraph == nullptr)
 		return;
 
 	task = taskGraph->getTask();
-	if (task == NULL)
+	if (task == nullptr)
 		return;
 
 	emit removeTaskGraph(task->pid);
@@ -235,7 +235,7 @@ void TaskInfo::removeTaskGraphClicked()
 
 void TaskInfo::checkGraphSelection()
 {
-	if (taskGraph == NULL)
+	if (taskGraph == nullptr)
 		return;
 	if (taskGraph->selected())
 		return;
