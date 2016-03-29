@@ -222,7 +222,7 @@ void MainWindow::computeLayout()
 {
 	unsigned int cpu;
 	unsigned int nrCPUs;
-	unsigned int offset = migrateSectionOffset;
+	unsigned int offset;
 	QString label;
 	double inc, o, p;
 	double start, end;
@@ -233,6 +233,7 @@ void MainWindow::computeLayout()
 	end = analyzer->getEndTime();
 
 	bottom = bugWorkAroundOffset;
+	offset = bottom + migrateSectionOffset;
 
 	ticks.resize(0);
 	tickLabels.resize(0);
