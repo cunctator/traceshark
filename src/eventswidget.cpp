@@ -23,7 +23,7 @@
 #include "traceshark.h"
 
 EventsWidget::EventsWidget(QWidget *parent):
-	QDockWidget(parent), events(nullptr)
+	QDockWidget(tr("Events"), parent), events(nullptr)
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(tableView);

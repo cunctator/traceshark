@@ -28,7 +28,7 @@
 #include <cmath>
 
 InfoWidget::InfoWidget(QWidget *parent):
-	QDockWidget(parent)
+	QDockWidget(tr("Info"), parent)
 {
 	unsigned int i;
 	QWidget *widget = new QWidget(this);
