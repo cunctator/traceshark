@@ -20,31 +20,13 @@
 #define CPUTASK_H
 
 #include <QVector>
+#include "abstracttask.h"
 
-class TaskGraph;
-
-class CPUTask {
+class CPUTask: public AbstractTask {
 public:
-	CPUTask(): isNew(true), graph(nullptr) {}
-	unsigned int pid; /* is really tid as all other pids here */
-	QVector<double> schedTimev;
-	QVector<double> schedData;
-	QVector<double> scaledSchedData;
-	QVector<double> wakeTimev;
-	QVector<double> wakeDelay;
+	CPUTask();
 	QVector<double> verticalDelay;
-	QVector<double> wakeHeight;
-	QVector<double> wakeZero;
-	QVector<double> runningTimev;
-	QVector<double> runningData;
-	QVector<double> scaledRunningData;
-	bool isNew; /* Only used during extraction */
-	double offset;
-	double scale;
-	TaskGraph *graph;
-	bool doScale();
 	bool doScaleWakeup();
-	bool doScaleRunning();
 };
 
 #endif /* CPUTASK_H */

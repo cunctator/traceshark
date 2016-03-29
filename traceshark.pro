@@ -17,7 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-HEADERS       = src/argnode.h
+HEADERS       = src/abstracttask.h
+HEADERS      += src/argnode.h
 HEADERS      += src/cpu.h
 HEADERS      += src/cpufreq.h
 HEADERS      += src/cpuidle.h
@@ -78,7 +79,8 @@ HEADERS      += threads/workthread.h
 HEADERS      += threads/workqueue.h
 HEADERS      += qcustomplot/qcustomplot.h
 
-SOURCES       = src/argnode.cpp
+SOURCES       = src/abstracttask.cpp
+SOURCES      += src/argnode.cpp
 SOURCES      += src/cpufreq.cpp
 SOURCES      += src/cpuidle.cpp
 SOURCES      += src/cpunode.cpp

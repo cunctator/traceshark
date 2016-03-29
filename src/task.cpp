@@ -25,8 +25,8 @@ TaskName::TaskName():
 {}
 
 Task::Task():
-	taskName(nullptr), exitStatus(STATUS_ALIVE), isNew(true), lastWakeUP(0),
-	graph(nullptr), wakeUpGraph(nullptr), runningGraph(nullptr)
+	AbstractTask(), taskName(nullptr), exitStatus(STATUS_ALIVE),
+	lastWakeUP(0), wakeUpGraph(nullptr), runningGraph(nullptr)
 {}
 
 Task::~Task()
@@ -72,47 +72,4 @@ QString Task::getLastName()
 	if (taskName != nullptr)
 		return QString(taskName->str);
 	return empty;
-}
-
-/* The member functions below should be moved to a superclass, that do not
- * exist at the time of writing, so that they can be shared with thos in the
- * CPUTask class */
-
-bool Task::doScale() {
-	int i;
-	int s = schedData.size();
-	scaledSchedData.resize(s);
-	for (i = 0; i < s; i++)
-		scaledSchedData[i] = schedData[i] * scale + offset;
-	return false; /* No error */
-}
-
-bool Task::doScaleWakeup() {
-	int s = wakeDelay.size();
-#if 0
-	int i;
-#endif
-	/* Create the dummy vector needed for horizontal display */
-	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
-	wakeZero.fill(0, s);
-	wakeHeight.fill(scaledHeight, s);
-	/* Compute a scaled delay vector needed for vertical display */
-#if 0
-	verticalDelay.resize(s);
-	double maxsize = WAKEUP_SIZE * scale;
-	double factor = maxsize / WAKEUP_MAX;
-	for (i = 0; i < s; i++)
-		verticalDelay[i] = TSMIN(factor * wakeDelay[i], maxsize);
-#endif
-
-	return false; /* No error */
-}
-
-bool Task::doScaleRunning() {
-	int i;
-	int s = runningData.size();
-	scaledRunningData.resize(s);
-	for (i = 0; i < s; i++)
-		scaledRunningData[i] = runningData[i] * scale + offset;
-	return false; /* No error */
 }

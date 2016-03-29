@@ -16,25 +16,35 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cputask.h"
-#include "traceanalyzer.h"
+#ifndef ABSTRACTTASK_H
+#define ABSTRACTTASK_H
 
-/* This delays (20 ms) rerpresents the "full length" of the error */
-#define WAKEUP_MAX ((double) 0.020)
+#include <QVector>
 
-CPUTask::CPUTask() :
-	AbstractTask()
-{}
+class TaskGraph;
 
-bool CPUTask::doScaleWakeup() {
-	int s = wakeDelay.size();
-	int i;
-	/* Compute a scaled delay vector needed for vertical display */
-	verticalDelay.resize(s);
-	double maxsize = WAKEUP_SIZE * scale;
-	double factor = maxsize / WAKEUP_MAX;
-	for (i = 0; i < s; i++)
-		verticalDelay[i] = TSMIN(factor * wakeDelay[i], maxsize);
+class AbstractTask {
+public:
+	AbstractTask();
+	unsigned int pid; /* is really tid as all other pids here */
+	QVector<double> schedTimev;
+	QVector<double> schedData;
+	QVector<double> scaledSchedData;
+	QVector<double> wakeTimev;
+	QVector<double> wakeDelay;
+	QVector<double> wakeHeight;
+	QVector<double> wakeZero;
+	QVector<double> runningTimev;
+	QVector<double> runningData;
+	QVector<double> scaledRunningData;
+	bool isNew; /* Only used during extraction */
+	/* These are for scaling purposes */
+	double offset;
+	double scale;
+	bool doScale();
+	bool doScaleWakeup();
+	bool doScaleRunning();
+	TaskGraph *graph;
+};
 
-	return AbstractTask::doScaleWakeup();
-}
+#endif /* ABSTRACTTASK_H */

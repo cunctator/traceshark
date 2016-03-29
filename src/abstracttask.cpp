@@ -16,25 +16,37 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cputask.h"
+#include "abstracttask.h"
 #include "traceanalyzer.h"
 
-/* This delays (20 ms) rerpresents the "full length" of the error */
-#define WAKEUP_MAX ((double) 0.020)
-
-CPUTask::CPUTask() :
-	AbstractTask()
+AbstractTask::AbstractTask() :
+	isNew(true), graph(nullptr)
 {}
 
-bool CPUTask::doScaleWakeup() {
-	int s = wakeDelay.size();
+bool AbstractTask::doScale() {
 	int i;
-	/* Compute a scaled delay vector needed for vertical display */
-	verticalDelay.resize(s);
-	double maxsize = WAKEUP_SIZE * scale;
-	double factor = maxsize / WAKEUP_MAX;
+	int s = schedData.size();
+	scaledSchedData.resize(s);
 	for (i = 0; i < s; i++)
-		verticalDelay[i] = TSMIN(factor * wakeDelay[i], maxsize);
+		scaledSchedData[i] = schedData[i] * scale + offset;
+	return false; /* No error */
+}
 
-	return AbstractTask::doScaleWakeup();
+bool AbstractTask::doScaleRunning() {
+	int i;
+	int s = runningData.size();
+	scaledRunningData.resize(s);
+	for (i = 0; i < s; i++)
+		scaledRunningData[i] = runningData[i] * scale + offset;
+	return false; /* No error */
+}
+
+bool AbstractTask::doScaleWakeup() {
+	int s = wakeDelay.size();
+	/* Create the dummy vector needed for horizontal display */
+	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
+	wakeZero.fill(0, s);
+	wakeHeight.fill(scaledHeight, s);
+
+	return false; /* No error */
 }

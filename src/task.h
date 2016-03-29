@@ -20,7 +20,8 @@
 #define TASK_H
 
 #include <QString>
-#include <QVector>
+
+#include "abstracttask.h"
 
 class QCPGraph;
 class TaskGraph;
@@ -38,7 +39,7 @@ public:
 	TaskName *prev;
 };
 
-class Task {
+class Task : public AbstractTask {
 public:
 	Task();
 	~Task();
@@ -46,31 +47,15 @@ public:
 	__always_inline void checkName(char *name);
 	QString getDisplayName();
 	QString getLastName();
-	unsigned int pid; /* is really tid as all other pids here */
 	TaskName *taskName;
-	QVector<double> schedTimev;
-	QVector<double> schedData;
-	QVector<double> scaledSchedData;
-	QVector<double> wakeTimev;
-	QVector<double> wakeDelay;
-	QVector<double> wakeHeight;
-	QVector<double> wakeZero;
-	QVector<double> runningTimev;
-	QVector<double> runningData;
-	QVector<double> scaledRunningData;
 	exitstatus_t exitStatus;
-	/* The next two are only used during extraction */
-	bool isNew;
+	/* lastWakeUP is only used during extraction */
 	double lastWakeUP;
-	/* These are for scaling purposes */
-	double offset;
-	double scale;
-	TaskGraph *graph;
+	/* The unified task needs to save pointers to these graphs so that they
+	 * can be deleted when the user requests the unified task to be 
+	 * removed */
 	QCPGraph *wakeUpGraph;
 	QCPGraph *runningGraph;
-	bool doScale();
-	bool doScaleWakeup();
-	bool doScaleRunning();
 };
 
 __always_inline void Task::checkName(char *name)
