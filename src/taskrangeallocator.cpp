@@ -138,5 +138,12 @@ void TaskRangeAllocator::putTaskRange(unsigned int pid)
 
 double TaskRangeAllocator::getBottom()
 {
-	return bottom;
+	if (bottom != top)
+		/* If there is at least on unified task graph, we will add an
+		 * offset to prevent it from being on top of the axis */
+		return bottom - taskSectionOffset;
+	else
+		/* In this case no offset is needed because the migration graph
+		 * has an offset of it's own */
+		return bottom;
 }

@@ -43,6 +43,7 @@ private:
 	double top;
 	double bottom;
 	double dec;
+	const double taskSectionOffset = 250;
 };
 
 #endif /* TASKRANGEALLOCATOR */
