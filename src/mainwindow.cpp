@@ -498,6 +498,62 @@ void MainWindow::closeTrace()
 	infoWidget->clear();
 }
 
+void MainWindow::saveScreenshot()
+{
+	QFileDialog dialog(this);
+	QStringList fileNameList;
+	QString fileName;
+	QString pngSuffix = QString(".png");
+	QString bmpSuffix = QString(".bmp");
+	QString jpgSuffix = QString(".jpg");
+	QString pdfSuffix = QString(".pdf");
+	QString pdfCreator = QString("traceshark ");
+	QString pdfTitle;
+
+	pdfCreator += QString(TRACESHARK_VERSION_STRING);
+
+	if (!analyzer->isOpen())
+		return;
+
+	switch (analyzer->getTraceType()) {
+	case TRACE_TYPE_FTRACE:
+		pdfTitle = tr("Ftrace rendered by ");
+		break;
+	case TRACE_TYPE_PERF:
+		pdfTitle = tr("Perf events rendered by ");
+		break;
+	default:
+		pdfTitle = tr("Uknown garbage rendered by ");
+		break;
+	}
+
+	pdfTitle += pdfCreator;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+	dialog.setNameFilter(tr("Images (*.png *.bmp *.jpg *.pdf)"));
+	dialog.setViewMode(QFileDialog::Detail);
+	dialog.setAcceptMode(QFileDialog::AcceptSave);
+	dialog.setDefaultSuffix(QString("png"));
+
+	if (dialog.exec())
+		fileNameList = dialog.selectedFiles();
+
+	if (fileNameList.size() != 1)
+		return;
+
+	fileName = fileNameList.at(0);
+
+	if (fileName.endsWith(pngSuffix, Qt::CaseInsensitive)) {
+		tracePlot->savePng(fileName);
+	} else if (fileName.endsWith(bmpSuffix, Qt::CaseInsensitive)) {
+		tracePlot->saveBmp(fileName);
+	} else if (fileName.endsWith(jpgSuffix, Qt::CaseInsensitive)) {
+		tracePlot->saveJpg(fileName);
+	} else if (fileName.endsWith(pdfSuffix, Qt::CaseInsensitive)) {
+		tracePlot->savePdf(fileName, false, 0, 0, pdfCreator, pdfTitle);
+	}
+}
+
 void MainWindow::about()
 {
 	QString textAboutCaption;
@@ -675,6 +731,11 @@ void MainWindow::createActions()
 	closeAction->setStatusTip(tr("Close the trace"));
 	tsconnect(closeAction, triggered(), this, closeTrace());
 
+	saveAction = new QAction(tr("&Save screenshot as..."), this);
+	saveAction->setShortcuts(QKeySequence::SaveAs);
+	saveAction->setStatusTip(tr("Save screenshot to an image file"));
+	tsconnect(saveAction, triggered(), this, saveScreenshot());
+
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
 	exitAction->setStatusTip(tr("Exit traceshark"));
@@ -702,6 +763,7 @@ void MainWindow::createMenus()
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(openAction);
 	fileMenu->addAction(closeAction);
+	fileMenu->addAction(saveAction);
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAction);
 

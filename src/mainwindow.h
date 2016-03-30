@@ -65,6 +65,7 @@ protected:
 private slots:
 	void openTrace();
 	void closeTrace();
+	void saveScreenshot();
 	void about();
 	void license();
 	void mouseWheel();
@@ -116,6 +117,7 @@ private:
 
 	QAction *openAction;
 	QAction *closeAction;
+	QAction *saveAction;
 	QAction *exitAction;
 	QAction *aboutAction;
 	QAction *licenseAction;
