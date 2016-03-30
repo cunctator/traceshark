@@ -19,7 +19,7 @@
 #ifndef TRACESHARK_H
 #define TRACESHARK_H
 
-#define TRACESHARK_VERSION_STRING "0.0.6-alpha"
+#define TRACESHARK_VERSION_STRING "0.0.7-alpha"
 
 #include <QtCore>
 #include <cstdint>
