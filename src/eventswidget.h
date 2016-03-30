@@ -37,8 +37,10 @@ public:
 	void setEvents(TList<TraceEvent> *e);
 	void beginResetModel();
 	void endResetModel();
+	void resizeColumnsToContents();
 	void scrollTo(double time);
 	void scrollTo(int n);
+	void show();
 signals:
 	void timeSelected(double time);
 	void infoDoubleClicked(const TraceEvent &event);

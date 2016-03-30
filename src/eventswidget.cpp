@@ -30,7 +30,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
 	tableView->horizontalHeader()->setStretchLastSection(true);
-	tableView->resizeColumnsToContents();
+	resizeColumnsToContents();
 	tableView->show();
 	tsconnect(tableView, clicked(const QModelIndex &),
 		  this, handleClick(const QModelIndex &));
@@ -47,7 +47,7 @@ EventsWidget::EventsWidget(TList<TraceEvent> *e, QWidget *parent):
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
 	tableView->horizontalHeader()->setStretchLastSection(true);
-	tableView->resizeColumnsToContents();
+	resizeColumnsToContents();
 	tableView->show();
 	tsconnect(tableView, clicked(const QModelIndex &),
 		  this, handleClick(const QModelIndex &));
@@ -74,7 +74,7 @@ void EventsWidget::beginResetModel()
 void EventsWidget::endResetModel()
 {
 	eventsModel->endResetModel();
-	tableView->resizeColumnsToContents();
+	resizeColumnsToContents();
 }
 
 void EventsWidget::scrollTo(double time)
@@ -82,7 +82,7 @@ void EventsWidget::scrollTo(double time)
 	if (events != nullptr) {
 		int n = findBestMatch(time);
 		tableView->selectRow(n);
-		tableView->resizeColumnsToContents();
+		resizeColumnsToContents();
 	}
 }
 
@@ -93,7 +93,7 @@ void EventsWidget::scrollTo(int n)
 	unsigned int index = (unsigned int) n;
 	if (index < events->size()) {
 		tableView->selectRow(index);
-		tableView->resizeColumnsToContents();
+		resizeColumnsToContents();
 	}
 }
 
@@ -181,4 +181,18 @@ void EventsWidget::handleDoubleClick(const QModelIndex &index)
 		const TraceEvent &event = events->at(index.row());
 		emit infoDoubleClicked(event);
 	}
+}
+
+/* Apparently it's a bad idea to do tableView->resizeColumnsToContents() if we
+ * are not visible */
+void EventsWidget::resizeColumnsToContents()
+{
+	if (QDockWidget::isVisible())
+		tableView->resizeColumnsToContents();
+}
+
+void EventsWidget::show()
+{
+	QDockWidget::show();
+	tableView->resizeColumnsToContents();
 }
