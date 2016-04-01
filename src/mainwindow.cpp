@@ -615,6 +615,37 @@ void MainWindow::about()
 	msgBox->show();
 }
 
+void MainWindow::aboutQCustomPlot()
+{
+	QString textAboutCaption;
+	QString textAbout;
+
+	textAboutCaption = QMessageBox::tr(
+	       "<h1>About QCustomPlot</h1>"
+	       "<p>This program contains version %1 of QCustomPlot.</p>"
+		).arg(QLatin1String(QCUSTOMPLOT_VERSION_STRING));
+	textAbout = QMessageBox::tr(
+	       "<p>Copyright &copy; 2011-2015 Emanuel Eichhammer"
+	       "<p>QCustomPlot is licensed under GNU General Public License as "
+	       "published by the Free Software Foundation, either version 3 of "
+	       " the License, or (at your option) any later version.</p>"
+	       "<p>See <a href=\"%1/\">%1</a> for more information about QCustomPlot.</p>"
+	       "<p>This program comes with ABSOLUTELY NO WARRANTY; select \"License\" under the \"Help\""
+	       " menu for details."
+	       "<p>This is free software, and you are welcome to redistribute it"
+	       " under certain conditions; see the license for details.").arg(QLatin1String("http://qcustomplot.com"));
+	QMessageBox *msgBox = new QMessageBox(this);
+	msgBox->setAttribute(Qt::WA_DeleteOnClose);
+	msgBox->setWindowTitle(tr("About QCustomPlot"));
+	msgBox->setText(textAboutCaption);
+	msgBox->setInformativeText(textAbout);
+
+	QPixmap pm(QLatin1String(":/traceshark/images/qcp-logo.png"));
+	if (!pm.isNull())
+		msgBox->setIconPixmap(pm);
+	msgBox->show();
+}
+
 void MainWindow::license()
 {
 	// Figure out some way to display the whole GPL nicely here
@@ -749,6 +780,10 @@ void MainWindow::createActions()
 	aboutAction->setStatusTip(tr("Show info about Traceshark"));
 	tsconnect(aboutAction, triggered(), this, about());
 
+	aboutQCPAction = new QAction(tr("About QCustom&Plot"), this);
+	aboutAction->setStatusTip(tr("Show info about QCustomPlot"));
+	tsconnect(aboutQCPAction, triggered(), this, aboutQCustomPlot());
+
 	licenseAction = new QAction(tr("&License"), this);
 	aboutAction->setStatusTip(tr("Show the license of Traceshark"));
 	tsconnect(licenseAction, triggered(), this, license());
@@ -770,8 +805,9 @@ void MainWindow::createMenus()
 	viewMenu = menuBar()->addMenu(tr("&View"));
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
-	helpMenu->addAction(aboutQtAction);
 	helpMenu->addAction(aboutAction);
+	helpMenu->addAction(aboutQCPAction);
+	helpMenu->addAction(aboutQtAction);
 	helpMenu->addAction(licenseAction);
 }
 

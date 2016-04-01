@@ -8,6 +8,7 @@
   <file>images/movered30x30.png</file>
   <file>images/removetask30x30.png</file>
   <file>images/wakeup30x30.png</file>
+  <file>images/qcp-logo.png</file>
   <file>LICENSE</file>
 </qresource>
 </RCC>

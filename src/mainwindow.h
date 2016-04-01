@@ -67,6 +67,7 @@ private slots:
 	void closeTrace();
 	void saveScreenshot();
 	void about();
+	void aboutQCustomPlot();
 	void license();
 	void mouseWheel();
 	void mousePress();
@@ -122,6 +123,7 @@ private:
 	QAction *aboutAction;
 	QAction *licenseAction;
 	QAction *aboutQtAction;
+	QAction *aboutQCPAction;
 
 	TraceAnalyzer *analyzer;
 
