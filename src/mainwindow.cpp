@@ -1051,5 +1051,6 @@ void MainWindow::showWakeup(unsigned int pid)
 	inactiveCursor->setPosition(wakeupevent->time);
 	activeCursor->setPosition(schedevent->time);
 	infoWidget->setTime(wakeupevent->time, inactiveIdx);
+	infoWidget->setTime(schedevent->time, activeIdx);
 	eventsWidget->scrollTo(wakeUpIndex);
 }
