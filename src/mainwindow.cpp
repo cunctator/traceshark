@@ -978,7 +978,11 @@ void MainWindow::addTaskGraph(unsigned int pid)
 	graph->setData(task->runningTimev, task->scaledRunningData);
 	task->runningGraph = graph;
 out:
-	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+	/* We only modify the lower part of the range to show the newly
+	 * added unified task graph. */
+	QCPRange range = tracePlot->yAxis->range();
+	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
+
 	tracePlot->replot();
 }
 
@@ -1006,7 +1010,10 @@ void MainWindow::removeTaskGraph(unsigned int pid)
 
 	taskRangeAllocator->putTaskRange(pid);
 	bottom = taskRangeAllocator->getBottom();
-	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+
+	QCPRange range = tracePlot->yAxis->range();
+	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
+
 	tracePlot->replot();
 }
 
