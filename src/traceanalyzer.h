@@ -361,6 +361,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	double delay;
 	CPU *eventCPU = &CPUs[cpu];
 	taskstate_t state;
+	char *name;
 
 	if (!isValidCPU(cpu))
 		return;
@@ -368,8 +369,14 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	/* This is done to update the names of existing tasks */
 	if (event.pid != 0) {
 		task = &taskMap[event.pid];
-		if (!task->isNew)
-			task->checkName(event.taskName->ptr);
+		if (!task->isNew) {
+			/* With the current implementation of the grammars, it
+			 * should never happen that there is a nullptr here
+			 * but we check anyway, in case I change the grammar
+			 * implementation */
+			if (event.taskName->ptr != nullptr)
+				task->checkName(event.taskName->ptr);
+		}
 		else
 			task->pid = event.pid;
 	}
@@ -395,8 +402,9 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	if (task->isNew) { /* true means task is newly constructed above */
 		task->pid = oldpid;
 		task->isNew = false;
-		task->checkName(sched_switch_oldname_strdup(ttype, event,
-							    taskNamePool));
+		name = sched_switch_oldname_strdup(ttype, event, taskNamePool);
+		if (name != nullptr)
+			task->checkName(name);
 
 		/* Apparently this task was running when we started tracing */
 		task->schedTimev.append(startTime);
@@ -442,8 +450,9 @@ skip:
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
-		task->checkName(sched_switch_newname_strdup(ttype, event,
-							    taskNamePool));
+		name = sched_switch_newname_strdup(ttype, event, taskNamePool);
+		if (name != nullptr)
+			task->checkName(name);
 		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
 
 		task->schedTimev.append(startTime);
@@ -485,6 +494,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	unsigned int pid;
 	Task *task;
 	double time;
+	char *name;
 
 	/* Only interested in success */
 	if (!sched_wakeup_success(ttype, event))
@@ -499,9 +509,9 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	if (task->isNew) {
 		task->pid = pid;
 		task->isNew = false;
-		char *name = sched_wakeup_name_strdup(ttype, event,
-						      taskNamePool);
-		task->checkName(name);
+		name = sched_wakeup_name_strdup(ttype, event, taskNamePool);
+		if (name != nullptr)
+			task->checkName(name);
 		task->schedTimev.append(startTime);
 		task->schedData.append(FLOOR_HEIGHT);
 	}
