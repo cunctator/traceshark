@@ -51,6 +51,7 @@ public:
 	exitstatus_t exitStatus;
 	/* lastWakeUP is only used during extraction */
 	double lastWakeUP;
+	double lastSleepEntry;
 	/* The unified task needs to save pointers to these graphs so that they
 	 * can be deleted when the user requests the unified task to be 
 	 * removed */

@@ -26,7 +26,8 @@ TaskName::TaskName():
 
 Task::Task():
 	AbstractTask(), taskName(nullptr), exitStatus(STATUS_ALIVE),
-	lastWakeUP(0), wakeUpGraph(nullptr), runningGraph(nullptr)
+	lastWakeUP(0), lastSleepEntry(0), wakeUpGraph(nullptr),
+	runningGraph(nullptr)
 {}
 
 Task::~Task()

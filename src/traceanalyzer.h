@@ -116,9 +116,9 @@ private:
 	__always_inline unsigned int generic_sched_wakeup_pid(TraceEvent
 							      &event);
 	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
-						 double startTime);
-	__always_inline double estimateWakeUp(Task *task, CPU *eventCPU,
-					      double newTime, double startTime);
+						 double startTime, bool &valid);
+	__always_inline double estimateWakeUp(Task *task, double newTime,
+					      bool &valid);
 	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, unsigned int oldpid,
 				  double oldtime);
@@ -185,33 +185,39 @@ private:
 };
 
 __always_inline double TraceAnalyzer::estimateWakeUpNew(CPU *eventCPU,
-						       double newTime,
-						       double startTime)
+							double newTime,
+							double startTime,
+							bool &valid)
 {
 	double delay;
 
 	if (!eventCPU->hasBeenScheduled)
 		goto regular;
 
-	if (eventCPU->lastEnterIdle < eventCPU->lastExitIdle)
-		return FAKE_DELTA;
+	if (eventCPU->lastEnterIdle < eventCPU->lastExitIdle) {
+		valid = false;
+		return 0;
+	}
 regular:
+	valid = true;
 	delay = newTime - startTime;
 	return delay;
 }
 
 __always_inline double TraceAnalyzer::estimateWakeUp(Task *task,
-						    CPU *eventCPU,
-						    double newTime,
-						    double /* startTime */)
+						     double newTime,
+						     bool &valid)
 {
 	double delay;
 
 	/* Is this reasonable ? */
-	if (task->lastWakeUP < eventCPU->lastEnterIdle)
-		return FAKE_DELTA;
+	if (task->lastWakeUP < task->lastSleepEntry) {
+		valid = false;
+		return 0;
+	}
 
 	delay = newTime - task->lastWakeUP;
+	valid = true;
 	return delay;
 }
 
@@ -359,6 +365,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	CPUTask *cpuTask;
 	Task *task;
 	double delay;
+	bool delayOK;
 	CPU *eventCPU = &CPUs[cpu];
 	taskstate_t state;
 	char *name;
@@ -421,6 +428,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->runningTimev.append(oldtime);
 		task->runningData.append(FLOOR_HEIGHT);
 		task->lastWakeUP = oldtime;
+	} else {
+		task->lastSleepEntry = oldtime;
 	}
 
 	/* ... then handle the per CPU task */
@@ -453,15 +462,18 @@ skip:
 		name = sched_switch_newname_strdup(ttype, event, taskNamePool);
 		if (name != nullptr)
 			task->checkName(name);
-		delay = estimateWakeUpNew(eventCPU, newtime, startTime);
+		delay = estimateWakeUpNew(eventCPU, newtime, startTime,
+					  delayOK);
 
 		task->schedTimev.append(startTime);
 		task->schedData.append(FLOOR_HEIGHT);
 	} else
-		delay = estimateWakeUp(task, eventCPU, newtime, startTime);
+		delay = estimateWakeUp(task, newtime, delayOK);
 
-	task->wakeTimev.append(newtime);
-	task->wakeDelay.append(delay);
+	if (delayOK) {
+		task->wakeTimev.append(newtime);
+		task->wakeDelay.append(delay);
+	}
 
 	task->schedTimev.append(newtime);
 	task->schedData.append(SCHED_HEIGHT);
@@ -475,8 +487,10 @@ skip:
 		cpuTask->schedData.append(FLOOR_HEIGHT);
 	}
 
-	cpuTask->wakeTimev.append(newtime);
-	cpuTask->wakeDelay.append(delay);
+	if (delayOK) {
+		cpuTask->wakeTimev.append(newtime);
+		cpuTask->wakeDelay.append(delay);
+	}
 
 	cpuTask->schedTimev.append(newtime);
 	cpuTask->schedData.append(SCHED_HEIGHT);
