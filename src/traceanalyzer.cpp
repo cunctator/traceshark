@@ -175,8 +175,11 @@ void TraceAnalyzer::processSchedAddTail()
 		Task &task = iter.value();
 		double d;
 		double lastTime;
+		int s = task.schedTimev.size();
 		iter++;
-		lastTime = task.schedTimev[task.schedTimev.size() - 1];
+		if (s <= 0)
+			continue;
+		lastTime = task.schedTimev[s - 1];
 		if (lastTime >= getEndTime() || task.exitStatus == STATUS_FINAL)
 			continue;
 		d = task.schedData[task.schedData.size() - 1];
