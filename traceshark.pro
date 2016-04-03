@@ -17,7 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-HEADERS       = src/abstracttask.h
+HEADERS       = qcustomplot/qcustomplot.h
+HEADERS      += src/abstracttask.h
 HEADERS      += src/argnode.h
 HEADERS      += src/cpu.h
 HEADERS      += src/cpufreq.h
@@ -77,9 +78,9 @@ HEADERS      += threads/indexwatcher.h
 HEADERS      += threads/workitem.h
 HEADERS      += threads/workthread.h
 HEADERS      += threads/workqueue.h
-HEADERS      += qcustomplot/qcustomplot.h
 
-SOURCES       = src/abstracttask.cpp
+SOURCES       = qcustomplot/qcustomplot.cpp
+SOURCES      += src/abstracttask.cpp
 SOURCES      += src/argnode.cpp
 SOURCES      += src/cpufreq.cpp
 SOURCES      += src/cpuidle.cpp
@@ -128,7 +129,6 @@ SOURCES      += src/tracefile.cpp
 SOURCES      += src/traceparser.cpp
 SOURCES      += src/traceplot.cpp
 SOURCES      += threads/workqueue.cpp
-SOURCES      += qcustomplot/qcustomplot.cpp
 
 QT           += core
 QT           += widgets
