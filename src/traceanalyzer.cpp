@@ -237,8 +237,12 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		faketime = oldtime - FAKE_DELTA;
 		cpuTask->schedTimev.append(faketime);
 		cpuTask->schedData.append(SCHED_HEIGHT);
-		task = findTask(epid);
-		Q_ASSERT(task != nullptr);
+
+		task = &taskMap[oldpid];
+		if (task->isNew) {
+			task->pid = oldpid;
+		}
+		task->isNew = false;
 		task->schedTimev.append(faketime);
 		task->schedData.append(SCHED_HEIGHT);
 	}
