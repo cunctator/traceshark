@@ -38,7 +38,7 @@ public:
 class StringPool
 {
 public:
-	StringPool(unsigned int nr_pages = 256*10, unsigned int hSizeP = 256);
+	StringPool(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256);
 	~StringPool();
 	__always_inline TString* allocString(const TString *str, uint32_t hval,
 					     uint32_t cutoff);

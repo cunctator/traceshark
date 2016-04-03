@@ -41,7 +41,7 @@ public:
 class StringTree
 {
 public:
-	StringTree(unsigned int nr_pages = 256*10, unsigned int hSizeP = 256);
+	StringTree(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256);
 	~StringTree();
 	__always_inline TString* searchAllocString(const TString *str,
 						   uint32_t hval,
