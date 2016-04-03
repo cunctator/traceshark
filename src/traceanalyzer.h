@@ -388,12 +388,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 			task->pid = event.pid;
 	}
 
-	if (eventCPU->pidOnCPU != oldpid) {
-		if (eventCPU->hasBeenScheduled)
-			handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid,
-					     oldtime);
-		/* else { do nothing, non scheduled CPU is handled below } */
-	}
+	if (eventCPU->pidOnCPU != oldpid && eventCPU->hasBeenScheduled)
+		handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid, oldtime);
 
 	if (oldpid == 0) {
 		eventCPU->lastExitIdle = oldtime;
