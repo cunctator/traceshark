@@ -225,15 +225,22 @@ void TraceParser::sendTraceType()
 
 void TraceParser::prepareParse()
 {
-	infoBegin = traceFile->mappedFile;
-	prevLineIsEvent = true;
 	fakePostEventInfo.ptr = traceFile->mappedFile;
 	fakeEvent.postEventInfo = &fakePostEventInfo;
-	prevEvent = &fakeEvent;
-	nrFtraceEvents = 0;
-	nrPerfEvents = 0;
+
+	perfLineData.infoBegin = traceFile->mappedFile;
+	perfLineData.prevEvent = &fakeEvent;
+	perfLineData.nrEvents = 0;
+	perfLineData.prevLineIsEvent = true;
+	perfLineData.prevTime = std::numeric_limits<double>::lowest();
+
+	ftraceLineData.infoBegin = traceFile->mappedFile;
+	ftraceLineData.prevEvent = &fakeEvent;
+	ftraceLineData.nrEvents = 0;
+	ftraceLineData.prevLineIsEvent = true;
+	ftraceLineData.prevTime = std::numeric_limits<double>::lowest();
+
 	events->clear();
-	prevTime = std::numeric_limits<double>::lowest();
 }
 
 /*
@@ -245,6 +252,22 @@ void TraceParser::prepareParse()
  */
 void TraceParser::fixLastEvent()
 {
+	bool prevLineIsEvent = false;
+	char *infoBegin = nullptr;
+
+	switch (traceType) {
+	case TRACE_TYPE_FTRACE:
+		prevLineIsEvent = ftraceLineData.prevLineIsEvent;
+		infoBegin = ftraceLineData.infoBegin;
+		break;
+	case TRACE_TYPE_PERF:
+		prevLineIsEvent = perfLineData.prevLineIsEvent;
+		infoBegin = perfLineData.infoBegin;
+		break;
+	default:
+		break;
+	};
+
 	/* Only perf traces will have backtraces after events, I think */
 	if (traceType != TRACE_TYPE_PERF)
 		return;
@@ -261,7 +284,7 @@ void TraceParser::fixLastEvent()
 	}
 }
 
-bool TraceParser::parseLineBugFixup(TraceEvent* event)
+bool TraceParser::parseLineBugFixup(TraceEvent* event, const double &prevTime)
 {
 	double corrtime = event->time + 0.9;
 	double delta = corrtime - prevTime;
@@ -276,11 +299,11 @@ bool TraceParser::parseLineBugFixup(TraceEvent* event)
 
 void TraceParser::determineTraceType()
 {
-	if (nrFtraceEvents > 0 && nrPerfEvents == 0) {
+	if (ftraceLineData.nrEvents > 0 && perfLineData.nrEvents == 0) {
 		traceType = TRACE_TYPE_FTRACE;
 		sendTraceType();
 		return;
-	} else if (nrFtraceEvents  == 0 && nrPerfEvents > 0) {
+	} else if (ftraceLineData.nrEvents  == 0 && perfLineData.nrEvents > 0) {
 		traceType = TRACE_TYPE_PERF;
 		sendTraceType();
 		return;

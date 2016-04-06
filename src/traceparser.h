@@ -25,6 +25,7 @@
 #include "grammar.h"
 #include "grammarnode.h"
 #include "mm/mempool.h"
+#include "tracelinedata.h"
 #include "traceline.h"
 #include "traceevent.h"
 #include "tlist.h"
@@ -54,8 +55,6 @@ public:
 	void threadParser();
 	void threadReader();
 protected:
-	unsigned long nrFtraceEvents;
-	unsigned long nrPerfEvents;
 	tracetype_t traceType;
 	__always_inline void waitForNextBatch(bool &eof, int &index);
 	void waitForTraceType();
@@ -74,7 +73,7 @@ private:
 	__always_inline bool parseLinePerf(TraceLine *line, TraceEvent &event);
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
-	bool parseLineBugFixup(TraceEvent* event);
+	bool parseLineBugFixup(TraceEvent* event, const double &prevTime);
 	TraceFile *traceFile;
 	MemPool *ptrPool;
 	MemPool *postEventPool;
@@ -85,10 +84,8 @@ private:
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<TraceParser> *parserThread;
 	WorkThread<TraceParser> *readerThread;
-	char *infoBegin;
-	bool prevLineIsEvent;
-	double prevTime;
-	TraceEvent *prevEvent;
+	TraceLineData ftraceLineData;
+	TraceLineData perfLineData;
 	TList<TraceEvent> *events;
 	IndexWatcher *eventsWatcher;
 	/* This IndexWatcher isn't really watching an index, it's to synchronize
@@ -175,18 +172,20 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
 		/* Check if the timestamp of this event is affected by
 		 * the infamous ftrace timestamp rollover bug and
 		 * try to correct it */
-		if (event.time < prevTime) {
-			if (!parseLineBugFixup(&event))
+		if (event.time < ftraceLineData.prevTime) {
+			if (!parseLineBugFixup(&event, ftraceLineData.prevTime))
 				return true;
 		}
-		prevTime = event.time;
+		ftraceLineData.prevTime = event.time;
+
 		ptrPool->commitN(event.argc);
-		event.postEventInfo = nullptr;
 		events->commit();
-		nrFtraceEvents++;
+
+		event.postEventInfo = nullptr;
+		ftraceLineData.nrEvents++;
 		/* probably not necessary because ftrace traces doesn't
 		 * have backtraces and stuff but do it anyway */
-		prevLineIsEvent = true;
+		ftraceLineData.prevLineIsEvent = true;
 		return true;
 	}
 	return false;
@@ -199,30 +198,32 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine* line,
 		/* Check if the timestamp of this event is affected by
 		 * the infamous ftrace timestamp rollover bug and
 		 * try to correct it */
-		if (event.time < prevTime) {
-			if (!parseLineBugFixup(&event))
+		if (event.time < perfLineData.prevTime) {
+			if (!parseLineBugFixup(&event, perfLineData.prevTime))
 				return true;
 		}
-		prevTime = event.time;
+		perfLineData.prevTime = event.time;
+
 		ptrPool->commitN(event.argc);
-		if (prevLineIsEvent) {
-			prevEvent->postEventInfo = nullptr;
+		events->commit();
+
+		if (perfLineData.prevLineIsEvent) {
+			perfLineData.prevEvent->postEventInfo = nullptr;
 		} else {
 			TString *str = (TString*) postEventPool->
 				allocObj();
-			str->ptr = infoBegin;
-			str->len = line->begin - infoBegin;
-			prevEvent->postEventInfo = str;
-			prevLineIsEvent = true;
+			str->ptr = perfLineData.infoBegin;
+			str->len = line->begin - perfLineData.infoBegin;
+			perfLineData.prevEvent->postEventInfo = str;
+			perfLineData.prevLineIsEvent = true;
 		}
-		events->commit();
-		prevEvent = &event;
-		nrPerfEvents++;
+		perfLineData.prevEvent = &event;
+		perfLineData.nrEvents++;
 		return true;
 	} else {
-		if (prevLineIsEvent) {
-			infoBegin = line->begin;
-			prevLineIsEvent = false;
+		if (perfLineData.prevLineIsEvent) {
+			perfLineData.infoBegin = line->begin;
+			perfLineData.prevLineIsEvent = false;
 		}
 		return false;
 	}
