@@ -223,7 +223,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		cpuTask->schedData.append(FLOOR_HEIGHT);
 		task = findTask(epid);
 		Q_ASSERT(task != nullptr);
-		task->lastWakeUP = faketime;
+		task->lastSleepEntry = faketime;
 		task->schedTimev.append(faketime);
 		task->schedData.append(FLOOR_HEIGHT);
 	}
