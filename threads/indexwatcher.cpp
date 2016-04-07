@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "indexwatcher.h"
+#include "threads/indexwatcher.h"
 
 IndexWatcher::IndexWatcher(int bSize) :
 	batchSize(bSize), isEOF(false), postedIndex(0), receivedIndex(0)

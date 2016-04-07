@@ -20,8 +20,8 @@
 #define WORKTHREAD_H
 
 #include <QString>
-#include "tthread.h"
-#include "src/traceshark.h"
+#include "threads/tthread.h"
+#include "misc/traceshark.h"
 
 #define WORKTHREAD_DEFAULTNAME "WorkThread"
 

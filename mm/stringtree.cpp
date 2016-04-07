@@ -17,7 +17,7 @@
  */
 
 #include <cstring>
-#include "stringtree.h"
+#include "mm/stringtree.h"
 
 #define MAX(A, B) ((A) >= (B) ? A:B)
 #define MIN(A, B) ((A) < (B) ? A:B)

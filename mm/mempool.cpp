@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mempool.h"
+#include "mm/mempool.h"
 
 extern "C" {
 #include <sys/mman.h>

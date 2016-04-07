@@ -20,10 +20,10 @@
 #define STRINGTREE_H
 
 #include <cstdint>
-#include "mempool.h"
-#include "src/traceshark.h"
-#include "src/tstring.h"
-#include "src/traceevent.h"
+#include "mm/mempool.h"
+#include "misc/traceshark.h"
+#include "misc/tstring.h"
+#include "parser/traceevent.h"
 
 class StringTreeEntry {
 public:

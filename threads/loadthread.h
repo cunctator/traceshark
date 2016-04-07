@@ -19,7 +19,7 @@
 #ifndef LOADTHREAD_H
 #define LOADTHREAD_H
 
-#include "tthread.h"
+#include "threads/tthread.h"
 
 class LoadBuffer;
 

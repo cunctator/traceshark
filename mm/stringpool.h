@@ -20,9 +20,9 @@ ema *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define STRINGPOOL_H
 
 #include <cstdint>
-#include "mempool.h"
-#include "src/traceshark.h"
-#include "src/tstring.h"
+#include "mm/mempool.h"
+#include "misc/traceshark.h"
+#include "misc/tstring.h"
 
 class StringPoolEntry {
 public:

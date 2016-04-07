@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "loadbuffer.h"
-#include "loadthread.h"
+#include "threads/loadbuffer.h"
+#include "threads/loadthread.h"
 
 LoadThread::LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
 		       char *map)

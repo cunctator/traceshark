@@ -17,130 +17,167 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+###############################################################################
+# Header files
+#
+
 HEADERS       = qcustomplot/qcustomplot.h
-HEADERS      += src/abstracttask.h
-HEADERS      += src/argnode.h
-HEADERS      += src/cpu.h
-HEADERS      += src/cpufreq.h
-HEADERS      += src/cpuidle.h
-HEADERS      += src/cpunode.h
-HEADERS      += src/cursor.h
-HEADERS      += src/cursorinfo.h
-HEADERS      += src/eventinfodialog.h
-HEADERS      += src/eventnode.h
-HEADERS      += src/eventsmodel.h
-HEADERS      += src/eventswidget.h
-HEADERS      += src/ftraceparams.h
-HEADERS      += src/ftracegrammar.h
-HEADERS      += src/genericparams.h
-HEADERS      += src/grammar.h
-HEADERS      += src/grammarnode.h
-HEADERS      += src/grammarroot.h
-HEADERS      += src/infowidget.h
-HEADERS      += src/legendgraph.h
-HEADERS      += src/licensedialog.h
-HEADERS      += threads/loadbuffer.h
-HEADERS      += threads/loadthread.h
-HEADERS      += src/mainwindow.h
-HEADERS      += src/migration.h
-HEADERS      += src/migrationarrow.h
-HEADERS      += src/migrationline.h
-HEADERS      += mm/mempool.h
-HEADERS      += mm/stringpool.h
-HEADERS      += mm/stringtree.h
-HEADERS      += src/cputask.h
-HEADERS      += src/setting.h
-HEADERS      += src/paramhelpers.h
-HEADERS      += src/perfeventnode.h
-HEADERS      += src/perfgrammar.h
-HEADERS      += src/perfparams.h
-HEADERS      += src/perftimenode.h
-HEADERS      += src/pidnode.h
-HEADERS      += src/storenode.h
-HEADERS      += src/task.h
-HEADERS      += src/taskgraph.h
-HEADERS      += src/tcolor.h
-HEADERS      += threads/threadbuffer.h
-HEADERS      += threads/tthread.h
-HEADERS      += src/taskinfo.h
-HEADERS      += src/taskrangeallocator.h
-HEADERS      += src/timenode.h
-HEADERS      += src/tlist.h
-HEADERS      += src/traceanalyzer.h
-HEADERS      += src/traceevent.h
-HEADERS      += src/tracefile.h
-HEADERS      += src/traceline.h
-HEADERS      += src/traceparser.h
-HEADERS      += src/traceplot.h
-HEADERS      += src/traceshark.h
-HEADERS      += src/tstring.h
-HEADERS      += threads/indexwatcher.h
-HEADERS      += threads/workitem.h
-HEADERS      += threads/workthread.h
-HEADERS      += threads/workqueue.h
+
+HEADERS      +=  ui/cursor.h
+HEADERS      +=  ui/cursorinfo.h
+HEADERS      +=  ui/eventinfodialog.h
+HEADERS      +=  ui/eventsmodel.h
+HEADERS      +=  ui/eventswidget.h
+HEADERS      +=  ui/infowidget.h
+HEADERS      +=  ui/legendgraph.h
+HEADERS      +=  ui/licensedialog.h
+HEADERS      +=  ui/mainwindow.h
+HEADERS      +=  ui/migrationarrow.h
+HEADERS      +=  ui/migrationline.h
+HEADERS      +=  ui/taskgraph.h
+HEADERS      +=  ui/taskinfo.h
+HEADERS      +=  ui/taskrangeallocator.h
+HEADERS      +=  ui/traceplot.h
+
+HEADERS      +=  analyzer/abstracttask.h
+HEADERS      +=  analyzer/cpufreq.h
+HEADERS      +=  analyzer/cpu.h
+HEADERS      +=  analyzer/cpuidle.h
+HEADERS      +=  analyzer/cputask.h
+HEADERS      +=  analyzer/migration.h
+HEADERS      +=  analyzer/task.h
+HEADERS      +=  analyzer/tcolor.h
+HEADERS      +=  analyzer/traceanalyzer.h
+
+HEADERS      +=  parser/argnode.h
+HEADERS      +=  parser/cpunode.h
+HEADERS      +=  parser/eventnode.h
+HEADERS      +=  parser/ftracegrammar.h
+HEADERS      +=  parser/ftraceparams.h
+HEADERS      +=  parser/genericparams.h
+HEADERS      +=  parser/grammar.h
+HEADERS      +=  parser/grammarnode.h
+HEADERS      +=  parser/grammarroot.h
+HEADERS      +=  parser/paramhelpers.h
+HEADERS      +=  parser/perfeventnode.h
+HEADERS      +=  parser/perfgrammar.h
+HEADERS      +=  parser/perfparams.h
+HEADERS      +=  parser/perftimenode.h
+HEADERS      +=  parser/pidnode.h
+HEADERS      +=  parser/storenode.h
+HEADERS      +=  parser/timenode.h
+HEADERS      +=  parser/traceevent.h
+HEADERS      +=  parser/tracefile.h
+HEADERS      +=  parser/tracelinedata.h
+HEADERS      +=  parser/traceline.h
+HEADERS      +=  parser/traceparser.h
+
+HEADERS      +=  threads/indexwatcher.h
+HEADERS      +=  threads/loadbuffer.h
+HEADERS      +=  threads/loadthread.h
+HEADERS      +=  threads/threadbuffer.h
+HEADERS      +=  threads/tthread.h
+HEADERS      +=  threads/workitem.h
+HEADERS      +=  threads/workqueue.h
+HEADERS      +=  threads/workthread.h
+
+HEADERS      +=  mm/mempool.h
+HEADERS      +=  mm/stringpool.h
+HEADERS      +=  mm/stringtree.h
+
+HEADERS      +=  misc/setting.h
+HEADERS      +=  misc/tlist.h
+HEADERS      +=  misc/traceshark.h
+HEADERS      +=  misc/tstring.h
+
+###############################################################################
+# Source files
+#
 
 SOURCES       = qcustomplot/qcustomplot.cpp
-SOURCES      += src/abstracttask.cpp
-SOURCES      += src/argnode.cpp
-SOURCES      += src/cpufreq.cpp
-SOURCES      += src/cpuidle.cpp
-SOURCES      += src/cpunode.cpp
-SOURCES      += src/cursor.cpp
-SOURCES      += src/cursorinfo.cpp
-SOURCES      += src/eventinfodialog.cpp
-SOURCES      += src/eventnode.cpp
-SOURCES      += src/eventsmodel.cpp
-SOURCES      += src/eventswidget.cpp
-SOURCES      += src/ftracegrammar.cpp
-SOURCES      += src/ftraceparams.cpp
-SOURCES      += src/grammar.cpp
-SOURCES      += src/grammarnode.cpp
-SOURCES      += src/grammarroot.cpp
-SOURCES      += src/infowidget.cpp
-SOURCES      += src/legendgraph.cpp
-SOURCES      += src/licensedialog.cpp
-SOURCES      += threads/indexwatcher.cpp
-SOURCES      += threads/loadbuffer.cpp
-SOURCES      += threads/loadthread.cpp
-SOURCES      += src/main.cpp
-SOURCES      += src/mainwindow.cpp
-SOURCES      += src/migrationarrow.cpp
-SOURCES      += src/migrationline.cpp
-SOURCES      += mm/mempool.cpp
-SOURCES      += src/perfeventnode.cpp
-SOURCES      += src/perfgrammar.cpp
-SOURCES      += src/perfparams.cpp
-SOURCES      += src/perftimenode.cpp
-SOURCES      += src/pidnode.cpp
-SOURCES      += src/storenode.cpp
-SOURCES      += mm/stringpool.cpp
-SOURCES      += mm/stringtree.cpp
-SOURCES      += src/cputask.cpp
-SOURCES      += src/task.cpp
-SOURCES      += src/taskrangeallocator.cpp
-SOURCES      += src/tcolor.cpp
-SOURCES      += threads/tthread.cpp
-SOURCES      += src/taskgraph.cpp
-SOURCES      += src/taskinfo.cpp
-SOURCES      += src/timenode.cpp
-SOURCES      += src/traceanalyzer.cpp
-SOURCES      += src/traceevent.cpp
-SOURCES      += src/tracefile.cpp
-SOURCES      += src/traceparser.cpp
-SOURCES      += src/traceplot.cpp
-SOURCES      += threads/workqueue.cpp
+
+SOURCES      +=  ui/cursor.cpp
+SOURCES      +=  ui/cursorinfo.cpp
+SOURCES      +=  ui/eventinfodialog.cpp
+SOURCES      +=  ui/eventsmodel.cpp
+SOURCES      +=  ui/eventswidget.cpp
+SOURCES      +=  ui/infowidget.cpp
+SOURCES      +=  ui/legendgraph.cpp
+SOURCES      +=  ui/licensedialog.cpp
+SOURCES      +=  ui/mainwindow.cpp
+SOURCES      +=  ui/migrationarrow.cpp
+SOURCES      +=  ui/migrationline.cpp
+SOURCES      +=  ui/taskgraph.cpp
+SOURCES      +=  ui/taskinfo.cpp
+SOURCES      +=  ui/taskrangeallocator.cpp
+SOURCES      +=  ui/traceplot.cpp
+
+SOURCES      +=  analyzer/abstracttask.cpp
+SOURCES      +=  analyzer/cpufreq.cpp
+SOURCES      +=  analyzer/cpuidle.cpp
+SOURCES      +=  analyzer/cputask.cpp
+SOURCES      +=  analyzer/task.cpp
+SOURCES      +=  analyzer/tcolor.cpp
+SOURCES      +=  analyzer/traceanalyzer.cpp
+
+SOURCES      +=  parser/argnode.cpp
+SOURCES      +=  parser/cpunode.cpp
+SOURCES      +=  parser/eventnode.cpp
+SOURCES      +=  parser/ftracegrammar.cpp
+SOURCES      +=  parser/ftraceparams.cpp
+SOURCES      +=  parser/grammar.cpp
+SOURCES      +=  parser/grammarnode.cpp
+SOURCES      +=  parser/grammarroot.cpp
+SOURCES      +=  parser/perfeventnode.cpp
+SOURCES      +=  parser/perfgrammar.cpp
+SOURCES      +=  parser/perfparams.cpp
+SOURCES      +=  parser/perftimenode.cpp
+SOURCES      +=  parser/pidnode.cpp
+SOURCES      +=  parser/storenode.cpp
+SOURCES      +=  parser/timenode.cpp
+SOURCES      +=  parser/traceevent.cpp
+SOURCES      +=  parser/tracefile.cpp
+SOURCES      +=  parser/traceparser.cpp
+
+SOURCES      +=  threads/indexwatcher.cpp
+SOURCES      +=  threads/loadbuffer.cpp
+SOURCES      +=  threads/loadthread.cpp
+SOURCES      +=  threads/tthread.cpp
+SOURCES      +=  threads/workqueue.cpp
+
+SOURCES      +=  mm/mempool.cpp
+SOURCES      +=  mm/stringpool.cpp
+SOURCES      +=  mm/stringtree.cpp
+
+SOURCES      +=  misc/main.cpp
+
+###############################################################################
+# Qt Modules
+#
 
 QT           += core
 QT           += widgets
 QT           += printsupport
 
+###############################################################################
+# Directories
+#
+
 #DESTDIR=bin #Target file directory
 OBJECTS_DIR=obj
 MOC_DIR=obj
+
+###############################################################################
+# Flags
+#
 
 QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -g -std=c++11
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99
 QMAKE_LFLAGS_RELEASE =
 CONFIG += DEBUG
+
+###############################################################################
+# Resources
+#
 
 RESOURCES     = traceshark.qrc

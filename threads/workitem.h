@@ -20,7 +20,7 @@
 #define WORKITEM_H
 
 //#include <QObject>
-#include "src/traceshark.h"
+#include "misc/traceshark.h"
 
 class WorkQueue;
 

@@ -21,8 +21,8 @@
 
 #include <QList>
 #include <QMutex>
-#include "workitem.h"
-#include "workthread.h"
+#include "threads/workitem.h"
+#include "threads/workthread.h"
 
 class WorkQueue {
 	friend class WorkThread<WorkQueue>;

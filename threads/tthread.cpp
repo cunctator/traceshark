@@ -20,7 +20,7 @@
  * through a pointer isolates us from having to intherit QObject in our thread
  * classes */
 #include <QThread>
-#include "tthread.h"
+#include "threads/tthread.h"
 
 extern "C" {
 #include <sys/prctl.h>
