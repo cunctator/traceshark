@@ -19,7 +19,7 @@
 #ifndef ARGNODE_H
 #define ARGNODE_H
 
-#include "parser/grammarnode.h"
+#include "parser/grammar/grammarnode.h"
 
 class StringPool;
 

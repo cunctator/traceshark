@@ -16,15 +16,16 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPUNODE_H
-#define CPUNODE_H
+#ifndef GRAMMARROOT_H
+#define GRAMMARROOT_H
 
-#include "parser/grammarnode.h"
+#include "parser/grammar/grammarnode.h"
 
-class CpuNode: public GrammarNode
+class GrammarRoot: public GrammarNode
 {
 public:
-	CpuNode(const char *name);
+	GrammarRoot(const char* name)
+		: GrammarNode(name) {};
 	bool match(TString *str, TraceEvent *event);
 	void clearStringPool() {};
 };

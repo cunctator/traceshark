@@ -16,18 +16,19 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAMMARROOT_H
-#define GRAMMARROOT_H
+#ifndef STORENODE_H
+#define STORENODE_H
 
-#include "parser/grammarnode.h"
+#include "parser/grammar/grammarnode.h"
 
-class GrammarRoot: public GrammarNode
+class StringPool;
+
+class StoreNode: public GrammarNode
 {
 public:
-	GrammarRoot(const char* name)
-		: GrammarNode(name) {};
+	StoreNode(const char *name);
 	bool match(TString *str, TraceEvent *event);
 	void clearStringPool() {};
 };
 
-#endif
+#endif /* STORENODE_H */

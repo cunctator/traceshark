@@ -16,23 +16,34 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENTNODE_H
-#define EVENTNODE_H
+#include "parser/grammar/pidnode.h"
+#include "parser/traceevent.h"
+#include "misc/tstring.h"
 
-#include "parser/grammarnode.h"
+PidNode::PidNode(const char *name)
+	: GrammarNode(name)
+{}
 
-class StringTree;
-
-class EventNode: public GrammarNode
+bool PidNode::match(TString *str, TraceEvent *event)
 {
-public:
-	EventNode(const char *name);
-	~EventNode();
-	bool match(TString *str, TraceEvent *event);
-	void clearStringPool();
-private:
-	StringTree *eventTree;
-	void setupTree();
-};
+	char *lastChr = str->ptr + str->len - 1;
+	int pid;
+	int digit;
+	char *c;
 
-#endif
+	if (str->len < 1 || str->len > 10)
+		return false;
+
+	pid = 0;
+	for (c = str->ptr; c <= lastChr; c++) {
+		pid *= 10;
+		digit = *c - '0';
+		if (digit <= 9 && digit >= 0)
+			pid += digit;
+		else
+			return false;
+	}
+
+	event->pid = pid;
+	return true;
+}

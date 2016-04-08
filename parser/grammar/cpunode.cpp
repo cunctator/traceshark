@@ -16,9 +16,35 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/grammarroot.h"
+#include "parser/grammar/cpunode.h"
+#include "parser/traceevent.h"
+#include "misc/tstring.h"
 
-bool GrammarRoot::match(TString * /*str*/, TraceEvent * /*event*/)
+CpuNode::CpuNode(const char *name)
+	: GrammarNode(name) {}
+
+bool CpuNode::match(TString *str, TraceEvent *event)
 {
+	char *c;
+	unsigned int cpu = 0;
+	int digit;
+
+	if (str->ptr[0] != '[')
+		return false;
+
+	cpu = 0;
+	for (c = str->ptr + 1; *c != '\0' && *c != ']'; c++) {
+		digit = *c - '0';
+		if (digit > 9 || digit < 0)
+			goto error;
+		cpu *= 10;
+		cpu += digit;
+	}
+	event->cpu = cpu;
+	event->argv[event->argc] = str;
+	event->argc++;
 	return true;
+error:
+	event->cpu = 0;
+	return false;
 }

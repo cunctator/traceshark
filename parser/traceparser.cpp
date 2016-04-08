@@ -23,10 +23,10 @@
 
 #include "misc/tstring.h"
 #include "parser/genericparams.h"
-#include "parser/grammarroot.h"
+#include "parser/grammar/grammarroot.h"
 #include "mm/mempool.h"
-#include "parser/ftracegrammar.h"
-#include "parser/perfgrammar.h"
+#include "parser/ftrace/ftracegrammar.h"
+#include "parser/perf/perfgrammar.h"
 #include "parser/tracefile.h"
 #include "parser/traceparser.h"
 #include "misc/traceshark.h"

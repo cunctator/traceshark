@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,34 +16,18 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/pidnode.h"
-#include "parser/traceevent.h"
-#include "misc/tstring.h"
+#ifndef FTRACEGRAMMAR_H
+#define FTRACEGRAMMAR_H
 
-PidNode::PidNode(const char *name)
-	: GrammarNode(name)
-{}
+#include "parser/grammar/grammar.h"
 
-bool PidNode::match(TString *str, TraceEvent *event)
+class FtraceGrammar: public Grammar
 {
-	char *lastChr = str->ptr + str->len - 1;
-	int pid;
-	int digit;
-	char *c;
+public:
+	FtraceGrammar();
+	~FtraceGrammar();
+private:
+	void createFtraceGrammarTree();
+};
 
-	if (str->len < 1 || str->len > 10)
-		return false;
-
-	pid = 0;
-	for (c = str->ptr; c <= lastChr; c++) {
-		pid *= 10;
-		digit = *c - '0';
-		if (digit <= 9 && digit >= 0)
-			pid += digit;
-		else
-			return false;
-	}
-
-	event->pid = pid;
-	return true;
-}
+#endif /* FTRACEGRAMMAR_H */

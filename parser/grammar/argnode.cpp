@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/argnode.h"
+#include "parser/grammar/argnode.h"
 #include "mm/stringpool.h"
 #include "parser/traceevent.h"
 

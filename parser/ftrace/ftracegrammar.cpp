@@ -16,12 +16,12 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/ftracegrammar.h"
-#include "parser/argnode.h"
-#include "parser/eventnode.h"
-#include "parser/timenode.h"
-#include "parser/cpunode.h"
-#include "parser/storenode.h"
+#include "parser/ftrace/ftracegrammar.h"
+#include "parser/grammar/argnode.h"
+#include "parser/grammar/eventnode.h"
+#include "parser/ftrace/timenode.h"
+#include "parser/grammar/cpunode.h"
+#include "parser/grammar/storenode.h"
 
 FtraceGrammar::FtraceGrammar()
 	: Grammar()

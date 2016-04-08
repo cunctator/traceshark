@@ -16,17 +16,17 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/grammarnode.h"
-#include <cstring>
-#include <cstdlib>
+#ifndef CPUNODE_H
+#define CPUNODE_H
 
-GrammarNode::GrammarNode(const char *name) :
-	reaped(false)
-{
-	nameDebug = strdup(name);
-}
+#include "parser/grammar/grammarnode.h"
 
-GrammarNode::~GrammarNode()
+class CpuNode: public GrammarNode
 {
-	free(nameDebug);
-}
+public:
+	CpuNode(const char *name);
+	bool match(TString *str, TraceEvent *event);
+	void clearStringPool() {};
+};
+
+#endif

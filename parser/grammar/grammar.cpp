@@ -16,9 +16,9 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/grammar.h"
-#include "parser/grammarnode.h"
-#include "parser/grammarroot.h"
+#include "parser/grammar/grammar.h"
+#include "parser/grammar/grammarnode.h"
+#include "parser/grammar/grammarroot.h"
 
 Grammar::Grammar()
 {

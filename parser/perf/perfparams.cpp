@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,18 +16,25 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PERFGRAMMAR_H
-#define PERFGRAMMAR_H
+#include "parser/perf/perfparams.h"
 
-#include "parser/grammar.h"
-
-class PerfGrammar: public Grammar
+char *perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 {
-public:
-	PerfGrammar();
-	~PerfGrammar();
-private:
-	void createPerfGrammarTree();
-};
+	return __perf_sched_switch_oldname_strdup(event, pool);
+}
 
-#endif /* FTRACEGRAMMAR_H */
+char *perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
+{
+	return __perf_sched_switch_newname_strdup(event, pool);
+}
+
+char *perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
+{
+	return __perf_sched_wakeup_name_strdup(event, pool);
+}
+
+char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
+					       MemPool *pool)
+{
+	return __perf_sched_process_fork_childname_strdup(event, pool);
+}

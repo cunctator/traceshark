@@ -16,19 +16,23 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIDNODE_H
-#define PIDNODE_H
+#ifndef PERFEVENTNODE_H
+#define PERFEVENTNODE_H
 
-#include "parser/grammarnode.h"
+#include "parser/grammar/grammarnode.h"
 
-class StringPool;
+class StringTree;
 
-class PidNode: public GrammarNode
+class PerfEventNode: public GrammarNode
 {
 public:
-	PidNode(const char *name);
+	PerfEventNode(const char *name);
+	~PerfEventNode();
 	bool match(TString *str, TraceEvent *event);
-	void clearStringPool() {};
+	void clearStringPool();
+private:
+	StringTree *eventTree;
+	void setupTree();
 };
 
-#endif
+#endif /* PERFEVENTNODE_H */

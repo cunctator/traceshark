@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,24 +16,18 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/storenode.h"
-#include "parser/traceevent.h"
-#include "misc/tstring.h"
+#ifndef PERFGRAMMAR_H
+#define PERFGRAMMAR_H
 
-StoreNode::StoreNode(const char *name)
-	: GrammarNode(name) {}
+#include "parser/grammar/grammar.h"
 
-bool StoreNode::match(TString *str, TraceEvent *event)
+class PerfGrammar: public Grammar
 {
-	/* We temporarily store the process name string(s) into the
-	 * argv/argc fields of the event, because we don't know how many
-	 * strings the process name will be split into. It may have been
-	 * split into several strings due to the process name containing
-	 * spaces. We will then consume this stored information in the
-	 * TimeNode class */
-	if (event->argc >= 256)
-		return false;
-	event->argv[event->argc] = str;
-	event->argc++;
-	return true;
-}
+public:
+	PerfGrammar();
+	~PerfGrammar();
+private:
+	void createPerfGrammarTree();
+};
+
+#endif /* FTRACEGRAMMAR_H */

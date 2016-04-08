@@ -19,8 +19,8 @@
 #ifndef GENERICPARAMS_H
 #define GENERICPARAMS_H
 
-#include "parser/ftraceparams.h"
-#include "parser/perfparams.h"
+#include "parser/ftrace/ftraceparams.h"
+#include "parser/perf/perfparams.h"
 
 typedef enum {
 	TRACE_TYPE_FTRACE = 0,

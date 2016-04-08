@@ -16,13 +16,13 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/ftracegrammar.h"
-#include "parser/argnode.h"
-#include "parser/perfeventnode.h"
-#include "parser/perftimenode.h"
-#include "parser/cpunode.h"
-#include "parser/storenode.h"
-#include "parser/perfgrammar.h"
+#include "parser/ftrace/ftracegrammar.h"
+#include "parser/grammar/argnode.h"
+#include "parser/perf/perfeventnode.h"
+#include "parser/perf/perftimenode.h"
+#include "parser/grammar/cpunode.h"
+#include "parser/grammar/storenode.h"
+#include "parser/perf/perfgrammar.h"
 
 PerfGrammar::PerfGrammar()
 	: Grammar()

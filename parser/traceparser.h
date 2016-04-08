@@ -22,8 +22,8 @@
 #include <QVector>
 
 #include "parser/genericparams.h"
-#include "parser/grammar.h"
-#include "parser/grammarnode.h"
+#include "parser/grammar/grammar.h"
+#include "parser/grammar/grammarnode.h"
 #include "mm/mempool.h"
 #include "parser/tracelinedata.h"
 #include "parser/traceline.h"

@@ -49,28 +49,31 @@ HEADERS      +=  analyzer/task.h
 HEADERS      +=  analyzer/tcolor.h
 HEADERS      +=  analyzer/traceanalyzer.h
 
-HEADERS      +=  parser/argnode.h
-HEADERS      +=  parser/cpunode.h
-HEADERS      +=  parser/eventnode.h
-HEADERS      +=  parser/ftracegrammar.h
-HEADERS      +=  parser/ftraceparams.h
 HEADERS      +=  parser/genericparams.h
-HEADERS      +=  parser/grammar.h
-HEADERS      +=  parser/grammarnode.h
-HEADERS      +=  parser/grammarroot.h
 HEADERS      +=  parser/paramhelpers.h
-HEADERS      +=  parser/perfeventnode.h
-HEADERS      +=  parser/perfgrammar.h
-HEADERS      +=  parser/perfparams.h
-HEADERS      +=  parser/perftimenode.h
-HEADERS      +=  parser/pidnode.h
-HEADERS      +=  parser/storenode.h
-HEADERS      +=  parser/timenode.h
 HEADERS      +=  parser/traceevent.h
 HEADERS      +=  parser/tracefile.h
 HEADERS      +=  parser/tracelinedata.h
 HEADERS      +=  parser/traceline.h
 HEADERS      +=  parser/traceparser.h
+
+HEADERS      +=  parser/grammar/argnode.h
+HEADERS      +=  parser/grammar/cpunode.h
+HEADERS      +=  parser/grammar/eventnode.h
+HEADERS      +=  parser/grammar/grammar.h
+HEADERS      +=  parser/grammar/grammarnode.h
+HEADERS      +=  parser/grammar/grammarroot.h
+HEADERS      +=  parser/grammar/pidnode.h
+HEADERS      +=  parser/grammar/storenode.h
+
+HEADERS      +=  parser/ftrace/ftracegrammar.h
+HEADERS      +=  parser/ftrace/ftraceparams.h
+HEADERS      +=  parser/ftrace/timenode.h
+
+HEADERS      +=  parser/perf/perfeventnode.h
+HEADERS      +=  parser/perf/perfgrammar.h
+HEADERS      +=  parser/perf/perfparams.h
+HEADERS      +=  parser/perf/perftimenode.h
 
 HEADERS      +=  threads/indexwatcher.h
 HEADERS      +=  threads/loadbuffer.h
@@ -120,24 +123,27 @@ SOURCES      +=  analyzer/task.cpp
 SOURCES      +=  analyzer/tcolor.cpp
 SOURCES      +=  analyzer/traceanalyzer.cpp
 
-SOURCES      +=  parser/argnode.cpp
-SOURCES      +=  parser/cpunode.cpp
-SOURCES      +=  parser/eventnode.cpp
-SOURCES      +=  parser/ftracegrammar.cpp
-SOURCES      +=  parser/ftraceparams.cpp
-SOURCES      +=  parser/grammar.cpp
-SOURCES      +=  parser/grammarnode.cpp
-SOURCES      +=  parser/grammarroot.cpp
-SOURCES      +=  parser/perfeventnode.cpp
-SOURCES      +=  parser/perfgrammar.cpp
-SOURCES      +=  parser/perfparams.cpp
-SOURCES      +=  parser/perftimenode.cpp
-SOURCES      +=  parser/pidnode.cpp
-SOURCES      +=  parser/storenode.cpp
-SOURCES      +=  parser/timenode.cpp
 SOURCES      +=  parser/traceevent.cpp
 SOURCES      +=  parser/tracefile.cpp
 SOURCES      +=  parser/traceparser.cpp
+
+SOURCES      +=  parser/grammar/argnode.cpp
+SOURCES      +=  parser/grammar/cpunode.cpp
+SOURCES      +=  parser/grammar/eventnode.cpp
+SOURCES      +=  parser/grammar/grammar.cpp
+SOURCES      +=  parser/grammar/grammarnode.cpp
+SOURCES      +=  parser/grammar/grammarroot.cpp
+SOURCES      +=  parser/grammar/pidnode.cpp
+SOURCES      +=  parser/grammar/storenode.cpp
+
+SOURCES      +=  parser/ftrace/ftracegrammar.cpp
+SOURCES      +=  parser/ftrace/ftraceparams.cpp
+SOURCES      +=  parser/ftrace/timenode.cpp
+
+SOURCES      +=  parser/perf/perfeventnode.cpp
+SOURCES      +=  parser/perf/perfgrammar.cpp
+SOURCES      +=  parser/perf/perfparams.cpp
+SOURCES      +=  parser/perf/perftimenode.cpp
 
 SOURCES      +=  threads/indexwatcher.cpp
 SOURCES      +=  threads/loadbuffer.cpp

@@ -16,25 +16,17 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/perfparams.h"
+#include "parser/grammar/grammarnode.h"
+#include <cstring>
+#include <cstdlib>
 
-char *perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
+GrammarNode::GrammarNode(const char *name) :
+	reaped(false)
 {
-	return __perf_sched_switch_oldname_strdup(event, pool);
+	nameDebug = strdup(name);
 }
 
-char *perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
+GrammarNode::~GrammarNode()
 {
-	return __perf_sched_switch_newname_strdup(event, pool);
-}
-
-char *perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
-{
-	return __perf_sched_wakeup_name_strdup(event, pool);
-}
-
-char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-					       MemPool *pool)
-{
-	return __perf_sched_process_fork_childname_strdup(event, pool);
+	free(nameDebug);
 }

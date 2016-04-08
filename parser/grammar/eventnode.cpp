@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/eventnode.h"
+#include "parser/grammar/eventnode.h"
 #include "mm/stringtree.h"
 #include "parser/traceevent.h"
 #include "misc/tstring.h"

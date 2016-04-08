@@ -16,24 +16,9 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parser/ftraceparams.h"
+#include "parser/grammar/grammarroot.h"
 
-char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
-					 MemPool *pool) {
-	return __ftrace_sched_switch_oldname_strdup(event, pool);
-}
-
-char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
-					 MemPool *pool) {
-	return __ftrace_sched_switch_newname_strdup(event, pool);
-}
-
-char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
-				      MemPool *pool) {
-	return __ftrace_sched_wakeup_name_strdup(event, pool);
-}
-
-char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
-						 MemPool *pool) {
-	return __ftrace_sched_process_fork_childname_strdup(event, pool);
+bool GrammarRoot::match(TString * /*str*/, TraceEvent * /*event*/)
+{
+	return true;
 }

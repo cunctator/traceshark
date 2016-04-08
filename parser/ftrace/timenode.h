@@ -20,7 +20,7 @@
 #define TIMENODE_H
 
 #include "misc/tstring.h"
-#include "parser/grammarnode.h"
+#include "parser/grammar/grammarnode.h"
 
 class StringPool;
 

@@ -16,19 +16,19 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STORENODE_H
-#define STORENODE_H
+#ifndef PIDNODE_H
+#define PIDNODE_H
 
-#include "parser/grammarnode.h"
+#include "parser/grammar/grammarnode.h"
 
 class StringPool;
 
-class StoreNode: public GrammarNode
+class PidNode: public GrammarNode
 {
 public:
-	StoreNode(const char *name);
+	PidNode(const char *name);
 	bool match(TString *str, TraceEvent *event);
 	void clearStringPool() {};
 };
 
-#endif /* STORENODE_H */
+#endif

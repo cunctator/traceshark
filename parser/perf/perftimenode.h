@@ -16,23 +16,46 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PERFEVENTNODE_H
-#define PERFEVENTNODE_H
+#ifndef PERFTIMENODE_H
+#define PERFTIMENODE_H
 
-#include "parser/grammarnode.h"
+#include "misc/tstring.h"
+#include "parser/grammar/grammarnode.h"
 
-class StringTree;
+class StringPool;
 
-class PerfEventNode: public GrammarNode
+class PerfTimeNode: public GrammarNode
 {
 public:
-	PerfEventNode(const char *name);
-	~PerfEventNode();
+	PerfTimeNode(const char *name);
+	~PerfTimeNode();
 	bool match(TString *str, TraceEvent *event);
-	void clearStringPool();
+	void clearStringPool() {};
 private:
-	StringTree *eventTree;
-	void setupTree();
+	__always_inline int pidFromString(const TString &str);
+	StringPool *namePool;
 };
 
-#endif /* PERFEVENTNODE_H */
+__always_inline int PerfTimeNode::pidFromString(const TString &str)
+{
+	char *lastChr = str.ptr + str.len - 1;
+	int pid;
+	int digit;
+	char *c;
+
+	if (str.len < 1 || str.len > 10)
+		return false;
+
+	pid = 0;
+	for (c = str.ptr; c <= lastChr; c++) {
+		pid *= 10;
+		digit = *c - '0';
+		if (digit <= 9 && digit >= 0)
+			pid += digit;
+		else
+			return -1;
+	}
+	return pid;
+}
+
+#endif
