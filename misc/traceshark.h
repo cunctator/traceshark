@@ -32,6 +32,14 @@
 #include <QtWidgets>
 #endif
 
+typedef enum {
+	TRACE_TYPE_FTRACE = 0,
+	TRACE_TYPE_PERF,
+	TRACE_TYPE_MAX
+} tracetype_t;
+
+#define TRACE_TYPE_NONE (TRACE_TYPE_MAX)
+
 #define tsconnect(src, ssig, dest, dslot) \
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
 

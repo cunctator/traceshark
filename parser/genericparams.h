@@ -21,14 +21,7 @@
 
 #include "parser/ftrace/ftraceparams.h"
 #include "parser/perf/perfparams.h"
-
-typedef enum {
-	TRACE_TYPE_FTRACE = 0,
-	TRACE_TYPE_PERF,
-	TRACE_TYPE_MAX
-} tracetype_t;
-
-#define TRACE_TYPE_NONE (TRACE_TYPE_MAX)
+#include "misc/traceshark.h"
 
 static __always_inline bool tracetype_is_valid(tracetype_t ttype)
 {
