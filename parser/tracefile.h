@@ -45,6 +45,8 @@ private:
 	__always_inline unsigned int nextBufferIdx(unsigned int n);
 	__always_inline unsigned int ReadNextWord(char *word,
 						  unsigned int maxstr);
+	__always_inline bool handleEndOfBuffer(char *word, unsigned int &pos,
+					       unsigned int nchar);
 	int fd;
 	bool eof;
 	unsigned int nRead;
@@ -62,54 +64,51 @@ private:
 	LoadThread *loadThread;
 };
 
+
+__always_inline bool TraceFile::handleEndOfBuffer(char *word, unsigned int &pos,
+						  unsigned int nchar)
+{
+	bool e;
+
+	pos++;
+	if (pos >= nRead) {
+		buffers[lastBuf]->endConsumeBuffer();
+		lastBuf = nextBufferIdx(lastBuf);
+		lastPos = 0;
+		pos = lastPos;
+		e = buffers[lastBuf]->beginConsumeBuffer();
+		if (e) {
+			buffers[lastBuf]->endConsumeBuffer();
+			eof = e;
+			word[nchar] = '\0';
+			nRead = 0;
+			return true;
+		}
+		nRead = (unsigned int) buffers[lastBuf]->nRead;
+	}
+	return false;
+}
+
 __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 						     unsigned int maxstr)
 {
 	unsigned int pos = lastPos;
 	unsigned int nchar = 0;
 	char c;
-	bool e;
 
 	maxstr--; /* Reserve space for null termination */
 
 	if (buffers[lastBuf]->buffer[lastPos] == '\n') {
-		lastPos++;
-		if (lastPos >= nRead) {
-			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = nextBufferIdx(lastBuf);
-			lastPos = 0;
-			e = buffers[lastBuf]->beginConsumeBuffer();
-			if (e) {
-				buffers[lastBuf]->endConsumeBuffer();
-				eof = e;
-				word[nchar] = '\0';
-				nRead = 0;
-				return nchar;
-			}
-			nRead = (unsigned int) buffers[lastBuf]->nRead;
-		}
+		if (handleEndOfBuffer(word, lastPos, nchar))
+			return nchar;
 		word[nchar] = '\0';
 		return nchar;
 	}
 
 	for (c = buffers[lastBuf]->buffer[pos]; c == ' ';
 	     c = buffers[lastBuf]->buffer[pos]) {
-		pos++;
-		if (pos >= nRead) {
-			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = nextBufferIdx(lastBuf);
-			lastPos = 0;
-			pos = lastPos;
-			e = buffers[lastBuf]->beginConsumeBuffer();
-			if (e) {
-				buffers[lastBuf]->endConsumeBuffer();
-				eof = e;
-				word[nchar] = '\0';
-				nRead = 0;
-				return nchar;
-			}
-			nRead = (unsigned int) buffers[lastBuf]->nRead;
-		}
+		if (handleEndOfBuffer(word, pos, nchar))
+			return nchar;
 	}
 
 	while (nchar < maxstr) {
@@ -121,22 +120,8 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		}
 		word[nchar] = c;
 		nchar++;
-		pos++;
-		if (pos >= nRead) {
-			buffers[lastBuf]->endConsumeBuffer();
-			lastBuf = nextBufferIdx(lastBuf);
-			lastPos = 0;
-			pos = lastPos;
-			e = buffers[lastBuf]->beginConsumeBuffer();
-			if (e) {
-				buffers[lastBuf]->endConsumeBuffer();
-				eof = e;
-				word[nchar] = '\0';
-				nRead = 0;
-				return nchar;
-			}
-			nRead = (unsigned int) buffers[lastBuf]->nRead;
-		}
+		if (handleEndOfBuffer(word, pos, nchar))
+			return nchar;
 	}
 
 	lastPos = pos;
