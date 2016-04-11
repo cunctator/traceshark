@@ -45,8 +45,9 @@ private:
 	__always_inline unsigned int nextBufferIdx(unsigned int n);
 	__always_inline unsigned int ReadNextWord(char *word,
 						  unsigned int maxstr);
-	__always_inline bool handleEndOfBuffer(char *word, unsigned int &pos,
-					       unsigned int nchar);
+	__always_inline bool IncPosHandleEndOfBuffer(char *word,
+						     unsigned int &pos,
+						     unsigned int nchar);
 	int fd;
 	bool eof;
 	unsigned int nRead;
@@ -65,8 +66,9 @@ private:
 };
 
 
-__always_inline bool TraceFile::handleEndOfBuffer(char *word, unsigned int &pos,
-						  unsigned int nchar)
+__always_inline bool TraceFile::IncPosHandleEndOfBuffer(char *word,
+							unsigned int &pos,
+							unsigned int nchar)
 {
 	bool e;
 
@@ -99,7 +101,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 	maxstr--; /* Reserve space for null termination */
 
 	if (buffers[lastBuf]->buffer[lastPos] == '\n') {
-		if (handleEndOfBuffer(word, lastPos, nchar))
+		if (IncPosHandleEndOfBuffer(word, lastPos, nchar))
 			return nchar;
 		word[nchar] = '\0';
 		return nchar;
@@ -107,7 +109,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 
 	for (c = buffers[lastBuf]->buffer[pos]; c == ' ';
 	     c = buffers[lastBuf]->buffer[pos]) {
-		if (handleEndOfBuffer(word, pos, nchar))
+		if (IncPosHandleEndOfBuffer(word, pos, nchar))
 			return nchar;
 	}
 
@@ -120,7 +122,7 @@ __always_inline unsigned int TraceFile::ReadNextWord(char *word,
 		}
 		word[nchar] = c;
 		nchar++;
-		if (handleEndOfBuffer(word, pos, nchar))
+		if (IncPosHandleEndOfBuffer(word, pos, nchar))
 			return nchar;
 	}
 
