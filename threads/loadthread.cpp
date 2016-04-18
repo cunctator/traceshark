@@ -16,8 +16,17 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cassert>
+#include <cstring>
+#include <QTextStream>
+
+#include "misc/tstring.h"
 #include "threads/loadbuffer.h"
 #include "threads/loadthread.h"
+
+extern "C" {
+#include <sys/mman.h>
+}
 
 LoadThread::LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
 		       char *map)
@@ -30,11 +39,28 @@ void LoadThread::run()
 	unsigned int i = 0;
 	bool eof;
 	char *filePos = mappedFile;
+	TString lineBegin;
+	size_t bufSize = loadBuffers[0]->bufSize;
+	int uval, eval;
+	QTextStream qout(stdout);
+
+	lineBegin.ptr = (char*) mmap(nullptr, bufSize, PROT_READ|PROT_WRITE,
+			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	assert(lineBegin.ptr != MAP_FAILED);
+	lineBegin.len = 0;
 
 	do {
-		eof = loadBuffers[i]->produceBuffer(fd, &filePos);
+		eof = loadBuffers[i]->produceBuffer(fd, &filePos, &lineBegin);
 		i++;
 		if (i == nBuffers)
 			i = 0;
 	} while(!eof);
+
+	uval = munmap(lineBegin.ptr, bufSize);
+	eval = errno;
+	if (uval != 0) {
+		qout << "Warning, error in " << __FUNCTION__
+		     <<	"(), munmap() failed because: " << strerror(eval)
+		     << "\n";
+	}
 }

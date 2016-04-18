@@ -115,17 +115,15 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 						unsigned int index)
 {
 	unsigned int i, s;
+	bool eof;
 
 	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
-	if (tbuf->beginConsumeBuffer()) {
-		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
-		return true;
-	}
+	tbuf->beginConsumeBuffer();
 
-	s = tbuf->nRead;
+	s = tbuf->list.size();
 
 	for(i = 0; i < s; i++) {
-		TraceLine *line = &tbuf->buffer[i];
+		TraceLine *line = &tbuf->list[i];
 		TraceEvent &event = events->preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
@@ -134,8 +132,9 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 		else if (ttype == TRACE_TYPE_PERF)
 			parseLinePerf(line, event);
 	}
+	eof = tbuf->loadBuffer->isEOF();
 	tbuf->endConsumeBuffer();
-	return false;
+	return eof;
 }
 		
 

@@ -75,7 +75,7 @@ bool TraceParser::open(const QString &fileName)
 		return ok;
 
 	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok,
-				  1024 * 1024, NR_TBUFFERS);
+				  1024 * 1024);
 
 	if (!ok) {
 		delete traceFile;
@@ -85,8 +85,7 @@ bool TraceParser::open(const QString &fileName)
 
 	/* These buffers will be deleted by the parserThread */
 	for (i = 0; i < NR_TBUFFERS; i++)
-		tbuffers[i] = new ThreadBuffer<TraceLine>(TBUFSIZE,
-							  NR_TBUFFERS);
+		tbuffers[i] = new ThreadBuffer<TraceLine>(TBUFSIZE);
 	eventsWatcher->reset();
 	traceTypeWatcher->reset();
 	readerThread->start();
@@ -118,31 +117,36 @@ void TraceParser::threadReader()
 	unsigned long long nr = 0;
 	unsigned int i = 0;
 	unsigned int curbuf = 0;
+	bool eof;
+
+	for (i = 0; i < NR_TBUFFERS; i++)
+		tbuffers[i]->loadBuffer = traceFile->getLoadBuffer(i);
 
 	tbuffers[curbuf]->beginProduceBuffer();
-	while(!traceFile->atEnd()) {
-		TraceLine *line = &tbuffers[curbuf]->buffer[i];
-		quint32 n = traceFile->ReadLine(line, curbuf);
+
+	while(true) {
+		TraceLine *line = &tbuffers[curbuf]->list.increase();
+		quint32 n = traceFile->ReadLine(line, tbuffers[curbuf]);
 		nr += n;
-		i++;
-		if (i == (TBUFSIZE - 1)) {
-			tbuffers[curbuf]->endProduceBuffer(i);
+		if (traceFile->getBufferSwitch()) {
+			eof = tbuffers[curbuf]->loadBuffer->isEOF();
+			tbuffers[curbuf]->endProduceBuffer();
+			if (eof)
+				break;
 			curbuf++;
 			if (curbuf == NR_TBUFFERS)
 				curbuf = 0;
-			i = 0;
+			traceFile->clearBufferSwitch();
 			tbuffers[curbuf]->beginProduceBuffer();
-			traceFile->clearPool(curbuf);
+			eof = tbuffers[curbuf]->loadBuffer->isEOF();
+			/* This is were EOF will be detected in practice, with
+			 * the current implementation of LoadBuffer
+			 */
+			if (eof && tbuffers[curbuf]->loadBuffer->nRead == 0) {
+				tbuffers[curbuf]->endProduceBuffer();
+				break;
+			}
 		}
-	}
-	tbuffers[curbuf]->endProduceBuffer(i);
-	/* We must send an empty buffer at the end to signal that we are EOF */
-	if (i != 0) {
-		curbuf++;
-		if (curbuf == NR_TBUFFERS)
-			curbuf = 0;
-		tbuffers[curbuf]->beginProduceBuffer();
-		tbuffers[curbuf]->endProduceBuffer(0);
 	}
 
 	QTextStream(stdout) << nr << "\n";
@@ -204,8 +208,6 @@ out:
 	sendTraceType();
 	eventsWatcher->sendNextIndex(events->size());
 	eventsWatcher->sendEOF();
-	for (i = 0; i < NR_TBUFFERS; i++)
-		delete tbuffers[i];
 
 	fixLastEvent();
 }
@@ -315,17 +317,15 @@ void TraceParser::determineTraceType()
 bool TraceParser::parseBuffer(unsigned int index)
 {
 	unsigned int i, s;
+	bool eof;
 
 	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
-	if (tbuf->beginConsumeBuffer()) {
-		tbuf->endConsumeBuffer(); /* Uncessary but beatiful */
-		return true;
-	}
+	tbuf->beginConsumeBuffer();
 
-	s = tbuf->nRead;
+	s = tbuf->list.size();
 
 	for(i = 0; i < s; i++) {
-		TraceLine *line = &tbuf->buffer[i];
+		TraceLine *line = &tbuf->list[i];
 		TraceEvent &event = events->preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
@@ -335,6 +335,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 			parseLinePerf(line, event);
 		}
 	}
+	eof = tbuf->loadBuffer->isEOF();
 	tbuf->endConsumeBuffer();
-	return false;
+	return eof;
 }

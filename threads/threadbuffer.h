@@ -19,8 +19,15 @@
 #ifndef THREADBUFFER_H
 #define THREADBUFFER_H
 
+#include <cstdint>
+
 #include <QMutex>
 #include <QWaitCondition>
+#include "misc/tlist.h"
+#include "misc/tstring.h"
+#include "mm/mempool.h"
+#include "threads/loadbuffer.h"
+
 
 /* This class is a load buffer for two threads where one is a producer and the
  * other is a consumer. The synchronization functions have not been designed
@@ -30,16 +37,16 @@ template<class T>
 class ThreadBuffer
 {
 public:
-	ThreadBuffer(unsigned int bufsize, unsigned int nr);
+	ThreadBuffer(unsigned int nr);
 	~ThreadBuffer();
-	unsigned int bufSize;
 	unsigned int nrBuffers;
-	unsigned int nRead;
-	T *buffer;
+	TList<T> list;
+	MemPool *strPool;
 	void beginProduceBuffer();
-	void endProduceBuffer(unsigned int s);
-	bool beginConsumeBuffer();
+	void endProduceBuffer();
+	void beginConsumeBuffer();
 	void endConsumeBuffer();
+	LoadBuffer *loadBuffer;
 private:
 	__always_inline void waitForProductionComplete();
 	__always_inline void completeProduction();
@@ -81,21 +88,21 @@ __always_inline void ThreadBuffer<T>::waitForConsumptionComplete() {
 template<class T>
 __always_inline void ThreadBuffer<T>::completeConsumption() {
 	isEmpty = true;
+	list.clear();
 	consumptionComplete.wakeOne();
 	mutex.unlock();
 }
 
-template<class T>
-ThreadBuffer<T>::ThreadBuffer(unsigned int bufsize, unsigned int nr):
-bufSize(bufsize), nrBuffers(nr), nRead(0), isEmpty(true)
+template<class T>ThreadBuffer<T>::ThreadBuffer(unsigned int nr):
+nrBuffers(nr), isEmpty(true)
 {
-	buffer = new T[bufsize];
+	strPool = new MemPool(4096, sizeof(TString));
 }
 
 template<class T>
 ThreadBuffer<T>::~ThreadBuffer()
 {
-	delete[] buffer;
+	delete strPool;
 }
 
 /* This should be called from the producer thread
@@ -103,13 +110,16 @@ ThreadBuffer<T>::~ThreadBuffer()
 template<class T>
 void ThreadBuffer<T>::beginProduceBuffer() {
 	waitForConsumptionComplete();
+	loadBuffer->beginTokenizeBuffer();
+	strPool->reset();
+	list.clear();
 }
 
 /* This should be called from the data processing thread
- * when the butter is ready to be consumed  */
+ * when the buffer is ready to be consumed  */
 template<class T>
-void ThreadBuffer<T>::endProduceBuffer(unsigned int s) {
-	nRead = s;
+void ThreadBuffer<T>::endProduceBuffer() {
+	loadBuffer->endTokenizeBuffer();
 	completeProduction();
 }
 
@@ -117,17 +127,16 @@ void ThreadBuffer<T>::endProduceBuffer(unsigned int s) {
 /* This should be called from the data processing thread
  * before starting to process a buffer */
 template<class T>
-bool ThreadBuffer<T>::beginConsumeBuffer() {
+void ThreadBuffer<T>::beginConsumeBuffer() {
 	waitForProductionComplete();
-	if (nRead == 0)
-		return true;
-	return false;
+	loadBuffer->beginConsumeBuffer();
 }
 
 /* This should be called from the data processing thread
  * when the processing of a buffer has been completed */
 template<class T>
 void ThreadBuffer<T>::endConsumeBuffer() {
+	loadBuffer->endConsumeBuffer();
 	completeConsumption();
 }
 

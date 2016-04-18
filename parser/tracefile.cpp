@@ -31,12 +31,10 @@ extern "C" {
 #include <unistd.h>
 }
 
-TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize, unsigned int
-		     nrPoolsMAX)
-	: mappedFile(nullptr), fileSize(0), nrPools(nrPoolsMAX)
+TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
+	: mappedFile(nullptr), fileSize(0), bufferSwitch(false)
 {
 	unsigned int i;
-	char *m;
 	struct stat sbuf;
 
 	fd = open(name, O_RDONLY);
@@ -61,29 +59,16 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize, unsigned int
 
 	lastPos = 0;
 	lastBuf = 0;
-	eof = false;
-	strPool = new MemPool*[nrPools];
-	ptrPool = new MemPool*[nrPools];
 
-	for (i = 0; i < nrPools; i++) {
-		strPool[i] = new MemPool(163840, 1);
-		ptrPool[i] = new MemPool(163840, sizeof(TString));
-	}
-
-	memory = new char[NR_BUFFERS * bsize];
-	m = memory;
 	for (i = 0; i < NR_BUFFERS; i++) {
-		buffers[i] = new LoadBuffer(m, bsize);
-		m += bsize;
+		loadBuffers[i] = new LoadBuffer(bsize);
 	}
-	loadThread = new LoadThread(buffers, NR_BUFFERS, fd, mappedFile);
+	loadThread = new LoadThread(loadBuffers, NR_BUFFERS, fd, mappedFile);
 	/* Don't start thread if something failed earlier, we go this far in
 	 * order to avoid problems in the destructor */
 	if (!ok)
 		return;
 	loadThread->start();
-	eof = buffers[0]->beginConsumeBuffer();
-	nRead = buffers[0]->nRead;
 }
 
 TraceFile::~TraceFile()
@@ -91,16 +76,8 @@ TraceFile::~TraceFile()
 	unsigned int i;
 	loadThread->wait();
 	delete loadThread;
-	delete[] memory;
-	for (i = 0; i < nrPools; i++) {
-		delete strPool[i];
-		delete ptrPool[i];
-	}
-	delete[] strPool;
-	delete[] ptrPool;
-	for (i = 0; i < NR_BUFFERS; i++) {
-		delete buffers[i];
-	}
+	for (i = 0; i < NR_BUFFERS; i++)
+		delete loadBuffers[i];
 	if (mappedFile != nullptr)
 		munmap(mappedFile, fileSize);
 }

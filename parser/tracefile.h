@@ -24,6 +24,7 @@
 #include <QDebug>
 
 #include "threads/loadbuffer.h"
+#include "threads/threadbuffer.h"
 #include "mm/mempool.h"
 #include "parser/traceline.h"
 
@@ -32,132 +33,126 @@ class LoadThread;
 class TraceFile
 {
 public:
-	TraceFile(char *name, bool &ok, unsigned int bsize = 1024*1024,
-		  unsigned int nrPoolsMAX = 1);
+	TraceFile(char *name, bool &ok, unsigned int bsize = 1024*1024);
 	~TraceFile();
-	__always_inline unsigned int ReadLine(TraceLine* line,
-					      unsigned int pool);
+	__always_inline unsigned int
+		ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer);
 	__always_inline bool atEnd();
-	__always_inline void clearPool(unsigned int pool);
+	__always_inline bool getBufferSwitch();
+	__always_inline void clearBufferSwitch();
 	char *mappedFile;
 	unsigned long fileSize;
+	__always_inline LoadBuffer *getLoadBuffer(int index);
 private:
 	__always_inline unsigned int nextBufferIdx(unsigned int n);
-	__always_inline unsigned int ReadNextWord(char *word,
-						  unsigned int maxstr);
-	__always_inline bool IncPosHandleEndOfBuffer(char *word,
-						     unsigned int &pos,
-						     unsigned int nchar);
+	__always_inline unsigned int
+		ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer);
+	__always_inline bool
+		CheckBufferSwitch(unsigned int pos,
+				  ThreadBuffer<TraceLine> *tbuffer);
 	int fd;
-	bool eof;
+	bool bufferSwitch;
 	unsigned int nRead;
-	char *memory;
-
 	unsigned lastBuf;
 	unsigned lastPos;
-	MemPool **strPool;
-	MemPool **ptrPool;
-	unsigned int nrPools;
-	static const unsigned int MAXPTR = 640;
-	static const unsigned int MAXSTR = 480;
+	bool endOfLine;
+	static const unsigned int MAX_NR_STRINGS = 128;
 	static const unsigned int NR_BUFFERS = 3;
-	LoadBuffer *buffers[NR_BUFFERS];
+	LoadBuffer *loadBuffers[NR_BUFFERS];
 	LoadThread *loadThread;
 };
 
 
-__always_inline bool TraceFile::IncPosHandleEndOfBuffer(char *word,
-							unsigned int &pos,
-							unsigned int nchar)
+__always_inline bool TraceFile::CheckBufferSwitch(unsigned int pos,
+						  ThreadBuffer<TraceLine>
+						  *tbuffer)
 {
-	bool e;
-
-	pos++;
-	if (pos >= nRead) {
-		buffers[lastBuf]->endConsumeBuffer();
-		lastBuf = nextBufferIdx(lastBuf);
+	LoadBuffer *loadBuffer = tbuffer->loadBuffer;
+	if (pos >= loadBuffer->nRead) {
 		lastPos = 0;
-		pos = lastPos;
-		e = buffers[lastBuf]->beginConsumeBuffer();
-		if (e) {
-			buffers[lastBuf]->endConsumeBuffer();
-			eof = e;
-			word[nchar] = '\0';
-			nRead = 0;
-			return true;
-		}
-		nRead = (unsigned int) buffers[lastBuf]->nRead;
+		bufferSwitch = true;
+		endOfLine = true;
+		return true;
 	}
 	return false;
 }
 
-__always_inline unsigned int TraceFile::ReadNextWord(char *word,
-						     unsigned int maxstr)
+__always_inline unsigned int
+TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 {
 	unsigned int pos = lastPos;
 	unsigned int nchar = 0;
 	char c;
+	char *buffer = tbuffer->loadBuffer->buffer;
 
-	maxstr--; /* Reserve space for null termination */
+	if (endOfLine)
+		return 0;
 
-	if (buffers[lastBuf]->buffer[lastPos] == '\n') {
-		if (IncPosHandleEndOfBuffer(word, lastPos, nchar))
-			return nchar;
-		word[nchar] = '\0';
-		return nchar;
+	for (c = buffer[pos]; c == ' '; c = buffer[pos]) {
+		pos++;
+		if (CheckBufferSwitch(pos, tbuffer))
+			return 0;
 	}
 
-	for (c = buffers[lastBuf]->buffer[pos]; c == ' ';
-	     c = buffers[lastBuf]->buffer[pos]) {
-		if (IncPosHandleEndOfBuffer(word, pos, nchar))
-			return nchar;
-	}
-
-	while (nchar < maxstr) {
-		c = buffers[lastBuf]->buffer[pos];
-		if (c == ' ' || c == '\n') {
+	if (c == '\n') {
+		pos++;
+		if (!CheckBufferSwitch(pos, tbuffer))
 			lastPos = pos;
-			word[nchar] = '\0';
-			return nchar;
-		}
-		word[nchar] = c;
-		nchar++;
-		if (IncPosHandleEndOfBuffer(word, pos, nchar))
-			return nchar;
+		return 0;
 	}
 
+	*word = buffer + pos;
+
+	while (true) {
+		c = buffer[pos];
+		if (c == ' ' || c == '\n')
+			break;
+		pos++;
+		if (CheckBufferSwitch(pos, tbuffer))
+			break;
+		nchar++;
+	}
+	if (c == '\n')
+		endOfLine = true;
+	buffer[pos] = '\0';
+	pos++;
+	if (CheckBufferSwitch(pos, tbuffer))
+		return nchar;
 	lastPos = pos;
-	word[nchar] = '\0';
 	return nchar;
 }
 
-__always_inline unsigned int TraceFile::ReadLine(TraceLine* line,
-						 unsigned int pool)
+__always_inline unsigned int
+TraceFile::ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer)
 {
 	unsigned int col;
 	unsigned int n;
+	/* This is a setup needed by ReadNextWord() */
+	endOfLine = false;
 
-	line->strings = (TString*) ptrPool[pool]->preallocN(MAXPTR);
-	line->begin = buffers[lastBuf]->filePos + lastPos;
+	line->strings = (TString*) tbuffer->strPool->preallocN(MAX_NR_STRINGS);
+	line->begin = tbuffer->loadBuffer->filePos + lastPos;
 
-	for(col = 0; col < MAXPTR; col++) {
-		line->strings[col].ptr = (char*)
-			strPool[pool]->preallocChars(MAXSTR);
-		n = ReadNextWord(line->strings[col].ptr, MAXSTR);
+	for(col = 0; col < MAX_NR_STRINGS; col++) {
+		n = ReadNextWord(&line->strings[col].ptr, tbuffer);
 		if (n == 0)
 			break;
-		strPool[pool]->commitChars(n + 1 ); // + 1 for null termination
 		line->strings[col].len = n;
 	}
 	if (col > 0)
-		ptrPool[pool]->commitN(col);
+		tbuffer->strPool->commitN(col);
 	line->nStrings = col;
 	return col;
 }
 
-__always_inline bool TraceFile::atEnd()
+__always_inline bool TraceFile::getBufferSwitch()
 {
-	return eof;
+	return bufferSwitch;
+}
+
+__always_inline void TraceFile::clearBufferSwitch()
+{
+	bufferSwitch = false;
 }
 
 __always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
@@ -168,10 +163,9 @@ __always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
 	return n;
 }
 
-__always_inline void TraceFile::clearPool(unsigned int pool)
+__always_inline LoadBuffer *TraceFile::getLoadBuffer(int index)
 {
-	ptrPool[pool]->reset();
-	strPool[pool]->reset();
+	return loadBuffers[index];
 }
 
 #endif
