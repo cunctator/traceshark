@@ -206,10 +206,17 @@ out:
 	 * type was detected, otherwise it would wait forever in
 	 * waitForTraceType() */
 	sendTraceType();
+
+	/* It's probable that at this point, one of the sendNextIndex() calls
+	 * above has already been issued with and index value that corresponds
+	 * to the last event but that is OK because the fixLastEvent() does
+	 * not touch data that would be read by the code that waits for
+	 * the sendNextIndex, i.e. the analyzer thread, so it's OK to call
+	 * fixLastEvent while the analyzer thread is reading the last event. */
+	fixLastEvent();
+
 	eventsWatcher->sendNextIndex(events->size());
 	eventsWatcher->sendEOF();
-
-	fixLastEvent();
 }
 
 void TraceParser::waitForTraceType()
