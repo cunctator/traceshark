@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,62 +17,41 @@
  */
 
 #include "parser/ftrace/ftracegrammar.h"
-#include "parser/grammar/argnode.h"
-#include "parser/grammar/eventnode.h"
-#include "parser/ftrace/timenode.h"
-#include "parser/grammar/cpunode.h"
-#include "parser/grammar/storenode.h"
+#include "parser/traceevent.h"
 
 FtraceGrammar::FtraceGrammar()
-	: Grammar()
 {
-	createFtraceGrammarTree();
+	argPool = new StringPool(2048, 1024 * 1024);
+	namePool =  new StringPool(1024, 65536);
+	eventTree = new StringTree(8, 256);
+	setupEventTree();
 }
 
 FtraceGrammar::~FtraceGrammar()
 {
+	delete argPool;
+	delete namePool;
+	delete eventTree;
 }
 
-void FtraceGrammar::createFtraceGrammarTree()
+void FtraceGrammar::clear()
 {
-	ArgNode *ftraceArgNode;
-	EventNode *ftraceEventNode;
-	TimeNode *ftraceTimeNode;
-	CpuNode *ftraceCpuNode;
-	StoreNode *ftraceNamePidNode;
+	argPool->clear();
+	namePool->clear();
+	eventTree->clear();
+	setupEventTree();
+}
 
-	ftraceArgNode = new ArgNode("ftraceArgNode");
-	ftraceArgNode->nChildren = 1;
-	ftraceArgNode->children[0] = ftraceArgNode;
-	ftraceArgNode->isLeaf = true;
+void FtraceGrammar::setupEventTree()
+{
+	int t;
+	event_t dummy;
+	TString str;
 
-	ftraceEventNode = new EventNode("ftraceEventnode");
-	ftraceEventNode->nChildren = 1;
-	ftraceEventNode->children[0] = ftraceArgNode;
-	ftraceEventNode->isLeaf = true;
-
-	ftraceTimeNode = new TimeNode("ftraceTimeNode");
-	ftraceTimeNode->nChildren = 1;
-	ftraceTimeNode->children[0] = ftraceEventNode;
-	ftraceTimeNode->isLeaf = false;
-
-	ftraceCpuNode = new CpuNode("ftraceCpuNode");
-	ftraceCpuNode->nChildren = 2;
-	ftraceCpuNode->children[0] = ftraceTimeNode;
-	// ftraceCpuNode->children[1] = ftraceNamePidNode;
-	ftraceCpuNode->isLeaf = false;
-
-	ftraceNamePidNode = new StoreNode("ftraceNamePidNode");
-	ftraceNamePidNode->nChildren = 2;
-	ftraceNamePidNode->children[0] = ftraceCpuNode;
-	ftraceNamePidNode->children[1] = ftraceNamePidNode;
-	ftraceNamePidNode->isLeaf = false;
-
-	root->nChildren = 1;
-	root->children[0] = ftraceNamePidNode;
-	root->isLeaf = false;
-
-	/* This is the commented out line being executed here because of the
-	 * loop structure */
-	ftraceCpuNode->children[1] = ftraceNamePidNode;
+	for (t = 0; t < NR_EVENTS; t++) {
+		str.ptr = eventstrings[t];
+		str.len = strlen(eventstrings[t]);
+		eventTree->searchAllocString(&str, TShark::StrHash32(&str),
+					     &dummy, (event_t) t);
+	}
 }

@@ -88,7 +88,7 @@ __always_inline void ThreadBuffer<T>::waitForConsumptionComplete() {
 template<class T>
 __always_inline void ThreadBuffer<T>::completeConsumption() {
 	isEmpty = true;
-	list.clear();
+	list.softclear();
 	consumptionComplete.wakeOne();
 	mutex.unlock();
 }
@@ -112,7 +112,7 @@ void ThreadBuffer<T>::beginProduceBuffer() {
 	waitForConsumptionComplete();
 	loadBuffer->beginTokenizeBuffer();
 	strPool->reset();
-	list.clear();
+	list.softclear();
 }
 
 /* This should be called from the data processing thread

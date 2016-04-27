@@ -23,7 +23,6 @@
 
 #include "misc/tstring.h"
 #include "parser/genericparams.h"
-#include "parser/grammar/grammarroot.h"
 #include "mm/mempool.h"
 #include "parser/ftrace/ftracegrammar.h"
 #include "parser/perf/perfgrammar.h"
@@ -106,8 +105,8 @@ void TraceParser::close()
 		traceFile = nullptr;
 	}
 	ptrPool->reset();
-	perfGrammar->clearPools();
-	ftraceGrammar->clearPools();
+	perfGrammar->clear();
+	ftraceGrammar->clear();
 	traceType = TRACE_TYPE_NONE;
 }
 
@@ -332,7 +331,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 	s = tbuf->list.size();
 
 	for(i = 0; i < s; i++) {
-		TraceLine *line = &tbuf->list[i];
+		TraceLine &line = tbuf->list[i];
 		TraceEvent &event = events->preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);

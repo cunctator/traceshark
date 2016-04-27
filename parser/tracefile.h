@@ -57,7 +57,7 @@ private:
 	unsigned lastPos;
 	bool endOfLine;
 	static const unsigned int MAX_NR_STRINGS = 128;
-	static const unsigned int NR_BUFFERS = 3;
+	static const unsigned int NR_BUFFERS = 4;
 	LoadBuffer *loadBuffers[NR_BUFFERS];
 	LoadThread *loadThread;
 };

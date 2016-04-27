@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -68,6 +68,7 @@ public:
 	__always_inline T& last();
 	__always_inline unsigned int size();
 	void clear();
+	void softclear();
 	__always_inline T& operator[](unsigned int index);
 private:
 	__always_inline unsigned int mapFromIndex(unsigned int index);
@@ -225,6 +226,12 @@ void TList<T>::clear()
 {
 	clearAll();
 	setupMem();
+}
+
+template<class T>
+void TList<T>::softclear()
+{
+	nrElements = 0;
 }
 
 template<class T>

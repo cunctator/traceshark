@@ -145,9 +145,6 @@ private:
 	void addCpuSchedWork(unsigned int cpu,
 			     QList<AbstractWorkItem*> &list);
 	void scaleMigration();
-	void _clearGrammarPools(GrammarNode *tree);
-	void resetGrammarReapedFlag(GrammarNode *tree);
-	void clearGrammarPools(GrammarNode *tree);
 	void processSchedAddTail();
 	void processFreqAddTail();
 	__always_inline void __processGeneric(tracetype_t ttype);

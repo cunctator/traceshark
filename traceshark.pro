@@ -57,23 +57,11 @@ HEADERS      +=  parser/tracelinedata.h
 HEADERS      +=  parser/traceline.h
 HEADERS      +=  parser/traceparser.h
 
-HEADERS      +=  parser/grammar/argnode.h
-HEADERS      +=  parser/grammar/cpunode.h
-HEADERS      +=  parser/grammar/eventnode.h
-HEADERS      +=  parser/grammar/grammar.h
-HEADERS      +=  parser/grammar/grammarnode.h
-HEADERS      +=  parser/grammar/grammarroot.h
-HEADERS      +=  parser/grammar/pidnode.h
-HEADERS      +=  parser/grammar/storenode.h
-
-HEADERS      +=  parser/ftrace/ftracegrammar.h
 HEADERS      +=  parser/ftrace/ftraceparams.h
-HEADERS      +=  parser/ftrace/timenode.h
+HEADERS      +=  parser/ftrace/ftracegrammar.h
 
-HEADERS      +=  parser/perf/perfeventnode.h
-HEADERS      +=  parser/perf/perfgrammar.h
 HEADERS      +=  parser/perf/perfparams.h
-HEADERS      +=  parser/perf/perftimenode.h
+HEADERS      +=  parser/perf/perfgrammar.h
 
 HEADERS      +=  threads/indexwatcher.h
 HEADERS      +=  threads/loadbuffer.h
@@ -127,23 +115,11 @@ SOURCES      +=  parser/traceevent.cpp
 SOURCES      +=  parser/tracefile.cpp
 SOURCES      +=  parser/traceparser.cpp
 
-SOURCES      +=  parser/grammar/argnode.cpp
-SOURCES      +=  parser/grammar/cpunode.cpp
-SOURCES      +=  parser/grammar/eventnode.cpp
-SOURCES      +=  parser/grammar/grammar.cpp
-SOURCES      +=  parser/grammar/grammarnode.cpp
-SOURCES      +=  parser/grammar/grammarroot.cpp
-SOURCES      +=  parser/grammar/pidnode.cpp
-SOURCES      +=  parser/grammar/storenode.cpp
-
-SOURCES      +=  parser/ftrace/ftracegrammar.cpp
 SOURCES      +=  parser/ftrace/ftraceparams.cpp
-SOURCES      +=  parser/ftrace/timenode.cpp
+SOURCES      +=  parser/ftrace/ftracegrammar.cpp
 
-SOURCES      +=  parser/perf/perfeventnode.cpp
-SOURCES      +=  parser/perf/perfgrammar.cpp
 SOURCES      +=  parser/perf/perfparams.cpp
-SOURCES      +=  parser/perf/perftimenode.cpp
+SOURCES      +=  parser/perf/perfgrammar.cpp
 
 SOURCES      +=  threads/indexwatcher.cpp
 SOURCES      +=  threads/loadbuffer.cpp

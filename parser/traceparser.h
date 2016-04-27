@@ -22,8 +22,8 @@
 #include <QVector>
 
 #include "parser/genericparams.h"
-#include "parser/grammar/grammar.h"
-#include "parser/grammar/grammarnode.h"
+#include "parser/ftrace/ftracegrammar.h"
+#include "parser/perf/perfgrammar.h"
 #include "mm/mempool.h"
 #include "parser/tracelinedata.h"
 #include "parser/traceline.h"
@@ -37,7 +37,7 @@
 #include "threads/workqueue.h"
 #include "misc/tstring.h"
 
-#define NR_TBUFFERS (3)
+#define NR_TBUFFERS (4)
 #define TBUFSIZE (256)
 
 class TraceFile;
@@ -66,11 +66,13 @@ private:
 					   unsigned int index);
 	__always_inline bool parseFtraceBuffer(unsigned int index);
 	__always_inline bool parsePerfBuffer(unsigned int index);
+#if 0
 	__always_inline bool parseLine(TraceLine* line, TraceEvent* event,
 				       GrammarNode *root);
-	__always_inline bool parseLineFtrace(TraceLine* line,
+#endif
+	__always_inline bool parseLineFtrace(TraceLine &line,
 					     TraceEvent &event);
-	__always_inline bool parseLinePerf(TraceLine *line, TraceEvent &event);
+	__always_inline bool parseLinePerf(TraceLine &line, TraceEvent &event);
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
 	bool parseLineBugFixup(TraceEvent* event, const double &prevTime);
@@ -79,8 +81,8 @@ private:
 	MemPool *postEventPool;
 	TraceEvent fakeEvent;
 	TString fakePostEventInfo;
-	Grammar *ftraceGrammar;
-	Grammar *perfGrammar;
+	FtraceGrammar *ftraceGrammar;
+	PerfGrammar *perfGrammar;
 	ThreadBuffer<TraceLine> **tbuffers;
 	WorkThread<TraceParser> *parserThread;
 	WorkThread<TraceParser> *readerThread;
@@ -123,7 +125,7 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 	s = tbuf->list.size();
 
 	for(i = 0; i < s; i++) {
-		TraceLine *line = &tbuf->list[i];
+		TraceLine &line = tbuf->list[i];
 		TraceEvent &event = events->preAlloc();
 		event.argc = 0;
 		event.argv = (TString**) ptrPool->preallocN(256);
@@ -136,38 +138,11 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 	tbuf->endConsumeBuffer();
 	return eof;
 }
-		
 
-
-__always_inline bool TraceParser::parseLine(TraceLine* line, TraceEvent* event,
-					    GrammarNode *root)
-{
-	unsigned int i,j;
-	GrammarNode *node = root;
-	bool retval = root->isLeaf;
-	event->argc = 0;
-
-	for (i = 0; i < line->nStrings; i++)
-	{
-		TString *str = &line->strings[i];
-		for (j = 0; j < node->nChildren; j++) {
-			if (node->children[j]->match(str, event)) {
-				node = node->children[j];
-				retval = node->children[j]->isLeaf;
-				goto cont;
-			}
-		}
-		return false;
-	cont:
-		continue;
-	}
-	return retval;
-}
-
-__always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
+__always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
 						  TraceEvent &event)
 {
-	if (parseLine(line, &event, ftraceGrammar->root)) {
+	if (ftraceGrammar->parseLine(line, event)) {
 		/* Check if the timestamp of this event is affected by
 		 * the infamous ftrace timestamp rollover bug and
 		 * try to correct it */
@@ -190,10 +165,10 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine* line,
 	return false;
 }
 
-__always_inline bool TraceParser::parseLinePerf(TraceLine* line,
-						TraceEvent & event)
+__always_inline bool TraceParser::parseLinePerf(TraceLine &line,
+						TraceEvent &event)
 {
-	if (parseLine(line, &event, perfGrammar->root)) {
+	if (perfGrammar->parseLine(line, event)) {
 		/* Check if the timestamp of this event is affected by
 		 * the infamous ftrace timestamp rollover bug and
 		 * try to correct it */
@@ -212,7 +187,7 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine* line,
 			TString *str = (TString*) postEventPool->
 				allocObj();
 			str->ptr = perfLineData.infoBegin;
-			str->len = line->begin - perfLineData.infoBegin;
+			str->len = line.begin - perfLineData.infoBegin;
 			perfLineData.prevEvent->postEventInfo = str;
 			perfLineData.prevLineIsEvent = true;
 		}
@@ -221,7 +196,7 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine* line,
 		return true;
 	} else {
 		if (perfLineData.prevLineIsEvent) {
-			perfLineData.infoBegin = line->begin;
+			perfLineData.infoBegin = line.begin;
 			perfLineData.prevLineIsEvent = false;
 		}
 		return false;

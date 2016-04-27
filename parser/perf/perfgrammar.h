@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,15 +19,293 @@
 #ifndef PERFGRAMMAR_H
 #define PERFGRAMMAR_H
 
-#include "parser/grammar/grammar.h"
+#include "misc/traceshark.h"
+#include "mm/stringpool.h"
+#include "mm/stringtree.h"
 
-class PerfGrammar: public Grammar
+#define NEXTTOKEN(IS_LEAF)			\
+	{					\
+		n--;				\
+		if (n == 0)			\
+			return (IS_LEAF);	\
+		str++;				\
+	}					\
+
+class PerfGrammar
 {
 public:
 	PerfGrammar();
 	~PerfGrammar();
+	void clear();
+	__always_inline bool parseLine(TraceLine &line, TraceEvent &event);
 private:
-	void createPerfGrammarTree();
+	void setupEventTree();
+	__always_inline bool StoreMatch(TString *str, TraceEvent &event);
+	__always_inline bool NameMatch(TString *str, TraceEvent &event);
+	__always_inline int pidFromString(const TString &str);
+	__always_inline bool PidMatch(TString *str, TraceEvent &event);
+	__always_inline bool CPUMatch(TString *str, TraceEvent &event);
+	__always_inline bool TimeMatch(TString *str, TraceEvent &event);
+	__always_inline bool EventMatch(TString *str, TraceEvent &event);
+	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
+	StringPool *argPool;
+	StringPool *namePool;
+	StringTree *eventTree;
+	typedef enum {
+		STATE_NAME = 0,
+		STATE_PID,
+		STATE_CPU,
+		STATE_TIME,
+		STATE_EVENT,
+		STATE_ARG
+	} grammarstate_t;
 };
 
-#endif /* FTRACEGRAMMAR_H */
+__always_inline bool PerfGrammar::StoreMatch(TString *str,
+					       TraceEvent &event)
+{
+	/* We temporarily store the process name string(s) into the
+	 * argv/argc fields of the event, because we don't know how many
+	 * strings the process name will be split into. It may have been
+	 * split into several strings due to the process name containing
+	 * spaces. We will then consume this stored information in the
+	 * TimeNode class */
+	if (event.argc >= 256)
+		return false;
+	event.argv[event.argc] = str;
+	event.argc++;
+	return true;
+}
+
+__always_inline bool PerfGrammar::NameMatch(TString *str,
+					      TraceEvent &event)
+{
+	return StoreMatch(str, event);
+}
+
+__always_inline bool PerfGrammar::PidMatch(TString *str,
+					      TraceEvent &event)
+{
+	return StoreMatch(str, event);
+}
+
+__always_inline bool PerfGrammar::CPUMatch(TString *str,
+					     TraceEvent &event)
+{
+	char *c;
+	unsigned int cpu = 0;
+	int digit;
+
+	if (str->ptr[0] != '[')
+		return false;
+
+	cpu = 0;
+	for (c = str->ptr + 1; *c != '\0' && *c != ']'; c++) {
+		digit = *c - '0';
+		if (digit > 9 || digit < 0)
+			goto error;
+		cpu *= 10;
+		cpu += digit;
+	}
+	event.cpu = cpu;
+	event.argv[event.argc] = str;
+	event.argc++;
+	return true;
+error:
+	event.cpu = 0;
+	return false;
+}
+
+__always_inline int PerfGrammar::pidFromString(const TString &str)
+{
+	char *lastChr = str.ptr + str.len - 1;
+	int pid;
+	int digit;
+	char *c;
+
+	if (str.len < 1 || str.len > 10)
+		return false;
+
+	pid = 0;
+	for (c = str.ptr; c <= lastChr; c++) {
+		pid *= 10;
+		digit = *c - '0';
+		if (digit <= 9 && digit >= 0)
+			pid += digit;
+		else
+			return -1;
+	}
+	return pid;
+}
+
+__always_inline bool PerfGrammar::TimeMatch(TString *str,
+					      TraceEvent &event)
+{
+	bool rval;
+	TString namestr;
+	TString *newname;
+	char cstr[256];
+	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
+	unsigned int i;
+	int pid;
+	uint32_t hash;
+
+	namestr.ptr = cstr;
+	namestr.len = 0;
+
+	/* atof() and sscanf() are buggy */
+	event.time = TShark::timeStrToDouble(str->ptr, rval);
+
+	/* This is the time field, if it is successful we need to assemble
+	 * the name and pid strings that has been temporarily stored in
+	 * argv/argc */
+	if (rval) {
+		if (event.argc < 3)
+			return false;
+
+		pid = pidFromString(*event.argv[event.argc - 2]);
+		if (pid < 0)
+			return false;
+		event.pid = pid;
+
+		if (event.argc > 3) {
+			namestr.set(event.argv[0], maxlen);
+			for (i = 1; i < event.argc - 2; i++) {
+				if (!namestr.merge(event.argv[i], maxlen))
+					return false;
+			}
+
+			hash = TShark::StrHash32(&namestr);
+			newname = namePool->allocString(&namestr, hash, 0);
+		} else {
+			hash = TShark::StrHash32(event.argv[0]);
+			newname = namePool->allocString(event.argv[0], hash,
+							0);
+		}
+		if (newname == nullptr)
+			return false;
+		event.taskName = newname;
+		event.argc = 0;
+	}
+	return rval;
+}
+
+__always_inline bool PerfGrammar::EventMatch(TString *str,
+					       TraceEvent &event)
+{
+	char *lastChr = str->ptr + str->len - 1;
+	char *c = str->ptr;
+	TString *newstr;
+	TString tmpstr;
+	event_t type;
+
+	if (str->len < 1)
+		return false;
+
+	if (*lastChr == ':') {
+		*lastChr = '\0';
+		str->len--;
+	} else
+		return false;
+
+	do {
+		if (c >= lastChr)
+			return false;
+		if (*c == ':')
+			break;
+		c++;
+	} while(true);
+
+	tmpstr.ptr = c + 1;
+	if (tmpstr.ptr >= lastChr)
+		return false;
+	tmpstr.len = lastChr - tmpstr.ptr;
+
+	newstr = eventTree->searchAllocString(&tmpstr,
+					      TShark::StrHash32(&tmpstr),
+					      &type, EVENT_UNKNOWN);
+	if (newstr == nullptr)
+		return false;
+	event.eventName = newstr;
+	event.type = type;
+	return true;
+}
+
+__always_inline bool PerfGrammar::ArgMatch(TString *str,
+					     TraceEvent &event)
+{
+	TString *newstr;
+	if (event.argc < 255) {
+		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
+		if (newstr == nullptr)
+			return false;
+		event.argv[event.argc] = newstr;
+		event.argc++;
+		return true;
+	}
+	return false;
+}
+
+
+__always_inline bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
+{
+	TString *str = line.strings;
+	unsigned int n = line.nStrings;
+	grammarstate_t state = STATE_NAME;
+
+	if (n == 0)
+		return false;
+
+	do {
+		switch(state) {
+		case STATE_NAME:
+			if (NameMatch(str, event)) {
+				NEXTTOKEN(false);
+				state = STATE_PID;
+				break;
+			}
+			return false;
+		case STATE_PID:
+			if (PidMatch(str, event)) {
+				NEXTTOKEN(false);
+				state = STATE_CPU;
+				break;
+			}
+			return false;
+		case STATE_CPU:
+			if (CPUMatch(str, event)) {
+				NEXTTOKEN(false);
+				state = STATE_TIME;
+				break;
+			}
+			state = STATE_PID;
+			break;
+		case STATE_TIME:
+			if (TimeMatch(str, event)) {
+				NEXTTOKEN(false);
+				state = STATE_EVENT;
+				break;
+			}
+			state = STATE_PID;
+			break;
+		case STATE_EVENT:
+			if (EventMatch(str, event)) {
+				NEXTTOKEN(true);
+				state = STATE_ARG;
+				break;
+			}
+			return false;
+		case STATE_ARG:
+			if (ArgMatch(str, event)) {
+				NEXTTOKEN(true);
+				state = STATE_ARG;
+				break;
+			}
+			return false;
+		}
+	} while(true);
+}
+
+#undef NEXTTOKEN
+
+#endif /* PERFGRAMMAR_H */
