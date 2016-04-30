@@ -102,18 +102,21 @@ TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 	}
 
 	*word = buffer + pos;
+	pos++;
 
 	while (true) {
+		nchar++;
+		if (CheckBufferSwitch(pos, tbuffer))
+			break;
 		c = buffer[pos];
 		if (c == ' ' || c == '\n')
 			break;
 		pos++;
-		if (CheckBufferSwitch(pos, tbuffer))
-			break;
-		nchar++;
 	}
 	if (c == '\n')
 		endOfLine = true;
+	/* This can be out otside of the buffer, in case hit the break
+	 * above but we have that spare page */
 	buffer[pos] = '\0';
 	pos++;
 	if (CheckBufferSwitch(pos, tbuffer))
