@@ -66,10 +66,6 @@ private:
 					   unsigned int index);
 	__always_inline bool parseFtraceBuffer(unsigned int index);
 	__always_inline bool parsePerfBuffer(unsigned int index);
-#if 0
-	__always_inline bool parseLine(TraceLine* line, TraceEvent* event,
-				       GrammarNode *root);
-#endif
 	__always_inline bool parseLineFtrace(TraceLine &line,
 					     TraceEvent &event);
 	__always_inline bool parseLinePerf(TraceLine &line, TraceEvent &event);
