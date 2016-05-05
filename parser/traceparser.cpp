@@ -338,6 +338,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 		if (parseLineFtrace(line, event))
 			continue;
 		else {
+			event.argc = 0;
 			parseLinePerf(line, event);
 		}
 	}
