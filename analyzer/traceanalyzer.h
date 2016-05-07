@@ -551,7 +551,7 @@ __always_inline void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
 {
 	unsigned int cpu = cpuidle_cpu(ttype, event);
 	double time = event.time;
-	unsigned int state = cpuidle_state(ttype, event);
+	unsigned int state = cpuidle_state(ttype, event) + 1;
 
 	if (!isValidCPU(cpu))
 		return;

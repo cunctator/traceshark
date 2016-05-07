@@ -336,11 +336,23 @@ void MainWindow::showTrace()
 	tracePlot->yAxis->setTickLabels(true);
 	tracePlot->yAxis->setTicks(true);
 
-	/* Show CPU frequency graphs */
+	/* Show CPU frequency and idle graphs */
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
+		QPen pen = QPen();
+
 		QCPGraph *graph = new QCPGraph(tracePlot->xAxis,
 					       tracePlot->yAxis);
-		QString name = QString(tr("cpu")) + QString::number(cpu);
+		QString name = QString(tr("cpuidle")) + QString::number(cpu);
+		pen.setColor(Qt::green);
+		graph->setPen(pen);
+		graph->setName(name);
+		tracePlot->addPlottable(graph);
+		graph->setLineStyle(QCPGraph::lsStepLeft);
+		graph->setData(analyzer->cpuIdle[cpu].timev,
+			       analyzer->cpuIdle[cpu].scaledData);
+
+		graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
+		name = QString(tr("cpufreq")) + QString::number(cpu);
 		graph->setName(name);
 		tracePlot->addPlottable(graph);
 		graph->setLineStyle(QCPGraph::lsStepLeft);
