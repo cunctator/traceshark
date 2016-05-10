@@ -346,6 +346,7 @@ void MainWindow::showTrace()
 		pen.setColor(Qt::green);
 		graph->setPen(pen);
 		graph->setName(name);
+		graph->setAdaptiveSampling(true);
 		tracePlot->addPlottable(graph);
 		graph->setLineStyle(QCPGraph::lsStepLeft);
 		graph->setData(analyzer->cpuIdle[cpu].timev,
@@ -354,6 +355,7 @@ void MainWindow::showTrace()
 		graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 		name = QString(tr("cpufreq")) + QString::number(cpu);
 		graph->setName(name);
+		graph->setAdaptiveSampling(true);
 		tracePlot->addPlottable(graph);
 		graph->setLineStyle(QCPGraph::lsStepLeft);
 		graph->setData(analyzer->cpuFreq[cpu].timev,
