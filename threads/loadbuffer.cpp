@@ -25,6 +25,7 @@
 extern "C" {
 #include <unistd.h>
 #include <sys/mman.h>
+#include <errno.h>
 }
 
 LoadBuffer::LoadBuffer(unsigned int size):
