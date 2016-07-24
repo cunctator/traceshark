@@ -42,10 +42,8 @@ private:
 	void setupEventTree();
 	__always_inline bool NamePidMatch(TString *str, TraceEvent &event);
 	__always_inline bool CPUMatch(TString *str, TraceEvent &event);
-	__always_inline bool extractNameAndPid(TString &dstr,
-					       unsigned int &pid,
-					       TString &compound,
-					       unsigned int maxlen);
+	__always_inline bool extractNameAndPid(unsigned int &pid,
+					       TString &compound);
 	__always_inline bool TimeMatch(TString *str, TraceEvent &event);
 	__always_inline bool EventMatch(TString *str, TraceEvent &event);
 	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
@@ -104,10 +102,8 @@ error:
 	return false;
 }
 
-__always_inline bool FtraceGrammar::extractNameAndPid(TString &dstr,
-						      unsigned int &pid,
-						      TString &compound,
-						      unsigned int maxlen)
+__always_inline bool FtraceGrammar::extractNameAndPid(unsigned int &pid,
+						      TString &compound)
 {
 	char *nullChr = compound.ptr + compound.len;
 	char *lastChr = nullChr - 1;
@@ -141,11 +137,6 @@ found1:
 			return false;
 	}
 
-	if (dstr.len == 0)
-		dstr.set(&compound, maxlen);
-	else
-		dstr.merge(&compound, maxlen);
-
 	return true;
 }
 
@@ -154,6 +145,7 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 {
 	bool rval;
 	TString namestr;
+	TString *nameptr;
 	TString *newname;
 	char cstr[256];
 	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
@@ -188,13 +180,23 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 
 		/* Extract the final portion of the name from event.argv[i]
 		 * and the pid. */
-		if (!extractNameAndPid(namestr, event.pid,
-				       *event.argv[i],
-				       maxlen))
+		if (!extractNameAndPid(event.pid, *event.argv[i]))
 			return false;
 
-		newname = namePool->allocString(&namestr,
-						TShark::StrHash32(&namestr), 0);
+		if (namestr.len != 0) {
+			/*
+			 * If there were preceding portions we need to merge
+			 * them with the final portions
+			 */
+			namestr.merge(event.argv[i], maxlen);
+			nameptr = &namestr;
+		} else
+			/* ...otherwise just use the final portion. This is
+			 * the common case that we want to be fast */
+			nameptr = event.argv[i];
+
+		newname = namePool->allocString(nameptr,
+						TShark::StrHash32(nameptr), 0);
 		if (newname == nullptr)
 			return false;
 		event.taskName = newname;
