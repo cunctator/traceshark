@@ -141,7 +141,11 @@ found1:
 			return false;
 	}
 
-	dstr.merge(&compound, maxlen);
+	if (dstr.len == 0)
+		dstr.set(&compound, maxlen);
+	else
+		dstr.merge(&compound, maxlen);
+
 	return true;
 }
 
