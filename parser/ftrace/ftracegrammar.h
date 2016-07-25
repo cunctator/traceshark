@@ -145,11 +145,12 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 {
 	bool rval;
 	TString namestr;
-	TString *nameptr;
 	TString *newname;
 	char cstr[256];
 	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
 	unsigned int i;
+	unsigned int fini;
+	uint32_t hash;
 
 	namestr.ptr = cstr;
 	namestr.len = 0;
@@ -165,38 +166,30 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 		if (event.argc < 2)
 			return false;
 
+		fini = event.argc - 2;
+		/* Extract the pid and the final portion of the name from
+		 * event.argv[fini] */
+		if (!extractNameAndPid(event.pid, *event.argv[fini]))
+			return false;
 
-		i = 0;
 		if (event.argc > 2) {
 			namestr.set(event.argv[0], maxlen);
 			/* This will assemble broken up parts of the process
 			 * name; those that have been broken up by spaces in
-			 * the name */
-			for (i = 1; i < event.argc - 2; i++) {
+			 * the name. */
+			for (i = 1; i < event.argc - 1; i++) {
 				if (!namestr.merge(event.argv[i], maxlen))
 					return false;
 			}
+			hash = TShark::StrHash32(&namestr);
+			newname = namePool->allocString(&namestr, hash, 0);
+		} else {
+			/* This is the common case, no spaces in the name */
+			hash = TShark::StrHash32(event.argv[fini]);
+			newname = namePool->allocString(event.argv[fini], hash,
+							0);
 		}
 
-		/* Extract the final portion of the name from event.argv[i]
-		 * and the pid. */
-		if (!extractNameAndPid(event.pid, *event.argv[i]))
-			return false;
-
-		if (namestr.len != 0) {
-			/*
-			 * If there were preceding portions we need to merge
-			 * them with the final portions
-			 */
-			namestr.merge(event.argv[i], maxlen);
-			nameptr = &namestr;
-		} else
-			/* ...otherwise just use the final portion. This is
-			 * the common case that we want to be fast */
-			nameptr = event.argv[i];
-
-		newname = namePool->allocString(nameptr,
-						TShark::StrHash32(nameptr), 0);
 		if (newname == nullptr)
 			return false;
 		event.taskName = newname;
