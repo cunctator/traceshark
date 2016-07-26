@@ -537,7 +537,7 @@ void MainWindow::saveScreenshot()
 		pdfTitle = tr("Perf events rendered by ");
 		break;
 	default:
-		pdfTitle = tr("Uknown garbage rendered by ");
+		pdfTitle = tr("Unknown garbage rendered by ");
 		break;
 	}
 
