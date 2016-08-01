@@ -79,7 +79,7 @@ InfoWidget::InfoWidget(QWidget *parent):
 		   requestTaskSelector());
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
 		  updateChange(double, int));
-	tsconnect(cursorInfos[0], valueChanged(double, int), this,
+	tsconnect(cursorInfos[1], valueChanged(double, int), this,
 		  updateChange(double, int));
 }
 
