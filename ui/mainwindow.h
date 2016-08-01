@@ -51,6 +51,7 @@ class QCPAbstractLegendItem;
 class TracePlot;
 class TraceEvent;
 class TaskRangeAllocator;
+class TaskSelectDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -81,7 +82,9 @@ private slots:
 	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
 			       *abstractItem);
 	void addTaskGraph(unsigned int pid);
+	void addTaskToLegend(unsigned int pid);
 	void removeTaskGraph(unsigned int pid);
+	void showTaskSelector();
 	void showWakeup(unsigned int pid);
 private:
 	void processTrace();
@@ -129,6 +132,7 @@ private:
 
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;
+	TaskSelectDialog *taskSelectDialog;
 
 	const double bugWorkAroundOffset = 100;
 	const double schedSectionOffset = 100;

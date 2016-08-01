@@ -75,6 +75,8 @@ InfoWidget::InfoWidget(QWidget *parent):
 		   addTaskGraph(unsigned int));
 	sigconnect(taskInfo, removeTaskGraph(unsigned int), this,
 		   removeTaskGraph(unsigned int));
+	sigconnect(taskInfo, requestTaskSelector(), this,
+		   requestTaskSelector());
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
 		  updateChange(double, int));
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
@@ -83,6 +85,11 @@ InfoWidget::InfoWidget(QWidget *parent):
 
 InfoWidget::~InfoWidget()
 {
+}
+
+void InfoWidget::addTaskGraphToLegend(TaskGraph *graph)
+{
+	taskInfo->addTaskGraphToLegend(graph);
 }
 
 void InfoWidget::setTime(double time, int cursorIdx)

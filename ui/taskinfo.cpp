@@ -38,11 +38,14 @@
 #define CLEAR_LEGEND_RESOURCE ":/traceshark/images/clearlegend30x30.png"
 #define FIND_WAKEUP_RESOURCE ":/traceshark/images/wakeup30x30.png"
 #define REMOVE_TASK_RESOURCE ":/traceshark/images/removetask30x30.png"
+#define TASKSELECTOR_RESOURCE ":/traceshark/images/taskselector30x30.png"
 
 #define FIND_TOOLTIP \
 	"Find the wakeup of this task that precedes the active cursor"
 #define REMOVE_TASK_TOOLTIP \
 	"Remove the unified graph for this task"
+#define TASKSELECTOR_TOOLTIP \
+	"View a list of all tasks and it's possible to select one"
 
 TaskInfo::TaskInfo(QWidget *parent):
 	QWidget(parent), taskGraph(nullptr)
@@ -52,11 +55,13 @@ TaskInfo::TaskInfo(QWidget *parent):
 	QPixmap clearPM(QLatin1String(CLEAR_LEGEND_RESOURCE));
 	QPixmap findPM(QLatin1String(FIND_WAKEUP_RESOURCE));
 	QPixmap removeTaskPM(QLatin1String(REMOVE_TASK_RESOURCE));
+	QPixmap taskSelectorPM(QLatin1String(TASKSELECTOR_RESOURCE));
 	QIcon findIcon(findPM);
 	QIcon addIcon(addPM);
 	QIcon addTaskIcon(addTaskPM);
 	QIcon clearIcon(clearPM);
 	QIcon removeTaskIcon(removeTaskPM);
+	QIcon taskSelectorIcon(taskSelectorPM);
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	QLabel *colonLabel = new QLabel(tr(":"));
 	QPushButton *addButton = new QPushButton(addIcon, tr(""), this);
@@ -65,6 +70,9 @@ TaskInfo::TaskInfo(QWidget *parent):
 	QPushButton *findButton = new QPushButton(findIcon, tr(""), this);
 	QPushButton *removeTaskButton = new QPushButton(removeTaskIcon, tr(""),
 							this);
+	QPushButton *taskSelectorButton = new  QPushButton(taskSelectorIcon,
+							   tr(""),
+							   this);
 
 	addButton->setToolTip(tr("Add this task to the legend"));
 	addButton->setIconSize(addPM.size());
@@ -81,6 +89,9 @@ TaskInfo::TaskInfo(QWidget *parent):
 	removeTaskButton->setToolTip(tr(REMOVE_TASK_TOOLTIP));
 	removeTaskButton->setIconSize(removeTaskPM.size());
 
+	taskSelectorButton->setToolTip(tr(TASKSELECTOR_TOOLTIP));
+	taskSelectorButton->setIconSize(taskSelectorPM.size());
+
 	nameLine = new QLineEdit(this);
 	pidLine = new QLineEdit(this);
 
@@ -90,6 +101,7 @@ TaskInfo::TaskInfo(QWidget *parent):
 	layout->addWidget(nameLine);
 	layout->addWidget(colonLabel);
 	layout->addWidget(pidLine);
+	layout->addWidget(taskSelectorButton);
 	layout->addWidget(addButton);
 	layout->addWidget(clearButton);
 	layout->addWidget(findButton);
@@ -102,6 +114,7 @@ TaskInfo::TaskInfo(QWidget *parent):
 	tsconnect(removeTaskButton, clicked(), this, removeTaskGraphClicked());
 	tsconnect(clearButton, clicked(), this, clearClicked());
 	tsconnect(findButton, clicked(), this, findClicked());
+	sigconnect(taskSelectorButton, clicked(), this, requestTaskSelector());
 }
 
 TaskInfo::~TaskInfo()
@@ -144,14 +157,20 @@ void TaskInfo::clear()
 
 void TaskInfo::addToLegendClicked()
 {
+	if (taskGraph == nullptr)
+		return;
+
+	addTaskGraphToLegend(taskGraph);
+}
+
+
+void TaskInfo::addTaskGraphToLegend(TaskGraph *graph)
+{
 	QObject *obj;
 	QCustomPlot *plot;
 	Task *task;
 
-	if (taskGraph == nullptr)
-		return;
-
-	task = taskGraph->getTask();
+	task = graph->getTask();
 	if (task == nullptr)
 		return;
 
@@ -164,13 +183,14 @@ void TaskInfo::addToLegendClicked()
 	if (legendPidMap.contains(task->pid))
 		return;
 
-	legendPidMap[task->pid] = taskGraph;
-	taskGraph->addToLegend();
-	obj = taskGraph->parent();
+	legendPidMap[task->pid] = graph;
+	graph->addToLegend();
+	obj = graph->parent();
 	plot = qobject_cast<QCustomPlot *>(obj);
 	if (plot != nullptr)
 		plot->replot();
 }
+
 
 void TaskInfo::clearClicked()
 {

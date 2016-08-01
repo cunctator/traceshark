@@ -34,6 +34,7 @@ class InfoWidget : public QDockWidget
 public:
 	InfoWidget(QWidget *parent = 0);
 	virtual ~InfoWidget();
+	void addTaskGraphToLegend(TaskGraph *graph);
 	void setTime(double time, int cursorIdx);
 	int getCursorIdx();
 	void setTaskGraph(TaskGraph *graph);
@@ -46,6 +47,7 @@ signals:
 	void findWakeup(unsigned int);
 	void addTaskGraph(unsigned int pid);
 	void removeTaskGraph(unsigned int pid);
+	void requestTaskSelector();
 private slots:
 	void updateChange(double value, int nr);
 private:

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,47 +16,42 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TASKINFO_H
-#define TASKINFO_H
+#ifndef TASKSELECTDIALOG
+#define TASKSELECTDIALOG
 
-#include <QWidget>
+#include <QDialog>
+#include <QString>
 #include <QMap>
 
+#include "analyzer/task.h"
+
 QT_BEGIN_NAMESPACE
-class QLineEdit;
+class QStringList;
 QT_END_NAMESPACE
 
-class TaskGraph;
+class TaskModel;
+class TaskView;
 
-class TaskInfo : public QWidget
-{
+class TaskSelectDialog : public QDialog {
 	Q_OBJECT
 public:
-	TaskInfo(QWidget *parent = 0);
-	virtual ~TaskInfo();
-
-	void addTaskGraphToLegend(TaskGraph *graph);
-	void setTaskGraph(TaskGraph *graph);
-	void removeTaskGraph();
-	void checkGraphSelection();
-	void clear();
-	void pidRemoved(unsigned int pid);
+	TaskSelectDialog(QWidget *parent = 0);
+	~TaskSelectDialog();
+	void setTaskMap(QMap<unsigned int, Task> *map);
+	void beginResetModel();
+	void endResetModel();
+	void resizeColumnsToContents();
+	void show();
 signals:
-	void findWakeup(unsigned int pid);
 	void addTaskGraph(unsigned int pid);
-	void removeTaskGraph(unsigned int pid);
-	void requestTaskSelector();
+	void addTaskToLegend(unsigned int pid);
 private slots:
-	void addTaskGraphClicked();
-	void addToLegendClicked();
-	void clearClicked();
-	void findClicked();
-	void removeTaskGraphClicked();
+	void closeClicked();
+	void addUnifiedClicked();
+	void addLegendClicked();
 private:
-	QLineEdit *pidLine;
-	QLineEdit *nameLine;
-	TaskGraph *taskGraph;
-	QMap <unsigned int, TaskGraph*> legendPidMap;
+	TaskView *taskView;
+	TaskModel *taskModel;
 };
 
-#endif /* TASKINFO_H */
+#endif /* TASKSELECTDIALOG */

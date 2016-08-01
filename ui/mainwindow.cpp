@@ -30,6 +30,7 @@
 #include "ui/migrationline.h"
 #include "ui/taskgraph.h"
 #include "ui/taskrangeallocator.h"
+#include "ui/taskselectdialog.h"
 #include "parser/traceevent.h"
 #include "ui/traceplot.h"
 #include "misc/traceshark.h"
@@ -79,6 +80,7 @@ MainWindow::MainWindow():
 
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
+	taskSelectDialog = new TaskSelectDialog();
 
 	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
@@ -90,10 +92,16 @@ MainWindow::MainWindow():
 		  showWakeup(unsigned int));
 	tsconnect(infoWidget, removeTaskGraph(unsigned int), this,
 		  removeTaskGraph(unsigned int));
+	tsconnect(infoWidget, requestTaskSelector(), this,
+		  showTaskSelector());
 	tsconnect(eventsWidget, timeSelected(double), this,
 		  moveActiveCursor(double));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
 		  this, showEventInfo(const TraceEvent &));
+	tsconnect(taskSelectDialog, addTaskGraph(unsigned int),
+		  this, addTaskGraph(unsigned int));
+	tsconnect(taskSelectDialog, addTaskToLegend(unsigned int),
+		  this, addTaskToLegend(unsigned int));
 
 	setupSettings();
 }
@@ -151,6 +159,10 @@ void MainWindow::openTrace()
 		eventsWidget->beginResetModel();
 		eventsWidget->setEvents(nullptr);
 		eventsWidget->endResetModel();
+
+		taskSelectDialog->beginResetModel();
+		taskSelectDialog->setTaskMap(nullptr);
+		taskSelectDialog->endResetModel();
 		if (analyzer->isOpen())
 			analyzer->close();
 		loadTraceFile(name);
@@ -174,6 +186,11 @@ void MainWindow::openTrace()
 		eventsWidget->beginResetModel();
 		eventsWidget->setEvents(&analyzer->events);
 		eventsWidget->endResetModel();
+
+		taskSelectDialog->beginResetModel();
+		taskSelectDialog->setTaskMap(&analyzer->taskMap);
+		taskSelectDialog->endResetModel();
+
 		eventsw = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 		setupCursors();
@@ -506,6 +523,11 @@ void MainWindow::closeTrace()
 	eventsWidget->beginResetModel();
 	eventsWidget->setEvents(nullptr);
 	eventsWidget->endResetModel();
+
+	taskSelectDialog->beginResetModel();
+	taskSelectDialog->setTaskMap(nullptr);
+	taskSelectDialog->endResetModel();
+
 	clearPlot();
 	if(analyzer->isOpen())
 		analyzer->close();
@@ -904,6 +926,26 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	infoWidget->pidRemoved(legendGraph->pid);
 }
 
+void MainWindow::addTaskToLegend(unsigned int pid)
+{
+	CPUTask *cpuTask;
+	unsigned int cpu;
+
+	/* Let's find a per CPU taskGraph, because they are always created,
+	 * the unified graphs only exist for those that have been chosen to be
+	 * displayed by the user */
+	for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
+		cpuTask = analyzer->findCPUTask(pid, cpu);
+		if (cpuTask != nullptr)
+			break;
+	}
+
+	if (cpuTask == nullptr)
+		return;
+
+	infoWidget->addTaskGraphToLegend(cpuTask->graph);
+}
+
 void MainWindow::addTaskGraph(unsigned int pid)
 {
 	/* Add a unified scheduling graph for pid */
@@ -1029,6 +1071,11 @@ void MainWindow::removeTaskGraph(unsigned int pid)
 	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
 
 	tracePlot->replot();
+}
+
+void MainWindow::showTaskSelector()
+{
+	taskSelectDialog->show();
 }
 
 void MainWindow::showWakeup(unsigned int pid)

@@ -36,7 +36,10 @@ HEADERS      +=  ui/migrationarrow.h
 HEADERS      +=  ui/migrationline.h
 HEADERS      +=  ui/taskgraph.h
 HEADERS      +=  ui/taskinfo.h
+HEADERS      +=  ui/taskmodel.h
 HEADERS      +=  ui/taskrangeallocator.h
+HEADERS      +=  ui/taskselectdialog.h
+HEADERS      +=  ui/taskview.h
 HEADERS      +=  ui/traceplot.h
 
 HEADERS      +=  analyzer/abstracttask.h
@@ -100,7 +103,10 @@ SOURCES      +=  ui/migrationarrow.cpp
 SOURCES      +=  ui/migrationline.cpp
 SOURCES      +=  ui/taskgraph.cpp
 SOURCES      +=  ui/taskinfo.cpp
+SOURCES      +=  ui/taskmodel.cpp
 SOURCES      +=  ui/taskrangeallocator.cpp
+SOURCES      +=  ui/taskselectdialog.cpp
+SOURCES      +=  ui/taskview.cpp
 SOURCES      +=  ui/traceplot.cpp
 
 SOURCES      +=  analyzer/abstracttask.cpp
