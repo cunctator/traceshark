@@ -103,15 +103,16 @@ void TaskSelectDialog::addUnifiedClicked()
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
 	unsigned int pid;
 	bool ok;
+	int i, s;
 
-	if (indexList.size() < 1)
-		return;
+	s = indexList.size();
+	for (i = 0; i < s; i++) {
+		const QModelIndex &index = indexList.at(i);
 
-	const QModelIndex &index = indexList.at(0);
-
-	pid = taskModel->rowToPid(index.row(), ok);
-	if (ok)
-		emit addTaskGraph(pid);
+		pid = taskModel->rowToPid(index.row(), ok);
+		if (ok)
+			emit addTaskGraph(pid);
+	}
 }
 
 void TaskSelectDialog::addLegendClicked()
@@ -119,13 +120,14 @@ void TaskSelectDialog::addLegendClicked()
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
 	unsigned int pid;
 	bool ok;
+	int i, s;
 
-	if (indexList.size() < 1)
-		return;
+	s = indexList.size();
+	for (i = 0; i < s; i++) {
+		const QModelIndex &index = indexList.at(i);
 
-	const QModelIndex &index = indexList.at(0);
-
-	pid = taskModel->rowToPid(index.row(), ok);
-	if (ok)
-		emit addTaskToLegend(pid);
+		pid = taskModel->rowToPid(index.row(), ok);
+		if (ok)
+			emit addTaskToLegend(pid);
+	}
 }

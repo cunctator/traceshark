@@ -22,7 +22,7 @@ TaskView::TaskView(QWidget *parent) :
 	QTableView(parent)
 {
 	setSelectionBehavior(QAbstractItemView::SelectRows);
-	setSelectionMode(QAbstractItemView::SingleSelection);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
 TaskView::~TaskView()
