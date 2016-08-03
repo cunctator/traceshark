@@ -148,6 +148,7 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	/* Here is a great place to save settings, if we ever want to do it */
+	taskSelectDialog->hide();
 	event->accept();
 	/* event->ignore() could be used to refuse to close the window */
 }
