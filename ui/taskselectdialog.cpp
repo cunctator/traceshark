@@ -26,7 +26,7 @@
 #include "misc/traceshark.h"
 
 TaskSelectDialog::TaskSelectDialog(QWidget *parent)
-	: QDialog(parent, Qt::WindowCloseButtonHint)
+	: QDialog(parent, Qt::WindowCloseButtonHint), savedHeight(900)
 {
 	QVBoxLayout *mainLayout =  new QVBoxLayout(this);
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
@@ -87,14 +87,14 @@ void TaskSelectDialog::show()
 	QDialog::activateWindow();
 	taskView->resizeColumnsToContents();
 	size = QDialog::size();
-	if (size.height() < 900) {
-		size.setHeight(900);
-		QDialog::resize(size);
-	}
+	size.setHeight(savedHeight);
+	QDialog::resize(size);
 }
 
 void TaskSelectDialog::closeClicked()
 {
+	QSize size = QDialog::size();
+	savedHeight = size.height();
 	QDialog::hide();
 }
 

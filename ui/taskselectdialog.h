@@ -52,6 +52,7 @@ private slots:
 private:
 	TaskView *taskView;
 	TaskModel *taskModel;
+	int savedHeight;
 };
 
 #endif /* TASKSELECTDIALOG */
