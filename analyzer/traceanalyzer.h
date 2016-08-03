@@ -136,8 +136,6 @@ private:
 						TraceEvent &event);
 	__always_inline void __processExitEvent(tracetype_t ttype,
 						TraceEvent &event);
-	__always_inline void processPerfCPUfreqEvent(TraceEvent &event);
-	__always_inline void processPerfCPUidleEvent(TraceEvent &event);
 	void addCpuFreqWork(unsigned int cpu,
 			    QList<AbstractWorkItem*> &list);
 	void addCpuIdleWork(unsigned int cpu,
