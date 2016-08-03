@@ -16,25 +16,35 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui/taskmodel.h"
+#include <QMap>
 #include <QStringList>
+
+#include "ui/taskmodel.h"
+#include "misc/tlist.h"
+#include "analyzer/task.h"
 
 TaskModel::TaskModel(QObject *parent):
 	QAbstractTableModel(parent), taskMap(nullptr)
 {
-	taskNameList = new QStringList();
+	taskList = new TList<Task*>;
+	taskNameList = new QStringList;
 }
 
 TaskModel::~TaskModel()
 {
+	delete taskList;
 	delete taskNameList;
 }
 
 void TaskModel::setTaskMap(QMap<unsigned int, Task> *map)
 {
-	taskMap = map;
-	nameMap.clear();
+	QMap<QString, unsigned int> *nameMap = new QMap<QString, unsigned int>;
+	int i, j, s;
+	int row;
+
+	taskList->clear();
 	taskNameList->clear();
+	taskMap = map;
 
 	if (map == nullptr)
 		return;
@@ -43,17 +53,60 @@ void TaskModel::setTaskMap(QMap<unsigned int, Task> *map)
 	while (iter != taskMap->end()) {
 		Task &task = iter.value();
 		QString name = task.getDisplayName();
-		nameMap.insertMulti(name, task.pid);
+		nameMap->insertMulti(name, task.pid);
 		taskNameList->append(name);
 		iter++;
 	}
 	taskNameList->sort();
+	s = taskNameList->size();
+
+	row = 0;
+	while (row < s) {
+		QString name = taskNameList->at(row);
+		QList<unsigned int> pidList = nameMap->values(name);
+		int sl = pidList.size();
+		bool done;
+		unsigned int pid;
+
+		/* Pathetic bubble sort to display tasks with the same names in
+		 * pid order */
+		do {
+			done = true;
+			for (i = 1; i < sl; i++) {
+				j = i - 1;
+				if (pidList[j] > pidList[i]) {
+					pidList.swap(i, j);
+					done = false;
+				}
+			}
+			if (done)
+				break;
+			done = true;
+			for (i = sl - 1; i > 0; i--) {
+				j = i - 1;
+				if (pidList[j] > pidList[i]) {
+					pidList.swap(i, j);
+					done = false;
+				}
+			}
+		} while(!done);
+
+		for (i = 0; i < sl; i++) {
+			pid = pidList[i];
+			Task &task = (*taskMap)[pid];
+			Task *&taskptr = taskList->increase();
+			taskptr = &task;
+		}
+		row += sl;
+	}
+
+	delete nameMap;
 }
 
 int TaskModel::rowCount(const QModelIndex & /* index */) const
 {
 	if (taskMap != nullptr)
-		return taskNameList->size();
+		return taskList->size();
 	else
 		return 0;
 }
@@ -65,36 +118,21 @@ int TaskModel::columnCount(const QModelIndex & /* index */) const
 
 unsigned int TaskModel::rowToPid(int row, bool &ok) const
 {
-	QString name;
-	QList<unsigned int> pidList;
-	int s;
-	int i;
-	int j;
-	int n = 0;
+	unsigned int urow;
 
-	ok = true;
-	name = taskNameList->at(row);
-	pidList = nameMap.values(name);
-	s = pidList.size();
-	n = 0;
-	/* Simple swap sort of the list so we display tasks */
-	for (i = 1; i < s; i++) {
-		j = i - 1;
-		if (pidList[j] > pidList[i])
-			pidList.swap(i, j);
-	}
-	/* In the general case, this row points to the nth task
-	 * with the same name. This determines n */
-	for (i = row - 1; i >= 0; i--) {
-		if (taskNameList->at(i) != name)
-			break;
-		n++;
-	}
-	if (n >= s) {
+	if (row < 0) {
 		ok = false;
 		return 0;
 	}
-	return pidList[n];
+	urow = (unsigned int) row;
+	if (urow >= taskList->size()) {
+		ok = false;
+		return 0;
+	}
+
+	ok = true;
+	const Task *task = taskList->at(row);
+	return task->pid;
 }
 
 QVariant TaskModel::data(const QModelIndex &index, int role) const
@@ -110,14 +148,14 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 	if (role == Qt::DisplayRole) {
 		int row = index.row();
 		int column = index.column();
-		int size = taskNameList->size();
+		int size;
 		unsigned int pid;
-
-		if (row >= size || row < 0)
-			return QVariant();
 
 		switch(column) {
 		case 0:
+			size = taskNameList->size();
+			if (row >= size || row < 0)
+				return QVariant();
 			return taskNameList->at(row);
 		case 1:
 			pid = rowToPid(row, ok);

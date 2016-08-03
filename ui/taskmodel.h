@@ -20,13 +20,14 @@
 #define TASKMODEL_H
 
 #include <QAbstractTableModel>
-#include <QMap>
-#include <QString>
-#include "analyzer/task.h"
 #include "misc/traceshark.h"
+
+template<class T> class TList;
+class Task;
 
 QT_BEGIN_NAMESPACE
 class QStringList;
+template<class Key, class T> class QMap;
 QT_END_NAMESPACE
 
 class TaskModel : public QAbstractTableModel
@@ -48,9 +49,9 @@ public:
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
-	QMap<QString, unsigned int> nameMap;
-	QStringList *taskNameList;
 	QMap<unsigned int, Task> *taskMap;
+	TList<Task*> *taskList;
+	QStringList *taskNameList;
 };
 
 #endif /* TASKMODEL_H */
