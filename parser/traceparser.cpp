@@ -309,10 +309,12 @@ void TraceParser::determineTraceType()
 {
 	if (ftraceLineData.nrEvents > 0 && perfLineData.nrEvents == 0) {
 		traceType = TRACE_TYPE_FTRACE;
+		TraceEvent::setStringTree(ftraceGrammar->eventTree);
 		sendTraceType();
 		return;
 	} else if (ftraceLineData.nrEvents  == 0 && perfLineData.nrEvents > 0) {
 		traceType = TRACE_TYPE_PERF;
+		TraceEvent::setStringTree(perfGrammar->eventTree);
 		sendTraceType();
 		return;
 	}

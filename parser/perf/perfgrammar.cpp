@@ -19,11 +19,12 @@
 #include "parser/perf/perfgrammar.h"
 #include "parser/traceevent.h"
 
-PerfGrammar::PerfGrammar()
+PerfGrammar::PerfGrammar() :
+	unknownTypeCounter(EVENT_UNKNOWN)
 {
 	argPool = new StringPool(2048, 1024 * 1024);
 	namePool =  new StringPool(1024, 65536);
-	eventTree = new StringTree(8, 256);
+	eventTree = new StringTree(8, 256, 4096);
 	setupEventTree();
 }
 
@@ -40,18 +41,18 @@ void PerfGrammar::clear()
 	namePool->clear();
 	eventTree->clear();
 	setupEventTree();
+	unknownTypeCounter = EVENT_UNKNOWN;
 }
 
 void PerfGrammar::setupEventTree()
 {
 	int t;
-	event_t dummy;
 	TString str;
 
 	for (t = 0; t < NR_EVENTS; t++) {
 		str.ptr = eventstrings[t];
 		str.len = strlen(eventstrings[t]);
 		eventTree->searchAllocString(&str, TShark::StrHash32(&str),
-					     &dummy, (event_t) t);
+					     (event_t) t);
 	}
 }

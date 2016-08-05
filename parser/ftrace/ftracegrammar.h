@@ -22,6 +22,7 @@
 #include "misc/traceshark.h"
 #include "mm/stringpool.h"
 #include "mm/stringtree.h"
+#include "parser/traceevent.h"
 
 #define NEXTTOKEN(IS_LEAF)			\
 	{					\
@@ -38,6 +39,7 @@ public:
 	~FtraceGrammar();
 	void clear();
 	__always_inline bool parseLine(TraceLine &line, TraceEvent &event);
+	StringTree *eventTree;
 private:
 	void setupEventTree();
 	__always_inline bool NamePidMatch(TString *str, TraceEvent &event);
@@ -49,7 +51,7 @@ private:
 	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
 	StringPool *argPool;
 	StringPool *namePool;
-	StringTree *eventTree;
+	int unknownTypeCounter;
 	typedef enum {
 		STATE_NAMEPID = 0,
 		STATE_CPU,
@@ -205,7 +207,6 @@ __always_inline bool FtraceGrammar::EventMatch(TString *str,
 					       TraceEvent &event)
 {
 	char *lastChr = str->ptr + str->len - 1;
-	TString *newstr;
 	event_t type;
 
 	if (str->len < 1)
@@ -217,11 +218,16 @@ __always_inline bool FtraceGrammar::EventMatch(TString *str,
 	} else
 		return false;
 
-	newstr = eventTree->searchAllocString(str, TShark::StrHash32(str),
-					      &type, EVENT_UNKNOWN);
-	if (newstr == nullptr)
+	type = eventTree->searchAllocString(str, TShark::StrHash32(str),
+					    (event_t) unknownTypeCounter);
+	if (type == EVENT_ERROR)
 		return false;
-	event.eventName = newstr;
+	else if (type == unknownTypeCounter) {
+		/* This event is a new event, so for the next one we need to
+		 * bump the counter in order to use a unique eventType value 
+		 * for every event name */
+		unknownTypeCounter++;
+	}
 	event.type = type;
 	return true;
 }

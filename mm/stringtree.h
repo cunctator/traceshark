@@ -41,12 +41,13 @@ public:
 class StringTree
 {
 public:
-	StringTree(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256);
+	StringTree(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256,
+		   unsigned int table_size = 4096);
 	~StringTree();
-	__always_inline TString* searchAllocString(const TString *str,
-						   uint32_t hval,
-						   event_t *foundval,
-						   event_t newval);
+	__always_inline TString *stringLookup(event_t value);
+	__always_inline event_t searchAllocString(const TString *str,
+						  uint32_t hval,
+						  event_t newval);
 	void clear();
 	void reset();
 	__always_inline void SwapEntries(StringTreeEntry *a,
@@ -58,18 +59,28 @@ private:
 	StringTreeEntry **hashTable;
 	unsigned int hSize;
 	char *curPtr;
-	void clearTable();
+	TString **stringTable;
+	int tableSize;
+	void clearTables();
 };
+
+
+__always_inline TString *StringTree::stringLookup(event_t value)
+{
+	if (value < 0 || value >= tableSize)
+		return nullptr;
+	return stringTable[value];
+}
+
 
 /* We use and  AVL-tree here, since this data structure is meant to store
  * event names and the number of event names is extremely small compared to
  * the total number of events. The number of different events names equals the
  * number of inserts and the number of events equals the number
  * of lookups */
-__always_inline TString* StringTree::searchAllocString(const TString *str,
-						       uint32_t hval,
-						       event_t *foundval,
-						       event_t newval)
+__always_inline event_t StringTree::searchAllocString(const TString *str,
+						      uint32_t hval,
+						      event_t newval)
 {
 	TString *newstr;
 	StringTreeEntry **aentry;
@@ -85,7 +96,6 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 	int smallH;
 	int largeH;
 
-	*foundval = newval;
 	hval = hval % hSize;
 	aentry = hashTable + hval;
 	rootptr = aentry;
@@ -95,10 +105,8 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 		/* Using strncmp here would lose performance and we know that
 		 * the strings are null terminated */
 		cmp = strcmp(str->ptr, entry->str->ptr);
-		if (cmp == 0) {
-			*foundval = entry->eventType;
-			return entry->str;
-		}
+		if (cmp == 0)
+			return entry->eventType;
 		parent = entry;
 		if (cmp < 0) {
 			aentry = &entry->small;
@@ -112,15 +120,15 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 
 	newstr = (TString*) strPool->allocObj();
 	if (newstr == nullptr)
-		return nullptr;
+		return EVENT_ERROR;
 	newstr->len = str->len;
 	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
 	if (newstr->ptr == nullptr)
-		return nullptr;
+		return EVENT_ERROR;
 	strncpy(newstr->ptr, str->ptr, str->len + 1);
 	entry = (StringTreeEntry*) entryPool->allocObj();
 	if (entry == nullptr)
-		return nullptr;
+		return EVENT_ERROR;
 	bzero(entry, sizeof(StringTreeEntry));
 	entry->str = newstr;
 	entry->eventType = newval;
@@ -128,10 +136,11 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 
 	entry->parent = parent;
 	entry->height = 0;
-	if (parent == nullptr)
-		return newstr; /* Ok, this is the root node */
-	if (parent->height > 0)
-		return newstr; /* parent already has another node */
+	if (parent == nullptr || parent->height > 0) {
+		/* This is the root node or parent already has another node */
+		stringTable[newval] = newstr;
+		return newval;
+	}
 	parent->height = 1;
 	grandParent = parent->parent;
 	/* update heights and find offending node */
@@ -152,7 +161,8 @@ __always_inline TString* StringTree::searchAllocString(const TString *str,
 		parent = grandParent;
 		grandParent = grandParent->parent;
 	}
-	return newstr;
+	stringTable[newval] = newstr;
+	return newval;
 rebalanceSmall:
 	/* Do small rebalance here (case 1 and case 2) */
 	if (entry == parent->small) {
@@ -189,7 +199,8 @@ rebalanceSmall:
 		if (smallChild != nullptr)
 			smallChild->parent = parent;
 	}
-	return newstr;
+	stringTable[newval] = newstr;
+	return newval;
 rebalanceLarge:
 	/* Do large rebalance here */
 	if (entry == parent->small) {
@@ -226,7 +237,8 @@ rebalanceLarge:
 		if (sibling != nullptr)
 			sibling->parent = grandParent;
 	}
-	return newstr;
+	stringTable[newval] = newstr;
+	return newval;
 }
 
 __always_inline void StringTree::SwapEntries(StringTreeEntry *a,

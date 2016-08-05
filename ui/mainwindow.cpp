@@ -876,7 +876,7 @@ void MainWindow::loadTraceFile(QString &fileName)
 	for (i = 0; i < s; i++) {
 		TraceEvent &event = analyzer->events[i];
 		qout << event.taskName->ptr << " " << event.pid << " " <<
-			event.time << " " << event.eventName->ptr;
+			event.time << " " << event.getEventName()->ptr;
 		for (j = 0; j < event.argc; j++) {
 			qout << " " << event.argv[j]->ptr;
 		}

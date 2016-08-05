@@ -29,7 +29,8 @@ typedef enum {
 } taskstate_t;
 
 typedef enum {
-	CPU_FREQUENCY = 0,
+	EVENT_ERROR = -1,
+	CPU_FREQUENCY,
 	CPU_IDLE,
 	SCHED_MIGRATE_TASK,
 	SCHED_SWITCH,
@@ -44,13 +45,14 @@ typedef enum {
 
 #define EVENT_UNKNOWN (NR_EVENTS)
 
+class StringTree;
+
 class TraceEvent {
 public:
 	TString *taskName;
 	unsigned int pid;
 	unsigned int cpu;
 	double time;
-	TString *eventName;
 	event_t type;
 	TString **argv;
 	unsigned int argc;
@@ -60,6 +62,13 @@ public:
 	 * cannot be null terminated, instead we will have to rely on the len
 	 * field to determine the length when using  this TString */
 	TString *postEventInfo;
+	TString *getEventName();
+	static void setStringTree(StringTree *sTree);
+private:
+	/* This is supposed to be set to the stringtree that was involved in
+	 * the parsing of the events, so that it can used to translate from
+	 * event_t to event name */
+	static StringTree *stringTree;
 };
 
 extern char *eventstrings[];

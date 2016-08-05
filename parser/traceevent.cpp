@@ -17,6 +17,7 @@
  */
 
 #include "parser/traceevent.h"
+#include "mm/stringtree.h"
 
 /* Do not change the order of these without updating the enum in
  * traceevent.h */
@@ -44,3 +45,15 @@ char *eventstrings[NR_EVENTS] = {
 	irqhdlrent,
 	irqhdlrext
 };
+
+StringTree *TraceEvent::stringTree = nullptr;
+
+void TraceEvent::setStringTree(StringTree *sTree)
+{
+	stringTree = sTree;
+}
+
+TString *TraceEvent::getEventName()
+{
+	return stringTree->stringLookup(TraceEvent::type);
+}

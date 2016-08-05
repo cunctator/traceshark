@@ -22,7 +22,8 @@
 #define MAX(A, B) ((A) >= (B) ? A:B)
 #define MIN(A, B) ((A) < (B) ? A:B)
 
-StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP)
+StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP,
+	unsigned int table_size)
 {
 	unsigned int entryPages, strPages;
 
@@ -41,7 +42,11 @@ StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP)
 	entryPool = new MemPool(entryPages, sizeof(StringTreeEntry));
 
 	hashTable = new StringTreeEntry*[hSize];
-	clearTable();
+
+	stringTable = new TString*[table_size];
+	tableSize = table_size;
+
+	clearTables();
 }
 
 StringTree::~StringTree()
@@ -50,16 +55,18 @@ StringTree::~StringTree()
 	delete strPool;
 	delete entryPool;
 	delete[] hashTable;
+	delete[] stringTable;
 }
 
-void StringTree::clearTable()
+void StringTree::clearTables()
 {
 	bzero(hashTable, hSize * sizeof(StringTreeEntry*));
+	bzero(stringTable, tableSize * sizeof(TString*));
 }
 
 void StringTree::clear()
 {
-	clearTable();
+	clearTables();
 	strPool->reset();
 	entryPool->reset();
 	charPool->reset();

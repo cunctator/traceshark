@@ -79,7 +79,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 			return QString("[") + QString::number(event.cpu) +
 				QString("]");
 		case 4:
-			return QString(event.eventName->ptr);
+			return QString(event.getEventName()->ptr);
 		case 5:
 			for (i = 0; i < event.argc; i++) {
 				str += QString(event.argv[i]->ptr);
