@@ -88,13 +88,10 @@ __always_inline TString* StringPool::allocString(const TString *str,
 		if (cmp == 0)
 			return entry->str;
 		parent = entry;
-		if (cmp < 0) {
+		if (cmp < 0)
 			aentry = &entry->small;
-			entry = *aentry;
-			continue;
-		}
-		/*  cmp must be > 0, since not 0 and not < 0 */
-		aentry = &entry->large;
+		else
+			aentry = &entry->large;
 		entry = *aentry;
 	}
 
