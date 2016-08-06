@@ -84,7 +84,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	entry = *aentry;
 
 	while(entry != nullptr) {
-		cmp = TString::strcmp(str, entry->str);
+		cmp = strcmp(str->ptr, entry->str->ptr);
 		if (cmp == 0)
 			return entry->str;
 		parent = entry;
