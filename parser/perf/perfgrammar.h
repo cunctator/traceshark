@@ -44,6 +44,7 @@ private:
 	void setupEventTree();
 	__always_inline bool StoreMatch(TString *str, TraceEvent &event);
 	__always_inline bool NameMatch(TString *str, TraceEvent &event);
+	__always_inline bool IntArgMatch(TString *str, TraceEvent &event);
 	__always_inline int pidFromString(const TString &str);
 	__always_inline bool PidMatch(TString *str, TraceEvent &event);
 	__always_inline bool CPUMatch(TString *str, TraceEvent &event);
@@ -61,6 +62,7 @@ private:
 		STATE_PID,
 		STATE_CPU,
 		STATE_TIME,
+		STATE_INTARG,
 		STATE_EVENT,
 		STATE_ARG
 	} grammarstate_t;
@@ -86,6 +88,36 @@ __always_inline bool PerfGrammar::NameMatch(TString *str,
 					      TraceEvent &event)
 {
 	return StoreMatch(str, event);
+}
+
+__always_inline bool PerfGrammar::IntArgMatch(TString *str,
+					      TraceEvent &event)
+{
+	char *lastChr = str->ptr + str->len - 1;
+	char *c = str->ptr;
+	int arg = 0;
+	bool negative = false;
+	int digit;
+
+	if (*c == '-') {
+		negative = true;
+		c++;
+	}
+
+	for (; c <= lastChr; c++) {
+		arg *= 10;
+		digit = *c - '0';
+		if (digit <=9 && digit >= 0) {
+			arg += digit;
+		} else {
+			event.intArg = 0;
+			return false;
+		}
+	}
+	if (negative)
+		arg = - arg;
+	event.intArg = arg;
+	return true;
 }
 
 __always_inline bool PerfGrammar::PidMatch(TString *str,
@@ -199,7 +231,7 @@ __always_inline bool PerfGrammar::EventMatch(TString *str,
 					       TraceEvent &event)
 {
 	char *lastChr = str->ptr + str->len - 1;
-	char *c = str->ptr;
+	char *c;
 	TString tmpstr;
 	event_t type;
 
@@ -212,18 +244,17 @@ __always_inline bool PerfGrammar::EventMatch(TString *str,
 	} else
 		return false;
 
-	do {
-		if (c >= lastChr)
-			return false;
+	for (c = str->ptr; c < lastChr; c++)
 		if (*c == ':')
 			break;
-		c++;
-	} while(true);
 
-	tmpstr.ptr = c + 1;
-	if (tmpstr.ptr >= lastChr)
-		return false;
-	tmpstr.len = lastChr - tmpstr.ptr;
+	if (c < lastChr) {
+		tmpstr.ptr = c + 1;
+		tmpstr.len = lastChr - tmpstr.ptr;
+	} else {
+		tmpstr.ptr = str->ptr;
+		tmpstr.len = str->len;
+	}
 
 	type = eventTree->searchAllocString(&tmpstr,
 					    TShark::StrHash32(&tmpstr),
@@ -292,11 +323,16 @@ __always_inline bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
 		case STATE_TIME:
 			if (TimeMatch(str, event)) {
 				NEXTTOKEN(false);
-				state = STATE_EVENT;
+				state = STATE_INTARG;
 				break;
 			}
 			state = STATE_PID;
 			break;
+		case STATE_INTARG:
+			if (IntArgMatch(str, event))
+				NEXTTOKEN(false);
+			/* This is an intentional fall through, there is no
+			 * missing break statement here */
 		case STATE_EVENT:
 			if (EventMatch(str, event)) {
 				NEXTTOKEN(true);

@@ -81,6 +81,14 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		case 4:
 			return QString(event.getEventName()->ptr);
 		case 5:
+			/* If there was an integer before the event name, then
+			 * we will display that as if it had been the first 
+			 * argument of the event */
+			if (event.intArg != 0) {
+				str += QString::number(event.intArg);
+				if (event.argc > 0)
+					str += QString(tr(" "));
+			}
 			for (i = 0; i < event.argc; i++) {
 				str += QString(event.argv[i]->ptr);
 				if (i < event.argc - 1)

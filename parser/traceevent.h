@@ -53,6 +53,7 @@ public:
 	unsigned int pid;
 	unsigned int cpu;
 	double time;
+	int intArg;
 	event_t type;
 	TString **argv;
 	unsigned int argc;
