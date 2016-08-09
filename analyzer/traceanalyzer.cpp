@@ -99,6 +99,7 @@ void TraceAnalyzer::close()
 		delete[] CPUs;
 		CPUs = nullptr;
 	}
+	taskMap.clear();
 	events.clear();
 	migrations.clear();
 	migrationArrows.clear();
