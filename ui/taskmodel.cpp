@@ -72,26 +72,30 @@ void TaskModel::setTaskMap(QMap<unsigned int, Task> *map)
 
 		/* Pathetic bubble sort to display tasks with the same names in
 		 * pid order */
+		int start = 0;
+		int end = sl - 1;
 		do {
 			done = true;
-			for (i = 1; i < sl; i++) {
+			for (i = start + 1; i <= end; i++) {
 				j = i - 1;
 				if (pidList[j] > pidList[i]) {
 					pidList.swap(i, j);
 					done = false;
 				}
 			}
-			if (done)
+			end--;
+			if (done || start >= end)
 				break;
 			done = true;
-			for (i = sl - 1; i > 0; i--) {
+			for (i = end; i > start; i--) {
 				j = i - 1;
 				if (pidList[j] > pidList[i]) {
 					pidList.swap(i, j);
 					done = false;
 				}
 			}
-		} while(!done);
+			start++;
+		} while(!done && start < end);
 
 		for (i = 0; i < sl; i++) {
 			pid = pidList[i];
