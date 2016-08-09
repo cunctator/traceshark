@@ -46,8 +46,10 @@ void TaskModel::setTaskMap(QMap<unsigned int, Task> *map)
 	taskNameList->clear();
 	taskMap = map;
 
-	if (map == nullptr)
+	if (map == nullptr) {
+		delete nameMap;
 		return;
+	}
 
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap->begin();
 	while (iter != taskMap->end()) {
