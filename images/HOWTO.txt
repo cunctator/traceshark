@@ -1,0 +1,39 @@
+INTRODUCTION
+
+This document tries to describe how the icons have been created. The idea behind
+the icons are functionalism and that they can be created quickly, without any
+artistic talents whatsoever.
+
+HOW?
+
+1. Draw the image with the worlds best drawing program, xfig. Using it gives a
+   nice 1980s style to the icons.
+
+2. As a reference save the drawing in the native fig format.
+
+3. In xfig, click File->Export
+
+4. Select "Language", to PNG.
+
+5. Export the file to a png file.
+
+6. Open the png file in gimp, if you are asked convert it to sRGB.
+
+7. In the gimp menu, select Layer->Transparency->Color to Alpha
+
+8. The above should open a dialoge where you are allowed to convert a color to
+   transparency, white should be the default, so you should only have to click
+   OK.
+
+9. Change the image to quadratic size, if it isn't already. This can happen by
+   creating a new image of quadratic size and copying the image into it.
+
+10. Save this intermediary result in gimp's native format, xcf, that is use
+    "Save As" in the menu.
+
+11. Scale the image to size 30x30. It happens with the menu "Image->Scale Image"
+    You should select Interpolation to be "Sinc (Lanczos3)".
+
+12. Save the scaled image as a png with "Export As". Add "30x30" to the base
+    file name.
+
