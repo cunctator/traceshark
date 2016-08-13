@@ -18,6 +18,7 @@
 
 #include <QTextStream>
 #include <QDateTime>
+#include <QToolBar>
 
 #include "ui/cursor.h"
 #include "ui/eventinfodialog.h"
@@ -790,16 +791,19 @@ void MainWindow::showEventInfo(const TraceEvent &event)
 void MainWindow::createActions()
 {
 	openAction = new QAction(tr("&Open"), this);
+	openAction->setIcon(QIcon(":/traceshark/images/open30x30.png"));
 	openAction->setShortcuts(QKeySequence::Open);
 	openAction->setStatusTip(tr("Open a trace file..."));
 	tsconnect(openAction, triggered(), this, openTrace());
 
 	closeAction = new QAction(tr("&Close"), this);
+	closeAction->setIcon(QIcon(":/traceshark/images/close30x30.png"));
 	closeAction->setShortcuts(QKeySequence::Close);
 	closeAction->setStatusTip(tr("Close the trace"));
 	tsconnect(closeAction, triggered(), this, closeTrace());
 
 	saveAction = new QAction(tr("&Save screenshot as..."), this);
+	saveAction->setIcon(QIcon(":/traceshark/images/screenshot30x30.png"));
 	saveAction->setShortcuts(QKeySequence::SaveAs);
 	saveAction->setStatusTip(tr("Save screenshot to an image file"));
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
@@ -828,6 +832,11 @@ void MainWindow::createActions()
 
 void MainWindow::createToolBars()
 {
+	fileToolBar = new QToolBar(tr("&File"));
+	addToolBar(Qt::LeftToolBarArea, fileToolBar);
+	fileToolBar->addAction(openAction);
+	fileToolBar->addAction(closeAction);
+	fileToolBar->addAction(saveAction);
 }
 
 void MainWindow::createMenus()

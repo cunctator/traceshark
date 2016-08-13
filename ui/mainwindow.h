@@ -33,6 +33,7 @@ class QLabel;
 class QMenu;
 class QPlainTextEdit;
 class QMouseEvent;
+class QToolBar;
 QT_END_NAMESPACE
 
 class TraceAnalyzer;
@@ -118,6 +119,8 @@ private:
 	QMenu *fileMenu;
 	QMenu *viewMenu;
 	QMenu *helpMenu;
+
+	QToolBar *fileToolBar;
 
 	QAction *openAction;
 	QAction *closeAction;
