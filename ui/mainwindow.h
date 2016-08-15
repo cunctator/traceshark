@@ -121,11 +121,13 @@ private:
 	QMenu *helpMenu;
 
 	QToolBar *fileToolBar;
+	QToolBar *viewToolBar;
 
 	QAction *openAction;
 	QAction *closeAction;
 	QAction *saveAction;
 	QAction *exitAction;
+	QAction *showTasksAction;
 	QAction *aboutAction;
 	QAction *licenseAction;
 	QAction *aboutQtAction;

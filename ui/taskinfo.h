@@ -45,7 +45,6 @@ signals:
 	void findWakeup(unsigned int pid);
 	void addTaskGraph(unsigned int pid);
 	void removeTaskGraph(unsigned int pid);
-	void requestTaskSelector();
 private slots:
 	void addTaskGraphClicked();
 	void addToLegendClicked();

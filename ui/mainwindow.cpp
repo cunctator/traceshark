@@ -39,6 +39,16 @@
 #include "threads/workitem.h"
 #include "qcustomplot/qcustomplot.h"
 
+
+#define TOOLTIP_OPEN \
+	"Open a new trace file"
+#define TOOLTIP_CLOSE \
+	"Close the currently open tracefile"
+#define TOOLTIP_SAVESCREEN \
+	"Take a screenshot of the current graph and save it to a file"
+#define TOOLTIP_SHOWTASKS \
+	"Show a list of all tasks and it's possible to select one"
+
 MainWindow::MainWindow():
 	tracePlot(nullptr)
 {
@@ -93,8 +103,7 @@ MainWindow::MainWindow():
 		  showWakeup(unsigned int));
 	tsconnect(infoWidget, removeTaskGraph(unsigned int), this,
 		  removeTaskGraph(unsigned int));
-	tsconnect(infoWidget, requestTaskSelector(), this,
-		  showTaskSelector());
+
 	tsconnect(eventsWidget, timeSelected(double), this,
 		  moveActiveCursor(double));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
@@ -231,6 +240,7 @@ void MainWindow::openTrace()
 		tracePlot->legend->setVisible(true);
 		saveAction->setEnabled(true);
 		closeAction->setEnabled(true);
+		showTasksAction->setEnabled(true);
 	}
 }
 
@@ -538,6 +548,7 @@ void MainWindow::closeTrace()
 	infoWidget->clear();
 	saveAction->setEnabled(false);
 	closeAction->setEnabled(false);
+	showTasksAction->setEnabled(false);
 }
 
 void MainWindow::saveScreenshot()
@@ -797,22 +808,28 @@ void MainWindow::createActions()
 	openAction = new QAction(tr("&Open"), this);
 	openAction->setIcon(QIcon(":/traceshark/images/open30x30.png"));
 	openAction->setShortcuts(QKeySequence::Open);
-	openAction->setStatusTip(tr("Open a trace file..."));
+	openAction->setToolTip(tr(TOOLTIP_OPEN));
 	tsconnect(openAction, triggered(), this, openTrace());
 
 	closeAction = new QAction(tr("&Close"), this);
 	closeAction->setIcon(QIcon(":/traceshark/images/close30x30.png"));
 	closeAction->setShortcuts(QKeySequence::Close);
-	closeAction->setStatusTip(tr("Close the trace"));
+	closeAction->setToolTip(tr(TOOLTIP_CLOSE));
 	closeAction->setEnabled(false);
 	tsconnect(closeAction, triggered(), this, closeTrace());
 
 	saveAction = new QAction(tr("&Save screenshot as..."), this);
 	saveAction->setIcon(QIcon(":/traceshark/images/screenshot30x30.png"));
 	saveAction->setShortcuts(QKeySequence::SaveAs);
-	saveAction->setStatusTip(tr("Save screenshot to an image file"));
+	saveAction->setToolTip(tr(TOOLTIP_SAVESCREEN));
 	saveAction->setEnabled(false);
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
+
+	showTasksAction = new QAction(tr("Show task list"), this);
+	showTasksAction->setIcon(QIcon(":/traceshark/images/taskselector30x30.png"));
+	showTasksAction->setToolTip(tr(TOOLTIP_SHOWTASKS));
+	showTasksAction->setEnabled(false);
+	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
 
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
@@ -846,6 +863,10 @@ void MainWindow::createToolBars()
 	fileToolBar->addAction(openAction);
 	fileToolBar->addAction(closeAction);
 	fileToolBar->addAction(saveAction);
+
+	viewToolBar = new QToolBar(tr("&View"));
+	addToolBar(Qt::LeftToolBarArea, viewToolBar);
+	viewToolBar->addAction(showTasksAction);
 }
 
 void MainWindow::createMenus()
@@ -858,6 +879,7 @@ void MainWindow::createMenus()
 	fileMenu->addAction(exitAction);
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
+	viewMenu->addAction(showTasksAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);

@@ -75,8 +75,6 @@ InfoWidget::InfoWidget(QWidget *parent):
 		   addTaskGraph(unsigned int));
 	sigconnect(taskInfo, removeTaskGraph(unsigned int), this,
 		   removeTaskGraph(unsigned int));
-	sigconnect(taskInfo, requestTaskSelector(), this,
-		   requestTaskSelector());
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
 		  updateChange(double, int));
 	tsconnect(cursorInfos[1], valueChanged(double, int), this,
