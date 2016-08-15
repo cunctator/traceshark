@@ -814,14 +814,17 @@ void MainWindow::createActions()
 	tsconnect(exitAction, triggered(), this, close());
 
 	aboutQtAction = new QAction(tr("About &Qt"), this);
+	aboutQtAction->setIcon(QIcon(":/traceshark/images/qtlogo-64.png"));
 	aboutQtAction->setStatusTip(tr("Show info about Qt"));
 	tsconnect(aboutQtAction, triggered(), qApp, aboutQt());
 
 	aboutAction = new QAction(tr("&About Traceshark"), this);
+	aboutAction->setIcon(QIcon(":/traceshark/images/shark.png"));
 	aboutAction->setStatusTip(tr("Show info about Traceshark"));
 	tsconnect(aboutAction, triggered(), this, about());
 
 	aboutQCPAction = new QAction(tr("About QCustom&Plot"), this);
+	aboutQCPAction->setIcon(QIcon(":/traceshark/images/qcp-logo.png"));
 	aboutAction->setStatusTip(tr("Show info about QCustomPlot"));
 	tsconnect(aboutQCPAction, triggered(), this, aboutQCustomPlot());
 
