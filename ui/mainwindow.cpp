@@ -229,6 +229,8 @@ void MainWindow::openTrace()
 		     << (double) (tshow - showt) / 1000;
 		qout << " s\n";
 		tracePlot->legend->setVisible(true);
+		saveAction->setEnabled(true);
+		closeAction->setEnabled(true);
 	}
 }
 
@@ -534,6 +536,8 @@ void MainWindow::closeTrace()
 	if(analyzer->isOpen())
 		analyzer->close();
 	infoWidget->clear();
+	saveAction->setEnabled(false);
+	closeAction->setEnabled(false);
 }
 
 void MainWindow::saveScreenshot()
@@ -800,12 +804,14 @@ void MainWindow::createActions()
 	closeAction->setIcon(QIcon(":/traceshark/images/close30x30.png"));
 	closeAction->setShortcuts(QKeySequence::Close);
 	closeAction->setStatusTip(tr("Close the trace"));
+	closeAction->setEnabled(false);
 	tsconnect(closeAction, triggered(), this, closeTrace());
 
 	saveAction = new QAction(tr("&Save screenshot as..."), this);
 	saveAction->setIcon(QIcon(":/traceshark/images/screenshot30x30.png"));
 	saveAction->setShortcuts(QKeySequence::SaveAs);
 	saveAction->setStatusTip(tr("Save screenshot to an image file"));
+	saveAction->setEnabled(false);
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
 
 	exitAction = new QAction(tr("E&xit"), this);
