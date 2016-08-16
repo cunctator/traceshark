@@ -238,9 +238,7 @@ void MainWindow::openTrace()
 		     << (double) (tshow - showt) / 1000;
 		qout << " s\n";
 		tracePlot->legend->setVisible(true);
-		saveAction->setEnabled(true);
-		closeAction->setEnabled(true);
-		showTasksAction->setEnabled(true);
+		setTraceActionsEnabled(true);
 	}
 }
 
@@ -532,6 +530,13 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	graph->setData(task.runningTimev, task.scaledRunningData);
 }
 
+void MainWindow::setTraceActionsEnabled(bool e)
+{
+	saveAction->setEnabled(e);
+	closeAction->setEnabled(e);
+	showTasksAction->setEnabled(e);
+}
+
 void MainWindow::closeTrace()
 {
 	eventsWidget->beginResetModel();
@@ -546,9 +551,7 @@ void MainWindow::closeTrace()
 	if(analyzer->isOpen())
 		analyzer->close();
 	infoWidget->clear();
-	saveAction->setEnabled(false);
-	closeAction->setEnabled(false);
-	showTasksAction->setEnabled(false);
+	setTraceActionsEnabled(false);
 }
 
 void MainWindow::saveScreenshot()

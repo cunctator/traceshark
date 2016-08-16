@@ -101,6 +101,8 @@ private:
 	void addWakeupGraph(CPUTask &task);
 	void addStillRunningGraph(CPUTask &task);
 
+	void setTraceActionsEnabled(bool e);
+
 	TracePlot *tracePlot;
 	TaskRangeAllocator *taskRangeAllocator;
 	QCPLayer *cursorLayer;
