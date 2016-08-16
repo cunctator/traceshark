@@ -20,6 +20,17 @@
 #include <QtCore>
 #include "ui/mainwindow.h"
 
+#define QT5_WARNING \
+"WARNING!!! WARNING!!! WARNING!!!\n" \
+"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
+"\n" \
+"You are using a Qt version that is >= 5.0.0. This is not recommended\n"  \
+"unless you are a developer who want's to try to fix the problems with\n" \
+"using Qt5\n" \
+"\n" \
+"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
+"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!" \
+
 int main(int argc, char* argv[])
 {
 	QApplication app(argc, argv);
@@ -31,6 +42,8 @@ int main(int argc, char* argv[])
 /* Set graphicssystem to opengl if we have old enough Qt */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 	QApplication::setGraphicsSystem("opengl");
+#else
+#pragma message(QT5_WARNING)
 #endif
 	app.setApplicationName(appname);
 	icon.addPixmap(pm);

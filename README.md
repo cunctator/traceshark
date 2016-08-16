@@ -20,6 +20,10 @@ qmake-qt4
 
 make -j5
 
+Please note that the software will compile for Qt5 but that the performance for
+scrolling and zooming will be very bad. For that reason it's recommended that
+you verify that you compile for Qt4.
+
 You can get an Ftrace trace to view by doing the following:
 
 trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new
