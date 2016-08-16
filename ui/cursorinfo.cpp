@@ -18,12 +18,14 @@
 
 #include "ui/cursorinfo.h"
 #include "misc/traceshark.h"
-#include <QIcon>
+
 #include <QHBoxLayout>
-#include <QPixmap>
-#include <QPushButton>
+#include <QIcon>
+#include <QToolBar>
+#include <QAction>
 #include <QLineEdit>
 #include <QString>
+#include <QWidget>
 #include <cmath>
 
 #define RED_CURSOR_RESOURCE ":/traceshark/images/movered30x30.png"
@@ -38,7 +40,6 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	QString qresource;
 	QHBoxLayout *layout  = new QHBoxLayout(this);
 	line = new QLineEdit(this);
-	QPushButton *button;
 
 	line->setReadOnly(false);
 	line->setInputMask(QString("0000000.0000000"));
@@ -59,16 +60,18 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 
 	layout->addWidget(line);
 
-	QPixmap buttonPM(qresource);
-	QIcon buttonIcon(buttonPM);
+	moveCursorAction = new QAction(tr("Move"), this);
+	moveCursorAction->setIcon(QIcon(qresource));
+	/* Todo: come up with a shortcut below */
+	/* moveCursorAction->setShortcuts(I_dont_know); */
+	moveCursorAction->setToolTip(text);
 
-	button = new QPushButton(buttonIcon, tr(""), this);
-	button->setToolTip(text);
-	button->setIconSize(buttonPM.size());
-	layout->addWidget(button);
+	moveToolBar = new QToolBar(tr("Move Toolbar"), this);
+	layout->addWidget(moveToolBar);
+	moveToolBar->addAction(moveCursorAction);
 
 	updateValue(0);
-	tsconnect(button, clicked(), this, buttonClicked());
+	tsconnect(moveCursorAction, triggered(), this, moveTriggered());
 }
 
 CursorInfo::~CursorInfo()
@@ -87,7 +90,7 @@ void CursorInfo::updateValue(double value)
 	line->setText(QString::number((value), 'f', precision));
 }
 
-void CursorInfo::buttonClicked()
+void CursorInfo::moveTriggered()
 {
 	if (line->hasAcceptableInput())
 		emit valueChanged(line->text().toDouble(), id);

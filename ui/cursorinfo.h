@@ -20,7 +20,12 @@
 #define CURSORINFO_H
 
 #include <QWidget>
+
+QT_BEGIN_NAMESPACE
+class QAction;
 class QLineEdit;
+class QToolBar;
+QT_END_NAMESPACE
 
 class CursorInfo : public QWidget
 {
@@ -32,8 +37,10 @@ public:
 signals:
 	void valueChanged(double value, int nr);
 private slots:
-	void buttonClicked();
+	void moveTriggered();
 private:
+	QAction *moveCursorAction;
+	QToolBar *moveToolBar;
 	QLineEdit *line;
 	int id;
 };
