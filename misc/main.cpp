@@ -66,7 +66,10 @@ int main(int argc, char* argv[])
 	else
 		width = 1600 + (geometry.width() - 1600) / 2;
 
-	height = geometry.height() - 70;
+	if (geometry.height() < 1100)
+		height = geometry.height();
+	else
+		height = geometry.height() - geometry.height() / 16;
 
 	mainWindow.resize(width, height);
 
