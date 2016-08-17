@@ -535,6 +535,8 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	saveAction->setEnabled(e);
 	closeAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
+
+	infoWidget->setTraceActionsEnabled(e);
 }
 
 void MainWindow::closeTrace()

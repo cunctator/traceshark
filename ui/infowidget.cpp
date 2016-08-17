@@ -152,3 +152,8 @@ void InfoWidget::clear()
 {
 	taskInfo->clear();
 }
+
+void InfoWidget::setTraceActionsEnabled(bool e)
+{
+	taskInfo->setTraceActionsEnabled(e);
+}

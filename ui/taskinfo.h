@@ -43,6 +43,7 @@ public:
 	void checkGraphSelection();
 	void clear();
 	void pidRemoved(unsigned int pid);
+	void setTraceActionsEnabled(bool e);
 signals:
 	void findWakeup(unsigned int pid);
 	void addTaskGraph(unsigned int pid);

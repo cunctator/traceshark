@@ -104,6 +104,8 @@ void TaskInfo::createActions()
 	removeTaskGraphAction->setIcon(QIcon(REMOVE_TASK_RESOURCE));
 	/* removeTaskGraphAction->setShortCuts(I_dont_know) */
 	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
+
+	setTraceActionsEnabled(false);
 }
 
 void TaskInfo::createToolBar()
@@ -114,6 +116,15 @@ void TaskInfo::createToolBar()
 	taskToolBar->addAction(findAction);
 	taskToolBar->addAction(addTaskGraphAction);
 	taskToolBar->addAction(removeTaskGraphAction);
+}
+
+void TaskInfo::setTraceActionsEnabled(bool e)
+{
+	addToLegendAction->setEnabled(e);
+	clearAction->setEnabled(e);
+	findAction->setEnabled(e);
+	addTaskGraphAction->setEnabled(e);
+	removeTaskGraphAction->setEnabled(e);
 }
 
 TaskInfo::~TaskInfo()
