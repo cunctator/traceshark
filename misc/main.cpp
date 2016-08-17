@@ -19,6 +19,7 @@
 #include <QApplication>
 #include <QtCore>
 #include "ui/mainwindow.h"
+#include "ui/tracesharkstyle.h"
 
 #define QT5_WARNING \
 "WARNING!!! WARNING!!! WARNING!!!\n" \
@@ -45,6 +46,8 @@ int main(int argc, char* argv[])
 #else
 #pragma message(QT5_WARNING)
 #endif
+
+	app.setStyle(new TraceSharkStyle);
 	app.setApplicationName(appname);
 	icon.addPixmap(pm);
 	app.setWindowIcon(icon);

@@ -41,6 +41,7 @@ HEADERS      +=  ui/taskrangeallocator.h
 HEADERS      +=  ui/taskselectdialog.h
 HEADERS      +=  ui/taskview.h
 HEADERS      +=  ui/traceplot.h
+HEADERS      +=  ui/tracesharkstyle.h
 
 HEADERS      +=  analyzer/abstracttask.h
 HEADERS      +=  analyzer/cpufreq.h
@@ -108,6 +109,7 @@ SOURCES      +=  ui/taskrangeallocator.cpp
 SOURCES      +=  ui/taskselectdialog.cpp
 SOURCES      +=  ui/taskview.cpp
 SOURCES      +=  ui/traceplot.cpp
+SOURCES      +=  ui/tracesharkstyle.cpp
 
 SOURCES      +=  analyzer/abstracttask.cpp
 SOURCES      +=  analyzer/cpufreq.cpp
