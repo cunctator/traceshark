@@ -39,6 +39,8 @@ int main(int argc, char* argv[])
 	QPixmap pm(QLatin1String(":/traceshark/images/shark.png"));
 	QIcon icon;
 	QString appname = QLatin1String("Traceshark");
+	QRect geometry;
+	int width, height;
 
 /* Set graphicssystem to opengl if we have old enough Qt */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -52,10 +54,21 @@ int main(int argc, char* argv[])
 	icon.addPixmap(pm);
 	app.setWindowIcon(icon);
 	
-	mainWindow.resize(1500, 980);
 	mainWindow.setWindowIconText(appname);
 	mainWindow.setWindowTitle(appname);
 
 	mainWindow.show();
+
+	geometry = QApplication::desktop()->availableGeometry();
+
+	if (geometry.width() < 1600)
+		width = geometry.width();
+	else
+		width = 1600 + (geometry.width() - 1600) / 2;
+
+	height = geometry.height() - 70;
+
+	mainWindow.resize(width, height);
+
 	return app.exec();
 }
