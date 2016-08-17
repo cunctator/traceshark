@@ -23,7 +23,9 @@
 #include <QMap>
 
 QT_BEGIN_NAMESPACE
+class QAction;
 class QLineEdit;
+class QToolBar;
 QT_END_NAMESPACE
 
 class TaskGraph;
@@ -46,12 +48,23 @@ signals:
 	void addTaskGraph(unsigned int pid);
 	void removeTaskGraph(unsigned int pid);
 private slots:
-	void addTaskGraphClicked();
-	void addToLegendClicked();
-	void clearClicked();
-	void findClicked();
-	void removeTaskGraphClicked();
+	void addTaskGraphTriggered();
+	void addToLegendTriggered();
+	void clearTriggered();
+	void findTriggered();
+	void removeTaskGraphTriggered();
 private:
+	void createActions();
+	void createToolBar();
+
+	QAction *addTaskGraphAction;
+	QAction *addToLegendAction;
+	QAction *clearAction;
+	QAction *findAction;
+	QAction *removeTaskGraphAction;
+
+	QToolBar *taskToolBar;
+
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
 	TaskGraph *taskGraph;
