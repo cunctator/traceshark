@@ -156,4 +156,6 @@ void InfoWidget::clear()
 void InfoWidget::setTraceActionsEnabled(bool e)
 {
 	taskInfo->setTraceActionsEnabled(e);
+	cursorInfos[0]->setTraceActionsEnabled(e);
+	cursorInfos[1]->setTraceActionsEnabled(e);
 }

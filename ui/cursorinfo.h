@@ -34,6 +34,7 @@ public:
 	CursorInfo(int nr, QWidget *parent = 0);
 	virtual ~CursorInfo();
 	void updateValue(double value);
+	void setTraceActionsEnabled(bool e);
 signals:
 	void valueChanged(double value, int nr);
 private slots:

@@ -65,6 +65,7 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	/* Todo: come up with a shortcut below */
 	/* moveCursorAction->setShortcuts(I_dont_know); */
 	moveCursorAction->setToolTip(text);
+	setTraceActionsEnabled(false);
 
 	moveToolBar = new QToolBar(tr("Move Toolbar"), this);
 	layout->addWidget(moveToolBar);
@@ -94,4 +95,12 @@ void CursorInfo::moveTriggered()
 {
 	if (line->hasAcceptableInput())
 		emit valueChanged(line->text().toDouble(), id);
+}
+
+void CursorInfo::setTraceActionsEnabled(bool e)
+{
+	if (e == false)
+		line->clear();
+	line->setEnabled(e);
+	moveCursorAction->setEnabled(e);
 }
