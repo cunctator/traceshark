@@ -26,11 +26,11 @@
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
 "\n" \
 "You are using a Qt version that is >= 5.0.0. This is not recommended\n"  \
-"unless you are a developer who want's to try to fix the problems with\n" \
+"unless you are a developer who wants to try to fix the problems with\n" \
 "using Qt5\n" \
 "\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
-"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!" \
+"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!"
 
 int main(int argc, char* argv[])
 {
