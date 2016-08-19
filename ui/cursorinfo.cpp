@@ -16,9 +16,6 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui/cursorinfo.h"
-#include "misc/traceshark.h"
-
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QToolBar>
@@ -28,8 +25,10 @@
 #include <QWidget>
 #include <cmath>
 
-#define RED_CURSOR_RESOURCE ":/traceshark/images/movered30x30.png"
-#define BLUE_CURSOR_RESOURCE ":/traceshark/images/moveblue30x30.png"
+#include "ui/cursorinfo.h"
+#include "misc/resources.h"
+#include "misc/traceshark.h"
+
 #define RED_CURSOR_TOOLTIP "Move the red cursor to the specified time"
 #define BLUE_CURSOR_TOOLTIP "Move the blue cursor to the specified time"
 
@@ -47,11 +46,11 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	switch (nr) {
 	case TShark::RED_CURSOR:
 		text = QString(tr(RED_CURSOR_TOOLTIP));
-		qresource = QLatin1String(RED_CURSOR_RESOURCE);
+		qresource = QLatin1String(RESSRC_PNG_MOVE_BLUE);
 		break;
 	case TShark::BLUE_CURSOR:
 		text = QString(tr(BLUE_CURSOR_TOOLTIP));
-		qresource = QLatin1String(BLUE_CURSOR_RESOURCE);
+		qresource = QLatin1String(RESSRC_PNG_MOVE_RED);
 		break;
 	default:
 		text = QString(tr("error in cursorinfo.cpp"));

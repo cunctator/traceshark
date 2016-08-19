@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "ui/licensedialog.h"
 
@@ -31,7 +32,7 @@
 LicenseDialog::LicenseDialog(QWidget *parent)
 	:QDialog(parent, Qt::WindowCloseButtonHint)
 {
-	QFile file(QLatin1String(":/traceshark/LICENSE"));
+	QFile file(QLatin1String(RESSRC_TEXT_LICENSE));
 
 	if (!file.open(QIODevice::ReadOnly))
 		qDebug() << "Warning, could not read license!\n";

@@ -18,6 +18,7 @@
 
 #include <QApplication>
 #include <QtCore>
+#include "misc/resources.h"
 #include "ui/mainwindow.h"
 #include "ui/tracesharkstyle.h"
 
@@ -36,7 +37,7 @@ int main(int argc, char* argv[])
 {
 	QApplication app(argc, argv);
 	MainWindow mainWindow;
-	QPixmap pm(QLatin1String(":/traceshark/images/shark.png"));
+	QPixmap pm(QLatin1String(RESSRC_PNG_SHARK));
 	QIcon icon;
 	QString appname = QLatin1String("Traceshark");
 	QRect geometry;

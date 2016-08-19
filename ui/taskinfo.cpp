@@ -29,17 +29,12 @@
 #include "analyzer/task.h"
 #include "ui/taskgraph.h"
 #include "ui/taskinfo.h"
+#include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "qcustomplot/qcustomplot.h"
 
 #define DEFINE_PIDMAP_ITERATOR(name) \
 	QMap<unsigned int, TaskGraph*>::iterator name
-
-#define ADD_TO_LEGEND_RESOURCE ":/traceshark/images/addtolegend30x30.png"
-#define ADD_TASK_RESOURCE ":/traceshark/images/addtask30x30.png"
-#define CLEAR_LEGEND_RESOURCE ":/traceshark/images/clearlegend30x30.png"
-#define FIND_WAKEUP_RESOURCE ":/traceshark/images/wakeup30x30.png"
-#define REMOVE_TASK_RESOURCE ":/traceshark/images/removetask30x30.png"
 
 #define FIND_TOOLTIP \
 	"Find the wakeup of this task that precedes the active cursor"
@@ -81,27 +76,27 @@ TaskInfo::TaskInfo(QWidget *parent):
 void TaskInfo::createActions()
 {
 	addTaskGraphAction = new QAction(tr("Add task graph"), this);
-	addTaskGraphAction->setIcon(QIcon(ADD_TASK_RESOURCE));
+	addTaskGraphAction->setIcon(QIcon(RESSRC_PNG_ADD_TASK));
 	/* addTaskGraphAction->setShortcuts(I_dont_know); */
 	addTaskGraphAction->setToolTip(tr("Add a unified graph for this task"));
 
 	addToLegendAction = new QAction(tr("Add task to the legend"), this);
-	addToLegendAction->setIcon(QIcon(ADD_TO_LEGEND_RESOURCE));
+	addToLegendAction->setIcon(QIcon(RESSRC_PNG_ADD_TO_LEGEND));
 	/* addToLegendAction->setShortcuts(I_dont_know); */
 	addToLegendAction->setToolTip(tr("Add this task to the legend"));
 
 	clearAction = new QAction(tr("Clear the legend"), this);
-	clearAction->setIcon(QIcon(CLEAR_LEGEND_RESOURCE));
+	clearAction->setIcon(QIcon(RESSRC_PNG_CLEAR_LEGEND));
 	/* clearAction->setShortcuts(I_dont_know) */
 	clearAction->setToolTip(tr("Remove all tasks from the legend"));
 
 	findAction = new QAction(tr("Find wakeup"), this);
-	findAction->setIcon(QIcon(FIND_WAKEUP_RESOURCE));
+	findAction->setIcon(QIcon(RESSRC_PNG_FIND_WAKEUP));
 	/* findAction->setShortCuts(I_dont_know) */
 	findAction->setToolTip(tr(FIND_TOOLTIP));
 
 	removeTaskGraphAction = new QAction(tr("Remove task graph"), this);
-	removeTaskGraphAction->setIcon(QIcon(REMOVE_TASK_RESOURCE));
+	removeTaskGraphAction->setIcon(QIcon(RESSRC_PNG_REMOVE_TASK));
 	/* removeTaskGraphAction->setShortCuts(I_dont_know) */
 	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
 

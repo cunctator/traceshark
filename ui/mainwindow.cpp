@@ -34,6 +34,7 @@
 #include "ui/taskselectdialog.h"
 #include "parser/traceevent.h"
 #include "ui/traceplot.h"
+#include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
@@ -667,7 +668,7 @@ void MainWindow::about()
 	msgBox->setText(textAboutCaption);
 	msgBox->setInformativeText(textAbout);
 
-	QPixmap pm(QLatin1String(":/traceshark/images/shark.png"));
+	QPixmap pm(QLatin1String(RESSRC_PNG_SHARK));
 	if (!pm.isNull())
 		msgBox->setIconPixmap(pm);
 	msgBox->show();
@@ -698,7 +699,7 @@ void MainWindow::aboutQCustomPlot()
 	msgBox->setText(textAboutCaption);
 	msgBox->setInformativeText(textAbout);
 
-	QPixmap pm(QLatin1String(":/traceshark/images/qcp-logo.png"));
+	QPixmap pm(QLatin1String(RESSRC_PNG_QCP_LOGO));
 	if (!pm.isNull())
 		msgBox->setIconPixmap(pm);
 	msgBox->show();
@@ -811,27 +812,27 @@ void MainWindow::showEventInfo(const TraceEvent &event)
 void MainWindow::createActions()
 {
 	openAction = new QAction(tr("&Open"), this);
-	openAction->setIcon(QIcon(":/traceshark/images/open30x30.png"));
+	openAction->setIcon(QIcon(RESSRC_PNG_OPEN));
 	openAction->setShortcuts(QKeySequence::Open);
 	openAction->setToolTip(tr(TOOLTIP_OPEN));
 	tsconnect(openAction, triggered(), this, openTrace());
 
 	closeAction = new QAction(tr("&Close"), this);
-	closeAction->setIcon(QIcon(":/traceshark/images/close30x30.png"));
+	closeAction->setIcon(QIcon(RESSRC_PNG_CLOSE));
 	closeAction->setShortcuts(QKeySequence::Close);
 	closeAction->setToolTip(tr(TOOLTIP_CLOSE));
 	closeAction->setEnabled(false);
 	tsconnect(closeAction, triggered(), this, closeTrace());
 
 	saveAction = new QAction(tr("&Save screenshot as..."), this);
-	saveAction->setIcon(QIcon(":/traceshark/images/screenshot30x30.png"));
+	saveAction->setIcon(QIcon(RESSRC_PNG_SCREENSHOT));
 	saveAction->setShortcuts(QKeySequence::SaveAs);
 	saveAction->setToolTip(tr(TOOLTIP_SAVESCREEN));
 	saveAction->setEnabled(false);
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
 
 	showTasksAction = new QAction(tr("Show task list"), this);
-	showTasksAction->setIcon(QIcon(":/traceshark/images/taskselector30x30.png"));
+	showTasksAction->setIcon(QIcon(RESSRC_PNG_TASKSELECT));
 	showTasksAction->setToolTip(tr(TOOLTIP_SHOWTASKS));
 	showTasksAction->setEnabled(false);
 	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
@@ -842,17 +843,17 @@ void MainWindow::createActions()
 	tsconnect(exitAction, triggered(), this, close());
 
 	aboutQtAction = new QAction(tr("About &Qt"), this);
-	aboutQtAction->setIcon(QIcon(":/traceshark/images/qtlogo-64.png"));
+	aboutQtAction->setIcon(QIcon(RESSRC_PNG_QT_LOGO));
 	aboutQtAction->setStatusTip(tr("Show info about Qt"));
 	tsconnect(aboutQtAction, triggered(), qApp, aboutQt());
 
 	aboutAction = new QAction(tr("&About Traceshark"), this);
-	aboutAction->setIcon(QIcon(":/traceshark/images/shark.png"));
+	aboutAction->setIcon(QIcon(RESSRC_PNG_SHARK));
 	aboutAction->setStatusTip(tr("Show info about Traceshark"));
 	tsconnect(aboutAction, triggered(), this, about());
 
 	aboutQCPAction = new QAction(tr("About QCustom&Plot"), this);
-	aboutQCPAction->setIcon(QIcon(":/traceshark/images/qcp-logo.png"));
+	aboutQCPAction->setIcon(QIcon(RESSRC_PNG_QCP_LOGO));
 	aboutAction->setStatusTip(tr("Show info about QCustomPlot"));
 	tsconnect(aboutQCPAction, triggered(), this, aboutQCustomPlot());
 

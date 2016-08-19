@@ -80,6 +80,7 @@ HEADERS      +=  mm/mempool.h
 HEADERS      +=  mm/stringpool.h
 HEADERS      +=  mm/stringtree.h
 
+HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
 HEADERS      +=  misc/tlist.h
 HEADERS      +=  misc/traceshark.h
