@@ -299,53 +299,38 @@ __always_inline bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
 	do {
 		switch(state) {
 		case STATE_NAME:
-			if (NameMatch(str, event)) {
-				NEXTTOKEN(false);
+			if (!NameMatch(str, event))
+				return false;
+			NEXTTOKEN(false);
+		case STATE_PID:
+			if (!PidMatch(str, event))
+				return false;
+			NEXTTOKEN(false);
+		case STATE_CPU:
+			if (!CPUMatch(str, event)) {
 				state = STATE_PID;
 				break;
 			}
-			return false;
-		case STATE_PID:
-			if (PidMatch(str, event)) {
-				NEXTTOKEN(false);
-				state = STATE_CPU;
-				break;
-			}
-			return false;
-		case STATE_CPU:
-			if (CPUMatch(str, event)) {
-				NEXTTOKEN(false);
-				state = STATE_TIME;
-				break;
-			}
-			state = STATE_PID;
-			break;
+			NEXTTOKEN(false);
 		case STATE_TIME:
-			if (TimeMatch(str, event)) {
-				NEXTTOKEN(false);
-				state = STATE_INTARG;
+			if (!TimeMatch(str, event)) {
+				state = STATE_PID;
 				break;
 			}
-			state = STATE_PID;
-			break;
+			NEXTTOKEN(false);
 		case STATE_INTARG:
+			/* Intarg is optional, if it's here we fetch the
+			 * next token and continue, if it's not then we just
+			 * continue */
 			if (IntArgMatch(str, event))
 				NEXTTOKEN(false);
-			/* This is an intentional fall through, there is no
-			 * missing break statement here */
 		case STATE_EVENT:
-			if (EventMatch(str, event)) {
-				NEXTTOKEN(true);
-				state = STATE_ARG;
-				break;
-			}
-			return false;
+			if (!EventMatch(str, event))
+				return false;
+			NEXTTOKEN(true);
 		case STATE_ARG:
-			if (ArgMatch(str, event)) {
+			while (ArgMatch(str, event))
 				NEXTTOKEN(true);
-				state = STATE_ARG;
-				break;
-			}
 			return false;
 		}
 	} while(true);

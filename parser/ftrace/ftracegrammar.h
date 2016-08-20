@@ -261,41 +261,28 @@ __always_inline bool FtraceGrammar::parseLine(TraceLine &line,
 	do {
 		switch(state) {
 		case STATE_NAMEPID:
-			if (NamePidMatch(str, event)) {
-				NEXTTOKEN(false);
-				state = STATE_CPU;
-				break;
-			}
-			return false;
+			if (!NamePidMatch(str, event))
+				return false;
+			NEXTTOKEN(false);
 		case STATE_CPU:
-			if (CPUMatch(str, event)) {
-				NEXTTOKEN(false);
-				state = STATE_TIME;
+			if (!CPUMatch(str, event)) {
+				state = STATE_NAMEPID;
 				break;
 			}
-			state = STATE_NAMEPID;
-			break;
+			NEXTTOKEN(false);
 		case STATE_TIME:
-			if (TimeMatch(str, event)) {
-				NEXTTOKEN(false);
-				state = STATE_EVENT;
+			if (!TimeMatch(str, event)) {
+				state = STATE_NAMEPID;
 				break;
 			}
-			state = STATE_NAMEPID;
-			break;
+			NEXTTOKEN(false);
 		case STATE_EVENT:
-			if (EventMatch(str, event)) {
-				NEXTTOKEN(true);
-				state = STATE_ARG;
-				break;
-			}
-			return false;
+			if (!EventMatch(str, event))
+				return false;
+			NEXTTOKEN(true);
 		case STATE_ARG:
-			if (ArgMatch(str, event)) {
+			while (ArgMatch(str, event))
 				NEXTTOKEN(true);
-				state = STATE_ARG;
-				break;
-			}
 			return false;
 		}
 	} while(true);
