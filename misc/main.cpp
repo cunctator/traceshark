@@ -62,15 +62,9 @@ int main(int argc, char* argv[])
 
 	geometry = QApplication::desktop()->availableGeometry();
 
-	if (geometry.width() < 1600)
-		width = geometry.width();
-	else
-		width = 1600 + (geometry.width() - 1600) / 2;
 
-	if (geometry.height() < 1100)
-		height = geometry.height();
-	else
-		height = geometry.height() - geometry.height() / 16;
+	width = geometry.width() - geometry.width() / 32;
+	height = geometry.height() - geometry.height() / 16;
 
 	mainWindow.resize(width, height);
 
