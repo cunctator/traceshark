@@ -60,6 +60,7 @@ MainWindow::MainWindow():
 	createActions();
 	createToolBars();
 	createMenus();
+	createStatusBar();
 
 	plotWidget = new QWidget(this);
 	plotLayout = new QVBoxLayout(plotWidget);
@@ -148,12 +149,17 @@ void MainWindow::createTracePlot()
 
 MainWindow::~MainWindow()
 {
+	int i;
+
 	closeTrace();
 	delete analyzer;
 	delete tracePlot;
 	delete taskRangeAllocator;
 	delete licenseDialog;
 	delete eventInfoDialog;
+
+	for (i = 0; i < STATUS_NR; i++)
+		delete statusStrings[i];
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -178,7 +184,8 @@ void MainWindow::openTrace()
 		if (analyzer->isOpen())
 			analyzer->close();
 		loadTraceFile(name);
-	}
+	} else
+		return;
 	if (analyzer->isOpen()) {
 		QTextStream qout(stdout);
 		qout.setRealNumberPrecision(6);
@@ -217,6 +224,8 @@ void MainWindow::openTrace()
 		tracePlot->show();
 		tshow = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
+		setStatus(STATUS_FILE, &name);
+
 		qout << "processTrace() took "
 		     << (double) (process - start) / 1000;
 		qout << " s\n";
@@ -238,9 +247,11 @@ void MainWindow::openTrace()
 		qout << "tracePlot->show() took "
 		     << (double) (tshow - showt) / 1000;
 		qout << " s\n";
+		qout.flush();
 		tracePlot->legend->setVisible(true);
 		setTraceActionsEnabled(true);
-	}
+	} else
+		setStatus(STATUS_ERROR);
 }
 
 void MainWindow::processTrace()
@@ -555,6 +566,7 @@ void MainWindow::closeTrace()
 		analyzer->close();
 	infoWidget->clear();
 	setTraceActionsEnabled(false);
+	setStatus(STATUS_NOFILE);
 }
 
 void MainWindow::saveScreenshot()
@@ -894,6 +906,30 @@ void MainWindow::createMenus()
 	helpMenu->addAction(licenseAction);
 }
 
+void MainWindow::createStatusBar()
+{
+	statusLabel = new QLabel(" W999 ");
+	statusLabel->setAlignment(Qt::AlignHCenter);
+	statusLabel->setMinimumSize(statusLabel->sizeHint());
+	statusBar()->addWidget(statusLabel);
+
+	statusStrings[STATUS_NOFILE] = new QString(tr("No file loaded"));
+	statusStrings[STATUS_FILE] = new QString(tr("Loaded file "));
+	statusStrings[STATUS_ERROR] = new QString(tr("An error has occured"));
+
+	setStatus(STATUS_NOFILE);
+}
+
+void MainWindow::setStatus(status_t status, QString *fileName)
+{
+	QString string;
+	if (fileName != nullptr)
+		string = *statusStrings[status] + *fileName;
+	else
+		string = *statusStrings[status];
+
+	statusLabel->setText(string);
+}
 
 void MainWindow::loadTraceFile(QString &fileName)
 {

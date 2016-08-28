@@ -88,6 +88,13 @@ private slots:
 	void showTaskSelector();
 	void showWakeup(unsigned int pid);
 private:
+	typedef enum {
+		STATUS_NOFILE = 0,
+		STATUS_FILE,
+		STATUS_ERROR,
+		STATUS_NR
+	} status_t;
+
 	void processTrace();
 	void computeLayout();
 	void rescaleTrace();
@@ -116,6 +123,9 @@ private:
 	void createToolBars();
 	void createMenus();
 	void createTracePlot();
+	void createStatusBar();
+
+	void setStatus(status_t status, QString *fileName = nullptr);
 	void loadTraceFile(QString &);
 
 	QMenu *fileMenu;
@@ -124,6 +134,9 @@ private:
 
 	QToolBar *fileToolBar;
 	QToolBar *viewToolBar;
+
+	QLabel *statusLabel;
+	QString *statusStrings[STATUS_NR];
 
 	QAction *openAction;
 	QAction *closeAction;
