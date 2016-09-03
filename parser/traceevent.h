@@ -22,11 +22,79 @@
 #include "parser/traceline.h"
 #include "misc/tstring.h"
 
-typedef enum {
-	TASK_STATE_UNKNOWN = 0,
-	TASK_STATE_RUNNABLE,
-	TASK_STATE_NOT_RUNNABLE,
-} taskstate_t;
+#include <cstdint>
+
+/*
+ * The definitions of the char values below comes from how the Linux kernel
+ * outputs the task state when sched_switch events are emitted, see how the
+ * sched_switch event is define in include/trace/events/sched.h in the Linux
+ * kernel sources, here I am referring to version 4.7.2
+ */
+
+#define TASK_STATE_RUNNABLE		0
+#define TASK_SCHAR_RUNNABLE		'R'
+
+#define TASK_FLAG_INTERRUPTIBLE		1
+#define TASK_CHAR_INTERRUPTIBLE		'S'
+
+#define TASK_FLAG_UNINTERRUPTIBLE	2
+#define TASK_CHAR_UNINTERRUPTIBLE	'D'
+
+#define TASK_FLAG_STOPPED		4 /* Use with care */
+#define TASK_CHAR_STOPPED		'T'
+
+#define TASK_FLAG_TRACED		8 /* Use with care */
+#define TASK_CHAR_TRACED		't'
+
+#define TASK_FLAG_EXIT_DEAD		16
+#define TASK_CHAR_EXIT_DEAD		'Z'
+
+#define TASK_FLAG_EXIT_ZOMBIE		32
+#define TASK_CHAR_EXIT_ZOMBIE		'X'
+
+/* I guess this weill never be used but include it for completeness sake */
+#define TASK_FLAG_EXIT_TRACE		(16 | 32)
+
+#define TASK_FLAG_DEAD			64
+#define TASK_CHAR_DEAD			'x'
+
+#define TASK_FLAG_WAKEKILL		128
+#define TASK_CHAR_WAKEKILL		'K'
+
+#define TASK_FLAG_WAKING		256
+#define TASK_CHAR_WAKING		'W'
+
+#define TASK_FLAG_PARKED		512
+#define TASK_CHAR_PARKED		'P'
+
+#define TASK_FLAG_NOLOAD		1024
+#define TASK_CHAR_NOLOAD		'N'
+
+#define TASK_STATE_PARSER_ERROR         2048
+
+#define TASK_FLAG_MAX			4096
+#define TASK_FLAG_PREEMPT      		TASK_FLAG_MAX
+#define TASK_CHAR_PREEMPT		'+'
+
+#define TASK_FLAG_MASK			(TASK_FLAG_MAX - 1)
+
+#define TASK_CHAR_SEPARATOR		'|'
+
+typedef uint32_t taskstate_t;
+
+/*
+ * This works because TASK_FLAG_MASK will mask out the preemption flag
+ */
+static __always_inline bool task_state_is_runnable(taskstate_t state)
+{
+	return ((state & TASK_FLAG_MASK) == TASK_STATE_RUNNABLE);
+}
+
+static __always_inline bool task_state_is_flag_set(taskstate_t state,
+						   taskstate_t flag)
+{
+	return ((state & flag) != 0);
+}
 
 typedef enum {
 	EVENT_ERROR = -1,

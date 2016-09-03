@@ -415,7 +415,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->exitStatus = STATUS_FINAL;
 	task->schedTimev.append(oldtime);
 	task->schedData.append(FLOOR_HEIGHT);
-	if (state == TASK_STATE_RUNNABLE) {
+	if (task_state_is_runnable(state)) {
 		task->runningTimev.append(oldtime);
 		task->runningData.append(FLOOR_HEIGHT);
 		task->lastWakeUP = oldtime;
@@ -434,7 +434,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	}
 	cpuTask->schedTimev.append(oldtime);
 	cpuTask->schedData.append(FLOOR_HEIGHT);
-	if (state == TASK_STATE_RUNNABLE) {
+	if (task_state_is_runnable(state)) {
 		cpuTask->runningTimev.append(oldtime);
 		cpuTask->runningData.append(FLOOR_HEIGHT);
 	}

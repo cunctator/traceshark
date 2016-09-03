@@ -66,19 +66,11 @@ static __always_inline taskstate_t
 	ftrace_sched_switch_state(const TraceEvent &event)
 {
 	unsigned int i;
-	taskstate_t state = TASK_STATE_UNKNOWN;
-	for (i = 3; i < event.argc; i++) {
+	for (i = 3; i < event.argc; i++)
 		if (isArrowStr(event.argv[i]))
-			break;
-	}
-	if (i < event.argc) {
-		if (event.argv[i - 1]->ptr[0] == 'R') {
-			state = TASK_STATE_RUNNABLE;
-		} else {
-			state = TASK_STATE_NOT_RUNNABLE;
-		}
-	}
-	return state;
+			return __sched_state_from_tstring(event.argv[i - 1]);
+
+	return TASK_STATE_PARSER_ERROR;
 }
 
 static __always_inline unsigned int

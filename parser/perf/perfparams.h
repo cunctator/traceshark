@@ -111,22 +111,20 @@ perf_sched_switch_state(const TraceEvent &event)
 {
 	unsigned int i;
 	unsigned int j;
-	taskstate_t state = TASK_STATE_UNKNOWN;
+	TString stateStr;
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i != 0 && event.argv[i - 1]->len > 2) {
-		TString *stateStr = event.argv[i - 1];
-		for (j = stateStr->len - 2; j > 0; j--) {
-			if (stateStr->ptr[j] == '=') {
-				if (stateStr->ptr[j + 1] == 'R')
-					state = TASK_STATE_RUNNABLE;
-				else
-					state = TASK_STATE_NOT_RUNNABLE;
-				break;
+		TString *stateArgStr = event.argv[i - 1];
+		for (j = stateArgStr->len - 2; j > 0; j--) {
+			if (stateArgStr->ptr[j] == '=') {
+				stateStr.len = stateArgStr->len - 1 - j;
+				stateStr.ptr = stateArgStr->ptr + j + 1;
+				return __sched_state_from_tstring(&stateStr);
 			}
 		}
 	}
-	return state;
+	return TASK_STATE_PARSER_ERROR;
 }
 
 static __always_inline unsigned int

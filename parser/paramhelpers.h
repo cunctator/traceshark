@@ -182,4 +182,74 @@ static __always_inline const char *substr_after_char(const char *str,
 	return nullptr;
 }
 
+static __always_inline taskstate_t __sched_state_from_tstring(
+	const TString *str)
+{
+	unsigned int i;
+	char c;
+	taskstate_t state = 0;
+	taskstate_t flag;
+
+	if (str->len == 1 && str->ptr[0] == TASK_SCHAR_RUNNABLE)
+		return TASK_STATE_RUNNABLE;
+	else if (str->len == 2 &&
+		 str->ptr[0] == TASK_SCHAR_RUNNABLE &&
+		 str->ptr[1] == TASK_CHAR_PREEMPT)
+		return TASK_STATE_RUNNABLE | TASK_FLAG_PREEMPT;
+
+	for (i = 0; i < str->len; i++) {
+		c = str->ptr[i];
+		switch (c) {
+		case TASK_CHAR_INTERRUPTIBLE:
+			flag = TASK_FLAG_INTERRUPTIBLE;
+			break;
+		case TASK_CHAR_UNINTERRUPTIBLE:
+			flag = TASK_FLAG_UNINTERRUPTIBLE;
+			break;
+		case TASK_CHAR_STOPPED:
+			flag = TASK_FLAG_STOPPED;
+			break;
+		case TASK_CHAR_TRACED:
+			flag = TASK_FLAG_TRACED;
+			break;
+		case TASK_CHAR_EXIT_DEAD:
+			flag = TASK_FLAG_EXIT_DEAD;
+			break;
+		case TASK_CHAR_EXIT_ZOMBIE:
+			flag = TASK_FLAG_EXIT_ZOMBIE;
+			break;
+		case TASK_CHAR_DEAD:
+			flag = TASK_FLAG_DEAD;
+			break;
+		case TASK_CHAR_WAKEKILL:
+			flag = TASK_FLAG_WAKEKILL;
+			break;
+		case TASK_CHAR_WAKING:
+			flag = TASK_FLAG_WAKING;
+			break;
+		case TASK_CHAR_PARKED:
+			flag = TASK_FLAG_PARKED;
+			break;
+		case TASK_CHAR_NOLOAD:
+			flag = TASK_FLAG_NOLOAD;
+			break;
+		case TASK_CHAR_PREEMPT:
+			flag = TASK_FLAG_PREEMPT;
+			break;
+		case TASK_CHAR_SEPARATOR:
+			flag = 0;
+			break;
+		 /* Let's accept spaces in the task state string also */
+		case ' ':
+			flag = 0;
+			break;
+		default:
+			return TASK_STATE_PARSER_ERROR;
+			break;
+		};
+		state |= flag;
+	}
+	return state;
+}
+
 #endif /* PARAMHELPERS_H */
