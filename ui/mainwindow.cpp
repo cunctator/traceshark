@@ -532,7 +532,7 @@ void MainWindow::addPreemptedGraph(CPUTask &task)
 	QString name = QString(tr("was preempted"));
 	graph->setName(name);
 	tracePlot->addPlottable(graph);
-	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	QPen pen = QPen();
 
 	pen.setColor(Qt::red);
@@ -552,7 +552,7 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	QString name = QString(tr("is runnable"));
 	graph->setName(name);
 	tracePlot->addPlottable(graph);
-	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	QPen pen = QPen();
 
 	pen.setColor(Qt::blue);
@@ -1122,7 +1122,7 @@ void MainWindow::addTaskGraph(unsigned int pid)
 
 	/* Add the still running graph on top of the other two... */
 	QString name = QString(tr("is runnable"));
-	QCPScatterStyle rstyle = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
+	QCPScatterStyle rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	if (task->runningTimev.size() == 0) {
 		task->runningGraph = nullptr;
 		goto out;
@@ -1141,7 +1141,7 @@ void MainWindow::addTaskGraph(unsigned int pid)
 
 	/* ...and then the preempted graph */
 	name = QString(tr("was preempted"));
-	rstyle = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
+	rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	if (task->preemptedTimev.size() == 0) {
 		task->preemptedGraph = nullptr;
 		goto out;
