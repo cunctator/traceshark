@@ -414,6 +414,7 @@ void MainWindow::showTrace()
 			addSchedGraph(task);
 			addHorizontalWakeupGraph(task);
 			addWakeupGraph(task);
+			addPreemptedGraph(task);
 			addStillRunningGraph(task);
 		}
 	}
@@ -522,6 +523,26 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	graph->setErrorPen(pen);
 }
 
+void MainWindow::addPreemptedGraph(CPUTask &task)
+{
+	/* Add still running graph on top of the other two...*/
+	if (task.runningTimev.size() == 0)
+		return;
+	QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
+	QString name = QString(tr("was preempted"));
+	graph->setName(name);
+	tracePlot->addPlottable(graph);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
+	QPen pen = QPen();
+
+	pen.setColor(Qt::red);
+	style.setPen(pen);
+	graph->setScatterStyle(style);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setData(task.preemptedTimev, task.scaledPreemptedData);
+}
+
 void MainWindow::addStillRunningGraph(CPUTask &task)
 {
 	/* Add still running graph on top of the other two...*/
@@ -531,10 +552,10 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	QString name = QString(tr("is runnable"));
 	graph->setName(name);
 	tracePlot->addPlottable(graph);
-	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
 	QPen pen = QPen();
 
-	pen.setColor(Qt::red);
+	pen.setColor(Qt::blue);
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -1079,6 +1100,7 @@ void MainWindow::addTaskGraph(unsigned int pid)
 	task->doScale();
 	task->doScaleWakeup();
 	task->doScaleRunning();
+	task->doScalePreempted();
 
 	taskGraph->setData(task->schedTimev, task->scaledSchedData);
 	task->graph = taskGraph;
@@ -1100,9 +1122,28 @@ void MainWindow::addTaskGraph(unsigned int pid)
 
 	/* Add the still running graph on top of the other two... */
 	QString name = QString(tr("is runnable"));
-	QCPScatterStyle rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+	QCPScatterStyle rstyle = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
 	if (task->runningTimev.size() == 0) {
 		task->runningGraph = nullptr;
+		goto out;
+	}
+	graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
+	graph->setName(name);
+	tracePlot->addPlottable(graph);
+
+	pen.setColor(Qt::blue);
+	rstyle.setPen(pen);
+	graph->setScatterStyle(rstyle);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setData(task->runningTimev, task->scaledRunningData);
+	task->runningGraph = graph;
+
+	/* ...and then the preempted graph */
+	name = QString(tr("was preempted"));
+	rstyle = QCPScatterStyle(QCPScatterStyle::ssDisc, 5);
+	if (task->preemptedTimev.size() == 0) {
+		task->preemptedGraph = nullptr;
 		goto out;
 	}
 	graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
@@ -1114,8 +1155,9 @@ void MainWindow::addTaskGraph(unsigned int pid)
 	graph->setScatterStyle(rstyle);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	graph->setData(task->runningTimev, task->scaledRunningData);
-	task->runningGraph = graph;
+	graph->setData(task->preemptedTimev, task->scaledPreemptedData);
+	task->preemptedGraph = graph;
+
 out:
 	/* We only modify the lower part of the range to show the newly
 	 * added unified task graph. */
@@ -1145,6 +1187,11 @@ void MainWindow::removeTaskGraph(unsigned int pid)
 	if (task->runningGraph != nullptr) {
 		tracePlot->removePlottable(task->runningGraph);
 		task->runningGraph = nullptr;
+	}
+
+	if (task->preemptedGraph != nullptr) {
+		tracePlot->removePlottable(task->preemptedGraph);
+		task->preemptedGraph = nullptr;
 	}
 
 	taskRangeAllocator->putTaskRange(pid);

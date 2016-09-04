@@ -41,6 +41,15 @@ bool AbstractTask::doScaleRunning() {
 	return false; /* No error */
 }
 
+bool AbstractTask::doScalePreempted() {
+	int i;
+	int s = preemptedData.size();
+	scaledPreemptedData.resize(s);
+	for (i = 0; i < s; i++)
+		scaledPreemptedData[i] = preemptedData[i] * scale + offset;
+	return false; /* No error */
+}
+
 bool AbstractTask::doScaleWakeup() {
 	int s = wakeDelay.size();
 	/* Create the dummy vector needed for horizontal display */

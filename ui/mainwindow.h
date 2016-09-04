@@ -106,6 +106,7 @@ private:
 	void addSchedGraph(CPUTask &task);
 	void addHorizontalWakeupGraph(CPUTask &task);
 	void addWakeupGraph(CPUTask &task);
+	void addPreemptedGraph(CPUTask &task);
 	void addStillRunningGraph(CPUTask &task);
 
 	void setTraceActionsEnabled(bool e);

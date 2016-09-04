@@ -56,6 +56,7 @@ public:
 	 * can be deleted when the user requests the unified task to be 
 	 * removed */
 	QCPGraph *wakeUpGraph;
+	QCPGraph *preemptedGraph;
 	QCPGraph *runningGraph;
 };
 

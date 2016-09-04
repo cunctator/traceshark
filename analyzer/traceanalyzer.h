@@ -364,6 +364,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	CPU *eventCPU = &CPUs[cpu];
 	taskstate_t state;
 	char *name;
+	bool runnable;
+	bool preempted;
 
 	if (!isValidCPU(cpu))
 		return;
@@ -415,9 +417,18 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->exitStatus = STATUS_FINAL;
 	task->schedTimev.append(oldtime);
 	task->schedData.append(FLOOR_HEIGHT);
-	if (task_state_is_runnable(state)) {
-		task->runningTimev.append(oldtime);
-		task->runningData.append(FLOOR_HEIGHT);
+
+	runnable = task_state_is_runnable(state);
+
+	if (runnable) {
+		preempted = task_state_is_flag_set(state, TASK_FLAG_PREEMPT);
+		if (preempted) {
+			task->preemptedTimev.append(oldtime);
+			task->preemptedData.append(FLOOR_HEIGHT);
+		} else {
+			task->runningTimev.append(oldtime);
+			task->runningData.append(FLOOR_HEIGHT);
+		}
 		task->lastWakeUP = oldtime;
 	} else {
 		task->lastSleepEntry = oldtime;
@@ -434,9 +445,14 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	}
 	cpuTask->schedTimev.append(oldtime);
 	cpuTask->schedData.append(FLOOR_HEIGHT);
-	if (task_state_is_runnable(state)) {
-		cpuTask->runningTimev.append(oldtime);
-		cpuTask->runningData.append(FLOOR_HEIGHT);
+	if (runnable) {
+		if (preempted) {
+			cpuTask->preemptedTimev.append(oldtime);
+			cpuTask->preemptedData.append(FLOOR_HEIGHT);
+		} else {
+			cpuTask->runningTimev.append(oldtime);
+			cpuTask->runningData.append(FLOOR_HEIGHT);
+		}
 	}
 
 skip:

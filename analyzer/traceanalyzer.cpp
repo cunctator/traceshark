@@ -496,6 +496,9 @@ void TraceAnalyzer::addCpuSchedWork(unsigned int cpu,
 		taskItem = new WorkItem<CPUTask>(&task,
 						 &CPUTask::doScaleRunning);
 		list.append(taskItem);
+		taskItem = new WorkItem<CPUTask>(&task,
+						 &CPUTask::doScalePreempted);
+		list.append(taskItem);
 		iter++;
 	}
 }

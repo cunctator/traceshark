@@ -34,8 +34,11 @@ public:
 	QVector<double> wakeDelay;
 	QVector<double> wakeHeight;
 	QVector<double> wakeZero;
+	QVector<double> preemptedTimev;
+	QVector<double> preemptedData;
 	QVector<double> runningTimev;
 	QVector<double> runningData;
+	QVector<double> scaledPreemptedData;
 	QVector<double> scaledRunningData;
 	bool isNew; /* Only used during extraction */
 	/* These are for scaling purposes */
@@ -44,6 +47,7 @@ public:
 	bool doScale();
 	bool doScaleWakeup();
 	bool doScaleRunning();
+	bool doScalePreempted();
 	TaskGraph *graph;
 };
 
