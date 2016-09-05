@@ -52,7 +52,7 @@
 #define TASK_FLAG_EXIT_ZOMBIE		32
 #define TASK_CHAR_EXIT_ZOMBIE		'X'
 
-/* I guess this weill never be used but include it for completeness sake */
+/* I guess this well never be used but include it for completeness sake */
 #define TASK_FLAG_EXIT_TRACE		(16 | 32)
 
 #define TASK_FLAG_DEAD			64
