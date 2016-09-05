@@ -39,7 +39,7 @@
 /* Warning, this function does not null terminate the string!
  * This function copies everything after the delim char into the cstring
  * pointed to by c and adds the length to len */
-static __always_inline void __copy_tstring_after_char(TString *str,
+static __always_inline void __copy_tstring_after_char(const TString *str,
 						      char delim,
 						      char *&dest,
 						      unsigned int &len,
@@ -109,7 +109,7 @@ merge_args_into_cstring(const TraceEvent &event,
 }
 
 static __always_inline unsigned int param_after_char(const TraceEvent &event,
-					    int n_param, char ch)
+						     int n_param, char ch)
 {
 	char *last;
 	char *first;

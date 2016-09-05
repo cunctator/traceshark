@@ -53,7 +53,7 @@ public:
 	void endTokenizeBuffer();
 	void beginConsumeBuffer();
 	void endConsumeBuffer();
-	__always_inline bool isEOF();
+	__always_inline bool isEOF() const;
 private:
 	__always_inline void waitForLoadingComplete();
 	__always_inline void completeLoading();
@@ -120,7 +120,7 @@ __always_inline void LoadBuffer::completeConsumption() {
 	mutex.unlock();
 }
 
-__always_inline bool LoadBuffer::isEOF() {
+__always_inline bool LoadBuffer::isEOF() const {
 	return eof;
 }
 

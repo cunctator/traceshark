@@ -50,7 +50,7 @@ public:
 	TraceParser(TList<TraceEvent> *analyzerEvents);
 	~TraceParser();
 	bool open(const QString &fileName);
-	bool isOpen();
+	bool isOpen() const;
 	void close();
 	void threadParser();
 	void threadReader();

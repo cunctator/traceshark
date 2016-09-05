@@ -93,7 +93,7 @@ bool TraceParser::open(const QString &fileName)
 	return true;
 }
 
-bool TraceParser::isOpen()
+bool TraceParser::isOpen() const
 {
 	return (traceFile != nullptr);
 }

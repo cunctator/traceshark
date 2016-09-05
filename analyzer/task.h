@@ -45,8 +45,8 @@ public:
 	~Task();
 	void addName(char *name);
 	__always_inline void checkName(char *name);
-	QString getDisplayName();
-	QString getLastName();
+	QString getDisplayName() const;
+	QString getLastName() const;
 	TaskName *taskName;
 	exitstatus_t exitStatus;
 	/* lastWakeUP is only used during extraction */

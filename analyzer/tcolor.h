@@ -30,7 +30,7 @@ public:
 	uint8_t red;
 	uint8_t green;
 	uint8_t blue;
-	QColor toQColor();
+	QColor toQColor() const;
 	__always_inline unsigned int SqDistance(TColor color);
 	static TColor fromQColor(const QColor &qColor);
 	static TColor getRandomColor();

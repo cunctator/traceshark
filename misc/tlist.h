@@ -63,16 +63,18 @@ public:
 	__always_inline T& increase();
 	__always_inline T& preAlloc();
 	__always_inline void commit();
-	__always_inline T value(unsigned int index);
-	__always_inline const T& at(unsigned int index);
+	__always_inline T value(unsigned int index) const;
+	__always_inline const T& at(unsigned int index) const;
 	__always_inline T& last();
-	__always_inline unsigned int size();
+	__always_inline unsigned int size() const;
 	void clear();
 	void softclear();
 	__always_inline T& operator[](unsigned int index);
+	__always_inline const T& operator[](unsigned int index) const;
 private:
-	__always_inline unsigned int mapFromIndex(unsigned int index);
-	__always_inline unsigned int mapIndexFromIndex(unsigned int index);
+	__always_inline unsigned int mapFromIndex(unsigned int index) const;
+	__always_inline unsigned int mapIndexFromIndex(unsigned int index)
+		const;
 	void clearAll();
 	void setupMem();
 	void addMem();
@@ -96,13 +98,14 @@ TList<T>::~TList()
 }
 
 template<class T>
-__always_inline unsigned int TList<T>::mapFromIndex(unsigned int index)
+__always_inline unsigned int TList<T>::mapFromIndex(unsigned int index) const
 {
 	return (index >> TLIST_MAP_SHIFT);
 }
 
 template<class T>
 __always_inline unsigned int TList<T>::mapIndexFromIndex(unsigned int index)
+const
 {
 	return (index & TLIST_MAP_ELEMENT_MASK);
 }
@@ -188,7 +191,7 @@ __always_inline void TList<T>::append(const T &element)
 }
 
 template<class T>
-__always_inline const T& TList<T>::at(unsigned int index)
+__always_inline const T& TList<T>::at(unsigned int index) const
 {
 	unsigned int map = mapFromIndex(index);
 	unsigned int mapIndex = mapIndexFromIndex(index);
@@ -196,7 +199,7 @@ __always_inline const T& TList<T>::at(unsigned int index)
 }
 
 template<class T>
-__always_inline T TList<T>::value(unsigned int index)
+__always_inline T TList<T>::value(unsigned int index) const
 {
 	if (index >= nrElements) {
 		T dvalue;
@@ -216,7 +219,7 @@ __always_inline T& TList<T>::last()
 }
 
 template<class T>
-__always_inline unsigned int TList<T>::size()
+__always_inline unsigned int TList<T>::size() const
 {
 	return nrElements;
 }
@@ -242,5 +245,10 @@ __always_inline T& TList<T>::operator[](unsigned int index)
 	return mapArray[map][mapIndex];
 }
 
+template<class T>
+__always_inline const T& TList<T>::operator[](unsigned int index) const
+{
+	return (*this)[index];
+}
 
 #endif /* TLIST_H */

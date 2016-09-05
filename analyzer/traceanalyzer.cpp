@@ -329,7 +329,7 @@ retry:
 }
 
 
-int TraceAnalyzer::binarySearch(double time, int start, int end)
+int TraceAnalyzer::binarySearch(double time, int start, int end) const
 {
 	int pivot = (end + start) / 2;
 	if (pivot == start)
@@ -340,7 +340,7 @@ int TraceAnalyzer::binarySearch(double time, int start, int end)
 		return binarySearch(time, pivot, end);
 }
 
-int TraceAnalyzer::findIndexBefore(double time)
+int TraceAnalyzer::findIndexBefore(double time) const
 {
 	if (events.size() < 1)
 		return -1;
@@ -360,9 +360,9 @@ int TraceAnalyzer::findIndexBefore(double time)
 	return c;
 }
 
-TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
-						unsigned int pid,
-						int *index)
+const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
+							unsigned int pid,
+							int *index) const
 {
 	int start = findIndexBefore(time);
 	int i;
@@ -371,7 +371,7 @@ TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
 		return nullptr;
 
 	for (i = start; i >= 0; i--) {
-		TraceEvent &event = events[i];
+		const TraceEvent &event = events[i];
 		if (event.type == SCHED_SWITCH  &&
 		    generic_sched_switch_newpid(event) == pid) {
 			if (index != nullptr)
@@ -382,9 +382,9 @@ TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
 	return nullptr;
 }
 
-TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
-						 unsigned int pid,
-						 int *index)
+const TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
+							 unsigned int pid,
+							 int *index) const
 {
 	int i;
 
@@ -392,7 +392,7 @@ TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
 		return nullptr;
 
 	for (i = startidx; i >= 0; i--) {
-		TraceEvent &event = events[i];
+		const TraceEvent &event = events[i];
 		if ((event.type == SCHED_WAKEUP ||
 		     event.type == SCHED_WAKEUP_NEW) &&
 				generic_sched_wakeup_pid(event) == pid) {

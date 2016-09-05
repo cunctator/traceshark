@@ -1234,12 +1234,12 @@ void MainWindow::showWakeup(unsigned int pid)
 	 * user is interested in, i.e. finding the previous wake up event
 	 * relative to */
 	double zerotime = activeCursor->getPosition();
-	TraceEvent *schedevent = analyzer->findPreviousSchedEvent(zerotime, pid,
-								  &schedIndex);
+	const TraceEvent *schedevent =
+		analyzer->findPreviousSchedEvent(zerotime, pid, &schedIndex);
 	if (schedevent == nullptr)
 		return;
 
-	TraceEvent *wakeupevent = analyzer->
+	const TraceEvent *wakeupevent = analyzer->
 		findPreviousWakeupEvent(schedIndex, pid, &wakeUpIndex);
 	if (wakeupevent == nullptr)
 		return;

@@ -25,7 +25,7 @@ TColor::TColor(int r, int g, int b):
 
 TColor::TColor() {}
 
-QColor TColor::toQColor()
+QColor TColor::toQColor() const
 {
 	QColor color(red, green, blue, 255);
 	return color;

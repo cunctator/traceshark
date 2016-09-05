@@ -37,12 +37,12 @@ public:
 	~TraceFile();
 	__always_inline unsigned int
 		ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer);
-	__always_inline bool atEnd();
-	__always_inline bool getBufferSwitch();
+	__always_inline bool atEnd() const;
+	__always_inline bool getBufferSwitch() const;
 	__always_inline void clearBufferSwitch();
 	char *mappedFile;
 	unsigned long fileSize;
-	__always_inline LoadBuffer *getLoadBuffer(int index);
+	__always_inline LoadBuffer *getLoadBuffer(int index) const;
 private:
 	__always_inline unsigned int nextBufferIdx(unsigned int n);
 	__always_inline unsigned int
@@ -148,7 +148,7 @@ TraceFile::ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer)
 	return col;
 }
 
-__always_inline bool TraceFile::getBufferSwitch()
+__always_inline bool TraceFile::getBufferSwitch() const
 {
 	return bufferSwitch;
 }
@@ -166,7 +166,7 @@ __always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
 	return n;
 }
 
-__always_inline LoadBuffer *TraceFile::getLoadBuffer(int index)
+__always_inline LoadBuffer *TraceFile::getLoadBuffer(int index) const
 {
 	return loadBuffers[index];
 }

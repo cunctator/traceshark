@@ -67,18 +67,18 @@ void TThread::terminate()
 	threadPtr->terminate();
 }
 
-bool TThread::isFinished()
+bool TThread::isFinished() const
 {
 	return threadPtr->isFinished();
 }
 
-bool TThread::isRunning()
+bool TThread::isRunning() const
 {
 	return threadPtr->isRunning();
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-bool TThread::isInterruptionRequested()
+bool TThread::isInterruptionRequested() const
 {
 	return threadPtr->isInterruptionRequested();
 }

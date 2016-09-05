@@ -49,7 +49,7 @@ void Task::addName(char *name)
 	taskName = newName;
 }
 
-QString Task::getDisplayName()
+QString Task::getDisplayName() const
 {
 	QString nameStr;
 
@@ -66,7 +66,7 @@ QString Task::getDisplayName()
 	return nameStr;
 }
 
-QString Task::getLastName()
+QString Task::getLastName() const
 {
 	QString empty;
 

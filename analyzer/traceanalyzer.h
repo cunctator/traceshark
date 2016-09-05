@@ -72,20 +72,21 @@ public:
 	void close();
 	void processTrace();
 	TList<TraceEvent> events;
-	TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
-					   int *index);
-	TraceEvent *findPreviousWakeupEvent(int startidx, unsigned int pid,
-					    int *index);
-	__always_inline unsigned int getMaxCPU();
-	__always_inline unsigned int getNrCPUs();
-	__always_inline double getStartTime();
-	__always_inline double getEndTime();
-	__always_inline int getMinIdleState();
-	__always_inline int getMaxIdleState();
+	const TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
+						 int *index) const;
+	const TraceEvent *findPreviousWakeupEvent(int startidx,
+						  unsigned int pid,
+						  int *index) const;
+	__always_inline unsigned int getMaxCPU() const;
+	__always_inline unsigned int getNrCPUs() const;
+	__always_inline double getStartTime() const;
+	__always_inline double getEndTime() const;
+	__always_inline int getMinIdleState() const;
+	__always_inline int getMaxIdleState() const;
 	__always_inline CPUTask *findCPUTask(unsigned int pid,
 					     unsigned int cpu);
-	__always_inline QColor getTaskColor(unsigned int pid);
-	__always_inline tracetype_t getTraceType();
+	__always_inline QColor getTaskColor(unsigned int pid) const;
+	__always_inline tracetype_t getTraceType() const;
 	void setSchedOffset(unsigned int cpu, double offset);
 	void setSchedScale(unsigned int cpu, double scale);
 	void setCpuIdleOffset(unsigned int cpu, double offset);
@@ -108,17 +109,20 @@ private:
 	void prepareDataStructures();
 	void resetProperties();
 	void threadProcess();
-	int binarySearch(double time, int start, int end);
+	int binarySearch(double time, int start, int end) const;
 	void colorizeTasks();
-	int findIndexBefore(double time);
-	__always_inline unsigned int generic_sched_switch_newpid(TraceEvent
-								 &event);
-	__always_inline unsigned int generic_sched_wakeup_pid(TraceEvent
-							      &event);
-	__always_inline double estimateWakeUpNew(CPU *eventCPU, double newTime,
-						 double startTime, bool &valid);
-	__always_inline double estimateWakeUp(Task *task, double newTime,
-					      bool &valid);
+	int findIndexBefore(double time) const;
+	__always_inline unsigned int
+		generic_sched_switch_newpid(const TraceEvent &event) const;
+	__always_inline unsigned int
+		generic_sched_wakeup_pid(const TraceEvent &event) const;
+	__always_inline double estimateWakeUpNew(const CPU *eventCPU,
+						 double newTime,
+						 double startTime,
+						 bool &valid) const;
+	__always_inline double estimateWakeUp(const Task *task,
+					      double newTime,
+					      bool &valid) const;
 	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, unsigned int oldpid,
 				  double oldtime);
@@ -179,10 +183,10 @@ private:
 	QCustomPlot *customPlot;
 };
 
-__always_inline double TraceAnalyzer::estimateWakeUpNew(CPU *eventCPU,
+__always_inline double TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,
 							double newTime,
 							double startTime,
-							bool &valid)
+							bool &valid) const
 {
 	double delay;
 
@@ -199,9 +203,9 @@ regular:
 	return delay;
 }
 
-__always_inline double TraceAnalyzer::estimateWakeUp(Task *task,
+__always_inline double TraceAnalyzer::estimateWakeUp(const Task *task,
 						     double newTime,
-						     bool &valid)
+						     bool &valid) const
 {
 	double delay;
 
@@ -216,60 +220,60 @@ __always_inline double TraceAnalyzer::estimateWakeUp(Task *task,
 	return delay;
 }
 
-__always_inline unsigned int TraceAnalyzer::generic_sched_switch_newpid(TraceEvent
-								      &event)
+__always_inline unsigned int
+TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 {
 	if (!tracetype_is_valid(getTraceType()))
 		return UINT_MAX;
 	return sched_switch_newpid(getTraceType(), event);
 }
 
-__always_inline unsigned int TraceAnalyzer::generic_sched_wakeup_pid(TraceEvent
-								   &event)
+__always_inline unsigned int
+TraceAnalyzer::generic_sched_wakeup_pid(const TraceEvent &event) const
 {
 	if (!tracetype_is_valid(getTraceType()))
 		return UINT_MAX;
 	return sched_wakeup_pid(getTraceType(), event);
 }
 
-__always_inline unsigned int TraceAnalyzer::getMaxCPU()
+__always_inline unsigned int TraceAnalyzer::getMaxCPU() const
 {
 	return maxCPU;
 }
 
-__always_inline unsigned int TraceAnalyzer::getNrCPUs()
+__always_inline unsigned int TraceAnalyzer::getNrCPUs() const
 {
 	return nrCPUs;
 }
 
-__always_inline double  TraceAnalyzer::getStartTime()
+__always_inline double  TraceAnalyzer::getStartTime() const
 {
 	return startTime;
 }
 
-__always_inline double TraceAnalyzer::getEndTime()
+__always_inline double TraceAnalyzer::getEndTime() const
 {
 	return endTime;
 }
 
-__always_inline int TraceAnalyzer::getMinIdleState()
+__always_inline int TraceAnalyzer::getMinIdleState() const
 {
 	return minIdleState;
 }
 
-__always_inline int TraceAnalyzer::getMaxIdleState()
+__always_inline int TraceAnalyzer::getMaxIdleState() const
 {
 	return maxIdleState;
 }
 
-__always_inline QColor TraceAnalyzer::getTaskColor(unsigned int pid)
+__always_inline QColor TraceAnalyzer::getTaskColor(unsigned int pid) const
 {
 	TColor taskColor = colorMap.value(pid, black);
 	return taskColor.toQColor();
 }
 
 __always_inline CPUTask *TraceAnalyzer::findCPUTask(unsigned int pid,
-						 unsigned int cpu)
+						    unsigned int cpu)
 {
 	if (cpuTaskMaps[cpu].contains(pid))
 		return &cpuTaskMaps[cpu][pid];
@@ -277,7 +281,7 @@ __always_inline CPUTask *TraceAnalyzer::findCPUTask(unsigned int pid,
 		return nullptr;
 }
 
-__always_inline tracetype_t TraceAnalyzer::getTraceType()
+__always_inline tracetype_t TraceAnalyzer::getTraceType() const
 {
 	return parser->traceType;
 }

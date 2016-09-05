@@ -36,12 +36,12 @@ public:
 	TThread(const QString &name);
 	virtual ~TThread();
 	void exit(int returnCode = 0);
-	bool isFinished();
+	bool isFinished() const;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-	bool isInterruptionRequested();
+	bool isInterruptionRequested() const;
 	void requestInterruption();
 #endif
-	bool isRunning();
+	bool isRunning() const;
 	void setPriority(QThread::Priority priority);
 	void setStackSize(uint stackSize);
 	uint stackSize();

@@ -131,7 +131,7 @@ public:
 	 * cannot be null terminated, instead we will have to rely on the len
 	 * field to determine the length when using  this TString */
 	TString *postEventInfo;
-	TString *getEventName();
+	TString *getEventName() const;
 	static void setStringTree(StringTree *sTree);
 private:
 	/* This is supposed to be set to the stringtree that was involved in

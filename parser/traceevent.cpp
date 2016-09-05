@@ -53,7 +53,7 @@ void TraceEvent::setStringTree(StringTree *sTree)
 	stringTree = sTree;
 }
 
-TString *TraceEvent::getEventName()
+TString *TraceEvent::getEventName() const
 {
 	return stringTree->stringLookup(TraceEvent::type);
 }

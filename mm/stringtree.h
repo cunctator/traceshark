@@ -44,15 +44,15 @@ public:
 	StringTree(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256,
 		   unsigned int table_size = 4096);
 	~StringTree();
-	__always_inline TString *stringLookup(event_t value);
+	__always_inline TString *stringLookup(event_t value) const;
 	__always_inline event_t searchAllocString(const TString *str,
 						  uint32_t hval,
 						  event_t newval);
 	void clear();
 	void reset();
+private:
 	__always_inline void SwapEntries(StringTreeEntry *a,
 					 StringTreeEntry *b);
-private:
 	MemPool *strPool;
 	MemPool *charPool;
 	MemPool *entryPool;
@@ -65,7 +65,7 @@ private:
 };
 
 
-__always_inline TString *StringTree::stringLookup(event_t value)
+__always_inline TString *StringTree::stringLookup(event_t value) const
 {
 	if (value < 0 || value >= tableSize)
 		return nullptr;
