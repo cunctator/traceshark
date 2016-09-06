@@ -72,6 +72,7 @@ public:
 	__always_inline T& operator[](unsigned int index);
 	__always_inline const T& operator[](unsigned int index) const;
 private:
+	__always_inline T& subscript(unsigned int index) const;
 	__always_inline unsigned int mapFromIndex(unsigned int index) const;
 	__always_inline unsigned int mapIndexFromIndex(unsigned int index)
 		const;
@@ -238,7 +239,7 @@ void TList<T>::softclear()
 }
 
 template<class T>
-__always_inline T& TList<T>::operator[](unsigned int index)
+__always_inline T& TList<T>::subscript(unsigned int index) const
 {
 	unsigned int map = mapFromIndex(index);
 	unsigned int mapIndex = mapIndexFromIndex(index);
@@ -246,9 +247,15 @@ __always_inline T& TList<T>::operator[](unsigned int index)
 }
 
 template<class T>
+__always_inline T& TList<T>::operator[](unsigned int index)
+{
+	return subscript(index);
+}
+
+template<class T>
 __always_inline const T& TList<T>::operator[](unsigned int index) const
 {
-	return (*this)[index];
+	return subscript(index);
 }
 
 #endif /* TLIST_H */
