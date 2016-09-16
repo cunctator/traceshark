@@ -37,7 +37,7 @@ public:
 	void setTaskGraphForLegend(TaskGraph *legendTaskGraph);
 	void setPen(const QPen &pen);
 	bool addToLegend();
-	bool removeFromLegend();
+	bool removeFromLegend() const;
 private:
 	Task *task;
 	TaskGraph *taskGraph;

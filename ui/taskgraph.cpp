@@ -61,7 +61,7 @@ bool TaskGraph::addToLegend()
 	return legendGraph->addToLegend();
 }
 
-bool TaskGraph::removeFromLegend()
+bool TaskGraph::removeFromLegend() const
 {
 	return legendGraph->removeFromLegend();
 }
