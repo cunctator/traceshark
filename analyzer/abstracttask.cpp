@@ -20,7 +20,7 @@
 #include "analyzer/traceanalyzer.h"
 
 AbstractTask::AbstractTask() :
-	isNew(true), graph(nullptr)
+	pid(0), isNew(true), offset(0), scale(0), graph(nullptr)
 {}
 
 bool AbstractTask::doScale() {
