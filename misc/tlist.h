@@ -20,6 +20,7 @@
 #define TLIST_H
 
 #include <climits>
+#include <cstdlib>
 
 #define TLIST_MAX(A, B) ((A) >= (B) ? A:B)
 #define TLIST_MIN(A, B) ((A) < (B) ? A:B)
@@ -119,7 +120,7 @@ void TList<T>::setupMem()
 			     PROT_READ | PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (mapArray == MAP_FAILED)
-		mapArray = nullptr; /* let's die from null pointer if failed */
+		abort();
 	addMem();
 }
 
@@ -130,7 +131,7 @@ void TList<T>::addMem()
 				sizeof(T), PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (mapArray[nrMaps] == MAP_FAILED)
-		mapArray[nrMaps] = nullptr; /* let's die from null pointer...*/
+		abort();
 	nrMaps++;
 }
 
