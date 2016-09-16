@@ -22,7 +22,7 @@
 #define DEFAULT_NR_CPUS (6) /* Isn't this what most people are running now? */
 
 WorkQueue::WorkQueue():
-	error(false)
+	error(false), nrStarted(0)
 {
 	int cpus, i;
 	cpus = QThread::idealThreadCount();
