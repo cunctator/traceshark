@@ -63,10 +63,14 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 	} else if (role == Qt::DisplayRole) {
 		int row = index.row();
 		int column = index.column();
-		int size = (int) TSMIN(INT_MAX, events->size());
+		int size;
 
-		if (events == nullptr || row >= size || row < 0)
+		if (events == nullptr)
 			return QVariant();
+		size = (int) TSMIN(INT_MAX, events->size());
+		if ( row >= size || row < 0)
+			return QVariant();
+
 		TraceEvent &event = (*events)[row];
 		switch(column) {
 		case 0:
