@@ -19,7 +19,7 @@
 #include "ui/taskrangeallocator.h"
 
 TaskRangeAllocator::TaskRangeAllocator(double decValue) :
-	rangeList(nullptr), dec(decValue)
+	rangeList(nullptr), top(0), bottom(0), dec(decValue)
 {}
 
 TaskRangeAllocator::~TaskRangeAllocator()
