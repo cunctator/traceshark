@@ -58,7 +58,6 @@ private:
 	MemPool *entryPool;
 	StringTreeEntry **hashTable;
 	unsigned int hSize;
-	char *curPtr;
 	TString **stringTable;
 	int tableSize;
 	void clearTables();
