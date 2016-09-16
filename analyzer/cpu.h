@@ -21,8 +21,8 @@
 
 class CPU {
 public:
-	CPU(): pidOnCPU(0), hasBeenScheduled(false), lastEnterIdle(0),
-		lastExitIdle(0) {}
+	CPU(): pidOnCPU(0), hasBeenScheduled(false), lastSched(0),
+		lastEnterIdle(0), lastExitIdle(0) {}
 	unsigned int pidOnCPU;
 	bool hasBeenScheduled;
 	double lastSched; /* Time when pidOnCPU was scheduled */
