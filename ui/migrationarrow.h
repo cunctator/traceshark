@@ -29,8 +29,6 @@ public:
 	MigrationArrow(double start, double end, double time,
 		       const QColor &color, QCustomPlot *parent);
 private:
-	QCPItemPosition *pos1;
-	QCPItemPosition *pos2;
 	QCPLineEnding head;
 };
 
