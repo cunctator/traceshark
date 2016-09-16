@@ -94,7 +94,7 @@ __always_inline void ThreadBuffer<T>::completeConsumption() {
 }
 
 template<class T>ThreadBuffer<T>::ThreadBuffer(unsigned int nr):
-nrBuffers(nr), isEmpty(true)
+nrBuffers(nr), strPool(nullptr), isEmpty(true)
 {
 	strPool = new MemPool(4096, sizeof(TString));
 }
