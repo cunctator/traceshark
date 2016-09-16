@@ -52,7 +52,6 @@ private:
 	StringPoolEntry **hashTable;
 	unsigned int *usageTable;
 	unsigned int hSize;
-	char *curPtr;
 	void clearTable();
 };
 
