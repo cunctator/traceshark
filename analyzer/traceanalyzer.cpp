@@ -34,8 +34,10 @@
 
 TraceAnalyzer::TraceAnalyzer()
 	: cpuTaskMaps(nullptr), cpuFreq(nullptr), cpuIdle(nullptr),
-	  black(0, 0, 0), white(255, 255, 255),
-	  CPUs(nullptr)
+	  black(0, 0, 0), white(255, 255, 255), migrationOffset(0),
+	  migrationScale(0), maxCPU(0), nrCPUs(0), endTime(0), startTime(0),
+	  maxFreq(0), minFreq(0), maxIdleState(0), minIdleState(0),
+	  CPUs(nullptr), customPlot(nullptr)
 {
 	taskNamePool = new MemPool(16384, sizeof(char));
 	parser = new TraceParser(&events);
