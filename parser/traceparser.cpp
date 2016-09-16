@@ -17,6 +17,7 @@
  */
 
 #include <climits>
+#include <cstring>
 #include <limits>
 
 #include <QTextStream>
@@ -31,6 +32,8 @@
 #include "misc/traceshark.h"
 #include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
+
+#define CLEAR_VARIABLE(VAR) memset(&VAR, 0, sizeof(VAR))
 
 TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
 	: traceType(TRACE_TYPE_NONE)
@@ -50,6 +53,11 @@ TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
 	events = analyzerEvents;
 	eventsWatcher = new IndexWatcher(10000);
 	traceTypeWatcher = new IndexWatcher;
+
+	CLEAR_VARIABLE(fakeEvent);
+	CLEAR_VARIABLE(fakePostEventInfo);
+	CLEAR_VARIABLE(ftraceLineData);
+	CLEAR_VARIABLE(perfLineData);
 }
 
 TraceParser::~TraceParser()
