@@ -18,6 +18,7 @@
 
 #include <new>
 #include <cassert>
+#include <cstdlib>
 #include <cstring>
 #include "misc/tstring.h"
 #include "threads/loadbuffer.h"
@@ -36,7 +37,8 @@ LoadBuffer::LoadBuffer(unsigned int size):
 	 * TraceFile::ReadNextWord() one byte out of bounds */
 	memory = (char*) mmap(nullptr, 2 * size + 1, PROT_READ | PROT_WRITE,
 			      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	assert(memory != MAP_FAILED);
+	if (memory == MAP_FAILED)
+		abort();
 	readBegin = memory + size;
 }
 
@@ -57,7 +59,8 @@ bool LoadBuffer::produceBuffer(int fd, char** filePosPtr, TString *lineBegin)
 	waitForConsumptionComplete();
 
 	nRead = lineBegin->len;
-	assert(nRead < bufSize);
+	if (nRead >= bufSize)
+		abort();
 	buffer = readBegin - lineBegin->len;
 	strncpy(buffer, lineBegin->ptr, lineBegin->len);
 

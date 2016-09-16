@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
+#include <cstdlib>
 #include <cstring>
 #include <QTextStream>
 
@@ -46,7 +46,8 @@ void LoadThread::run()
 
 	lineBegin.ptr = (char*) mmap(nullptr, bufSize, PROT_READ|PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	assert(lineBegin.ptr != MAP_FAILED);
+	if (lineBegin.ptr == MAP_FAILED)
+		abort();
 	lineBegin.len = 0;
 
 	do {
