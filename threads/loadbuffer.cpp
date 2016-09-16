@@ -29,7 +29,8 @@ extern "C" {
 }
 
 LoadBuffer::LoadBuffer(unsigned int size):
-	bufSize(size), state(LOADSTATE_EMPTY)
+	buffer(nullptr), bufSize(size), nRead(0), filePos(nullptr),
+	IOerror(false), IOerrno(0), state(LOADSTATE_EMPTY), eof(false)
 {
 	/* We need the extra byte to be able to set a null character in
 	 * TraceFile::ReadNextWord() one byte out of bounds */
