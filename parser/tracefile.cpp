@@ -32,7 +32,8 @@ extern "C" {
 }
 
 TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
-	: mappedFile(nullptr), fileSize(0), bufferSwitch(false)
+	: mappedFile(nullptr), fileSize(0), bufferSwitch(false), nRead(0),
+	  lastBuf(0), lastPos(0), endOfLine(false)
 {
 	unsigned int i;
 	struct stat sbuf;
@@ -56,9 +57,6 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 			}
 		}
 	}
-
-	lastPos = 0;
-	lastBuf = 0;
 
 	for (i = 0; i < NR_BUFFERS; i++) {
 		loadBuffers[i] = new LoadBuffer(bsize);
