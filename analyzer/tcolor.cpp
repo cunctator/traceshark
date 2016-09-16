@@ -23,7 +23,8 @@
 TColor::TColor(int r, int g, int b):
 	red(r), green(g), blue(b) {}
 
-TColor::TColor() {}
+TColor::TColor():
+	red(0), green(0), blue(0) {}
 
 QColor TColor::toQColor() const
 {
