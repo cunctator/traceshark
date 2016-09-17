@@ -9,7 +9,6 @@
 #
 # Normal rules
 #
-.*
 *.o
 *.so
 *.so.dbg

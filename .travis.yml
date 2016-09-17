@@ -1,0 +1,5 @@
+language: cpp
+script: qmake-qt4 && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y qt4-qmake libqt4-dev
