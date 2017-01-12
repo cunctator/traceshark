@@ -16,14 +16,21 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui/legendgraph.h"
+#include "qcustomplot/qcustomplot.h"
 #include "ui/taskgraph.h"
 #include "analyzer/task.h"
 
-TaskGraph::TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis):
-	QCPGraph(keyAxis, valueAxis), task(nullptr), taskGraph(nullptr)
+QHash<QCPGraph *, TaskGraph *> TaskGraph::graphDir;
+
+TaskGraph::TaskGraph(QCustomPlot *parent):
+	task(nullptr), taskGraph(nullptr)
 {
-	legendGraph = new LegendGraph(keyAxis, valueAxis, this);
+	graph = parent->addGraph(parent->xAxis, parent->yAxis);
+	graphDir[graph] = this;
+	graph->setAdaptiveSampling(true);
+	graph->setLineStyle(QCPGraph::lsStepLeft);
+	legendGraph = parent->addGraph(parent->xAxis, parent->yAxis);
+	graphDir[legendGraph] = this;
 }
 
 TaskGraph::~TaskGraph()
@@ -36,9 +43,8 @@ void TaskGraph::setTask(Task *newTask)
 {
 	QString name = newTask->getDisplayName();
 	name += QString(":") + QString::number(newTask->pid);
-	QCPGraph::setName(name);
+	graph->setName(name);
 	legendGraph->setName(name);
-	legendGraph->pid = newTask->pid;
 	task = newTask;
 }	
 
@@ -49,7 +55,7 @@ Task *TaskGraph::getTask()
 
 void TaskGraph::setPen(const QPen &pen)
 {
-	QCPGraph::setPen(pen);
+	graph->setPen(pen);
 
 	QPen legendPen(pen);
 	legendPen.setWidth(5);
@@ -74,4 +80,24 @@ TaskGraph *TaskGraph::getTaskGraphForLegend()
 void TaskGraph::setTaskGraphForLegend(TaskGraph *legendTaskGraph)
 {
 	taskGraph = legendTaskGraph;
+}
+
+void TaskGraph::setData(const QVector<double > &keys,
+			const QVector<double> &values,
+			bool alreadySorted)
+{
+	graph->setData(keys, values, alreadySorted);
+}
+
+TaskGraph *TaskGraph::fromQCPGraph(QCPGraph *g)
+{
+	QHash<QCPGraph *, TaskGraph *>::iterator i = graphDir.find(g);
+	if (i == graphDir.end())
+		return nullptr;
+	return i.value();
+}
+
+QCPGraph *TaskGraph::getQCPGraph()
+{
+	return graph;
 }

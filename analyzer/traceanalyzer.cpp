@@ -521,7 +521,6 @@ void TraceAnalyzer::scaleMigration()
 		double e = migrationOffset + (m.newcpu + 1) * unit;
 		QColor color = getTaskColor(m.pid);
 		a = new MigrationArrow(s, e, m.time, color, customPlot);
-		customPlot->addItem(a);
 		migrationArrows.append(a);
 	}
 }

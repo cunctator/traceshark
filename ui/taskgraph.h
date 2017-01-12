@@ -20,16 +20,18 @@
 #define TASKGRAPH_H
 
 #include <QString>
-#include "qcustomplot/qcustomplot.h"
+#include <QVector>
+#include <QHash>
 
 class LegendGraph;
 class Task;
+class QCustomPlot;
+class QCPGraph;
 
-class TaskGraph : public QCPGraph
+class TaskGraph
 {
-	Q_OBJECT
 public:
-	TaskGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
+	TaskGraph(QCustomPlot *parent);
 	virtual ~TaskGraph();
 	void setTask(Task *newTask);
 	Task *getTask();
@@ -38,10 +40,17 @@ public:
 	void setPen(const QPen &pen);
 	bool addToLegend();
 	bool removeFromLegend() const;
+	void setData(const QVector<double > &keys,
+		     const QVector<double> &values,
+		     bool alreadySorted = false);
+	static TaskGraph *fromQCPGraph(QCPGraph *g);
+	QCPGraph *getQCPGraph();
 private:
 	Task *task;
 	TaskGraph *taskGraph;
-	LegendGraph *legendGraph;
+	QCPGraph *graph;
+	QCPGraph *legendGraph;
+	static QHash<QCPGraph *, TaskGraph *> graphDir;
 };
 
 #endif /* TASKGRAPH_H */

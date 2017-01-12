@@ -42,6 +42,7 @@ HEADERS      +=  ui/taskselectdialog.h
 HEADERS      +=  ui/taskview.h
 HEADERS      +=  ui/traceplot.h
 HEADERS      +=  ui/tracesharkstyle.h
+HEADERS      +=  ui/yaxisticker.h
 
 HEADERS      +=  analyzer/abstracttask.h
 HEADERS      +=  analyzer/cpufreq.h
@@ -111,6 +112,8 @@ SOURCES      +=  ui/taskselectdialog.cpp
 SOURCES      +=  ui/taskview.cpp
 SOURCES      +=  ui/traceplot.cpp
 SOURCES      +=  ui/tracesharkstyle.cpp
+SOURCES      +=  ui/yaxisticker.cpp
+
 
 SOURCES      +=  analyzer/abstracttask.cpp
 SOURCES      +=  analyzer/cpufreq.cpp
@@ -166,6 +169,9 @@ QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -g -std=c++11
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99
 QMAKE_LFLAGS_RELEASE =
 CONFIG += DEBUG
+# Uncomment the line below to enable OpenGl through the new method. Seems flaky,
+# so for now is better to use Qt4 and rely on on OpenGl being enabled in main()
+# DEFINES += QCUSTOMPLOT_USE_OPENGL
 
 ###############################################################################
 # Resources

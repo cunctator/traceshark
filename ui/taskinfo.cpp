@@ -190,7 +190,7 @@ void TaskInfo::addTaskGraphToLegend(TaskGraph *graph)
 
 	legendPidMap[task->pid] = graph;
 	graph->addToLegend();
-	obj = graph->parent();
+	obj = graph->getQCPGraph()->parent();
 	plot = qobject_cast<QCustomPlot *>(obj);
 	if (plot != nullptr)
 		plot->replot();
@@ -206,7 +206,7 @@ void TaskInfo::clearTriggered()
 		TaskGraph *&graph = iter.value();
 		graph->removeFromLegend();
 		if (plot == nullptr) {
-			obj = graph->parent();
+			obj = graph->getQCPGraph()->parent();
 			plot = qobject_cast<QCustomPlot *>(obj);
 		}
 		iter++;
@@ -262,7 +262,7 @@ void TaskInfo::checkGraphSelection()
 {
 	if (taskGraph == nullptr)
 		return;
-	if (taskGraph->selected())
+	if (taskGraph->getQCPGraph()->selected())
 		return;
 	removeTaskGraph();
 }

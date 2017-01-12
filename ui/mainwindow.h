@@ -53,6 +53,7 @@ class TracePlot;
 class TraceEvent;
 class TaskRangeAllocator;
 class TaskSelectDialog;
+class YAxisTicker;
 
 class MainWindow : public QMainWindow
 {
@@ -78,7 +79,7 @@ private slots:
 	void moveActiveCursor(double time);
 	void showEventInfo(const TraceEvent &event);
 	void selectionChanged();
-	void plottableClicked(QCPAbstractPlottable *plottable,
+	void plottableClicked(QCPAbstractPlottable *plottable, int dataIndex,
 			      QMouseEvent *event);
 	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
 			       *abstractItem);
@@ -112,6 +113,7 @@ private:
 	void setTraceActionsEnabled(bool e);
 
 	TracePlot *tracePlot;
+	YAxisTicker *yaxisTicker;
 	TaskRangeAllocator *taskRangeAllocator;
 	QCPLayer *cursorLayer;
 	QWidget *plotWidget;
