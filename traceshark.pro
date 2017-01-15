@@ -1,7 +1,8 @@
 #
 #
 #  Traceshark - a visualizer for visualizing ftrace and perf traces
-#  Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2014, 2015, 2016, 2017  Viktor Rosendahl
+#  <viktor.rosendahl@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
