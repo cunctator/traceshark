@@ -497,7 +497,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 	QPen pen = QPen();
 	QCPErrorBars *errorBars = new QCPErrorBars(tracePlot->xAxis,
 						   tracePlot->yAxis);
-
+	errorBars->setAntialiased(false);
 	pen.setColor(color);
 	style.setPen(pen);
 	graph->setScatterStyle(style);
@@ -529,6 +529,7 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	QPen pen = QPen();
 	QCPErrorBars *errorBars = new QCPErrorBars(tracePlot->xAxis,
 						   tracePlot->yAxis);
+	errorBars->setAntialiased(false);
 
 	pen.setColor(color);
 	style.setPen(pen);
@@ -1148,6 +1149,7 @@ void MainWindow::addTaskGraph(unsigned int pid)
 					      tracePlot->yAxis);
 	QCPErrorBars *errorBars = new QCPErrorBars(tracePlot->xAxis,
 						   tracePlot->yAxis);
+	errorBars->setAntialiased(false);
 	//tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
 	style.setPen(pen);
