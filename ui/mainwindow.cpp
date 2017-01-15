@@ -379,11 +379,8 @@ void MainWindow::showTrace()
 	tracePlot->xAxis->setRange(QCPRange(start, end));
 	tracePlot->xAxis->setNumberPrecision(precision);
 	tracePlot->yAxis->setTicks(false);
-	//tracePlot->yAxis->setAutoTicks(false);
-	//tracePlot->yAxis->setAutoTickLabels(false);
 	yaxisTicker->setTickVector(ticks);
 	yaxisTicker->setTickVectorLabels(tickLabels);
-	//tracePlot->yAxis->setTickLabels(true);
 	tracePlot->yAxis->setTicks(true);
 
 	/* Show CPU frequency and idle graphs */
@@ -438,9 +435,6 @@ void MainWindow::setupCursors()
 	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot, Qt::red);
 	cursors[TShark::BLUE_CURSOR] = new Cursor(tracePlot, Qt::blue);
 
-	//tracePlot->addItem(cursors[TShark::RED_CURSOR]);
-	//tracePlot->addItem(cursors[TShark::BLUE_CURSOR]);
-
 	cursors[TShark::RED_CURSOR]->setLayer(cursorLayer);
 	cursors[TShark::BLUE_CURSOR]->setLayer(cursorLayer);
 
@@ -488,10 +482,8 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 		return;
 
 	/* Add wakeup graph on top of scheduling */
-	// QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
-	// tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
 	QColor color = analyzer->getTaskColor(task.pid);
 	QPen pen = QPen();
@@ -503,8 +495,6 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	//graph->setDataKeyError(task.wakeTimev, task.wakeHeight,
-	//		       task.wakeDelay, task.wakeZero);
 	graph->setData(task.wakeTimev, task.wakeHeight);
 	errorBars->setData(task.wakeDelay, task.wakeZero);
 	errorBars->setErrorType(QCPErrorBars::etKeyError);
@@ -512,16 +502,11 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 	errorBars->setWhiskerWidth(4);
 	errorBars->setDataPlottable(graph);
 	/* errorBars->setSymbolGap(0); */
-	//graph->setErrorType(QCPGraph::etKey);
-	//graph->setErrorBarSize(4);
-	//graph->setErrorPen(pen);
 }
 
 void MainWindow::addWakeupGraph(CPUTask &task)
 {
 	/* Add wakeup graph on top of scheduling */
-	//QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
-	//tracePlot->addPlottable(graph);
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
@@ -536,17 +521,12 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	//graph->setDataValueError(task.wakeTimev, task.wakeHeight, task.wakeZero,
-	//			 task.verticalDelay);
 	graph->setData(task.wakeTimev, task.wakeHeight);
 	errorBars->setData(task.wakeZero, task.verticalDelay);
 	errorBars->setErrorType(QCPErrorBars::etValueError);
 	errorBars->setPen(pen);
 	errorBars->setWhiskerWidth(4);
 	errorBars->setDataPlottable(graph);
-	//graph->setErrorType(QCPGraph::etValue);
-	//graph->setErrorBarSize(4);
-	//graph->setErrorPen(pen);
 }
 
 void MainWindow::addPreemptedGraph(CPUTask &task)
@@ -554,12 +534,10 @@ void MainWindow::addPreemptedGraph(CPUTask &task)
 	/* Add still running graph on top of the other two...*/
 	if (task.runningTimev.size() == 0)
 		return;
-	//QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
 	QString name = QString(tr("was preempted"));
 	graph->setName(name);
-	//tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	QPen pen = QPen();
 
@@ -576,12 +554,10 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	/* Add still running graph on top of the other two...*/
 	if (task.runningTimev.size() == 0)
 		return;
-	// QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
 	QString name = QString(tr("is runnable"));
 	graph->setName(name);
-	// tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	QPen pen = QPen();
 
@@ -1129,9 +1105,6 @@ void MainWindow::addTaskGraph(unsigned int pid)
 	pen.setColor(color);
 	taskGraph->setPen(pen);
 	taskGraph->setTask(task);
-	//tracePlot->addPlottable(taskGraph);
-	//taskGraph->setLineStyle(QCPGraph::lsStepLeft);
-	//taskGraph->setAdaptiveSampling(true);
 
 	task->offset = taskRange->lower;
 	task->scale = schedHeight;
@@ -1144,26 +1117,19 @@ void MainWindow::addTaskGraph(unsigned int pid)
 	task->graph = taskGraph;
 
 	/* Add the horizontal wakeup graph as well */
-	//QCPGraph *graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
 	QCPErrorBars *errorBars = new QCPErrorBars(tracePlot->xAxis,
 						   tracePlot->yAxis);
 	errorBars->setAntialiased(false);
-	//tracePlot->addPlottable(graph);
 	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssDot);
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	//graph->setDataKeyError(task->wakeTimev, task->wakeHeight,
-	//		       task->wakeDelay, task->wakeZero);
 	graph->setData(task->wakeTimev, task->wakeHeight);
 	errorBars->setData(task->wakeDelay, task->wakeZero);
-	//graph->setErrorType(QCPGraph::etKey);
 	errorBars->setErrorType(QCPErrorBars::etKeyError);
-	//graph->setErrorBarSize(4);
-	//graph->setErrorPen(pen);
 	errorBars->setPen(pen);
 	errorBars->setWhiskerWidth(4);
 	errorBars->setDataPlottable(graph);
@@ -1176,10 +1142,8 @@ void MainWindow::addTaskGraph(unsigned int pid)
 		task->runningGraph = nullptr;
 		goto out;
 	}
-	//graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
 	graph->setName(name);
-	//tracePlot->addPlottable(graph);
 
 	pen.setColor(Qt::blue);
 	rstyle.setPen(pen);
@@ -1196,10 +1160,8 @@ void MainWindow::addTaskGraph(unsigned int pid)
 		task->preemptedGraph = nullptr;
 		goto out;
 	}
-	//graph = new QCPGraph(tracePlot->xAxis, tracePlot->yAxis);
 	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
 	graph->setName(name);
-	//tracePlot->addPlottable(graph);
 
 	pen.setColor(Qt::red);
 	rstyle.setPen(pen);
