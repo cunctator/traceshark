@@ -278,7 +278,6 @@ void MainWindow::computeLayout()
 	QString label;
 	double inc, o, p;
 	double start, end;
-	MigrationLine *line;
 	QColor color;
 
 	start = analyzer->getStartTime();
@@ -299,7 +298,7 @@ void MainWindow::computeLayout()
 	color = QColor(135, 206, 250); /* Light sky blue */
 	label = QString("fork/exit");
 	ticks.append(offset);
-	line = new MigrationLine(start, end, offset, color, tracePlot);
+	new MigrationLine(start, end, offset, color, tracePlot);
 	tickLabels.append(label);
 	o = offset;
 	p = inc / nrCPUs ;
@@ -308,7 +307,7 @@ void MainWindow::computeLayout()
 		label = QString("cpu") + QString::number(cpu);
 		ticks.append(o);
 		tickLabels.append(label);
-		line = new MigrationLine(start, end, o, color, tracePlot);
+		new MigrationLine(start, end, o, color, tracePlot);
 	}
 
 	offset += inc;
