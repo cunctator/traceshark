@@ -33,6 +33,7 @@ class TaskGraph
 public:
 	TaskGraph(QCustomPlot *parent);
 	virtual ~TaskGraph();
+	void destroy();
 	void setTask(Task *newTask);
 	Task *getTask();
 	TaskGraph *getTaskGraphForLegend();
@@ -44,8 +45,10 @@ public:
 		     const QVector<double> &values,
 		     bool alreadySorted = false);
 	static TaskGraph *fromQCPGraph(QCPGraph *g);
+	static void clearMap();
 	QCPGraph *getQCPGraph();
 private:
+	QCustomPlot *plot;
 	Task *task;
 	TaskGraph *taskGraph;
 	QCPGraph *graph;

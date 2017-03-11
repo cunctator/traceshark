@@ -353,6 +353,7 @@ void MainWindow::clearPlot()
 	tracePlot->clearItems();
 	tracePlot->clearPlottables();
 	tracePlot->hide();
+	TaskGraph::clearMap();
 	taskRangeAllocator->clearAll();
 	infoWidget->setTime(0, TShark::RED_CURSOR);
 	infoWidget->setTime(0, TShark::BLUE_CURSOR);
@@ -1187,23 +1188,22 @@ void MainWindow::removeTaskGraph(unsigned int pid)
 		return;
 
 	if (task->graph != nullptr) {
-		tracePlot->removePlottable(task->graph->getQCPGraph());
-		delete task->graph;
+		task->graph->destroy();
 		task->graph = nullptr;
 	}
 
 	if (task->wakeUpGraph != nullptr) {
-		tracePlot->removePlottable(task->wakeUpGraph);
+		tracePlot->removeGraph(task->wakeUpGraph);
 		task->wakeUpGraph = nullptr;
 	}
 
 	if (task->runningGraph != nullptr) {
-		tracePlot->removePlottable(task->runningGraph);
+		tracePlot->removeGraph(task->runningGraph);
 		task->runningGraph = nullptr;
 	}
 
 	if (task->preemptedGraph != nullptr) {
-		tracePlot->removePlottable(task->preemptedGraph);
+		tracePlot->removeGraph(task->preemptedGraph);
 		task->preemptedGraph = nullptr;
 	}
 

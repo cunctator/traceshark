@@ -23,7 +23,7 @@
 QHash<QCPGraph *, TaskGraph *> TaskGraph::graphDir;
 
 TaskGraph::TaskGraph(QCustomPlot *parent):
-	task(nullptr), taskGraph(nullptr)
+	plot(parent), task(nullptr), taskGraph(nullptr)
 {
 	graph = parent->addGraph(parent->xAxis, parent->yAxis);
 	graphDir[graph] = this;
@@ -35,8 +35,15 @@ TaskGraph::TaskGraph(QCustomPlot *parent):
 
 TaskGraph::~TaskGraph()
 {
-	legendGraph->removeFromLegend();
-	delete legendGraph;
+}
+
+void TaskGraph::destroy()
+{
+	plot->removeGraph(graph);
+	plot->removeGraph(legendGraph);
+	graphDir.remove(graph);
+	graphDir.remove(legendGraph);
+	delete this;
 }
 
 void TaskGraph::setTask(Task *newTask)
@@ -95,6 +102,11 @@ TaskGraph *TaskGraph::fromQCPGraph(QCPGraph *g)
 	if (i == graphDir.end())
 		return nullptr;
 	return i.value();
+}
+
+void TaskGraph::clearMap()
+{
+	graphDir.clear();
 }
 
 QCPGraph *TaskGraph::getQCPGraph()
