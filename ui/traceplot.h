@@ -19,7 +19,7 @@
 #ifndef TRACEPLOT_H
 #define TRACEPLOT_H
 
-#include "qcustomplot/qcustomplot.h"
+#include "qcp/qcp.h"
 
 class TracePlot : public QCustomPlot
 {

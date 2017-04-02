@@ -21,7 +21,7 @@
 
 #include <QVector>
 #include <QString>
-#include "qcustomplot/qcustomplot.h"
+#include "qcp/qcp.h"
 
 class YAxisTicker : public QCPAxisTicker {
 public:

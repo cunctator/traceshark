@@ -19,7 +19,7 @@
 #ifndef LEGENDGRAPH_H
 #define LEGENDGRAPH_H
 
-#include "qcustomplot/qcustomplot.h"
+#include "qcp/qcp.h"
 
 class LegendGraph : public QCPGraph
 {

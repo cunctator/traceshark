@@ -20,7 +20,7 @@
 #define MIGRATIONARROW_H
 
 #include <QColor>
-#include "qcustomplot/qcustomplot.h"
+#include "qcp/qcp.h"
 
 class MigrationArrow : public QCPItemLine
 {

@@ -39,7 +39,7 @@
 #include "misc/traceshark.h"
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
-#include "qcustomplot/qcustomplot.h"
+#include "qcp/core.h"
 
 
 #define TOOLTIP_OPEN \

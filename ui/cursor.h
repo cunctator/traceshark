@@ -19,7 +19,7 @@
 #ifndef CURSOR_H
 #define CURSOR_H
 
-#include "qcustomplot/qcustomplot.h"
+#include "qcp/qcp.h"
 
 class Cursor : public QCPItemLine
 {
