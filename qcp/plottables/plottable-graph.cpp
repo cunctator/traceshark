@@ -558,6 +558,9 @@ void QCPGraph::getLines(QVector<QPointF> *lines, const QCPDataRange &dataRange) 
   QVector<QCPGraphData> lineData;
   if (mLineStyle != lsNone)
     getOptimizedLineData(&lineData, begin, end);
+  
+  if (mKeyAxis->rangeReversed() != (mKeyAxis->orientation() == Qt::Vertical)) // make sure key pixels are sorted ascending in lineData (significantly simplifies following processing)
+    std::reverse(lineData.begin(), lineData.end());
 
   switch (mLineStyle)
   {
@@ -599,6 +602,10 @@ void QCPGraph::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataR
   
   QVector<QCPGraphData> data;
   getOptimizedScatterData(&data, begin, end);
+  
+  if (mKeyAxis->rangeReversed() != (mKeyAxis->orientation() == Qt::Vertical)) // make sure key pixels are sorted ascending in data (significantly simplifies following processing)
+    std::reverse(data.begin(), data.end());
+  
   scatters->resize(data.size());
   if (keyAxis->orientation() == Qt::Vertical)
   {
@@ -640,7 +647,6 @@ QVector<QPointF> QCPGraph::dataToLines(const QVector<QCPGraphData> &data) const
   QCPAxis *valueAxis = mValueAxis.data();
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
 
-  result.reserve(data.size()+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
   result.resize(data.size());
   
   // transform data points to pixels:
@@ -679,7 +685,6 @@ QVector<QPointF> QCPGraph::dataToStepLeftLines(const QVector<QCPGraphData> &data
   QCPAxis *valueAxis = mValueAxis.data();
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
   
-  result.reserve(data.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
   result.resize(data.size()*2);
   
   // calculate steps from data and transform to pixel coordinates:
@@ -728,7 +733,6 @@ QVector<QPointF> QCPGraph::dataToStepRightLines(const QVector<QCPGraphData> &dat
   QCPAxis *valueAxis = mValueAxis.data();
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
   
-  result.reserve(data.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
   result.resize(data.size()*2);
   
   // calculate steps from data and transform to pixel coordinates:
@@ -777,7 +781,6 @@ QVector<QPointF> QCPGraph::dataToStepCenterLines(const QVector<QCPGraphData> &da
   QCPAxis *valueAxis = mValueAxis.data();
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
   
-  result.reserve(data.size()*2+2); // added 2 to reserve memory for lower/upper fill base points that might be needed for fill
   result.resize(data.size()*2);
   
   // calculate steps from data and transform to pixel coordinates:
@@ -838,7 +841,7 @@ QVector<QPointF> QCPGraph::dataToImpulseLines(const QVector<QCPGraphData> &data)
   QCPAxis *valueAxis = mValueAxis.data();
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
   
-  result.resize(data.size()*2); // no need to reserve 2 extra points because impulse plot has no fill
+  result.resize(data.size()*2);
   
   // transform data points to pixels:
   if (keyAxis->orientation() == Qt::Vertical)
@@ -887,16 +890,24 @@ void QCPGraph::drawFill(QCPPainter *painter, QVector<QPointF> *lines) const
   if (painter->brush().style() == Qt::NoBrush || painter->brush().color().alpha() == 0) return;
   
   applyFillAntialiasingHint(painter);
+  QVector<DataRange> segments = getNonNanSegments(lines, keyAxis()->orientation());
   if (!mChannelFillGraph)
   {
     // draw base fill under graph, fill goes all the way to the zero-value-line:
-    addFillBasePoints(lines);
-    painter->drawPolygon(QPolygonF(*lines));
-    removeFillBasePoints(lines);
+    for (int i=0; i<segments.size(); ++i)
+      painter->drawPolygon(getFillPolygon(lines, segments.at(i)));
   } else
   {
-    // draw channel fill between this graph and mChannelFillGraph:
-    painter->drawPolygon(getChannelFillPolygon(lines));
+    // draw fill between this graph and mChannelFillGraph:
+    QVector<QPointF> otherLines;
+    mChannelFillGraph->getLines(&otherLines, QCPDataRange(0, mChannelFillGraph->dataCount()));
+    if (!otherLines.isEmpty())
+    {
+      QVector<DataRange> otherSegments = getNonNanSegments(&otherLines, mChannelFillGraph->keyAxis()->orientation());
+      QVector<QPair<DataRange, DataRange> > segmentPairs = getOverlappingSegments(segments, lines, otherSegments, &otherLines);
+      for (int i=0; i<segmentPairs.size(); ++i)
+        painter->drawPolygon(getChannelFillPolygon(lines, segmentPairs.at(i).first, &otherLines, segmentPairs.at(i).second));
+    }
   }
 }
 
@@ -1039,13 +1050,8 @@ void QCPGraph::getOptimizedLineData(QVector<QCPGraphData> *lineData, const QCPGr
     
   } else // don't use adaptive sampling algorithm, transfer points one-to-one from the data container into the output
   {
-    QCPGraphDataContainer::const_iterator it = begin;
-    lineData->reserve(dataCount+2); // +2 for possible fill end points
-    while (it != end)
-    {
-      lineData->append(*it);
-      ++it;
-    }
+    lineData->resize(dataCount);
+    std::copy(begin, end, lineData->begin());
   }
 }
 
@@ -1261,157 +1267,145 @@ void QCPGraph::getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin
   }
 }
 
-/*! \internal
-  
-  The line vector generated by e.g. \ref getLines describes only the line that connects the data
-  points. If the graph needs to be filled, two additional points need to be added at the
-  value-zero-line in the lower and upper key positions of the graph. This function calculates these
-  points and adds them to the end of \a lineData. Since the fill is typically drawn before the line
-  stroke, these added points need to be removed again after the fill is done, with the
-  removeFillBasePoints function.
-
-  The expanding of \a lines by two points will not cause unnecessary memory reallocations, because
-  the data vector generation functions (e.g. \ref getLines) reserve two extra points when they
-  allocate memory for \a lines.
-  
-  \see removeFillBasePoints, lowerFillBasePoint, upperFillBasePoint
-*/
-void QCPGraph::addFillBasePoints(QVector<QPointF> *lines) const
+QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const
 {
-  if (!mKeyAxis) { qDebug() << Q_FUNC_INFO << "invalid key axis"; return; }
-  if (!lines) { qDebug() << Q_FUNC_INFO << "passed null as lineData"; return; }
-  if (lines->isEmpty()) return;
+  QVector<DataRange> result;
+  const int n = lineData->size();
   
-  // append points that close the polygon fill at the key axis:
-  if (mKeyAxis.data()->orientation() == Qt::Vertical)
+  DataRange currentSegment(-1, -1);
+  int i = 0;
+  
+  if (keyOrientation == Qt::Horizontal)
   {
-    *lines << upperFillBasePoint(lines->last().y());
-    *lines << lowerFillBasePoint(lines->first().y());
+    while (i < n)
+    {
+      while (i < n && qIsNaN(lineData->at(i).y())) // seek next non-NaN data point
+        ++i;
+      if (i == n)
+        break;
+      currentSegment.first = i++;
+      while (i < n && !qIsNaN(lineData->at(i).y())) // seek next NaN data point or end of data
+        ++i;
+      currentSegment.second = i++;
+      result.append(currentSegment);
+    }
+  } else // keyOrientation == Qt::Vertical
+  {
+    while (i < n)
+    {
+      while (i < n && qIsNaN(lineData->at(i).x())) // seek next non-NaN data point
+        ++i;
+      if (i == n)
+        break;
+      currentSegment.first = i++;
+      while (i < n && !qIsNaN(lineData->at(i).x())) // seek next NaN data point or end of data
+        ++i;
+      currentSegment.second = i++;
+      result.append(currentSegment);
+    }
+  }
+  return result;
+}
+
+QVector<QPair<QCPGraph::DataRange, QCPGraph::DataRange> > QCPGraph::getOverlappingSegments(QVector<QCPGraph::DataRange> thisSegments, const QVector<QPointF> *thisData, QVector<QCPGraph::DataRange> otherSegments, const QVector<QPointF> *otherData) const
+{
+  QVector<QPair<DataRange, DataRange> > result;
+  if (thisData->isEmpty() || otherData->isEmpty() || thisSegments.isEmpty() || otherSegments.isEmpty())
+    return result;
+  
+  int thisIndex = 0;
+  int otherIndex = 0;
+  const bool verticalKey = mKeyAxis->orientation() == Qt::Vertical;
+  while (thisIndex < thisSegments.size() && otherIndex < otherSegments.size())
+  {
+    if (thisSegments.at(thisIndex).second-thisSegments.at(thisIndex).first < 2) // segments with fewer than two points won't have a fill anyhow
+    {
+      ++thisIndex;
+      continue;
+    }
+    if (otherSegments.at(otherIndex).second-otherSegments.at(otherIndex).first < 2) // segments with fewer than two points won't have a fill anyhow
+    {
+      ++otherIndex;
+      continue;
+    }
+    double thisLower, thisUpper, otherLower, otherUpper;
+    if (!verticalKey)
+    {
+      thisLower = thisData->at(thisSegments.at(thisIndex).first).x();
+      thisUpper = thisData->at(thisSegments.at(thisIndex).second-1).x();
+      otherLower = otherData->at(otherSegments.at(otherIndex).first).x();
+      otherUpper = otherData->at(otherSegments.at(otherIndex).second-1).x();
+    } else
+    {
+      thisLower = thisData->at(thisSegments.at(thisIndex).first).y();
+      thisUpper = thisData->at(thisSegments.at(thisIndex).second-1).y();
+      otherLower = otherData->at(otherSegments.at(otherIndex).first).y();
+      otherUpper = otherData->at(otherSegments.at(otherIndex).second-1).y();
+    }
+    
+    int bPrecedence;
+    if (segmentsIntersect(thisLower, thisUpper, otherLower, otherUpper, bPrecedence))
+      result.append(QPair<DataRange, DataRange>(thisSegments.at(thisIndex), otherSegments.at(otherIndex)));
+    
+    if (bPrecedence <= 0) // otherSegment doesn't reach as far as thisSegment, so continue with next otherSegment, keeping current thisSegment
+      ++otherIndex;
+    else // otherSegment reaches further than thisSegment, so continue with next thisSegment, keeping current otherSegment
+      ++thisIndex;
+  }
+  
+  return result;
+}
+
+bool QCPGraph::segmentsIntersect(double aLower, double aUpper, double bLower, double bUpper, int &bPrecedence) const
+{
+  bPrecedence = 0;
+  if (aLower > bUpper)
+  {
+    bPrecedence = -1;
+    return false;
+  } else if (bLower > aUpper)
+  {
+    bPrecedence = 1;
+    return false;
   } else
   {
-    *lines << upperFillBasePoint(lines->last().x());
-    *lines << lowerFillBasePoint(lines->first().x());
+    if (aUpper > bUpper)
+      bPrecedence = -1;
+    else if (aUpper < bUpper)
+      bPrecedence = 1;
+    
+    return true;
   }
 }
 
 /*! \internal
   
-  removes the two points from \a lines that were added by \ref addFillBasePoints.
-  
-  \see addFillBasePoints, lowerFillBasePoint, upperFillBasePoint
-*/
-void QCPGraph::removeFillBasePoints(QVector<QPointF> *lines) const
-{
-  if (!lines) { qDebug() << Q_FUNC_INFO << "passed null as lineData"; return; }
-  if (lines->isEmpty()) return;
-  
-  lines->remove(lines->size()-2, 2);
-}
+  Returns the point which closes the fill polygon on the zero-value-line parallel to the key axis.
+  The logarithmic axis scale case is a bit special, since the zero-value-line in pixel coordinates
+  is in positive or negative infinity. So this case is handled separately by just closing the fill
+  polygon on the axis which lies in the direction towards the zero value.
 
-/*! \internal
-  
-  called by \ref addFillBasePoints to conveniently assign the point which closes the fill polygon
-  on the lower side of the zero-value-line parallel to the key axis. The logarithmic axis scale
-  case is a bit special, since the zero-value-line in pixel coordinates is in positive or negative
-  infinity. So this case is handled separately by just closing the fill polygon on the axis which
-  lies in the direction towards the zero value.
-  
-  \a lowerKey will be the the key (in pixels) of the returned point. Depending on whether the key
-  axis is horizontal or vertical, \a lowerKey will end up as the x or y value of the returned
-  point, respectively.
-  
-  \see upperFillBasePoint, addFillBasePoints
+  \a matchingDataPoint will provide the key (in pixels) of the returned point. Depending on whether
+  the key axis is horizontal or vertical, \a matchingDataPoint will provide the x or y value of the
+  returned point, respectively.
 */
-QPointF QCPGraph::lowerFillBasePoint(double lowerKey) const
+QPointF QCPGraph::getFillBasePoint(QPointF matchingDataPoint) const
 {
   QCPAxis *keyAxis = mKeyAxis.data();
   QCPAxis *valueAxis = mValueAxis.data();
   if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return QPointF(); }
   
-  QPointF point;
+  QPointF result;
   if (valueAxis->scaleType() == QCPAxis::stLinear)
   {
-    if (keyAxis->axisType() == QCPAxis::atLeft)
+    if (keyAxis->orientation() == Qt::Horizontal)
     {
-      point.setX(valueAxis->coordToPixel(0));
-      point.setY(lowerKey);
-    } else if (keyAxis->axisType() == QCPAxis::atRight)
+      result.setX(matchingDataPoint.x());
+      result.setY(valueAxis->coordToPixel(0));
+    } else // keyAxis->orientation() == Qt::Vertical
     {
-      point.setX(valueAxis->coordToPixel(0));
-      point.setY(lowerKey);
-    } else if (keyAxis->axisType() == QCPAxis::atTop)
-    {
-      point.setX(lowerKey);
-      point.setY(valueAxis->coordToPixel(0));
-    } else if (keyAxis->axisType() == QCPAxis::atBottom)
-    {
-      point.setX(lowerKey);
-      point.setY(valueAxis->coordToPixel(0));
-    }
-  } else // valueAxis->mScaleType == QCPAxis::stLogarithmic
-  {
-    // In logarithmic scaling we can't just draw to value zero so we just fill all the way
-    // to the axis which is in the direction towards zero
-    if (keyAxis->orientation() == Qt::Vertical)
-    {
-      if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
-          (valueAxis->range().upper > 0 && valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
-        point.setX(keyAxis->axisRect()->right());
-      else
-        point.setX(keyAxis->axisRect()->left());
-      point.setY(lowerKey);
-    } else if (keyAxis->axisType() == QCPAxis::atTop || keyAxis->axisType() == QCPAxis::atBottom)
-    {
-      point.setX(lowerKey);
-      if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
-          (valueAxis->range().upper > 0 && valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
-        point.setY(keyAxis->axisRect()->top());
-      else
-        point.setY(keyAxis->axisRect()->bottom());
-    }
-  }
-  return point;
-}
-
-/*! \internal
-  
-  called by \ref addFillBasePoints to conveniently assign the point which closes the fill
-  polygon on the upper side of the zero-value-line parallel to the key axis. The logarithmic axis
-  scale case is a bit special, since the zero-value-line in pixel coordinates is in positive or
-  negative infinity. So this case is handled separately by just closing the fill polygon on the
-  axis which lies in the direction towards the zero value.
-
-  \a upperKey will be the the key (in pixels) of the returned point. Depending on whether the key
-  axis is horizontal or vertical, \a upperKey will end up as the x or y value of the returned
-  point, respectively.
-  
-  \see lowerFillBasePoint, addFillBasePoints
-*/
-QPointF QCPGraph::upperFillBasePoint(double upperKey) const
-{
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return QPointF(); }
-  
-  QPointF point;
-  if (valueAxis->scaleType() == QCPAxis::stLinear)
-  {
-    if (keyAxis->axisType() == QCPAxis::atLeft)
-    {
-      point.setX(valueAxis->coordToPixel(0));
-      point.setY(upperKey);
-    } else if (keyAxis->axisType() == QCPAxis::atRight)
-    {
-      point.setX(valueAxis->coordToPixel(0));
-      point.setY(upperKey);
-    } else if (keyAxis->axisType() == QCPAxis::atTop)
-    {
-      point.setX(upperKey);
-      point.setY(valueAxis->coordToPixel(0));
-    } else if (keyAxis->axisType() == QCPAxis::atBottom)
-    {
-      point.setX(upperKey);
-      point.setY(valueAxis->coordToPixel(0));
+      result.setX(valueAxis->coordToPixel(0));
+      result.setY(matchingDataPoint.y());
     }
   } else // valueAxis->mScaleType == QCPAxis::stLogarithmic
   {
@@ -1421,21 +1415,34 @@ QPointF QCPGraph::upperFillBasePoint(double upperKey) const
     {
       if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
           (valueAxis->range().upper > 0 && valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
-        point.setX(keyAxis->axisRect()->right());
+        result.setX(keyAxis->axisRect()->right());
       else
-        point.setX(keyAxis->axisRect()->left());
-      point.setY(upperKey);
+        result.setX(keyAxis->axisRect()->left());
+      result.setY(matchingDataPoint.y());
     } else if (keyAxis->axisType() == QCPAxis::atTop || keyAxis->axisType() == QCPAxis::atBottom)
     {
-      point.setX(upperKey);
+      result.setX(matchingDataPoint.x());
       if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
           (valueAxis->range().upper > 0 && valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
-        point.setY(keyAxis->axisRect()->top());
+        result.setY(keyAxis->axisRect()->top());
       else
-        point.setY(keyAxis->axisRect()->bottom());
+        result.setY(keyAxis->axisRect()->bottom());
     }
   }
-  return point;
+  return result;
+}
+
+const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, DataRange segment) const
+{
+  if (segment.second-segment.first < 2)
+    return QPolygonF();
+  QPolygonF result(segment.second-segment.first+2);
+  
+  result[0] = getFillBasePoint(lineData->at(segment.first));
+  std::copy(lineData->constBegin()+segment.first, lineData->constBegin()+segment.second, result.begin()+1);
+  result[result.size()-1] = getFillBasePoint(lineData->at(segment.second-1));
+  
+  return result;
 }
 
 /*! \internal
@@ -1450,7 +1457,7 @@ QPointF QCPGraph::upperFillBasePoint(double upperKey) const
   increased performance (due to implicit sharing), it is recommended to keep the returned QPolygonF
   const.
 */
-const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *lines) const
+const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData, DataRange thisSegment, const QVector<QPointF> *otherData, DataRange otherSegment) const
 {
   if (!mChannelFillGraph)
     return QPolygonF();
@@ -1463,47 +1470,29 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *lines) c
   if (mChannelFillGraph.data()->mKeyAxis.data()->orientation() != keyAxis->orientation())
     return QPolygonF(); // don't have same axis orientation, can't fill that (Note: if keyAxis fits, valueAxis will fit too, because it's always orthogonal to keyAxis)
   
-  if (lines->isEmpty()) return QPolygonF();
-  QVector<QPointF> otherData;
-  mChannelFillGraph.data()->getLines(&otherData, QCPDataRange(0, mChannelFillGraph.data()->dataCount()));
-  if (otherData.isEmpty()) return QPolygonF();
-  QVector<QPointF> thisData;
-  thisData.reserve(lines->size()+otherData.size()); // because we will join both vectors at end of this function
-  for (int i=0; i<lines->size(); ++i) // don't use the vector<<(vector),  it squeezes internally, which ruins the performance tuning with reserve()
-    thisData << lines->at(i);
-  
+  if (thisData->isEmpty()) return QPolygonF();
+  QVector<QPointF> thisSegmentData(thisSegment.second-thisSegment.first);
+  QVector<QPointF> otherSegmentData(otherSegment.second-otherSegment.first);
+  std::copy(thisData->constBegin()+thisSegment.first, thisData->constBegin()+thisSegment.second, thisSegmentData.begin());
+  std::copy(otherData->constBegin()+otherSegment.first, otherData->constBegin()+otherSegment.second, otherSegmentData.begin());
   // pointers to be able to swap them, depending which data range needs cropping:
-  QVector<QPointF> *staticData = &thisData;
-  QVector<QPointF> *croppedData = &otherData;
+  QVector<QPointF> *staticData = &thisSegmentData;
+  QVector<QPointF> *croppedData = &otherSegmentData;
   
   // crop both vectors to ranges in which the keys overlap (which coord is key, depends on axisType):
   if (keyAxis->orientation() == Qt::Horizontal)
   {
     // x is key
-    // if an axis range is reversed, the data point keys will be descending. Reverse them, since following algorithm assumes ascending keys:
-    if (staticData->first().x() > staticData->last().x())
-    {
-      int size = staticData->size();
-      for (int i=0; i<size/2; ++i)
-        qSwap((*staticData)[i], (*staticData)[size-1-i]);
-    }
-    if (croppedData->first().x() > croppedData->last().x())
-    {
-      int size = croppedData->size();
-      for (int i=0; i<size/2; ++i)
-        qSwap((*croppedData)[i], (*croppedData)[size-1-i]);
-    }
     // crop lower bound:
     if (staticData->first().x() < croppedData->first().x()) // other one must be cropped
       qSwap(staticData, croppedData);
-    int lowBound = findIndexBelowX(croppedData, staticData->first().x());
+    const int lowBound = findIndexBelowX(croppedData, staticData->first().x());
     if (lowBound == -1) return QPolygonF(); // key ranges have no overlap
     croppedData->remove(0, lowBound);
-    // set lowest point of cropped data to fit exactly key position of first static data
-    // point via linear interpolation:
+    // set lowest point of cropped data to fit exactly key position of first static data point via linear interpolation:
     if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
     double slope;
-    if (croppedData->at(1).x()-croppedData->at(0).x() != 0)
+    if (!qFuzzyCompare(croppedData->at(1).x(), croppedData->at(0).x()))
       slope = (croppedData->at(1).y()-croppedData->at(0).y())/(croppedData->at(1).x()-croppedData->at(0).x());
     else
       slope = 0;
@@ -1516,11 +1505,10 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *lines) c
     int highBound = findIndexAboveX(croppedData, staticData->last().x());
     if (highBound == -1) return QPolygonF(); // key ranges have no overlap
     croppedData->remove(highBound+1, croppedData->size()-(highBound+1));
-    // set highest point of cropped data to fit exactly key position of last static data
-    // point via linear interpolation:
+    // set highest point of cropped data to fit exactly key position of last static data point via linear interpolation:
     if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
-    int li = croppedData->size()-1; // last index
-    if (croppedData->at(li).x()-croppedData->at(li-1).x() != 0)
+    const int li = croppedData->size()-1; // last index
+    if (!qFuzzyCompare(croppedData->at(li).x(), croppedData->at(li-1).x()))
       slope = (croppedData->at(li).y()-croppedData->at(li-1).y())/(croppedData->at(li).x()-croppedData->at(li-1).x());
     else
       slope = 0;
@@ -1529,32 +1517,16 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *lines) c
   } else // mKeyAxis->orientation() == Qt::Vertical
   {
     // y is key
-    // similar to "x is key" but switched x,y. Further, lower/upper meaning is inverted compared to x,
-    // because in pixel coordinates, y increases from top to bottom, not bottom to top like data coordinate.
-    // if an axis range is reversed, the data point keys will be descending. Reverse them, since following algorithm assumes ascending keys:
-    if (staticData->first().y() < staticData->last().y())
-    {
-      int size = staticData->size();
-      for (int i=0; i<size/2; ++i)
-        qSwap((*staticData)[i], (*staticData)[size-1-i]);
-    }
-    if (croppedData->first().y() < croppedData->last().y())
-    {
-      int size = croppedData->size();
-      for (int i=0; i<size/2; ++i)
-        qSwap((*croppedData)[i], (*croppedData)[size-1-i]);
-    }
     // crop lower bound:
-    if (staticData->first().y() > croppedData->first().y()) // other one must be cropped
+    if (staticData->first().y() < croppedData->first().y()) // other one must be cropped
       qSwap(staticData, croppedData);
-    int lowBound = findIndexAboveY(croppedData, staticData->first().y());
+    int lowBound = findIndexBelowY(croppedData, staticData->first().y());
     if (lowBound == -1) return QPolygonF(); // key ranges have no overlap
     croppedData->remove(0, lowBound);
-    // set lowest point of cropped data to fit exactly key position of first static data
-    // point via linear interpolation:
+    // set lowest point of cropped data to fit exactly key position of first static data point via linear interpolation:
     if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
     double slope;
-    if (croppedData->at(1).y()-croppedData->at(0).y() != 0) // avoid division by zero in step plots
+    if (!qFuzzyCompare(croppedData->at(1).y(), croppedData->at(0).y())) // avoid division by zero in step plots
       slope = (croppedData->at(1).x()-croppedData->at(0).x())/(croppedData->at(1).y()-croppedData->at(0).y());
     else
       slope = 0;
@@ -1562,16 +1534,15 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *lines) c
     (*croppedData)[0].setY(staticData->first().y());
     
     // crop upper bound:
-    if (staticData->last().y() < croppedData->last().y()) // other one must be cropped
+    if (staticData->last().y() > croppedData->last().y()) // other one must be cropped
       qSwap(staticData, croppedData);
-    int highBound = findIndexBelowY(croppedData, staticData->last().y());
+    int highBound = findIndexAboveY(croppedData, staticData->last().y());
     if (highBound == -1) return QPolygonF(); // key ranges have no overlap
     croppedData->remove(highBound+1, croppedData->size()-(highBound+1));
-    // set highest point of cropped data to fit exactly key position of last static data
-    // point via linear interpolation:
+    // set highest point of cropped data to fit exactly key position of last static data point via linear interpolation:
     if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
     int li = croppedData->size()-1; // last index
-    if (croppedData->at(li).y()-croppedData->at(li-1).y() != 0) // avoid division by zero in step plots
+    if (!qFuzzyCompare(croppedData->at(li).y(), croppedData->at(li-1).y())) // avoid division by zero in step plots
       slope = (croppedData->at(li).x()-croppedData->at(li-1).x())/(croppedData->at(li).y()-croppedData->at(li-1).y());
     else
       slope = 0;
@@ -1580,15 +1551,16 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *lines) c
   }
   
   // return joined:
-  for (int i=otherData.size()-1; i>=0; --i) // insert reversed, otherwise the polygon will be twisted
-    thisData << otherData.at(i);
-  return QPolygonF(thisData);
+  for (int i=otherSegmentData.size()-1; i>=0; --i) // insert reversed, otherwise the polygon will be twisted
+    thisSegmentData << otherSegmentData.at(i);
+  return QPolygonF(thisSegmentData);
 }
 
 /*! \internal
   
   Finds the smallest index of \a data, whose points x value is just above \a x. Assumes x values in
-  \a data points are ordered ascending, as is the case when plotting with horizontal key axis.
+  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
+  horizontal.
 
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
@@ -1610,7 +1582,8 @@ int QCPGraph::findIndexAboveX(const QVector<QPointF> *data, double x) const
 /*! \internal
   
   Finds the highest index of \a data, whose points x value is just below \a x. Assumes x values in
-  \a data points are ordered ascending, as is the case when plotting with horizontal key axis.
+  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
+  horizontal.
   
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
@@ -1632,20 +1605,21 @@ int QCPGraph::findIndexBelowX(const QVector<QPointF> *data, double x) const
 /*! \internal
   
   Finds the smallest index of \a data, whose points y value is just above \a y. Assumes y values in
-  \a data points are ordered descending, as is the case when plotting with vertical key axis.
+  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
+  vertical.
   
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
 int QCPGraph::findIndexAboveY(const QVector<QPointF> *data, double y) const
 {
-  for (int i=0; i<data->size(); ++i)
+  for (int i=data->size()-1; i>=0; --i)
   {
     if (data->at(i).y() < y)
     {
-      if (i>0)
-        return i-1;
+      if (i<data->size()-1)
+        return i+1;
       else
-        return 0;
+        return data->size()-1;
     }
   }
   return -1;
@@ -1713,21 +1687,21 @@ double QCPGraph::pointDistance(const QPointF &pixelPoint, QCPGraphDataContainer:
 /*! \internal
   
   Finds the highest index of \a data, whose points y value is just below \a y. Assumes y values in
-  \a data points are ordered descending, as is the case when plotting with vertical key axis (since
-  keys are ordered ascending).
+  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
+  vertical.
 
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
 int QCPGraph::findIndexBelowY(const QVector<QPointF> *data, double y) const
 {
-  for (int i=data->size()-1; i>=0; --i)
+  for (int i=0; i<data->size(); ++i)
   {
     if (data->at(i).y() > y)
     {
-      if (i<data->size()-1)
-        return i+1;
+      if (i>0)
+        return i-1;
       else
-        return data->size()-1;
+        return 0;
     }
   }
   return -1;
