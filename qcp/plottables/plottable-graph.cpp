@@ -869,18 +869,19 @@ QVector<QPointF> QCPGraph::dataToImpulseLines(const QVector<QCPGraphData> &data)
 }
 
 /*! \internal
-
+  
   Draws the fill of the graph using the specified \a painter, with the currently set brush.
   
-  \a lines contains the points of the graph line, in pixel coordinates.
-
-  If the fill is a normal fill towards the zero-value-line, only the points in \a lines are
-  required and two extra points at the zero-value-line, which are added by \ref addFillBasePoints
-  and removed by \ref removeFillBasePoints after the fill drawing is done.
-
-  On the other hand if the fill is a channel fill between this QCPGraph and another QCPGraph (\a
-  mChannelFillGraph), the more complex polygon is calculated with the \ref getChannelFillPolygon
-  function, and then drawn.
+  Depending on whether a normal fill or a channel fill (\ref setChannelFillGraph) is needed, \ref
+  getFillPolygon or \ref getChannelFillPolygon are used to find the according fill polygons.
+  
+  In order to handle NaN Data points correctly (the fill needs to be split into disjoint areas),
+  this method first determines a list of non-NaN segments with \ref getNonNanSegments, on which to
+  operate. In the channel fill case, \ref getOverlappingSegments is used to consolidate the non-NaN
+  segments of the two involved graphs, before passing the overlapping pairs to \ref
+  getChannelFillPolygon.
+  
+  Pass the points of this graph's line as \a lines, in pixel coordinates.
 
   \see drawLinePlot, drawImpulsePlot, drawScatterPlot
 */
@@ -1267,6 +1268,20 @@ void QCPGraph::getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin
   }
 }
 
+/*!  \internal
+  
+  This method goes through the passed points in \a lineData and returns a list of the segments
+  which don't contain NaN data points.
+  
+  \a keyOrientation defines whether the \a x or \a y member of the passed QPointF is used to check
+  for NaN. If \a keyOrientation is \c Qt::Horizontal, the \a y member is checked, if it is \c
+  Qt::Vertical, the \a x member is checked.
+  
+  The return value is a vector of data ranges. Each data range carries the index of the first data
+  point in the segment, and the index one above the last data point in the segment.
+  
+  \see getOverlappingSegments, drawFill
+*/
 QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const
 {
   QVector<DataRange> result;
@@ -1307,6 +1322,25 @@ QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> 
   return result;
 }
 
+/*!  \internal
+  
+  This method takes two segment lists (e.g. created by \ref getNonNanSegments) \a thisSegments and
+  \a otherSegments, and their associated point data \a thisData and \a otherData.
+
+  It returns all pairs of segments (the first from \a thisSegments, the second from \a
+  otherSegments), which overlap in plot coordinates. Each data range carries the index of the first
+  data point in the segment, and the index one above the last data point in the segment.
+  
+  This method is useful in the case of a channel fill between two graphs, when only those non-NaN
+  segments which actually overlap in their key coordinate shall be considered for drawing a channel
+  fill polygon.
+  
+  It is assumed that the passed segments in \a thisSegments are ordered ascending by index, and
+  that the segments don't overlap themselves. The same is assumed for the segments in \a
+  otherSegments. This is fulfilled when the segments are obtained via \ref getNonNanSegments.
+  
+  \see getNonNanSegments, segmentsIntersect, drawFill, getChannelFillPolygon
+*/
 QVector<QPair<QCPGraph::DataRange, QCPGraph::DataRange> > QCPGraph::getOverlappingSegments(QVector<QCPGraph::DataRange> thisSegments, const QVector<QPointF> *thisData, QVector<QCPGraph::DataRange> otherSegments, const QVector<QPointF> *otherData) const
 {
   QVector<QPair<DataRange, DataRange> > result;
@@ -1356,6 +1390,20 @@ QVector<QPair<QCPGraph::DataRange, QCPGraph::DataRange> > QCPGraph::getOverlappi
   return result;
 }
 
+/*!  \internal
+  
+  Returns whether the segments defined by the coordinates (aLower, aUpper) and (bLower, bUpper)
+  have overlap.
+  
+  The output parameter \a bPrecedence indicates whether the \a b segment reaches farther than the
+  \a a segment or not. If \a bPrecedence returns 1, segment \a b reaches the farthest to higher
+  coordinates (i.e. bUpper > aUpper). If it returns -1, segment \a a reaches the farthest. Only if
+  both segment's upper bounds are identical, 0 is returned as \a bPrecedence.
+  
+  It is assumed that the lower bounds always have smaller or equal values than the upper bounds.
+  
+  \see getOverlappingSegments
+*/
 bool QCPGraph::segmentsIntersect(double aLower, double aUpper, double bLower, double bUpper, int &bPrecedence) const
 {
   bPrecedence = 0;
@@ -1386,8 +1434,8 @@ bool QCPGraph::segmentsIntersect(double aLower, double aUpper, double bLower, do
   polygon on the axis which lies in the direction towards the zero value.
 
   \a matchingDataPoint will provide the key (in pixels) of the returned point. Depending on whether
-  the key axis is horizontal or vertical, \a matchingDataPoint will provide the x or y value of the
-  returned point, respectively.
+  the key axis of this graph is horizontal or vertical, \a matchingDataPoint will provide the x or
+  y value of the returned point, respectively.
 */
 QPointF QCPGraph::getFillBasePoint(QPointF matchingDataPoint) const
 {
@@ -1432,6 +1480,22 @@ QPointF QCPGraph::getFillBasePoint(QPointF matchingDataPoint) const
   return result;
 }
 
+/*! \internal
+  
+  Returns the polygon needed for drawing normal fills between this graph and the key axis.
+  
+  Pass the graph's data points (in pixel coordinates) as \a lineData, and specify the \a segment
+  which shall be used for the fill. The collection of \a lineData points described by \a segment
+  must not contain NaN data points (see \ref getNonNanSegments).
+  
+  The returned fill polygon will be closed at the key axis (the zero-value line) for linear value
+  axes. For logarithmic value axes the polygon will reach just beyond the corresponding axis rect
+  side (see \ref getFillBasePoint).
+
+  For increased performance (due to implicit sharing), keep the returned QPolygonF const.
+  
+  \see drawFill, getNonNanSegments
+*/
 const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, DataRange segment) const
 {
   if (segment.second-segment.first < 2)
@@ -1447,15 +1511,21 @@ const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, DataR
 
 /*! \internal
   
-  Generates the polygon needed for drawing channel fills between this graph and the graph specified
-  in \a mChannelFillGraph (see \ref setChannelFillGraph). The data points representing the line of
-  this graph in pixel coordinates must be passed in \a lines, the corresponding points of the other
-  graph are generated by calling its \ref getLines method.
-
-  This method may return an empty polygon if the key ranges of the two graphs have no overlap of if
-  they don't have the same orientation (e.g. one key axis vertical, the other horizontal). For
-  increased performance (due to implicit sharing), it is recommended to keep the returned QPolygonF
-  const.
+  Returns the polygon needed for drawing (partial) channel fills between this graph and the graph
+  specified by \ref setChannelFillGraph.
+  
+  The data points of this graph are passed as pixel coordinates via \a thisData, the data of the
+  other graph as \a otherData. The returned polygon will be calculated for the specified data
+  segments \a thisSegment and \a otherSegment, pertaining to the respective \a thisData and \a
+  otherData, respectively.
+  
+  The passed \a thisSegment and \a otherSegment should correspond to the segment pairs returned by
+  \ref getOverlappingSegments, to make sure only segments that actually have key coordinate overlap
+  need to be processed here.
+  
+  For increased performance due to implicit sharing, keep the returned QPolygonF const.
+  
+  \see drawFill, getOverlappingSegments, getNonNanSegments
 */
 const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData, DataRange thisSegment, const QVector<QPointF> *otherData, DataRange otherSegment) const
 {
