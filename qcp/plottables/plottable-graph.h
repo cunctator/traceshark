@@ -122,8 +122,6 @@ public:
   virtual QCPRange getValueRange(bool &foundRange, QCP::SignDomain inSignDomain=QCP::sdBoth, const QCPRange &inKeyRange=QCPRange()) const Q_DECL_OVERRIDE;
   
 protected:
-  typedef QPair<int, int> DataRange;
-  
   // property members:
   LineStyle mLineStyle;
   QCPScatterStyle mScatterStyle;
@@ -153,12 +151,12 @@ protected:
   QVector<QPointF> dataToStepRightLines(const QVector<QCPGraphData> &data) const;
   QVector<QPointF> dataToStepCenterLines(const QVector<QCPGraphData> &data) const;
   QVector<QPointF> dataToImpulseLines(const QVector<QCPGraphData> &data) const;
-  QVector<DataRange> getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const;
-  QVector<QPair<DataRange, DataRange> > getOverlappingSegments(QVector<DataRange> thisSegments, const QVector<QPointF> *thisData, QVector<DataRange> otherSegments, const QVector<QPointF> *otherData) const;
+  QVector<QCPDataRange> getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const;
+  QVector<QPair<QCPDataRange, QCPDataRange> > getOverlappingSegments(QVector<QCPDataRange> thisSegments, const QVector<QPointF> *thisData, QVector<QCPDataRange> otherSegments, const QVector<QPointF> *otherData) const;
   bool segmentsIntersect(double aLower, double aUpper, double bLower, double bUpper, int &bPrecedence) const;
   QPointF getFillBasePoint(QPointF matchingDataPoint) const;
-  const QPolygonF getFillPolygon(const QVector<QPointF> *lineData, DataRange segment) const;
-  const QPolygonF getChannelFillPolygon(const QVector<QPointF> *lineData, DataRange thisSegment, const QVector<QPointF> *otherData, DataRange otherSegment) const;
+  const QPolygonF getFillPolygon(const QVector<QPointF> *lineData, QCPDataRange segment) const;
+  const QPolygonF getChannelFillPolygon(const QVector<QPointF> *lineData, QCPDataRange thisSegment, const QVector<QPointF> *otherData, QCPDataRange otherSegment) const;
   int findIndexBelowX(const QVector<QPointF> *data, double x) const;
   int findIndexAboveX(const QVector<QPointF> *data, double x) const;
   int findIndexBelowY(const QVector<QPointF> *data, double y) const;

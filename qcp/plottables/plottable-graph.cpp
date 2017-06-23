@@ -891,7 +891,7 @@ void QCPGraph::drawFill(QCPPainter *painter, QVector<QPointF> *lines) const
   if (painter->brush().style() == Qt::NoBrush || painter->brush().color().alpha() == 0) return;
   
   applyFillAntialiasingHint(painter);
-  QVector<DataRange> segments = getNonNanSegments(lines, keyAxis()->orientation());
+  QVector<QCPDataRange> segments = getNonNanSegments(lines, keyAxis()->orientation());
   if (!mChannelFillGraph)
   {
     // draw base fill under graph, fill goes all the way to the zero-value-line:
@@ -904,8 +904,8 @@ void QCPGraph::drawFill(QCPPainter *painter, QVector<QPointF> *lines) const
     mChannelFillGraph->getLines(&otherLines, QCPDataRange(0, mChannelFillGraph->dataCount()));
     if (!otherLines.isEmpty())
     {
-      QVector<DataRange> otherSegments = getNonNanSegments(&otherLines, mChannelFillGraph->keyAxis()->orientation());
-      QVector<QPair<DataRange, DataRange> > segmentPairs = getOverlappingSegments(segments, lines, otherSegments, &otherLines);
+      QVector<QCPDataRange> otherSegments = getNonNanSegments(&otherLines, mChannelFillGraph->keyAxis()->orientation());
+      QVector<QPair<QCPDataRange, QCPDataRange> > segmentPairs = getOverlappingSegments(segments, lines, otherSegments, &otherLines);
       for (int i=0; i<segmentPairs.size(); ++i)
         painter->drawPolygon(getChannelFillPolygon(lines, segmentPairs.at(i).first, &otherLines, segmentPairs.at(i).second));
     }
@@ -1277,17 +1277,14 @@ void QCPGraph::getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin
   for NaN. If \a keyOrientation is \c Qt::Horizontal, the \a y member is checked, if it is \c
   Qt::Vertical, the \a x member is checked.
   
-  The return value is a vector of data ranges. Each data range carries the index of the first data
-  point in the segment, and the index one above the last data point in the segment.
-  
   \see getOverlappingSegments, drawFill
 */
-QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const
+QVector<QCPDataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const
 {
-  QVector<DataRange> result;
+  QVector<QCPDataRange> result;
   const int n = lineData->size();
   
-  DataRange currentSegment(-1, -1);
+  QCPDataRange currentSegment(-1, -1);
   int i = 0;
   
   if (keyOrientation == Qt::Horizontal)
@@ -1298,10 +1295,10 @@ QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> 
         ++i;
       if (i == n)
         break;
-      currentSegment.first = i++;
+      currentSegment.setBegin(i++);
       while (i < n && !qIsNaN(lineData->at(i).y())) // seek next NaN data point or end of data
         ++i;
-      currentSegment.second = i++;
+      currentSegment.setEnd(i++);
       result.append(currentSegment);
     }
   } else // keyOrientation == Qt::Vertical
@@ -1312,10 +1309,10 @@ QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> 
         ++i;
       if (i == n)
         break;
-      currentSegment.first = i++;
+      currentSegment.setBegin(i++);
       while (i < n && !qIsNaN(lineData->at(i).x())) // seek next NaN data point or end of data
         ++i;
-      currentSegment.second = i++;
+      currentSegment.setEnd(i++);
       result.append(currentSegment);
     }
   }
@@ -1328,8 +1325,7 @@ QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> 
   \a otherSegments, and their associated point data \a thisData and \a otherData.
 
   It returns all pairs of segments (the first from \a thisSegments, the second from \a
-  otherSegments), which overlap in plot coordinates. Each data range carries the index of the first
-  data point in the segment, and the index one above the last data point in the segment.
+  otherSegments), which overlap in plot coordinates.
   
   This method is useful in the case of a channel fill between two graphs, when only those non-NaN
   segments which actually overlap in their key coordinate shall be considered for drawing a channel
@@ -1341,9 +1337,9 @@ QVector<QCPGraph::DataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> 
   
   \see getNonNanSegments, segmentsIntersect, drawFill, getChannelFillPolygon
 */
-QVector<QPair<QCPGraph::DataRange, QCPGraph::DataRange> > QCPGraph::getOverlappingSegments(QVector<QCPGraph::DataRange> thisSegments, const QVector<QPointF> *thisData, QVector<QCPGraph::DataRange> otherSegments, const QVector<QPointF> *otherData) const
+QVector<QPair<QCPDataRange, QCPDataRange> > QCPGraph::getOverlappingSegments(QVector<QCPDataRange> thisSegments, const QVector<QPointF> *thisData, QVector<QCPDataRange> otherSegments, const QVector<QPointF> *otherData) const
 {
-  QVector<QPair<DataRange, DataRange> > result;
+  QVector<QPair<QCPDataRange, QCPDataRange> > result;
   if (thisData->isEmpty() || otherData->isEmpty() || thisSegments.isEmpty() || otherSegments.isEmpty())
     return result;
   
@@ -1352,12 +1348,12 @@ QVector<QPair<QCPGraph::DataRange, QCPGraph::DataRange> > QCPGraph::getOverlappi
   const bool verticalKey = mKeyAxis->orientation() == Qt::Vertical;
   while (thisIndex < thisSegments.size() && otherIndex < otherSegments.size())
   {
-    if (thisSegments.at(thisIndex).second-thisSegments.at(thisIndex).first < 2) // segments with fewer than two points won't have a fill anyhow
+    if (thisSegments.at(thisIndex).size() < 2) // segments with fewer than two points won't have a fill anyhow
     {
       ++thisIndex;
       continue;
     }
-    if (otherSegments.at(otherIndex).second-otherSegments.at(otherIndex).first < 2) // segments with fewer than two points won't have a fill anyhow
+    if (otherSegments.at(otherIndex).size() < 2) // segments with fewer than two points won't have a fill anyhow
     {
       ++otherIndex;
       continue;
@@ -1365,21 +1361,21 @@ QVector<QPair<QCPGraph::DataRange, QCPGraph::DataRange> > QCPGraph::getOverlappi
     double thisLower, thisUpper, otherLower, otherUpper;
     if (!verticalKey)
     {
-      thisLower = thisData->at(thisSegments.at(thisIndex).first).x();
-      thisUpper = thisData->at(thisSegments.at(thisIndex).second-1).x();
-      otherLower = otherData->at(otherSegments.at(otherIndex).first).x();
-      otherUpper = otherData->at(otherSegments.at(otherIndex).second-1).x();
+      thisLower = thisData->at(thisSegments.at(thisIndex).begin()).x();
+      thisUpper = thisData->at(thisSegments.at(thisIndex).end()-1).x();
+      otherLower = otherData->at(otherSegments.at(otherIndex).begin()).x();
+      otherUpper = otherData->at(otherSegments.at(otherIndex).end()-1).x();
     } else
     {
-      thisLower = thisData->at(thisSegments.at(thisIndex).first).y();
-      thisUpper = thisData->at(thisSegments.at(thisIndex).second-1).y();
-      otherLower = otherData->at(otherSegments.at(otherIndex).first).y();
-      otherUpper = otherData->at(otherSegments.at(otherIndex).second-1).y();
+      thisLower = thisData->at(thisSegments.at(thisIndex).begin()).y();
+      thisUpper = thisData->at(thisSegments.at(thisIndex).end()-1).y();
+      otherLower = otherData->at(otherSegments.at(otherIndex).begin()).y();
+      otherUpper = otherData->at(otherSegments.at(otherIndex).end()-1).y();
     }
     
     int bPrecedence;
     if (segmentsIntersect(thisLower, thisUpper, otherLower, otherUpper, bPrecedence))
-      result.append(QPair<DataRange, DataRange>(thisSegments.at(thisIndex), otherSegments.at(otherIndex)));
+      result.append(QPair<QCPDataRange, QCPDataRange>(thisSegments.at(thisIndex), otherSegments.at(otherIndex)));
     
     if (bPrecedence <= 0) // otherSegment doesn't reach as far as thisSegment, so continue with next otherSegment, keeping current thisSegment
       ++otherIndex;
@@ -1496,15 +1492,15 @@ QPointF QCPGraph::getFillBasePoint(QPointF matchingDataPoint) const
   
   \see drawFill, getNonNanSegments
 */
-const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, DataRange segment) const
+const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, QCPDataRange segment) const
 {
-  if (segment.second-segment.first < 2)
+  if (segment.size() < 2)
     return QPolygonF();
-  QPolygonF result(segment.second-segment.first+2);
+  QPolygonF result(segment.size()+2);
   
-  result[0] = getFillBasePoint(lineData->at(segment.first));
-  std::copy(lineData->constBegin()+segment.first, lineData->constBegin()+segment.second, result.begin()+1);
-  result[result.size()-1] = getFillBasePoint(lineData->at(segment.second-1));
+  result[0] = getFillBasePoint(lineData->at(segment.begin()));
+  std::copy(lineData->constBegin()+segment.begin(), lineData->constBegin()+segment.end(), result.begin()+1);
+  result[result.size()-1] = getFillBasePoint(lineData->at(segment.end()-1));
   
   return result;
 }
@@ -1527,7 +1523,7 @@ const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, DataR
   
   \see drawFill, getOverlappingSegments, getNonNanSegments
 */
-const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData, DataRange thisSegment, const QVector<QPointF> *otherData, DataRange otherSegment) const
+const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData, QCPDataRange thisSegment, const QVector<QPointF> *otherData, QCPDataRange otherSegment) const
 {
   if (!mChannelFillGraph)
     return QPolygonF();
@@ -1541,10 +1537,10 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData
     return QPolygonF(); // don't have same axis orientation, can't fill that (Note: if keyAxis fits, valueAxis will fit too, because it's always orthogonal to keyAxis)
   
   if (thisData->isEmpty()) return QPolygonF();
-  QVector<QPointF> thisSegmentData(thisSegment.second-thisSegment.first);
-  QVector<QPointF> otherSegmentData(otherSegment.second-otherSegment.first);
-  std::copy(thisData->constBegin()+thisSegment.first, thisData->constBegin()+thisSegment.second, thisSegmentData.begin());
-  std::copy(otherData->constBegin()+otherSegment.first, otherData->constBegin()+otherSegment.second, otherSegmentData.begin());
+  QVector<QPointF> thisSegmentData(thisSegment.size());
+  QVector<QPointF> otherSegmentData(otherSegment.size());
+  std::copy(thisData->constBegin()+thisSegment.begin(), thisData->constBegin()+thisSegment.end(), thisSegmentData.begin());
+  std::copy(otherData->constBegin()+otherSegment.begin(), otherData->constBegin()+otherSegment.end(), otherSegmentData.begin());
   // pointers to be able to swap them, depending which data range needs cropping:
   QVector<QPointF> *staticData = &thisSegmentData;
   QVector<QPointF> *croppedData = &otherSegmentData;
