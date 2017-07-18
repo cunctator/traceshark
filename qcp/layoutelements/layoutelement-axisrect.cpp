@@ -1237,7 +1237,7 @@ void QCPAxisRect::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
     {
       if (mParentPlot->noAntialiasingOnDrag())
         mParentPlot->setNotAntialiasedElements(QCP::aeAll);
-      mParentPlot->replot();
+      mParentPlot->replot(QCustomPlot::rpQueuedReplot);
     }
     
   }
