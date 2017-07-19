@@ -388,6 +388,8 @@ bool QCPAxisRect::removeAxis(QCPAxis *axis)
     it.next();
     if (it.value().contains(axis))
     {
+      if (it.value().first() == axis && it.value().size() > 1) // if removing first axis, transfer axis offset to the new first axis (which at this point is the second axis, if it exists)
+        it.value()[1]->setOffset(axis->offset());
       mAxes[it.key()].removeOne(axis);
       if (qobject_cast<QCustomPlot*>(parentPlot())) // make sure this isn't called from QObject dtor when QCustomPlot is already destructed (happens when the axis rect is not in any layout and thus QObject-child of QCustomPlot)
         parentPlot()->axisRemoved(axis);
