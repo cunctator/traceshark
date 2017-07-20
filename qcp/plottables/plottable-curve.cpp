@@ -838,42 +838,55 @@ int QCPCurve::getRegion(double key, double value, double keyMin, double valueMax
 */
 QPointF QCPCurve::getOptimizedPoint(int otherRegion, double otherKey, double otherValue, double key, double value, double keyMin, double valueMax, double keyMax, double valueMin) const
 {
-  double intersectKey = keyMin; // initial value is just fail-safe
-  double intersectValue = valueMax; // initial value is just fail-safe
+  // The intersection point interpolation here is done in pixel coordinates, so we don't need to
+  // differentiate between different axis scale types. Note that the nomenclature
+  // top/left/bottom/right/min/max is with respect to the rect in plot coordinates, wich may be
+  // different in pixel coordinates (horz/vert key axes, reversed ranges)
+  
+  const double keyMinPx = mKeyAxis->coordToPixel(keyMin);
+  const double keyMaxPx = mKeyAxis->coordToPixel(keyMax);
+  const double valueMinPx = mValueAxis->coordToPixel(valueMin);
+  const double valueMaxPx = mValueAxis->coordToPixel(valueMax);
+  const double otherValuePx = mValueAxis->coordToPixel(otherValue);
+  const double valuePx = mValueAxis->coordToPixel(value);
+  const double otherKeyPx = mKeyAxis->coordToPixel(otherKey);
+  const double keyPx = mKeyAxis->coordToPixel(key);
+  double intersectKeyPx = keyMinPx; // initial key just a fail-safe
+  double intersectValuePx = valueMinPx; // initial value just a fail-safe
   switch (otherRegion)
   {
     case 1: // top and left edge
     {
-      intersectValue = valueMax;
-      intersectKey = otherKey + (key-otherKey)/(value-otherValue)*(intersectValue-otherValue);
-      if (intersectKey < keyMin || intersectKey > keyMax) // doesn't intersect, so must intersect other:
+      intersectValuePx = valueMaxPx;
+      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
+      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether top edge is not intersected, then it must be left edge (qMin/qMax necessary since axes may be reversed)
       {
-        intersectKey = keyMin;
-        intersectValue = otherValue + (value-otherValue)/(key-otherKey)*(intersectKey-otherKey);
+        intersectKeyPx = keyMinPx;
+        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
       }
       break;
     }
     case 2: // left edge
     {
-      intersectKey = keyMin;
-      intersectValue = otherValue + (value-otherValue)/(key-otherKey)*(intersectKey-otherKey);
+      intersectKeyPx = keyMinPx;
+      intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
       break;
     }
     case 3: // bottom and left edge
     {
-      intersectValue = valueMin;
-      intersectKey = otherKey + (key-otherKey)/(value-otherValue)*(intersectValue-otherValue);
-      if (intersectKey < keyMin || intersectKey > keyMax) // doesn't intersect, so must intersect other:
+      intersectValuePx = valueMinPx;
+      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
+      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether bottom edge is not intersected, then it must be left edge (qMin/qMax necessary since axes may be reversed)
       {
-        intersectKey = keyMin;
-        intersectValue = otherValue + (value-otherValue)/(key-otherKey)*(intersectKey-otherKey);
+        intersectKeyPx = keyMinPx;
+        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
       }
       break;
     }
     case 4: // top edge
     {
-      intersectValue = valueMax;
-      intersectKey = otherKey + (key-otherKey)/(value-otherValue)*(intersectValue-otherValue);
+      intersectValuePx = valueMaxPx;
+      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
       break;
     }
     case 5:
@@ -882,40 +895,43 @@ QPointF QCPCurve::getOptimizedPoint(int otherRegion, double otherKey, double oth
     }
     case 6: // bottom edge
     {
-      intersectValue = valueMin;
-      intersectKey = otherKey + (key-otherKey)/(value-otherValue)*(intersectValue-otherValue);
+      intersectValuePx = valueMinPx;
+      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
       break;
     }
     case 7: // top and right edge
     {
-      intersectValue = valueMax;
-      intersectKey = otherKey + (key-otherKey)/(value-otherValue)*(intersectValue-otherValue);
-      if (intersectKey < keyMin || intersectKey > keyMax) // doesn't intersect, so must intersect other:
+      intersectValuePx = valueMaxPx;
+      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
+      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether top edge is not intersected, then it must be right edge (qMin/qMax necessary since axes may be reversed)
       {
-        intersectKey = keyMax;
-        intersectValue = otherValue + (value-otherValue)/(key-otherKey)*(intersectKey-otherKey);
+        intersectKeyPx = keyMaxPx;
+        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
       }
       break;
     }
     case 8: // right edge
     {
-      intersectKey = keyMax;
-      intersectValue = otherValue + (value-otherValue)/(key-otherKey)*(intersectKey-otherKey);
+      intersectKeyPx = keyMaxPx;
+      intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
       break;
     }
     case 9: // bottom and right edge
     {
-      intersectValue = valueMin;
-      intersectKey = otherKey + (key-otherKey)/(value-otherValue)*(intersectValue-otherValue);
-      if (intersectKey < keyMin || intersectKey > keyMax) // doesn't intersect, so must intersect other:
+      intersectValuePx = valueMinPx;
+      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
+      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether bottom edge is not intersected, then it must be right edge (qMin/qMax necessary since axes may be reversed)
       {
-        intersectKey = keyMax;
-        intersectValue = otherValue + (value-otherValue)/(key-otherKey)*(intersectKey-otherKey);
+        intersectKeyPx = keyMaxPx;
+        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
       }
       break;
     }
   }
-  return coordsToPixels(intersectKey, intersectValue);
+  if (mKeyAxis->orientation() == Qt::Horizontal)
+    return QPointF(intersectKeyPx, intersectValuePx);
+  else
+    return QPointF(intersectValuePx, intersectKeyPx);
 }
 
 /*! \internal
@@ -1205,38 +1221,51 @@ bool QCPCurve::mayTraverse(int prevRegion, int currentRegion) const
 */
 bool QCPCurve::getTraverse(double prevKey, double prevValue, double key, double value, double keyMin, double valueMax, double keyMax, double valueMin, QPointF &crossA, QPointF &crossB) const
 {
-  QList<QPointF> intersections; // x of QPointF corresponds to key and y to value
+  // The intersection point interpolation here is done in pixel coordinates, so we don't need to
+  // differentiate between different axis scale types. Note that the nomenclature
+  // top/left/bottom/right/min/max is with respect to the rect in plot coordinates, wich may be
+  // different in pixel coordinates (horz/vert key axes, reversed ranges)
+  
+  QList<QPointF> intersections;
+  const double valueMinPx = mValueAxis->coordToPixel(valueMin);
+  const double valueMaxPx = mValueAxis->coordToPixel(valueMax);
+  const double keyMinPx = mKeyAxis->coordToPixel(keyMin);
+  const double keyMaxPx = mKeyAxis->coordToPixel(keyMax);
+  const double keyPx = mKeyAxis->coordToPixel(key);
+  const double valuePx = mValueAxis->coordToPixel(value);
+  const double prevKeyPx = mKeyAxis->coordToPixel(prevKey);
+  const double prevValuePx = mValueAxis->coordToPixel(prevValue);
   if (qFuzzyIsNull(key-prevKey)) // line is parallel to value axis
   {
-    // due to region filter in mayTraverseR(), if line is parallel to value or key axis, R is traversed here
-    intersections.append(QPointF(key, valueMin)); // direction will be taken care of at end of method
-    intersections.append(QPointF(key, valueMax));
+    // due to region filter in mayTraverse(), if line is parallel to value or key axis, region 5 is traversed here
+    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyPx, valueMinPx) : QPointF(valueMinPx, keyPx)); // direction will be taken care of at end of method
+    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyPx, valueMaxPx) : QPointF(valueMaxPx, keyPx));
   } else if (qFuzzyIsNull(value-prevValue)) // line is parallel to key axis
   {
-    // due to region filter in mayTraverseR(), if line is parallel to value or key axis, R is traversed here
-    intersections.append(QPointF(keyMin, value)); // direction will be taken care of at end of method
-    intersections.append(QPointF(keyMax, value));
+    // due to region filter in mayTraverse(), if line is parallel to value or key axis, region 5 is traversed here
+    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMinPx, valuePx) : QPointF(valuePx, keyMinPx)); // direction will be taken care of at end of method
+    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMaxPx, valuePx) : QPointF(valuePx, keyMaxPx));
   } else // line is skewed
   {
     double gamma;
-    double keyPerValue = (key-prevKey)/(value-prevValue);
+    double keyPerValuePx = (keyPx-prevKeyPx)/(valuePx-prevValuePx);
     // check top of rect:
-    gamma = prevKey + (valueMax-prevValue)*keyPerValue;
-    if (gamma >= keyMin && gamma <= keyMax)
-      intersections.append(QPointF(gamma, valueMax));
+    gamma = prevKeyPx + (valueMaxPx-prevValuePx)*keyPerValuePx;
+    if (gamma >= qMin(keyMinPx, keyMaxPx) && gamma <= qMax(keyMinPx, keyMaxPx)) // qMin/qMax necessary since axes may be reversed
+      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(gamma, valueMaxPx) : QPointF(valueMaxPx, gamma));
     // check bottom of rect:
-    gamma = prevKey + (valueMin-prevValue)*keyPerValue;
-    if (gamma >= keyMin && gamma <= keyMax)
-      intersections.append(QPointF(gamma, valueMin));
-    double valuePerKey = 1.0/keyPerValue;
+    gamma = prevKeyPx + (valueMinPx-prevValuePx)*keyPerValuePx;
+    if (gamma >= qMin(keyMinPx, keyMaxPx) && gamma <= qMax(keyMinPx, keyMaxPx)) // qMin/qMax necessary since axes may be reversed
+      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(gamma, valueMinPx) : QPointF(valueMinPx, gamma));
+    const double valuePerKeyPx = 1.0/keyPerValuePx;
     // check left of rect:
-    gamma = prevValue + (keyMin-prevKey)*valuePerKey;
-    if (gamma >= valueMin && gamma <= valueMax)
-      intersections.append(QPointF(keyMin, gamma));
+    gamma = prevValuePx + (keyMinPx-prevKeyPx)*valuePerKeyPx;
+    if (gamma >= qMin(valueMinPx, valueMaxPx) && gamma <= qMax(valueMinPx, valueMaxPx)) // qMin/qMax necessary since axes may be reversed
+      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMinPx, gamma) : QPointF(gamma, keyMinPx));
     // check right of rect:
-    gamma = prevValue + (keyMax-prevKey)*valuePerKey;
-    if (gamma >= valueMin && gamma <= valueMax)
-      intersections.append(QPointF(keyMax, gamma));
+    gamma = prevValuePx + (keyMaxPx-prevKeyPx)*valuePerKeyPx;
+    if (gamma >= qMin(valueMinPx, valueMaxPx) && gamma <= qMax(valueMinPx, valueMaxPx)) // qMin/qMax necessary since axes may be reversed
+      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMaxPx, gamma) : QPointF(gamma, keyMaxPx));
   }
   
   // handle cases where found points isn't exactly 2:
@@ -1267,10 +1296,14 @@ bool QCPCurve::getTraverse(double prevKey, double prevValue, double key, double 
   }
   
   // possibly re-sort points so optimized point segment has same direction as original segment:
-  if ((key-prevKey)*(intersections.at(1).x()-intersections.at(0).x()) + (value-prevValue)*(intersections.at(1).y()-intersections.at(0).y()) < 0) // scalar product of both segments < 0 -> opposite direction
+  double xDelta = keyPx-prevKeyPx;
+  double yDelta = valuePx-prevValuePx;
+  if (mKeyAxis->orientation() != Qt::Horizontal)
+    qSwap(xDelta, yDelta);
+  if (xDelta*(intersections.at(1).x()-intersections.at(0).x()) + yDelta*(intersections.at(1).y()-intersections.at(0).y()) < 0) // scalar product of both segments < 0 -> opposite direction
     intersections.move(0, 1);
-  crossA = coordsToPixels(intersections.at(0).x(), intersections.at(0).y());
-  crossB = coordsToPixels(intersections.at(1).x(), intersections.at(1).y());
+  crossA = intersections.at(0);
+  crossB = intersections.at(1);
   return true;
 }
 
