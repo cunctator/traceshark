@@ -73,7 +73,7 @@ public:
   virtual void drawBracket(QCPPainter *painter, int direction) const;
   
   // virtual methods:
-  virtual void drawDecoration(QCPPainter *painter, QCPDataSelection selection);
+  virtual void drawDecoration(QCPPainter *painter, QCPDataSelection selection) Q_DECL_OVERRIDE;
   
 protected:
   // property members:

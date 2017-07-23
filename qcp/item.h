@@ -112,7 +112,7 @@ public:
   QCPAxis *keyAxis() const { return mKeyAxis.data(); }
   QCPAxis *valueAxis() const { return mValueAxis.data(); }
   QCPAxisRect *axisRect() const;
-  virtual QPointF pixelPosition() const;
+  virtual QPointF pixelPosition() const Q_DECL_OVERRIDE;
   
   // setters:
   void setType(PositionType type);

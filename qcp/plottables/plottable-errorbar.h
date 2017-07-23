@@ -111,16 +111,16 @@ public:
   void addData(double errorMinus, double errorPlus);
   
   // virtual methods of 1d plottable interface:
-  virtual int dataCount() const;
-  virtual double dataMainKey(int index) const;
-  virtual double dataSortKey(int index) const;
-  virtual double dataMainValue(int index) const;
-  virtual QCPRange dataValueRange(int index) const;
-  virtual QPointF dataPixelPosition(int index) const;
-  virtual bool sortKeyIsMainKey() const;
-  virtual QCPDataSelection selectTestRect(const QRectF &rect, bool onlySelectable) const;
-  virtual int findBegin(double sortKey, bool expandedRange=true) const;
-  virtual int findEnd(double sortKey, bool expandedRange=true) const;
+  virtual int dataCount() const Q_DECL_OVERRIDE;
+  virtual double dataMainKey(int index) const Q_DECL_OVERRIDE;
+  virtual double dataSortKey(int index) const Q_DECL_OVERRIDE;
+  virtual double dataMainValue(int index) const Q_DECL_OVERRIDE;
+  virtual QCPRange dataValueRange(int index) const Q_DECL_OVERRIDE;
+  virtual QPointF dataPixelPosition(int index) const Q_DECL_OVERRIDE;
+  virtual bool sortKeyIsMainKey() const Q_DECL_OVERRIDE;
+  virtual QCPDataSelection selectTestRect(const QRectF &rect, bool onlySelectable) const Q_DECL_OVERRIDE;
+  virtual int findBegin(double sortKey, bool expandedRange=true) const Q_DECL_OVERRIDE;
+  virtual int findEnd(double sortKey, bool expandedRange=true) const Q_DECL_OVERRIDE;
   
   // reimplemented virtual methods:
   virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=0) const Q_DECL_OVERRIDE;

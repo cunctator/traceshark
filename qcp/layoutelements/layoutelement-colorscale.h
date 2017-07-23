@@ -54,7 +54,7 @@ protected:
   using QCPAxisRect::mouseReleaseEvent;
   using QCPAxisRect::wheelEvent;
   using QCPAxisRect::update;
-  virtual void draw(QCPPainter *painter);
+  virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE;
   void updateGradientImage();
   Q_SLOT void axisSelectionChanged(QCPAxis::SelectableParts selectedParts);
   Q_SLOT void axisSelectableChanged(QCPAxis::SelectableParts selectableParts);
