@@ -2276,11 +2276,14 @@ void QCPAxisPainterPrivate::placeTickLabel(QCPPainter *painter, double position,
       {
         cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size()*mParentPlot->bufferDevicePixelRatio());
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
+#  ifdef QCP_DEVICEPIXELRATIO_FLOAT
+        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
+#  else
         cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
+#  endif
 #endif
       } else
         cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size());
-      cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size());
       cachedLabel->pixmap.fill(Qt::transparent);
       QCPPainter cachePainter(&cachedLabel->pixmap);
       cachePainter.setPen(painter->pen());

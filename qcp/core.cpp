@@ -384,7 +384,11 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
   currentLocale.setNumberOptions(QLocale::OmitGroupSeparator);
   setLocale(currentLocale);
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
+#  ifdef QCP_DEVICEPIXELRATIO_FLOAT
+  setBufferDevicePixelRatio(QWidget::devicePixelRatioF());
+#  else
   setBufferDevicePixelRatio(QWidget::devicePixelRatio());
+#  endif
 #endif
   
   mOpenGlAntialiasedElementsBackup = mAntialiasedElements;

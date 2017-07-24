@@ -42,7 +42,10 @@
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
-  #define QCP_DEVICEPIXELRATIO_SUPPORTED
+#  define QCP_DEVICEPIXELRATIO_SUPPORTED
+#  if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+#    define QCP_DEVICEPIXELRATIO_FLOAT
+#  endif
 #endif
 
 #include <QtCore/QObject>
