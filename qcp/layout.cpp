@@ -1484,7 +1484,9 @@ void QCPLayoutGrid::indexToRowCol(int index, int &row, int &column) const
 {
   row = -1;
   column = -1;
-  if (columnCount() == 0 || rowCount() == 0)
+  const int nCols = columnCount();
+  const int nRows = rowCount();
+  if (nCols == 0 || nRows == 0)
     return;
   if (index < 0 || index >= elementCount())
   {
@@ -1496,14 +1498,14 @@ void QCPLayoutGrid::indexToRowCol(int index, int &row, int &column) const
   {
     case foRowsFirst:
     {
-      column = index / rowCount();
-      row = index % rowCount();
+      column = index / nRows;
+      row = index % nRows;
       break;
     }
     case foColumnsFirst:
     {
-      row = index / columnCount();
-      column = index % columnCount();
+      row = index / nCols;
+      column = index % nCols;
       break;
     }
   }
