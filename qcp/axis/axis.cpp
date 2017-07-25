@@ -1499,9 +1499,9 @@ double QCPAxis::coordToPixel(double value) const
         return (mRange.upper-value)/mRange.size()*mAxisRect->width()+mAxisRect->left();
     } else // mScaleType == stLogarithmic
     {
-      if (value >= 0 && mRange.upper < 0) // invalid value for logarithmic scale, just draw it outside visible range
+      if (value >= 0.0 && mRange.upper < 0.0) // invalid value for logarithmic scale, just draw it outside visible range
         return !mRangeReversed ? mAxisRect->right()+200 : mAxisRect->left()-200;
-      else if (value <= 0 && mRange.upper > 0) // invalid value for logarithmic scale, just draw it outside visible range
+      else if (value <= 0.0 && mRange.upper >= 0.0) // invalid value for logarithmic scale, just draw it outside visible range
         return !mRangeReversed ? mAxisRect->left()-200 : mAxisRect->right()+200;
       else
       {
@@ -1521,9 +1521,9 @@ double QCPAxis::coordToPixel(double value) const
         return mAxisRect->bottom()-(mRange.upper-value)/mRange.size()*mAxisRect->height();
     } else // mScaleType == stLogarithmic
     {
-      if (value >= 0 && mRange.upper < 0) // invalid value for logarithmic scale, just draw it outside visible range
+      if (value >= 0.0 && mRange.upper < 0.0) // invalid value for logarithmic scale, just draw it outside visible range
         return !mRangeReversed ? mAxisRect->top()-200 : mAxisRect->bottom()+200;
-      else if (value <= 0 && mRange.upper > 0) // invalid value for logarithmic scale, just draw it outside visible range
+      else if (value <= 0.0 && mRange.upper >= 0.0) // invalid value for logarithmic scale, just draw it outside visible range
         return !mRangeReversed ? mAxisRect->bottom()+200 : mAxisRect->top()-200;
       else
       {
