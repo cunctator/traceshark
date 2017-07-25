@@ -754,8 +754,8 @@ void QCPErrorBars::getErrorBarLines(QCPErrorBarsDataContainer::const_iterator it
   QPointF centerPixel = mDataPlottable->interface1D()->dataPixelPosition(index);
   if (qIsNaN(centerPixel.x()) || qIsNaN(centerPixel.y()))
     return;
-  QCPAxis *errorAxis = mErrorType == etValueError ? mValueAxis : mKeyAxis;
-  QCPAxis *orthoAxis = mErrorType == etValueError ? mKeyAxis : mValueAxis;
+  QCPAxis *errorAxis = mErrorType == etValueError ? mValueAxis.data() : mKeyAxis.data();
+  QCPAxis *orthoAxis = mErrorType == etValueError ? mKeyAxis.data() : mValueAxis.data();
   const double centerErrorAxisPixel = errorAxis->orientation() == Qt::Horizontal ? centerPixel.x() : centerPixel.y();
   const double centerOrthoAxisPixel = orthoAxis->orientation() == Qt::Horizontal ? centerPixel.x() : centerPixel.y();
   const double centerErrorAxisCoord = errorAxis->pixelToCoord(centerErrorAxisPixel); // depending on plottable, this might be different from just mDataPlottable->interface1D()->dataMainKey/Value
@@ -879,6 +879,11 @@ double QCPErrorBars::pointDistance(const QPointF &pixelPoint, QCPErrorBarsDataCo
   closestData = mDataContainer->constEnd();
   if (!mDataPlottable || mDataContainer->isEmpty())
     return -1.0;
+  if (!mKeyAxis || !mValueAxis)
+  {
+    qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+    return -1.0;
+  }
   
   QCPErrorBarsDataContainer::const_iterator begin, end;
   getVisibleDataBounds(begin, end, QCPDataRange(0, dataCount()));
