@@ -648,12 +648,13 @@ QCPLayout::QCPLayout()
 }
 
 /*!
-  First calls the QCPLayoutElement::update base class implementation to update the margins on this
-  layout.
+  If \a phase is \ref upLayout, calls \ref updateLayout, which subclasses may reimplement to
+  reposition and resize their cells.
   
-  Then calls \ref updateLayout which subclasses reimplement to reposition and resize their cells.
+  Finally, the call is propagated down to all child \ref QCPLayoutElement "QCPLayoutElements".
   
-  Finally, \ref update is called on all child elements.
+  For details about this method and the update phases, see the documentation of \ref
+  QCPLayoutElement::update.
 */
 void QCPLayout::update(UpdatePhase phase)
 {
@@ -1311,7 +1312,7 @@ void QCPLayoutGrid::setWrap(int count)
 
   If you want to have all current elements arranged in the new order, set \a rearrange to true. The
   elements will be rearranged in a way that tries to preserve their linear index. However, empty
-  cells are skipped during build-up of the new cell order, which shifts the succeding element's
+  cells are skipped during build-up of the new cell order, which shifts the succeeding element's
   index. The rearranging is performed even if the specified \a order is already the current fill
   order. Thus this method can be used to re-wrap the current elements.
 
@@ -1410,7 +1411,8 @@ void QCPLayoutGrid::insertRow(int newIndex)
 
 /*!
   Inserts a new column with empty cells at the column index \a newIndex. Valid values for \a
-  newIndex range from 0 (inserts a row at the left) to \a rowCount (appends a row at the right).
+  newIndex range from 0 (inserts a column at the left) to \a columnCount (appends a column at the
+  right).
   
   \see insertRow
 */

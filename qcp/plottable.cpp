@@ -110,6 +110,8 @@ void QCPSelectionDecorator::setScatterStyle(const QCPScatterStyle &scatterStyle,
   Use this method to define which properties of the scatter style (set via \ref setScatterStyle)
   will be used for selected data segments. All properties of the scatter style that are not
   specified in \a properties will remain as specified in the plottable's original scatter style.
+  
+  \see QCPScatterStyle::ScatterProperty
 */
 void QCPSelectionDecorator::setUsedScatterProperties(const QCPScatterStyle::ScatterProperties &properties)
 {

@@ -716,8 +716,9 @@ QCPRange QCPDataContainer<DataType>::valueRange(bool &foundRange, QCP::SignDomai
 
 /*!
   Makes sure \a begin and \a end mark a data range that is both within the bounds of this data
-  container's data, as well as within the specified \a dataRange.
-
+  container's data, as well as within the specified \a dataRange. The initial range described by
+  the passed iterators \a begin and \a end is never expanded, only contracted if necessary.
+  
   This function doesn't require for \a dataRange to be within the bounds of this data container's
   valid range.
 */

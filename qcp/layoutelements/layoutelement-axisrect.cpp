@@ -288,7 +288,7 @@ QList<QCPAxis*> QCPAxisRect::axes() const
   new QCPAxis instance is created internally. QCustomPlot owns the returned axis, so if you want to
   remove an axis, use \ref removeAxis instead of deleting it manually.
 
-  You may inject QCPAxis instances (or sublasses of QCPAxis) by setting \a axis to an axis that was
+  You may inject QCPAxis instances (or subclasses of QCPAxis) by setting \a axis to an axis that was
   previously created outside QCustomPlot. It is important to note that QCustomPlot takes ownership
   of the axis, so you may not delete it afterwards. Further, the \a axis must have been created
   with this axis rect as parent and with the same axis type as specified in \a type. If this is not

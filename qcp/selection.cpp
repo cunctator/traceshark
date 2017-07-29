@@ -330,7 +330,7 @@ QCPDataSelection &QCPDataSelection::operator+=(const QCPDataRange &other)
 }
 
 /*!
-  Removes all data point indices that are described by \a other from this data range.
+  Removes all data point indices that are described by \a other from this data selection.
 */
 QCPDataSelection &QCPDataSelection::operator-=(const QCPDataSelection &other)
 {
@@ -341,7 +341,7 @@ QCPDataSelection &QCPDataSelection::operator-=(const QCPDataSelection &other)
 }
 
 /*!
-  Removes all data point indices that are described by \a other from this data range.
+  Removes all data point indices that are described by \a other from this data selection.
 */
 QCPDataSelection &QCPDataSelection::operator-=(const QCPDataRange &other)
 {

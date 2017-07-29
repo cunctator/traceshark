@@ -208,8 +208,8 @@ QCPScatterStyle::QCPScatterStyle(const QPixmap &pixmap) :
   
   The custom shape line will be drawn with \a pen and filled with \a brush. The size has a slightly
   different meaning than for built-in scatter points: The custom path will be drawn scaled by a
-  factor of \a size/6.0. Since the default \a size is 6, the custom path will appear at a its
-  natural size by default. To double the size of the path for example, set \a size to 12.
+  factor of \a size/6.0. Since the default \a size is 6, the custom path will appear in its
+  original size by default. To for example double the size of the path, set \a size to 12.
 */
 QCPScatterStyle::QCPScatterStyle(const QPainterPath &customPath, const QPen &pen, const QBrush &brush, double size) :
   mSize(size),

@@ -229,9 +229,7 @@ void QCPAbstractLegendItem::deselectEvent(bool *selectionStateChanged)
   QCPLegend::setIconBorderPen and \ref QCPLegend::setIconTextPadding.
 
   The function \ref QCPAbstractPlottable::addToLegend/\ref QCPAbstractPlottable::removeFromLegend
-  creates/removes legend items of this type in the default implementation. However, these functions
-  may be reimplemented such that a different kind of legend item (e.g a direct subclass of
-  QCPAbstractLegendItem) is used for that plottable.
+  creates/removes legend items of this type.
   
   Since QCPLegend is based on QCPLayoutGrid, a legend item itself is just a subclass of
   QCPLayoutElement. While it could be added to a legend (or any other layout) via the normal layout
