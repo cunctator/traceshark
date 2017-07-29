@@ -148,7 +148,7 @@ protected:
   QCPColorGradient mGradient;
   bool mInterpolate;
   bool mTightBoundary;
-  QPointer<QCPColorScale> mColorScale;
+  QCPPointer<QCPColorScale> mColorScale;
   
   // non-property members:
   QImage mMapImage, mUndersampledMapImage;

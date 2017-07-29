@@ -160,7 +160,7 @@ protected:
   bool mAntialiasedFill, mAntialiasedScatters;
   QPen mPen;
   QBrush mBrush;
-  QPointer<QCPAxis> mKeyAxis, mValueAxis;
+  QCPPointer<QCPAxis> mKeyAxis, mValueAxis;
   QCP::SelectionType mSelectable;
   QCPDataSelection mSelection;
   QCPSelectionDecorator *mSelectionDecorator;

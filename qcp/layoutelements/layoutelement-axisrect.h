@@ -125,8 +125,8 @@ protected:
   Qt::AspectRatioMode mBackgroundScaledMode;
   QCPLayoutInset *mInsetLayout;
   Qt::Orientations mRangeDrag, mRangeZoom;
-  QList<QPointer<QCPAxis> > mRangeDragHorzAxis, mRangeDragVertAxis;
-  QList<QPointer<QCPAxis> > mRangeZoomHorzAxis, mRangeZoomVertAxis;
+  QList<QCPPointer<QCPAxis> > mRangeDragHorzAxis, mRangeDragVertAxis;
+  QList<QCPPointer<QCPAxis> > mRangeZoomHorzAxis, mRangeZoomVertAxis;
   double mRangeZoomFactorHorz, mRangeZoomFactorVert;
   
   // non-property members:

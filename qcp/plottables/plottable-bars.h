@@ -198,7 +198,7 @@ protected:
   QCPBarsGroup *mBarsGroup;
   double mBaseValue;
   double mStackingGap;
-  QPointer<QCPBars> mBarBelow, mBarAbove;
+  QCPPointer<QCPBars> mBarBelow, mBarAbove;
   
   // reimplemented virtual methods:
   virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE;

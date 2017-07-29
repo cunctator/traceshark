@@ -64,6 +64,7 @@ HEADERS      +=  ./qcp/plottables/plottable-financial.h
 HEADERS      +=  ./qcp/plottables/plottable-graph.h
 HEADERS      +=  ./qcp/plottables/plottable-statisticalbox.h
 HEADERS      +=  ./qcp/qcp.h
+HEADERS      +=  ./qcp/qcppointer.h
 HEADERS      +=  ./qcp/scatterstyle.h
 HEADERS      +=  ./qcp/selection.h
 HEADERS      +=  ./qcp/selectiondecorator-bracket.h

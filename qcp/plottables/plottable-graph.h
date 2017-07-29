@@ -126,7 +126,7 @@ protected:
   LineStyle mLineStyle;
   QCPScatterStyle mScatterStyle;
   int mScatterSkip;
-  QPointer<QCPGraph> mChannelFillGraph;
+  QCPPointer<QCPGraph> mChannelFillGraph;
   bool mAdaptiveSampling;
   
   // reimplemented virtual methods:

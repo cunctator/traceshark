@@ -273,7 +273,7 @@ bool QCPSelectionDecorator::registerWithPlottable(QCPAbstractPlottable *plottabl
     <td>The generic brush of the plottable. You should use this brush for the most prominent fillable structures in the plottable
         (e.g. QCPGraph uses this brush to control filling under the graph)</td>
   </tr><tr>
-    <td>QPointer<\ref QCPAxis> \b mKeyAxis, \b mValueAxis</td>
+    <td>QCPPointer<\ref QCPAxis> \b mKeyAxis, \b mValueAxis</td>
     <td>The key and value axes this plottable is attached to. Call their QCPAxis::coordToPixel functions to translate coordinates
         to pixels in either the key or value dimension. Make sure to check whether the pointer is null before using it. If one of
         the axes is null, don't draw the plottable.</td>

@@ -121,8 +121,8 @@ protected:
   int mBarWidth;
   
   // non-property members:
-  QPointer<QCPColorScaleAxisRectPrivate> mAxisRect;
-  QPointer<QCPAxis> mColorAxis;
+  QCPPointer<QCPColorScaleAxisRectPrivate> mAxisRect;
+  QCPPointer<QCPAxis> mColorAxis;
   
   // reimplemented virtual methods:
   virtual void applyDefaultAntialiasingHint(QCPPainter *painter) const Q_DECL_OVERRIDE;

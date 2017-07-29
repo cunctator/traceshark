@@ -129,7 +129,7 @@ public:
 protected:
   // property members:
   QSharedPointer<QCPErrorBarsDataContainer> mDataContainer;
-  QPointer<QCPAbstractPlottable> mDataPlottable;
+  QCPPointer<QCPAbstractPlottable> mDataPlottable;
   ErrorType mErrorType;
   double mWhiskerWidth;
   double mSymbolGap;

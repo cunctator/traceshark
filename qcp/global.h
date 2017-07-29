@@ -49,7 +49,7 @@
 #endif
 
 #include <QtCore/QObject>
-#include <QtCore/QPointer>
+#include "qcppointer.h"
 #include <QtCore/QSharedPointer>
 #include <QtCore/QTimer>
 #include <QtGui/QPainter>

@@ -130,8 +130,8 @@ public:
 protected:
   // property members:
   PositionType mPositionTypeX, mPositionTypeY;
-  QPointer<QCPAxis> mKeyAxis, mValueAxis;
-  QPointer<QCPAxisRect> mAxisRect;
+  QCPPointer<QCPAxis> mKeyAxis, mValueAxis;
+  QCPPointer<QCPAxisRect> mAxisRect;
   double mKey, mValue;
   QCPItemAnchor *mParentAnchorX, *mParentAnchorY;
   
@@ -187,7 +187,7 @@ signals:
 protected:
   // property members:
   bool mClipToAxisRect;
-  QPointer<QCPAxisRect> mClipAxisRect;
+  QCPPointer<QCPAxisRect> mClipAxisRect;
   QList<QCPItemPosition*> mPositions;
   QList<QCPItemAnchor*> mAnchors;
   bool mSelectable, mSelected;

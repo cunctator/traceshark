@@ -914,7 +914,7 @@ void QCPAxisRect::setRangeDragAxes(QList<QCPAxis*> horizontal, QList<QCPAxis*> v
   mRangeDragHorzAxis.clear();
   foreach (QCPAxis *ax, horizontal)
   {
-    QPointer<QCPAxis> axPointer(ax);
+    QCPPointer<QCPAxis> axPointer(ax);
     if (!axPointer.isNull())
       mRangeDragHorzAxis.append(axPointer);
     else
@@ -923,7 +923,7 @@ void QCPAxisRect::setRangeDragAxes(QList<QCPAxis*> horizontal, QList<QCPAxis*> v
   mRangeDragVertAxis.clear();
   foreach (QCPAxis *ax, vertical)
   {
-    QPointer<QCPAxis> axPointer(ax);
+    QCPPointer<QCPAxis> axPointer(ax);
     if (!axPointer.isNull())
       mRangeDragVertAxis.append(axPointer);
     else
@@ -986,7 +986,7 @@ void QCPAxisRect::setRangeZoomAxes(QList<QCPAxis*> horizontal, QList<QCPAxis*> v
   mRangeZoomHorzAxis.clear();
   foreach (QCPAxis *ax, horizontal)
   {
-    QPointer<QCPAxis> axPointer(ax);
+    QCPPointer<QCPAxis> axPointer(ax);
     if (!axPointer.isNull())
       mRangeZoomHorzAxis.append(axPointer);
     else
@@ -995,7 +995,7 @@ void QCPAxisRect::setRangeZoomAxes(QList<QCPAxis*> horizontal, QList<QCPAxis*> v
   mRangeZoomVertAxis.clear();
   foreach (QCPAxis *ax, vertical)
   {
-    QPointer<QCPAxis> axPointer(ax);
+    QCPPointer<QCPAxis> axPointer(ax);
     if (!axPointer.isNull())
       mRangeZoomVertAxis.append(axPointer);
     else
