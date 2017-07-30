@@ -20,9 +20,11 @@ qmake-qt4
 
 make -j5
 
-Please note that the software will compile for Qt5 but that the performance for
-scrolling and zooming will be very bad. For that reason it's recommended that
-you verify that you compile for Qt4.
+Please note that the software will compile for Qt5 but that it has not been as
+tested with Qt 5. Previously scrolling and zooming when built for Qt 5 were
+very bad, although it now appears that the latest QCustomPlot improvements have
+fixed that.  For that reason you might still want to build with Qt 4, unless
+you feel adventurous or just happen to prefer Qt 5.
 
 You can get an Ftrace trace to view by doing the following:
 
