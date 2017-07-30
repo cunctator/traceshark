@@ -43,13 +43,14 @@
 #include <QWeakPointer>
 #include <QSharedPointer>
 #include <QObject>
+#include <type_traits>
 
 class QVariant;
 
 template <class T>
 class QCPPointer
 {
-	//Q_STATIC_ASSERT_X(!std::is_pointer<T>::value, "QCPPointer's template type must not be a pointer type");
+    static_assert(!std::is_pointer<T>::value, "QCPPointer's template type must not be a pointer type");
 
     template<typename U>
     struct TypeSelector
