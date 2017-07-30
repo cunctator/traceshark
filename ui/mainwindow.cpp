@@ -663,7 +663,7 @@ void MainWindow::about()
 	       "<p>This is version %1.</p>"
 		).arg(QLatin1String(TRACESHARK_VERSION_STRING));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2014, 2015, 2016 Viktor Rosendahl"
+	       "<p>Copyright &copy; 2014-2017 Viktor Rosendahl"
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below."
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; select \"License\" under the \"Help\""
@@ -721,10 +721,10 @@ void MainWindow::aboutQCustomPlot()
 
 	textAboutCaption = QMessageBox::tr(
 	       "<h1>About QCustomPlot</h1>"
-	       "<p>This program contains version %1 of QCustomPlot.</p>"
+	       "<p>This program contains a modified version of QCustomPlot %1.</p>"
 		).arg(QLatin1String(QCUSTOMPLOT_VERSION_STRING));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2011-2016 Emanuel Eichhammer"
+	       "<p>Copyright &copy; 2011-2017 Emanuel Eichhammer"
 	       "<p>QCustomPlot is licensed under GNU General Public License as "
 	       "published by the Free Software Foundation, either version 3 of "
 	       " the License, or (at your option) any later version.</p>"
