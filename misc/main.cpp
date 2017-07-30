@@ -26,9 +26,8 @@
 "WARNING!!! WARNING!!! WARNING!!!\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
 "\n" \
-"You are using a Qt version that is >= 5.0.0. This is not recommended\n"  \
-"unless you are a developer who wants to try to fix the problems with\n" \
-"using Qt5\n" \
+"You are using a Qt version that is >= 5.0.0. This may go well but is\n"  \
+"not recommended unless you want to help testing it for Qt 5.\n" \
 "\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!"
