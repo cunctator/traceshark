@@ -19,7 +19,7 @@
 #ifndef MIGRATIONLINE_H
 #define MIGRATIONLINE_H
 
-#include "qcp/qcp.h"
+#include "qcustomplot/qcustomplot.h"
 
 class MigrationLine : public QCPItemLine
 {

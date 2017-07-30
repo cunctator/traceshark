@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "qcp/qcp.h"
+#include "qcustomplot/qcustomplot.h"
 #include "ui/taskgraph.h"
 #include "analyzer/task.h"
 

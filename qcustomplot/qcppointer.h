@@ -1,5 +1,6 @@
 /*
- * Traceshark - a visualizer for visualizing ftrace and perf traces
+ * QCustomPlot, an easy to use, modern plotting widget for Qt
+ * This code is part of the improved version for traceshark
  * Copyright (C) 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  *   This program is free software: you can redistribute it and/or modify

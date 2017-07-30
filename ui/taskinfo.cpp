@@ -31,7 +31,7 @@
 #include "ui/taskinfo.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
-#include "qcp/qcp.h"
+#include "qcustomplot/qcustomplot.h"
 
 #define DEFINE_PIDMAP_ITERATOR(name) \
 	QMap<unsigned int, TaskGraph*>::iterator name
