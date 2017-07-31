@@ -26,7 +26,7 @@ extern "C" {
 #include <unistd.h>
 }
 
-MemPool::MemPool(unsigned int nr_pages, unsigned long objsize)
+MemPool::MemPool(unsigned int nr_pages, unsigned int objsize)
 {
 	poolSize = nr_pages * sysconf(_SC_PAGESIZE);
 	objSize = objsize;

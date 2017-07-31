@@ -30,12 +30,12 @@ class MemPool
 {
 public:
 	MemPool(unsigned int nr_pages = 256 * 10,
-		unsigned long objsize = 64);
+		unsigned int objsize = 64);
 	~MemPool();
 	__always_inline void* allocObj();
-	__always_inline void* allocN(unsigned long n);
-	__always_inline void* preallocN(unsigned long n);
-	__always_inline bool commitN(unsigned long n);
+	__always_inline void* allocN(unsigned int n);
+	__always_inline void* preallocN(unsigned int n);
+	__always_inline bool commitN(unsigned int n);
 	__always_inline void* allocBytes(unsigned int bytes);
 	__always_inline void* allocChars(unsigned int chars);
 	__always_inline void* preallocBytes(unsigned int maxbytes);
@@ -48,7 +48,7 @@ private:
 	quint8 *next;
 	unsigned long long poolSize;
 	unsigned long long used;
-	unsigned long objSize;
+	unsigned int objSize;
 	QList <void*> exhaustList;
 	__always_inline bool newMap();
 	bool addMemory();
@@ -74,57 +74,25 @@ __always_inline void* MemPool::allocObj()
 	return nullptr;
 }
 
-__always_inline void* MemPool::allocN(unsigned long n)
+__always_inline void* MemPool::allocN(unsigned int n)
 {
-	quint8 *ptr;
-	unsigned long chunk = objSize * n;
-	int retries = 0;
+	unsigned int chunk = objSize * n;
 
-	do {
-		used += chunk;
-		if (used < poolSize) {
-			ptr = next;
-			next += chunk;
-			return ptr;
-		}
-		used -= chunk;
-		if (used == 0 || !addMemory())
-			return nullptr;
-		retries++;
-	} while(retries < 2);
-	return nullptr;
+	return allocBytes(chunk);
 }
 
-__always_inline void* MemPool::preallocN(unsigned long n)
+__always_inline void* MemPool::preallocN(unsigned int n)
 {
-	unsigned long chunk = objSize * n;
-	int retries = 0;
-	unsigned long long maxused = used + chunk;
+	unsigned int chunk = objSize * n;
 
-	do {
-		if (maxused < poolSize)
-			return next;
-		if (used == 0)
-			return nullptr;
-		if (!addMemory())
-			return nullptr;
-		maxused = chunk; /* used will be 0 here */
-		retries++;
-	} while(retries < 2);
-	return nullptr;
+	return preallocBytes(chunk);
 }
 
-__always_inline bool MemPool::commitN(unsigned long n)
+__always_inline bool MemPool::commitN(unsigned int n)
 {
-	unsigned long chunk = objSize * n;
+	unsigned int chunk = objSize * n;
 
-	used += chunk;
-	if (used >= poolSize) {
-		next = nullptr;
-		return false;
-	}
-	next += chunk;
-	return true;
+	return commitBytes(chunk);
 }
 
 __always_inline void* MemPool::allocBytes(unsigned int bytes)
