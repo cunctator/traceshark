@@ -1,6 +1,6 @@
 dist: trusty
 language: cpp
-script: qmake-qt5 && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)
+script: qmake && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)
 
 addons:
   apt:
