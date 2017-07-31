@@ -1,7 +1,23 @@
 sudo: required
 dist: trusty
 language: cpp
-script: qmake-qt4 && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "GdtY1OoOPuWQwTK6b8UK9FL4/UkLlRyDnaitEN6pLknlejeq2ScC3qzDsaMp+uq0qvZGtRC35CotQ4EZR/6NOcmuwMwfGHQpEjZz8P/2f4XTBdyFW/ihdExAydQrA8RFYNNzQDwZADv2HRahsfy6p7lmHEllW+XRAs88cqxBXnUPzYS0X4LfCBEVjoypKkVvulcpb8GuvNi2Pe1x6O5wdJyj0hFEiZWBQD1Ob8Hulr2JFtCQPb0cUSL7o4b5rKK3wLSEa2Dpm13Zi0FtZbKJBihnnVFoLC5HQTeRd/ATpcEEW3EDrErzj0k1jWHW0KFah8e6VYHg+FGzs1F9T27N1Cynw2NvaHqvlOLfjQzhcliVYEEaEnylfRFsvvUwCaKO+1Yjf7dlPR8ajPmOT9EIK5EWY+qoWaD7CITdikicVYA/AyfPmomudo48SZG/UkxQ3Lh8F15IvNAK8iUWW7EsPN6tTAly0bbtWTbeF+65TJ29z9Uco51X1B6+2EMR9jXgVTDWMAvntH2/hiY15nyh4175lU8FAII5+cj4WlHWsj0dWsXr/7KaKIkPVOnULtwWa31q0yaBz2bEwzUCBPul2Md1lHmxz0SwTFVH75H/blUhcJVkD6RUuOQ/+NqyUqbrwKASGL4QXwXCRE2E9MS8YRCDNMTRpYU5GWeA5x+m//Y="
+
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y qt4-qmake libqt4-dev
+      - sudo apt-get -qq update
+      - sudo apt-get install -y qtbase5-dev
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  coverity_scan:
+    project:
+      name: "cunctator/traceshark"
+      description: "This is a tool for Linux kernel ftrace and perf events visualization"
+    notification_email: viktor.rosendahl@gmail.com
+    build_command_prepend: echo "Nice weather"
+    build_command: qmake && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)
+    branch_pattern: coverity_scan
