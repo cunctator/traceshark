@@ -1,4 +1,6 @@
 dist: trusty
+language: cpp
+script:
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
@@ -17,6 +19,6 @@ addons:
       name: "cunctator/traceshark"
       description: "Build submitted via Travis CI"
     notification_email: viktor.rosendahl@gmail.com
-    build_command_prepend: "qmake"
+    build_command_prepend: "qmake-qt5"
     build_command: "make -j$(cat /proc/cpuinfo|grep processor|wc -l)"
     branch_pattern: coverity_scan
