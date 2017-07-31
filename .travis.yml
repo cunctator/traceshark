@@ -17,6 +17,6 @@ addons:
       name: "cunctator/traceshark"
       description: "Build submitted via Travis CI"
     notification_email: viktor.rosendahl@gmail.com
-    build_command_prepend: ""
-    build_command: "qmake && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)"
+    build_command_prepend: "qmake"
+    build_command: "make -j$(cat /proc/cpuinfo|grep processor|wc -l)"
     branch_pattern: coverity_scan
