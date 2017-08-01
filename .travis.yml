@@ -1,7 +1,12 @@
 sudo: required
 dist: trusty
 language: cpp
-script: QT_SELECT=qt5 qmake && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y qt5-qmake qtbase5-dev
+script: QT_SELECT=qt5 qmake && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l) && QT_SELECT=qt4 qmake && make clean && make -j$(cat /proc/cpuinfo|grep processor|wc -l)
+
+addons:
+  apt:
+   packages:
+   - qt5-qmake
+   - qtbase5-dev
+   - qt4-qmake
+   - libqt4-dev
