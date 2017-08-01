@@ -76,23 +76,17 @@ __always_inline void* MemPool::allocObj()
 
 __always_inline void* MemPool::allocN(unsigned int n)
 {
-	unsigned int chunk = objSize * n;
-
-	return allocBytes(chunk);
+	return allocBytes(objSize * n);
 }
 
 __always_inline void* MemPool::preallocN(unsigned int n)
 {
-	unsigned int chunk = objSize * n;
-
-	return preallocBytes(chunk);
+	return preallocBytes(objSize * n);
 }
 
 __always_inline bool MemPool::commitN(unsigned int n)
 {
-	unsigned int chunk = objSize * n;
-
-	return commitBytes(chunk);
+	return commitBytes(objSize * n);
 }
 
 __always_inline void* MemPool::allocBytes(unsigned int bytes)
