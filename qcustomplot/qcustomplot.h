@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2016 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2017 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 13.09.16                                             **
-**          Version: 2.0.0-beta                                           **
+**             Date: 04.09.17                                             **
+**          Version: 2.0.0                                                **
 ****************************************************************************/
 
 #ifndef QCUSTOMPLOT_H
@@ -114,7 +114,7 @@ class QCPColorScale;
 class QCPBars;
 
 /* including file 'src/global.h', size 16222                                 */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 // decl definitions for shared library compilation/usage:
 #if defined(QCUSTOMPLOT_COMPILE_LIBRARY)
@@ -378,7 +378,7 @@ Q_DECLARE_METATYPE(QCP::SelectionType)
 
 
 /* including file 'src/vector2d.h', size 4928                                */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPVector2D
 {
@@ -452,7 +452,7 @@ inline QDebug operator<< (QDebug d, const QCPVector2D &vec)
 
 
 /* including file 'src/painter.h', size 4035                                 */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPPainter : public QPainter
 {
@@ -511,7 +511,7 @@ Q_DECLARE_METATYPE(QCPPainter::PainterMode)
 
 
 /* including file 'src/paintbuffer.h', size 4958                             */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAbstractPaintBuffer
 {
@@ -619,7 +619,7 @@ protected:
 
 
 /* including file 'src/layer.h', size 6887                                   */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPLayer : public QObject
 {
@@ -768,7 +768,7 @@ private:
 
 
 /* including file 'src/axis/range.h', size 5280                              */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPRange
 {
@@ -886,7 +886,7 @@ inline const QCPRange operator/(const QCPRange& range, double value)
 
 
 /* including file 'src/selection.h', size 8579                               */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPDataRange
 {
@@ -1090,7 +1090,7 @@ inline QDebug operator<< (QDebug d, const QCPDataSelection &selection)
 
 
 /* including file 'src/selectionrect.h', size 3338                           */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPSelectionRect : public QCPLayerable
 {
@@ -1143,8 +1143,8 @@ protected:
 /* end of 'src/selectionrect.h' */
 
 
-/* including file 'src/layout.h', size 13128                                 */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* including file 'src/layout.h', size 14224                                 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPMarginGroup : public QObject
 {
@@ -1188,6 +1188,7 @@ class QCP_LIB_DECL QCPLayoutElement : public QCPLayerable
   Q_PROPERTY(QMargins minimumMargins READ minimumMargins WRITE setMinimumMargins)
   Q_PROPERTY(QSize minimumSize READ minimumSize WRITE setMinimumSize)
   Q_PROPERTY(QSize maximumSize READ maximumSize WRITE setMaximumSize)
+  Q_PROPERTY(SizeConstraintRect sizeConstraintRect READ sizeConstraintRect WRITE setSizeConstraintRect)
   /// \endcond
 public:
   /*!
@@ -1199,6 +1200,19 @@ public:
                      ,upLayout     ///< Final phase in which the layout system places the rects of the elements
                    };
   Q_ENUMS(UpdatePhase)
+  
+  /*!
+    Defines to which rect of a layout element the size constraints that can be set via \ref
+    setMinimumSize and \ref setMaximumSize apply. The outer rect (\ref outerRect) includes the
+    margins (e.g. in the case of a QCPAxisRect the axis labels), whereas the inner rect (\ref rect)
+    does not.
+    
+    \see setSizeConstraintRect
+  */
+  enum SizeConstraintRect { scrInnerRect ///< Minimum/Maximum size constraints apply to inner rect
+                            , scrOuterRect ///< Minimum/Maximum size constraints apply to outer rect, thus include layout element margins
+                          };
+  Q_ENUMS(SizeConstraintRect)
 
   explicit QCPLayoutElement(QCustomPlot *parentPlot=0);
   virtual ~QCPLayoutElement();
@@ -1212,6 +1226,7 @@ public:
   QCP::MarginSides autoMargins() const { return mAutoMargins; }
   QSize minimumSize() const { return mMinimumSize; }
   QSize maximumSize() const { return mMaximumSize; }
+  SizeConstraintRect sizeConstraintRect() const { return mSizeConstraintRect; }
   QCPMarginGroup *marginGroup(QCP::MarginSide side) const { return mMarginGroups.value(side, (QCPMarginGroup*)0); }
   QHash<QCP::MarginSide, QCPMarginGroup*> marginGroups() const { return mMarginGroups; }
   
@@ -1224,12 +1239,13 @@ public:
   void setMinimumSize(int width, int height);
   void setMaximumSize(const QSize &size);
   void setMaximumSize(int width, int height);
+  void setSizeConstraintRect(SizeConstraintRect constraintRect);
   void setMarginGroup(QCP::MarginSides sides, QCPMarginGroup *group);
   
   // introduced virtual methods:
   virtual void update(UpdatePhase phase);
-  virtual QSize minimumSizeHint() const;
-  virtual QSize maximumSizeHint() const;
+  virtual QSize minimumOuterSizeHint() const;
+  virtual QSize maximumOuterSizeHint() const;
   virtual QList<QCPLayoutElement*> elements(bool recursive) const;
   
   // reimplemented virtual methods:
@@ -1239,6 +1255,7 @@ protected:
   // property members:
   QCPLayout *mParentLayout;
   QSize mMinimumSize, mMaximumSize;
+  SizeConstraintRect mSizeConstraintRect;
   QRect mRect, mOuterRect;
   QMargins mMargins, mMinimumMargins;
   QCP::MarginSides mAutoMargins;
@@ -1294,6 +1311,8 @@ protected:
   void adoptElement(QCPLayoutElement *el);
   void releaseElement(QCPLayoutElement *el);
   QVector<int> getSectionSizes(QVector<int> maxSizes, QVector<int> minSizes, QVector<double> stretchFactors, int totalSize) const;
+  static QSize getFinalMinimumOuterSize(const QCPLayoutElement *el);
+  static QSize getFinalMaximumOuterSize(const QCPLayoutElement *el);
   
 private:
   Q_DISABLE_COPY(QCPLayout)
@@ -1359,8 +1378,8 @@ public:
   virtual bool take(QCPLayoutElement* element) Q_DECL_OVERRIDE;
   virtual QList<QCPLayoutElement*> elements(bool recursive) const Q_DECL_OVERRIDE;
   virtual void simplify() Q_DECL_OVERRIDE;
-  virtual QSize minimumSizeHint() const Q_DECL_OVERRIDE;
-  virtual QSize maximumSizeHint() const Q_DECL_OVERRIDE;
+  virtual QSize minimumOuterSizeHint() const Q_DECL_OVERRIDE;
+  virtual QSize maximumOuterSizeHint() const Q_DECL_OVERRIDE;
   
   // non-virtual methods:
   QCPLayoutElement *element(int row, int column) const;
@@ -1446,7 +1465,7 @@ Q_DECLARE_METATYPE(QCPLayoutInset::InsetPlacement)
 
 
 /* including file 'src/lineending.h', size 4426                              */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPLineEnding
 {
@@ -1510,7 +1529,7 @@ Q_DECLARE_METATYPE(QCPLineEnding::EndingStyle)
 
 
 /* including file 'src/axis/axisticker.h', size 4177                         */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAxisTicker
 {
@@ -1571,7 +1590,7 @@ Q_DECLARE_METATYPE(QSharedPointer<QCPAxisTicker>)
 
 
 /* including file 'src/axis/axistickerdatetime.h', size 3289                 */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAxisTickerDateTime : public QCPAxisTicker
 {
@@ -1611,8 +1630,8 @@ protected:
 /* end of 'src/axis/axistickerdatetime.h' */
 
 
-/* including file 'src/axis/axistickertime.h', size 3288                     */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* including file 'src/axis/axistickertime.h', size 3542                     */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAxisTickerTime : public QCPAxisTicker
 {
@@ -1623,11 +1642,11 @@ public:
     
     \see setFieldWidth, setTimeFormat
   */
-  enum TimeUnit { tuMilliseconds
-                  ,tuSeconds
-                  ,tuMinutes
-                  ,tuHours
-                  ,tuDays
+  enum TimeUnit { tuMilliseconds ///< Milliseconds, one thousandth of a second (%%z in \ref setTimeFormat)
+                  ,tuSeconds     ///< Seconds (%%s in \ref setTimeFormat)
+                  ,tuMinutes     ///< Minutes (%%m in \ref setTimeFormat)
+                  ,tuHours       ///< Hours (%%h in \ref setTimeFormat)
+                  ,tuDays        ///< Days (%%d in \ref setTimeFormat)
                 };
   Q_ENUMS(TimeUnit)
   
@@ -1664,7 +1683,7 @@ Q_DECLARE_METATYPE(QCPAxisTickerTime::TimeUnit)
 
 
 /* including file 'src/axis/axistickerfixed.h', size 3308                    */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAxisTickerFixed : public QCPAxisTicker
 {
@@ -1706,7 +1725,7 @@ Q_DECLARE_METATYPE(QCPAxisTickerFixed::ScaleStrategy)
 
 
 /* including file 'src/axis/axistickertext.h', size 3085                     */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAxisTickerText : public QCPAxisTicker
 {
@@ -1745,7 +1764,7 @@ protected:
 
 
 /* including file 'src/axis/axistickerpi.h', size 3911                       */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAxisTickerPi : public QCPAxisTicker
 {
@@ -1804,7 +1823,7 @@ Q_DECLARE_METATYPE(QCPAxisTickerPi::FractionStyle)
 
 
 /* including file 'src/axis/axistickerlog.h', size 2663                      */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAxisTickerLog : public QCPAxisTicker
 {
@@ -1836,8 +1855,8 @@ protected:
 /* end of 'src/axis/axistickerlog.h' */
 
 
-/* including file 'src/axis/axis.h', size 20230                              */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* including file 'src/axis/axis.h', size 20634                              */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPGrid :public QCPLayerable
 {
@@ -2150,6 +2169,9 @@ protected:
   QVector<double> mSubTickVector;
   bool mCachedMarginValid;
   int mCachedMargin;
+  bool mDragging;
+  QCPRange mDragStartRange;
+  QCP::AntialiasedElements mAADragBackup, mNotAADragBackup;
   
   // introduced virtual methods:
   virtual int calculateMargin();
@@ -2161,6 +2183,11 @@ protected:
   // events:
   virtual void selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) Q_DECL_OVERRIDE;
   virtual void deselectEvent(bool *selectionStateChanged) Q_DECL_OVERRIDE;
+  // mouse events:
+  virtual void mousePressEvent(QMouseEvent *event, const QVariant &details);
+  virtual void mouseMoveEvent(QMouseEvent *event, const QPointF &startPos);
+  virtual void mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos);
+  virtual void wheelEvent(QWheelEvent *event);
   
   // non-virtual methods:
   void setupTickVectors();
@@ -2257,7 +2284,7 @@ protected:
 
 
 /* including file 'src/scatterstyle.h', size 7275                            */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPScatterStyle
 {
@@ -2363,8 +2390,8 @@ Q_DECLARE_METATYPE(QCPScatterStyle::ScatterShape)
 /* end of 'src/scatterstyle.h' */
 
 
-/* including file 'src/datacontainer.h', size 4535                           */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* including file 'src/datacontainer.h', size 4596                           */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 /*! \relates QCPDataContainer
   Returns whether the sort key of \a a is less than the sort key of \a b.
@@ -2375,7 +2402,7 @@ template <class DataType>
 inline bool qcpLessThanSortKey(const DataType &a, const DataType &b) { return a.sortKey() < b.sortKey(); }
 
 template <class DataType>
-class QCP_LIB_DECL QCPDataContainer
+class QCPDataContainer // no QCP_LIB_DECL, template class ends up in header (cpp included below)
 {
 public:
   typedef typename QVector<DataType>::const_iterator const_iterator;
@@ -2434,7 +2461,7 @@ protected:
 // include implementation in header since it is a class template:
 
 /* including file 'src/datacontainer.cpp', size 31349                        */
-/* commit 820d2282db70144c358c13433cd74b4175f9252b 2017-07-24 00:24:17 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPDataContainer
@@ -3209,7 +3236,7 @@ void QCPDataContainer<DataType>::performAutoSqueeze()
 
 
 /* including file 'src/plottable.h', size 8314                               */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPSelectionDecorator
 {
@@ -3366,7 +3393,7 @@ private:
 
 
 /* including file 'src/item.h', size 9390                                    */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPItemAnchor
 {
@@ -3551,7 +3578,7 @@ private:
 
 
 /* including file 'src/core.h', size 14914                                   */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCustomPlot : public QWidget
 {
@@ -3818,10 +3845,10 @@ Q_DECLARE_METATYPE(QCustomPlot::RefreshPriority)
 /* end of 'src/core.h' */
 
 
-/* including file 'src/plottable1d.h', size 4496                             */
-/* commit f51fc22d1b852be5b09035c092a5b24f26e51eb0 2017-07-23 23:58:27 +0200 */
+/* including file 'src/plottable1d.h', size 4544                             */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
-class QCP_LIB_DECL QCPPlottableInterface1D
+class QCPPlottableInterface1D
 {
 public:
   virtual ~QCPPlottableInterface1D() {}
@@ -3839,7 +3866,7 @@ public:
 };
 
 template <class DataType>
-class QCP_LIB_DECL QCPAbstractPlottable1D : public QCPAbstractPlottable, public QCPPlottableInterface1D
+class QCPAbstractPlottable1D : public QCPAbstractPlottable, public QCPPlottableInterface1D // no QCP_LIB_DECL, template class ends up in header (cpp included below)
 {
   // No Q_OBJECT macro due to template class
   
@@ -3879,7 +3906,7 @@ private:
 // include implementation in header since it is a class template:
 
 /* including file 'src/plottable1d.cpp', size 22240                          */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPPlottableInterface1D
@@ -4399,7 +4426,7 @@ void QCPAbstractPlottable1D<DataType>::drawPolyline(QCPPainter *painter, const Q
 
 
 /* including file 'src/colorgradient.h', size 6243                           */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPColorGradient
 {
@@ -4482,7 +4509,7 @@ Q_DECLARE_METATYPE(QCPColorGradient::GradientPreset)
 
 
 /* including file 'src/selectiondecorator-bracket.h', size 4442              */
-/* commit 681a87c5e5365a5c7187d20b4077031003c48449 2017-07-23 23:46:48 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPSelectionDecoratorBracket : public QCPSelectionDecorator
 {
@@ -4550,8 +4577,8 @@ Q_DECLARE_METATYPE(QCPSelectionDecoratorBracket::BracketStyle)
 /* end of 'src/selectiondecorator-bracket.h' */
 
 
-/* including file 'src/layoutelements/layoutelement-axisrect.h', size 7532   */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* including file 'src/layoutelements/layoutelement-axisrect.h', size 7511   */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPAxisRect : public QCPLayoutElement
 {
@@ -4648,7 +4675,6 @@ protected:
   // non-property members:
   QList<QCPRange> mDragStartHorzRange, mDragStartVertRange;
   QCP::AntialiasedElements mAADragBackup, mNotAADragBackup;
-  QPoint mDragStart;
   bool mDragging;
   QHash<QCPAxis::AxisType, QList<QCPAxis*> > mAxes;
   
@@ -4677,8 +4703,8 @@ private:
 /* end of 'src/layoutelements/layoutelement-axisrect.h' */
 
 
-/* including file 'src/layoutelements/layoutelement-legend.h', size 10392    */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* including file 'src/layoutelements/layoutelement-legend.h', size 10397    */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPAbstractLegendItem : public QCPLayoutElement
 {
@@ -4759,7 +4785,7 @@ protected:
   
   // reimplemented virtual methods:
   virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE;
-  virtual QSize minimumSizeHint() const Q_DECL_OVERRIDE;
+  virtual QSize minimumOuterSizeHint() const Q_DECL_OVERRIDE;
   
   // non-virtual methods:
   QPen getIconBorderPen() const;
@@ -4895,8 +4921,8 @@ Q_DECLARE_METATYPE(QCPLegend::SelectablePart)
 /* end of 'src/layoutelements/layoutelement-legend.h' */
 
 
-/* including file 'src/layoutelements/layoutelement-textelement.h', size 5343 */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200  */
+/* including file 'src/layoutelements/layoutelement-textelement.h', size 5353 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200  */
 
 class QCP_LIB_DECL QCPTextElement : public QCPLayoutElement
 {
@@ -4963,8 +4989,8 @@ protected:
   // reimplemented virtual methods:
   virtual void applyDefaultAntialiasingHint(QCPPainter *painter) const Q_DECL_OVERRIDE;
   virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE;
-  virtual QSize minimumSizeHint() const Q_DECL_OVERRIDE;
-  virtual QSize maximumSizeHint() const Q_DECL_OVERRIDE;
+  virtual QSize minimumOuterSizeHint() const Q_DECL_OVERRIDE;
+  virtual QSize maximumOuterSizeHint() const Q_DECL_OVERRIDE;
   // events:
   virtual void selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) Q_DECL_OVERRIDE;
   virtual void deselectEvent(bool *selectionStateChanged) Q_DECL_OVERRIDE;
@@ -4983,7 +5009,7 @@ private:
 
 
 /* including file 'src/layoutelements/layoutelement-colorscale.h', size 5927 */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 
 class QCPColorScaleAxisRectPrivate : public QCPAxisRect
@@ -5091,7 +5117,7 @@ private:
 
 
 /* including file 'src/plottables/plottable-graph.h', size 9296              */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPGraphData
 {
@@ -5230,7 +5256,7 @@ Q_DECLARE_METATYPE(QCPGraph::LineStyle)
 
 
 /* including file 'src/plottables/plottable-curve.h', size 7409              */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPCurveData
 {
@@ -5345,7 +5371,7 @@ Q_DECLARE_METATYPE(QCPCurve::LineStyle)
 
 
 /* including file 'src/plottables/plottable-bars.h', size 8926               */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPBarsGroup : public QObject
 {
@@ -5533,7 +5559,7 @@ Q_DECLARE_METATYPE(QCPBars::WidthType)
 
 
 /* including file 'src/plottables/plottable-statisticalbox.h', size 7516     */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPStatisticalBoxData
 {
@@ -5650,7 +5676,7 @@ protected:
 
 
 /* including file 'src/plottables/plottable-colormap.h', size 7072           */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPColorMapData
 {
@@ -5786,7 +5812,7 @@ protected:
 
 
 /* including file 'src/plottables/plottable-financial.h', size 8622          */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPFinancialData
 {
@@ -5925,7 +5951,7 @@ Q_DECLARE_METATYPE(QCPFinancial::ChartStyle)
 
 
 /* including file 'src/plottables/plottable-errorbar.h', size 7729           */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 class QCP_LIB_DECL QCPErrorBarsData
 {
@@ -6050,7 +6076,7 @@ protected:
 
 
 /* including file 'src/items/item-straightline.h', size 3117                 */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemStraightLine : public QCPAbstractItem
 {
@@ -6093,7 +6119,7 @@ protected:
 
 
 /* including file 'src/items/item-line.h', size 3407                         */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemLine : public QCPAbstractItem
 {
@@ -6143,7 +6169,7 @@ protected:
 
 
 /* including file 'src/items/item-curve.h', size 3379                        */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemCurve : public QCPAbstractItem
 {
@@ -6194,7 +6220,7 @@ protected:
 
 
 /* including file 'src/items/item-rect.h', size 3688                         */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemRect : public QCPAbstractItem
 {
@@ -6253,7 +6279,7 @@ protected:
 
 
 /* including file 'src/items/item-text.h', size 5554                         */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemText : public QCPAbstractItem
 {
@@ -6350,7 +6376,7 @@ protected:
 
 
 /* including file 'src/items/item-ellipse.h', size 3868                      */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemEllipse : public QCPAbstractItem
 {
@@ -6412,7 +6438,7 @@ protected:
 
 
 /* including file 'src/items/item-pixmap.h', size 4373                       */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemPixmap : public QCPAbstractItem
 {
@@ -6481,7 +6507,7 @@ protected:
 
 
 /* including file 'src/items/item-tracer.h', size 4762                       */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemTracer : public QCPAbstractItem
 {
@@ -6567,7 +6593,7 @@ Q_DECLARE_METATYPE(QCPItemTracer::TracerStyle)
 
 
 /* including file 'src/items/item-bracket.h', size 3969                      */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 class QCP_LIB_DECL QCPItemBracket : public QCPAbstractItem
 {

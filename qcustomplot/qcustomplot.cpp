@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2016 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2017 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,15 +19,15 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 13.09.16                                             **
-**          Version: 2.0.0-beta                                           **
+**             Date: 04.09.17                                             **
+**          Version: 2.0.0                                                **
 ****************************************************************************/
 
 #include "qcustomplot.h"
 
 
 /* including file 'src/vector2d.cpp', size 7340                              */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPVector2D
@@ -260,7 +260,7 @@ QCPVector2D &QCPVector2D::operator-=(const QCPVector2D &vector)
 
 
 /* including file 'src/painter.cpp', size 8670                               */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPPainter
@@ -478,7 +478,7 @@ void QCPPainter::makeNonCosmetic()
 
 
 /* including file 'src/paintbuffer.cpp', size 18502                          */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAbstractPaintBuffer
@@ -951,7 +951,7 @@ void QCPPaintBufferGlFbo::reallocateBuffer()
 
 
 /* including file 'src/layer.cpp', size 37064                                */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLayer
@@ -1804,7 +1804,7 @@ void QCPLayerable::wheelEvent(QWheelEvent *event)
 
 
 /* including file 'src/axis/range.cpp', size 12221                           */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPRange
@@ -2126,7 +2126,7 @@ bool QCPRange::validRange(const QCPRange &range)
 
 
 /* including file 'src/selection.cpp', size 21906                            */
-/* commit 820d2282db70144c358c13433cd74b4175f9252b 2017-07-24 00:24:17 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPDataRange
@@ -2726,7 +2726,7 @@ QCPDataSelection QCPDataSelection::inverse(const QCPDataRange &outerRange) const
 
 
 /* including file 'src/selectionrect.cpp', size 9224                         */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionRect
@@ -2954,8 +2954,8 @@ void QCPSelectionRect::draw(QCPPainter *painter)
 /* end of 'src/selectionrect.cpp' */
 
 
-/* including file 'src/layout.cpp', size 74417                               */
-/* commit 45725168f3d6a00ac963b67d2a52c917ee7d16c8 2017-07-25 12:02:25 +0200 */
+/* including file 'src/layout.cpp', size 79064                               */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPMarginGroup
@@ -3145,7 +3145,7 @@ void QCPMarginGroup::removeChild(QCP::MarginSide side, QCPLayoutElement *element
 
 /*! \fn QRect QCPLayoutElement::rect() const
   
-  Returns the inner rect of this layout element. The inner rect is the outer rect (\ref
+  Returns the inner rect of this layout element. The inner rect is the outer rect (\ref outerRect, \ref
   setOuterRect) shrinked by the margins (\ref setMargins, \ref setAutoMargins).
   
   In some cases, the area between outer and inner rect is left blank. In other cases the margin
@@ -3154,6 +3154,17 @@ void QCPMarginGroup::removeChild(QCP::MarginSide side, QCPLayoutElement *element
   adapt the margins to the peripheral graphics it wants to draw. For example, \ref QCPAxisRect
   draws the axis labels and tick labels in the margin area, thus needs to adjust the margins (if
   \ref setAutoMargins is enabled) according to the space required by the labels of the axes.
+  
+  \see outerRect
+*/
+
+/*! \fn QRect QCPLayoutElement::outerRect() const
+  
+  Returns the outer rect of this layout element. The outer rect is the inner rect expanded by the
+  margins (\ref setMargins, \ref setAutoMargins). The outer rect is used (and set via \ref
+  setOuterRect) by the parent \ref QCPLayout to control the size of this layout element.
+  
+  \see rect
 */
 
 /* end documentation of inline functions */
@@ -3166,6 +3177,7 @@ QCPLayoutElement::QCPLayoutElement(QCustomPlot *parentPlot) :
   mParentLayout(0),
   mMinimumSize(),
   mMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX),
+  mSizeConstraintRect(scrInnerRect),
   mRect(0, 0, 0, 0),
   mOuterRect(0, 0, 0, 0),
   mMargins(0, 0, 0, 0),
@@ -3255,13 +3267,16 @@ void QCPLayoutElement::setAutoMargins(QCP::MarginSides sides)
 }
 
 /*!
-  Sets the minimum size for the inner \ref rect of this layout element. A parent layout tries to
-  respect the \a size here by changing row/column sizes in the layout accordingly.
+  Sets the minimum size of this layout element. A parent layout tries to respect the \a size here
+  by changing row/column sizes in the layout accordingly.
   
   If the parent layout size is not sufficient to satisfy all minimum size constraints of its child
   layout elements, the layout may set a size that is actually smaller than \a size. QCustomPlot
   propagates the layout's size constraints to the outside by setting its own minimum QWidget size
   accordingly, so violations of \a size should be exceptions.
+  
+  Whether this constraint applies to the inner or the outer rect can be specified with \ref
+  setSizeConstraintRect (see \ref rect and \ref outerRect).
 */
 void QCPLayoutElement::setMinimumSize(const QSize &size)
 {
@@ -3275,7 +3290,10 @@ void QCPLayoutElement::setMinimumSize(const QSize &size)
 
 /*! \overload
   
-  Sets the minimum size for the inner \ref rect of this layout element.
+  Sets the minimum size of this layout element.
+  
+  Whether this constraint applies to the inner or the outer rect can be specified with \ref
+  setSizeConstraintRect (see \ref rect and \ref outerRect).
 */
 void QCPLayoutElement::setMinimumSize(int width, int height)
 {
@@ -3283,8 +3301,11 @@ void QCPLayoutElement::setMinimumSize(int width, int height)
 }
 
 /*!
-  Sets the maximum size for the inner \ref rect of this layout element. A parent layout tries to
-  respect the \a size here by changing row/column sizes in the layout accordingly.
+  Sets the maximum size of this layout element. A parent layout tries to respect the \a size here
+  by changing row/column sizes in the layout accordingly.
+  
+  Whether this constraint applies to the inner or the outer rect can be specified with \ref
+  setSizeConstraintRect (see \ref rect and \ref outerRect).
 */
 void QCPLayoutElement::setMaximumSize(const QSize &size)
 {
@@ -3298,11 +3319,33 @@ void QCPLayoutElement::setMaximumSize(const QSize &size)
 
 /*! \overload
   
-  Sets the maximum size for the inner \ref rect of this layout element.
+  Sets the maximum size of this layout element.
+  
+  Whether this constraint applies to the inner or the outer rect can be specified with \ref
+  setSizeConstraintRect (see \ref rect and \ref outerRect).
 */
 void QCPLayoutElement::setMaximumSize(int width, int height)
 {
   setMaximumSize(QSize(width, height));
+}
+
+/*!
+  Sets to which rect of a layout element the size constraints apply. Size constraints can be set
+  via \ref setMinimumSize and \ref setMaximumSize.
+  
+  The outer rect (\ref outerRect) includes the margins (e.g. in the case of a QCPAxisRect the axis
+  labels), whereas the inner rect (\ref rect) does not.
+  
+  \see setMinimumSize, setMaximumSize
+*/
+void QCPLayoutElement::setSizeConstraintRect(SizeConstraintRect constraintRect)
+{
+  if (mSizeConstraintRect != constraintRect)
+  {
+    mSizeConstraintRect = constraintRect;
+    if (mParentLayout)
+      mParentLayout->sizeConstraintsChanged();
+  }
 }
 
 /*!
@@ -3387,27 +3430,41 @@ void QCPLayoutElement::update(UpdatePhase phase)
 }
 
 /*!
-  Returns the minimum size this layout element (the inner \ref rect) may be compressed to.
+  Returns the suggested minimum size this layout element (the \ref outerRect) may be compressed to,
+  if no manual minimum size is set.
   
-  if a minimum size (\ref setMinimumSize) was not set manually, parent layouts consult this
-  function to determine the minimum allowed size of this layout element. (A manual minimum size is
-  considered set if it is non-zero.)
+  if a minimum size (\ref setMinimumSize) was not set manually, parent layouts use the returned size
+  (usually indirectly through \ref QCPLayout::getFinalMinimumOuterSize) to determine the minimum
+  allowed size of this layout element.
+
+  A manual minimum size is considered set if it is non-zero.
+  
+  The default implementation simply returns the sum of the horizontal margins for the width and the
+  sum of the vertical margins for the height. Reimplementations may use their detailed knowledge
+  about the layout element's content to provide size hints.
 */
-QSize QCPLayoutElement::minimumSizeHint() const
+QSize QCPLayoutElement::minimumOuterSizeHint() const
 {
-  return mMinimumSize;
+  return QSize(mMargins.left()+mMargins.right(), mMargins.top()+mMargins.bottom());
 }
 
 /*!
-  Returns the maximum size this layout element (the inner \ref rect) may be expanded to.
+  Returns the suggested maximum size this layout element (the \ref outerRect) may be expanded to,
+  if no manual maximum size is set.
   
-  if a maximum size (\ref setMaximumSize) was not set manually, parent layouts consult this
-  function to determine the maximum allowed size of this layout element. (A manual maximum size is
-  considered set if it is smaller than Qt's QWIDGETSIZE_MAX.)
+  if a maximum size (\ref setMaximumSize) was not set manually, parent layouts use the returned
+  size (usually indirectly through \ref QCPLayout::getFinalMaximumOuterSize) to determine the
+  maximum allowed size of this layout element.
+
+  A manual maximum size is considered set if it is smaller than Qt's \c QWIDGETSIZE_MAX.
+  
+  The default implementation simply returns \c QWIDGETSIZE_MAX for both width and height, implying
+  no suggested maximum size. Reimplementations may use their detailed knowledge about the layout
+  element's content to provide size hints.
 */
-QSize QCPLayoutElement::maximumSizeHint() const
+QSize QCPLayoutElement::maximumOuterSizeHint() const
 {
-  return mMaximumSize;
+  return QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 }
 
 /*!
@@ -3917,6 +3974,56 @@ QVector<int> QCPLayout::getSectionSizes(QVector<int> maxSizes, QVector<int> minS
   return result;
 }
 
+/*! \internal
+  
+  This is a helper function for the implementation of subclasses.
+  
+  It returns the minimum size that should finally be used for the outer rect of the passed layout
+  element \a el.
+  
+  It takes into account whether a manual minimum size is set (\ref
+  QCPLayoutElement::setMinimumSize), which size constraint is set (\ref
+  QCPLayoutElement::setSizeConstraintRect), as well as the minimum size hint, if no manual minimum
+  size was set (\ref QCPLayoutElement::minimumOuterSizeHint).
+*/
+QSize QCPLayout::getFinalMinimumOuterSize(const QCPLayoutElement *el)
+{
+  QSize minOuterHint = el->minimumOuterSizeHint();
+  QSize minOuter = el->minimumSize(); // depending on sizeConstraitRect this might be with respect to inner rect, so possibly add margins in next four lines (preserving unset minimum of 0)
+  if (minOuter.width() > 0 && el->sizeConstraintRect() == QCPLayoutElement::scrInnerRect)
+    minOuter.rwidth() += el->margins().left() + el->margins().right();
+  if (minOuter.height() > 0 && el->sizeConstraintRect() == QCPLayoutElement::scrInnerRect)
+    minOuter.rheight() += el->margins().top() + el->margins().bottom();
+  
+  return QSize(minOuter.width() > 0 ? minOuter.width() : minOuterHint.width(),
+               minOuter.height() > 0 ? minOuter.height() : minOuterHint.height());;
+}
+
+/*! \internal
+  
+  This is a helper function for the implementation of subclasses.
+  
+  It returns the maximum size that should finally be used for the outer rect of the passed layout
+  element \a el.
+  
+  It takes into account whether a manual maximum size is set (\ref
+  QCPLayoutElement::setMaximumSize), which size constraint is set (\ref
+  QCPLayoutElement::setSizeConstraintRect), as well as the maximum size hint, if no manual maximum
+  size was set (\ref QCPLayoutElement::maximumOuterSizeHint).
+*/
+QSize QCPLayout::getFinalMaximumOuterSize(const QCPLayoutElement *el)
+{
+  QSize maxOuterHint = el->maximumOuterSizeHint();
+  QSize maxOuter = el->maximumSize(); // depending on sizeConstraitRect this might be with respect to inner rect, so possibly add margins in next four lines (preserving unset maximum of QWIDGETSIZE_MAX)
+  if (maxOuter.width() < QWIDGETSIZE_MAX && el->sizeConstraintRect() == QCPLayoutElement::scrInnerRect)
+    maxOuter.rwidth() += el->margins().left() + el->margins().right();
+  if (maxOuter.height() < QWIDGETSIZE_MAX && el->sizeConstraintRect() == QCPLayoutElement::scrInnerRect)
+    maxOuter.rheight() += el->margins().top() + el->margins().bottom();
+  
+  return QSize(maxOuter.width() < QWIDGETSIZE_MAX ? maxOuter.width() : maxOuterHint.width(),
+               maxOuter.height() < QWIDGETSIZE_MAX ? maxOuter.height() : maxOuterHint.height());
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLayoutGrid
@@ -4092,8 +4199,9 @@ bool QCPLayoutGrid::hasElement(int row, int column)
   Sets the stretch \a factor of \a column.
   
   Stretch factors control the relative sizes of rows and columns. Cells will not be resized beyond
-  their minimum and maximum widths/heights (\ref QCPLayoutElement::setMinimumSize, \ref
-  QCPLayoutElement::setMaximumSize), regardless of the stretch factor.
+  their minimum and maximum widths/heights, regardless of the stretch factor. (see \ref
+  QCPLayoutElement::setMinimumSize, \ref QCPLayoutElement::setMaximumSize, \ref
+  QCPLayoutElement::setSizeConstraintRect.)
   
   The default stretch factor of newly created rows/columns is 1.
   
@@ -4115,8 +4223,9 @@ void QCPLayoutGrid::setColumnStretchFactor(int column, double factor)
   Sets the stretch \a factors of all columns. \a factors must have the size \ref columnCount.
   
   Stretch factors control the relative sizes of rows and columns. Cells will not be resized beyond
-  their minimum and maximum widths/heights (\ref QCPLayoutElement::setMinimumSize, \ref
-  QCPLayoutElement::setMaximumSize), regardless of the stretch factor.
+  their minimum and maximum widths/heights, regardless of the stretch factor. (see \ref
+  QCPLayoutElement::setMinimumSize, \ref QCPLayoutElement::setMaximumSize, \ref
+  QCPLayoutElement::setSizeConstraintRect.)
   
   The default stretch factor of newly created rows/columns is 1.
   
@@ -4143,8 +4252,9 @@ void QCPLayoutGrid::setColumnStretchFactors(const QList<double> &factors)
   Sets the stretch \a factor of \a row.
   
   Stretch factors control the relative sizes of rows and columns. Cells will not be resized beyond
-  their minimum and maximum widths/heights (\ref QCPLayoutElement::setMinimumSize, \ref
-  QCPLayoutElement::setMaximumSize), regardless of the stretch factor.
+  their minimum and maximum widths/heights, regardless of the stretch factor. (see \ref
+  QCPLayoutElement::setMinimumSize, \ref QCPLayoutElement::setMaximumSize, \ref
+  QCPLayoutElement::setSizeConstraintRect.)
   
   The default stretch factor of newly created rows/columns is 1.
   
@@ -4166,8 +4276,9 @@ void QCPLayoutGrid::setRowStretchFactor(int row, double factor)
   Sets the stretch \a factors of all rows. \a factors must have the size \ref rowCount.
   
   Stretch factors control the relative sizes of rows and columns. Cells will not be resized beyond
-  their minimum and maximum widths/heights (\ref QCPLayoutElement::setMinimumSize, \ref
-  QCPLayoutElement::setMaximumSize), regardless of the stretch factor.
+  their minimum and maximum widths/heights, regardless of the stretch factor. (see \ref
+  QCPLayoutElement::setMinimumSize, \ref QCPLayoutElement::setMaximumSize, \ref
+  QCPLayoutElement::setSizeConstraintRect.)
   
   The default stretch factor of newly created rows/columns is 1.
   
@@ -4602,7 +4713,7 @@ void QCPLayoutGrid::simplify()
 }
 
 /* inherits documentation from base class */
-QSize QCPLayoutGrid::minimumSizeHint() const
+QSize QCPLayoutGrid::minimumOuterSizeHint() const
 {
   QVector<int> minColWidths, minRowHeights;
   getMinimumRowColSizes(&minColWidths, &minRowHeights);
@@ -4611,13 +4722,15 @@ QSize QCPLayoutGrid::minimumSizeHint() const
     result.rwidth() += minColWidths.at(i);
   for (int i=0; i<minRowHeights.size(); ++i)
     result.rheight() += minRowHeights.at(i);
-  result.rwidth() += qMax(0, columnCount()-1) * mColumnSpacing + mMargins.left() + mMargins.right();
-  result.rheight() += qMax(0, rowCount()-1) * mRowSpacing + mMargins.top() + mMargins.bottom();
+  result.rwidth() += qMax(0, columnCount()-1) * mColumnSpacing;
+  result.rheight() += qMax(0, rowCount()-1) * mRowSpacing;
+  result.rwidth() += mMargins.left()+mMargins.right();
+  result.rheight() += mMargins.top()+mMargins.bottom();
   return result;
 }
 
 /* inherits documentation from base class */
-QSize QCPLayoutGrid::maximumSizeHint() const
+QSize QCPLayoutGrid::maximumOuterSizeHint() const
 {
   QVector<int> maxColWidths, maxRowHeights;
   getMaximumRowColSizes(&maxColWidths, &maxRowHeights);
@@ -4627,8 +4740,14 @@ QSize QCPLayoutGrid::maximumSizeHint() const
     result.setWidth(qMin(result.width()+maxColWidths.at(i), QWIDGETSIZE_MAX));
   for (int i=0; i<maxRowHeights.size(); ++i)
     result.setHeight(qMin(result.height()+maxRowHeights.at(i), QWIDGETSIZE_MAX));
-  result.rwidth() += qMax(0, columnCount()-1) * mColumnSpacing + mMargins.left() + mMargins.right();
-  result.rheight() += qMax(0, rowCount()-1) * mRowSpacing + mMargins.top() + mMargins.bottom();
+  result.rwidth() += qMax(0, columnCount()-1) * mColumnSpacing;
+  result.rheight() += qMax(0, rowCount()-1) * mRowSpacing;
+  result.rwidth() += mMargins.left()+mMargins.right();
+  result.rheight() += mMargins.top()+mMargins.bottom();
+  if (result.height() > QWIDGETSIZE_MAX)
+    result.setHeight(QWIDGETSIZE_MAX);
+  if (result.width() > QWIDGETSIZE_MAX)
+    result.setWidth(QWIDGETSIZE_MAX);
   return result;
 }
 
@@ -4637,8 +4756,9 @@ QSize QCPLayoutGrid::maximumSizeHint() const
   Places the minimum column widths and row heights into \a minColWidths and \a minRowHeights
   respectively.
   
-  The minimum height of a row is the largest minimum height of any element in that row. The minimum
-  width of a column is the largest minimum width of any element in that column.
+  The minimum height of a row is the largest minimum height of any element's outer rect in that
+  row. The minimum width of a column is the largest minimum width of any element's outer rect in
+  that column.
   
   This is a helper function for \ref updateLayout.
   
@@ -4652,15 +4772,13 @@ void QCPLayoutGrid::getMinimumRowColSizes(QVector<int> *minColWidths, QVector<in
   {
     for (int col=0; col<columnCount(); ++col)
     {
-      if (mElements.at(row).at(col))
+      if (QCPLayoutElement *el = mElements.at(row).at(col))
       {
-        QSize minHint = mElements.at(row).at(col)->minimumSizeHint();
-        QSize min = mElements.at(row).at(col)->minimumSize();
-        QSize final(min.width() > 0 ? min.width() : minHint.width(), min.height() > 0 ? min.height() : minHint.height());
-        if (minColWidths->at(col) < final.width())
-          (*minColWidths)[col] = final.width();
-        if (minRowHeights->at(row) < final.height())
-          (*minRowHeights)[row] = final.height();
+        QSize minSize = getFinalMinimumOuterSize(el);
+        if (minColWidths->at(col) < minSize.width())
+          (*minColWidths)[col] = minSize.width();
+        if (minRowHeights->at(row) < minSize.height())
+          (*minRowHeights)[row] = minSize.height();
       }
     }
   }
@@ -4671,8 +4789,9 @@ void QCPLayoutGrid::getMinimumRowColSizes(QVector<int> *minColWidths, QVector<in
   Places the maximum column widths and row heights into \a maxColWidths and \a maxRowHeights
   respectively.
   
-  The maximum height of a row is the smallest maximum height of any element in that row. The
-  maximum width of a column is the smallest maximum width of any element in that column.
+  The maximum height of a row is the smallest maximum height of any element's outer rect in that
+  row. The maximum width of a column is the smallest maximum width of any element's outer rect in
+  that column.
   
   This is a helper function for \ref updateLayout.
   
@@ -4686,15 +4805,13 @@ void QCPLayoutGrid::getMaximumRowColSizes(QVector<int> *maxColWidths, QVector<in
   {
     for (int col=0; col<columnCount(); ++col)
     {
-      if (mElements.at(row).at(col))
+      if (QCPLayoutElement *el = mElements.at(row).at(col))
       {
-        QSize maxHint = mElements.at(row).at(col)->maximumSizeHint();
-        QSize max = mElements.at(row).at(col)->maximumSize();
-        QSize final(max.width() < QWIDGETSIZE_MAX ? max.width() : maxHint.width(), max.height() < QWIDGETSIZE_MAX ? max.height() : maxHint.height());
-        if (maxColWidths->at(col) > final.width())
-          (*maxColWidths)[col] = final.width();
-        if (maxRowHeights->at(row) > final.height())
-          (*maxRowHeights)[row] = final.height();
+        QSize maxSize = getFinalMaximumOuterSize(el);
+        if (maxColWidths->at(col) > maxSize.width())
+          (*maxColWidths)[col] = maxSize.width();
+        if (maxRowHeights->at(row) > maxSize.height())
+          (*maxRowHeights)[row] = maxSize.height();
       }
     }
   }
@@ -4843,14 +4960,10 @@ void QCPLayoutInset::updateLayout()
 {
   for (int i=0; i<mElements.size(); ++i)
   {
+    QCPLayoutElement *el = mElements.at(i);
     QRect insetRect;
-    QSize finalMinSize, finalMaxSize;
-    QSize minSizeHint = mElements.at(i)->minimumSizeHint();
-    QSize maxSizeHint = mElements.at(i)->maximumSizeHint();
-    finalMinSize.setWidth(mElements.at(i)->minimumSize().width() > 0 ? mElements.at(i)->minimumSize().width() : minSizeHint.width());
-    finalMinSize.setHeight(mElements.at(i)->minimumSize().height() > 0 ? mElements.at(i)->minimumSize().height() : minSizeHint.height());
-    finalMaxSize.setWidth(mElements.at(i)->maximumSize().width() < QWIDGETSIZE_MAX ? mElements.at(i)->maximumSize().width() : maxSizeHint.width());
-    finalMaxSize.setHeight(mElements.at(i)->maximumSize().height() < QWIDGETSIZE_MAX ? mElements.at(i)->maximumSize().height() : maxSizeHint.height());
+    QSize finalMinSize = getFinalMinimumOuterSize(el);
+    QSize finalMaxSize = getFinalMaximumOuterSize(el);
     if (mInsetPlacement.at(i) == ipFree)
     {
       insetRect = QRect(rect().x()+rect().width()*mInsetRect.at(i).x(),
@@ -5012,7 +5125,7 @@ void QCPLayoutInset::addElement(QCPLayoutElement *element, const QRectF &rect)
 
 
 /* including file 'src/lineending.cpp', size 11536                           */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLineEnding
@@ -5311,7 +5424,7 @@ void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, double ang
 
 
 /* including file 'src/axis/axisticker.cpp', size 18664                      */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTicker
@@ -5731,7 +5844,7 @@ double QCPAxisTicker::cleanMantissa(double input) const
 
 
 /* including file 'src/axis/axistickerdatetime.cpp', size 14443              */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerDateTime
@@ -6028,7 +6141,7 @@ double QCPAxisTickerDateTime::dateTimeToKey(const QDate date)
 
 
 /* including file 'src/axis/axistickertime.cpp', size 11747                  */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerTime
@@ -6277,7 +6390,7 @@ void QCPAxisTickerTime::replaceUnit(QString &text, QCPAxisTickerTime::TimeUnit u
 
 
 /* including file 'src/axis/axistickerfixed.cpp', size 5583                  */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerFixed
@@ -6379,7 +6492,7 @@ double QCPAxisTickerFixed::getTickStep(const QCPRange &range)
 
 
 /* including file 'src/axis/axistickertext.cpp', size 8653                   */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerText
@@ -6592,7 +6705,7 @@ QVector<double> QCPAxisTickerText::createTickVector(double tickStep, const QCPRa
 
 
 /* including file 'src/axis/axistickerpi.cpp', size 11170                    */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerPi
@@ -6879,7 +6992,7 @@ QString QCPAxisTickerPi::unicodeSubscript(int number) const
 
 
 /* including file 'src/axis/axistickerlog.cpp', size 7106                    */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerLog
@@ -7019,8 +7132,8 @@ QVector<double> QCPAxisTickerLog::createTickVector(double tickStep, const QCPRan
 /* end of 'src/axis/axistickerlog.cpp' */
 
 
-/* including file 'src/axis/axis.cpp', size 94538                            */
-/* commit e54a31c5ad07498dc0cc8e6afff77a8efdc72439 2017-07-25 11:51:42 +0200 */
+/* including file 'src/axis/axis.cpp', size 99397                            */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8684,6 +8797,137 @@ void QCPAxis::deselectEvent(bool *selectionStateChanged)
 }
 
 /*! \internal
+  
+  This mouse event reimplementation provides the functionality to let the user drag individual axes
+  exclusively, by startig the drag on top of the axis.
+
+  For the axis to accept this event and perform the single axis drag, the parent \ref QCPAxisRect
+  must be configured accordingly, i.e. it must allow range dragging in the orientation of this axis
+  (\ref QCPAxisRect::setRangeDrag) and this axis must be a draggable axis (\ref
+  QCPAxisRect::setRangeDragAxes)
+  
+  \seebaseclassmethod
+  
+  \note The dragging of possibly multiple axes at once by starting the drag anywhere in the axis
+  rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::mousePressEvent.
+*/
+void QCPAxis::mousePressEvent(QMouseEvent *event, const QVariant &details)
+{
+  Q_UNUSED(details)
+  if (!mParentPlot->interactions().testFlag(QCP::iRangeDrag) ||
+      !mAxisRect->rangeDrag().testFlag(orientation()) ||
+      !mAxisRect->rangeDragAxes(orientation()).contains(this))
+  {
+    event->ignore();
+    return;
+  }
+  
+  if (event->buttons() & Qt::LeftButton)
+  {
+    mDragging = true;
+    // initialize antialiasing backup in case we start dragging:
+    if (mParentPlot->noAntialiasingOnDrag())
+    {
+      mAADragBackup = mParentPlot->antialiasedElements();
+      mNotAADragBackup = mParentPlot->notAntialiasedElements();
+    }
+    // Mouse range dragging interaction:
+    if (mParentPlot->interactions().testFlag(QCP::iRangeDrag))
+      mDragStartRange = mRange;
+  }
+}
+
+/*! \internal
+  
+  This mouse event reimplementation provides the functionality to let the user drag individual axes
+  exclusively, by startig the drag on top of the axis.
+  
+  \seebaseclassmethod
+  
+  \note The dragging of possibly multiple axes at once by starting the drag anywhere in the axis
+  rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::mousePressEvent.
+  
+  \see QCPAxis::mousePressEvent
+*/
+void QCPAxis::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
+{
+  if (mDragging)
+  {
+    const double startPixel = orientation() == Qt::Horizontal ? startPos.x() : startPos.y();
+    const double currentPixel = orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y();
+    if (mScaleType == QCPAxis::stLinear)
+    {
+      const double diff = pixelToCoord(startPixel) - pixelToCoord(currentPixel);
+      setRange(mDragStartRange.lower+diff, mDragStartRange.upper+diff);
+    } else if (mScaleType == QCPAxis::stLogarithmic)
+    {
+      const double diff = pixelToCoord(startPixel) / pixelToCoord(currentPixel);
+      setRange(mDragStartRange.lower*diff, mDragStartRange.upper*diff);
+    }
+    
+    if (mParentPlot->noAntialiasingOnDrag())
+      mParentPlot->setNotAntialiasedElements(QCP::aeAll);
+    mParentPlot->replot(QCustomPlot::rpQueuedReplot);
+  }
+}
+
+/*! \internal
+  
+  This mouse event reimplementation provides the functionality to let the user drag individual axes
+  exclusively, by startig the drag on top of the axis.
+  
+  \seebaseclassmethod
+  
+  \note The dragging of possibly multiple axes at once by starting the drag anywhere in the axis
+  rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::mousePressEvent.
+  
+  \see QCPAxis::mousePressEvent
+*/
+void QCPAxis::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
+{
+  Q_UNUSED(event)
+  Q_UNUSED(startPos)
+  mDragging = false;
+  if (mParentPlot->noAntialiasingOnDrag())
+  {
+    mParentPlot->setAntialiasedElements(mAADragBackup);
+    mParentPlot->setNotAntialiasedElements(mNotAADragBackup);
+  }
+}
+
+/*! \internal
+  
+  This mouse event reimplementation provides the functionality to let the user zoom individual axes
+  exclusively, by performing the wheel event on top of the axis.
+
+  For the axis to accept this event and perform the single axis zoom, the parent \ref QCPAxisRect
+  must be configured accordingly, i.e. it must allow range zooming in the orientation of this axis
+  (\ref QCPAxisRect::setRangeZoom) and this axis must be a zoomable axis (\ref
+  QCPAxisRect::setRangeZoomAxes)
+  
+  \seebaseclassmethod
+  
+  \note The zooming of possibly multiple axes at once by performing the wheel event anywhere in the
+  axis rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::wheelEvent.
+*/
+void QCPAxis::wheelEvent(QWheelEvent *event)
+{
+  // Mouse range zooming interaction:
+  if (!mParentPlot->interactions().testFlag(QCP::iRangeZoom) ||
+      !mAxisRect->rangeZoom().testFlag(orientation()) ||
+      !mAxisRect->rangeZoomAxes(orientation()).contains(this))
+  {
+    event->ignore();
+    return;
+  }
+  
+  const double wheelSteps = event->delta()/120.0; // a single step delta is +/-120 usually
+  const double factor = qPow(mAxisRect->rangeZoomFactor(orientation()), wheelSteps);
+  scaleRange(factor, pixelToCoord(orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y()));
+  mParentPlot->replot();
+}
+
+/*! \internal
 
   A convenience function to easily set the QPainter::Antialiased hint on the provided \a painter
   before drawing axis lines.
@@ -9575,7 +9819,7 @@ void QCPAxisPainterPrivate::getMaxTickLabelSize(const QFont &font, const QString
 
 
 /* including file 'src/scatterstyle.cpp', size 17450                         */
-/* commit 820d2282db70144c358c13433cd74b4175f9252b 2017-07-24 00:24:17 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPScatterStyle
@@ -10048,8 +10292,8 @@ void QCPScatterStyle::drawShape(QCPPainter *painter, double x, double y) const
 
 //amalgamation: add datacontainer.cpp
 
-/* including file 'src/plottable.cpp', size 38906                            */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* including file 'src/plottable.cpp', size 38847                            */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionDecorator
@@ -10087,8 +10331,8 @@ void QCPScatterStyle::drawShape(QCPPainter *painter, double x, double y) const
 QCPSelectionDecorator::QCPSelectionDecorator() :
   mPen(QColor(80, 80, 255), 2.5),
   mBrush(Qt::NoBrush),
-  mScatterStyle(QCPScatterStyle::ssNone, QPen(Qt::blue, 2), Qt::NoBrush, 6.0),
-  mUsedScatterProperties(QCPScatterStyle::spPen),
+  mScatterStyle(),
+  mUsedScatterProperties(QCPScatterStyle::spNone),
   mPlottable(0)
 {
 }
@@ -11022,7 +11266,7 @@ void QCPAbstractPlottable::deselectEvent(bool *selectionStateChanged)
 
 
 /* including file 'src/item.cpp', size 49273                                 */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemAnchor
@@ -12292,8 +12536,8 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
 /* end of 'src/item.cpp' */
 
 
-/* including file 'src/core.cpp', size 124780                                */
-/* commit e7c6a5540d344a96d107dce53f9d4414a09a7320 2017-07-25 00:52:29 +0200 */
+/* including file 'src/core.cpp', size 125037                                */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCustomPlot
@@ -13035,6 +13279,10 @@ void QCustomPlot::setSelectionRect(QCPSelectionRect *selectionRect)
 }
 
 /*!
+  \warning This is still an experimental feature and its performance depends on the system that it
+  runs on. Having multiple QCustomPlot widgets in one application with enabled OpenGL rendering
+  might cause context conflicts on some systems.
+  
   This method allows to enable OpenGL plot rendering, for increased plotting performance of
   graphically demanding plots (thick lines, translucent fills, etc.).
 
@@ -14449,7 +14697,7 @@ bool QCustomPlot::saveBmp(const QString &fileName, int width, int height, double
 */
 QSize QCustomPlot::minimumSizeHint() const
 {
-  return mPlotLayout->minimumSizeHint();
+  return mPlotLayout->minimumOuterSizeHint();
 }
 
 /*! \internal
@@ -14459,7 +14707,7 @@ QSize QCustomPlot::minimumSizeHint() const
 */
 QSize QCustomPlot::sizeHint() const
 {
-  return mPlotLayout->minimumSizeHint();
+  return mPlotLayout->minimumOuterSizeHint();
 }
 
 /*! \internal
@@ -15471,7 +15719,7 @@ void QCustomPlot::toPainter(QCPPainter *painter, int width, int height)
 //amalgamation: add plottable1d.cpp
 
 /* including file 'src/colorgradient.cpp', size 24646                        */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -16111,7 +16359,7 @@ void QCPColorGradient::updateColorBuffer()
 
 
 /* including file 'src/selectiondecorator-bracket.cpp', size 12313           */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionDecoratorBracket
@@ -16396,8 +16644,8 @@ QPointF QCPSelectionDecoratorBracket::getPixelCoordinates(const QCPPlottableInte
 /* end of 'src/selectiondecorator-bracket.cpp' */
 
 
-/* including file 'src/layoutelements/layoutelement-axisrect.cpp', size 47783 */
-/* commit 2b8dbc48bcac796ff32327373a355a02b1ac1252 2017-07-30 14:44:21 +0200  */
+/* including file 'src/layoutelements/layoutelement-axisrect.cpp', size 47592 */
+/* commit 3608839fbc65334dd4666baa2dadbb6d666e8690 2017-07-30 14:44:21 +0200  */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17522,7 +17770,6 @@ void QCPAxisRect::layoutChanged()
 void QCPAxisRect::mousePressEvent(QMouseEvent *event, const QVariant &details)
 {
   Q_UNUSED(details)
-  mDragStart = event->pos(); // need this even when not LeftButton is pressed, to determine in releaseEvent whether it was a full click (no position change between press and release)
   if (event->buttons() & Qt::LeftButton)
   {
     mDragging = true;
@@ -17570,11 +17817,11 @@ void QCPAxisRect::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
           break;
         if (ax->mScaleType == QCPAxis::stLinear)
         {
-          double diff = ax->pixelToCoord(mDragStart.x()) - ax->pixelToCoord(event->pos().x());
+          double diff = ax->pixelToCoord(startPos.x()) - ax->pixelToCoord(event->pos().x());
           ax->setRange(mDragStartHorzRange.at(i).lower+diff, mDragStartHorzRange.at(i).upper+diff);
         } else if (ax->mScaleType == QCPAxis::stLogarithmic)
         {
-          double diff = ax->pixelToCoord(mDragStart.x()) / ax->pixelToCoord(event->pos().x());
+          double diff = ax->pixelToCoord(startPos.x()) / ax->pixelToCoord(event->pos().x());
           ax->setRange(mDragStartHorzRange.at(i).lower*diff, mDragStartHorzRange.at(i).upper*diff);
         }
       }
@@ -17591,11 +17838,11 @@ void QCPAxisRect::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
           break;
         if (ax->mScaleType == QCPAxis::stLinear)
         {
-          double diff = ax->pixelToCoord(mDragStart.y()) - ax->pixelToCoord(event->pos().y());
+          double diff = ax->pixelToCoord(startPos.y()) - ax->pixelToCoord(event->pos().y());
           ax->setRange(mDragStartVertRange.at(i).lower+diff, mDragStartVertRange.at(i).upper+diff);
         } else if (ax->mScaleType == QCPAxis::stLogarithmic)
         {
-          double diff = ax->pixelToCoord(mDragStart.y()) / ax->pixelToCoord(event->pos().y());
+          double diff = ax->pixelToCoord(startPos.y()) / ax->pixelToCoord(event->pos().y());
           ax->setRange(mDragStartVertRange.at(i).lower*diff, mDragStartVertRange.at(i).upper*diff);
         }
       }
@@ -17672,8 +17919,8 @@ void QCPAxisRect::wheelEvent(QWheelEvent *event)
 /* end of 'src/layoutelements/layoutelement-axisrect.cpp' */
 
 
-/* including file 'src/layoutelements/layoutelement-legend.cpp', size 30734  */
-/* commit 820d2282db70144c358c13433cd74b4175f9252b 2017-07-24 00:24:17 +0200 */
+/* including file 'src/layoutelements/layoutelement-legend.cpp', size 31097  */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAbstractLegendItem
@@ -17931,8 +18178,8 @@ QFont QCPPlottableLegendItem::getFont() const
 /*! \internal
   
   Draws the item with \a painter. The size and position of the drawn legend item is defined by the
-  parent layout (typically a \ref QCPLegend) and the \ref minimumSizeHint and \ref maximumSizeHint
-  of this legend item.
+  parent layout (typically a \ref QCPLegend) and the \ref minimumOuterSizeHint and \ref
+  maximumOuterSizeHint of this legend item.
 */
 void QCPPlottableLegendItem::draw(QCPPainter *painter)
 {
@@ -17967,7 +18214,7 @@ void QCPPlottableLegendItem::draw(QCPPainter *painter)
   
   \seebaseclassmethod
 */
-QSize QCPPlottableLegendItem::minimumSizeHint() const
+QSize QCPPlottableLegendItem::minimumOuterSizeHint() const
 {
   if (!mPlottable) return QSize();
   QSize result(0, 0);
@@ -17975,8 +18222,10 @@ QSize QCPPlottableLegendItem::minimumSizeHint() const
   QFontMetrics fontMetrics(getFont());
   QSize iconSize = mParentLegend->iconSize();
   textRect = fontMetrics.boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip, mPlottable->name());
-  result.setWidth(iconSize.width() + mParentLegend->iconTextPadding() + textRect.width() + mMargins.left() + mMargins.right());
-  result.setHeight(qMax(textRect.height(), iconSize.height()) + mMargins.top() + mMargins.bottom());
+  result.setWidth(iconSize.width() + mParentLegend->iconTextPadding() + textRect.width());
+  result.setHeight(qMax(textRect.height(), iconSize.height()));
+  result.rwidth() += mMargins.left()+mMargins.right();
+  result.rheight() += mMargins.top()+mMargins.bottom();
   return result;
 }
 
@@ -17990,10 +18239,14 @@ QSize QCPPlottableLegendItem::minimumSizeHint() const
 
   A legend is a small box somewhere in the plot which lists plottables with their name and icon.
 
-  Normally, the legend is populated by calling \ref QCPAbstractPlottable::addToLegend. The
-  respective legend item can be removed with \ref QCPAbstractPlottable::removeFromLegend. However,
-  QCPLegend also offers an interface to add and manipulate legend items directly: \ref item, \ref
-  itemWithPlottable, \ref itemCount, \ref addItem, \ref removeItem, etc.
+  A legend is populated with legend items by calling \ref QCPAbstractPlottable::addToLegend on the
+  plottable, for which a legend item shall be created. In the case of the main legend (\ref
+  QCustomPlot::legend), simply adding plottables to the plot while \ref
+  QCustomPlot::setAutoAddPlottableToLegend is set to true (the default) creates corresponding
+  legend items. The legend item associated with a certain plottable can be removed with \ref
+  QCPAbstractPlottable::removeFromLegend. However, QCPLegend also offers an interface to add and
+  manipulate legend items directly: \ref item, \ref itemWithPlottable, \ref itemCount, \ref
+  addItem, \ref removeItem, etc.
 
   Since \ref QCPLegend derives from \ref QCPLayoutGrid, it can be placed in any position a \ref
   QCPLayoutElement may be positioned. The legend items are themselves \ref QCPLayoutElement
@@ -18582,8 +18835,8 @@ void QCPLegend::parentPlotInitialized(QCustomPlot *parentPlot)
 /* end of 'src/layoutelements/layoutelement-legend.cpp' */
 
 
-/* including file 'src/layoutelements/layoutelement-textelement.cpp', size 12759 */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200     */
+/* including file 'src/layoutelements/layoutelement-textelement.cpp', size 12761 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200     */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPTextElement
@@ -18862,22 +19115,22 @@ void QCPTextElement::draw(QCPPainter *painter)
 }
 
 /* inherits documentation from base class */
-QSize QCPTextElement::minimumSizeHint() const
+QSize QCPTextElement::minimumOuterSizeHint() const
 {
   QFontMetrics metrics(mFont);
-  QSize result = metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size();
-  result.rwidth() += mMargins.left() + mMargins.right();
-  result.rheight() += mMargins.top() + mMargins.bottom();
+  QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size());
+  result.rwidth() += mMargins.left()+mMargins.right();
+  result.rheight() += mMargins.top()+mMargins.bottom();
   return result;
 }
 
 /* inherits documentation from base class */
-QSize QCPTextElement::maximumSizeHint() const
+QSize QCPTextElement::maximumOuterSizeHint() const
 {
   QFontMetrics metrics(mFont);
-  QSize result = metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size();
-  result.rheight() += mMargins.top() + mMargins.bottom();
+  QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size());
   result.setWidth(QWIDGETSIZE_MAX);
+  result.rheight() += mMargins.top()+mMargins.bottom();
   return result;
 }
 
@@ -18986,8 +19239,8 @@ QColor QCPTextElement::mainTextColor() const
 /* end of 'src/layoutelements/layoutelement-textelement.cpp' */
 
 
-/* including file 'src/layoutelements/layoutelement-colorscale.cpp', size 25910 */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200    */
+/* including file 'src/layoutelements/layoutelement-colorscale.cpp', size 25770 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200    */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19408,12 +19661,12 @@ void QCPColorScale::update(UpdatePhase phase)
     {
       if (mType == QCPAxis::atBottom || mType == QCPAxis::atTop)
       {
-        setMaximumSize(QWIDGETSIZE_MAX, mBarWidth+mAxisRect.data()->margins().top()+mAxisRect.data()->margins().bottom()+margins().top()+margins().bottom());
-        setMinimumSize(0,               mBarWidth+mAxisRect.data()->margins().top()+mAxisRect.data()->margins().bottom()+margins().top()+margins().bottom());
+        setMaximumSize(QWIDGETSIZE_MAX, mBarWidth+mAxisRect.data()->margins().top()+mAxisRect.data()->margins().bottom());
+        setMinimumSize(0,               mBarWidth+mAxisRect.data()->margins().top()+mAxisRect.data()->margins().bottom());
       } else
       {
-        setMaximumSize(mBarWidth+mAxisRect.data()->margins().left()+mAxisRect.data()->margins().right()+margins().left()+margins().right(), QWIDGETSIZE_MAX);
-        setMinimumSize(mBarWidth+mAxisRect.data()->margins().left()+mAxisRect.data()->margins().right()+margins().left()+margins().right(), 0);
+        setMaximumSize(mBarWidth+mAxisRect.data()->margins().left()+mAxisRect.data()->margins().right(), QWIDGETSIZE_MAX);
+        setMinimumSize(mBarWidth+mAxisRect.data()->margins().left()+mAxisRect.data()->margins().right(), 0);
       }
       break;
     }
@@ -19646,8 +19899,8 @@ void QCPColorScaleAxisRectPrivate::axisSelectableChanged(QCPAxis::SelectablePart
 /* end of 'src/layoutelements/layoutelement-colorscale.cpp' */
 
 
-/* including file 'src/plottables/plottable-graph.cpp', size 73904           */
-/* commit f3881770eaf7366171012ad01cad2aaf5f61dd27 2017-06-23 02:48:21 +0200 */
+/* including file 'src/plottables/plottable-graph.cpp', size 73960           */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPGraphData
@@ -21244,8 +21497,8 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData
 /*! \internal
   
   Finds the smallest index of \a data, whose points x value is just above \a x. Assumes x values in
-  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
-  horizontal.
+  \a data points are ordered ascending, as is ensured by \ref getLines/\ref getScatters if the key
+  axis is horizontal.
 
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
@@ -21267,8 +21520,8 @@ int QCPGraph::findIndexAboveX(const QVector<QPointF> *data, double x) const
 /*! \internal
   
   Finds the highest index of \a data, whose points x value is just below \a x. Assumes x values in
-  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
-  horizontal.
+  \a data points are ordered ascending, as is ensured by \ref getLines/\ref getScatters if the key
+  axis is horizontal.
   
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
@@ -21290,8 +21543,8 @@ int QCPGraph::findIndexBelowX(const QVector<QPointF> *data, double x) const
 /*! \internal
   
   Finds the smallest index of \a data, whose points y value is just above \a y. Assumes y values in
-  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
-  vertical.
+  \a data points are ordered ascending, as is ensured by \ref getLines/\ref getScatters if the key
+  axis is vertical.
   
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
@@ -21372,8 +21625,8 @@ double QCPGraph::pointDistance(const QPointF &pixelPoint, QCPGraphDataContainer:
 /*! \internal
   
   Finds the highest index of \a data, whose points y value is just below \a y. Assumes y values in
-  \a data points are ordered ascending, as is ensured by \ref getPlotData if the key axis is
-  vertical.
+  \a data points are ordered ascending, as is ensured by \ref getLines/\ref getScatters if the key
+  axis is vertical.
 
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
@@ -21395,7 +21648,7 @@ int QCPGraph::findIndexBelowY(const QVector<QPointF> *data, double y) const
 
 
 /* including file 'src/plottables/plottable-curve.cpp', size 63527           */
-/* commit 63bcca79007f7f56dce5dd035560f2e871d1dfc1 2017-07-20 18:02:21 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPCurveData
@@ -22844,7 +23097,7 @@ double QCPCurve::pointDistance(const QPointF &pixelPoint, QCPCurveDataContainer:
 
 
 /* including file 'src/plottables/plottable-bars.cpp', size 43512            */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24012,7 +24265,7 @@ void QCPBars::connectBars(QCPBars *lower, QCPBars *upper)
 
 
 /* including file 'src/plottables/plottable-statisticalbox.cpp', size 28622  */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPStatisticalBoxData
@@ -24665,8 +24918,8 @@ QVector<QLineF> QCPStatisticalBox::getWhiskerBarLines(QCPStatisticalBoxDataConta
 /* end of 'src/plottables/plottable-statisticalbox.cpp' */
 
 
-/* including file 'src/plottables/plottable-colormap.cpp', size 47570        */
-/* commit 6f6fa32c558895255d3f469483db8ed1fa8aedc2 2016-12-01 22:29:31 +0100 */
+/* including file 'src/plottables/plottable-colormap.cpp', size 47881        */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPColorMapData
@@ -25650,52 +25903,60 @@ void QCPColorMap::updateMapImage()
   else if (keyAxis->orientation() == Qt::Vertical && (mMapImage.width() != valueSize*valueOversamplingFactor || mMapImage.height() != keySize*keyOversamplingFactor))
     mMapImage = QImage(QSize(valueSize*valueOversamplingFactor, keySize*keyOversamplingFactor), format);
   
-  QImage *localMapImage = &mMapImage; // this is the image on which the colorization operates. Either the final mMapImage, or if we need oversampling, mUndersampledMapImage
-  if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1)
+  if (mMapImage.isNull())
   {
-    // resize undersampled map image to actual key/value cell sizes:
-    if (keyAxis->orientation() == Qt::Horizontal && (mUndersampledMapImage.width() != keySize || mUndersampledMapImage.height() != valueSize))
-      mUndersampledMapImage = QImage(QSize(keySize, valueSize), format);
-    else if (keyAxis->orientation() == Qt::Vertical && (mUndersampledMapImage.width() != valueSize || mUndersampledMapImage.height() != keySize))
-      mUndersampledMapImage = QImage(QSize(valueSize, keySize), format);
-    localMapImage = &mUndersampledMapImage; // make the colorization run on the undersampled image
-  } else if (!mUndersampledMapImage.isNull())
-    mUndersampledMapImage = QImage(); // don't need oversampling mechanism anymore (map size has changed) but mUndersampledMapImage still has nonzero size, free it
-  
-  const double *rawData = mMapData->mData;
-  const unsigned char *rawAlpha = mMapData->mAlpha;
-  if (keyAxis->orientation() == Qt::Horizontal)
+    qDebug() << Q_FUNC_INFO << "Couldn't create map image (possibly too large for memory)";
+    mMapImage = QImage(QSize(10, 10), format);
+    mMapImage.fill(Qt::black);
+  } else
   {
-    const int lineCount = valueSize;
-    const int rowCount = keySize;
-    for (int line=0; line<lineCount; ++line)
+    QImage *localMapImage = &mMapImage; // this is the image on which the colorization operates. Either the final mMapImage, or if we need oversampling, mUndersampledMapImage
+    if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1)
     {
-      QRgb* pixels = reinterpret_cast<QRgb*>(localMapImage->scanLine(lineCount-1-line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
-      if (rawAlpha)
-        mGradient.colorize(rawData+line*rowCount, rawAlpha+line*rowCount, mDataRange, pixels, rowCount, 1, mDataScaleType==QCPAxis::stLogarithmic);
-      else
-        mGradient.colorize(rawData+line*rowCount, mDataRange, pixels, rowCount, 1, mDataScaleType==QCPAxis::stLogarithmic);
-    }
-  } else // keyAxis->orientation() == Qt::Vertical
-  {
-    const int lineCount = keySize;
-    const int rowCount = valueSize;
-    for (int line=0; line<lineCount; ++line)
-    {
-      QRgb* pixels = reinterpret_cast<QRgb*>(localMapImage->scanLine(lineCount-1-line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
-      if (rawAlpha)
-        mGradient.colorize(rawData+line, rawAlpha+line, mDataRange, pixels, rowCount, lineCount, mDataScaleType==QCPAxis::stLogarithmic);
-      else
-        mGradient.colorize(rawData+line, mDataRange, pixels, rowCount, lineCount, mDataScaleType==QCPAxis::stLogarithmic);
-    }
-  }
-  
-  if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1)
-  {
+      // resize undersampled map image to actual key/value cell sizes:
+      if (keyAxis->orientation() == Qt::Horizontal && (mUndersampledMapImage.width() != keySize || mUndersampledMapImage.height() != valueSize))
+        mUndersampledMapImage = QImage(QSize(keySize, valueSize), format);
+      else if (keyAxis->orientation() == Qt::Vertical && (mUndersampledMapImage.width() != valueSize || mUndersampledMapImage.height() != keySize))
+        mUndersampledMapImage = QImage(QSize(valueSize, keySize), format);
+      localMapImage = &mUndersampledMapImage; // make the colorization run on the undersampled image
+    } else if (!mUndersampledMapImage.isNull())
+      mUndersampledMapImage = QImage(); // don't need oversampling mechanism anymore (map size has changed) but mUndersampledMapImage still has nonzero size, free it
+    
+    const double *rawData = mMapData->mData;
+    const unsigned char *rawAlpha = mMapData->mAlpha;
     if (keyAxis->orientation() == Qt::Horizontal)
-      mMapImage = mUndersampledMapImage.scaled(keySize*keyOversamplingFactor, valueSize*valueOversamplingFactor, Qt::IgnoreAspectRatio, Qt::FastTransformation);
-    else
-      mMapImage = mUndersampledMapImage.scaled(valueSize*valueOversamplingFactor, keySize*keyOversamplingFactor, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    {
+      const int lineCount = valueSize;
+      const int rowCount = keySize;
+      for (int line=0; line<lineCount; ++line)
+      {
+        QRgb* pixels = reinterpret_cast<QRgb*>(localMapImage->scanLine(lineCount-1-line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
+        if (rawAlpha)
+          mGradient.colorize(rawData+line*rowCount, rawAlpha+line*rowCount, mDataRange, pixels, rowCount, 1, mDataScaleType==QCPAxis::stLogarithmic);
+        else
+          mGradient.colorize(rawData+line*rowCount, mDataRange, pixels, rowCount, 1, mDataScaleType==QCPAxis::stLogarithmic);
+      }
+    } else // keyAxis->orientation() == Qt::Vertical
+    {
+      const int lineCount = keySize;
+      const int rowCount = valueSize;
+      for (int line=0; line<lineCount; ++line)
+      {
+        QRgb* pixels = reinterpret_cast<QRgb*>(localMapImage->scanLine(lineCount-1-line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
+        if (rawAlpha)
+          mGradient.colorize(rawData+line, rawAlpha+line, mDataRange, pixels, rowCount, lineCount, mDataScaleType==QCPAxis::stLogarithmic);
+        else
+          mGradient.colorize(rawData+line, mDataRange, pixels, rowCount, lineCount, mDataScaleType==QCPAxis::stLogarithmic);
+      }
+    }
+    
+    if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1)
+    {
+      if (keyAxis->orientation() == Qt::Horizontal)
+        mMapImage = mUndersampledMapImage.scaled(keySize*keyOversamplingFactor, valueSize*valueOversamplingFactor, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+      else
+        mMapImage = mUndersampledMapImage.scaled(valueSize*valueOversamplingFactor, keySize*keyOversamplingFactor, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    }
   }
   mMapData->mDataModified = false;
   mMapImageInvalidated = false;
@@ -25793,7 +26054,7 @@ void QCPColorMap::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
 
 
 /* including file 'src/plottables/plottable-financial.cpp', size 42610       */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPFinancialData
@@ -26748,7 +27009,7 @@ QRectF QCPFinancial::selectionHitBox(QCPFinancialDataContainer::const_iterator i
 
 
 /* including file 'src/plottables/plottable-errorbar.cpp', size 37355        */
-/* commit 6f159843e9ec9ea6431b26591937aea13a9f2751 2017-07-25 11:13:32 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPErrorBarsData
@@ -27709,7 +27970,7 @@ bool QCPErrorBars::rectIntersectsLine(const QRectF &pixelRect, const QLineF &lin
 
 
 /* including file 'src/items/item-straightline.cpp', size 7592               */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemStraightLine
@@ -27890,7 +28151,7 @@ QPen QCPItemStraightLine::mainPen() const
 
 
 /* including file 'src/items/item-line.cpp', size 8498                       */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemLine
@@ -28121,7 +28382,7 @@ QPen QCPItemLine::mainPen() const
 
 
 /* including file 'src/items/item-curve.cpp', size 7159                      */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemCurve
@@ -28286,7 +28547,7 @@ QPen QCPItemCurve::mainPen() const
 
 
 /* including file 'src/items/item-rect.cpp', size 6479                       */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemRect
@@ -28443,7 +28704,7 @@ QBrush QCPItemRect::mainBrush() const
 
 
 /* including file 'src/items/item-text.cpp', size 13338                      */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemText
@@ -28791,7 +29052,7 @@ QBrush QCPItemText::mainBrush() const
 
 
 /* including file 'src/items/item-ellipse.cpp', size 7863                    */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemEllipse
@@ -28979,7 +29240,7 @@ QBrush QCPItemEllipse::mainBrush() const
 
 
 /* including file 'src/items/item-pixmap.cpp', size 10615                    */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemPixmap
@@ -29249,7 +29510,7 @@ QPen QCPItemPixmap::mainPen() const
 
 
 /* including file 'src/items/item-tracer.cpp', size 14624                    */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemTracer
@@ -29619,7 +29880,7 @@ QBrush QCPItemTracer::mainBrush() const
 
 
 /* including file 'src/items/item-bracket.cpp', size 10687                   */
-/* commit 633339dadc92cb10c58ef3556b55570685fafb99 2016-09-13 23:54:56 +0200 */
+/* commit 9868e55d3b412f2f89766bb482fcf299e93a0988 2017-09-04 01:56:22 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemBracket
