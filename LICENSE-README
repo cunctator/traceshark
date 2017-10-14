@@ -1,0 +1,28 @@
+PURPOSE
+
+This file is just a brief overview and clarification of the current license
+situation of Traceshark.
+
+GPL in this document refers to the GNU General Public License.
+
+ABOUT LICENSES
+
+* Most source files of Traceshark are dual licensed. These files are clearly
+  marked as such by the comment in the beginning of each file. The files can
+  be used either under the terms of the GPL version 2 or later, or under the
+  terms of the two clause BSD license.
+
+* The only exception to the above is that Tracehsark includes a copy of
+  QCustomPlot. QCustomPlot is licensed under the GPL version 3 or later.
+
+* Currently tracehsark is dependent on QCustomPlot, so in order to compile
+  a working binary, you need to choose the GPL version 3 for the program as
+  a whole because GPL version 2 is not compatible with GPL version 3. This is
+  also the reason why Traceshark only displays the GPL version 3 in its user
+  interface, since for all practical purposes it is the licensing terms that
+  apply to the program.
+ 
+* However, if Traceshark is modified to not include QCustomPlot, then it will
+  be possible to chose the license. This also include the scenario where code
+  from dual licensed files are used in another work, where QCustomPlot is not
+  used at all.
