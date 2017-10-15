@@ -25,6 +25,7 @@
 # Qt Specials
 moc_*.cpp
 qrc_*.cpp
+.qmake.stash
 
 #
 # Top-level generic files
