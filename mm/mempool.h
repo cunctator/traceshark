@@ -89,22 +89,7 @@ private:
 
 __always_inline void* MemPool::allocObj()
 {
-	quint8 *ptr;
-	int retries = 0;
-
-	do {
-		used += objSize;
-		if (used < poolSize) {
-			ptr = next;
-			next += objSize;
-			return ptr;
-		}
-		used -= objSize;
-		if (used == 0 || !addMemory())
-			return nullptr;
-		retries++;
-	} while(retries < 2);
-	return nullptr;
+	return allocBytes(objSize);
 }
 
 __always_inline void* MemPool::allocN(unsigned int n)
