@@ -100,24 +100,24 @@ get automatically enabled if you have the necessary development packages
 installed on your machine. Here is a list of development packages that you can
 try to install on Debian Stretch:
 
-sudo apt-get install binutils-dev
-sudo apt-get install binutils-multiarch-dev
-sudo apt-get install bison
-sudo apt-get install elfutils
-sudo apt-get install flex
-sudo apt-get install libaudit-dev
-sudo apt-get install libbfd-dev
-sudo apt-get install libdw-dev
-sudo apt-get install libelf-dev
-sudo apt-get install libelf1
-sudo apt-get install libgtk2.0-dev
-sudo apt-get install libiberty-dev
-sudo apt-get install liblzma-dev
-sudo apt-get install libnuma-dev
-sudo apt-get install libnuma-dev
-sudo apt-get install libperl-dev
-sudo apt-get install libslang-dev
-sudo apt-get install libslang2 libslang2-dev
-sudo apt-get install libunwind*
-sudo apt-get install libunwind8 libunwind8-dev
-sudo apt-get install python-dev
+binutils-dev
+binutils-multiarch-dev
+bison
+elfutils
+flex
+libaudit-dev
+libbfd-dev
+libdw-dev
+libelf-dev
+libelf1
+libgtk2.0-dev
+libiberty-dev
+liblzma-dev
+libnuma-dev
+libnuma-dev
+libperl-dev
+libslang-dev
+libslang2
+libunwind*
+libunwind8
+python-dev
