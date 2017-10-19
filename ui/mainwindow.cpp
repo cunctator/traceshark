@@ -1289,12 +1289,66 @@ void MainWindow::showWakeup(unsigned int pid)
 		findPreviousWakeupEvent(schedIndex, pid, &wakeUpIndex);
 	if (wakeupevent == nullptr)
 		return;
-	/* This is what we do, we move the *inactive* cursor to the wakeup
-	 * event, move the *active* cursor to the scheduling event and then
-	 * finally scroll the events widget to the same time */
-	inactiveCursor->setPosition(wakeupevent->time);
-	activeCursor->setPosition(schedevent->time);
+	/*
+	 * This is what we do, we move the *active* cursor to the wakeup
+	 * event, move the *inactive* cursor to the scheduling event and then
+	 * finally scroll the events widget to the same time and highlight
+	 * the task that was doing the wakeup. This way we can push the button
+	 * again to see who woke up the task that was doing the wakeup
+	 */
+	activeCursor->setPosition(wakeupevent->time);
+	inactiveCursor->setPosition(schedevent->time);
 	infoWidget->setTime(wakeupevent->time, inactiveIdx);
 	infoWidget->setTime(schedevent->time, activeIdx);
 	eventsWidget->scrollTo(wakeUpIndex);
+
+	unsigned int wcpu = wakeupevent->cpu;
+	unsigned int wpid = wakeupevent->pid;
+
+	/*
+	 * If the wakeup task was run with pid 0 = swapper, then leave the
+	 * orginially selected task selected.
+	 */
+	if (wpid == 0)
+		return;
+
+	/*
+	 * If there is reason to believe that we should find a *potential*
+	 * wakeup task, then deselect the selected task.
+	 */
+	tracePlot->deselectAll();
+
+	CPUTask *cpuTask = analyzer->findCPUTask(wpid, wcpu);
+
+	/*
+	 * If we can't find what we expected, we return, the advanced user
+	 * could notice that something fishy is going on by the fact that
+	 * no task is selected after this user interaction.
+	 */
+	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
+		tracePlot->replot();
+		return;
+	}
+	QCPGraph *qcpGraph = cpuTask->graph->getQCPGraph();
+	if (qcpGraph == nullptr) {
+		tracePlot->replot();
+		return;
+	}
+
+	/* Finally, mark the potential wakeup task as selected */
+	int count = qcpGraph->dataCount();
+	if (count > 0)
+		count--;
+	QCPDataRange wholeRange(0,  count);
+	QCPDataSelection wholeSelection(wholeRange);
+	qcpGraph->setSelection(wholeSelection);
+	tracePlot->replot();
+
+	/* Finally update the infoWidget to reflect the change in selection */
+	TaskGraph *graph = TaskGraph::fromQCPGraph(qcpGraph);
+	if (graph == nullptr) {
+		infoWidget->removeTaskGraph();
+		return;
+	}
+	infoWidget->setTaskGraph(graph);
 }
