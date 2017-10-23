@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -156,8 +156,10 @@ void TraceAnalyzer::resetProperties()
 void TraceAnalyzer::processTrace()
 {
 	resetProperties();
-	/* We do the processing from the main thread, since otherwise
-	 * we would have to wait for it */
+	/*
+	 * We do the processing from the main thread, since otherwise
+	 * we would have to wait for it
+	 */
 	threadProcess();
 	colorizeTasks();
 }
@@ -191,9 +193,11 @@ void TraceAnalyzer::processSchedAddTail()
 			double lastTime;
 			int lastIndex = task.schedTimev.size() - 1;
 			iter++;
-			/* I think that this should not happen, there should
+			/*
+			 * I think that this should not happen, there should
 			 * always be some data in a CPUTask at this point but
-			 * check anyway */
+			 * check anyway
+			 */
 			if (lastIndex < 0)
 				continue;
 			/* Check if tail is necessary */
@@ -237,8 +241,10 @@ void TraceAnalyzer::processFreqAddTail()
 	}
 }
 
-/* This function is supposed to be called seldom, thus it's ok to not have it
- * as optimized as the other functions, e.g. in terms of inlining */
+/*
+ * This function is supposed to be called seldom, thus it's ok to not have it
+ * as optimized as the other functions, e.g. in terms of inlining
+ */
 void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 					 unsigned int cpu,
 					 CPU *eventCPU, unsigned int oldpid,
@@ -343,8 +349,10 @@ retry:
 		}
 	}
 
-	/* Randomize the order by swapping every element with a random
-	 * element */
+	/*
+	 * Randomize the order by swapping every element with a random
+	 * element
+	 */
 	for (i = 0; i < ncolor; i++) {
 		j = rand_r(&seed) % ncolor;
 		tmp = colorList[j];
@@ -576,7 +584,8 @@ void TraceAnalyzer::doScale()
 	for (i = 0; i < s; i++)
 		scalingQueue.addWorkItem(workList[i]);
 	scalingQueue.start();
-	scaleMigration(); /* Migration scaling is done from the mainthread */
+	/* Migration scaling is done from the mainthread */
+	scaleMigration();
 	scalingQueue.wait();
 	for (i = 0; i < s; i++)
 		delete workList[i];

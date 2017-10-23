@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -158,12 +158,16 @@ public:
 	event_t type;
 	TString **argv;
 	unsigned int argc;
-	/* postEventInfo most likely will contain a backtrace that will occur
+
+	/*
+	 * postEventInfo most likely will contain a backtrace that will occur
 	 * in perf traces after the event. Note that this TString will have a
 	 * pointer to the read-only mapping of the trace file and thus it
 	 * cannot be null terminated, instead we will have to rely on the len
-	 * field to determine the length when using  this TString */
+	 * field to determine the length when using  this TString.
+	 */
 	TString *postEventInfo;
+
 	TString *getEventName() const;
 	static void setStringTree(StringTree *sTree);
 private:

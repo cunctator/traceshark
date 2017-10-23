@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -62,7 +62,8 @@ extern "C" {
 #include <sys/mman.h>
 }
 
-/* Here we assume that UINT_MAX can be expressed as 2^N - 1
+/*
+ * Here we assume that UINT_MAX can be expressed as 2^N - 1
  * This is a bit theoretical, if we have for example 64-bit unsigned ints, then
  * the idea is that we want to keep the array of pointers at a size of no more
  * than one million elements, in order to avoid execessive use of address space
@@ -70,10 +71,12 @@ extern "C" {
  */
 #define TLIST_INDEX_MAX (TLIST_MIN(0xffffffffff, UINT_MAX))
 
-/* This code is needed in order to take into account platforms with small
+/*
+ * This code is needed in order to take into account platforms with small
  * unsigned ints, since it's not guaranteed to be more than 2^16 -1, although
  * I have to say that I don't think traceshark would run well on a platform with
- * 16-bit ints */
+ * 16-bit ints.
+ */
 #if UINT_MAX > 0x100000
 /* This is the normal case */
 #define TLIST_MAP_NR_ELEMENTS (0x100000)

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -58,7 +58,10 @@ public:
 		lastEnterIdle(0), lastExitIdle(0) {}
 	unsigned int pidOnCPU;
 	bool hasBeenScheduled;
-	double lastSched; /* Time when pidOnCPU was scheduled */
+
+	/* Time when pidOnCPU was scheduled */
+	double lastSched;
+
 	double lastEnterIdle;
 	double lastExitIdle;
 };

@@ -105,8 +105,10 @@ void TaskSelectDialog::endResetModel()
 	taskModel->endResetModel();
 }
 
-/* Apparently it's a bad idea to do taskView->resizeColumnsToContents() if we
- * are not visible */
+/*
+ * Apparently it's a bad idea to do taskView->resizeColumnsToContents() if we
+ * are not visible.
+ */
 void TaskSelectDialog::resizeColumnsToContents()
 {
 	if (QDialog::isVisible())

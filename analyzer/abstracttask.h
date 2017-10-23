@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -59,7 +59,10 @@ class TaskGraph;
 class AbstractTask {
 public:
 	AbstractTask();
-	unsigned int pid; /* is really tid as all other pids here */
+
+	/* is really tid as all other pids here */
+	unsigned int pid;
+
 	QVector<double> schedTimev;
 	QVector<double> schedData;
 	QVector<double> scaledSchedData;
@@ -73,14 +76,19 @@ public:
 	QVector<double> runningData;
 	QVector<double> scaledPreemptedData;
 	QVector<double> scaledRunningData;
-	bool isNew; /* Only used during extraction */
+
+	/* Only used during extraction */
+	bool isNew;
+
 	/* These are for scaling purposes */
 	double offset;
 	double scale;
+
 	bool doScale();
 	bool doScaleWakeup();
 	bool doScaleRunning();
 	bool doScalePreempted();
+
 	TaskGraph *graph;
 };
 

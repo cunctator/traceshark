@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -80,14 +80,20 @@ public:
 	__always_inline void checkName(char *name);
 	QString getDisplayName() const;
 	QString getLastName() const;
+
 	TaskName *taskName;
 	exitstatus_t exitStatus;
+
 	/* lastWakeUP is only used during extraction */
 	double lastWakeUP;
+
 	double lastSleepEntry;
-	/* The unified task needs to save pointers to these graphs so that they
+
+	/*
+	 * The unified task needs to save pointers to these graphs so that they
 	 * can be deleted when the user requests the unified task to be 
-	 * removed */
+	 * removed
+	 */
 	QCPGraph *wakeUpGraph;
 	QCPGraph *preemptedGraph;
 	QCPGraph *runningGraph;

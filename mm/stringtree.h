@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -105,11 +105,13 @@ __always_inline TString *StringTree::stringLookup(event_t value) const
 }
 
 
-/* We use and  AVL-tree here, since this data structure is meant to store
+/*
+ * We use and  AVL-tree here, since this data structure is meant to store
  * event names and the number of event names is extremely small compared to
  * the total number of events. The number of different events names equals the
  * number of inserts and the number of events equals the number
- * of lookups */
+ * of lookups
+ */
 __always_inline event_t StringTree::searchAllocString(const TString *str,
 						      uint32_t hval,
 						      event_t newval)
@@ -134,8 +136,10 @@ __always_inline event_t StringTree::searchAllocString(const TString *str,
 	entry = *aentry;
 
 	while (entry != nullptr) {
-		/* Using strncmp here would lose performance and we know that
-		 * the strings are null terminated */
+		/*
+		 * Using strncmp here would lose performance and we know that
+		 * the strings are null terminated
+		 */
 		cmp = strcmp(str->ptr, entry->str->ptr);
 		if (cmp == 0)
 			return entry->eventType;
@@ -161,7 +165,8 @@ __always_inline event_t StringTree::searchAllocString(const TString *str,
 	bzero(entry, sizeof(StringTreeEntry));
 	entry->str = newstr;
 	entry->eventType = newval;
-	*aentry = entry; /* aentry is equal to &parent->[large|small] */
+	/* aentry is equal to &parent->[large|small] */
+	*aentry = entry;
 
 	entry->parent = parent;
 	entry->height = 0;

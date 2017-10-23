@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -97,12 +97,14 @@ private:
 __always_inline bool FtraceGrammar::NamePidMatch(TString *str,
 						 TraceEvent &event)
 {
-	/* We temporarily store the process name string(s) into the
+	/*
+	 * We temporarily store the process name string(s) into the
 	 * argv/argc fields of the event, because we don't know how many
 	 * strings the process name will be split into. It may have been
 	 * split into several strings due to the process name containing
 	 * spaces. We will then consume this stored information in the
-	 * TimeMatch function */
+	 * TimeMatch function.
+	 */
 	if (event.argc >= 256)
 		return false;
 	event.argv[event.argc] = str;
@@ -160,8 +162,10 @@ found1:
 	*c = '\0';
 	beginPid = c + 1;
 
-	/* Use the remainder, that was cutoff from the name, as separated by the
-	 * '-' sign get the pid */
+	/*
+	 * Use the remainder, that was cutoff from the name, as separated by the
+	 * '-' sign get the pid
+	 */
 	pid = 0;
 	for (c = beginPid; c <= lastChr; c++) {
 		pid *= 10;
@@ -190,28 +194,36 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 	namestr.ptr = cstr;
 	namestr.len = 0;
 
-	/* atof() and sscanf() are not up to the task because they are
-	 * too slow and get confused by locality issues */
+	/*
+	 * atof() and sscanf() are not up to the task because they are
+	 * too slow and get confused by locality issues.
+	 */
 	event.time = TShark::timeStrToDouble(str->ptr, rval);
 
-	/* This is the time field, if it is successful we need to assemble
+	/*
+	 * This is the time field, if it is successful we need to assemble
 	 * the name and pid strings that has been temporarily stored in
-	 * argv/argc */
+	 * argv/argc.
+	 */
 	if (rval) {
 		if (event.argc < 2)
 			return false;
 
 		fini = event.argc - 2;
-		/* Extract the pid and the final portion of the name from
-		 * event.argv[fini] */
+		/*
+		 * Extract the pid and the final portion of the name from
+		 * event.argv[fini]
+		 */
 		if (!extractNameAndPid(event.pid, *event.argv[fini]))
 			return false;
 
 		if (event.argc > 2) {
 			namestr.set(event.argv[0], maxlen);
-			/* This will assemble broken up parts of the process
+			/*
+			 * This will assemble broken up parts of the process
 			 * name; those that have been broken up by spaces in
-			 * the name. */
+			 * the name.
+			 */
 			for (i = 1; i < event.argc - 1; i++) {
 				if (!namestr.merge(event.argv[i], maxlen))
 					return false;
@@ -219,7 +231,7 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 			hash = TShark::StrHash32(&namestr);
 			newname = namePool->allocString(&namestr, hash, 0);
 		} else {
-			/* This is the common case, no spaces in the name */
+			/* This is the common case, no spaces in the name. */
 			hash = TShark::StrHash32(event.argv[fini]);
 			newname = namePool->allocString(event.argv[fini], hash,
 							0);
@@ -228,9 +240,11 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 		if (newname == nullptr)
 			return false;
 		event.taskName = newname;
-		/* Need to reset the arguments because the real arguments
+		/*
+		 * Need to reset the arguments because the real arguments
 		 * will be stored after the succesful completion of the next
-		 * node */
+		 * node.
+		 */
 		event.argc = 0;
 	}
 	return rval;
@@ -256,9 +270,11 @@ __always_inline bool FtraceGrammar::EventMatch(TString *str,
 	if (type == EVENT_ERROR)
 		return false;
 	else if (type == unknownTypeCounter) {
-		/* This event is a new event, so for the next one we need to
+		/*
+		 * This event is a new event, so for the next one we need to
 		 * bump the counter in order to use a unique eventType value 
-		 * for every event name */
+		 * for every event name
+		 */
 		unknownTypeCounter++;
 	}
 	event.type = type;

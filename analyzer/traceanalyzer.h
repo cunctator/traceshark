@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -361,7 +361,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 
 	Task *task = &taskMap[m.pid];
 	if (task->isNew) {
-		/* This should be very likely for task that just forked !*/
+		/* This should be very likely for a task that just forked !*/
 		task->isNew = false;
 		task->pid = m.pid;
 		task->schedTimev.append(event.time);
@@ -411,10 +411,12 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	if (event.pid != 0) {
 		task = &taskMap[event.pid];
 		if (!task->isNew) {
-			/* With the current implementation of the grammars, it
+			/*
+			 * With the current implementation of the grammars, it
 			 * should never happen that there is a nullptr here
 			 * but we check anyway, in case I change the grammar
-			 * implementation */
+			 * implementation.
+			 */
 			if (event.taskName->ptr != nullptr)
 				task->checkName(event.taskName->ptr);
 		}
@@ -427,16 +429,17 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 	if (oldpid == 0) {
 		eventCPU->lastExitIdle = oldtime;
-		goto skip;  /* We don't care about the idle task */
+		goto skip; /* We don't care about the idle task */
 	}
 
 	/* Handle the outgoing task */
-	cpuTask = &cpuTaskMaps[cpu][oldpid]; /* Modifiable reference */
-	task = &taskMap[oldpid];             /* Modifiable reference */
+	cpuTask = &cpuTaskMaps[cpu][oldpid];
+	task = &taskMap[oldpid];
 	state = sched_switch_state(ttype, event);
 
 	/* First handle the global task */
-	if (task->isNew) { /* true means task is newly constructed above */
+	if (task->isNew) {
+		/* true means task is newly constructed above */
 		task->pid = oldpid;
 		task->isNew = false;
 		name = sched_switch_oldname_strdup(ttype, event, taskNamePool);
@@ -472,7 +475,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	}
 
 	/* ... then handle the per CPU task */
-	if (cpuTask->isNew) { /* true means task is newly constructed above */
+	if (cpuTask->isNew) {
+		/* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
 
@@ -499,7 +503,7 @@ skip:
 	}
 
 	/* Handle the incoming task */
-	task = &taskMap[newpid]; /* Modifiable reference */
+	task = &taskMap[newpid];
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
@@ -522,8 +526,9 @@ skip:
 	task->schedTimev.append(newtime);
 	task->schedData.append(SCHED_HEIGHT);
 
-	cpuTask = &cpuTaskMaps[cpu][newpid]; /* Modifiable reference */
-	if (cpuTask->isNew) { /* true means task is newly constructed above */
+	cpuTask = &cpuTaskMaps[cpu][newpid];
+	if (cpuTask->isNew) {
+		/* true means task is newly constructed above */
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
 
@@ -589,8 +594,10 @@ __always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 	updateMaxFreq(freq);
 	updateMinFreq(freq);
 
-	/* If this is the first cpufreq event of the CPU, we will insert it as
-	 * a start frequency for that CPU */
+	/*
+	 * If this is the first cpufreq event of the CPU, we will insert it as
+	 * a start frequency for that CPU
+	 */
 	if (cpuFreq[cpu].timev.isEmpty())
 		time = startTime;
 	cpuFreq[cpu].timev.append(time);

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -477,11 +477,13 @@ void MainWindow::setupCursors()
 	blue = (start + end) / 2 + (end - start) / 10;
 	cursors[TShark::BLUE_CURSOR]->setPosition(blue);
 	infoWidget->setTime(blue, TShark::BLUE_CURSOR);
-	/* Fixme:
+	/*
+	 * Fixme:
 	 * For some reason the EventsWidget doesn't want to make its first 
 	 * scroll to somewhere in the middle of the trace. As a work around
 	 * we first scroll to the beginning and to the end, and then to 
-	 * where we want */
+	 * where we want.
+	 */
 	eventsWidget->scrollTo(start);
 	eventsWidget->scrollTo(end);
 	eventsWidget->scrollTo(red);
@@ -791,7 +793,8 @@ void MainWindow::mouseWheel()
 	bool ySelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
 
-	if (xSelected && ySelected) /* This is not possible but would be cool */
+	/* This is not possible but would be cool */
+	if (xSelected && ySelected)
 		tracePlot->axisRect()->setRangeZoom(Qt::Vertical |
 						    Qt::Horizontal);
 	else if (ySelected)
@@ -807,7 +810,8 @@ void MainWindow::mousePress()
 	bool ySelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
 
-	if (xSelected && ySelected) /* This is not possible but would be cool */
+	/* This is not possible but would be cool */
+	if (xSelected && ySelected)
 		tracePlot->axisRect()->setRangeDrag(Qt::Vertical |
 						    Qt::Horizontal);
 	else if (ySelected)
@@ -1069,11 +1073,13 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	if (legendGraph == nullptr)
 		return;
 	legendGraph->removeFromLegend();
-	/* Inform the TaskInfo class (inside InfoWidget) that the pid has
+	/*
+	 * Inform the TaskInfo class (inside InfoWidget) that the pid has
 	 * been removed. This is needed because InfoWidget keeps track of this
 	 * for the purpose of preventing the same pid being added twice from
 	 * different LegendGraphs, there might be "identical" LegendGraphs
-	 * when the same pid has migrated between CPUs */
+	 * when the same pid has migrated between CPUs
+	 */
 	infoWidget->pidRemoved(legendGraph->pid);
 }
 
@@ -1082,9 +1088,11 @@ void MainWindow::addTaskToLegend(unsigned int pid)
 	CPUTask *cpuTask;
 	unsigned int cpu;
 
-	/* Let's find a per CPU taskGraph, because they are always created,
+	/*
+	 * Let's find a per CPU taskGraph, because they are always created,
 	 * the unified graphs only exist for those that have been chosen to be
-	 * displayed by the user */
+	 * displayed by the user
+	 */
 	for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
 		cpuTask = analyzer->findCPUTask(pid, cpu);
 		if (cpuTask != nullptr)
@@ -1205,8 +1213,10 @@ void MainWindow::addTaskGraph(unsigned int pid)
 	task->preemptedGraph = graph;
 
 out:
-	/* We only modify the lower part of the range to show the newly
-	 * added unified task graph. */
+	/*
+	 * We only modify the lower part of the range to show the newly
+	 * added unified task graph.
+	 */
 	QCPRange range = tracePlot->yAxis->range();
 	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
 
@@ -1276,9 +1286,11 @@ void MainWindow::showWakeup(unsigned int pid)
 	if (activeCursor == nullptr || inactiveCursor == nullptr)
 		return;
 
-	/* The time of the active cursor is taken to be the time that the
+	/*
+	 * The time of the active cursor is taken to be the time that the
 	 * user is interested in, i.e. finding the previous wake up event
-	 * relative to */
+	 * relative to
+	 */
 	double zerotime = activeCursor->getPosition();
 	const TraceEvent *schedevent =
 		analyzer->findPreviousSchedEvent(zerotime, pid, &schedIndex);

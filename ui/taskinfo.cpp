@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -170,12 +170,14 @@ void TaskInfo::setTaskGraph(TaskGraph *graph)
 	QString pidStr = QString::number(task->pid);
 	nameLine->setText(nameStr);
 	pidLine->setText(pidStr);
-	/* taskGraph will be used for displaying the legend in case the user
+	/*
+	 * taskGraph will be used for displaying the legend in case the user
 	 * pushes that button. For that reason we will check if this TaskGraph
 	 * has a pointer to another TaskGraph that is to be used for legend
 	 * displaying purposes. In practice this happens when a unfied TaskGraph
 	 * is set here, because that one might get deleted by user action, it
-	 * instead has a pointer to a per CPU TaskGraph */
+	 * instead has a pointer to a per CPU TaskGraph.
+	 */
 	legendGraph = graph->getTaskGraphForLegend();
 	taskGraph = legendGraph != nullptr ? legendGraph : graph;
 }
@@ -212,12 +214,14 @@ void TaskInfo::addTaskGraphToLegend(TaskGraph *graph)
 	if (task == nullptr)
 		return;
 
-	/* We use the legendPidMap to keep track of pids that have been added
+	/*
+	 * We use the legendPidMap to keep track of pids that have been added
 	 * to the legend, otherwise it could happen that someone added the same
 	 * task multiple times to the legend and that looks a bit crazy. While
 	 * QCustomPlot prevents the same the same LegendGraph object being
 	 * added twice we can have multiple identical objects, since tasks can
-	 * migrate between CPUs */
+	 * migrate between CPUs.
+	 */
 	if (legendPidMap.contains(task->pid))
 		return;
 

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -156,7 +156,8 @@ static __always_inline char
 	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
 	c = retstr;
 
-	/* This loop will merge any strings before the final string, in case
+	/*
+	 * This loop will merge any strings before the final string, in case
 	 * such strings exists due to the task name containing spaces, and
 	 * then the taskname would be split into several strings
 	 */
@@ -230,7 +231,8 @@ static __always_inline char
 	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
 	c = retstr;
 
-	/* This loop will merge any strings before the final string, in case
+	/*
+	 * This loop will merge any strings before the final string, in case
 	 * such strings exists due to the task name containing spaces, and
 	 * then the taskname would be split into several strings
 	 */

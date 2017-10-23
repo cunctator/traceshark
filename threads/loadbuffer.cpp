@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -66,8 +66,10 @@ LoadBuffer::LoadBuffer(unsigned int size):
 	buffer(nullptr), bufSize(size), nRead(0), filePos(nullptr),
 	IOerror(false), IOerrno(0), state(LOADSTATE_EMPTY), eof(false)
 {
-	/* We need the extra byte to be able to set a null character in
-	 * TraceFile::ReadNextWord() one byte out of bounds */
+	/*
+	 * We need the extra byte to be able to set a null character in
+	 * TraceFile::ReadNextWord() one byte out of bounds.
+	 */
 	memory = (char*) mmap(nullptr, 2 * size + 1, PROT_READ | PROT_WRITE,
 			      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (memory == MAP_FAILED)
@@ -82,8 +84,10 @@ LoadBuffer::~LoadBuffer()
 	assert(uval == 0);
 }
 
-/* This function should be called from the IO thread until the function returns
- * true */
+/*
+ * This function should be called from the IO thread until the function returns
+ * true.
+ */
 bool LoadBuffer::produceBuffer(int fd, char** filePosPtr, TString *lineBegin)
 {
 	ssize_t nRawBytes;
@@ -137,38 +141,50 @@ bool LoadBuffer::produceBuffer(int fd, char** filePosPtr, TString *lineBegin)
 	return eof;
 }
 
-/* This should be called from the load thread before starting to process a
- * buffer */
+/*
+ * This should be called from the load thread before starting to process a
+ * buffer.
+ */
 void LoadBuffer::beginProduceBuffer() {
 	waitForConsumptionComplete();
 }
 
-/* This should be called from the load hread when the processing of a buffer
- * has been completed */
+/*
+ * This should be called from the load hread when the processing of a buffer
+ * has been completed.
+ */
 void LoadBuffer::endProduceBuffer() {
 	completeLoading();
 }
 
-/* This should be called from the reader thread before starting to process a
- * buffer */
+/*
+ * This should be called from the reader thread before starting to process a
+ * buffer.
+ */
 void LoadBuffer::beginTokenizeBuffer() {
 	waitForLoadingComplete();
 }
 
-/* This should be called from the reader processing thread when the processing
- * of a buffer has been completed */
+/*
+ * This should be called from the reader processing thread when the processing
+ * of a buffer has been completed.
+ */
 void LoadBuffer::endTokenizeBuffer() {
 	completeTokenization();
 }
 
-/* This should be called from the parser threa before starting to process a
- * buffer */
+/*
+ * This should be called from the parser threa before starting to process a
+ * buffer.
+ */
 void LoadBuffer::beginConsumeBuffer() {
 	waitForTokenizationComplete();
 }
 
-/* This should be called from the reader thread when the processing of a buffer
- * that has been completed */
+/*
+ * This should be called from the reader thread when the processing of a buffer
+ * that has been completed
+ */
 void LoadBuffer::endConsumeBuffer() {
 	completeConsumption();
 }

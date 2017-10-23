@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -118,9 +118,11 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		case 4:
 			return QString(event.getEventName()->ptr);
 		case 5:
-			/* If there was an integer before the event name, then
+			/*
+			 * If there was an integer before the event name, then
 			 * we will display that as if it had been the first 
-			 * argument of the event */
+			 * argument of the event
+			 */
 			if (event.intArg != 0) {
 				str += QString::number(event.intArg);
 				if (event.argc > 0)
@@ -146,8 +148,8 @@ bool EventsModel::setData(const QModelIndex &/*index*/, const QVariant
 }
 
 QVariant EventsModel::headerData(int section,
-                               Qt::Orientation orientation,
-                               int role) const
+				 Qt::Orientation orientation,
+				 int role) const
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
 		switch(section) {

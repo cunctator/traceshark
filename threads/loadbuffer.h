@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -61,7 +61,8 @@ extern "C" {
 
 class TString;
 
-/* This class is a load buffer for three threads where one is a loader, i.e.
+/*
+ * This class is a load buffer for three threads where one is a loader, i.e.
  * IO thread, and the second is a tokenizer, and the third is a consumer, which
  * probably is a grammar processing thread. The synchronization functions have
  * not been designed for scenarios with more than one thread per category
@@ -110,8 +111,10 @@ private:
 __always_inline void LoadBuffer::waitForLoadingComplete() {
 	mutex.lock();
 	while(state != LOADSTATE_LOADED) {
-		/* Note that this implicitely unlocks the mutex while waiting
-		 * and relocks it when done waiting */
+		/*
+		 * Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting.
+		 */
 		loadingComplete.wait(&mutex);
 	}
 }
@@ -125,8 +128,10 @@ __always_inline void LoadBuffer::completeLoading() {
 __always_inline void LoadBuffer::waitForTokenizationComplete() {
 	mutex.lock();
 	while(state != LOADSTATE_TOKENIZED) {
-		/* Note that this implicitely unlocks the mutex while waiting
-		 * and relocks it when done waiting */
+		/*
+		 * Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting.
+		 */
 		parsingComplete.wait(&mutex);
 	}
 }
@@ -141,8 +146,10 @@ __always_inline void LoadBuffer::completeTokenization() {
 __always_inline void LoadBuffer::waitForConsumptionComplete() {
 	mutex.lock();
 	while(state != LOADSTATE_EMPTY) {
-		/* Note that this implicitely unlocks the mutex while waiting
-		 * and relocks it when done waiting */
+		/*
+		 * Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting.
+		 */
 		consumptionComplete.wait(&mutex);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -95,8 +95,10 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 		loadBuffers[i] = new LoadBuffer(bsize);
 	}
 	loadThread = new LoadThread(loadBuffers, NR_BUFFERS, fd, mappedFile);
-	/* Don't start thread if something failed earlier, we go this far in
-	 * order to avoid problems in the destructor */
+	/*
+	 * Don't start thread if something failed earlier, we go this far in
+	 * order to avoid problems in the destructor
+	 */
 	if (!ok)
 		return;
 	loadThread->start();

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -70,8 +70,10 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 	int32_t state;
 	uint32_t ustate;
 	ustate = param_after_char(event, 0, '=');
-	state = *((int*) &ustate); /* the string is a signed printed as 
-				    * unsigned :) */
+
+	/* the string is a signed printed as unsigned :) */
+	state = *((int*) &ustate);
+
 	return state;
 }
 
@@ -205,8 +207,10 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 		return nullptr;
 	c = retstr;
 
-	/* This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character */
+	/*
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character
+	 */
 	first = event.argv[0];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
@@ -249,8 +253,10 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 		return nullptr;
 	c = retstr;
 
-	/* This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character */
+	/*
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character.
+	 */
 	first = event.argv[i + 1];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
@@ -279,7 +285,6 @@ char *perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool);
  * ..or:
  * Xorg   829 [003]  2726.130986: sched:sched_wakeup: comm=spotify pid=9288 \
  * prio=120 target_cpu=000
- *
  */
 
 #define WAKE_SUCC_PFIX "success="
@@ -302,7 +307,7 @@ static __always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
 
-	/* Assume that wakeup is successful if no success field is found*/
+	/* Assume that wakeup is successful if no success field is found */
 	if (strncmp(ss->ptr, WAKE_SUCC_PFIX,WAKE_SUCC_PFIX_LEN) != 0)
 		return true;
 
@@ -373,8 +378,10 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 		return nullptr;
 	c = retstr;
 
-	/* This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character */
+	/*
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character
+	 */
 	first = event.argv[0];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
@@ -442,8 +449,10 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 		return nullptr;
 	c = retstr;
 	
-	/* This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character */
+	/*
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character
+	 */
 	first = event.argv[i];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)

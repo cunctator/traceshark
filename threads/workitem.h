@@ -57,7 +57,7 @@
 
 class WorkQueue;
 
-/****************************** AbstractWorkItem ******************************
+/*
  * This class must be a virtual class, because it can't be a template, that 
  * would drag the WorkQueue class into the template business.
  */
@@ -74,7 +74,7 @@ __always_inline bool AbstractWorkItem::__runWork() {
 	return run();
 }
 
-/****************************** WorkItem **************************************
+/*
  * This class needs to be a template to be able to call functions in different
  * classes. The WorkQueue uses it through the AbstractWorkItem class interface
  * in order to avoid dealing with templates.

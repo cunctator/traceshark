@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -52,16 +52,19 @@
 #ifndef TTHREAD_H
 #define TTHREAD_H
 
-/* I hate this class. I would like to use QThread directly instead of inventing
- * my own thread class. However, QThread does not lend itself to the use of
- * templates since it inherits QObject, so here we go down the dirty road */
+ /* We are going to piggyback on QThread */
+#include <QThread>
 
-#include <QThread> /* We are going to piggyback */
 #include <QtCore>
 #include <QString>
 
 class __TThread;
 
+/*
+ * I hate this class. I would like to use QThread directly instead of inventing
+ * my own thread class. However, QThread does not lend itself to the use of
+ * templates since it inherits QObject, so here we go down the dirty road.
+ */
 class TThread {
 	friend class __TThread;
 public:

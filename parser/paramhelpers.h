@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,8 +54,8 @@
 
 #include "parser/traceevent.h"
 
-#define TASKNAME_MAXLEN (128) /* Should be enough, I wouldn't expect more
-				 than about 16 */
+/* Should be enough, I wouldn't expect more than about 16 */
+#define TASKNAME_MAXLEN (128)
 
 #define ABSURD_UNSIGNED (2147483647)
 
@@ -69,9 +69,11 @@
 #define taskname_prealloc(POOL) \
 	((char*) POOL->preallocChars(TASKNAME_MAXLEN + 1))
 
-/* Warning, this function does not null terminate the string!
+/*
+ * WARNING: This function does not null terminate the string!
  * This function copies everything after the delim char into the cstring
- * pointed to by c and adds the length to len */
+ * pointed to by c and adds the length to len
+ */
 static __always_inline void __copy_tstring_after_char(const TString *str,
 						      char delim,
 						      char *&dest,
@@ -90,8 +92,10 @@ static __always_inline void __copy_tstring_after_char(const TString *str,
 	}
 	if (i >= str->len)
 		goto err;
-	/* ...then copy everything after the delim char into the name, if there
-	 * is anything to copy */
+	/*
+	 * ...then copy everything after the delim char into the name, if there
+	 * is anything to copy
+	 */
 	i++;
 	if (i < str->len) {
 		flen = str->len - i;
@@ -108,9 +112,11 @@ err:
 	return;
 }
 
-/* This function will merge event arguments from beginidx to endix into
+/*
+ * This function will merge event arguments from beginidx to endix into
  * a cstring. Such cases exists because tasknames that contains spaces have
- * been split into several arguments due to parsing with space as delimiter */
+ * been split into several arguments due to parsing with space as delimiter
+ */
 static __always_inline void
 merge_args_into_cstring(const TraceEvent &event,
 			unsigned int beginidx,
@@ -135,8 +141,10 @@ merge_args_into_cstring(const TraceEvent &event,
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 	}
-	/* Terminate the string, it's assumed that maxlen is maximum length
-	 * *excluding* terminating null character :) */
+	/*
+	 * Terminate the string, it's assumed that maxlen is maximum length
+	 * *excluding* terminating null character :)
+	 */
 	*c = '\0';
 	len++;
 }
@@ -215,8 +223,8 @@ static __always_inline const char *substr_after_char(const char *str,
 	return nullptr;
 }
 
-static __always_inline taskstate_t __sched_state_from_tstring(
-	const TString *str)
+static __always_inline taskstate_t
+__sched_state_from_tstring(const TString *str)
 {
 	unsigned int i;
 	char c;

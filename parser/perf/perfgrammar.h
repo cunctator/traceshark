@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -86,10 +86,14 @@ private:
 	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
 	StringPool *argPool;
 	StringPool *namePool;
-	/* This is a counter that will count up every time a new event name
+
+	/*
+	 * This is a counter that will count up every time a new event name
 	 * is encountered, so that we get unique event types for every 
-	 * unknown event name */
+	 * unknown event name.
+	 */
 	int unknownTypeCounter;
+
 	typedef enum {
 		STATE_NAME = 0,
 		STATE_PID,
@@ -104,12 +108,14 @@ private:
 __always_inline bool PerfGrammar::StoreMatch(TString *str,
 					       TraceEvent &event)
 {
-	/* We temporarily store the process name string(s) into the
+	/*
+	 * We temporarily store the process name string(s) into the
 	 * argv/argc fields of the event, because we don't know how many
 	 * strings the process name will be split into. It may have been
 	 * split into several strings due to the process name containing
 	 * spaces. We will then consume this stored information in the
-	 * TimeNode class */
+	 * TimeNode class.
+	 */
 	if (event.argc >= 256)
 		return false;
 	event.argv[event.argc] = str;
@@ -223,12 +229,14 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str,
 	namestr.ptr = cstr;
 	namestr.len = 0;
 
-	/* atof() and sscanf() are buggy */
+	/* atof() and sscanf() are buggy. */
 	event.time = TShark::timeStrToDouble(str->ptr, rval);
 
-	/* This is the time field, if it is successful we need to assemble
+	/*
+	 * This is the time field, if it is successful we need to assemble
 	 * the name and pid strings that has been temporarily stored in
-	 * argv/argc */
+	 * argv/argc.
+	 */
 	if (rval) {
 		if (event.argc < 3)
 			return false;
@@ -295,9 +303,11 @@ __always_inline bool PerfGrammar::EventMatch(TString *str,
 	if (type == EVENT_ERROR)
 		return false;
 	else if (type == unknownTypeCounter) {
-		/* This event is a new event, so for the next one we need to
+		/*
+		 * This event is a new event, so for the next one we need to
 		 * bump the counter in order to use a unique eventType value 
-		 * for every event name */
+		 * for every event name.
+		 */
 		unknownTypeCounter++;
 	}
 	event.type = type;
@@ -352,9 +362,11 @@ __always_inline bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
 			}
 			NEXTTOKEN(false);
 		case STATE_INTARG:
-			/* Intarg is optional, if it's here we fetch the
+			/*
+			 * Intarg is optional, if it's here we fetch the
 			 * next token and continue, if it's not then we just
-			 * continue */
+			 * continue.
+			 */
 			if (IntArgMatch(str, event))
 				NEXTTOKEN(false);
 		case STATE_EVENT:

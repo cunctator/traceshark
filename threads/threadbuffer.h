@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -62,9 +62,10 @@
 #include "threads/loadbuffer.h"
 
 
-/* This class is a load buffer for two threads where one is a producer and the
+/*
+ * This class is a load buffer for two threads where one is a producer and the
  * other is a consumer. The synchronization functions have not been designed
- * for scenarios with multiple consumers or producers
+ * for scenarios with multiple consumers or producers.
  */
 template<class T>
 class ThreadBuffer
@@ -95,8 +96,10 @@ template<class T>
 __always_inline void ThreadBuffer<T>::waitForProductionComplete() {
 	mutex.lock();
 	while(isEmpty) {
-		/* Note that this implicitely unlocks the mutex while waiting
-		 * and relocks it when done waiting */
+		/*
+		 * Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting.
+		 */
 		productionComplete.wait(&mutex);
 	}
 }
@@ -112,8 +115,10 @@ template<class T>
 __always_inline void ThreadBuffer<T>::waitForConsumptionComplete() {
 	mutex.lock();
 	while(!isEmpty) {
-		/* Note that this implicitely unlocks the mutex while waiting
-		 * and relocks it when done waiting */
+		/*
+		 * Note that this implicitely unlocks the mutex while waiting
+		 * and relocks it when done waiting.
+		 */
 		consumptionComplete.wait(&mutex);
 	}
 }
@@ -138,8 +143,10 @@ ThreadBuffer<T>::~ThreadBuffer()
 	delete strPool;
 }
 
-/* This should be called from the producer thread
- * before starting to fill a buffer */
+/*
+ * This should be called from the producer thread before starting to fill a
+ * buffer.
+ */
 template<class T>
 void ThreadBuffer<T>::beginProduceBuffer() {
 	waitForConsumptionComplete();
@@ -148,8 +155,10 @@ void ThreadBuffer<T>::beginProduceBuffer() {
 	list.softclear();
 }
 
-/* This should be called from the data processing thread
- * when the buffer is ready to be consumed  */
+/*
+ * This should be called from the data processing thread when the buffer is
+ * ready to be consumed.
+ */
 template<class T>
 void ThreadBuffer<T>::endProduceBuffer() {
 	loadBuffer->endTokenizeBuffer();
@@ -157,16 +166,20 @@ void ThreadBuffer<T>::endProduceBuffer() {
 }
 
 
-/* This should be called from the data processing thread
- * before starting to process a buffer */
+/*
+ * This should be called from the data processing thread
+ * before starting to process a buffer.
+ */
 template<class T>
 void ThreadBuffer<T>::beginConsumeBuffer() {
 	waitForProductionComplete();
 	loadBuffer->beginConsumeBuffer();
 }
 
-/* This should be called from the data processing thread
- * when the processing of a buffer has been completed */
+/*
+ * This should be called from the data processing thread
+ * when the processing of a buffer has been completed.
+ */
 template<class T>
 void ThreadBuffer<T>::endConsumeBuffer() {
 	loadBuffer->endConsumeBuffer();

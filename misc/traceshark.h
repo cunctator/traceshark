@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -111,7 +111,8 @@ namespace TShark {
 
 	enum CursorIdx {RED_CURSOR, BLUE_CURSOR, NR_CURSORS};
 
-	/* This functions accepts ':' at the end of the value
+	/*
+	 * This functions accepts ':' at the end of the value
 	 * For example, 123.456: is ok. 123.456X is not ok if
 	 * X is not a digit between 0-9 or a ':'
 	 */
