@@ -179,7 +179,8 @@ void TraceParser::threadReader()
 			traceFile->clearBufferSwitch();
 			tbuffers[curbuf]->beginProduceBuffer();
 			eof = tbuffers[curbuf]->loadBuffer->isEOF();
-			/* This is were EOF will be detected in practice, with
+			/*
+			 * This is were EOF will be detected in practice, with
 			 * the current implementation of LoadBuffer
 			 */
 			if (eof && tbuffers[curbuf]->loadBuffer->nRead == 0) {
@@ -193,8 +194,10 @@ void TraceParser::threadReader()
 }
 
 
-/* This function does prescanning as well, to determine number of events,
- * number of CPUs, max/min CPU frequency etc */
+/*
+ * This function does prescanning as well, to determine number of events,
+ * number of CPUs, max/min CPU frequency etc.
+ */
 void TraceParser::threadParser()
 {
 	unsigned int i = 0;
@@ -215,12 +218,16 @@ void TraceParser::threadParser()
 		if (traceType == TRACE_TYPE_PERF)
 			goto perf;
 	}
-	/* Must have been a short trace or a lot of unknown garbage in the
-	 * trace if we end up here */
+	/*
+	 * Must have been a short trace or a lot of unknown garbage in the
+	 * trace if we end up here
+	 */
 	goto out;
 
-	/* The purpose of jumping to these loops is to  be able to use the
-	 * (hopefully faster) specialized parse functions */
+	/*
+	 * The purpose of jumping to these loops is to  be able to use the
+	 * (hopefully faster) specialized parse functions
+	 */
 ftrace:
 	while(true) {
 		if (parseFtraceBuffer(i))
@@ -242,17 +249,21 @@ perf:
 			i = 0;
 	}
 out:
-	/* Make sure that the processing thread can continue even if no trace
+	/*
+	 * Make sure that the processing thread can continue even if no trace
 	 * type was detected, otherwise it would wait forever in
-	 * waitForTraceType() */
+	 * waitForTraceType()
+	 */
 	sendTraceType();
 
-	/* It's probable that at this point, one of the sendNextIndex() calls
+	/*
+	 * It's probable that at this point, one of the sendNextIndex() calls
 	 * above has already been issued with and index value that corresponds
 	 * to the last event but that is OK because the fixLastEvent() does
 	 * not touch data that would be read by the code that waits for
 	 * the sendNextIndex, i.e. the analyzer thread, so it's OK to call
-	 * fixLastEvent while the analyzer thread is reading the last event. */
+	 * fixLastEvent while the analyzer thread is reading the last event.
+	 */
 	fixLastEvent();
 
 	eventsWatcher->sendNextIndex(events->size());
