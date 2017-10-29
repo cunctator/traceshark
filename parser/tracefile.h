@@ -67,7 +67,7 @@ class LoadThread;
 class TraceFile
 {
 public:
-	TraceFile(char *name, bool &ok, unsigned int bsize = 1024*1024);
+	TraceFile(char *name, bool &ok, unsigned int bsize = 1024 * 1024);
 	~TraceFile();
 	__always_inline unsigned int
 		ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer);
