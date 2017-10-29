@@ -59,6 +59,7 @@
 
 extern "C" {
 #include <sys/mman.h>
+#include <unistd.h>
 }
 
 LoadThread::LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
@@ -89,6 +90,14 @@ void LoadThread::run()
 		if (i == nBuffers)
 			i = 0;
 	} while(!eof);
+
+	uval = close(fd);
+	eval = errno;
+	if (uval != 0) {
+		qout << "Warning, error in " << __FUNCTION__
+		     <<	"(), close() failed because: " << strerror(eval)
+		     << "\n";
+	}
 
 	uval = munmap(lineBegin.ptr, bufSize);
 	eval = errno;
