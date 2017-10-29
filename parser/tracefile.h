@@ -149,8 +149,10 @@ TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 	}
 	if (c == '\n')
 		endOfLine = true;
-	/* This can be out otside of the buffer, in case hit the break
-	 * above but we have that spare page */
+	/*
+	 * This can be out otside of the buffer, in case hit the break
+	 * above but we have that spare page
+	 */
 	buffer[pos] = '\0';
 	pos++;
 	if (unlikely(CheckBufferSwitch(pos, tbuffer)))
