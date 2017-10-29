@@ -115,7 +115,7 @@ bool TraceParser::open(const QString &fileName)
 		return ok;
 
 	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok,
-				  1024 * 1024);
+				  1024 * 1024 * 2);
 
 	if (!ok) {
 		delete traceFile;

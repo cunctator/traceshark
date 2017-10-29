@@ -60,6 +60,7 @@
 #include "threads/threadbuffer.h"
 #include "mm/mempool.h"
 #include "parser/traceline.h"
+#include "misc/traceshark.h"
 
 class LoadThread;
 
@@ -101,7 +102,7 @@ __always_inline bool TraceFile::CheckBufferSwitch(unsigned int pos,
 						  *tbuffer)
 {
 	LoadBuffer *loadBuffer = tbuffer->loadBuffer;
-	if (pos >= loadBuffer->nRead) {
+	if (unlikely(pos >= loadBuffer->nRead)) {
 		lastPos = 0;
 		bufferSwitch = true;
 		endOfLine = true;
@@ -123,13 +124,13 @@ TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 
 	for (c = buffer[pos]; c == ' '; c = buffer[pos]) {
 		pos++;
-		if (CheckBufferSwitch(pos, tbuffer))
+		if (unlikely(CheckBufferSwitch(pos, tbuffer)))
 			return 0;
 	}
 
 	if (c == '\n') {
 		pos++;
-		if (!CheckBufferSwitch(pos, tbuffer))
+		if (likely(!CheckBufferSwitch(pos, tbuffer)))
 			lastPos = pos;
 		return 0;
 	}
@@ -139,7 +140,7 @@ TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 
 	while (true) {
 		nchar++;
-		if (CheckBufferSwitch(pos, tbuffer))
+		if (unlikely(CheckBufferSwitch(pos, tbuffer)))
 			break;
 		c = buffer[pos];
 		if (c == ' ' || c == '\n')
@@ -152,7 +153,7 @@ TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 	 * above but we have that spare page */
 	buffer[pos] = '\0';
 	pos++;
-	if (CheckBufferSwitch(pos, tbuffer))
+	if (unlikely(CheckBufferSwitch(pos, tbuffer)))
 		return nchar;
 	lastPos = pos;
 	return nchar;

@@ -65,6 +65,10 @@
 #include <QtWidgets>
 #endif
 
+
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 typedef enum {
 	TRACE_TYPE_FTRACE = 0,
 	TRACE_TYPE_PERF,
