@@ -87,8 +87,8 @@
 
 #else /* __GNUC__ not defined */
 
-#define likely(x)
-#define unlikely(x)
+#define likely(x)   (x)
+#define unlikely(x) (x)
 #define prefetch_read(addr, locality)
 #define prefetch_write(addr, locality)
 #define prefetch(addr)
