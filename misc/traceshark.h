@@ -65,9 +65,35 @@
 #include <QtWidgets>
 #endif
 
+#ifdef __GNUC__
 
 #define likely(x)   __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
+
+/*
+ * locality must be between [0, 3]
+ *
+ * 0 no temporal locality
+ * 1 low temporal locality
+ * 2 moderate degree of temporal locality
+ * 3 high degree of temporal locality
+ */
+#define prefetch_read(addr, locality) \
+	__builtin_prefetch(addr, 0, locality)
+#define prefetch_write(addr, locality) \
+	__builtin_prefetch(addr, 1, locality)
+#define prefetch(addr) \
+	__builtin_prefetch(addr)
+
+#else /* __GNUC__ not defined */
+
+#define likely(x)
+#define unlikely(x)
+#define prefetch_read(addr, locality)
+#define prefetch_write(addr, locality)
+#define prefetch(addr)
+
+#endif /* __GNUC__ */
 
 typedef enum {
 	TRACE_TYPE_FTRACE = 0,

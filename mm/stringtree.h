@@ -135,7 +135,7 @@ __always_inline event_t StringTree::searchAllocString(const TString *str,
 	rootptr = aentry;
 	entry = *aentry;
 
-	while (entry != nullptr) {
+	while (likely(entry != nullptr)) {
 		/*
 		 * Using strncmp here would lose performance and we know that
 		 * the strings are null terminated
