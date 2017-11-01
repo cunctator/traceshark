@@ -83,7 +83,8 @@ private:
 	MemPool *charPool;
 	MemPool *entryPool;
 	StringPoolEntry **hashTable;
-	unsigned int *usageTable;
+	unsigned int *countAllocs;
+	unsigned int *countReuse;
 	unsigned int hSize;
 	void clearTable();
 };
@@ -107,7 +108,8 @@ __always_inline TString* StringPool::allocString(const TString *str,
 
 	hval = hval % hSize;
 
-	if (cutoff != 0 && usageTable[hval] > cutoff) {
+	if (cutoff != 0 && countAllocs[hval] > cutoff &&
+	    countAllocs[hval] > countReuse[hval]) {
 		newstr = allocUniqueString(str);
 		return newstr;
 	}
@@ -117,8 +119,11 @@ __always_inline TString* StringPool::allocString(const TString *str,
 
 	while(entry != nullptr) {
 		cmp = strcmp(str->ptr, entry->str->ptr);
-		if (cmp == 0)
+		if (cmp == 0) {
+			if (cutoff != 0)
+				countReuse[hval]++;
 			return entry->str;
+		}
 		parent = entry;
 		if (cmp < 0)
 			aentry = &entry->small;
@@ -131,7 +136,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	if (newstr == nullptr)
 		return newstr;
 	if (cutoff != 0)
-		usageTable[hval]++;
+		countAllocs[hval]++;
 
 	entry = (StringPoolEntry*) entryPool->allocObj();
 	if (entry == nullptr)

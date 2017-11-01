@@ -74,7 +74,8 @@ StringPool::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 	entryPool = new MemPool(entryPages, sizeof(StringPoolEntry));
 
 	hashTable = new StringPoolEntry*[hSize];
-	usageTable = new unsigned int[hSize];
+	countAllocs = new unsigned int[hSize];
+	countReuse = new unsigned int[hSize];
 	clearTable();
 }
 
@@ -84,13 +85,15 @@ StringPool::~StringPool()
 	delete strPool;
 	delete entryPool;
 	delete[] hashTable;
-	delete[] usageTable;
+	delete[] countAllocs;
+	delete[] countReuse;
 }
 
 void StringPool::clearTable()
 {
 	bzero(hashTable, hSize * sizeof(StringPoolEntry*));
-	bzero(usageTable, hSize * sizeof(unsigned int));
+	bzero(countAllocs, hSize * sizeof(unsigned int));
+	bzero(countReuse, hSize * sizeof(unsigned int));
 }
 
 void StringPool::clear()
