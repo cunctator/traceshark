@@ -52,7 +52,7 @@
 #ifndef PERFPARAMS_H
 #define PERFPARAMS_H
 
-#include "mm/mempool.h"
+#include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
 #include "misc/traceshark.h"
@@ -185,27 +185,28 @@ perf_sched_switch_oldpid(const TraceEvent &event)
 }
 
 static __always_inline char *
-__perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
+__perf_sched_switch_oldname_strdup(const TraceEvent &event,
+				   StringPool *pool)
 {
 	unsigned int i;
 	unsigned int beginidx;
 	unsigned int endidx;
 	unsigned int len = 0;
-	char *retstr;
 	char *c;
 	TString *first;
 	bool ok;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i == 0)
 		return nullptr;
 	beginidx = 1;
 	endidx = i - 4;
-
-	retstr = taskname_prealloc(pool);
-	if (retstr == nullptr)
-		return nullptr;
-	c = retstr;
 
 	/*
 	 * This will copy the first part of the name, that is the portion
@@ -221,25 +222,33 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
 	if (!ok)
 		return nullptr;
 
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
-char *perf_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool);
+char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
+				       StringPool *pool);
 
 static __always_inline char *
-__perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
+__perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
 	unsigned int beginidx;
 	unsigned int endidx;
 	unsigned int len = 0;
-	char *retstr;
 	char *c;
 	TString *first;
 	bool ok;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i == 0)
@@ -247,11 +256,6 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 	beginidx = i + 2;
 	endidx = event.argc - 3;
 
-	/* + 1 needed for null termination */
-	retstr = taskname_prealloc(pool);
-	if (retstr == nullptr)
-		return nullptr;
-	c = retstr;
 
 	/*
 	 * This will copy the first part of the name, that is the portion
@@ -267,13 +271,16 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
 	if (!ok)
 		return nullptr;
 
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
-char *perf_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool);
+char *perf_sched_switch_newname_strdup(const TraceEvent &event,
+				       StringPool *pool);
 
 /*
  * These functions for sched_wakeup assumes that the format is either the "old"
@@ -349,16 +356,21 @@ perf_sched_wakeup_pid(const TraceEvent &event)
 }
 
 static __always_inline char *
-__perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
+__perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
 	unsigned int beginidx;
 	unsigned int endidx;
 	unsigned int len = 0;
-	char *retstr;
 	char *c;
 	TString *first;
 	bool ok;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	/* Find the index of the pid=... that is followed by prio= */
 	for (i = 1; i <= event.argc - 2; i++) {
@@ -372,11 +384,6 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 		return nullptr;
 	beginidx = 1;
 	endidx = i - 1;
-
-	retstr = taskname_prealloc(pool);
-	if (retstr == nullptr)
-		return nullptr;
-	c = retstr;
 
 	/*
 	 * This will copy the first part of the name, that is the portion
@@ -392,13 +399,15 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
 	if (!ok)
 		return nullptr;
 
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
-char *perf_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool);
+char *perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool);
 
 #define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define perf_sched_process_fork_childpid(EVENT) \
@@ -424,16 +433,21 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 
 static __always_inline char *
 __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-					   MemPool *pool)
+					   StringPool *pool)
 {
 	unsigned int i;
 	unsigned int beginidx;
 	const unsigned int endidx = event.argc - 2;
 	char *c;
-	char *retstr;
 	unsigned int len = 0;
 	bool ok;
 	TString *first;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	for (i = 2; i <= endidx; i++) {
 		if (!strncmp(event.argv[i - 1]->ptr, "pid=", 4) &&
@@ -444,11 +458,6 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 		return nullptr;
 	beginidx = i + 1;
 
-	retstr = taskname_prealloc(pool);
-	if (retstr == nullptr)
-		return nullptr;
-	c = retstr;
-	
 	/*
 	 * This will copy the first part of the name, that is the portion
 	 * of first that is suceeded by the '=' character
@@ -463,14 +472,16 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	if (!ok)
 		return nullptr;
 
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
 char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-					       MemPool *pool);
+					       StringPool *pool);
 
 #define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define perf_sched_process_exit_pid(EVENT) \

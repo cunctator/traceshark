@@ -52,7 +52,7 @@
 #ifndef FTRACEPARAMS_H
 #define FTRACEPARAMS_H
 
-#include "mm/mempool.h"
+#include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
 #include "misc/traceshark.h"
@@ -133,15 +133,20 @@ ftrace_sched_switch_oldpid(const TraceEvent &event)
 }
 
 static __always_inline char
-*__ftrace_sched_switch_oldname_strdup(const TraceEvent &event, MemPool *pool)
+*__ftrace_sched_switch_oldname_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
 	unsigned int endidx;
 	unsigned int len = 0;
-	char *retstr;
 	char *c;
 	char *d;
 	char *end;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	/* Find the index of the '==>' */
 	for (i = 3; i < event.argc; i++) {
@@ -151,10 +156,6 @@ static __always_inline char
 	if (!(i < event.argc))
 		return nullptr;
 	endidx = i - 3;
-
-	/* + 1 needed for null termination */
-	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
-	c = retstr;
 
 	/*
 	 * This loop will merge any strings before the final string, in case
@@ -195,26 +196,34 @@ static __always_inline char
 	/* Terminate the string */
 	*c = '\0';
 	len++;
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
 char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
-					 MemPool *pool);
+					 StringPool *pool);
 
 /* TODO: Check what code could be shared between this and the above function */
 static __always_inline char
-*__ftrace_sched_switch_newname_strdup(const TraceEvent &event, MemPool *pool)
+*__ftrace_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
 	unsigned int startidx, endidx;
 	unsigned int len = 0;
-	char *retstr;
 	char *c;
 	char *d;
 	char *end;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	endidx = event.argc - 2;
 
@@ -226,10 +235,6 @@ static __always_inline char
 	if (!(i < event.argc))
 		return nullptr;
 	startidx = i + 1;
-
-	/* + 1 needed for null termination */
-	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
-	c = retstr;
 
 	/*
 	 * This loop will merge any strings before the final string, in case
@@ -270,14 +275,17 @@ static __always_inline char
 	/* Terminate the string */
 	*c = '\0';
 	len++;
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
 char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
-					 MemPool *pool);
+					 StringPool *pool);
 
 #define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 #define ftrace_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, \
@@ -298,22 +306,25 @@ static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 							 ':'))
 /* Todo, code could be shrared with the other two *_strup() functions */
 static __always_inline char
-*__ftrace_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool)
+*__ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
-	char *c, *retstr;
+	char *c;
 	unsigned int endidx;
 	char *d;
 	char *end;
 	unsigned int len = 0;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	if (event.argc < 4)
 		return nullptr;
 
 	endidx = event.argc - 4;
-
-	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
-	c = retstr;
 
 	/* This loop will merge any strings before the final string, in case
 	 * such strings exists due to the task name containing spaces, and
@@ -354,13 +365,17 @@ static __always_inline char
 	/* Terminate the string */
 	*c = '\0';
 	len++;
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
-char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event, MemPool *pool);
+char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
+				      StringPool *pool);
 
 #define ftrace_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define ftrace_sched_process_fork_childpid(EVENT) \
@@ -389,14 +404,19 @@ ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 
 static __always_inline char *
 __ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
-					     MemPool *pool)
+					     StringPool *pool)
 {
 	unsigned int i;
 	const unsigned int endidx = event.argc - 2;
 	char *c;
-	char *retstr;
 	unsigned int len;
 	unsigned int sublen;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
 
 	if (event.argc < 4)
 		return nullptr;
@@ -408,8 +428,6 @@ __ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 	return nullptr;
 
 found:
-	retstr = (char*) pool->preallocChars(TASKNAME_MAXLEN + 1);
-	c = retstr;
 	len = 0;
 
 	const char *d = substr_after_char(event.argv[i]->ptr,
@@ -435,14 +453,17 @@ finalize:
 	/* Terminate the string */
 	*c  = '\0';
 	len++;
-	/* commmit the allocation */
-	if (pool->commitChars(len))
-		return retstr;
-	return nullptr;
+
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
 }
 
 char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
-						 MemPool *pool);
+						 StringPool *pool);
 
 #define ftrace_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define ftrace_sched_process_exit_pid(EVENT) \

@@ -212,7 +212,7 @@ private:
 	int maxIdleState;
 	int minIdleState;
 	CPU *CPUs;
-	MemPool *taskNamePool;
+	StringPool *taskNamePool;
 	QCustomPlot *customPlot;
 };
 

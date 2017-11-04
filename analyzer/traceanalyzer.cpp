@@ -72,7 +72,7 @@ TraceAnalyzer::TraceAnalyzer()
 	  maxFreq(0), minFreq(0), maxIdleState(0), minIdleState(0),
 	  CPUs(nullptr), customPlot(nullptr)
 {
-	taskNamePool = new MemPool(16384, sizeof(char));
+	taskNamePool = new StringPool(16384, 256);
 	parser = new TraceParser(&events);
 }
 
@@ -140,6 +140,7 @@ void TraceAnalyzer::close()
 	migrationArrows.clear();
 	colorMap.clear();
 	parser->close();
+	taskNamePool->clear();
 }
 
 void TraceAnalyzer::resetProperties()

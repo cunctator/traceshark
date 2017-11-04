@@ -74,7 +74,7 @@ static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
 #define DECLARE_GENERIC_TRACEFN_POOL(FNAME, RETTYPE)		   \
 static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
 				     const TraceEvent &event,	   \
-				     MemPool *pool)		   \
+				     StringPool *pool)		   \
 {							           \
 	if (tt == TRACE_TYPE_FTRACE)				   \
 		return ftrace_##FNAME(event, pool);		   \
