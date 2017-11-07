@@ -219,7 +219,7 @@ void MainWindow::openTrace()
 	QString name = QFileDialog::getOpenFileName(this);
 	if (!name.isEmpty()) {
 		eventsWidget->beginResetModel();
-		eventsWidget->setEvents(nullptr);
+		eventsWidget->clear();
 		eventsWidget->endResetModel();
 
 		taskSelectDialog->beginResetModel();
@@ -616,7 +616,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 void MainWindow::closeTrace()
 {
 	eventsWidget->beginResetModel();
-	eventsWidget->setEvents(nullptr);
+	eventsWidget->clear();
 	eventsWidget->endResetModel();
 
 	taskSelectDialog->beginResetModel();

@@ -56,7 +56,7 @@
 #include "misc/traceshark.h"
 
 EventsWidget::EventsWidget(QWidget *parent):
-	QDockWidget(tr("Events"), parent), events(nullptr)
+	QDockWidget(tr("Events"), parent), events(nullptr), eventsPtrs(nullptr)
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(tableView);
@@ -96,6 +96,21 @@ void EventsWidget::setEvents(TList<TraceEvent> *e)
 {
 	eventsModel->setEvents(e);
 	events = e;
+	eventsPtrs = nullptr;
+}
+
+void EventsWidget::setEvents(TList<TraceEvent*> *e)
+{
+	eventsModel->setEvents(e);
+	events = nullptr;
+	eventsPtrs = e;
+}
+
+void EventsWidget::clear()
+{
+	eventsModel->clear();
+	events = nullptr;
+	eventsPtrs = nullptr;
 }
 
 void EventsWidget::beginResetModel()
@@ -124,7 +139,7 @@ void EventsWidget::scrollTo(int n)
 	if (n < 0 || events == nullptr)
 		return;
 	unsigned int index = (unsigned int) n;
-	if (index < events->size()) {
+	if (index < getSize()) {
 		tableView->selectRow(index);
 		resizeColumnsToContents();
 	}
@@ -144,7 +159,7 @@ int EventsWidget::findBestMatch(double time)
 	int bestN;
 	int i;
 
-	end = events->size() - 1;
+	end = getSize() - 1;
 
 	if (end < 0)
 		return 0;
@@ -152,7 +167,7 @@ int EventsWidget::findBestMatch(double time)
 	c =  binarySearch(time, 0, end);
 
 	cand[n] = c;
-	diffs[n] = fabs(events->at(c).time - time);
+	diffs[n] = fabs(getEventAt(c)->time - time);
 	bestN = c;
 	best = diffs[n];
 	n++;
@@ -162,13 +177,13 @@ int EventsWidget::findBestMatch(double time)
 
 	if (next <= end) {
 		cand[n] = next;
-		diffs[n] = fabs(events->at(next).time - time);
+		diffs[n] = fabs(getEventAt(next)->time - time);
 		n++;
 	}
 
 	if (prev >= 0) {
 		cand[n] = prev;
-		diffs[n] = fabs(events->at(prev).time - time);
+		diffs[n] = fabs(getEventAt(prev)->time - time);
 		n++;
 	}
 
@@ -181,9 +196,9 @@ int EventsWidget::findBestMatch(double time)
 
 	/* Basic sanity in case the beginning or end has multiple events
 	 * with the same time */
-	if (time > events->at(end).time)
+	if (time > getEventAt(end)->time)
 		bestN = end;
-	if (time < events->at(0).time)
+	if (time < getEventAt(0)->time)
 		bestN = 0;
 
 	return bestN;
@@ -194,7 +209,7 @@ int EventsWidget::binarySearch(double time, int start, int end)
 	int pivot = (end + start) / 2;
 	if (pivot == start)
 		return pivot;
-	if (time < events->at(pivot).time)
+	if (time < getEventAt(pivot)->time)
 		return binarySearch(time, start, pivot);
 	else
 		return binarySearch(time, pivot, end);
@@ -203,7 +218,7 @@ int EventsWidget::binarySearch(double time, int start, int end)
 void EventsWidget::handleClick(const QModelIndex &index)
 {
 	if (index.column() == 0) {
-		double time = events->at(index.row()).time;
+		double time = getEventAt(index.row())->time;
 		emit timeSelected(time);
 	}
 }
@@ -211,7 +226,7 @@ void EventsWidget::handleClick(const QModelIndex &index)
 void EventsWidget::handleDoubleClick(const QModelIndex &index)
 {
 	if (index.column() == 5) {
-		const TraceEvent &event = events->at(index.row());
+		const TraceEvent &event = *getEventAt(index.row());
 		emit infoDoubleClicked(event);
 	}
 }
@@ -228,4 +243,22 @@ void EventsWidget::show()
 {
 	QDockWidget::show();
 	tableView->resizeColumnsToContents();
+}
+
+const TraceEvent* EventsWidget::getEventAt(int index) const
+{
+	if (events != nullptr)
+		return &events->at(index);
+	if (eventsPtrs != nullptr)
+		return eventsPtrs->at(index);
+	return nullptr;
+}
+
+unsigned int EventsWidget::getSize() const
+{
+	if (events != nullptr)
+		return events->size();
+	if (eventsPtrs != nullptr)
+		return eventsPtrs->size();
+	return 0;
 }

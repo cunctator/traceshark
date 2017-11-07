@@ -58,7 +58,7 @@
 
 
 EventsModel::EventsModel(QObject *parent):
-	QAbstractTableModel(parent), events(nullptr)
+	QAbstractTableModel(parent), events(nullptr), eventsPtrs(nullptr)
 {}
 
 EventsModel::EventsModel(TList<TraceEvent> *e, QObject *parent):
@@ -68,14 +68,24 @@ EventsModel::EventsModel(TList<TraceEvent> *e, QObject *parent):
 void EventsModel::setEvents(TList<TraceEvent> *e)
 {
 	events = e;
+	eventsPtrs = nullptr;
+}
+
+void EventsModel::setEvents(TList<TraceEvent*> *e)
+{
+	events = nullptr;
+	eventsPtrs = e;
+}
+
+void EventsModel::clear()
+{
+	events = nullptr;
+	eventsPtrs = nullptr;
 }
 
 int EventsModel::rowCount(const QModelIndex & /*parent*/) const
 {
-	if (events != nullptr)
-		return events->size();
-	else 
-		return 0;
+	return getSize();
 }
 
 int EventsModel::columnCount(const QModelIndex & /* parent */) const
@@ -100,11 +110,11 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 
 		if (events == nullptr)
 			return QVariant();
-		size = (int) TSMIN(INT_MAX, events->size());
+		size = (int) TSMIN(INT_MAX, getSize());
 		if ( row >= size || row < 0)
 			return QVariant();
 
-		TraceEvent &event = (*events)[row];
+		const TraceEvent &event = *getEventAt(row);
 		switch(column) {
 		case 0:
 			return QString::number(event.time, 'f', 6);
@@ -186,4 +196,22 @@ void EventsModel::beginResetModel()
 void EventsModel::endResetModel()
 {
 	QAbstractTableModel::endResetModel();
+}
+
+const TraceEvent* EventsModel::getEventAt(int index) const
+{
+	if (events != nullptr)
+		return &events->at(index);
+	if (eventsPtrs != nullptr)
+		return eventsPtrs->at(index);
+	return nullptr;
+}
+
+unsigned int EventsModel::getSize() const
+{
+	if (events != nullptr)
+		return events->size();
+	if (eventsPtrs != nullptr)
+		return eventsPtrs->size();
+	return 0;
 }

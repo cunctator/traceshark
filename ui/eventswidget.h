@@ -68,6 +68,8 @@ public:
 	EventsWidget(TList<TraceEvent> *e, QWidget *parent = 0);
 	virtual ~EventsWidget();
 	void setEvents(TList<TraceEvent> *e);
+	void setEvents(TList<TraceEvent*> *e);
+	void clear();
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
@@ -84,8 +86,11 @@ private:
 	QTableView *tableView;
 	EventsModel *eventsModel;
 	TList<TraceEvent> *events;
+	TList<TraceEvent*> *eventsPtrs;
 	int findBestMatch(double time);
 	int binarySearch(double time, int start, int end);
+	const TraceEvent* getEventAt(int index) const;
+	unsigned int getSize() const;
 };
 
 #endif /* EVENTSWIDGET_H*/
