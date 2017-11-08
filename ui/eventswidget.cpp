@@ -57,7 +57,7 @@
 
 EventsWidget::EventsWidget(QWidget *parent):
 	QDockWidget(tr("Events"), parent), events(nullptr),
-	eventsPtrs(nullptr), saveScrollTime(false)
+	eventsPtrs(nullptr), saveScrollTime(false), scrollTime(0)
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(tableView);
@@ -283,5 +283,7 @@ unsigned int EventsWidget::getSize() const
 
 double EventsWidget::getSavedScroll()
 {
-	return scrollTime;
+	if (saveScrollTime)
+		return scrollTime;
+	return 0;
 }
