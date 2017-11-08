@@ -78,10 +78,13 @@ public:
 signals:
 	void addTaskGraph(unsigned int pid);
 	void addTaskToLegend(unsigned int pid);
+	void resetFilter(void);
+	void createFilter(QMap<unsigned int, unsigned int> &map);
 private slots:
 	void closeClicked();
 	void addUnifiedClicked();
 	void addLegendClicked();
+	void addFilterClicked();
 private:
 	TaskView *taskView;
 	TaskModel *taskModel;

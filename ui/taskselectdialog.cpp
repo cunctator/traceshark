@@ -63,6 +63,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 {
 	QVBoxLayout *mainLayout =  new QVBoxLayout(this);
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
+	QHBoxLayout *filterLayout = new QHBoxLayout();
 
 	taskView = new TaskView(this);
 	taskModel = new TaskModel(taskView);
@@ -70,6 +71,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 
 	mainLayout->addWidget(taskView);
 	mainLayout->addLayout(buttonLayout);
+	mainLayout->addLayout(filterLayout);
 
 	QPushButton *closeButton = new QPushButton(tr("Close"));
 	QPushButton *addUnifiedButton =
@@ -82,9 +84,19 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 	buttonLayout->addWidget(addLegendButton);
 	buttonLayout->addStretch();
 
+	QPushButton *addFilterButton =
+		new QPushButton(tr("Create events filter"));
+	QPushButton *resetFilterButton =
+		new QPushButton(tr("Reset events filter"));
+
+	filterLayout->addWidget(addFilterButton);
+	filterLayout->addWidget(resetFilterButton);
+
 	tsconnect(closeButton, clicked(), this, closeClicked());
 	tsconnect(addUnifiedButton, clicked(), this, addUnifiedClicked());
 	tsconnect(addLegendButton, clicked(), this, addLegendClicked());
+	tsconnect(addFilterButton, clicked(), this, addFilterClicked());
+	sigconnect(resetFilterButton, clicked(), this, resetFilter());
 }
 
 TaskSelectDialog::~TaskSelectDialog()
@@ -165,4 +177,24 @@ void TaskSelectDialog::addLegendClicked()
 		if (ok)
 			emit addTaskToLegend(pid);
 	}
+}
+
+void TaskSelectDialog::addFilterClicked()
+{
+	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
+	unsigned int pid;
+	bool ok;
+	int i, s;
+	QMap<unsigned int, unsigned int> filterMap;
+
+	s = indexList.size();
+	for (i = 0; i < s; i++) {
+		const QModelIndex &index = indexList.at(i);
+
+		pid = taskModel->rowToPid(index.row(), ok);
+		if (ok)
+			filterMap[pid] = pid;
+	}
+	QMap<unsigned int, unsigned int>& emap = filterMap;
+	emit createFilter(emap);
 }

@@ -70,12 +70,15 @@ public:
 	void setEvents(TList<TraceEvent> *e);
 	void setEvents(TList<TraceEvent*> *e);
 	void clear();
+	void clearScrollTime();
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
 	void scrollTo(double time);
 	void scrollTo(int n);
+	void scrollToSaved();
 	void show();
+	double getSavedScroll();
 signals:
 	void timeSelected(double time);
 	void infoDoubleClicked(const TraceEvent &event);
@@ -87,6 +90,8 @@ private:
 	EventsModel *eventsModel;
 	TList<TraceEvent> *events;
 	TList<TraceEvent*> *eventsPtrs;
+	bool saveScrollTime;
+	double scrollTime;
 	int findBestMatch(double time);
 	int binarySearch(double time, int start, int end);
 	const TraceEvent* getEventAt(int index) const;

@@ -108,7 +108,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		int column = index.column();
 		int size;
 
-		if (events == nullptr)
+		if (events == nullptr && eventsPtrs == nullptr)
 			return QVariant();
 		size = (int) TSMIN(INT_MAX, getSize());
 		if ( row >= size || row < 0)

@@ -120,6 +120,9 @@ typedef enum {
 #define DEFINE_COLORMAP_ITERATOR(name) \
 	QMap<unsigned int, TColor>::iterator name
 
+#define DEFINE_FILTERMAP_ITERATOR(name) \
+	QMap<unsigned int, unsigned int>::iterator name;
+
 #define TSMAX(A, B) ((A) >= (B) ? A:B)
 #define TSMIN(A, B) ((A) < (B) ? A:B)
 #define TSABS(A) ((A) >= 0 ? A:-A)

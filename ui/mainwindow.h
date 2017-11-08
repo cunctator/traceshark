@@ -57,8 +57,9 @@
 #include <QVector>
 #include <QString>
 #include "misc/setting.h"
-#include "threads/workitem.h"
 #include "misc/traceshark.h"
+#include "misc/tlist.h"
+#include "threads/workitem.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -121,6 +122,8 @@ private slots:
 	void removeTaskGraph(unsigned int pid);
 	void showTaskSelector();
 	void showWakeup(unsigned int pid);
+	void createFilter(QMap<unsigned int, unsigned int> &map);
+	void resetFilter();
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
@@ -210,6 +213,8 @@ private:
 	QVector<QString> tickLabels;
 	Cursor *cursors[TShark::NR_CURSORS];
 	Setting settings[Setting::MAX_SETTINGS];
+	TList <TraceEvent*> filteredEvents;
+	bool filterActive;
 };
 
 #endif /* MAINWINDOW_H */

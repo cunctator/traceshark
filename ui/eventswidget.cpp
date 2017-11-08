@@ -56,7 +56,8 @@
 #include "misc/traceshark.h"
 
 EventsWidget::EventsWidget(QWidget *parent):
-	QDockWidget(tr("Events"), parent), events(nullptr), eventsPtrs(nullptr)
+	QDockWidget(tr("Events"), parent), events(nullptr),
+	eventsPtrs(nullptr), saveScrollTime(false)
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(tableView);
@@ -113,10 +114,16 @@ void EventsWidget::clear()
 	eventsPtrs = nullptr;
 }
 
+void EventsWidget::clearScrollTime()
+{
+	saveScrollTime = false;
+}
+
 void EventsWidget::beginResetModel()
 {
 	eventsModel->beginResetModel();
 	events = nullptr;
+	eventsPtrs = nullptr;
 }
 
 void EventsWidget::endResetModel()
@@ -127,23 +134,34 @@ void EventsWidget::endResetModel()
 
 void EventsWidget::scrollTo(double time)
 {
-	if (events != nullptr) {
+	if (events != nullptr || eventsPtrs != nullptr) {
 		int n = findBestMatch(time);
 		tableView->selectRow(n);
 		resizeColumnsToContents();
+		scrollTime = time;
+		saveScrollTime = true;
 	}
 }
 
 void EventsWidget::scrollTo(int n)
 {
-	if (n < 0 || events == nullptr)
+	if (n < 0 || (events == nullptr && eventsPtrs == nullptr))
 		return;
 	unsigned int index = (unsigned int) n;
 	if (index < getSize()) {
 		tableView->selectRow(index);
 		resizeColumnsToContents();
+		scrollTime = getEventAt(index)->time;
+		saveScrollTime = true;
 	}
 }
+
+void EventsWidget::scrollToSaved()
+{
+	if (saveScrollTime)
+		scrollTo(scrollTime);
+}
+
 
 /* This function checks the value at, before and after the value found 
  * with binary search in order to determine the one with smallest difference
@@ -261,4 +279,9 @@ unsigned int EventsWidget::getSize() const
 	if (eventsPtrs != nullptr)
 		return eventsPtrs->size();
 	return 0;
+}
+
+double EventsWidget::getSavedScroll()
+{
+	return scrollTime;
 }
