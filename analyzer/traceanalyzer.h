@@ -112,6 +112,7 @@ public:
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
 						  unsigned int pid,
 						  int *index) const;
+	const TraceEvent *findFilteredEvent(int index, int *filterIndex);
 	__always_inline unsigned int getMaxCPU() const;
 	__always_inline unsigned int getNrCPUs() const;
 	__always_inline double getStartTime() const;
@@ -152,8 +153,10 @@ private:
 	void resetProperties();
 	void threadProcess();
 	int binarySearch(double time, int start, int end) const;
+	int binarySearchFiltered(double time, int start, int end) const;
 	void colorizeTasks();
 	int findIndexBefore(double time) const;
+	int findFilteredIndexBefore(double time) const;
 	__always_inline unsigned int
 		generic_sched_switch_newpid(const TraceEvent &event) const;
 	__always_inline unsigned int

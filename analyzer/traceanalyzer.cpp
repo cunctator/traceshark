@@ -387,6 +387,17 @@ int TraceAnalyzer::binarySearch(double time, int start, int end) const
 		return binarySearch(time, pivot, end);
 }
 
+int TraceAnalyzer::binarySearchFiltered(double time, int start, int end) const
+{
+	int pivot = (end + start) / 2;
+	if (pivot == start)
+		return pivot;
+	if (time < filteredEvents.at(pivot)->time)
+		return binarySearchFiltered(time, start, pivot);
+	else
+		return binarySearchFiltered(time, pivot, end);
+}
+
 int TraceAnalyzer::findIndexBefore(double time) const
 {
 	if (events.size() < 1)
@@ -402,7 +413,27 @@ int TraceAnalyzer::findIndexBefore(double time) const
 
 	int c = binarySearch(time, 0, end);
 
-	if (events.at(c).time >= time)
+	while (c > 0 && events.at(c).time >= time)
+		c--;
+	return c;
+}
+
+int TraceAnalyzer::findFilteredIndexBefore(double time) const
+{
+	if (filteredEvents.size() < 1)
+		return -1;
+
+	int end = filteredEvents.size() - 1;
+
+	/* Basic sanity checks */
+	if (time > filteredEvents.at(end)->time)
+		return end;
+	if (time < filteredEvents.at(0)->time)
+		return 0;
+
+	int c = binarySearchFiltered(time, 0, end);
+
+	while (c > 0 && filteredEvents.at(c)->time >= time)
 		c--;
 	return c;
 }
@@ -425,6 +456,30 @@ const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
 				*index = i;
 			return &event;
 		}
+	}
+	return nullptr;
+}
+
+const TraceEvent *TraceAnalyzer::findFilteredEvent(int index,
+						   int *filterIndex)
+{
+	TraceEvent *eptr = &events[index];
+	double time = eptr->time;
+	int s = filteredEvents.size();
+	int i;
+	int start = findFilteredIndexBefore(time);
+
+	if (start < 0)
+		return nullptr;
+
+	for (i = start; i < s; i++) {
+		const TraceEvent *cptr = filteredEvents[i];
+		if (cptr == eptr) {
+			*filterIndex = i;
+			return cptr;
+		}
+		if (cptr->time > time)
+			break;
 	}
 	return nullptr;
 }

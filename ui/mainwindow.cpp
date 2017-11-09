@@ -1379,7 +1379,19 @@ void MainWindow::showWakeup(unsigned int pid)
 	inactiveCursor->setPosition(schedevent->time);
 	infoWidget->setTime(wakeupevent->time, inactiveIdx);
 	infoWidget->setTime(schedevent->time, activeIdx);
-	eventsWidget->scrollTo(wakeUpIndex);
+
+	if (!analyzer->isFiltered()) {
+		eventsWidget->scrollTo(wakeUpIndex);
+	} else {
+		/*
+		 * If a filter is enabled we need to try to find the index in
+		 * analyzer->filteredEvents
+		 */
+		int filterIndex;
+		if (analyzer->findFilteredEvent(wakeUpIndex, &filterIndex)
+		    != nullptr)
+			eventsWidget->scrollTo(filterIndex);
+	}
 
 	unsigned int wcpu = wakeupevent->cpu;
 	unsigned int wpid = wakeupevent->pid;
