@@ -150,8 +150,8 @@ MainWindow::MainWindow():
 		  this, addTaskToLegend(unsigned int));
 	tsconnect(taskSelectDialog, createFilter(QMap<unsigned int,
 						 unsigned int> &),
-		  this, createFilter(QMap<unsigned int, unsigned int> &));
-	tsconnect(taskSelectDialog, resetFilter(), this, resetFilter());
+		  this, createPidFilter(QMap<unsigned int, unsigned int> &));
+	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
 	setupSettings();
 }
 
@@ -225,11 +225,6 @@ void MainWindow::openTrace()
 		eventsWidget->clear();
 		eventsWidget->endResetModel();
 		eventsWidget->clearScrollTime();
-
-		if (filterActive) {
-			filteredEvents.clear();
-			filterActive = false;
-		}
 
 		taskSelectDialog->beginResetModel();
 		taskSelectDialog->setTaskMap(nullptr);
@@ -486,16 +481,8 @@ void MainWindow::setupCursors()
 	blue = (start + end) / 2 + (end - start) / 10;
 	cursors[TShark::BLUE_CURSOR]->setPosition(blue);
 	infoWidget->setTime(blue, TShark::BLUE_CURSOR);
-	/*
-	 * Fixme:
-	 * For some reason the EventsWidget doesn't want to make its first
-	 * scroll to somewhere in the middle of the trace. As a work around
-	 * we first scroll to the beginning and to the end, and then to
-	 * where we want.
-	 */
-	eventsWidget->scrollTo(start);
-	eventsWidget->scrollTo(end);
-	eventsWidget->scrollTo(red);
+
+	scrollTo(red);
 }
 
 void MainWindow::setupSettings()
@@ -639,11 +626,6 @@ void MainWindow::closeTrace()
 	infoWidget->clear();
 	setTraceActionsEnabled(false);
 	setStatus(STATUS_NOFILE);
-
-	if (filterActive) {
-		filteredEvents.clear();
-		filterActive = false;
-	}
 }
 
 void MainWindow::saveScreenshot()
@@ -1120,49 +1102,19 @@ void MainWindow::addTaskToLegend(unsigned int pid)
 	infoWidget->addTaskGraphToLegend(cpuTask->graph);
 }
 
-void MainWindow::createFilter(QMap<unsigned int, unsigned int> &map)
+void MainWindow::setEventsWidgetEvents()
 {
-	unsigned int i;
-	unsigned int s = analyzer->events.size();
-	TraceEvent *eptr;
-	DEFINE_FILTERMAP_ITERATOR(iter);
-
-	eventsWidget->beginResetModel();
-	eventsWidget->clear();
-	eventsWidget->endResetModel();
-
-	filteredEvents.clear();
-
-	for (i = 0; i < s; i++) {
-		eptr = &analyzer->events[i];
-		iter = map.find(eptr->pid);
-		if (iter != map.end())
-			filteredEvents.append(eptr);
-	}
-
-	eventsWidget->beginResetModel();
-	eventsWidget->setEvents(&filteredEvents);
-	eventsWidget->endResetModel();
-	filterActive = true;
-	eventsWidget->scrollToSaved();
+	if (analyzer->isFiltered())
+		eventsWidget->setEvents(&analyzer->filteredEvents);
+	else
+		eventsWidget->setEvents(&analyzer->events);
 }
 
-void MainWindow::resetFilter()
+void MainWindow::scrollTo(double time)
 {
-	double start, end, saved;
-
+	double start, end;
 	start = analyzer->getStartTime();
 	end = analyzer->getEndTime();
-	saved = eventsWidget->getSavedScroll();
-
-	if (!filterActive)
-		return;
-
-	eventsWidget->beginResetModel();
-	eventsWidget->setEvents(&analyzer->events);
-	eventsWidget->endResetModel();
-	filteredEvents.clear();
-	filterActive = false;
 
 	/*
 	 * Fixme:
@@ -1173,7 +1125,51 @@ void MainWindow::resetFilter()
 	 */
 	eventsWidget->scrollTo(start);
 	eventsWidget->scrollTo(end);
-	eventsWidget->scrollTo(saved);
+	eventsWidget->scrollTo(time);
+}
+
+void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map)
+{
+	double saved = eventsWidget->getSavedScroll();
+
+	eventsWidget->beginResetModel();
+	analyzer->createPidFilter(map);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+}
+
+void MainWindow::resetPidFilter()
+{
+	double saved;
+
+	if (!analyzer->filterActive(FilterState::FILTER_PID))
+		return;
+
+	saved = eventsWidget->getSavedScroll();
+
+	eventsWidget->beginResetModel();
+	analyzer->disableFilter(FilterState::FILTER_PID);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+
+	scrollTo(saved);
+}
+
+void MainWindow::resetFilters()
+{
+	double saved;
+
+	if (!analyzer->isFiltered())
+		return;
+
+	saved = eventsWidget->getSavedScroll();
+
+	eventsWidget->beginResetModel();
+	analyzer->disableAllFilters();
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
 }
 
 void MainWindow::addTaskGraph(unsigned int pid)

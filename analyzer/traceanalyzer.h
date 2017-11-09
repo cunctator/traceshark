@@ -65,6 +65,7 @@
 #include "analyzer/cpu.h"
 #include "analyzer/cpufreq.h"
 #include "analyzer/cpuidle.h"
+#include "analyzer/filterstate.h"
 #include "parser/genericparams.h"
 #include "mm/mempool.h"
 #include "analyzer/cputask.h"
@@ -105,6 +106,7 @@ public:
 	void close();
 	void processTrace();
 	TList<TraceEvent> events;
+	TList <TraceEvent*> filteredEvents;
 	const TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
 						 int *index) const;
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
@@ -137,6 +139,13 @@ public:
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
 	QList<MigrationArrow*> migrationArrows;
+	void createPidFilter(QMap<unsigned int, unsigned int> &map);
+	void disableFilter(FilterState::filter_t filter);
+	void addPidToFilter(unsigned int pid);
+	void removePidFromFilter(unsigned int pid);
+	void disableAllFilters();
+	bool isFiltered();
+	bool filterActive(FilterState::filter_t filter);
 private:
 	TraceParser *parser;
 	void prepareDataStructures();
@@ -190,6 +199,7 @@ private:
 	__always_inline void updateMinIdleState(int state);
 	void processFtrace();
 	void processPerf();
+	void processAllFilters();
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	QMap <unsigned int, TColor> colorMap;
@@ -214,6 +224,8 @@ private:
 	CPU *CPUs;
 	StringPool *taskNamePool;
 	QCustomPlot *customPlot;
+	FilterState filterState;
+	QMap<unsigned int, unsigned int> filterPidMap;
 };
 
 __always_inline double TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,

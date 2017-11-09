@@ -58,7 +58,6 @@
 #include <QString>
 #include "misc/setting.h"
 #include "misc/traceshark.h"
-#include "misc/tlist.h"
 #include "threads/workitem.h"
 
 QT_BEGIN_NAMESPACE
@@ -122,8 +121,9 @@ private slots:
 	void removeTaskGraph(unsigned int pid);
 	void showTaskSelector();
 	void showWakeup(unsigned int pid);
-	void createFilter(QMap<unsigned int, unsigned int> &map);
-	void resetFilter();
+	void createPidFilter(QMap<unsigned int, unsigned int> &map);
+	void resetPidFilter();
+	void resetFilters();
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
@@ -147,6 +147,8 @@ private:
 	void addStillRunningGraph(CPUTask &task);
 
 	void setTraceActionsEnabled(bool e);
+	void setEventsWidgetEvents();
+	void scrollTo(double time);
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;
@@ -213,7 +215,6 @@ private:
 	QVector<QString> tickLabels;
 	Cursor *cursors[TShark::NR_CURSORS];
 	Setting settings[Setting::MAX_SETTINGS];
-	TList <TraceEvent*> filteredEvents;
 	bool filterActive;
 };
 

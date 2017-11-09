@@ -74,6 +74,7 @@ TraceAnalyzer::TraceAnalyzer()
 {
 	taskNamePool = new StringPool(16384, 256);
 	parser = new TraceParser(&events);
+	filterState.disableAll();
 }
 
 TraceAnalyzer::~TraceAnalyzer()
@@ -136,6 +137,8 @@ void TraceAnalyzer::close()
 	}
 	taskMap.clear();
 	events.clear();
+	filteredEvents.clear();
+	filterState.disableAll();
 	migrations.clear();
 	migrationArrows.clear();
 	colorMap.clear();
@@ -600,4 +603,127 @@ void TraceAnalyzer::processFtrace()
 void TraceAnalyzer::processPerf()
 {
 	__processGeneric(TRACE_TYPE_PERF);
+}
+
+void TraceAnalyzer::processAllFilters()
+{
+	unsigned int i;
+	unsigned int s = events.size();
+	TraceEvent *eptr;
+	DEFINE_FILTERMAP_ITERATOR(iter);
+
+	filteredEvents.clear();
+
+	for (i = 0; i < s; i++) {
+		eptr = &events[i];
+		if (filterState.isEnabled(FilterState::FILTER_PID)) {
+			iter = filterPidMap.find(eptr->pid);
+			if (iter == filterPidMap.end())
+				continue;
+		} else if (filterState.isEnabled(FilterState::FILTER_EVENT)) {
+			/* Add event type filtering here */
+		} else if (filterState.isEnabled(FilterState::FILTER_CPU)) {
+			/* Add CPU nr filtering here */
+		} else if (filterState.isEnabled(FilterState::FILTER_ARG)) {
+			/* Add argument filtering here */
+		}
+		filteredEvents.append(eptr);
+	}
+}
+
+void TraceAnalyzer::createPidFilter(QMap<unsigned int, unsigned int> &map)
+{
+	/*
+	 * An empty map is interpreted to mean that no filtering is desired,
+	 * a map of the same size as the taskMap should mean that the user
+	 * wants to filter on all pids, which is the same as no filtering
+	 */
+	if (map.isEmpty() || map.size() == taskMap.size()) {
+		if (filterState.isEnabled(FilterState::FILTER_PID))
+			disableFilter(FilterState::FILTER_PID);
+		return;
+	}
+
+	filterPidMap = map;
+	filterState.enable(FilterState::FILTER_PID);
+	processAllFilters();
+}
+
+void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
+{
+	filterState.disable(filter);
+	switch (filter) {
+	case FilterState::FILTER_PID:
+		filterPidMap.clear();
+		break;
+	case FilterState::FILTER_EVENT:
+		break;
+	case FilterState::FILTER_CPU:
+		break;
+	case FilterState::FILTER_ARG:
+		break;
+	default:
+		break;
+	}
+	if (filterState.isEnabled())
+		processAllFilters();
+	else
+		filteredEvents.clear();
+}
+
+void TraceAnalyzer::addPidToFilter(unsigned int pid) {
+	DEFINE_FILTERMAP_ITERATOR(iter);
+
+	iter = filterPidMap.find(pid);
+	if (iter != filterPidMap.end()) {
+		if (filterState.isEnabled(FilterState::FILTER_PID))
+			return;
+		goto epilogue;
+	}
+	filterPidMap[pid] = pid;
+
+epilogue:
+	/* Disable filter if we are filtering on all pids */
+	if (filterPidMap.size() == taskMap.size()) {
+		disableFilter(FilterState::FILTER_PID);
+		return;
+	}
+
+	filterState.enable(FilterState::FILTER_PID);
+	processAllFilters();
+}
+
+void TraceAnalyzer::removePidFromFilter(unsigned int pid) {
+	DEFINE_FILTERMAP_ITERATOR(iter);
+
+	if (!filterState.isEnabled(FilterState::FILTER_PID))
+		return;
+
+	iter = filterPidMap.find(pid);
+	if (iter == filterPidMap.end()) {
+		return;
+	}
+
+	iter = filterPidMap.erase(iter);
+	if (filterPidMap.isEmpty()) {
+		disableFilter(FilterState::FILTER_PID);
+		return;
+	}
+	processAllFilters();
+}
+
+void TraceAnalyzer::disableAllFilters()
+{
+	filterState.disableAll();
+	filteredEvents.clear();
+}
+
+bool TraceAnalyzer::isFiltered()
+{
+	return filterState.isEnabled();
+}
+
+bool TraceAnalyzer::filterActive(FilterState::filter_t filter)
+{
+	return filterState.isEnabled(filter);
 }
