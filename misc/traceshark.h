@@ -57,6 +57,7 @@
 
 #include <QtCore>
 #include <cstdint>
+#include <cstdio>
 #include "misc/tstring.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -115,7 +116,7 @@ typedef enum {
 	QMap<unsigned int, CPUTask>::iterator name
 
 #define DEFINE_TASKMAP_ITERATOR(name) \
-	QMap<unsigned int, Task>::iterator name
+	QMap<unsigned int, TaskHandle>::iterator name
 
 #define DEFINE_COLORMAP_ITERATOR(name) \
 	QMap<unsigned int, TColor>::iterator name
@@ -221,6 +222,83 @@ namespace TShark {
 		uvalue.word8[2] = str->ptr[2];
 		uvalue.word8[3] = str->ptr[3];
 		return uvalue.word32;
+	}
+
+	__always_inline unsigned int __heap_iParent(unsigned int i)
+	{
+		return (i - 1) / 2;
+	}
+
+	__always_inline unsigned int __heap_iLeftChild(unsigned int i)
+	{
+		return 2 * i + 1;
+	}
+
+	__always_inline unsigned int __heap_iRightChild(unsigned int i)
+	{
+		return 2 * i + 2;
+	}
+
+	template<template <typename> class C, typename T>
+		__always_inline void __heap_siftdown(C<T> &container,
+						     long start,
+						     long end,
+						     int (*compFunc)(T&, T&))
+	{
+		long root, child, rchild, swap;
+
+		root = start;
+		while (__heap_iLeftChild(root) <= end) {
+			child = __heap_iLeftChild(root);
+			swap = root;
+			if (compFunc(container[swap], container[child]) < 0)
+				swap = child;
+			rchild = child + 1;
+			if (rchild <= end && compFunc(container[swap],
+						      container[rchild]) < 0)
+				swap = rchild;
+			if (swap == root)
+				return;
+			else {
+				container.swap(root, swap);
+				root = swap;
+			}
+		}
+	}
+
+	template<template <typename> class C, typename T>
+		__always_inline void __heap_heapify(C<T> &container,
+						    int (*compFunc)(T&, T&))
+	{
+		long count = container.size();
+		long start;
+
+		start = __heap_iParent(count - 1);
+
+		while(start >= 0) {
+			__heap_siftdown(container, start, count - 1, compFunc);
+			start--;
+		}
+	}
+
+	template<template <typename> class C, typename T>
+		void heapsort(C<T> &container,
+			      int (*compFunc)(T&, T&))
+	{
+		long count = container.size();
+		long end;
+
+		if (count < 2)
+			return;
+
+		__heap_heapify(container, compFunc);
+
+		end = count - 1;
+		while (end > 0) {
+			container.swap(0, end);
+			end--;
+			__heap_siftdown(container, 0, end, compFunc);
+		}
 	}
 }
 

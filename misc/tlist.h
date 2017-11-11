@@ -108,6 +108,7 @@ public:
 	void softclear();
 	__always_inline T& operator[](unsigned int index);
 	__always_inline const T& operator[](unsigned int index) const;
+	__always_inline void swap(unsigned int a, unsigned int b);
 private:
 	__always_inline T& subscript(unsigned int index) const;
 	__always_inline unsigned int mapFromIndex(unsigned int index) const;
@@ -273,6 +274,17 @@ template<class T>
 void TList<T>::softclear()
 {
 	nrElements = 0;
+}
+
+template<class T>
+__always_inline void TList<T>::swap(unsigned int a, unsigned int b)
+{
+	T foo;
+	T &ta = subscript(a);
+	T &tb = subscript(b);
+	foo = ta;
+	ta = tb;
+	tb = foo;
 }
 
 template<class T>

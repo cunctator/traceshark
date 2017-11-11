@@ -135,7 +135,7 @@ public:
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(unsigned int pid);
 	QMap<unsigned int, CPUTask> *cpuTaskMaps;
-	QMap<unsigned int, Task> taskMap;
+	QMap<unsigned int, TaskHandle> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
@@ -340,7 +340,7 @@ __always_inline Task *TraceAnalyzer::findTask(unsigned int pid)
 	if (iter == taskMap.end())
 		return nullptr;
 	else
-		return &iter.value();
+		return iter.value().task;
 }
 
 __always_inline void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
@@ -374,7 +374,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 	m.time = event.time;
 	migrations.append(m);
 
-	Task *task = &taskMap[m.pid];
+	Task *task = &taskMap[m.pid].getTask();
 	if (task->isNew) {
 		/* This should be very likely for a task that just forked !*/
 		task->isNew = false;
@@ -395,7 +395,7 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 	m.time = event.time;
 	migrations.append(m);
 
-	Task *task = &taskMap[m.pid];
+	Task *task = &taskMap[m.pid].getTask();
 	if (task->isNew)
 		task->pid = m.pid;
 	task->exitStatus = STATUS_EXITCALLED;
@@ -424,7 +424,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 	/* This is done to update the names of existing tasks */
 	if (event.pid != 0) {
-		task = &taskMap[event.pid];
+		task = &taskMap[event.pid].getTask();
 		if (!task->isNew) {
 			/*
 			 * With the current implementation of the grammars, it
@@ -449,7 +449,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 	/* Handle the outgoing task */
 	cpuTask = &cpuTaskMaps[cpu][oldpid];
-	task = &taskMap[oldpid];
+	task = &taskMap[oldpid].getTask();
 	state = sched_switch_state(ttype, event);
 
 	/* First handle the global task */
@@ -518,7 +518,7 @@ skip:
 	}
 
 	/* Handle the incoming task */
-	task = &taskMap[newpid];
+	task = &taskMap[newpid].getTask();
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
@@ -582,7 +582,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	pid = sched_wakeup_pid(ttype, event);
 
 	/* Handle the woken up task */
-	task = &taskMap[pid];
+	task = &taskMap[pid].getTask();
 	task->lastWakeUP = time;
 	if (task->isNew) {
 		task->pid = pid;

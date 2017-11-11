@@ -102,7 +102,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 TaskSelectDialog::~TaskSelectDialog()
 {}
 
-void TaskSelectDialog::setTaskMap(QMap<unsigned int, Task> *map)
+void TaskSelectDialog::setTaskMap(QMap<unsigned int, TaskHandle> *map)
 {
 	taskModel->setTaskMap(map);
 }

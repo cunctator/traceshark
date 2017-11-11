@@ -81,7 +81,7 @@ void TaskGraph::destroy()
 
 void TaskGraph::setTask(Task *newTask)
 {
-	QString name = newTask->getDisplayName();
+	QString name = *newTask->displayName;
 	name += QString(":") + QString::number(newTask->pid);
 	graph->setName(name);
 	legendGraph->setName(name);

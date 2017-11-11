@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -61,7 +61,9 @@ Task::Task():
 	AbstractTask(), taskName(nullptr), exitStatus(STATUS_ALIVE),
 	lastWakeUP(0), lastSleepEntry(0), wakeUpGraph(nullptr),
 	preemptedGraph(nullptr), runningGraph(nullptr)
-{}
+{
+	displayName = new QString();
+}
 
 Task::~Task()
 {
@@ -72,6 +74,7 @@ Task::~Task()
 		delete current;
 		current = prev;
 	}
+	delete displayName;
 }
 
 void Task::addName(char *name)
@@ -82,21 +85,18 @@ void Task::addName(char *name)
 	taskName = newName;
 }
 
-QString Task::getDisplayName() const
+void Task::generateDisplayName()
 {
-	QString nameStr;
-
 	if (taskName != nullptr) {
-		nameStr += QString(taskName->str);
+		displayName->append(taskName->str);
 		if (taskName->prev != nullptr) {
-			nameStr += QString("(")
-				+ QString(taskName->prev->str)
-				+ QString(")");
+			displayName->append("(");
+			displayName->append(taskName->prev->str);
+			displayName->append(")");
 			if (taskName->prev->prev != nullptr)
-				nameStr += QString("...");
+				displayName->append("...");
 		}
 	}
-	return nameStr;
 }
 
 QString Task::getLastName() const

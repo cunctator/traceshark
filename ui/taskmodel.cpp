@@ -54,100 +54,55 @@
 
 #include "ui/taskmodel.h"
 #include "misc/tlist.h"
+#include "misc/traceshark.h"
 #include "analyzer/task.h"
 
 TaskModel::TaskModel(QObject *parent):
-	QAbstractTableModel(parent), taskMap(nullptr)
+	QAbstractTableModel(parent)
 {
-	taskList = new TList<Task*>;
-	taskNameList = new QStringList;
+	taskList = new TList<const Task*>;
+	errorStr = new QString(tr("Error in taskmodel.cpp"));
 }
 
 TaskModel::~TaskModel()
 {
 	delete taskList;
-	delete taskNameList;
+	delete errorStr;
 }
 
-void TaskModel::setTaskMap(QMap<unsigned int, Task> *map)
+void TaskModel::setTaskMap(QMap<unsigned int, TaskHandle> *map)
 {
-	QMap<QString, unsigned int> *nameMap = new QMap<QString, unsigned int>;
-	int i, j, s;
-	int row;
-
 	taskList->clear();
-	taskNameList->clear();
-	taskMap = map;
 
-	if (map == nullptr) {
-		delete nameMap;
+	if (map == nullptr)
 		return;
-	}
 
-	DEFINE_TASKMAP_ITERATOR(iter) = taskMap->begin();
-	while (iter != taskMap->end()) {
-		Task &task = iter.value();
-		QString name = task.getDisplayName();
-		nameMap->insertMulti(name, task.pid);
-		taskNameList->append(name);
+	DEFINE_TASKMAP_ITERATOR(iter) = map->begin();
+	while (iter != map->end()) {
+		Task *task = iter.value().task;
+		taskList->append(task);
 		iter++;
 	}
-	taskNameList->sort();
-	s = taskNameList->size();
 
-	row = 0;
-	while (row < s) {
-		QString name = taskNameList->at(row);
-		QList<unsigned int> pidList = nameMap->values(name);
-		int sl = pidList.size();
-		bool done;
-		unsigned int pid;
-
-		/* Pathetic bubble sort to display tasks with the same names in
-		 * pid order */
-		int start = 0;
-		int end = sl - 1;
-		do {
-			done = true;
-			for (i = start + 1; i <= end; i++) {
-				j = i - 1;
-				if (pidList[j] > pidList[i]) {
-					pidList.swap(i, j);
-					done = false;
-				}
-			}
-			end--;
-			if (done || start >= end)
-				break;
-			done = true;
-			for (i = end; i > start; i--) {
-				j = i - 1;
-				if (pidList[j] > pidList[i]) {
-					pidList.swap(i, j);
-					done = false;
-				}
-			}
-			start++;
-		} while(!done && start < end);
-
-		for (i = 0; i < sl; i++) {
-			pid = pidList[i];
-			Task &task = (*taskMap)[pid];
-			Task *&taskptr = taskList->increase();
-			taskptr = &task;
-		}
-		row += sl;
-	}
-
-	delete nameMap;
+	TShark::heapsort<TList, const Task*>(
+		*taskList, [] (const Task *&a, const Task *&b) -> int {
+			const QString &as = *a->displayName;
+			const QString &bs = *b->displayName;
+			if (as > bs)
+				return 1;
+			if (as < bs)
+				return -1;
+			if (a->pid > b->pid)
+				return 1;
+			if (a->pid < b->pid)
+				return -1;
+			return 0;
+		});
 }
 
 int TaskModel::rowCount(const QModelIndex & /* index */) const
 {
-	if (taskMap != nullptr)
-		return taskList->size();
-	else
-		return 0;
+	return taskList->size();
 }
 
 int TaskModel::columnCount(const QModelIndex & /* index */) const
@@ -174,6 +129,26 @@ unsigned int TaskModel::rowToPid(int row, bool &ok) const
 	return task->pid;
 }
 
+const QString &TaskModel::rowToName(int row, bool &ok) const
+{
+	unsigned int urow;
+
+	if (row < 0) {
+		ok = false;
+		return *errorStr;
+	}
+	urow = (unsigned int) row;
+	if (urow >= taskList->size()) {
+		ok = false;
+		return *errorStr;
+	}
+
+	ok = true;
+	const Task *task = taskList->at(row);
+
+	return *task->displayName;
+}
+
 QVariant TaskModel::data(const QModelIndex &index, int role) const
 {
 	bool ok;
@@ -187,15 +162,15 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 	if (role == Qt::DisplayRole) {
 		int row = index.row();
 		int column = index.column();
-		int size;
 		unsigned int pid;
+		QString name;
 
 		switch(column) {
 		case 0:
-			size = taskNameList->size();
-			if (row >= size || row < 0)
-				return QVariant();
-			return taskNameList->at(row);
+			name = rowToName(row, ok);
+			if (ok)
+				return name;
+			break;
 		case 1:
 			pid = rowToPid(row, ok);
 			if (ok)
@@ -225,7 +200,7 @@ QVariant TaskModel::headerData(int section,
 		case 1:
 			return QString(tr("PID(TID)"));
 		default:
-			return QString(tr("Error in taskmodel.cpp"));
+			return *errorStr;
 		}
 	}
 	return QVariant();

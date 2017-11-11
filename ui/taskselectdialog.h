@@ -70,7 +70,7 @@ class TaskSelectDialog : public QDialog {
 public:
 	TaskSelectDialog(QWidget *parent = 0);
 	~TaskSelectDialog();
-	void setTaskMap(QMap<unsigned int, Task> *map);
+	void setTaskMap(QMap<unsigned int, TaskHandle> *map);
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();

@@ -58,12 +58,20 @@
 
 class QCPGraph;
 class TaskGraph;
+class Task;
 
 typedef enum {
 	STATUS_ALIVE,
 	STATUS_EXITCALLED,
 	STATUS_FINAL
 } exitstatus_t;
+
+class TaskHandle {
+public:
+	TaskHandle():task(nullptr) {};
+	Task *task;
+	__always_inline Task &getTask();
+};
 
 class TaskName {
 public:
@@ -78,7 +86,7 @@ public:
 	~Task();
 	void addName(char *name);
 	__always_inline void checkName(char *name);
-	QString getDisplayName() const;
+	void generateDisplayName();
 	QString getLastName() const;
 
 	TaskName *taskName;
@@ -97,12 +105,20 @@ public:
 	QCPGraph *wakeUpGraph;
 	QCPGraph *preemptedGraph;
 	QCPGraph *runningGraph;
+	QString *displayName;
 };
 
 __always_inline void Task::checkName(char *name)
 {
 	if (taskName == nullptr || strcmp(taskName->str, name) != 0)
 		addName(name);
+}
+
+__always_inline Task &TaskHandle::getTask()
+{
+	if (task == nullptr)
+		task = new Task;
+	return *task;
 }
 
 #endif /* TASK_H */

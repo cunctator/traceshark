@@ -135,6 +135,14 @@ void TraceAnalyzer::close()
 		delete[] CPUs;
 		CPUs = nullptr;
 	}
+
+	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.begin();
+	while (iter != taskMap.end()) {
+		Task *task = iter.value().task;
+		delete task;
+		iter++;
+	}
+
 	taskMap.clear();
 	events.clear();
 	filteredEvents.clear();
@@ -216,11 +224,12 @@ void TraceAnalyzer::processSchedAddTail()
 
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.begin();
 	while (iter != taskMap.end()) {
-		Task &task = iter.value();
+		Task &task = *iter.value().task;
 		double d;
 		double lastTime;
 		int s = task.schedTimev.size();
 		iter++;
+		task.generateDisplayName();
 		if (s <= 0)
 			continue;
 		lastTime = task.schedTimev[s - 1];
@@ -284,7 +293,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		cpuTask->schedTimev.append(faketime);
 		cpuTask->schedData.append(SCHED_HEIGHT);
 
-		task = &taskMap[oldpid];
+		task = &taskMap[oldpid].getTask();
 		if (task->isNew) {
 			task->pid = oldpid;
 		}

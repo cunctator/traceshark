@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,6 +57,7 @@
 
 template<class T> class TList;
 class Task;
+class TaskHandle;
 
 QT_BEGIN_NAMESPACE
 class QStringList;
@@ -69,7 +70,7 @@ class TaskModel : public QAbstractTableModel
 public:
 	TaskModel(QObject *parent = 0);
 	~TaskModel();
-	void setTaskMap(QMap<unsigned int, Task> *map);
+	void setTaskMap(QMap<unsigned int, TaskHandle> *map);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
@@ -78,13 +79,13 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation,
 			    int role) const;
 	unsigned int rowToPid(int row, bool &ok) const;
+	const QString &rowToName(int row, bool &ok) const;
 	void beginResetModel();
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
-	QMap<unsigned int, Task> *taskMap;
-	TList<Task*> *taskList;
-	QStringList *taskNameList;
+	TList<const Task*> *taskList;
+	QString *errorStr;
 };
 
 #endif /* TASKMODEL_H */
