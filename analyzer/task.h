@@ -78,6 +78,7 @@ public:
 	TaskName();
 	char *str;
 	TaskName *prev;
+	bool forkname;
 };
 
 class Task : public AbstractTask {
@@ -85,7 +86,7 @@ public:
 	Task();
 	~Task();
 	void addName(char *name);
-	__always_inline void checkName(char *name);
+	__always_inline void checkName(char *name, bool forkname = false);
 	void generateDisplayName();
 	QString getLastName() const;
 
@@ -106,12 +107,16 @@ public:
 	QCPGraph *preemptedGraph;
 	QCPGraph *runningGraph;
 	QString *displayName;
+private:
+	__always_inline void appendName(const TaskName *name, bool isnewest);
 };
 
-__always_inline void Task::checkName(char *name)
+__always_inline void Task::checkName(char *name, bool forkname)
 {
-	if (taskName == nullptr || strcmp(taskName->str, name) != 0)
+	if (taskName == nullptr || strcmp(taskName->str, name) != 0) {
 		addName(name);
+		taskName->forkname = forkname;
+	}
 }
 
 __always_inline Task &TaskHandle::getTask()
@@ -119,6 +124,26 @@ __always_inline Task &TaskHandle::getTask()
 	if (task == nullptr)
 		task = new Task;
 	return *task;
+}
+/*
+ * If the name is not the newest name and is "forkname", then we will will
+ * surrount it with {}. If the name is not the newest and not a forkname,
+ * then we will surround it with ()
+ */
+__always_inline void Task::appendName(const TaskName *name, bool isnewest)
+{
+	bool curly  =  name->forkname && !isnewest;
+	bool normal = !name->forkname && !isnewest;
+
+	if (curly)
+		displayName->append("{");
+	if (normal)
+		displayName->append("(");
+	displayName->append(name->str);
+	if (curly)
+		displayName->append("}");
+	if (normal)
+		displayName->append(")");
 }
 
 #endif /* TASK_H */

@@ -85,16 +85,21 @@ void Task::addName(char *name)
 	taskName = newName;
 }
 
+/*
+ * If the name has more than two names, we add ...
+ */
 void Task::generateDisplayName()
 {
 	if (taskName != nullptr) {
-		displayName->append(taskName->str);
+		appendName(taskName, true);
 		if (taskName->prev != nullptr) {
-			displayName->append("(");
-			displayName->append(taskName->prev->str);
-			displayName->append(")");
-			if (taskName->prev->prev != nullptr)
-				displayName->append("...");
+			appendName(taskName->prev, false);
+			if (taskName->prev->prev != nullptr) {
+				if (taskName->prev->prev->forkname)
+					appendName(taskName->prev->prev, false);
+				else
+					displayName->append("...");
+			}
 		}
 	}
 }

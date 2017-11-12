@@ -367,6 +367,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 						       TraceEvent &event)
 {
 	Migration m;
+	char *childname;
 
 	m.pid = sched_process_fork_childpid(ttype, event);
 	m.oldcpu = -1;
@@ -381,6 +382,9 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 		task->pid = m.pid;
 		task->schedTimev.append(event.time);
 		task->schedData.append(FLOOR_HEIGHT);
+		childname = sched_process_fork_childname_strdup(ttype, event,
+								taskNamePool);
+		task->checkName(childname, true);
 	}
 }
 
@@ -425,17 +429,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	/* This is done to update the names of existing tasks */
 	if (event.pid != 0) {
 		task = &taskMap[event.pid].getTask();
-		if (!task->isNew) {
-			/*
-			 * With the current implementation of the grammars, it
-			 * should never happen that there is a nullptr here
-			 * but we check anyway, in case I change the grammar
-			 * implementation.
-			 */
-			if (event.taskName->ptr != nullptr)
-				task->checkName(event.taskName->ptr);
-		}
-		else
+		task->checkName(event.taskName->ptr);
+		if (task->isNew)
 			task->pid = event.pid;
 	}
 
@@ -458,8 +453,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->pid = oldpid;
 		task->isNew = false;
 		name = sched_switch_oldname_strdup(ttype, event, taskNamePool);
-		if (name != nullptr)
-			task->checkName(name);
+		task->checkName(name);
 
 		/* Apparently this task was running when we started tracing */
 		task->schedTimev.append(startTime);
