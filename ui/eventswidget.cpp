@@ -100,7 +100,7 @@ void EventsWidget::setEvents(TList<TraceEvent> *e)
 	eventsPtrs = nullptr;
 }
 
-void EventsWidget::setEvents(TList<TraceEvent*> *e)
+void EventsWidget::setEvents(TList<const TraceEvent*> *e)
 {
 	eventsModel->setEvents(e);
 	events = nullptr;

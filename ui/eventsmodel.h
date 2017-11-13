@@ -66,7 +66,7 @@ public:
 	EventsModel(QObject *parent = 0);
 	EventsModel(TList<TraceEvent> *e, QObject *parent = 0);
 	void setEvents(TList<TraceEvent> *e);
-	void setEvents(TList<TraceEvent*> *e);
+	void setEvents(TList<const TraceEvent*> *e);
 	void clear();
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
@@ -80,7 +80,7 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
 	TList<TraceEvent> *events;
-	TList<TraceEvent*> *eventsPtrs;
+	TList<const TraceEvent*> *eventsPtrs;
 	const TraceEvent* getEventAt(int index) const;
 	unsigned int getSize() const;
 };

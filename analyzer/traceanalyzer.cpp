@@ -673,21 +673,20 @@ void TraceAnalyzer::processAllFilters()
 {
 	unsigned int i;
 	unsigned int s = events.size();
-	TraceEvent *eptr;
+	const TraceEvent *eptr;
 
 	filteredEvents.clear();
 
 	for (i = 0; i < s; i++) {
-		eptr = &events[i];
-		if (filterState.isEnabled(FilterState::FILTER_PID)) {
-			DEFINE_FILTER_PIDMAP_ITERATOR(iter);
-			iter = filterPidMap.find(eptr->pid);
-			if (iter == filterPidMap.end())
-				continue;
+		const TraceEvent &event = events[i];
+		eptr = &event;
+		if (filterState.isEnabled(FilterState::FILTER_PID) &&
+		    __processPidFilter(event)) {
+			continue;
 		}
 		if (filterState.isEnabled(FilterState::FILTER_EVENT)) {
 			DEFINE_FILTER_EVENTMAP_ITERATOR(iter);
-			iter = filterEventMap.find(eptr->type);
+			iter = filterEventMap.find(event.type);
 			if (iter == filterEventMap.end())
 				continue;
 		}

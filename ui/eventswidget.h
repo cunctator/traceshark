@@ -68,7 +68,7 @@ public:
 	EventsWidget(TList<TraceEvent> *e, QWidget *parent = 0);
 	virtual ~EventsWidget();
 	void setEvents(TList<TraceEvent> *e);
-	void setEvents(TList<TraceEvent*> *e);
+	void setEvents(TList<const TraceEvent*> *e);
 	void clear();
 	void clearScrollTime();
 	void beginResetModel();
@@ -89,7 +89,7 @@ private:
 	QTableView *tableView;
 	EventsModel *eventsModel;
 	TList<TraceEvent> *events;
-	TList<TraceEvent*> *eventsPtrs;
+	TList<const TraceEvent*> *eventsPtrs;
 	bool saveScrollTime;
 	double scrollTime;
 	int findBestMatch(double time);

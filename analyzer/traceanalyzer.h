@@ -106,7 +106,7 @@ public:
 	void close();
 	void processTrace();
 	TList<TraceEvent> events;
-	TList <TraceEvent*> filteredEvents;
+	TList <const TraceEvent*> filteredEvents;
 	const TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
 						 int *index) const;
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
@@ -204,6 +204,7 @@ private:
 	void processFtrace();
 	void processPerf();
 	void processAllFilters();
+	__always_inline bool __processPidFilter(const TraceEvent &event);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	QMap <unsigned int, TColor> colorMap;
@@ -725,6 +726,42 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 	}
 	endTime = events.last().time;
 	nrCPUs = maxCPU + 1;
+}
+
+__always_inline bool TraceAnalyzer::__processPidFilter(const TraceEvent &event)
+{
+	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
+	iter = filterPidMap.find(event.pid);
+	if (iter == filterPidMap.end()) {
+		tracetype_t ttype = getTraceType();
+		unsigned int pid = UINT_MAX;
+		switch (event.type) {
+		case SCHED_WAKEUP:
+		case SCHED_WAKEUP_NEW:
+			if (!sched_wakeup_args_ok(ttype, event))
+				return true;
+			pid = sched_wakeup_pid(ttype, event);
+			break;
+		case SCHED_PROCESS_FORK:
+			if (!sched_process_fork_args_ok(ttype, event))
+				return true;
+			pid = sched_process_fork_childpid(ttype, event);
+			break;
+		case SCHED_SWITCH:
+			if (!sched_switch_args_ok(ttype, event))
+				return true;
+			pid = sched_switch_newpid(ttype, event);
+			if (pid == 0)
+				return true;
+			break;
+		default:
+			return true;
+		}
+		iter = filterPidMap.find(pid);
+		if (iter == filterPidMap.end())
+			return true;
+	}
+	return false;
 }
 
 #endif /* TRACEANALYZER_H */

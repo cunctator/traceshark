@@ -71,7 +71,7 @@ void EventsModel::setEvents(TList<TraceEvent> *e)
 	eventsPtrs = nullptr;
 }
 
-void EventsModel::setEvents(TList<TraceEvent*> *e)
+void EventsModel::setEvents(TList<const TraceEvent*> *e)
 {
 	events = nullptr;
 	eventsPtrs = e;
