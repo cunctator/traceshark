@@ -49,6 +49,7 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #include <QMap>
 #include <QStringList>
 
@@ -57,17 +58,24 @@
 #include "misc/traceshark.h"
 #include "analyzer/task.h"
 
+static const char swappername[] = "swapper";
+
 TaskModel::TaskModel(QObject *parent):
 	QAbstractTableModel(parent)
 {
 	taskList = new TList<const Task*>;
 	errorStr = new QString(tr("Error in taskmodel.cpp"));
+	idleTask = new Task;
+	idleTask->pid = 0;
+	idleTask->checkName(swappername, false);
+	idleTask->generateDisplayName();
 }
 
 TaskModel::~TaskModel()
 {
 	delete taskList;
 	delete errorStr;
+	delete idleTask;
 }
 
 void TaskModel::setTaskMap(QMap<unsigned int, TaskHandle> *map)
@@ -83,6 +91,9 @@ void TaskModel::setTaskMap(QMap<unsigned int, TaskHandle> *map)
 		taskList->append(task);
 		iter++;
 	}
+
+	/* Add a fake idle task for event filtering purposes */
+	taskList->append(idleTask);
 
 	TShark::heapsort<TList, const Task*>(
 		*taskList, [] (const Task *&a, const Task *&b) -> int {

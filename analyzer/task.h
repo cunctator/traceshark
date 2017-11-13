@@ -76,7 +76,7 @@ public:
 class TaskName {
 public:
 	TaskName();
-	char *str;
+	const char *str;
 	TaskName *prev;
 	bool forkname;
 };
@@ -85,8 +85,8 @@ class Task : public AbstractTask {
 public:
 	Task();
 	~Task();
-	void addName(char *name);
-	__always_inline void checkName(char *name, bool forkname = false);
+	void addName(const char *name);
+	__always_inline void checkName(const char *name, bool forkname = false);
 	void generateDisplayName();
 	QString getLastName() const;
 
@@ -111,7 +111,7 @@ private:
 	__always_inline void appendName(const TaskName *name, bool isnewest);
 };
 
-__always_inline void Task::checkName(char *name, bool forkname)
+__always_inline void Task::checkName(const char *name, bool forkname)
 {
 	if (taskName == nullptr || strcmp(taskName->str, name) != 0) {
 		addName(name);

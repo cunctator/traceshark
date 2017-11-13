@@ -77,7 +77,7 @@ Task::~Task()
 	delete displayName;
 }
 
-void Task::addName(char *name)
+void Task::addName(const char *name)
 {
 	TaskName *newName = new TaskName();
 	newName->str = name;

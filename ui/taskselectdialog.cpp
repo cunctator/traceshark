@@ -157,7 +157,7 @@ void TaskSelectDialog::addUnifiedClicked()
 		const QModelIndex &index = indexList.at(i);
 
 		pid = taskModel->rowToPid(index.row(), ok);
-		if (ok)
+		if (ok && pid != 0)
 			emit addTaskGraph(pid);
 	}
 }
@@ -174,7 +174,7 @@ void TaskSelectDialog::addLegendClicked()
 		const QModelIndex &index = indexList.at(i);
 
 		pid = taskModel->rowToPid(index.row(), ok);
-		if (ok)
+		if (ok && pid != 0)
 			emit addTaskToLegend(pid);
 	}
 }

@@ -86,6 +86,7 @@ public:
 private:
 	TList<const Task*> *taskList;
 	QString *errorStr;
+	Task *idleTask;
 };
 
 #endif /* TASKMODEL_H */
