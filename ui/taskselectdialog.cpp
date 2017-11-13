@@ -89,8 +89,10 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 	QPushButton *resetFilterButton =
 		new QPushButton(tr("Reset events filter"));
 
+	filterLayout->addStretch();
 	filterLayout->addWidget(addFilterButton);
 	filterLayout->addWidget(resetFilterButton);
+	filterLayout->addStretch();
 
 	tsconnect(closeButton, clicked(), this, closeClicked());
 	tsconnect(addUnifiedButton, clicked(), this, addUnifiedClicked());
