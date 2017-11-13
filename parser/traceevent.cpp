@@ -86,7 +86,22 @@ void TraceEvent::setStringTree(StringTree *sTree)
 	stringTree = sTree;
 }
 
+const StringTree *TraceEvent::getStringTree()
+{
+	return stringTree;
+}
+
 TString *TraceEvent::getEventName() const
 {
 	return stringTree->stringLookup(TraceEvent::type);
+}
+
+const TString *TraceEvent::getEventName(event_t event)
+{
+	return stringTree->stringLookup(event);
+}
+
+int TraceEvent::getNrEvents()
+{
+	return stringTree->getMaxEvent() + 1;
 }

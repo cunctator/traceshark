@@ -58,6 +58,7 @@
 #include <QString>
 #include "misc/setting.h"
 #include "misc/traceshark.h"
+#include "parser/traceevent.h"
 #include "threads/workitem.h"
 
 QT_BEGIN_NAMESPACE
@@ -86,6 +87,7 @@ class TracePlot;
 class TraceEvent;
 class TaskRangeAllocator;
 class TaskSelectDialog;
+class EventSelectDialog;
 class YAxisTicker;
 
 class MainWindow : public QMainWindow
@@ -120,9 +122,12 @@ private slots:
 	void addTaskToLegend(unsigned int pid);
 	void removeTaskGraph(unsigned int pid);
 	void showTaskSelector();
+	void showEventFilter();
 	void showWakeup(unsigned int pid);
 	void createPidFilter(QMap<unsigned int, unsigned int> &map);
+	void createEventFilter(QMap<event_t, event_t> &map);
 	void resetPidFilter();
+	void resetEventFilter();
 	void resetFilters();
 private:
 	typedef enum {
@@ -184,6 +189,7 @@ private:
 	QAction *saveAction;
 	QAction *exitAction;
 	QAction *showTasksAction;
+	QAction *showEventsAction;
 	QAction *aboutAction;
 	QAction *licenseAction;
 	QAction *aboutQtAction;
@@ -194,6 +200,7 @@ private:
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;
 	TaskSelectDialog *taskSelectDialog;
+	EventSelectDialog *eventSelectDialog;
 
 	const double bugWorkAroundOffset = 100;
 	const double schedSectionOffset = 100;

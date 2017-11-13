@@ -169,7 +169,10 @@ public:
 	TString *postEventInfo;
 
 	TString *getEventName() const;
+	static const TString *getEventName(event_t event);
 	static void setStringTree(StringTree *sTree);
+	static const StringTree *getStringTree();
+	static int getNrEvents();
 private:
 	/* This is supposed to be set to the stringtree that was involved in
 	 * the parsing of the events, so that it can used to translate from

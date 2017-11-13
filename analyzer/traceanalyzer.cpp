@@ -674,21 +674,27 @@ void TraceAnalyzer::processAllFilters()
 	unsigned int i;
 	unsigned int s = events.size();
 	TraceEvent *eptr;
-	DEFINE_FILTERMAP_ITERATOR(iter);
 
 	filteredEvents.clear();
 
 	for (i = 0; i < s; i++) {
 		eptr = &events[i];
 		if (filterState.isEnabled(FilterState::FILTER_PID)) {
+			DEFINE_FILTER_PIDMAP_ITERATOR(iter);
 			iter = filterPidMap.find(eptr->pid);
 			if (iter == filterPidMap.end())
 				continue;
-		} else if (filterState.isEnabled(FilterState::FILTER_EVENT)) {
-			/* Add event type filtering here */
-		} else if (filterState.isEnabled(FilterState::FILTER_CPU)) {
+		}
+		if (filterState.isEnabled(FilterState::FILTER_EVENT)) {
+			DEFINE_FILTER_EVENTMAP_ITERATOR(iter);
+			iter = filterEventMap.find(eptr->type);
+			if (iter == filterEventMap.end())
+				continue;
+		}
+		if (filterState.isEnabled(FilterState::FILTER_CPU)) {
 			/* Add CPU nr filtering here */
-		} else if (filterState.isEnabled(FilterState::FILTER_ARG)) {
+		}
+		if (filterState.isEnabled(FilterState::FILTER_ARG)) {
 			/* Add argument filtering here */
 		}
 		filteredEvents.append(eptr);
@@ -713,6 +719,24 @@ void TraceAnalyzer::createPidFilter(QMap<unsigned int, unsigned int> &map)
 	processAllFilters();
 }
 
+void TraceAnalyzer::createEventFilter(QMap<event_t, event_t> &map)
+{
+	/*
+	 * An empty map is interpreted to mean that no filtering is desired,
+	 * a map of the same size as the taskMap should mean that the user
+	 * wants to filter on all pids, which is the same as no filtering
+	 */
+	if (map.isEmpty() || map.size() == TraceEvent::getNrEvents()) {
+		if (filterState.isEnabled(FilterState::FILTER_EVENT))
+			disableFilter(FilterState::FILTER_EVENT);
+		return;
+	}
+
+	filterEventMap = map;
+	filterState.enable(FilterState::FILTER_EVENT);
+	processAllFilters();
+}
+
 void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 {
 	filterState.disable(filter);
@@ -721,6 +745,7 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 		filterPidMap.clear();
 		break;
 	case FilterState::FILTER_EVENT:
+		filterEventMap.clear();
 		break;
 	case FilterState::FILTER_CPU:
 		break;
@@ -736,7 +761,7 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 }
 
 void TraceAnalyzer::addPidToFilter(unsigned int pid) {
-	DEFINE_FILTERMAP_ITERATOR(iter);
+	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
 
 	iter = filterPidMap.find(pid);
 	if (iter != filterPidMap.end()) {
@@ -758,7 +783,7 @@ epilogue:
 }
 
 void TraceAnalyzer::removePidFromFilter(unsigned int pid) {
-	DEFINE_FILTERMAP_ITERATOR(iter);
+	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
 
 	if (!filterState.isEnabled(FilterState::FILTER_PID))
 		return;

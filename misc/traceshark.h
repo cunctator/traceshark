@@ -121,8 +121,11 @@ typedef enum {
 #define DEFINE_COLORMAP_ITERATOR(name) \
 	QMap<unsigned int, TColor>::iterator name
 
-#define DEFINE_FILTERMAP_ITERATOR(name) \
+#define DEFINE_FILTER_PIDMAP_ITERATOR(name) \
 	QMap<unsigned int, unsigned int>::iterator name;
+
+#define DEFINE_FILTER_EVENTMAP_ITERATOR(name) \
+	QMap<event_t, event_t>::iterator name;
 
 #define TSMAX(A, B) ((A) >= (B) ? A:B)
 #define TSMIN(A, B) ((A) < (B) ? A:B)
@@ -239,11 +242,11 @@ namespace TShark {
 		return 2 * i + 2;
 	}
 
-	template<template <typename> class C, typename T>
+	template<template <typename> class C, typename T, typename TCompFunc>
 		__always_inline void __heap_siftdown(C<T> &container,
 						     long start,
 						     long end,
-						     int (*compFunc)(T&, T&))
+						     TCompFunc compFunc)
 	{
 		long root, child, rchild, swap;
 
@@ -266,9 +269,9 @@ namespace TShark {
 		}
 	}
 
-	template<template <typename> class C, typename T>
+	template<template <typename> class C, typename T, typename TCompFunc>
 		__always_inline void __heap_heapify(C<T> &container,
-						    int (*compFunc)(T&, T&))
+						    TCompFunc compFunc)
 	{
 		long count = container.size();
 		long start;
@@ -281,9 +284,9 @@ namespace TShark {
 		}
 	}
 
-	template<template <typename> class C, typename T>
+	template<template <typename> class C, typename T, typename TCompFunc>
 		void heapsort(C<T> &container,
-			      int (*compFunc)(T&, T&))
+			      TCompFunc compFunc)
 	{
 		long count = container.size();
 		long end;

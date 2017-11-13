@@ -78,6 +78,7 @@ public:
 		   unsigned int table_size = 4096);
 	~StringTree();
 	__always_inline TString *stringLookup(event_t value) const;
+	event_t getMaxEvent() const;
 	__always_inline event_t searchAllocString(const TString *str,
 						  uint32_t hval,
 						  event_t newval);
@@ -93,13 +94,14 @@ private:
 	unsigned int hSize;
 	TString **stringTable;
 	int tableSize;
+	event_t maxEvent;
 	void clearTables();
 };
 
 
 __always_inline TString *StringTree::stringLookup(event_t value) const
 {
-	if (value < 0 || value >= tableSize)
+	if (value < 0 || value > maxEvent)
 		return nullptr;
 	return stringTable[value];
 }
@@ -135,6 +137,9 @@ __always_inline event_t StringTree::searchAllocString(const TString *str,
 	rootptr = aentry;
 	entry = *aentry;
 
+	if (newval >= tableSize)
+		return EVENT_ERROR;
+
 	while (likely(entry != nullptr)) {
 		/*
 		 * Using strncmp here would lose performance and we know that
@@ -162,6 +167,8 @@ __always_inline event_t StringTree::searchAllocString(const TString *str,
 	entry = (StringTreeEntry*) entryPool->allocObj();
 	if (entry == nullptr)
 		return EVENT_ERROR;
+	if (newval > maxEvent)
+		maxEvent = newval;
 	bzero(entry, sizeof(StringTreeEntry));
 	entry->str = newstr;
 	entry->eventType = newval;

@@ -141,6 +141,7 @@ public:
 	QList<Migration> migrations;
 	QList<MigrationArrow*> migrationArrows;
 	void createPidFilter(QMap<unsigned int, unsigned int> &map);
+	void createEventFilter(QMap<event_t, event_t> &map);
 	void disableFilter(FilterState::filter_t filter);
 	void addPidToFilter(unsigned int pid);
 	void removePidFromFilter(unsigned int pid);
@@ -229,6 +230,7 @@ private:
 	QCustomPlot *customPlot;
 	FilterState filterState;
 	QMap<unsigned int, unsigned int> filterPidMap;
+	QMap<event_t, event_t> filterEventMap;
 };
 
 __always_inline double TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,

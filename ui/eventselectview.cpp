@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,71 +49,19 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-#include "mm/stringtree.h"
-#include "parser/traceevent.h"
+#include "ui/eventselectview.h"
 
-#define MAX(A, B) ((A) >= (B) ? A:B)
-#define MIN(A, B) ((A) < (B) ? A:B)
-
-StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP,
-		       unsigned int table_size) :
-	maxEvent((event_t)-1)
+EventSelectView::EventSelectView(QWidget *parent) :
+	QTableView(parent)
 {
-	unsigned int entryPages, strPages;
-
-	if (hSizeP == 0)
-		hSize = 1;
-	else
-		hSize = hSizeP;
-
-	entryPages = 2 * hSize * sizeof(StringTreeEntry) / 4096;
-	entryPages = MAX(1, entryPages);
-	strPages = 2* hSize * sizeof(TString) / 4096;
-	strPages = MAX(16, strPages);
-
-	strPool = new MemPool(strPages, sizeof(TString));
-	charPool = new MemPool(nr_pages, 1);
-	entryPool = new MemPool(entryPages, sizeof(StringTreeEntry));
-
-	hashTable = new StringTreeEntry*[hSize];
-
-	stringTable = new TString*[table_size];
-	tableSize = table_size;
-
-	clearTables();
+	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
-StringTree::~StringTree()
-{
-	delete charPool;
-	delete strPool;
-	delete entryPool;
-	delete[] hashTable;
-	delete[] stringTable;
-}
+EventSelectView::~EventSelectView()
+{}
 
-void StringTree::clearTables()
+QModelIndexList EventSelectView::selectedIndexes() const
 {
-	bzero(hashTable, hSize * sizeof(StringTreeEntry*));
-	bzero(stringTable, tableSize * sizeof(TString*));
-}
-
-void StringTree::clear()
-{
-	clearTables();
-	strPool->reset();
-	entryPool->reset();
-	charPool->reset();
-	maxEvent = (event_t)-1;
-}
-
-void StringTree::reset()
-{
-	clear();
-}
-
-event_t StringTree::getMaxEvent() const
-{
-	return maxEvent;
+	return QTableView::selectedIndexes();
 }

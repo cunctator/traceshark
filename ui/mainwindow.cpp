@@ -65,6 +65,7 @@
 #include "ui/taskgraph.h"
 #include "ui/taskrangeallocator.h"
 #include "ui/taskselectdialog.h"
+#include "ui/eventselectdialog.h"
 #include "parser/traceevent.h"
 #include "ui/traceplot.h"
 #include "ui/yaxisticker.h"
@@ -83,6 +84,8 @@
 	"Take a screenshot of the current graph and save it to a file"
 #define TOOLTIP_SHOWTASKS \
 	"Show a list of all tasks and it's possible to select one"
+#define TOOLTIP_SHOWEVENTS \
+	"Show a list of event types and it's possible to select which to filter on"
 
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
@@ -128,6 +131,7 @@ MainWindow::MainWindow():
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
 	taskSelectDialog = new TaskSelectDialog();
+	eventSelectDialog = new EventSelectDialog();
 
 	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
@@ -152,6 +156,9 @@ MainWindow::MainWindow():
 						 unsigned int> &),
 		  this, createPidFilter(QMap<unsigned int, unsigned int> &));
 	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
+	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &),
+		  this, createEventFilter(QMap<event_t, event_t> &));
+	tsconnect(eventSelectDialog, resetFilter(), this, resetEventFilter());
 	setupSettings();
 }
 
@@ -213,6 +220,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
 	/* Here is a great place to save settings, if we ever want to do it */
 	taskSelectDialog->hide();
+	eventSelectDialog->hide();
 	event->accept();
 	/* event->ignore() could be used to refuse to close the window */
 }
@@ -229,6 +237,11 @@ void MainWindow::openTrace()
 		taskSelectDialog->beginResetModel();
 		taskSelectDialog->setTaskMap(nullptr);
 		taskSelectDialog->endResetModel();
+
+		eventSelectDialog->beginResetModel();
+		eventSelectDialog->setStringTree(nullptr);
+		eventSelectDialog->endResetModel();
+
 		if (analyzer->isOpen())
 			analyzer->close();
 		loadTraceFile(name);
@@ -257,6 +270,10 @@ void MainWindow::openTrace()
 		taskSelectDialog->beginResetModel();
 		taskSelectDialog->setTaskMap(&analyzer->taskMap);
 		taskSelectDialog->endResetModel();
+
+		eventSelectDialog->beginResetModel();
+		eventSelectDialog->setStringTree(TraceEvent::getStringTree());
+		eventSelectDialog->endResetModel();
 
 		eventsw = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -605,6 +622,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	saveAction->setEnabled(e);
 	closeAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
+	showEventsAction->setEnabled(e);
 
 	infoWidget->setTraceActionsEnabled(e);
 }
@@ -619,6 +637,10 @@ void MainWindow::closeTrace()
 	taskSelectDialog->beginResetModel();
 	taskSelectDialog->setTaskMap(nullptr);
 	taskSelectDialog->endResetModel();
+
+	eventSelectDialog->beginResetModel();
+	eventSelectDialog->setStringTree(nullptr);
+	eventSelectDialog->endResetModel();
 
 	clearPlot();
 	if(analyzer->isOpen())
@@ -911,6 +933,12 @@ void MainWindow::createActions()
 	showTasksAction->setEnabled(false);
 	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
 
+	showEventsAction = new QAction(tr("Filter on event type"), this);
+	showEventsAction->setIcon(QIcon(RESSRC_PNG_TASKSELECT));
+	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
+	showEventsAction->setEnabled(false);
+	tsconnect(showEventsAction, triggered(), this, showEventFilter());
+
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
 	exitAction->setStatusTip(tr("Exit traceshark"));
@@ -947,6 +975,7 @@ void MainWindow::createToolBars()
 	viewToolBar = new QToolBar(tr("&View"));
 	addToolBar(Qt::LeftToolBarArea, viewToolBar);
 	viewToolBar->addAction(showTasksAction);
+	viewToolBar->addAction(showEventsAction);
 }
 
 void MainWindow::createMenus()
@@ -960,6 +989,7 @@ void MainWindow::createMenus()
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(showTasksAction);
+	viewMenu->addAction(showEventsAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
@@ -1139,6 +1169,18 @@ void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map)
 	scrollTo(saved);
 }
 
+void MainWindow::createEventFilter(QMap<event_t, event_t> &map)
+{
+	double saved = eventsWidget->getSavedScroll();
+
+	eventsWidget->beginResetModel();
+	analyzer->createEventFilter(map);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+}
+
+
 void MainWindow::resetPidFilter()
 {
 	double saved;
@@ -1150,6 +1192,23 @@ void MainWindow::resetPidFilter()
 
 	eventsWidget->beginResetModel();
 	analyzer->disableFilter(FilterState::FILTER_PID);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+
+	scrollTo(saved);
+}
+
+void MainWindow::resetEventFilter()
+{
+	double saved;
+
+	if (!analyzer->filterActive(FilterState::FILTER_EVENT))
+		return;
+
+	saved = eventsWidget->getSavedScroll();
+
+	eventsWidget->beginResetModel();
+	analyzer->disableFilter(FilterState::FILTER_EVENT);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 
@@ -1329,6 +1388,11 @@ void MainWindow::removeTaskGraph(unsigned int pid)
 void MainWindow::showTaskSelector()
 {
 	taskSelectDialog->show();
+}
+
+void MainWindow::showEventFilter()
+{
+	eventSelectDialog->show();
 }
 
 void MainWindow::showWakeup(unsigned int pid)
