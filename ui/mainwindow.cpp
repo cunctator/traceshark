@@ -934,7 +934,7 @@ void MainWindow::createActions()
 	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
 
 	showEventsAction = new QAction(tr("Filter on event type"), this);
-	showEventsAction->setIcon(QIcon(RESSRC_PNG_TASKSELECT));
+	showEventsAction->setIcon(QIcon(RESSRC_PNG_EVENTFILTER));
 	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
 	showEventsAction->setEnabled(false);
 	tsconnect(showEventsAction, triggered(), this, showEventFilter());
