@@ -54,12 +54,14 @@
 
 #include <QDialog>
 #include <QString>
-#include <QMap>
 
 #include "analyzer/task.h"
 
 QT_BEGIN_NAMESPACE
 class QStringList;
+class QCheckBox;
+class QComboBox;
+template <typename, typename> class QMap;
 QT_END_NAMESPACE
 
 class TaskModel;
@@ -79,7 +81,8 @@ signals:
 	void addTaskGraph(unsigned int pid);
 	void addTaskToLegend(unsigned int pid);
 	void resetFilter(void);
-	void createFilter(QMap<unsigned int, unsigned int> &map);
+	void createFilter(QMap<unsigned int, unsigned int> &map,
+			  bool orlogic, bool inclusive);
 private slots:
 	void closeClicked();
 	void addUnifiedClicked();
@@ -88,6 +91,9 @@ private slots:
 private:
 	TaskView *taskView;
 	TaskModel *taskModel;
+	QComboBox *logicBox;
+	QCheckBox *includeBox;
+	QMap<unsigned int, unsigned int> *filterMap;
 	int savedHeight;
 };
 

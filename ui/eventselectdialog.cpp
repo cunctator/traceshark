@@ -49,14 +49,19 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <QComboBox>
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QMap>
 
 #include "ui/eventselectdialog.h"
 #include "ui/eventselectmodel.h"
 #include "ui/eventselectview.h"
 #include "misc/traceshark.h"
+
+#define CBOX_INDEX_AND 0
+#define CBOX_INDEX_OR  1
 
 EventSelectDialog::EventSelectDialog(QWidget *parent)
 	: QDialog(parent, Qt::WindowCloseButtonHint), savedHeight(900)
@@ -72,6 +77,12 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 	mainLayout->addLayout(filterLayout);
 
 	QPushButton *closeButton = new QPushButton(tr("Close"));
+
+	logicBox = new QComboBox();
+	logicBox->addItem(QString(tr("&&")));
+	logicBox->addItem(QString(tr("||")));
+	logicBox->setCurrentIndex(CBOX_INDEX_AND);
+
 	QPushButton *addFilterButton =
 		new QPushButton(tr("Create events filter"));
 	QPushButton *resetFilterButton =
@@ -79,6 +90,7 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 
 	filterLayout->addStretch();
 	filterLayout->addWidget(closeButton);
+	filterLayout->addWidget(logicBox);
 	filterLayout->addWidget(addFilterButton);
 	filterLayout->addWidget(resetFilterButton);
 	filterLayout->addStretch();
@@ -86,10 +98,14 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 	tsconnect(closeButton, clicked(), this, closeClicked());
 	tsconnect(addFilterButton, clicked(), this, addFilterClicked());
 	sigconnect(resetFilterButton, clicked(), this, resetFilter());
+
+	filterMap = new QMap<event_t, event_t>();
 }
 
 EventSelectDialog::~EventSelectDialog()
-{}
+{
+	delete filterMap;
+}
 
 void EventSelectDialog::setStringTree(const StringTree *stree)
 {
@@ -141,14 +157,16 @@ void EventSelectDialog::addFilterClicked()
 	event_t event;
 	bool ok;
 	int i, s;
-	QMap<event_t, event_t> filterMap;
+	bool orlogic;
 
+	filterMap->clear();
 	s = indexList.size();
 	for (i = 0; i < s; i++) {
 		const QModelIndex &index = indexList.at(i);
 		event = eventModel->rowToEvent(index.row(), ok);
 		if (ok)
-			filterMap[event] = event;
+			(*filterMap)[event] = event;
 	}
-	emit createFilter(filterMap);
+	orlogic = logicBox->currentIndex() == CBOX_INDEX_OR;
+	emit createFilter(*filterMap, orlogic);
 }

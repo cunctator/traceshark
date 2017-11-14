@@ -49,6 +49,10 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLabel>
+#include <QMap>
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -58,12 +62,16 @@
 #include "ui/taskview.h"
 #include "misc/traceshark.h"
 
+#define CBOX_INDEX_AND 0
+#define CBOX_INDEX_OR  1
+
 TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 	: QDialog(parent, Qt::WindowCloseButtonHint), savedHeight(900)
 {
 	QVBoxLayout *mainLayout =  new QVBoxLayout(this);
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	QHBoxLayout *filterLayout = new QHBoxLayout();
+	QHBoxLayout *settingLayout = new QHBoxLayout();
 
 	taskView = new TaskView(this);
 	taskModel = new TaskModel(taskView);
@@ -72,6 +80,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 	mainLayout->addWidget(taskView);
 	mainLayout->addLayout(buttonLayout);
 	mainLayout->addLayout(filterLayout);
+	mainLayout->addLayout(settingLayout);
 
 	QPushButton *closeButton = new QPushButton(tr("Close"));
 	QPushButton *addUnifiedButton =
@@ -84,25 +93,45 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 	buttonLayout->addWidget(addLegendButton);
 	buttonLayout->addStretch();
 
+	logicBox = new QComboBox();
+	logicBox->addItem(QString(tr("&&")));
+	logicBox->addItem(QString(tr("||")));
+	logicBox->setCurrentIndex(CBOX_INDEX_AND);
+
 	QPushButton *addFilterButton =
 		new QPushButton(tr("Create events filter"));
 	QPushButton *resetFilterButton =
 		new QPushButton(tr("Reset events filter"));
 
 	filterLayout->addStretch();
+	filterLayout->addWidget(logicBox);
 	filterLayout->addWidget(addFilterButton);
 	filterLayout->addWidget(resetFilterButton);
 	filterLayout->addStretch();
+
+	QLabel *boxlabel = new QLabel(
+		tr("Include wakeup/fork/switch from other PIDs"));
+	includeBox = new QCheckBox();
+	includeBox->setChecked(true);
+
+	settingLayout->addStretch();
+	settingLayout->addWidget(boxlabel);
+	settingLayout->addWidget(includeBox);
+	settingLayout->addStretch();
 
 	tsconnect(closeButton, clicked(), this, closeClicked());
 	tsconnect(addUnifiedButton, clicked(), this, addUnifiedClicked());
 	tsconnect(addLegendButton, clicked(), this, addLegendClicked());
 	tsconnect(addFilterButton, clicked(), this, addFilterClicked());
 	sigconnect(resetFilterButton, clicked(), this, resetFilter());
+
+	filterMap = new QMap<unsigned int, unsigned int>();
 }
 
 TaskSelectDialog::~TaskSelectDialog()
-{}
+{
+	delete filterMap;
+}
 
 void TaskSelectDialog::setTaskMap(QMap<unsigned int, TaskHandle> *map)
 {
@@ -187,16 +216,18 @@ void TaskSelectDialog::addFilterClicked()
 	unsigned int pid;
 	bool ok;
 	int i, s;
-	QMap<unsigned int, unsigned int> filterMap;
+	bool orlogic, inclusive;
 
+	filterMap->clear();
 	s = indexList.size();
 	for (i = 0; i < s; i++) {
 		const QModelIndex &index = indexList.at(i);
 
 		pid = taskModel->rowToPid(index.row(), ok);
 		if (ok)
-			filterMap[pid] = pid;
+			(*filterMap)[pid] = pid;
 	}
-	QMap<unsigned int, unsigned int>& emap = filterMap;
-	emit createFilter(emap);
+	orlogic = logicBox->currentIndex() == CBOX_INDEX_OR;
+	inclusive = includeBox->isChecked();
+	emit createFilter(*filterMap, orlogic, inclusive);
 }

@@ -54,13 +54,14 @@
 
 #include <QDialog>
 #include <QString>
-#include <QMap>
 
 #include "analyzer/task.h"
 #include "parser/traceevent.h"
 
 QT_BEGIN_NAMESPACE
+class QComboBox;
 class QStringList;
+template <typename, typename> class QMap;
 QT_END_NAMESPACE
 
 class EventSelectModel;
@@ -78,13 +79,15 @@ public:
 	void show();
 signals:
 	void resetFilter(void);
-	void createFilter(QMap<event_t, event_t> &map);
+	void createFilter(QMap<event_t, event_t> &map, bool orlogic);
 private slots:
 	void closeClicked();
 	void addFilterClicked();
 private:
 	EventSelectView *eventView;
 	EventSelectModel *eventModel;
+	QComboBox *logicBox;
+	QMap<event_t, event_t> *filterMap;
 	int savedHeight;
 };
 

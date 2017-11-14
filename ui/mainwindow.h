@@ -124,8 +124,9 @@ private slots:
 	void showTaskSelector();
 	void showEventFilter();
 	void showWakeup(unsigned int pid);
-	void createPidFilter(QMap<unsigned int, unsigned int> &map);
-	void createEventFilter(QMap<event_t, event_t> &map);
+	void createPidFilter(QMap<unsigned int, unsigned int> &map,
+			     bool orlogic, bool inclusive);
+	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void resetPidFilter();
 	void resetEventFilter();
 	void resetFilters();

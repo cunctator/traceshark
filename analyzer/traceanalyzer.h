@@ -140,8 +140,9 @@ public:
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
 	QList<MigrationArrow*> migrationArrows;
-	void createPidFilter(QMap<unsigned int, unsigned int> &map);
-	void createEventFilter(QMap<event_t, event_t> &map);
+	void createPidFilter(QMap<unsigned int, unsigned int> &map,
+			     bool orlogic, bool inclusive);
+	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void disableFilter(FilterState::filter_t filter);
 	void addPidToFilter(unsigned int pid);
 	void removePidFromFilter(unsigned int pid);
@@ -204,7 +205,10 @@ private:
 	void processFtrace();
 	void processPerf();
 	void processAllFilters();
-	__always_inline bool __processPidFilter(const TraceEvent &event);
+	__always_inline
+		bool __processPidFilter(const TraceEvent &event,
+					QMap<unsigned int, unsigned int> &map,
+					bool inclusive);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	QMap <unsigned int, TColor> colorMap;
@@ -230,8 +234,13 @@ private:
 	StringPool *taskNamePool;
 	QCustomPlot *customPlot;
 	FilterState filterState;
+	FilterState OR_filterState;
 	QMap<unsigned int, unsigned int> filterPidMap;
+	QMap<unsigned int, unsigned int> OR_filterPidMap;
 	QMap<event_t, event_t> filterEventMap;
+	QMap<event_t, event_t> OR_filterEventMap;
+	bool pidFilterInclusive;
+	bool OR_pidFilterInclusive;
 };
 
 __always_inline double TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,
@@ -728,13 +737,18 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 	nrCPUs = maxCPU + 1;
 }
 
-__always_inline bool TraceAnalyzer::__processPidFilter(const TraceEvent &event)
+__always_inline
+bool TraceAnalyzer::__processPidFilter(const TraceEvent &event,
+				       QMap<unsigned int, unsigned int> &map,
+				       bool inclusive)
 {
 	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
-	iter = filterPidMap.find(event.pid);
-	if (iter == filterPidMap.end()) {
+	iter = map.find(event.pid);
+	if (iter == map.end()) {
 		tracetype_t ttype = getTraceType();
 		unsigned int pid = UINT_MAX;
+		if (!inclusive)
+			return true;
 		switch (event.type) {
 		case SCHED_WAKEUP:
 		case SCHED_WAKEUP_NEW:

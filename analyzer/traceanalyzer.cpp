@@ -75,6 +75,7 @@ TraceAnalyzer::TraceAnalyzer()
 	taskNamePool = new StringPool(16384, 256);
 	parser = new TraceParser(&events);
 	filterState.disableAll();
+	OR_filterState.disableAll();
 }
 
 TraceAnalyzer::~TraceAnalyzer()
@@ -145,8 +146,7 @@ void TraceAnalyzer::close()
 
 	taskMap.clear();
 	events.clear();
-	filteredEvents.clear();
-	filterState.disableAll();
+	disableAllFilters();
 	migrations.clear();
 	migrationArrows.clear();
 	colorMap.clear();
@@ -680,8 +680,25 @@ void TraceAnalyzer::processAllFilters()
 	for (i = 0; i < s; i++) {
 		const TraceEvent &event = events[i];
 		eptr = &event;
+		/* OR filters */
+		if (OR_filterState.isEnabled(FilterState::FILTER_PID) &&
+		    !__processPidFilter(event, OR_filterPidMap,
+					OR_pidFilterInclusive)) {
+			filteredEvents.append(eptr);
+			continue;
+		}
+		if (OR_filterState.isEnabled(FilterState::FILTER_EVENT)) {
+			DEFINE_FILTER_EVENTMAP_ITERATOR(iter);
+			iter = OR_filterEventMap.find(event.type);
+			if (iter != OR_filterEventMap.end()) {
+				filteredEvents.append(eptr);
+				continue;
+			}
+		}
+		/* AND filters */
 		if (filterState.isEnabled(FilterState::FILTER_PID) &&
-		    __processPidFilter(event)) {
+		    __processPidFilter(event, filterPidMap,
+				       pidFilterInclusive)) {
 			continue;
 		}
 		if (filterState.isEnabled(FilterState::FILTER_EVENT)) {
@@ -700,7 +717,8 @@ void TraceAnalyzer::processAllFilters()
 	}
 }
 
-void TraceAnalyzer::createPidFilter(QMap<unsigned int, unsigned int> &map)
+void TraceAnalyzer::createPidFilter(QMap<unsigned int, unsigned int> &map,
+				    bool orlogic, bool inclusive)
 {
 	/*
 	 * An empty map is interpreted to mean that no filtering is desired,
@@ -713,12 +731,21 @@ void TraceAnalyzer::createPidFilter(QMap<unsigned int, unsigned int> &map)
 		return;
 	}
 
-	filterPidMap = map;
-	filterState.enable(FilterState::FILTER_PID);
-	processAllFilters();
+	if (orlogic) {
+		OR_pidFilterInclusive = inclusive;
+		OR_filterPidMap = map;
+		OR_filterState.enable(FilterState::FILTER_PID);
+	} else {
+		pidFilterInclusive = inclusive;
+		filterPidMap = map;
+		filterState.enable(FilterState::FILTER_PID);
+	}
+	if (filterState.isEnabled())
+		processAllFilters();
 }
 
-void TraceAnalyzer::createEventFilter(QMap<event_t, event_t> &map)
+void TraceAnalyzer::createEventFilter(QMap<event_t, event_t> &map,
+				      bool orlogic)
 {
 	/*
 	 * An empty map is interpreted to mean that no filtering is desired,
@@ -731,17 +758,26 @@ void TraceAnalyzer::createEventFilter(QMap<event_t, event_t> &map)
 		return;
 	}
 
-	filterEventMap = map;
-	filterState.enable(FilterState::FILTER_EVENT);
-	processAllFilters();
+	if (orlogic) {
+		OR_filterEventMap = map;
+		OR_filterState.enable(FilterState::FILTER_EVENT);
+	} else {
+		filterEventMap = map;
+		filterState.enable(FilterState::FILTER_EVENT);
+	}
+	/* No need to process filters if we only have OR-filters */
+	if (filterState.isEnabled())
+		processAllFilters();
 }
 
 void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 {
 	filterState.disable(filter);
+	OR_filterState.disable(filter);
 	switch (filter) {
 	case FilterState::FILTER_PID:
 		filterPidMap.clear();
+		OR_filterPidMap.clear();
 		break;
 	case FilterState::FILTER_EVENT:
 		filterEventMap.clear();
@@ -803,15 +839,28 @@ void TraceAnalyzer::removePidFromFilter(unsigned int pid) {
 void TraceAnalyzer::disableAllFilters()
 {
 	filterState.disableAll();
+	OR_filterState.disableAll();
+
+	filterPidMap.clear();
+	OR_filterPidMap.clear();
+
+	filterEventMap.clear();
+	OR_filterEventMap.clear();
+
 	filteredEvents.clear();
 }
 
 bool TraceAnalyzer::isFiltered()
 {
+	/*
+	 * No need to consider us filtered if we only have OR-filters, so we
+	 * only check the normal (AND) filters
+	 */
 	return filterState.isEnabled();
 }
 
 bool TraceAnalyzer::filterActive(FilterState::filter_t filter)
 {
-	return filterState.isEnabled(filter);
+	return filterState.isEnabled(filter) ||
+		OR_filterState.isEnabled(filter);
 }

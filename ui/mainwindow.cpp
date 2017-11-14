@@ -153,11 +153,13 @@ MainWindow::MainWindow():
 	tsconnect(taskSelectDialog, addTaskToLegend(unsigned int),
 		  this, addTaskToLegend(unsigned int));
 	tsconnect(taskSelectDialog, createFilter(QMap<unsigned int,
-						 unsigned int> &),
-		  this, createPidFilter(QMap<unsigned int, unsigned int> &));
+						 unsigned int> &, bool, bool),
+		  this, createPidFilter(QMap<unsigned int, unsigned int> &,
+					bool, bool));
 	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
-	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &),
-		  this, createEventFilter(QMap<event_t, event_t> &));
+	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
+						  bool),
+		  this, createEventFilter(QMap<event_t, event_t> &, bool));
 	tsconnect(eventSelectDialog, resetFilter(), this, resetEventFilter());
 	setupSettings();
 }
@@ -1158,23 +1160,24 @@ void MainWindow::scrollTo(double time)
 	eventsWidget->scrollTo(time);
 }
 
-void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map)
+void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map,
+				 bool orlogic, bool inclusive)
 {
 	double saved = eventsWidget->getSavedScroll();
 
 	eventsWidget->beginResetModel();
-	analyzer->createPidFilter(map);
+	analyzer->createPidFilter(map, orlogic, inclusive);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
 }
 
-void MainWindow::createEventFilter(QMap<event_t, event_t> &map)
+void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
 {
 	double saved = eventsWidget->getSavedScroll();
 
 	eventsWidget->beginResetModel();
-	analyzer->createEventFilter(map);
+	analyzer->createEventFilter(map, orlogic);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
@@ -1189,12 +1192,10 @@ void MainWindow::resetPidFilter()
 		return;
 
 	saved = eventsWidget->getSavedScroll();
-
 	eventsWidget->beginResetModel();
 	analyzer->disableFilter(FilterState::FILTER_PID);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
-
 	scrollTo(saved);
 }
 
@@ -1206,12 +1207,10 @@ void MainWindow::resetEventFilter()
 		return;
 
 	saved = eventsWidget->getSavedScroll();
-
 	eventsWidget->beginResetModel();
 	analyzer->disableFilter(FilterState::FILTER_EVENT);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
-
 	scrollTo(saved);
 }
 
@@ -1223,7 +1222,6 @@ void MainWindow::resetFilters()
 		return;
 
 	saved = eventsWidget->getSavedScroll();
-
 	eventsWidget->beginResetModel();
 	analyzer->disableAllFilters();
 	setEventsWidgetEvents();
