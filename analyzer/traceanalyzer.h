@@ -79,6 +79,7 @@
 #include "threads/workitem.h"
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
+#include "misc/avltree.h"
 #include "misc/tlist.h"
 
 #define FAKE_DELTA ((double) 0.00000005)
@@ -134,8 +135,8 @@ public:
 	void doScale();
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(unsigned int pid);
-	QMap<unsigned int, CPUTask> *cpuTaskMaps;
-	QMap<unsigned int, TaskHandle> taskMap;
+	AVLTree<unsigned int, CPUTask> *cpuTaskMaps;
+	AVLTree<unsigned int, TaskHandle> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
@@ -211,7 +212,7 @@ private:
 					bool inclusive);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
-	QMap <unsigned int, TColor> colorMap;
+	AVLTree <unsigned int, TColor> colorMap;
 	TColor black;
 	TColor white;
 	QVector<double> schedOffset;

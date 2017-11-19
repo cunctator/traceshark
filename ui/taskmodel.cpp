@@ -49,11 +49,10 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include <QMap>
 #include <QStringList>
 
 #include "ui/taskmodel.h"
+#include "misc/avltree.h"
 #include "misc/tlist.h"
 #include "misc/traceshark.h"
 #include "analyzer/task.h"
@@ -78,7 +77,7 @@ TaskModel::~TaskModel()
 	delete idleTask;
 }
 
-void TaskModel::setTaskMap(QMap<unsigned int, TaskHandle> *map)
+void TaskModel::setTaskMap(AVLTree<unsigned int, TaskHandle> *map)
 {
 	taskList->clear();
 

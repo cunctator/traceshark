@@ -90,6 +90,8 @@ class TaskSelectDialog;
 class EventSelectDialog;
 class YAxisTicker;
 
+template<class T, class U> class AVLTree;
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT

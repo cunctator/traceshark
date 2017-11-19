@@ -49,8 +49,7 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QMap>
-#include <QStringList>
+#include <QString>
 
 #include <cstring>
 

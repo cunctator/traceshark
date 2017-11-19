@@ -61,8 +61,9 @@ class TaskHandle;
 
 QT_BEGIN_NAMESPACE
 class QStringList;
-template<class Key, class T> class QMap;
 QT_END_NAMESPACE
+
+template<class T, class U> class AVLTree;
 
 class TaskModel : public QAbstractTableModel
 {
@@ -70,7 +71,7 @@ class TaskModel : public QAbstractTableModel
 public:
 	TaskModel(QObject *parent = 0);
 	~TaskModel();
-	void setTaskMap(QMap<unsigned int, TaskHandle> *map);
+	void setTaskMap(AVLTree<unsigned int, TaskHandle> *map);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;

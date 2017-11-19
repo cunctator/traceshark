@@ -62,11 +62,8 @@ class TaskHandle;
 class StringTree;
 
 QT_BEGIN_NAMESPACE
-class QStringList;
-template<class Key, class T> class QMap;
+class QString;
 QT_END_NAMESPACE
-
-
 
 class EventSelectModel : public QAbstractTableModel
 {

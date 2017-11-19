@@ -113,13 +113,13 @@ typedef enum {
 #define lastfunc(myint) ((double) myint)
 
 #define DEFINE_CPUTASKMAP_ITERATOR(name) \
-	QMap<unsigned int, CPUTask>::iterator name
+	AVLTree<unsigned int, CPUTask>::iterator name
 
 #define DEFINE_TASKMAP_ITERATOR(name) \
-	QMap<unsigned int, TaskHandle>::iterator name
+	AVLTree<unsigned int, TaskHandle>::iterator name
 
 #define DEFINE_COLORMAP_ITERATOR(name) \
-	QMap<unsigned int, TColor>::iterator name
+	AVLTree<unsigned int, TColor>::iterator name
 
 #define DEFINE_FILTER_PIDMAP_ITERATOR(name) \
 	QMap<unsigned int, unsigned int>::iterator name;

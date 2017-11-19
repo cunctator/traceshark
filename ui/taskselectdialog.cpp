@@ -60,6 +60,7 @@
 #include "ui/taskselectdialog.h"
 #include "ui/taskmodel.h"
 #include "ui/taskview.h"
+#include "misc/avltree.h"
 #include "misc/traceshark.h"
 
 #define CBOX_INDEX_AND 0
@@ -133,7 +134,7 @@ TaskSelectDialog::~TaskSelectDialog()
 	delete filterMap;
 }
 
-void TaskSelectDialog::setTaskMap(QMap<unsigned int, TaskHandle> *map)
+void TaskSelectDialog::setTaskMap(AVLTree<unsigned int, TaskHandle> *map)
 {
 	taskModel->setTaskMap(map);
 }
