@@ -97,6 +97,7 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow();
 	virtual ~MainWindow();
+	void openFile(const QString &name);
 protected:
 	void closeEvent(QCloseEvent *event);
 
@@ -172,8 +173,8 @@ private:
 	void createTracePlot();
 	void createStatusBar();
 
-	void setStatus(status_t status, QString *fileName = nullptr);
-	void loadTraceFile(QString &);
+	void setStatus(status_t status, const QString *fileName = nullptr);
+	void loadTraceFile(const QString &);
 
 	QMenu *fileMenu;
 	QMenu *viewMenu;

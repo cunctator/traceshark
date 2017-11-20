@@ -50,6 +50,7 @@
  */
 
 #include <QApplication>
+#include <QString>
 #include <QtCore>
 #include "misc/resources.h"
 #include "ui/mainwindow.h"
@@ -65,6 +66,31 @@
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!"
 
+static char *prgname;
+
+static void parseOption(const char *opt)
+{
+}
+
+static void parseArguments(QString *fileName, int argc, char* argv[])
+{
+	if (argc > 0) {
+		prgname = *argv;
+		argc--;
+		argv++;
+	}
+
+	while (argc > 0) {
+		if (**argv == '-')
+			parseOption(*argv);
+		else
+			*fileName = QString(*argv);
+		argc--;
+		argv++;
+	}
+}
+
+
 int main(int argc, char* argv[])
 {
 	QApplication app(argc, argv);
@@ -74,7 +100,9 @@ int main(int argc, char* argv[])
 	QString appname = QLatin1String("Traceshark");
 	QRect geometry;
 	int width, height;
+	QString fileName;
 
+	parseArguments(&fileName, argc, argv);
 /* Set graphicssystem to opengl if we have old enough Qt */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 	QApplication::setGraphicsSystem("opengl");
@@ -99,6 +127,8 @@ int main(int argc, char* argv[])
 	height = geometry.height() - geometry.height() / 16;
 
 	mainWindow.resize(width, height);
+	if (!fileName.isEmpty())
+		mainWindow.openFile(fileName);
 
 	return app.exec();
 }

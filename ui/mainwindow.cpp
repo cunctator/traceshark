@@ -231,24 +231,29 @@ void MainWindow::openTrace()
 {
 	QString name = QFileDialog::getOpenFileName(this);
 	if (!name.isEmpty()) {
-		eventsWidget->beginResetModel();
-		eventsWidget->clear();
-		eventsWidget->endResetModel();
-		eventsWidget->clearScrollTime();
+		openFile(name);
+	}
+}
 
-		taskSelectDialog->beginResetModel();
-		taskSelectDialog->setTaskMap(nullptr);
-		taskSelectDialog->endResetModel();
+void MainWindow::openFile(const QString &name)
+{
+	eventsWidget->beginResetModel();
+	eventsWidget->clear();
+	eventsWidget->endResetModel();
+	eventsWidget->clearScrollTime();
 
-		eventSelectDialog->beginResetModel();
-		eventSelectDialog->setStringTree(nullptr);
-		eventSelectDialog->endResetModel();
+	taskSelectDialog->beginResetModel();
+	taskSelectDialog->setTaskMap(nullptr);
+	taskSelectDialog->endResetModel();
 
-		if (analyzer->isOpen())
-			analyzer->close();
-		loadTraceFile(name);
-	} else
-		return;
+	eventSelectDialog->beginResetModel();
+	eventSelectDialog->setStringTree(nullptr);
+	eventSelectDialog->endResetModel();
+
+	if (analyzer->isOpen())
+		analyzer->close();
+	loadTraceFile(name);
+
 	if (analyzer->isOpen()) {
 		QTextStream qout(stdout);
 		qout.setRealNumberPrecision(6);
@@ -1014,7 +1019,7 @@ void MainWindow::createStatusBar()
 	setStatus(STATUS_NOFILE);
 }
 
-void MainWindow::setStatus(status_t status, QString *fileName)
+void MainWindow::setStatus(status_t status, const QString *fileName)
 {
 	QString string;
 	if (fileName != nullptr)
@@ -1025,7 +1030,7 @@ void MainWindow::setStatus(status_t status, QString *fileName)
 	statusLabel->setText(string);
 }
 
-void MainWindow::loadTraceFile(QString &fileName)
+void MainWindow::loadTraceFile(const QString &fileName)
 {
 	qint64 start, stop;
 	QTextStream qout(stdout);
