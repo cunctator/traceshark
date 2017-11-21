@@ -68,9 +68,8 @@
 
 static char *prgname;
 
-static void parseOption(const char *opt)
-{
-}
+static void parseOption(const char */*opt*/)
+{}
 
 static void parseArguments(QString *fileName, int argc, char* argv[])
 {
