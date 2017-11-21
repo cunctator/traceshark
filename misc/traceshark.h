@@ -227,17 +227,17 @@ namespace TShark {
 		return uvalue.word32;
 	}
 
-	__always_inline unsigned int __heap_iParent(unsigned int i)
+	__always_inline long __heap_iParent(long i)
 	{
 		return (i - 1) / 2;
 	}
 
-	__always_inline unsigned int __heap_iLeftChild(unsigned int i)
+	__always_inline long __heap_iLeftChild(long i)
 	{
 		return 2 * i + 1;
 	}
 
-	__always_inline unsigned int __heap_iRightChild(unsigned int i)
+	__always_inline long __heap_iRightChild(long i)
 	{
 		return 2 * i + 2;
 	}
