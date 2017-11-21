@@ -68,7 +68,7 @@
 
 #define CLEAR_VARIABLE(VAR) memset(&VAR, 0, sizeof(VAR))
 
-TraceParser::TraceParser(TList<TraceEvent> *analyzerEvents)
+TraceParser::TraceParser(vtl::TList<TraceEvent> *analyzerEvents)
 	: traceType(TRACE_TYPE_NONE)
 {
 	traceFile = nullptr;

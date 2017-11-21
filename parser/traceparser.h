@@ -61,7 +61,6 @@
 #include "parser/tracelinedata.h"
 #include "parser/traceline.h"
 #include "parser/traceevent.h"
-#include "misc/tlist.h"
 #include "misc/traceshark.h"
 #include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
@@ -75,12 +74,15 @@
 
 class TraceFile;
 class TraceAnalyzer;
+namespace vtl {
+	template<class T> class TList;
+}
 
 class TraceParser
 {
 	friend class TraceAnalyzer;
 public:
-	TraceParser(TList<TraceEvent> *analyzerEvents);
+	TraceParser(vtl::TList<TraceEvent> *analyzerEvents);
 	~TraceParser();
 	bool open(const QString &fileName);
 	bool isOpen() const;
@@ -117,7 +119,7 @@ private:
 	WorkThread<TraceParser> *readerThread;
 	TraceLineData ftraceLineData;
 	TraceLineData perfLineData;
-	TList<TraceEvent> *events;
+	vtl::TList<TraceEvent> *events;
 	IndexWatcher *eventsWatcher;
 	/* This IndexWatcher isn't really watching an index, it's to synchronize
 	 * when traceType has been determined in the parser thread */

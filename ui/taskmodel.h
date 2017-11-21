@@ -55,7 +55,10 @@
 #include <QAbstractTableModel>
 #include "misc/traceshark.h"
 
-template<class T> class TList;
+namespace vtl {
+	template<class T> class TList;
+	template<class T, class U> class AVLTree;
+}
 class Task;
 class TaskHandle;
 
@@ -63,15 +66,13 @@ QT_BEGIN_NAMESPACE
 class QStringList;
 QT_END_NAMESPACE
 
-template<class T, class U> class AVLTree;
-
 class TaskModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
 	TaskModel(QObject *parent = 0);
 	~TaskModel();
-	void setTaskMap(AVLTree<unsigned int, TaskHandle> *map);
+	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
@@ -85,7 +86,7 @@ public:
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
-	TList<const Task*> *taskList;
+	vtl::TList<const Task*> *taskList;
 	QString *errorStr;
 	Task *idleTask;
 };

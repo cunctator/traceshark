@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,55 +49,88 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TASKSELECTDIALOG
-#define TASKSELECTDIALOG
+#ifndef __HEAPSORT_H
+#define __HEAPSORT_H
 
-#include <QDialog>
-#include <QString>
-
-#include "analyzer/task.h"
-
-QT_BEGIN_NAMESPACE
-class QStringList;
-class QCheckBox;
-class QComboBox;
-template <typename, typename> class QMap;
-QT_END_NAMESPACE
-
-class TaskModel;
-class TaskView;
 namespace vtl {
-	template <typename, typename> class AVLTree;
+
+__always_inline long __heap_iParent(long i)
+{
+	return (i - 1) / 2;
 }
 
-class TaskSelectDialog : public QDialog {
-	Q_OBJECT
-public:
-	TaskSelectDialog(QWidget *parent = 0);
-	~TaskSelectDialog();
-	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map);
-	void beginResetModel();
-	void endResetModel();
-	void resizeColumnsToContents();
-	void show();
-signals:
-	void addTaskGraph(unsigned int pid);
-	void addTaskToLegend(unsigned int pid);
-	void resetFilter(void);
-	void createFilter(QMap<unsigned int, unsigned int> &map,
-			  bool orlogic, bool inclusive);
-private slots:
-	void closeClicked();
-	void addUnifiedClicked();
-	void addLegendClicked();
-	void addFilterClicked();
-private:
-	TaskView *taskView;
-	TaskModel *taskModel;
-	QComboBox *logicBox;
-	QCheckBox *includeBox;
-	QMap<unsigned int, unsigned int> *filterMap;
-	int savedHeight;
-};
+__always_inline long __heap_iLeftChild(long i)
+{
+	return 2 * i + 1;
+}
 
-#endif /* TASKSELECTDIALOG */
+__always_inline long __heap_iRightChild(long i)
+{
+	return 2 * i + 2;
+}
+
+template<template <typename> class C, typename T, typename TCompFunc>
+	__always_inline void __heap_siftdown(C<T> &container,
+					     long start,
+					     long end,
+					     TCompFunc compFunc)
+{
+	long root, child, rchild, swap;
+
+	root = start;
+	while (__heap_iLeftChild(root) <= end) {
+		child = __heap_iLeftChild(root);
+		swap = root;
+		if (compFunc(container[swap], container[child]) < 0)
+			swap = child;
+		rchild = child + 1;
+		if (rchild <= end && compFunc(container[swap],
+					      container[rchild]) < 0)
+			swap = rchild;
+		if (swap == root)
+			return;
+		else {
+			container.swap(root, swap);
+			root = swap;
+		}
+	}
+}
+
+template<template <typename> class C, typename T, typename TCompFunc>
+	__always_inline void __heap_heapify(C<T> &container,
+					    TCompFunc compFunc)
+{
+	long count = container.size();
+	long start;
+
+	start = __heap_iParent(count - 1);
+
+	while(start >= 0) {
+		__heap_siftdown(container, start, count - 1, compFunc);
+		start--;
+	}
+}
+
+template<template <typename> class C, typename T, typename TCompFunc>
+	void heapsort(C<T> &container,
+		      TCompFunc compFunc)
+{
+	long count = container.size();
+	long end;
+
+	if (count < 2)
+		return;
+
+	__heap_heapify(container, compFunc);
+
+	end = count - 1;
+	while (end > 0) {
+		container.swap(0, end);
+		end--;
+		__heap_siftdown(container, 0, end, compFunc);
+	}
+}
+ 
+}
+
+#endif /* __HEAPSORT_H */

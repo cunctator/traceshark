@@ -50,6 +50,11 @@
  */
 
 #ifndef __AVLTREE_H
+#define __AVLTREE_H
+
+#include <cstdlib>
+
+namespace vtl {
 
 #define __AVLTREEMAX(A, B) ((A) >= (B) ? A:B)
 
@@ -498,5 +503,6 @@ void AVLTree<T, U>::clear()
 	}
 }
 
-#define __AVLTREE_H
+}
+
 #endif /* __AVLTREE_H */

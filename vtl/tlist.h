@@ -55,12 +55,14 @@
 #include <climits>
 #include <cstdlib>
 
-#define TLIST_MAX(A, B) ((A) >= (B) ? A:B)
-#define TLIST_MIN(A, B) ((A) < (B) ? A:B)
-
 extern "C" {
 #include <sys/mman.h>
 }
+
+namespace vtl {
+
+#define TLIST_MAX(A, B) ((A) >= (B) ? A:B)
+#define TLIST_MIN(A, B) ((A) < (B) ? A:B)
 
 /*
  * Here we assume that UINT_MAX can be expressed as 2^N - 1
@@ -305,6 +307,8 @@ template<class T>
 __always_inline const T& TList<T>::operator[](unsigned int index) const
 {
 	return subscript(index);
+}
+
 }
 
 #endif /* TLIST_H */

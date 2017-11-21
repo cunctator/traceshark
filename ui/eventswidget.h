@@ -53,22 +53,24 @@
 #define EVENTSWIDGET_H
 
 #include <QDockWidget>
-#include "misc/tlist.h"
-#include "parser/traceevent.h"
 #include "misc/traceshark.h"
 
 class QTableView;
 class EventsModel;
+class TraceEvent;
+namespace vtl {
+	template<class T> class TList;
+}
 
 class EventsWidget : public QDockWidget
 {
 	Q_OBJECT
 public:
 	EventsWidget(QWidget *parent = 0);
-	EventsWidget(TList<TraceEvent> *e, QWidget *parent = 0);
+	EventsWidget(vtl::TList<TraceEvent> *e, QWidget *parent = 0);
 	virtual ~EventsWidget();
-	void setEvents(TList<TraceEvent> *e);
-	void setEvents(TList<const TraceEvent*> *e);
+	void setEvents(vtl::TList<TraceEvent> *e);
+	void setEvents(vtl::TList<const TraceEvent*> *e);
 	void clear();
 	void clearScrollTime();
 	void beginResetModel();
@@ -88,8 +90,8 @@ private slots:
 private:
 	QTableView *tableView;
 	EventsModel *eventsModel;
-	TList<TraceEvent> *events;
-	TList<const TraceEvent*> *eventsPtrs;
+	vtl::TList<TraceEvent> *events;
+	vtl::TList<const TraceEvent*> *eventsPtrs;
 	bool saveScrollTime;
 	double scrollTime;
 	int findBestMatch(double time);

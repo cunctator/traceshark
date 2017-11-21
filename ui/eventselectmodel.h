@@ -53,10 +53,11 @@
 #define EVENTSELECTMODEL_H
 
 #include <QAbstractTableModel>
-#include "misc/traceshark.h"
 #include "parser/traceevent.h"
 
-template<class T> class TList;
+namespace vtl {
+	template<class T> class TList;
+}
 class Task;
 class TaskHandle;
 class StringTree;
@@ -85,7 +86,7 @@ public:
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
-	TList<event_t> *eventList;
+	vtl::TList<event_t> *eventList;
 	const StringTree *stringTree;
 	QString *errorStr;
 };

@@ -51,9 +51,13 @@
 
 #include <climits>
 #include <cstdlib>
+
 #include <QtGlobal>
 #include <QList>
 #include <QString>
+
+#include "vtl/tlist.h"
+
 #include "analyzer/cpufreq.h"
 #include "analyzer/cpuidle.h"
 #include "parser/genericparams.h"
@@ -63,7 +67,6 @@
 #include "threads/workthread.h"
 #include "threads/workitem.h"
 #include "threads/workqueue.h"
-#include "misc/tlist.h"
 
 TraceAnalyzer::TraceAnalyzer()
 	: cpuTaskMaps(nullptr), cpuFreq(nullptr), cpuIdle(nullptr),
@@ -95,7 +98,7 @@ bool TraceAnalyzer::open(const QString &fileName)
 
 void TraceAnalyzer::prepareDataStructures()
 {
-	cpuTaskMaps = new AVLTree<unsigned int, CPUTask>[NR_CPUS_ALLOWED];
+	cpuTaskMaps = new vtl::AVLTree<unsigned int, CPUTask>[NR_CPUS_ALLOWED];
 	cpuFreq = new CpuFreq[NR_CPUS_ALLOWED];
 	cpuIdle = new CpuIdle[NR_CPUS_ALLOWED];
 	CPUs = new CPU[NR_CPUS_ALLOWED];

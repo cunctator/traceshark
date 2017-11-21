@@ -49,20 +49,21 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QString>
-
 #include <cstring>
 
+#include <QString>
+
+#include "vtl/tlist.h"
+#include "vtl/heapsort.h"
+
 #include "ui/eventselectmodel.h"
-#include "misc/tlist.h"
-#include "misc/traceshark.h"
 #include "analyzer/task.h"
 #include "mm/stringtree.h"
 
 EventSelectModel::EventSelectModel(QObject *parent):
 	QAbstractTableModel(parent), stringTree(nullptr)
 {
-	eventList = new TList<event_t>;
+	eventList = new vtl::TList<event_t>;
 	errorStr = new QString(tr("Error in eventselectmodel.cpp"));
 }
 
@@ -89,7 +90,7 @@ void EventSelectModel::setStringTree(const StringTree *stree)
 		eventList->append(event);
 	}
 
-	TShark::heapsort<TList, event_t>(
+	vtl::heapsort<vtl::TList, event_t>(
 		*eventList, [stree] (event_t a, event_t b) -> int {
 			const TString *as = stree->stringLookup(a);
 			const TString *bs = stree->stringLookup(b);

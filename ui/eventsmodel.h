@@ -53,20 +53,20 @@
 #define EVENTSMODEL_H
 
 #include <QAbstractTableModel>
-#include "misc/tlist.h"
-#include "parser/traceevent.h"
 
-//class TraceEvent;
-//class QVector<TraceEvent>
+class TraceEvent;
+namespace vtl {
+	template<class T> class TList;
+}
 
 class EventsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
 	EventsModel(QObject *parent = 0);
-	EventsModel(TList<TraceEvent> *e, QObject *parent = 0);
-	void setEvents(TList<TraceEvent> *e);
-	void setEvents(TList<const TraceEvent*> *e);
+	EventsModel(vtl::TList<TraceEvent> *e, QObject *parent = 0);
+	void setEvents(vtl::TList<TraceEvent> *e);
+	void setEvents(vtl::TList<const TraceEvent*> *e);
 	void clear();
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
@@ -79,8 +79,8 @@ public:
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
-	TList<TraceEvent> *events;
-	TList<const TraceEvent*> *eventsPtrs;
+	vtl::TList<TraceEvent> *events;
+	vtl::TList<const TraceEvent*> *eventsPtrs;
 	const TraceEvent* getEventAt(int index) const;
 	unsigned int getSize() const;
 };

@@ -68,6 +68,7 @@ class QMenu;
 class QPlainTextEdit;
 class QMouseEvent;
 class QToolBar;
+template<class T, class U> class QMap;
 QT_END_NAMESPACE
 
 class TraceAnalyzer;
@@ -89,8 +90,6 @@ class TaskRangeAllocator;
 class TaskSelectDialog;
 class EventSelectDialog;
 class YAxisTicker;
-
-template<class T, class U> class AVLTree;
 
 class MainWindow : public QMainWindow
 {

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,11 +49,11 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QStringList>
+#include "vtl/avltree.h"
+#include "vtl/heapsort.h"
+#include "vtl/tlist.h"
 
 #include "ui/taskmodel.h"
-#include "misc/avltree.h"
-#include "misc/tlist.h"
 #include "misc/traceshark.h"
 #include "analyzer/task.h"
 
@@ -62,7 +62,7 @@ static const char swappername[] = "swapper";
 TaskModel::TaskModel(QObject *parent):
 	QAbstractTableModel(parent)
 {
-	taskList = new TList<const Task*>;
+	taskList = new vtl::TList<const Task*>;
 	errorStr = new QString(tr("Error in taskmodel.cpp"));
 	idleTask = new Task;
 	idleTask->pid = 0;
@@ -77,7 +77,7 @@ TaskModel::~TaskModel()
 	delete idleTask;
 }
 
-void TaskModel::setTaskMap(AVLTree<unsigned int, TaskHandle> *map)
+void TaskModel::setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map)
 {
 	taskList->clear();
 
@@ -94,7 +94,7 @@ void TaskModel::setTaskMap(AVLTree<unsigned int, TaskHandle> *map)
 	/* Add a fake idle task for event filtering purposes */
 	taskList->append(idleTask);
 
-	TShark::heapsort<TList, const Task*>(
+	vtl::heapsort<vtl::TList, const Task*>(
 		*taskList, [] (const Task *&a, const Task *&b) -> int {
 			const QString &as = *a->displayName;
 			const QString &bs = *b->displayName;

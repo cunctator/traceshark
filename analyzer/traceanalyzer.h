@@ -62,6 +62,9 @@
 #include <QTextStream>
 #include <limits>
 
+#include "vtl/avltree.h"
+#include "vtl/tlist.h"
+
 #include "analyzer/cpu.h"
 #include "analyzer/cpufreq.h"
 #include "analyzer/cpuidle.h"
@@ -79,8 +82,6 @@
 #include "threads/workitem.h"
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
-#include "misc/avltree.h"
-#include "misc/tlist.h"
 
 #define FAKE_DELTA ((double) 0.00000005)
 
@@ -106,8 +107,8 @@ public:
 	bool isOpen();
 	void close();
 	void processTrace();
-	TList<TraceEvent> events;
-	TList <const TraceEvent*> filteredEvents;
+	vtl::TList<TraceEvent> events;
+	vtl::TList <const TraceEvent*> filteredEvents;
 	const TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
 						 int *index) const;
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
@@ -135,8 +136,8 @@ public:
 	void doScale();
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(unsigned int pid);
-	AVLTree<unsigned int, CPUTask> *cpuTaskMaps;
-	AVLTree<unsigned int, TaskHandle> taskMap;
+	vtl::AVLTree<unsigned int, CPUTask> *cpuTaskMaps;
+	vtl::AVLTree<unsigned int, TaskHandle> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
@@ -212,7 +213,7 @@ private:
 					bool inclusive);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
-	AVLTree <unsigned int, TColor> colorMap;
+	vtl::AVLTree <unsigned int, TColor> colorMap;
 	TColor black;
 	TColor white;
 	QVector<double> schedOffset;

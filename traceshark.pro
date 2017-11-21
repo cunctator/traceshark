@@ -119,12 +119,14 @@ HEADERS      +=  mm/mempool.h
 HEADERS      +=  mm/stringpool.h
 HEADERS      +=  mm/stringtree.h
 
-HEADERS      +=  misc/avltree.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
-HEADERS      +=  misc/tlist.h
 HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/tstring.h
+
+HEADERS      +=  vtl/avltree.h
+HEADERS      +=  vtl/heapsort.h
+HEADERS      +=  vtl/tlist.h
 
 ###############################################################################
 # Source files

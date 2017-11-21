@@ -56,11 +56,10 @@
 
 #include <QMutex>
 #include <QWaitCondition>
-#include "misc/tlist.h"
 #include "misc/tstring.h"
 #include "mm/mempool.h"
 #include "threads/loadbuffer.h"
-
+#include "vtl/tlist.h"
 
 /*
  * This class is a load buffer for two threads where one is a producer and the
@@ -74,7 +73,7 @@ public:
 	ThreadBuffer(unsigned int nr);
 	~ThreadBuffer();
 	unsigned int nrBuffers;
-	TList<T> list;
+	vtl::TList<T> list;
 	MemPool *strPool;
 	void beginProduceBuffer();
 	void endProduceBuffer();

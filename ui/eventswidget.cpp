@@ -51,9 +51,11 @@
 
 #include <QTableView>
 #include <cmath>
+#include "vtl/tlist.h"
 #include "ui/eventsmodel.h"
 #include "ui/eventswidget.h"
 #include "misc/traceshark.h"
+#include "parser/traceevent.h"
 
 EventsWidget::EventsWidget(QWidget *parent):
 	QDockWidget(tr("Events"), parent), events(nullptr),
@@ -72,7 +74,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 		  this, handleDoubleClick(const QModelIndex &));
 }
 
-EventsWidget::EventsWidget(TList<TraceEvent> *e, QWidget *parent):
+EventsWidget::EventsWidget(vtl::TList<TraceEvent> *e, QWidget *parent):
 	QDockWidget(parent)
 {
 	tableView = new QTableView(this);
@@ -93,14 +95,14 @@ EventsWidget::~EventsWidget()
 {
 }
 
-void EventsWidget::setEvents(TList<TraceEvent> *e)
+void EventsWidget::setEvents(vtl::TList<TraceEvent> *e)
 {
 	eventsModel->setEvents(e);
 	events = e;
 	eventsPtrs = nullptr;
 }
 
-void EventsWidget::setEvents(TList<const TraceEvent*> *e)
+void EventsWidget::setEvents(vtl::TList<const TraceEvent*> *e)
 {
 	eventsModel->setEvents(e);
 	events = nullptr;

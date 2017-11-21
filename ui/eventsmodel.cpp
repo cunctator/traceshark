@@ -49,29 +49,29 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "misc/tlist.h"
 #include <QVariant>
 #include <QString>
 #include "ui/eventsmodel.h"
 #include "parser/traceevent.h"
 #include "misc/traceshark.h"
+#include "vtl/tlist.h"
 
 
 EventsModel::EventsModel(QObject *parent):
 	QAbstractTableModel(parent), events(nullptr), eventsPtrs(nullptr)
 {}
 
-EventsModel::EventsModel(TList<TraceEvent> *e, QObject *parent):
+EventsModel::EventsModel(vtl::TList<TraceEvent> *e, QObject *parent):
 	QAbstractTableModel(parent), events(e)
 {}
 
-void EventsModel::setEvents(TList<TraceEvent> *e)
+void EventsModel::setEvents(vtl::TList<TraceEvent> *e)
 {
 	events = e;
 	eventsPtrs = nullptr;
 }
 
-void EventsModel::setEvents(TList<const TraceEvent*> *e)
+void EventsModel::setEvents(vtl::TList<const TraceEvent*> *e)
 {
 	events = nullptr;
 	eventsPtrs = e;
