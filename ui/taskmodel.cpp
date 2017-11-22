@@ -98,15 +98,11 @@ void TaskModel::setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map)
 		*taskList, [] (const Task *&a, const Task *&b) -> int {
 			const QString &as = *a->displayName;
 			const QString &bs = *b->displayName;
-			if (as > bs)
-				return 1;
-			if (as < bs)
-				return -1;
-			if (a->pid > b->pid)
-				return 1;
-			if (a->pid < b->pid)
-				return -1;
-			return 0;
+			int cmp1 = as.compare(bs);
+			if (cmp1 != 0)
+				return cmp1;
+			long cmp2 = (long) a->pid - (long) b->pid;
+			return (int) cmp2;
 		});
 }
 
