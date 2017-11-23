@@ -56,6 +56,7 @@
 #include <QString>
 
 #include "analyzer/task.h"
+#include "vtl/avltree.h"
 
 QT_BEGIN_NAMESPACE
 class QStringList;
@@ -66,8 +67,9 @@ QT_END_NAMESPACE
 
 class TaskModel;
 class TaskView;
-namespace vtl {
-	template <typename, typename> class AVLTree;
+
+namespace TShark {
+	class CmpUInt;
 }
 
 class TaskSelectDialog : public QDialog {
@@ -75,7 +77,8 @@ class TaskSelectDialog : public QDialog {
 public:
 	TaskSelectDialog(QWidget *parent = 0);
 	~TaskSelectDialog();
-	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map);
+	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle,
+			TShark::CmpUInt> *map);
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();

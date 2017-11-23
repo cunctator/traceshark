@@ -98,7 +98,8 @@ bool TraceAnalyzer::open(const QString &fileName)
 
 void TraceAnalyzer::prepareDataStructures()
 {
-	cpuTaskMaps = new vtl::AVLTree<unsigned int, CPUTask>[NR_CPUS_ALLOWED];
+	cpuTaskMaps = new vtl::AVLTree<unsigned int, CPUTask,
+				       TShark::CmpUInt>[NR_CPUS_ALLOWED];
 	cpuFreq = new CpuFreq[NR_CPUS_ALLOWED];
 	cpuIdle = new CpuIdle[NR_CPUS_ALLOWED];
 	CPUs = new CPU[NR_CPUS_ALLOWED];

@@ -58,15 +58,26 @@ namespace vtl {
 
 #define __AVLTREEMAX(A, B) ((A) >= (B) ? A:B)
 
-template <class T, class U>
+template <class T>
+class AVLDefaultCompare {
+public:
+	__always_inline int operator()(const T &a, const T &b) const {
+		if (a < b)
+			return -1;
+		if (a > b)
+			return 1;
+		return 0;
+	}
+};
+
+template <class T, class U, typename CF = AVLDefaultCompare<T>>
 class AVLTree
 {
 private:
 	class AVLNode;
 public:
-	class iterator
-	{
-		friend class AVLTree<T, U>;
+	class iterator {
+		friend class AVLTree<T, U, CF>;
 	public:
 		iterator();
 		__always_inline const T &key() const;
@@ -83,6 +94,7 @@ public:
 	protected:
 		AVLNode *pos;
 	};
+	AVLTree(CF cf);
 	AVLTree();
 	~AVLTree();
 	__always_inline void insert(const T &key, const U &value);
@@ -114,33 +126,34 @@ private:
 	void deleteNode(AVLNode *node);
 	class AVLNode *root;
 	int _size;
+	CF compFunc;
 };
 
-template <class T, class U>
-	AVLTree<T, U>::iterator::iterator():
-	pos(nullptr)
+template <class T, class U, typename CF>
+AVLTree<T, U, CF>::iterator::iterator():
+pos(nullptr)
 {}
 
-template <class T, class U>
-__always_inline const T &AVLTree<T, U>::iterator::key() const
+template <class T, class U, typename CF>
+__always_inline const T &AVLTree<T, U, CF>::iterator::key() const
 {
 	return pos->key;
 }
 
-template <class T, class U>
-__always_inline U &AVLTree<T, U>::iterator::value() const
+template <class T, class U, typename CF>
+__always_inline U &AVLTree<T, U, CF>::iterator::value() const
 {
 	return pos->value;
 }
 
-template <class T, class U>
-__always_inline bool AVLTree<T, U>::iterator::atEnd() const
+template <class T, class U, typename CF>
+__always_inline bool AVLTree<T, U, CF>::iterator::atEnd() const
 {
 	return pos == nullptr;
 }
 
-template <class T, class U>
-__always_inline	void AVLTree<T, U>::iterator::next()
+template <class T, class U, typename CF>
+__always_inline	void AVLTree<T, U, CF>::iterator::next()
 {
 	AVLNode *prev;
 	if (pos->large != nullptr) {
@@ -158,25 +171,25 @@ __always_inline	void AVLTree<T, U>::iterator::next()
 	pos = nullptr;
 }
 
-template <class T, class U>
-__always_inline	typename AVLTree<T, U>::iterator
-	&AVLTree<T, U>::iterator::operator++()
+template <class T, class U, typename CF>
+__always_inline	typename AVLTree<T, U, CF>::iterator
+	&AVLTree<T, U, CF>::iterator::operator++()
 {
 	next();
 	return *this;
 }
 
-template <class T, class U>
-__always_inline	typename AVLTree<T, U>::iterator
-	AVLTree<T, U>::iterator::operator++(int)
+template <class T, class U, typename CF>
+__always_inline	typename AVLTree<T, U, CF>::iterator
+	AVLTree<T, U, CF>::iterator::operator++(int)
 {
 	iterator prev = *this;
 	next();
 	return prev;
 }
 
-template <class T, class U>
-__always_inline	void AVLTree<T, U>::iterator::prev()
+template <class T, class U, typename CF>
+__always_inline	void AVLTree<T, U, CF>::iterator::prev()
 {
 	AVLNode *prev;
 	if (pos->small != nullptr) {
@@ -192,64 +205,68 @@ __always_inline	void AVLTree<T, U>::iterator::prev()
 	pos = nullptr;
 }
 
-template <class T, class U>
-__always_inline	typename AVLTree<T, U>::iterator
-	&AVLTree<T, U>::iterator::operator--()
+template <class T, class U, typename CF>
+__always_inline	typename AVLTree<T, U, CF>::iterator
+	&AVLTree<T, U, CF>::iterator::operator--()
 {
 	prev();
 	return *this;
 }
 
-template <class T, class U>
-__always_inline	typename AVLTree<T, U>::iterator
-	AVLTree<T, U>::iterator::operator--(int)
+template <class T, class U, typename CF>
+__always_inline	typename AVLTree<T, U, CF>::iterator
+	AVLTree<T, U, CF>::iterator::operator--(int)
 {
 	iterator prev = *this;
 	prev();
 	return prev;
 }
 
-template <class T, class U>
+template <class T, class U, typename CF>
 __always_inline
-	bool AVLTree<T, U>::iterator::operator!=(const iterator &other) const
+ bool AVLTree<T, U, CF>::iterator::operator!=(const iterator &other)
+	const
 {
 	return pos != other.pos;
 }
 
-template <class T, class U>
+template <class T, class U, typename CF>
 __always_inline
-	bool AVLTree<T, U>::iterator::operator==(const iterator &other) const
+bool AVLTree<T, U, CF>::iterator::operator==(const iterator &other)
+	const
 {
 	return pos == other.pos;
 }
 
-template <class T, class U>
-AVLTree<T, U>::AVLTree():
-	root(nullptr), _size(0)
+template <class T, class U, typename CF>
+AVLTree<T, U, CF>::AVLTree():
+root(nullptr), _size(0), compFunc(CF())
 {}
 
-template <class T, class U>
-AVLTree<T, U>::~AVLTree()
+template <class T, class U, typename CF>
+AVLTree<T, U, CF>::~AVLTree()
 {
 	clear();
 }
 
-template <class T, class U>
-__always_inline void AVLTree<T, U>::insert(const T &key, const U &value)
+template <class T, class U, typename CF>
+__always_inline void AVLTree<T, U, CF>::insert(const T &key, const U &value)
 {
 	U &ref = findValue(key);
 	ref = value;
 }
 
-template <class T, class U>
-__always_inline	typename AVLTree<T, U>::iterator AVLTree<T, U>::find(const T &key) const
+template <class T, class U, typename CF>
+__always_inline	typename AVLTree<T, U, CF>::iterator
+	AVLTree<T, U, CF>::find(const T &key) const
 {
 	AVLNode *entry = root;
 	iterator iter;
 	while (entry != nullptr) {
-		if (key == entry->key)
+		int cmp = compFunc(key, entry->key);
+		if (cmp == 0)
 			break;
-		if (key < entry->key)
+		if (cmp < 0)
 			entry = entry->small;
 		else
 			entry = entry->large;
@@ -258,8 +275,8 @@ __always_inline	typename AVLTree<T, U>::iterator AVLTree<T, U>::find(const T &ke
 	return iter;
 }
 
-template <class T, class U>
-__always_inline	U &AVLTree<T, U>::findValue(const T &key)
+template <class T, class U, typename CF>
+__always_inline	U &AVLTree<T, U, CF>::findValue(const T &key)
 {
 	AVLNode **aentry;
 	AVLNode *entry;
@@ -276,10 +293,11 @@ __always_inline	U &AVLTree<T, U>::findValue(const T &key)
 	aentry = &root;
 	entry = root;
 	while (entry != nullptr) {
-		if (key == entry->key)
+		int cmp = compFunc(key, entry->key);
+		if (cmp == 0)
 			return entry->value;
 		parent = entry;
-		if (key < entry->key)
+		if (cmp < 0)
 			aentry = &entry->small;
 		else
 			aentry = &entry->large;
@@ -397,9 +415,10 @@ rebalanceLarge:
 	return newentry->value;
 }
 
-template <class T, class U>
-__always_inline	U AVLTree<T, U>::value(const T &key,
-				       const U &defaultValue) const
+template <class T, class U, typename CF>
+__always_inline	U AVLTree<T, U, CF>::value(const T &key,
+						    const U &defaultValue)
+	const
 {
 	iterator iter = find(key);
 	if (iter.pos == nullptr)
@@ -407,38 +426,38 @@ __always_inline	U AVLTree<T, U>::value(const T &key,
 	return iter.value();
 }
 
-template <class T, class U>
-__always_inline	bool AVLTree<T, U>::contains(const T &key) const
+template <class T, class U, typename CF>
+__always_inline	bool AVLTree<T, U, CF>::contains(const T &key) const
 {
 	iterator iter = find(key);
 	return iter.pos != nullptr;
 }
 
-template <class T, class U>
-__always_inline	bool AVLTree<T, U>::isEmpty() const
+template <class T, class U, typename CF>
+__always_inline	bool AVLTree<T, U, CF>::isEmpty() const
 {
 	return _size == 0;
 }
 
-template <class T, class U>
-__always_inline	int AVLTree<T, U>::size() const
+template <class T, class U, typename CF>
+__always_inline	int AVLTree<T, U, CF>::size() const
 {
 	return _size;
 }
 
-template <class T, class U>
-__always_inline	U &AVLTree<T, U>::operator[](const T &key)
+template <class T, class U, typename CF>
+__always_inline	U &AVLTree<T, U, CF>::operator[](const T &key)
 {
 	return findValue(key);
 }
 
-template <class T, class U>
-AVLTree<T, U>::AVLNode::AVLNode():
-	small(nullptr), large(nullptr)
+template <class T, class U, typename CF>
+AVLTree<T, U, CF>::AVLNode::AVLNode():
+small(nullptr), large(nullptr)
 {}
 
-template <class T, class U>
-__always_inline void AVLTree<T,U>::AVLNode::stealParent(
+template <class T, class U, typename CF>
+__always_inline void AVLTree<T, U, CF>::AVLNode::stealParent(
 	AVLNode *newChild,
 	AVLNode **rootptr)
 {
@@ -454,8 +473,9 @@ __always_inline void AVLTree<T,U>::AVLNode::stealParent(
 		parent->large = newChild;
 }
 
-template <class T, class U>
-__always_inline void AVLTree<T,U>::AVLNode::setHeightFromChildren()
+template <class T, class U, typename CF>
+__always_inline
+void AVLTree<T, U, CF>::AVLNode::setHeightFromChildren()
 {
 	int lh;
 	int rh;
@@ -465,8 +485,9 @@ __always_inline void AVLTree<T,U>::AVLNode::setHeightFromChildren()
 	height = __AVLTREEMAX(lh, rh) + 1;
 }
 
-template <class T, class U>
-__always_inline typename AVLTree<T, U>::iterator AVLTree<T, U>::begin() const
+template <class T, class U, typename CF>
+__always_inline typename AVLTree<T, U, CF>::iterator AVLTree<T, U, CF>::begin()
+	const
 {
 	iterator _begin;
 	_begin.pos = root;
@@ -477,15 +498,16 @@ __always_inline typename AVLTree<T, U>::iterator AVLTree<T, U>::begin() const
 	return _begin;
 }
 
-template <class T, class U>
-__always_inline typename AVLTree<T, U>::iterator AVLTree<T, U>::end() const
+template <class T, class U, typename CF>
+__always_inline typename AVLTree<T, U, CF>::iterator AVLTree<T, U, CF>::end()
+	const
 {
 	iterator _end;
 	return _end;
 }
 
-template <class T, class U>
-void AVLTree<T, U>::deleteNode(AVLNode *node) {
+template <class T, class U, typename CF>
+void AVLTree<T, U, CF>::deleteNode(AVLNode *node) {
 	if (node->small != nullptr)
 		deleteNode(node->small);
 	if (node->large != nullptr)
@@ -493,8 +515,8 @@ void AVLTree<T, U>::deleteNode(AVLNode *node) {
 	delete node;
 }
 
-template <class T, class U>
-void AVLTree<T, U>::clear()
+template <class T, class U, typename CF>
+void AVLTree<T, U, CF>::clear()
 {
 	if (root != nullptr) {
 		deleteNode(root);

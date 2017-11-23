@@ -135,7 +135,8 @@ TaskSelectDialog::~TaskSelectDialog()
 	delete filterMap;
 }
 
-void TaskSelectDialog::setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map)
+void TaskSelectDialog::setTaskMap(vtl::AVLTree<unsigned int,
+				  TaskHandle, TShark::CmpUInt> *map)
 {
 	taskModel->setTaskMap(map);
 }

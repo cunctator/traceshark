@@ -53,12 +53,14 @@
 #define TASKMODEL_H
 
 #include <QAbstractTableModel>
+#include "vtl/avltree.h"
 #include "misc/traceshark.h"
 
 namespace vtl {
-	template<class T> class TList;
-	template<class T, class U> class AVLTree;
+       template<class T> class TList;
 }
+
+
 class Task;
 class TaskHandle;
 
@@ -72,7 +74,8 @@ class TaskModel : public QAbstractTableModel
 public:
 	TaskModel(QObject *parent = 0);
 	~TaskModel();
-	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map);
+	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle,
+			TShark::CmpUInt> *map);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;

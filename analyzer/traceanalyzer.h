@@ -136,8 +136,8 @@ public:
 	void doScale();
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(unsigned int pid);
-	vtl::AVLTree<unsigned int, CPUTask> *cpuTaskMaps;
-	vtl::AVLTree<unsigned int, TaskHandle> taskMap;
+	vtl::AVLTree<unsigned int, CPUTask, TShark::CmpUInt> *cpuTaskMaps;
+	vtl::AVLTree<unsigned int, TaskHandle, TShark::CmpUInt> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
@@ -213,7 +213,7 @@ private:
 					bool inclusive);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
-	vtl::AVLTree <unsigned int, TColor> colorMap;
+	vtl::AVLTree <unsigned int, TColor, TShark::CmpUInt> colorMap;
 	TColor black;
 	TColor white;
 	QVector<double> schedOffset;
