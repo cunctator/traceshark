@@ -68,17 +68,12 @@ QT_END_NAMESPACE
 class TaskModel;
 class TaskView;
 
-namespace TShark {
-	class CmpUInt;
-}
-
 class TaskSelectDialog : public QDialog {
 	Q_OBJECT
 public:
 	TaskSelectDialog(QWidget *parent = 0);
 	~TaskSelectDialog();
-	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle,
-			TShark::CmpUInt> *map);
+	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map);
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();

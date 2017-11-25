@@ -1,3 +1,4 @@
+
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
  * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
@@ -52,6 +53,7 @@
 #ifndef __AVLTREE_H
 #define __AVLTREE_H
 
+#include <utility>
 #include <cstdlib>
 
 namespace vtl {
@@ -59,9 +61,9 @@ namespace vtl {
 #define __AVLTREEMAX(A, B) ((A) >= (B) ? A:B)
 
 template <class T>
-class AVLDefaultCompare {
+class AVLSampleCompare {
 public:
-	__always_inline int operator()(const T &a, const T &b) const {
+	__always_inline static int compare(const T &a, const T &b) {
 		if (a < b)
 			return -1;
 		if (a > b)
@@ -70,10 +72,39 @@ public:
 	}
 };
 
+template <class T>
+class AVLDefaultCompare {
+};
+
+/*
+ * This is a type trait class that determines whether a class has the
+ * compare(U, U) function.
+ */
+template <typename T, typename U>
+class has_compare {
+private:
+	typedef char Yes;
+	typedef Yes No[2];
+	template<typename C> static auto Test(void*)
+		-> decltype(int{std::declval<C const>().compare(U(), U())},
+			    Yes{});
+
+	template<typename> static No& Test(...);
+public:
+	static bool const value = sizeof(Test<T>(0)) == sizeof(Yes);
+};
+
+template<bool b> class __AVLFindSelect;
+template<bool b> class __AVLFindValueSelect;
+
 template <class T, class U, typename CF = AVLDefaultCompare<T>>
 class AVLTree
 {
-private:
+	friend class __AVLFindSelect<false>;
+	friend class __AVLFindValueSelect<false>;
+	friend class __AVLFindSelect<true>;
+	friend class __AVLFindValueSelect<true>;
+protected:
 	class AVLNode;
 public:
 	class iterator {
@@ -106,10 +137,11 @@ public:
 	__always_inline int size() const;
 	__always_inline U &operator[](const T &key);
 	__always_inline iterator find(const T &key) const;
+
 	void clear();
 	__always_inline iterator begin() const;
 	__always_inline iterator end() const;
-private:
+protected:
 	class AVLNode {
 	public:
 		AVLNode();
@@ -123,10 +155,57 @@ private:
 		T key;
 		U value;
 	};
+	__always_inline iterator __findCmp(const T &key) const;
+	__always_inline iterator __find(const T &key) const;
+	__always_inline U &__findValue(const T &key);
+	__always_inline U &__findValueCmp(const T &key);
 	void deleteNode(AVLNode *node);
 	class AVLNode *root;
 	int _size;
-	CF compFunc;
+};
+
+template <bool b>
+	class __AVLFindSelect {
+public:
+	template <typename T, typename U, typename CF>
+		__always_inline
+		static typename AVLTree<T, U, CF>::iterator
+		find(const AVLTree<T, U, CF> &obj, const T &key) {
+		return obj.__find(key);
+	}
+};
+
+template <>
+	class __AVLFindSelect<true> {
+public:
+	template <typename T, typename U, typename CF>
+		__always_inline
+		static typename AVLTree<T, U, CF>::iterator
+		find(const AVLTree<T, U, CF> &obj, const T &key) {
+		return obj.__findCmp(key);
+	}
+};
+
+template<bool b>
+	class __AVLFindValueSelect {
+public:
+	template <typename T, typename U, typename CF>
+		__always_inline
+		static U &findValue(AVLTree<T, U, CF> &obj,
+				    const T &key) {
+		return obj.__findValue(key);
+	}
+};
+
+template<>
+	class __AVLFindValueSelect<true> {
+public:
+	template <typename T, typename U, typename CF>
+		__always_inline
+		static U &findValue(AVLTree<T, U, CF> &obj,
+				    const T &key) {
+		return obj.__findValueCmp(key);
+	}
 };
 
 template <class T, class U, typename CF>
@@ -240,7 +319,7 @@ bool AVLTree<T, U, CF>::iterator::operator==(const iterator &other)
 
 template <class T, class U, typename CF>
 AVLTree<T, U, CF>::AVLTree():
-root(nullptr), _size(0), compFunc(CF())
+root(nullptr), _size(0)
 {}
 
 template <class T, class U, typename CF>
@@ -258,12 +337,12 @@ __always_inline void AVLTree<T, U, CF>::insert(const T &key, const U &value)
 
 template <class T, class U, typename CF>
 __always_inline	typename AVLTree<T, U, CF>::iterator
-	AVLTree<T, U, CF>::find(const T &key) const
+	AVLTree<T, U, CF>::__findCmp(const T &key) const
 {
 	AVLNode *entry = root;
 	iterator iter;
 	while (entry != nullptr) {
-		int cmp = compFunc(key, entry->key);
+		int cmp = CF::compare(key, entry->key);
 		if (cmp == 0)
 			break;
 		if (cmp < 0)
@@ -276,7 +355,41 @@ __always_inline	typename AVLTree<T, U, CF>::iterator
 }
 
 template <class T, class U, typename CF>
+__always_inline	typename AVLTree<T, U, CF>::iterator
+	AVLTree<T, U, CF>::__find(const T &key) const
+{
+	AVLNode *entry = root;
+	iterator iter;
+	while (entry != nullptr) {
+		if (key == entry->key)
+			break;
+		if (key < entry->key)
+			entry = entry->small;
+		else
+			entry = entry->large;
+	}
+	iter.pos = entry;
+	return iter;
+}
+
+template <class T, class U, typename CF>
+__always_inline	typename AVLTree<T, U, CF>::iterator
+	AVLTree<T, U, CF>::find(const T &key) const
+{
+	return __AVLFindSelect<has_compare<CF, T>::value>::find(*this, key);
+}
+
+
+template <class T, class U, typename CF>
 __always_inline	U &AVLTree<T, U, CF>::findValue(const T &key)
+{
+	return __AVLFindValueSelect<has_compare<CF, T>::value>::findValue(*this,
+									  key);
+}
+
+
+template <class T, class U, typename CF>
+__always_inline	U &AVLTree<T, U, CF>::__findValue(const T &key)
 {
 	AVLNode **aentry;
 	AVLNode *entry;
@@ -292,8 +405,149 @@ __always_inline	U &AVLTree<T, U, CF>::findValue(const T &key)
 
 	aentry = &root;
 	entry = root;
+
 	while (entry != nullptr) {
-		int cmp = compFunc(key, entry->key);
+		if (key == entry->key)
+			return entry->value;
+		parent = entry;
+		if (key < entry->key)
+			aentry = &entry->small;
+		else
+			aentry = &entry->large;
+		entry = *aentry;
+	}
+
+	_size++;
+	newentry = new AVLNode;
+	entry = newentry;
+	*aentry = entry;
+
+	entry->key = key;
+	entry->parent = parent;
+	entry->height = 0;
+	if (parent == nullptr)
+		return newentry->value;
+
+	if (parent->height > 0)
+		return newentry->value;
+
+	parent->height = 1;
+	grandParent = parent->parent;
+
+	while(grandParent != nullptr) {
+		smallH = grandParent->small == nullptr ?
+			-1 : grandParent->small->height;
+		largeH = grandParent->large == nullptr ?
+			-1 : grandParent->large->height;
+		diff = smallH - largeH;
+		if (diff == 0)
+			break;
+		if (diff > 1)
+			goto rebalanceSmall;
+		if (diff < -1)
+			goto rebalanceLarge;
+		grandParent->height = parent->height + 1;
+		entry = parent;
+		parent = grandParent;
+		grandParent = grandParent->parent;
+	}
+	return newentry->value;
+rebalanceSmall:
+	/* Do small rebalance here (case 1 and case 2) */
+	if (entry == parent->small) {
+		/* Case 1 */
+		sibling = parent->large;
+
+		grandParent->stealParent(parent, &root);
+		parent->large = grandParent;
+		grandParent->parent = parent;
+		grandParent->small = sibling;
+		grandParent->height--;
+		if (sibling != nullptr)
+			sibling->parent = grandParent;
+	} else {
+		/* Case 2 */
+		smallChild = entry->small;
+		largeChild = entry->large;
+
+		grandParent->stealParent(entry, &root);
+		entry->small = parent;
+		entry->large = grandParent;
+		entry->height = grandParent->height;
+
+		grandParent->parent = entry;
+		grandParent->small = largeChild;
+		grandParent->setHeightFromChildren(); // Fixme: faster
+
+		parent->parent = entry;
+		parent->large = smallChild;
+		parent->setHeightFromChildren();
+
+		if (largeChild != nullptr)
+			largeChild->parent = grandParent;
+		if (smallChild != nullptr)
+			smallChild->parent = parent;
+	}
+	return newentry->value;
+rebalanceLarge:
+	/* Do large rebalance here */
+	if (entry == parent->small) {
+		/* Case 3 */
+		smallChild = entry->small;
+		largeChild = entry->large;
+
+		grandParent->stealParent(entry, &root);
+		entry->small = grandParent;
+		entry->large = parent;
+		entry->height = grandParent->height;
+
+		grandParent->parent = entry;
+		grandParent->large = smallChild;
+		grandParent->setHeightFromChildren(); // Fixme: faster
+
+		parent->parent = entry;
+		parent->small = largeChild;
+		parent->setHeightFromChildren();
+
+		if (largeChild != nullptr)
+			largeChild->parent = parent;
+		if (smallChild != nullptr)
+			smallChild->parent = grandParent;
+	} else {
+		/* Case 4 */
+		sibling = parent->small;
+
+		grandParent->stealParent(parent, &root);
+		parent->small = grandParent;
+		grandParent->parent = parent;
+		grandParent->large = sibling;
+		grandParent->height--;
+		if (sibling != nullptr)
+			sibling->parent = grandParent;
+	}
+	return newentry->value;
+}
+
+template <class T, class U, typename CF>
+__always_inline	U &AVLTree<T, U, CF>::__findValueCmp(const T &key)
+{
+	AVLNode **aentry;
+	AVLNode *entry;
+	AVLNode *newentry;
+	AVLNode *parent = nullptr;
+	AVLNode *sibling;
+	AVLNode *grandParent;
+	AVLNode *smallChild;
+	AVLNode *largeChild;
+	int diff;
+	int smallH;
+	int largeH;
+
+	aentry = &root;
+	entry = root;
+
+	while (entry != nullptr) {
+		int cmp = CF::compare(key, entry->key);
 		if (cmp == 0)
 			return entry->value;
 		parent = entry;

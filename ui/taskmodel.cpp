@@ -77,8 +77,7 @@ TaskModel::~TaskModel()
 	delete idleTask;
 }
 
-void TaskModel::setTaskMap(vtl::AVLTree<unsigned int, TaskHandle,
-			   TShark::CmpUInt> *map)
+void TaskModel::setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map)
 {
 	taskList->clear();
 

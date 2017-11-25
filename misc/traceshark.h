@@ -113,13 +113,13 @@ typedef enum {
 #define lastfunc(myint) ((double) myint)
 
 #define DEFINE_CPUTASKMAP_ITERATOR(name) \
-	vtl::AVLTree<unsigned int, CPUTask, TShark::CmpUInt>::iterator name
+	vtl::AVLTree<unsigned int, CPUTask>::iterator name
 
 #define DEFINE_TASKMAP_ITERATOR(name) \
-	vtl::AVLTree<unsigned int, TaskHandle, TShark::CmpUInt>::iterator name
+	vtl::AVLTree<unsigned int, TaskHandle>::iterator name
 
 #define DEFINE_COLORMAP_ITERATOR(name) \
-	vtl::AVLTree<unsigned int, TColor, TShark::CmpUInt>::iterator name
+	vtl::AVLTree<unsigned int, TColor>::iterator name
 
 #define DEFINE_FILTER_PIDMAP_ITERATOR(name) \
 	QMap<unsigned int, unsigned int>::iterator name;
@@ -226,18 +226,6 @@ namespace TShark {
 		uvalue.word8[3] = str->ptr[3];
 		return uvalue.word32;
 	}
-
-	class  CmpUInt {
-	public:
-		__always_inline int operator()(const unsigned int &a,
-					       const unsigned int &b)
-			const
-		{
-			int c = a;
-			int d = b;
-			return c - d;
-		}
-	};
 }
 
 #endif /* TRACESHARK_H */

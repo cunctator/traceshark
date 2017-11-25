@@ -74,8 +74,7 @@ class TaskModel : public QAbstractTableModel
 public:
 	TaskModel(QObject *parent = 0);
 	~TaskModel();
-	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle,
-			TShark::CmpUInt> *map);
+	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
