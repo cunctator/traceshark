@@ -55,6 +55,7 @@
 #include <QtGlobal>
 #include <QList>
 #include <QString>
+#include <QTextStream>
 
 #include "vtl/tlist.h"
 
@@ -318,12 +319,17 @@ void TraceAnalyzer::colorizeTasks()
 	int red;
 	int green;
 	int blue;
-	unsigned int seed = 290876;
+	struct drand48_data rdata;
 	unsigned int i, j;
 	QList<TColor> colorList;
 	const TColor black(0, 0, 0);
 	const TColor white(255, 255, 255);
+	TColor gray;
 	TColor tmp;
+	long int rnd = 0;
+	QTextStream qout(stdout);
+
+	srand48_r(290876, &rdata);
 
 	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
@@ -339,18 +345,22 @@ void TraceAnalyzer::colorizeTasks()
 
 	n = colorMap.size();
 	nf = (double) n;
-	s = cbrt( (1 / nf) * (255 * 255 * 255 ));
+	s = 0.95 * cbrt( (1 / nf) * (255 * 255 * 255 ));
 	s = TSMIN(s, 128.0);
 	s = TSMAX(s, 1.0);
+	qout << "s = " << s << "\n";
 retry:
 	step = (unsigned int) s;
 	for (red = 0; red < 256; red += step) {
 		for (green = 0; green < 256; green += step)  {
 			for (blue = 0; blue < 256; blue += step) {
 				TColor color(red, green, blue);
-				if (color.SqDistance(black) < 1000)
+				if (color.SqDistance(black) < 10000)
 					continue;
-				if (color.SqDistance(white) < 10000)
+				if (color.SqDistance(white) < 12000)
+					continue;
+				gray = TColor(red, red, red);
+				if (color.SqDistance(gray) < 2500)
 					continue;
 				colorList.append(color);
 			}
@@ -362,6 +372,7 @@ retry:
 		s = s * 0.95;
 		if (s >= 1) {
 			colorList.clear();
+			qout << "retrying colors...\n";
 			goto retry;
 		}
 	}
@@ -371,7 +382,8 @@ retry:
 	 * element
 	 */
 	for (i = 0; i < ncolor; i++) {
-		j = rand_r(&seed) % ncolor;
+		lrand48_r(&rdata, &rnd);
+		j = rnd % ncolor;
 		tmp = colorList[j];
 		colorList[j] = colorList[i];
 		colorList[i] = tmp;
