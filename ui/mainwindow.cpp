@@ -1007,6 +1007,7 @@ void MainWindow::createMenus()
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(showEventsAction);
+	viewMenu->addAction(resetFiltersAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
