@@ -136,7 +136,7 @@ public:
 	void doScale();
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(unsigned int pid);
-	vtl::AVLTree<unsigned int, CPUTask> *cpuTaskMaps;
+	vtl::AVLTree<unsigned int, CPUTask, false> *cpuTaskMaps;
 	vtl::AVLTree<unsigned int, TaskHandle> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;

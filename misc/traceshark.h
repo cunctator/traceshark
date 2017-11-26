@@ -113,7 +113,7 @@ typedef enum {
 #define lastfunc(myint) ((double) myint)
 
 #define DEFINE_CPUTASKMAP_ITERATOR(name) \
-	vtl::AVLTree<unsigned int, CPUTask>::iterator name
+	vtl::AVLTree<unsigned int, CPUTask, false>::iterator name
 
 #define DEFINE_TASKMAP_ITERATOR(name) \
 	vtl::AVLTree<unsigned int, TaskHandle>::iterator name
