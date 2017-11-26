@@ -62,6 +62,7 @@
 #define RESSRC_PNG_MOVE_RED      ":/traceshark/images/movered30x30.png"
 #define RESSRC_PNG_OPEN          ":/traceshark/images/open30x30.png"
 #define RESSRC_PNG_REMOVE_TASK   ":/traceshark/images/removetask30x30.png"
+#define RESSRC_PNG_RESETFILTERS  ":/traceshark/images/resetfilters30x30.png"
 #define RESSRC_PNG_SCREENSHOT    ":/traceshark/images/screenshot30x30.png"
 #define RESSRC_PNG_SHARK         ":/traceshark/images/shark.png"
 #define RESSRC_PNG_TASKSELECT    ":/traceshark/images/taskselector30x30.png"

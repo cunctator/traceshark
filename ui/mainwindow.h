@@ -147,6 +147,7 @@ private:
 	void showTrace();
 	void setupCursors();
 	void setupSettings();
+	void updateResetFiltersEnabled();
 
 	void addSchedGraph(CPUTask &task);
 	void addHorizontalWakeupGraph(CPUTask &task);
@@ -193,6 +194,7 @@ private:
 	QAction *exitAction;
 	QAction *showTasksAction;
 	QAction *showEventsAction;
+	QAction *resetFiltersAction;
 	QAction *aboutAction;
 	QAction *licenseAction;
 	QAction *aboutQtAction;

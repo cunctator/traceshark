@@ -87,6 +87,9 @@
 #define TOOLTIP_SHOWEVENTS \
 	"Show a list of event types and it's possible to select which to filter on"
 
+#define TOOLTIP_RESETFILTERS \
+	"Reset all filters"
+
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
 {
@@ -946,6 +949,12 @@ void MainWindow::createActions()
 	showEventsAction->setEnabled(false);
 	tsconnect(showEventsAction, triggered(), this, showEventFilter());
 
+	resetFiltersAction = new QAction(tr("Reset all filters"), this);
+	resetFiltersAction->setIcon(QIcon(RESSRC_PNG_RESETFILTERS));
+	resetFiltersAction->setToolTip(tr(TOOLTIP_RESETFILTERS));
+	resetFiltersAction->setEnabled(false);
+	tsconnect(resetFiltersAction, triggered(), this, resetFilters());
+
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
 	exitAction->setStatusTip(tr("Exit traceshark"));
@@ -983,6 +992,7 @@ void MainWindow::createToolBars()
 	addToolBar(Qt::LeftToolBarArea, viewToolBar);
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(showEventsAction);
+	viewToolBar->addAction(resetFiltersAction);
 }
 
 void MainWindow::createMenus()
@@ -1165,6 +1175,14 @@ void MainWindow::scrollTo(double time)
 	eventsWidget->scrollTo(time);
 }
 
+void MainWindow::updateResetFiltersEnabled(void)
+{
+	if (analyzer->isFiltered())
+		resetFiltersAction->setEnabled(true);
+	else
+		resetFiltersAction->setEnabled(false);
+}
+
 void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map,
 				 bool orlogic, bool inclusive)
 {
@@ -1175,6 +1193,7 @@ void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map,
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
+	updateResetFiltersEnabled();
 }
 
 void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
@@ -1186,6 +1205,7 @@ void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
+	updateResetFiltersEnabled();
 }
 
 
@@ -1202,6 +1222,7 @@ void MainWindow::resetPidFilter()
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
+	updateResetFiltersEnabled();
 }
 
 void MainWindow::resetEventFilter()
@@ -1217,6 +1238,7 @@ void MainWindow::resetEventFilter()
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
+	updateResetFiltersEnabled();
 }
 
 void MainWindow::resetFilters()
@@ -1232,6 +1254,7 @@ void MainWindow::resetFilters()
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
+	updateResetFiltersEnabled();
 }
 
 void MainWindow::addTaskGraph(unsigned int pid)
