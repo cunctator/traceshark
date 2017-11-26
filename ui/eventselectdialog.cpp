@@ -79,8 +79,8 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 	QPushButton *closeButton = new QPushButton(tr("Close"));
 
 	logicBox = new QComboBox();
-	logicBox->addItem(QString(tr("&&")));
-	logicBox->addItem(QString(tr("||")));
+	logicBox->addItem(QString(tr("AND")));
+	logicBox->addItem(QString(tr("OR")));
 	logicBox->setCurrentIndex(CBOX_INDEX_AND);
 
 	QPushButton *addFilterButton =
