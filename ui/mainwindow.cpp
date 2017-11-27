@@ -86,6 +86,8 @@
 	"Show a list of all tasks and it's possible to select one"
 #define TOOLTIP_SHOWEVENTS \
 	"Show a list of event types and it's possible to select which to filter on"
+#define TOOLTIP_TIMEFILTER \
+	"Filter on the time interval specified by the current position of the cursors"
 
 #define TOOLTIP_RESETFILTERS \
 	"Reset all filters"
@@ -165,6 +167,8 @@ MainWindow::MainWindow():
 		  this, createEventFilter(QMap<event_t, event_t> &, bool));
 	tsconnect(eventSelectDialog, resetFilter(), this, resetEventFilter());
 	setupSettings();
+	cursorPos[TShark::RED_CURSOR] = 0;
+	cursorPos[TShark::BLUE_CURSOR] = 0;
 }
 
 void MainWindow::createTracePlot()
@@ -504,9 +508,11 @@ void MainWindow::setupCursors()
 
 	red = (start + end) / 2;
 	cursors[TShark::RED_CURSOR]->setPosition(red);
+	cursorPos[TShark::RED_CURSOR] = red;
 	infoWidget->setTime(red, TShark::RED_CURSOR);
 	blue = (start + end) / 2 + (end - start) / 10;
 	cursors[TShark::BLUE_CURSOR]->setPosition(blue);
+	cursorPos[TShark::BLUE_CURSOR] = blue;
 	infoWidget->setTime(blue, TShark::BLUE_CURSOR);
 
 	scrollTo(red);
@@ -633,12 +639,15 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	closeAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
+	timeFilterAction->setEnabled(e);
 
 	infoWidget->setTraceActionsEnabled(e);
 }
 
 void MainWindow::closeTrace()
 {
+	resetFilters();
+
 	eventsWidget->beginResetModel();
 	eventsWidget->clear();
 	eventsWidget->endResetModel();
@@ -878,6 +887,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 	if (cursor != nullptr) {
 		double pixel = (double) event->x();
 		double coord = tracePlot->xAxis->pixelToCoord(pixel);
+		cursorPos[cursorIdx] = coord;
 		cursor->setPosition(coord);
 		eventsWidget->scrollTo(coord);
 		infoWidget->setTime(coord, cursorIdx);
@@ -892,6 +902,7 @@ void MainWindow::infoValueChanged(double value, int nr)
 		if (cursor != nullptr)
 			cursor->setPosition(value);
 		eventsWidget->scrollTo(value);
+		cursorPos[nr] = value;
 	}
 }
 
@@ -907,6 +918,7 @@ void MainWindow::moveActiveCursor(double time)
 	if (cursor != nullptr) {
 		cursor->setPosition(time);
 		infoWidget->setTime(time, cursorIdx);
+		cursorPos[cursorIdx] = time;
 	}
 }
 
@@ -948,6 +960,12 @@ void MainWindow::createActions()
 	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
 	showEventsAction->setEnabled(false);
 	tsconnect(showEventsAction, triggered(), this, showEventFilter());
+
+	timeFilterAction = new QAction(tr("Filter on time"), this);
+	timeFilterAction->setIcon(QIcon(RESSRC_PNG_TIMEFILTER));
+	timeFilterAction->setToolTip(tr(TOOLTIP_TIMEFILTER));
+	timeFilterAction->setEnabled(false);
+	tsconnect(timeFilterAction, triggered(), this, timeFilter());
 
 	resetFiltersAction = new QAction(tr("Reset all filters"), this);
 	resetFiltersAction->setIcon(QIcon(RESSRC_PNG_RESETFILTERS));
@@ -992,6 +1010,7 @@ void MainWindow::createToolBars()
 	addToolBar(Qt::LeftToolBarArea, viewToolBar);
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(showEventsAction);
+	viewToolBar->addAction(timeFilterAction);
 	viewToolBar->addAction(resetFiltersAction);
 }
 
@@ -1007,6 +1026,7 @@ void MainWindow::createMenus()
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(showEventsAction);
+	viewMenu->addAction(timeFilterAction);
 	viewMenu->addAction(resetFiltersAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -1182,6 +1202,24 @@ void MainWindow::updateResetFiltersEnabled(void)
 		resetFiltersAction->setEnabled(true);
 	else
 		resetFiltersAction->setEnabled(false);
+}
+
+void MainWindow::timeFilter(void)
+{
+	double min, max;
+	double saved = eventsWidget->getSavedScroll();
+
+	min = TSMIN(cursorPos[TShark::RED_CURSOR],
+		    cursorPos[TShark::BLUE_CURSOR]);
+	max = TSMAX(cursorPos[TShark::RED_CURSOR],
+		    cursorPos[TShark::BLUE_CURSOR]);
+
+	eventsWidget->beginResetModel();
+	analyzer->createTimeFilter(min, max, false);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+	updateResetFiltersEnabled();
 }
 
 void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map,
@@ -1468,8 +1506,10 @@ void MainWindow::showWakeup(unsigned int pid)
 	 */
 	activeCursor->setPosition(wakeupevent->time);
 	inactiveCursor->setPosition(schedevent->time);
-	infoWidget->setTime(wakeupevent->time, inactiveIdx);
-	infoWidget->setTime(schedevent->time, activeIdx);
+	infoWidget->setTime(wakeupevent->time, activeIdx);
+	infoWidget->setTime(schedevent->time, inactiveIdx);
+	cursorPos[activeIdx] = wakeupevent->time;
+	cursorPos[inactiveIdx] = schedevent->time;
 
 	if (!analyzer->isFiltered()) {
 		eventsWidget->scrollTo(wakeUpIndex);

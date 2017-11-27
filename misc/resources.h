@@ -66,6 +66,7 @@
 #define RESSRC_PNG_SCREENSHOT    ":/traceshark/images/screenshot30x30.png"
 #define RESSRC_PNG_SHARK         ":/traceshark/images/shark.png"
 #define RESSRC_PNG_TASKSELECT    ":/traceshark/images/taskselector30x30.png"
+#define RESSRC_PNG_TIMEFILTER    ":/traceshark/images/timefilter30x30.png"
 #define RESSRC_PNG_FIND_WAKEUP   ":/traceshark/images/wakeup30x30.png"
 #define RESSRC_PNG_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
 #define RESSRC_PNG_QT_LOGO       ":/traceshark/images/qtlogo-64.png"

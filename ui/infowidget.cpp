@@ -158,7 +158,11 @@ void InfoWidget::updateDifference()
 
 int InfoWidget::getCursorIdx()
 {
-	return cursorComboBox->currentIndex();
+	int index =  cursorComboBox->currentIndex();
+
+	if (index >= 0 && index < TShark::NR_CURSORS)
+		return index;
+	return 0;
 }
 
 void InfoWidget::setTaskGraph(TaskGraph *graph)

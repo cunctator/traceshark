@@ -710,6 +710,13 @@ void TraceAnalyzer::processAllFilters()
 				continue;
 			}
 		}
+		if (OR_filterState.isEnabled(FilterState::FILTER_TIME)) {
+			if (event.time >= OR_filterTimeLow &&
+			    event.time <= OR_filterTimeHigh) {
+				filteredEvents.append(eptr);
+				continue;
+			}
+		}
 		/* AND filters */
 		if (filterState.isEnabled(FilterState::FILTER_PID) &&
 		    __processPidFilter(event, filterPidMap,
@@ -720,6 +727,11 @@ void TraceAnalyzer::processAllFilters()
 			DEFINE_FILTER_EVENTMAP_ITERATOR(iter);
 			iter = filterEventMap.find(event.type);
 			if (iter == filterEventMap.end())
+				continue;
+		}
+		if (filterState.isEnabled(FilterState::FILTER_TIME)) {
+			if (event.time < filterTimeLow ||
+			    event.time > filterTimeHigh)
 				continue;
 		}
 		if (filterState.isEnabled(FilterState::FILTER_CPU)) {
@@ -785,6 +797,29 @@ void TraceAnalyzer::createEventFilter(QMap<event_t, event_t> &map,
 		processAllFilters();
 }
 
+void TraceAnalyzer::createTimeFilter(double low, double high, bool
+				     orlogic)
+{
+	double start = getStartTime();
+	double end = getEndTime();
+
+	if (low < start && high > end)
+		return;
+
+	if (orlogic) {
+		OR_filterTimeLow = low;
+		OR_filterTimeHigh = high;
+		OR_filterState.enable(FilterState::FILTER_TIME);
+	} else {
+		filterTimeLow = low;
+		filterTimeHigh = high;
+		filterState.enable(FilterState::FILTER_TIME);
+	}
+	/* No need to process filters if we only have OR-filters */
+	if (filterState.isEnabled())
+		processAllFilters();
+}
+
 void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 {
 	filterState.disable(filter);
@@ -796,6 +831,9 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 		break;
 	case FilterState::FILTER_EVENT:
 		filterEventMap.clear();
+		break;
+	case FilterState::FILTER_TIME:
+		/* We need to do nothing */
 		break;
 	case FilterState::FILTER_CPU:
 		break;
@@ -878,4 +916,23 @@ bool TraceAnalyzer::filterActive(FilterState::filter_t filter)
 {
 	return filterState.isEnabled(filter) ||
 		OR_filterState.isEnabled(filter);
+}
+
+double TraceAnalyzer::getStartTime()
+{
+	double rval = 0;
+
+	if (events.size() > 0)
+		rval = events[0].time;
+	return rval;
+}
+
+double TraceAnalyzer::getEndTime()
+{
+	double rval = 0;
+	unsigned int s = events.size();
+
+	if (s > 0)
+		rval = events[s - 1].time;
+	return rval;
 }

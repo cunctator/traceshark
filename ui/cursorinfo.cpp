@@ -79,11 +79,11 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	switch (nr) {
 	case TShark::RED_CURSOR:
 		text = QString(tr(RED_CURSOR_TOOLTIP));
-		qresource = QLatin1String(RESSRC_PNG_MOVE_BLUE);
+		qresource = QLatin1String(RESSRC_PNG_MOVE_RED);
 		break;
 	case TShark::BLUE_CURSOR:
 		text = QString(tr(BLUE_CURSOR_TOOLTIP));
-		qresource = QLatin1String(RESSRC_PNG_MOVE_RED);
+		qresource = QLatin1String(RESSRC_PNG_MOVE_BLUE);
 		break;
 	default:
 		text = QString(tr("error in cursorinfo.cpp"));

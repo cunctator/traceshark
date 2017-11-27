@@ -60,6 +60,7 @@ public:
 	typedef enum {
 		FILTER_PID = 0,
 		FILTER_EVENT,
+		FILTER_TIME,
 		FILTER_CPU,
 		FILTER_ARG,
 		NR_FILTERS

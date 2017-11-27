@@ -132,6 +132,7 @@ private slots:
 	void resetPidFilter();
 	void resetEventFilter();
 	void resetFilters();
+	void timeFilter();
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
@@ -194,6 +195,7 @@ private:
 	QAction *exitAction;
 	QAction *showTasksAction;
 	QAction *showEventsAction;
+	QAction *timeFilterAction;
 	QAction *resetFiltersAction;
 	QAction *aboutAction;
 	QAction *licenseAction;
@@ -228,6 +230,7 @@ private:
 	Cursor *cursors[TShark::NR_CURSORS];
 	Setting settings[Setting::MAX_SETTINGS];
 	bool filterActive;
+	double cursorPos[TShark::NR_CURSORS];
 };
 
 #endif /* MAINWINDOW_H */

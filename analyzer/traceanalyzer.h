@@ -145,12 +145,15 @@ public:
 	void createPidFilter(QMap<unsigned int, unsigned int> &map,
 			     bool orlogic, bool inclusive);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
+	void createTimeFilter(double low, double high, bool orlogic);
 	void disableFilter(FilterState::filter_t filter);
 	void addPidToFilter(unsigned int pid);
 	void removePidFromFilter(unsigned int pid);
 	void disableAllFilters();
 	bool isFiltered();
 	bool filterActive(FilterState::filter_t filter);
+	double getStartTime();
+	double getEndTime();
 private:
 	TraceParser *parser;
 	void prepareDataStructures();
@@ -243,6 +246,10 @@ private:
 	QMap<event_t, event_t> OR_filterEventMap;
 	bool pidFilterInclusive;
 	bool OR_pidFilterInclusive;
+	double filterTimeLow;
+	double filterTimeHigh;
+	double OR_filterTimeLow;
+	double OR_filterTimeHigh;
 };
 
 __always_inline double TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,
