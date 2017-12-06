@@ -216,14 +216,15 @@ namespace TShark {
 	{
 		union value32 uvalue;
 		uvalue.word32 = 0;
-		if (str->len < 1)
+		unsigned int s = str->len;
+		if (s < 1)
 			return 0;
-		uvalue.word8[0] = str->ptr[0];
-		if (str->len < 4)
+		uvalue.word8[3] = str->ptr[0];
+		if (s < 4)
 			return uvalue.word32;
-		uvalue.word8[1] = str->ptr[1];
-		uvalue.word8[2] = str->ptr[2];
-		uvalue.word8[3] = str->ptr[3];
+		uvalue.word8[2] = str->ptr[s - 3];
+		uvalue.word8[1] = str->ptr[s - 2];
+		uvalue.word8[0] = str->ptr[s - 1];
 		return uvalue.word32;
 	}
 }
