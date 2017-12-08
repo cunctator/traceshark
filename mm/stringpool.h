@@ -53,19 +53,79 @@
 #define STRINGPOOL_H
 
 #include <cstdint>
+#include <cstring>
 #include "mm/mempool.h"
 #include "misc/traceshark.h"
 #include "misc/tstring.h"
+#include "vtl/avltree.h"
+#include "vtl/tlist.h"
+
+class __DummySP {};
+
+class PoolBundleSP {
+public:
+	MemPool *charPool;
+	MemPool *nodePool;
+};
+
+#define __STRINGPOOL_ITERATOR(name) \
+vtl::AVLTree<TString, __DummySP, false, AVLAllocatorSP<TString, __DummySP>, \
+AVLCompareSP<TString>>::iterator
+
+template <class T>
+class AVLCompareSP {
+public:
+	__always_inline static int compare(const T &a, const T &b) {
+		return strcmp(a.ptr, b.ptr);
+	}
+};
+
+template <class T, class U>
+class AVLAllocatorSP {
+public:
+	AVLAllocatorSP(void *data) {
+		PoolBundleSP *pb = (PoolBundleSP*) data;
+		pools = *pb;
+	}
+	__always_inline vtl::AVLNode<T, U> *alloc(const T &key) {
+		vtl::AVLNode<T, U> *node = (vtl::AVLNode<T, U> *)
+			pools.nodePool->allocObj();
+		node->key.len = key.len;
+		node->key.ptr = (char*) pools.charPool->allocChars(key.len + 1);
+		strncpy(node->key.ptr, key.ptr, key.len + 1);
+		return node;
+	}
+	__always_inline int clear() {
+		/*
+		 * Do nothing because the pools are owned by StringPool. This
+		 * is only called from StringPool, via AVLTree, when the object
+		 * is cleared.
+		 */
+		return 0;
+	}
+private:
+	PoolBundleSP pools;
+};
+
+#define AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, __DummySP, false, \
+AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>))
+#define TSTRING_PTR_SIZE (sizeof(TString*))
+#define TYPICAL_CACHE_LINE_SIZE (64)
+
+#define SP_CACHE_SIZE (TYPICAL_CACHE_LINE_SIZE - TSTRING_PTR_SIZE - \
+		       AVLTREE_SIZE)
 
 class StringPoolEntry {
+	friend class StringPool;
 public:
-	StringPoolEntry *small;
-	StringPoolEntry *large;
-	StringPoolEntry *parent;
-	TString *str;
-	int height;
-	__always_inline void setHeightFromChildren();
-	__always_inline void swapEntries(StringPoolEntry *entry);
+StringPoolEntry(void *data): cachePtr(nullptr), avlTree(data) {
+		bzero(cache, SP_CACHE_SIZE + 1);
+	}
+protected:
+	char cache[SP_CACHE_SIZE];
+	TString *cachePtr;
+	vtl::AVLTree<TString, __DummySP, false, AVLAllocatorSP<TString,
+		__DummySP>, AVLCompareSP<TString>> avlTree;
 };
 
 class StringPool
@@ -79,186 +139,66 @@ public:
 	void reset();
 private:
 	__always_inline TString* allocUniqueString(const TString *str);
+	MemPool *coldCharPool;
 	MemPool *strPool;
-	MemPool *charPool;
-	MemPool *entryPool;
+	PoolBundleSP avlPools;
 	StringPoolEntry **hashTable;
 	unsigned int *countAllocs;
 	unsigned int *countReuse;
 	unsigned int hSize;
 	void clearTable();
+	vtl::TList<StringPoolEntry*> deleteList;
 };
 
 __always_inline TString* StringPool::allocString(const TString *str,
 						 uint32_t hval,
 						 uint32_t cutoff)
 {
-	TString *newstr;
-	StringPoolEntry **aentry;
 	StringPoolEntry *entry;
-	StringPoolEntry *parent = nullptr;
-	StringPoolEntry *grandParent;
-	StringPoolEntry *smallChild;
-	StringPoolEntry *largeChild;
-	int cmp;
-	int diff;
-	int smallH;
-	int largeH;
-	int gHeight;
+	bool isNew;
 
 	hval = hval % hSize;
 
 	if (cutoff != 0 && countAllocs[hval] > cutoff &&
 	    countAllocs[hval] > countReuse[hval]) {
-		newstr = allocUniqueString(str);
+		TString *newstr = allocUniqueString(str);
 		return newstr;
 	}
 
-	aentry = hashTable + hval;
-	entry = *aentry;
-
-	while(entry != nullptr) {
-		cmp = strcmp(str->ptr, entry->str->ptr);
-		if (cmp == 0) {
+	if (hashTable[hval] != nullptr) {
+		entry = hashTable[hval];
+		if (entry->cachePtr != nullptr &&
+		    strcmp(entry->cache, str->ptr) == 0) {
 			if (cutoff != 0)
 				countReuse[hval]++;
-			return entry->str;
+			return entry->cachePtr;
 		}
-		parent = entry;
-		if (cmp < 0)
-			aentry = &entry->small;
-		else
-			aentry = &entry->large;
-		entry = *aentry;
-	}
-
-	newstr = allocUniqueString(str);
-	if (newstr == nullptr)
-		return newstr;
-	if (cutoff != 0)
-		countAllocs[hval]++;
-
-	entry = (StringPoolEntry*) entryPool->allocObj();
-	if (entry == nullptr)
-		return nullptr;
-	bzero(entry, sizeof(StringPoolEntry));
-	entry->str = newstr;
-	/* aentry is equal to &parent->[large|small] */
-	*aentry = entry;
-
-	entry->parent = parent;
-	entry->height = 0;
-	if (parent == nullptr)
-		return newstr; /* Ok, this is the root node */
-	if (parent->height > 0)
-		return newstr; /* parent already has another node */
-	parent->height = 1;
-	grandParent = parent->parent;
-	/* update heights and find offending node */
-	while(grandParent != nullptr) {
-		smallH = grandParent->small == nullptr ?
-			-1 : grandParent->small->height;
-		largeH = grandParent->large == nullptr ?
-			-1 : grandParent->large->height;
-		diff = smallH - largeH;
-		if (diff == 0)
-			break;
-		if (diff > 1)
-			goto rebalanceSmall;
-		if (diff < -1)
-			goto rebalanceLarge;
-		grandParent->height = parent->height + 1;
-		entry = parent;
-		parent = grandParent;
-		grandParent = grandParent->parent;
-	}
-	return newstr;
-rebalanceSmall:
-	/* Do small rebalance here (case 1 and case 2) */
-	if (entry == parent->small) {
-		/* Case 1 */
-		grandParent->small = entry;
-		entry->parent = grandParent;
-
-		parent->small = parent->large;
-		parent->height--;
-
-		parent->large = grandParent->large;
-		if (parent->large != nullptr)
-			parent->large->parent = parent;
-
-		grandParent->large = parent;
-		parent->swapEntries(grandParent);
+		__STRINGPOOL_ITERATOR(iter) iter =
+			entry->avlTree.findInsert(*str, isNew);
+		TString &refStr = iter.key();
+		if (isNew) {
+			if (cutoff != 0)
+				countAllocs[hval]++;
+		} else {
+			if (refStr.len < SP_CACHE_SIZE) {
+				strncpy(entry->cache, refStr.ptr, refStr.len);
+				entry->cachePtr = &refStr;
+			}
+			if (cutoff != 0)
+				countReuse[hval]++;
+		}
+		return &refStr;
 	} else {
-		/* Case 2 */
-		smallChild = entry->small;
-		largeChild = entry->large;
-		gHeight = 0;
-		if (grandParent->large != nullptr) {
-			gHeight = grandParent->large->height + 1;
-			grandParent->large->parent = entry;
-		}
-
-		parent->large = smallChild;
-		if (smallChild != nullptr)
-			smallChild->parent = parent;
-		parent->height = grandParent->height - 1;
-
-		entry->large = grandParent->large;
-		entry->small = largeChild;
-		if (largeChild != nullptr)
-			largeChild->parent = entry;
-
-		grandParent->large = entry;
-		entry->parent = grandParent;
-
-		entry->height = gHeight;
-		entry->swapEntries(grandParent);
+		entry = new StringPoolEntry(&avlPools);
+		hashTable[hval] = entry;
+		deleteList.append(entry);
+		__STRINGPOOL_ITERATOR(iter) iter =
+			entry->avlTree.findInsert(*str, isNew);
+		if (cutoff != 0)
+			countAllocs[hval]++;
+		TString &refStr = iter.key();
+		return &refStr;
 	}
-	return newstr;
-rebalanceLarge:
-	/* Do large rebalance here */
-	if (entry == parent->small) {
-		/* Case 3 */
-		smallChild = entry->small;
-		largeChild = entry->large;
-		gHeight = 0;
-		if (grandParent->small != nullptr) {
-			gHeight = grandParent->small->height + 1;
-			grandParent->small->parent = entry;
-		}
-
-		parent->small = largeChild;
-		if (largeChild != nullptr)
-			largeChild->parent = parent;
-		parent->height = grandParent->height - 1;
-
-		entry->small = grandParent->small;
-		entry->large = smallChild;
-		if (smallChild != nullptr)
-			smallChild->parent = entry;
-
-		grandParent->small = entry;
-		entry->parent = grandParent;
-
-		entry->height = gHeight;
-		entry->swapEntries(grandParent);
-	} else {
-		/* Case 4 */
-		grandParent->large = entry;
-		entry->parent = grandParent;
-
-		parent->large = parent->small;
-		parent->height--;
-
-		parent->small = grandParent->small;
-		if (parent->small != nullptr)
-			parent->small->parent = parent;
-
-		grandParent->small = parent;
-		parent->swapEntries(grandParent);
-	}
-	return newstr;
 }
 
 __always_inline TString* StringPool::allocUniqueString(const TString *str)
@@ -269,30 +209,13 @@ __always_inline TString* StringPool::allocUniqueString(const TString *str)
 	if (newstr == nullptr)
 		return nullptr;
 	newstr->len = str->len;
-	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
+	newstr->ptr = (char*) coldCharPool->allocChars(str->len + 1);
 	if (newstr->ptr == nullptr)
 		return nullptr;
 	strncpy(newstr->ptr, str->ptr, str->len + 1);
 	return newstr;
 }
 
-__always_inline void StringPoolEntry::swapEntries(StringPoolEntry *entry)
-{
-	TString *tmp;
-	tmp = entry->str;
-	entry->str = str;
-	str = tmp;
-}
-
-__always_inline void StringPoolEntry::setHeightFromChildren()
-{
-	int lh;
-	int rh;
-
-	lh = (small != nullptr) ? (small->height) : -1;
-	rh = (large != nullptr) ? (large->height) : -1;
-	height = TSMAX(lh, rh) + 1;
-}
 
 
 

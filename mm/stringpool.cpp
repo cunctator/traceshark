@@ -55,6 +55,7 @@
 #define MAX(A, B) ((A) >= (B) ? A:B)
 #define MIN(A, B) ((A) < (B) ? A:B)
 
+
 StringPool::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 {
 	unsigned int entryPages, strPages;
@@ -64,15 +65,18 @@ StringPool::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 	else
 		hSize = hSizeP;
 
-	entryPages = 2 * hSize * sizeof(StringPoolEntry) / 4096;
+	entryPages = 2 * hSize *
+		sizeof(vtl::AVLNode<TString, __DummySP>) / 4096;
 	entryPages = MAX(1, entryPages);
 	strPages = 2* hSize * sizeof(TString) / 4096;
 	strPages = MAX(16, strPages);
 
-	strPool = new MemPool(strPages, sizeof(TString));
-	charPool = new MemPool(nr_pages, 1);
-	entryPool = new MemPool(entryPages, sizeof(StringPoolEntry));
+	coldCharPool = new MemPool(nr_pages, 1);
+	strPool = new MemPool(nr_pages, sizeof(TString));
 
+	avlPools.charPool = new MemPool(nr_pages, sizeof(char));
+	avlPools.nodePool = new MemPool(entryPages, sizeof(vtl::AVLNode<TString,
+							   __DummySP>));
 	hashTable = new StringPoolEntry*[hSize];
 	countAllocs = new unsigned int[hSize];
 	countReuse = new unsigned int[hSize];
@@ -81,12 +85,18 @@ StringPool::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 
 StringPool::~StringPool()
 {
-	delete charPool;
+	unsigned int i, s;
+	delete coldCharPool;
 	delete strPool;
-	delete entryPool;
+	delete avlPools.charPool;
+	delete avlPools.nodePool;
 	delete[] hashTable;
 	delete[] countAllocs;
 	delete[] countReuse;
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
 }
 
 void StringPool::clearTable()
@@ -98,10 +108,17 @@ void StringPool::clearTable()
 
 void StringPool::clear()
 {
+	unsigned int s, i;
 	clearTable();
+	coldCharPool->reset();
 	strPool->reset();
-	entryPool->reset();
-	charPool->reset();
+	avlPools.nodePool->reset();
+	avlPools.charPool->reset();
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
+	deleteList.clear();
 }
 
 void StringPool::reset()
