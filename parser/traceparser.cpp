@@ -391,7 +391,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 		TraceLine &line = tbuf->list[i];
 		TraceEvent &event = events->preAlloc();
 		event.argc = 0;
-		event.argv = (TString**) ptrPool->preallocN(256);
+		event.argv = (const TString**) ptrPool->preallocN(256);
 		if (parseLineFtrace(line, event))
 			continue;
 		else {

@@ -150,13 +150,13 @@ class StringTree;
 
 class TraceEvent {
 public:
-	TString *taskName;
+	const TString *taskName;
 	unsigned int pid;
 	unsigned int cpu;
 	double time;
 	int intArg;
 	event_t type;
-	TString **argv;
+	const TString **argv;
 	unsigned int argc;
 
 	/*

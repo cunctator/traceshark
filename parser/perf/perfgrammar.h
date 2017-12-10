@@ -219,7 +219,7 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str,
 {
 	bool rval;
 	TString namestr;
-	TString *newname;
+	const TString *newname;
 	char cstr[256];
 	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
 	unsigned int i;
@@ -315,9 +315,9 @@ __always_inline bool PerfGrammar::EventMatch(TString *str,
 }
 
 __always_inline bool PerfGrammar::ArgMatch(TString *str,
-					     TraceEvent &event)
+					   TraceEvent &event)
 {
-	TString *newstr;
+	const TString *newstr;
 	if (event.argc < 255) {
 		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
 		if (newstr == nullptr)

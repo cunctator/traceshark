@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -51,25 +51,26 @@
 
 #include "parser/perf/perfparams.h"
 
-char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
-				       StringPool *pool)
+const char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
+					     StringPool *pool)
 {
 	return __perf_sched_switch_oldname_strdup(event, pool);
 }
 
-char *perf_sched_switch_newname_strdup(const TraceEvent &event,
-				       StringPool *pool)
+const char *perf_sched_switch_newname_strdup(const TraceEvent &event,
+					     StringPool *pool)
 {
 	return __perf_sched_switch_newname_strdup(event, pool);
 }
 
-char *perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
+const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
+					  StringPool *pool)
 {
 	return __perf_sched_wakeup_name_strdup(event, pool);
 }
 
-char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-					       StringPool *pool)
+const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
+						     StringPool *pool)
 {
 	return __perf_sched_process_fork_childname_strdup(event, pool);
 }

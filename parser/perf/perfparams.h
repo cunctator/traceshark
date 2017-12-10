@@ -124,11 +124,11 @@ ___perf_sched_switch_find_arrow(const TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 4; i < event.argc - 3; i++) {
-		char *c1 = event.argv[i - 3]->ptr;
-		char *c2 = event.argv[i - 2]->ptr;
-		char *c3 = event.argv[i - 1]->ptr;
-		TString *c4 = event.argv[i];
-		char *c5 = event.argv[i + 1]->ptr;
+		const char *c1 = event.argv[i - 3]->ptr;
+		const char *c2 = event.argv[i - 2]->ptr;
+		const char *c3 = event.argv[i - 1]->ptr;
+		const TString *c4 = event.argv[i];
+		const char *c5 = event.argv[i + 1]->ptr;
 		if (!strncmp(c1, SWITCH_PPID_PFIX, strlen(SWITCH_PPID_PFIX)) &&
 		    !strncmp(c2, SWITCH_PPRI_PFIX, strlen(SWITCH_PPRI_PFIX)) &&
 		    !strncmp(c3, SWITCH_PSTA_PFIX, strlen(SWITCH_PSTA_PFIX)) &&
@@ -150,7 +150,7 @@ perf_sched_switch_state(const TraceEvent &event)
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i != 0 && event.argv[i - 1]->len > 2) {
-		TString *stateArgStr = event.argv[i - 1];
+		const TString *stateArgStr = event.argv[i - 1];
 		for (j = stateArgStr->len - 2; j > 0; j--) {
 			if (stateArgStr->ptr[j] == '=') {
 				stateStr.len = stateArgStr->len - 1 - j;
@@ -184,7 +184,7 @@ perf_sched_switch_oldpid(const TraceEvent &event)
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline char *
+static __always_inline const char *
 __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 				   StringPool *pool)
 {
@@ -193,11 +193,11 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	unsigned int endidx;
 	unsigned int len = 0;
 	char *c;
-	TString *first;
+	const TString *first;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -230,10 +230,10 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	return retstr->ptr;
 }
 
-char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
-				       StringPool *pool);
+const char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
+					     StringPool *pool);
 
-static __always_inline char *
+static __always_inline const char *
 __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
@@ -241,11 +241,11 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 	unsigned int endidx;
 	unsigned int len = 0;
 	char *c;
-	TString *first;
+	const TString *first;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -279,8 +279,8 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 	return retstr->ptr;
 }
 
-char *perf_sched_switch_newname_strdup(const TraceEvent &event,
-				       StringPool *pool);
+const char *perf_sched_switch_newname_strdup(const TraceEvent &event,
+					     StringPool *pool);
 
 /*
  * These functions for sched_wakeup assumes that the format is either the "old"
@@ -355,7 +355,7 @@ perf_sched_wakeup_pid(const TraceEvent &event)
 	return param_after_char(event, oldidx, '=');
 }
 
-static __always_inline char *
+static __always_inline const char *
 __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
@@ -363,11 +363,11 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 	unsigned int endidx;
 	unsigned int len = 0;
 	char *c;
-	TString *first;
+	const TString *first;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -407,7 +407,8 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 	return retstr->ptr;
 }
 
-char *perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool);
+const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
+					  StringPool *pool);
 
 #define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define perf_sched_process_fork_childpid(EVENT) \
@@ -431,7 +432,7 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 	return param_after_char(event, i - 1, '=');
 }
 
-static __always_inline char *
+static __always_inline const char *
 __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 					   StringPool *pool)
 {
@@ -441,10 +442,10 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	char *c;
 	unsigned int len = 0;
 	bool ok;
-	TString *first;
+	const TString *first;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -480,8 +481,8 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	return retstr->ptr;
 }
 
-char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-					       StringPool *pool);
+const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
+						     StringPool *pool);
 
 #define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define perf_sched_process_exit_pid(EVENT) \

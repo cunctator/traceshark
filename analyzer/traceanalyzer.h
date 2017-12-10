@@ -388,7 +388,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 						       TraceEvent &event)
 {
 	Migration m;
-	char *childname;
+	const char *childname;
 
 	m.pid = sched_process_fork_childpid(ttype, event);
 	m.oldcpu = -1;
@@ -440,7 +440,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	bool delayOK;
 	CPU *eventCPU = &CPUs[cpu];
 	taskstate_t state;
-	char *name;
+	const char *name;
 	bool runnable;
 	bool preempted;
 
@@ -587,7 +587,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	unsigned int pid;
 	Task *task;
 	double time;
-	char *name;
+	const char *name;
 
 	/* Only interested in success */
 	if (!sched_wakeup_success(ttype, event))

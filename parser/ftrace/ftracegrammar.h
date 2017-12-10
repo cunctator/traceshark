@@ -92,10 +92,12 @@ private:
 		STATE_EVENT,
 		STATE_ARG
 	} grammarstate_t;
+	unsigned int tmp_argc;
+	TString *tmp_argv[256];
 };
 
 __always_inline bool FtraceGrammar::NamePidMatch(TString *str,
-						 TraceEvent &event)
+						 TraceEvent &/*event*/)
 {
 	/*
 	 * We temporarily store the process name string(s) into the
@@ -105,10 +107,10 @@ __always_inline bool FtraceGrammar::NamePidMatch(TString *str,
 	 * spaces. We will then consume this stored information in the
 	 * TimeMatch function.
 	 */
-	if (event.argc >= 256)
+	if (tmp_argc >= 255)
 		return false;
-	event.argv[event.argc] = str;
-	event.argc++;
+	tmp_argv[tmp_argc] = str;
+	tmp_argc++;
 	return true;
 }
 
@@ -131,8 +133,8 @@ __always_inline bool FtraceGrammar::CPUMatch(TString *str,
 		cpu += digit;
 	}
 	event.cpu = cpu;
-	event.argv[event.argc] = str;
-	event.argc++;
+	tmp_argv[tmp_argc] = str;
+	tmp_argc++;
 	return true;
 error:
 	event.cpu = 0;
@@ -184,7 +186,7 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 {
 	bool rval;
 	TString namestr;
-	TString *newname;
+	const TString *newname;
 	char cstr[256];
 	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
 	unsigned int i;
@@ -203,49 +205,43 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 	/*
 	 * This is the time field, if it is successful we need to assemble
 	 * the name and pid strings that has been temporarily stored in
-	 * argv/argc.
+	 * tmp_argv/tmp_argc.
 	 */
 	if (rval) {
-		if (event.argc < 2)
+		if (tmp_argc < 2)
 			return false;
 
-		fini = event.argc - 2;
+		fini = tmp_argc - 2;
 		/*
 		 * Extract the pid and the final portion of the name from
-		 * event.argv[fini]
+		 * tmp_argv[fini]
 		 */
-		if (!extractNameAndPid(event.pid, *event.argv[fini]))
+		if (!extractNameAndPid(event.pid, *tmp_argv[fini]))
 			return false;
 
-		if (event.argc > 2) {
-			namestr.set(event.argv[0], maxlen);
+		if (tmp_argc > 2) {
+			namestr.set(tmp_argv[0], maxlen);
 			/*
 			 * This will assemble broken up parts of the process
 			 * name; those that have been broken up by spaces in
 			 * the name.
 			 */
-			for (i = 1; i < event.argc - 1; i++) {
-				if (!namestr.merge(event.argv[i], maxlen))
+			for (i = 1; i < tmp_argc - 1; i++) {
+				if (!namestr.merge(tmp_argv[i], maxlen))
 					return false;
 			}
 			hash = TShark::StrHash32(&namestr);
 			newname = namePool->allocString(&namestr, hash, 0);
 		} else {
 			/* This is the common case, no spaces in the name. */
-			hash = TShark::StrHash32(event.argv[fini]);
-			newname = namePool->allocString(event.argv[fini], hash,
+			hash = TShark::StrHash32(tmp_argv[fini]);
+			newname = namePool->allocString(tmp_argv[fini], hash,
 							0);
 		}
 
 		if (newname == nullptr)
 			return false;
 		event.taskName = newname;
-		/*
-		 * Need to reset the arguments because the real arguments
-		 * will be stored after the succesful completion of the next
-		 * node.
-		 */
-		event.argc = 0;
 	}
 	return rval;
 }
@@ -284,7 +280,7 @@ __always_inline bool FtraceGrammar::EventMatch(TString *str,
 __always_inline bool FtraceGrammar::ArgMatch(TString *str,
 					     TraceEvent &event)
 {
-	TString *newstr;
+	const TString *newstr;
 	if (event.argc < 255) {
 		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
 		if (newstr == nullptr)
@@ -303,6 +299,7 @@ __always_inline bool FtraceGrammar::parseLine(TraceLine &line,
 	TString *str = line.strings;
 	unsigned int n = line.nStrings;
 	grammarstate_t state = STATE_NAMEPID;
+	tmp_argc = 0;
 
 	if (n == 0)
 		return false;

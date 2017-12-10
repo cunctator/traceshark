@@ -133,12 +133,13 @@ class StringPool
 public:
 	StringPool(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256);
 	~StringPool();
-	__always_inline TString* allocString(const TString *str, uint32_t hval,
-					     uint32_t cutoff);
+	__always_inline const TString *allocString(const TString *str,
+						   uint32_t hval,
+						   uint32_t cutoff);
 	void clear();
 	void reset();
 private:
-	__always_inline TString* allocUniqueString(const TString *str);
+	__always_inline const TString *allocUniqueString(const TString *str);
 	MemPool *coldCharPool;
 	MemPool *strPool;
 	PoolBundleSP avlPools;
@@ -150,9 +151,9 @@ private:
 	vtl::TList<StringPoolEntry*> deleteList;
 };
 
-__always_inline TString* StringPool::allocString(const TString *str,
-						 uint32_t hval,
-						 uint32_t cutoff)
+__always_inline const TString *StringPool::allocString(const TString *str,
+						       uint32_t hval,
+						       uint32_t cutoff)
 {
 	StringPoolEntry *entry;
 	bool isNew;
@@ -161,7 +162,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 
 	if (cutoff != 0 && countAllocs[hval] > cutoff &&
 	    countAllocs[hval] > countReuse[hval]) {
-		TString *newstr = allocUniqueString(str);
+		const TString *newstr = allocUniqueString(str);
 		return newstr;
 	}
 
@@ -201,7 +202,7 @@ __always_inline TString* StringPool::allocString(const TString *str,
 	}
 }
 
-__always_inline TString* StringPool::allocUniqueString(const TString *str)
+__always_inline const TString *StringPool::allocUniqueString(const TString *str)
 {
 	TString *newstr;
 

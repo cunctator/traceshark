@@ -132,7 +132,7 @@ ftrace_sched_switch_oldpid(const TraceEvent &event)
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline char
+static __always_inline const char
 *__ftrace_sched_switch_oldname_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
@@ -143,7 +143,7 @@ static __always_inline char
 	char *end;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -205,11 +205,11 @@ static __always_inline char
 	return retstr->ptr;
 }
 
-char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
-					 StringPool *pool);
+const char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
+					       StringPool *pool);
 
 /* TODO: Check what code could be shared between this and the above function */
-static __always_inline char
+static __always_inline const char
 *__ftrace_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
@@ -220,7 +220,7 @@ static __always_inline char
 	char *end;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -284,8 +284,8 @@ static __always_inline char
 	return retstr->ptr;
 }
 
-char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
-					 StringPool *pool);
+const char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
+					       StringPool *pool);
 
 #define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 #define ftrace_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, \
@@ -305,7 +305,7 @@ static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 							 EVENT.argc - 4, \
 							 ':'))
 /* Todo, code could be shrared with the other two *_strup() functions */
-static __always_inline char
+static __always_inline const char
 *__ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
 	unsigned int i;
@@ -316,7 +316,7 @@ static __always_inline char
 	unsigned int len = 0;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -374,8 +374,8 @@ static __always_inline char
 	return retstr->ptr;
 }
 
-char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
-				      StringPool *pool);
+const char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
+					    StringPool *pool);
 
 #define ftrace_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define ftrace_sched_process_fork_childpid(EVENT) \
@@ -402,7 +402,7 @@ ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 	return param_after_char(event, i - 1, '=');
 }
 
-static __always_inline char *
+static __always_inline const char *
 __ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 					     StringPool *pool)
 {
@@ -413,7 +413,7 @@ __ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 	unsigned int sublen;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
-	TString *retstr;
+	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
@@ -462,8 +462,8 @@ finalize:
 	return retstr->ptr;
 }
 
-char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
-						 StringPool *pool);
+const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
+						       StringPool *pool);
 
 #define ftrace_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define ftrace_sched_process_exit_pid(EVENT) \
