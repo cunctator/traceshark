@@ -57,4 +57,12 @@ fi
 
 file=$1
 
-cat $file|awk '/processTrace/ { sum+=$3;n++ } END {print sum/n}'
+average=$(cat $file|awk '/processTrace/ { sum+=$3;n++ } END {print sum/n}')
+
+minimum=$(cat $file|awk 'BEGIN {min=-1} $1~/processTrace/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
+
+maximum=$(cat $file|awk 'BEGIN {max=-1} $1~/processTrace/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
+
+echo "minimum = "$minimum
+echo "average = "$average
+echo "maximum = "$maximum
