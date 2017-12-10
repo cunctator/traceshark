@@ -59,6 +59,7 @@ class TaskGraph;
 class AbstractTask {
 public:
 	AbstractTask();
+	~AbstractTask();
 
 	/* is really tid as all other pids here */
 	unsigned int pid;

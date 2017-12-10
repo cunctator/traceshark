@@ -220,6 +220,8 @@ MainWindow::~MainWindow()
 	delete taskRangeAllocator;
 	delete licenseDialog;
 	delete eventInfoDialog;
+	delete taskSelectDialog;
+	delete eventSelectDialog;
 
 	for (i = 0; i < STATUS_NR; i++)
 		delete statusStrings[i];
@@ -537,7 +539,11 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask)
 	graph->setPen(pen);
 	graph->setTask(task);
 	graph->setData(cpuTask.schedTimev, cpuTask.scaledSchedData);
-	cpuTask.graph = graph; /* Save a pointer to the graph object in the task */
+	/*
+	 * Save a pointer to the graph object in the task. The destructor of
+	 * AbstractClass will delete this when it is destroyed.
+	 */
+	cpuTask.graph = graph;
 }
 
 void MainWindow::addHorizontalWakeupGraph(CPUTask &task)

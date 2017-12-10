@@ -268,6 +268,9 @@ out:
 
 	eventsWatcher->sendNextIndex(events->size());
 	eventsWatcher->sendEOF();
+
+	for (i = 0; i < NR_TBUFFERS; i++)
+		delete tbuffers[i];
 }
 
 void TraceParser::waitForTraceType()

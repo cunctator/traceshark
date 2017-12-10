@@ -51,10 +51,17 @@
 
 #include "analyzer/abstracttask.h"
 #include "analyzer/traceanalyzer.h"
+#include "ui/taskgraph.h"
 
 AbstractTask::AbstractTask() :
 	pid(0), isNew(true), offset(0), scale(0), graph(nullptr)
 {}
+
+AbstractTask::~AbstractTask()
+{
+	if (graph != nullptr)
+		delete graph;
+}
 
 bool AbstractTask::doScale() {
 	int i;
