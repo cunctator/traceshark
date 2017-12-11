@@ -168,7 +168,7 @@ public:
 	 */
 	TString *postEventInfo;
 
-	TString *getEventName() const;
+	const TString *getEventName() const;
 	static const TString *getEventName(event_t event);
 	static void setStringTree(StringTree *sTree);
 	static const StringTree *getStringTree();

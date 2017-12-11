@@ -53,22 +53,74 @@
 #define STRINGTREE_H
 
 #include <cstdint>
+#include <cstring>
 #include "mm/mempool.h"
 #include "misc/traceshark.h"
 #include "misc/tstring.h"
 #include "parser/traceevent.h"
+#include "vtl/avltree.h"
+#include "vtl/tlist.h"
+
+class PoolBundleST {
+public:
+	MemPool *charPool;
+	MemPool *nodePool;
+};
+
+#define __STRINGTREE_ITERATOR(name) \
+vtl::AVLTree<TString, event_t, false, AVLAllocatorST<TString, event_t>, \
+AVLCompareST<TString>>::iterator
+
+template <class T>
+class AVLCompareST {
+public:
+	__always_inline static int compare(const T &a, const T &b) {
+		return strcmp(a.ptr, b.ptr);
+	}
+};
+
+template <class T, class U>
+class AVLAllocatorST {
+public:
+	AVLAllocatorST(void *data) {
+		PoolBundleST *pb = (PoolBundleST*) data;
+		pools = *pb;
+	}
+	__always_inline vtl::AVLNode<T, U> *alloc(const T &key) {
+		vtl::AVLNode<T, U> *node = (vtl::AVLNode<T, U> *)
+			pools.nodePool->allocObj();
+		node->key.len = key.len;
+		node->key.ptr = (char*) pools.charPool->allocChars(key.len + 1);
+		strncpy(node->key.ptr, key.ptr, key.len + 1);
+		return node;
+	}
+	__always_inline int clear() {
+		/*
+		 * Do nothing because the pools are owned by StringTree. This
+		 * is only called from StringTree, via AVLTree, when the object
+		 * is cleared.
+		 */
+		return 0;
+	}
+private:
+	PoolBundleST pools;
+};
+
+#define ST_AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, event_t, false, \
+AVLAllocatorST<TString, event_t>, AVLCompareST<TString>>))
+#define ST_TSTRING_PTR_SIZE (sizeof(TString*))
+#define ST_TYPICAL_CACHE_LINE_SIZE (32)
+
+#define ST_CACHE_SIZE (ST_TYPICAL_CACHE_LINE_SIZE - ST_TSTRING_PTR_SIZE - \
+		       ST_AVLTREE_SIZE)
 
 class StringTreeEntry {
+	friend class StringTree;
 public:
-	StringTreeEntry *small;
-	StringTreeEntry *large;
-	StringTreeEntry *parent;
-	TString *str;
-	event_t eventType;
-	int height;
-	__always_inline void stealParent(StringTreeEntry *newChild,
-					 StringTreeEntry **rootptr);
-	__always_inline void setHeightFromChildren();
+StringTreeEntry(void *data): avlTree(data) { }
+protected:
+	vtl::AVLTree<TString, event_t, false, AVLAllocatorST<TString,
+		event_t>, AVLCompareST<TString>> avlTree;
 };
 
 class StringTree
@@ -77,251 +129,70 @@ public:
 	StringTree(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256,
 		   unsigned int table_size = 4096);
 	~StringTree();
-	__always_inline TString *stringLookup(event_t value) const;
-	event_t getMaxEvent() const;
+	__always_inline const TString *stringLookup(event_t value) const;
 	__always_inline event_t searchAllocString(const TString *str,
 						  uint32_t hval,
 						  event_t newval);
+	__always_inline event_t getMaxEvent() const;
 	void clear();
 	void reset();
 private:
-	__always_inline void SwapEntries(StringTreeEntry *a,
-					 StringTreeEntry *b);
-	MemPool *strPool;
-	MemPool *charPool;
-	MemPool *entryPool;
+	PoolBundleST avlPools;
 	StringTreeEntry **hashTable;
 	unsigned int hSize;
-	TString **stringTable;
-	int tableSize;
+	unsigned int tableSize;
 	event_t maxEvent;
-	void clearTables();
+	TString **stringTable;
+	void clearTable();
+	vtl::TList<StringTreeEntry*> deleteList;
 };
 
-
-__always_inline TString *StringTree::stringLookup(event_t value) const
+__always_inline const TString *StringTree::stringLookup(event_t value) const
 {
 	if (value < 0 || value > maxEvent)
 		return nullptr;
 	return stringTable[value];
 }
 
-
-/*
- * We use and  AVL-tree here, since this data structure is meant to store
- * event names and the number of event names is extremely small compared to
- * the total number of events. The number of different events names equals the
- * number of inserts and the number of events equals the number
- * of lookups
- */
 __always_inline event_t StringTree::searchAllocString(const TString *str,
 						      uint32_t hval,
 						      event_t newval)
 {
-	TString *newstr;
-	StringTreeEntry **aentry;
-	StringTreeEntry **rootptr;
 	StringTreeEntry *entry;
-	StringTreeEntry *parent = nullptr;
-	StringTreeEntry *sibling;
-	StringTreeEntry *grandParent;
-	StringTreeEntry *smallChild;
-	StringTreeEntry *largeChild;
-	int cmp;
-	int diff;
-	int smallH;
-	int largeH;
+	bool isNew;
 
 	hval = hval % hSize;
-	aentry = hashTable + hval;
-	rootptr = aentry;
-	entry = *aentry;
 
-	if (newval >= tableSize)
-		return EVENT_ERROR;
-
-	while (likely(entry != nullptr)) {
-		/*
-		 * Using strncmp here would lose performance and we know that
-		 * the strings are null terminated
-		 */
-		cmp = strcmp(str->ptr, entry->str->ptr);
-		if (cmp == 0)
-			return entry->eventType;
-		parent = entry;
-		if (cmp < 0)
-			aentry = &entry->small;
-		else
-			aentry = &entry->large;
-		entry = *aentry;
-	}
-
-	newstr = (TString*) strPool->allocObj();
-	if (newstr == nullptr)
-		return EVENT_ERROR;
-	newstr->len = str->len;
-	newstr->ptr = (char*) charPool->allocChars(str->len + 1);
-	if (newstr->ptr == nullptr)
-		return EVENT_ERROR;
-	strncpy(newstr->ptr, str->ptr, str->len + 1);
-	entry = (StringTreeEntry*) entryPool->allocObj();
-	if (entry == nullptr)
-		return EVENT_ERROR;
-	if (newval > maxEvent)
+	if (hashTable[hval] != nullptr) {
+		entry = hashTable[hval];
+		__STRINGTREE_ITERATOR(iter) iter =
+			entry->avlTree.findInsert(*str, isNew);
+		if (isNew) {
+			event_t &e = iter.value();
+			e = newval;
+			stringTable[newval] = &iter.key();
+			maxEvent = newval;
+			return newval;
+		} else {
+			return iter.value();
+		}
+	} else {
+		entry = new StringTreeEntry(&avlPools);
+		hashTable[hval] = entry;
+		deleteList.append(entry);
+		__STRINGTREE_ITERATOR(iter) iter =
+			entry->avlTree.findInsert(*str, isNew);
+		event_t &e = iter.value();
+		e = newval;
+		stringTable[newval] = &iter.key();
 		maxEvent = newval;
-	bzero(entry, sizeof(StringTreeEntry));
-	entry->str = newstr;
-	entry->eventType = newval;
-	/* aentry is equal to &parent->[large|small] */
-	*aentry = entry;
-
-	entry->parent = parent;
-	entry->height = 0;
-	if (parent == nullptr || parent->height > 0) {
-		/* This is the root node or parent already has another node */
-		stringTable[newval] = newstr;
 		return newval;
 	}
-	parent->height = 1;
-	grandParent = parent->parent;
-	/* update heights and find offending node */
-	while(grandParent != nullptr) {
-		smallH = grandParent->small == nullptr ?
-			-1 : grandParent->small->height;
-		largeH = grandParent->large == nullptr ?
-			-1 : grandParent->large->height;
-		diff = smallH - largeH;
-		if (diff == 0)
-			break;
-		if (diff > 1)
-			goto rebalanceSmall;
-		if (diff < -1)
-			goto rebalanceLarge;
-		grandParent->height = parent->height + 1;
-		entry = parent;
-		parent = grandParent;
-		grandParent = grandParent->parent;
-	}
-	stringTable[newval] = newstr;
-	return newval;
-rebalanceSmall:
-	/* Do small rebalance here (case 1 and case 2) */
-	if (entry == parent->small) {
-		/* Case 1 */
-		sibling = parent->large;
-
-		grandParent->stealParent(parent, rootptr);
-		parent->large = grandParent;
-		grandParent->parent = parent;
-		grandParent->small = sibling;
-		grandParent->height--;
-		if (sibling != nullptr)
-			sibling->parent = grandParent;
-	} else {
-		/* Case 2 */
-		smallChild = entry->small;
-		largeChild = entry->large;
-
-		grandParent->stealParent(entry, rootptr);
-		entry->small = parent;
-		entry->large = grandParent;
-		entry->height = grandParent->height;
-
-		grandParent->parent = entry;
-		grandParent->small = largeChild;
-		grandParent->setHeightFromChildren(); // Fixme: faster
-
-		parent->parent = entry;
-		parent->large = smallChild;
-		parent->setHeightFromChildren();
-
-		if (largeChild != nullptr)
-			largeChild->parent = grandParent;
-		if (smallChild != nullptr)
-			smallChild->parent = parent;
-	}
-	stringTable[newval] = newstr;
-	return newval;
-rebalanceLarge:
-	/* Do large rebalance here */
-	if (entry == parent->small) {
-		/* Case 3 */
-		smallChild = entry->small;
-		largeChild = entry->large;
-
-		grandParent->stealParent(entry, rootptr);
-		entry->small = grandParent;
-		entry->large = parent;
-		entry->height = grandParent->height;
-
-		grandParent->parent = entry;
-		grandParent->large = smallChild;
-		grandParent->setHeightFromChildren(); // Fixme: faster
-
-		parent->parent = entry;
-		parent->small = largeChild;
-		parent->setHeightFromChildren();
-
-		if (largeChild != nullptr)
-			largeChild->parent = parent;
-		if (smallChild != nullptr)
-			smallChild->parent = grandParent;
-	} else {
-		/* Case 4 */
-		sibling = parent->small;
-
-		grandParent->stealParent(parent, rootptr);
-		parent->small = grandParent;
-		grandParent->parent = parent;
-		grandParent->large = sibling;
-		grandParent->height--;
-		if (sibling != nullptr)
-			sibling->parent = grandParent;
-	}
-	stringTable[newval] = newstr;
-	return newval;
 }
 
-__always_inline void StringTree::SwapEntries(StringTreeEntry *a,
-					     StringTreeEntry *b)
+__always_inline event_t StringTree::getMaxEvent() const
 {
-	TString *tmp;
-	event_t et;
-	int height;
-	tmp = a->str;
-	et = a->eventType;
-	height = a->height;
-	a->str = b->str;
-	a->eventType = b->eventType;
-	a->height = b->height;
-	b->str = tmp;
-	b->eventType = et;
-	b->height = height;
-}
-
-__always_inline void StringTreeEntry::stealParent(StringTreeEntry *newChild,
-						  StringTreeEntry **rootptr)
-{
-	newChild->parent = parent;
-	if (parent == nullptr) {
-		/* Oops this is a root node */
-		*rootptr = newChild;
-		return;
-	}
-	if (parent->small == this)
-		parent->small = newChild;
-	else
-		parent->large = newChild;
-}
-
-__always_inline void StringTreeEntry::setHeightFromChildren()
-{
-	int lh;
-	int rh;
-
-	lh = (small != nullptr) ? (small->height) : -1;
-	rh = (large != nullptr) ? (large->height) : -1;
-	height = TSMAX(lh, rh) + 1;
+	return maxEvent;
 }
 
 #endif /* STRINGTREE_H */

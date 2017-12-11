@@ -91,7 +91,7 @@ const StringTree *TraceEvent::getStringTree()
 	return stringTree;
 }
 
-TString *TraceEvent::getEventName() const
+const TString *TraceEvent::getEventName() const
 {
 	return stringTree->stringLookup(TraceEvent::type);
 }

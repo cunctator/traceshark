@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -51,13 +51,13 @@
 
 #include <cstring>
 #include "mm/stringtree.h"
-#include "parser/traceevent.h"
 
 #define MAX(A, B) ((A) >= (B) ? A:B)
 #define MIN(A, B) ((A) < (B) ? A:B)
 
+
 StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP,
-		       unsigned int table_size) :
+		       unsigned int table_size):
 	maxEvent((event_t)-1)
 {
 	unsigned int entryPages, strPages;
@@ -67,53 +67,55 @@ StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP,
 	else
 		hSize = hSizeP;
 
-	entryPages = 2 * hSize * sizeof(StringTreeEntry) / 4096;
+	entryPages = 2 * hSize *
+		sizeof(vtl::AVLNode<TString, event_t>) / 4096;
 	entryPages = MAX(1, entryPages);
-	strPages = 2* hSize * sizeof(TString) / 4096;
-	strPages = MAX(16, strPages);
 
-	strPool = new MemPool(strPages, sizeof(TString));
-	charPool = new MemPool(nr_pages, 1);
-	entryPool = new MemPool(entryPages, sizeof(StringTreeEntry));
-
+	avlPools.charPool = new MemPool(nr_pages, sizeof(char));
+	avlPools.nodePool = new MemPool(entryPages, sizeof(vtl::AVLNode<TString,
+							   event_t>));
 	hashTable = new StringTreeEntry*[hSize];
 
 	stringTable = new TString*[table_size];
 	tableSize = table_size;
 
-	clearTables();
+	clearTable();
 }
 
 StringTree::~StringTree()
 {
-	delete charPool;
-	delete strPool;
-	delete entryPool;
+	unsigned int i, s;
+	delete avlPools.charPool;
+	delete avlPools.nodePool;
 	delete[] hashTable;
 	delete[] stringTable;
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
 }
 
-void StringTree::clearTables()
+void StringTree::clearTable()
 {
 	bzero(hashTable, hSize * sizeof(StringTreeEntry*));
 	bzero(stringTable, tableSize * sizeof(TString*));
+	maxEvent = (event_t) -1;
 }
 
 void StringTree::clear()
 {
-	clearTables();
-	strPool->reset();
-	entryPool->reset();
-	charPool->reset();
-	maxEvent = (event_t)-1;
+	unsigned int s, i;
+	clearTable();
+	avlPools.nodePool->reset();
+	avlPools.charPool->reset();
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
+	deleteList.clear();
 }
 
 void StringTree::reset()
 {
 	clear();
-}
-
-event_t StringTree::getMaxEvent() const
-{
-	return maxEvent;
 }
