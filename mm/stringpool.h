@@ -69,8 +69,8 @@ public:
 };
 
 #define __STRINGPOOL_ITERATOR(name) \
-vtl::AVLTree<TString, __DummySP, false, AVLAllocatorSP<TString, __DummySP>, \
-AVLCompareSP<TString>>::iterator
+vtl::AVLTree<TString, __DummySP, vtl::AVLBALANCE_USEPOINTERS, \
+AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>::iterator
 
 template <class T>
 class AVLCompareSP {
@@ -107,7 +107,7 @@ private:
 	PoolBundleSP pools;
 };
 
-#define AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, __DummySP, false, \
+#define AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, __DummySP, vtl::AVLBALANCE_USEPOINTERS, \
 AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>))
 #define TSTRING_PTR_SIZE (sizeof(TString*))
 #define TYPICAL_CACHE_LINE_SIZE (64)
@@ -124,8 +124,9 @@ StringPoolEntry(void *data): cachePtr(nullptr), avlTree(data) {
 protected:
 	char cache[SP_CACHE_SIZE];
 	TString *cachePtr;
-	vtl::AVLTree<TString, __DummySP, false, AVLAllocatorSP<TString,
-		__DummySP>, AVLCompareSP<TString>> avlTree;
+	vtl::AVLTree<TString, __DummySP, vtl::AVLBALANCE_USEPOINTERS,
+		AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>
+		avlTree;
 };
 
 class StringPool

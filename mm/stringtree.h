@@ -68,8 +68,8 @@ public:
 };
 
 #define __STRINGTREE_ITERATOR(name) \
-vtl::AVLTree<TString, event_t, false, AVLAllocatorST<TString, event_t>, \
-AVLCompareST<TString>>::iterator
+	vtl::AVLTree<TString, event_t, vtl::AVLBALANCE_USEPOINTERS, \
+AVLAllocatorST<TString, event_t>, AVLCompareST<TString>>::iterator
 
 template <class T>
 class AVLCompareST {
@@ -106,8 +106,9 @@ private:
 	PoolBundleST pools;
 };
 
-#define ST_AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, event_t, false, \
-AVLAllocatorST<TString, event_t>, AVLCompareST<TString>>))
+#define ST_AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, event_t, \
+vtl::AVLBALANCE_USEPOINTERS, AVLAllocatorST<TString, event_t>, \
+				AVLCompareST<TString>>))
 #define ST_TSTRING_PTR_SIZE (sizeof(TString*))
 #define ST_TYPICAL_CACHE_LINE_SIZE (32)
 
@@ -119,8 +120,9 @@ class StringTreeEntry {
 public:
 StringTreeEntry(void *data): avlTree(data) { }
 protected:
-	vtl::AVLTree<TString, event_t, false, AVLAllocatorST<TString,
-		event_t>, AVLCompareST<TString>> avlTree;
+	vtl::AVLTree<TString, event_t, vtl::AVLBALANCE_USEPOINTERS,
+		AVLAllocatorST<TString, event_t>, AVLCompareST<TString>>
+		avlTree;
 };
 
 class StringTree
