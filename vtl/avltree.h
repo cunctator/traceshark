@@ -657,6 +657,8 @@ __always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
 
 	entry->parent = parent;
 	entry->height = 0;
+	entry->small = nullptr;
+	entry->large = nullptr;
 	if (parent == nullptr)
 		return newentry;
 
@@ -782,6 +784,8 @@ __always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
 
 	entry->parent = parent;
 	entry->height = 0;
+	entry->small = nullptr;
+	entry->large = nullptr;
 	if (parent == nullptr)
 		return newentry;
 
