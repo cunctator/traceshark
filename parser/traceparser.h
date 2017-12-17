@@ -159,7 +159,8 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 		TraceLine &line = tbuf->list[i];
 		TraceEvent &event = events->preAlloc();
 		event.argc = 0;
-		event.argv = (const TString**) ptrPool->preallocN(256);
+		event.argv = (const TString**)
+			ptrPool->preallocN(EVENT_MAX_NR_ARGS);
 		if (ttype == TRACE_TYPE_FTRACE)
 			parseLineFtrace(line, event);
 		else if (ttype == TRACE_TYPE_PERF)

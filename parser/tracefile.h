@@ -90,7 +90,6 @@ private:
 	unsigned lastBuf;
 	unsigned lastPos;
 	bool endOfLine;
-	static const unsigned int MAX_NR_STRINGS = 128;
 	static const unsigned int NR_BUFFERS = 4;
 	LoadBuffer *loadBuffers[NR_BUFFERS];
 	LoadThread *loadThread;
@@ -169,10 +168,11 @@ TraceFile::ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer)
 	/* This is a setup needed by ReadNextWord() */
 	endOfLine = false;
 
-	line->strings = (TString*) tbuffer->strPool->preallocN(MAX_NR_STRINGS);
+	line->strings = (TString*)
+		tbuffer->strPool->preallocN(EVENT_MAX_NR_ARGS);
 	line->begin = tbuffer->loadBuffer->filePos + lastPos;
 
-	for(col = 0; col < MAX_NR_STRINGS; col++) {
+	for(col = 0; col < EVENT_MAX_NR_ARGS; col++) {
 		n = ReadNextWord(&line->strings[col].ptr, tbuffer);
 		if (n == 0)
 			break;

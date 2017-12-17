@@ -93,7 +93,7 @@ private:
 		STATE_ARG
 	} grammarstate_t;
 	unsigned int tmp_argc;
-	TString *tmp_argv[256];
+	TString *tmp_argv[EVENT_MAX_NR_ARGS];
 };
 
 __always_inline bool FtraceGrammar::NamePidMatch(TString *str,
@@ -107,7 +107,7 @@ __always_inline bool FtraceGrammar::NamePidMatch(TString *str,
 	 * spaces. We will then consume this stored information in the
 	 * TimeMatch function.
 	 */
-	if (tmp_argc >= 255)
+	if (tmp_argc >= EVENT_MAX_NR_ARGS)
 		return false;
 	tmp_argv[tmp_argc] = str;
 	tmp_argc++;
@@ -281,7 +281,7 @@ __always_inline bool FtraceGrammar::ArgMatch(TString *str,
 					     TraceEvent &event)
 {
 	const TString *newstr;
-	if (event.argc < 255) {
+	if (event.argc < EVENT_MAX_NR_ARGS) {
 		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
 		if (newstr == nullptr)
 			return false;

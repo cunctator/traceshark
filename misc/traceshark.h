@@ -60,6 +60,8 @@
 #include <cstdio>
 #include "misc/tstring.h"
 
+#define EVENT_MAX_NR_ARGS (128)
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include <QtGui>
 #else

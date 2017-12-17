@@ -116,7 +116,7 @@ __always_inline bool PerfGrammar::StoreMatch(TString *str,
 	 * spaces. We will then consume this stored information in the
 	 * TimeNode class.
 	 */
-	if (event.argc >= 256)
+	if (event.argc >= EVENT_MAX_NR_ARGS)
 		return false;
 	event.argv[event.argc] = str;
 	event.argc++;
@@ -318,7 +318,7 @@ __always_inline bool PerfGrammar::ArgMatch(TString *str,
 					   TraceEvent &event)
 {
 	const TString *newstr;
-	if (event.argc < 255) {
+	if (event.argc < EVENT_MAX_NR_ARGS) {
 		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
 		if (newstr == nullptr)
 			return false;
