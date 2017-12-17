@@ -60,7 +60,7 @@ StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP,
 		       unsigned int table_size):
 	maxEvent((event_t)-1)
 {
-	unsigned int entryPages, strPages;
+	unsigned int entryPages;
 
 	if (hSizeP == 0)
 		hSize = 1;
