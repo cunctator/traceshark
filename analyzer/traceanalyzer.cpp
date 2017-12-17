@@ -52,6 +52,12 @@
 #include <climits>
 #include <cstdlib>
 
+extern "C" {
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+}
+
 #include <QtGlobal>
 #include <QList>
 #include <QString>
@@ -68,6 +74,17 @@
 #include "threads/workthread.h"
 #include "threads/workitem.h"
 #include "threads/workqueue.h"
+
+__always_inline static int clib_open(const char *pathname, int flags,
+				     mode_t mode)
+{
+	return open(pathname, flags, mode);
+}
+
+__always_inline static int clib_close(int fd)
+{
+	return close(fd);
+}
 
 TraceAnalyzer::TraceAnalyzer()
 	: cpuTaskMaps(nullptr), cpuFreq(nullptr), cpuIdle(nullptr),
@@ -935,5 +952,162 @@ double TraceAnalyzer::getEndTime()
 
 	if (s > 0)
 		rval = events[s - 1].time;
+	return rval;
+}
+
+#define WRITE_BUFFER_SIZE (256 * sysconf(_SC_PAGESIZE))
+#define WRITE_BUFFER_LIMIT ((size_t)(WRITE_BUFFER_SIZE - 64 * 1024))
+
+const char TraceAnalyzer::spaceStr[] = \
+	"                                     ";
+const int TraceAnalyzer::spaceStrLen = sizeof(spaceStr) / sizeof(char);
+
+bool TraceAnalyzer::exportTraceFile(const char *fileName)
+{
+	bool isFtrace = false, isPerf = false;
+	char *wbuf, *wb;
+	int fd, w;
+	size_t written, written_io, space, nrspaces;
+	ssize_t write_rval;
+	unsigned int nr_elements = filteredEvents.size();
+	unsigned int idx;
+	unsigned int i;
+	const TraceEvent *eptr;
+	bool rval = true;
+	const char *ename;
+
+	if (!isOpen())
+		return false;
+
+	switch (getTraceType()) {
+	case TRACE_TYPE_FTRACE:
+		isFtrace = true;
+		break;
+	case TRACE_TYPE_PERF:
+		isPerf = true;
+		break;
+	default:
+		return false;
+	}
+
+	wbuf = (char*) mmap(nullptr, (size_t) WRITE_BUFFER_SIZE,
+			    PROT_READ|PROT_WRITE,
+			    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+	if (wbuf == MAP_FAILED)
+		return false;
+
+	fd =  clib_open(fileName, O_WRONLY | O_CREAT | O_DIRECT,
+			(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
+
+	if (fd < 0)
+		goto error_munmap;
+
+	idx = 0;
+
+	if (!isPerf)
+		goto skip_perf;
+
+	do {
+		written = 0;
+		space = WRITE_BUFFER_SIZE;
+		wb = wbuf;
+
+		while (idx < nr_elements && written < WRITE_BUFFER_LIMIT) {
+			eptr = filteredEvents[idx];
+			idx++;
+			w = snprintf(wb, space,
+				     "%s %5u [%03u] %lf: ",
+				     eptr->taskName->ptr, eptr->pid,
+				     eptr->cpu, eptr->time);
+			if (w > 0) {
+				written += w;
+				space   -= w;
+				wb      += w;
+			}
+			if (eptr->intArg != 0) {
+				w = snprintf(wb, space, "%10u ",
+					     eptr->intArg);
+				if (w > 0) {
+					written += w;
+					space   -= w;
+					wb      += w;
+				}
+			}
+
+			ename = eptr->getEventName()->ptr;
+			nrspaces = TSMAX(1, spaceStrLen - strlen(ename));
+			nrspaces = TSMIN(nrspaces, space);
+			strncpy(wb, spaceStr, nrspaces);
+			if (nrspaces > 0) {
+				written += nrspaces;
+				space   -= nrspaces;
+				wb      += nrspaces;
+			}
+
+			w = snprintf(wb, space, "%s:", ename);
+			if (w > 0) {
+				written += w;
+				space   -= w;
+				wb      += w;
+			}
+
+			for (i = 0; i < eptr->argc; i++) {
+				w = snprintf(wb, space, " %s",
+					     eptr->argv[i]->ptr);
+				if (w > 0) {
+					written += w;
+					space   -= w;
+					wb      += w;
+				}
+			}
+			w = snprintf(wb, space, "\n");
+			if (w > 0) {
+				written += w;
+				space   -= w;
+				wb      += w;
+			}
+			if (eptr->postEventInfo != nullptr &&
+			    eptr->postEventInfo->len > 0) {
+				size_t cs = TSMIN(space,
+						  eptr->postEventInfo->len);
+				strncpy(wb, eptr->postEventInfo->ptr, cs);
+				if (cs > 0) {
+					written += cs;
+					space   -= cs;
+					wb      += cs;
+				}
+			}
+		}
+
+		if (written > 0) {
+			written_io = 0;
+			do {
+				write_rval = write(fd, wbuf, written);
+				if (write_rval > 0) {
+					written_io += write_rval;
+				}
+				if (write_rval < 0 && errno != EINTR) {
+					rval = false;
+					goto skip_ftrace;
+				}
+			} while(written_io < written);
+		}
+		if (idx >= nr_elements)
+			break;
+	} while(true);
+
+skip_perf:
+	if (!isFtrace)
+		goto skip_ftrace;
+
+/* Insert ftrace code here */
+
+skip_ftrace:
+	clib_close(fd);
+
+error_munmap:
+	munmap(wbuf, WRITE_BUFFER_SIZE);
+
 	return rval;
 }

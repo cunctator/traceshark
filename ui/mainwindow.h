@@ -133,6 +133,7 @@ private slots:
 	void resetEventFilter();
 	void resetFilters();
 	void timeFilter();
+	void exportEvents();
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
@@ -197,6 +198,7 @@ private:
 	QAction *showEventsAction;
 	QAction *timeFilterAction;
 	QAction *resetFiltersAction;
+	QAction *exportEventsAction;
 	QAction *aboutAction;
 	QAction *licenseAction;
 	QAction *aboutQtAction;

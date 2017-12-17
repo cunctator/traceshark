@@ -155,6 +155,7 @@ public:
 	bool filterActive(FilterState::filter_t filter);
 	double getStartTime();
 	double getEndTime();
+	bool exportTraceFile(const char *fileName);
 private:
 	TraceParser *parser;
 	void prepareDataStructures();
@@ -251,6 +252,8 @@ private:
 	double filterTimeHigh;
 	double OR_filterTimeLow;
 	double OR_filterTimeHigh;
+	static const char spaceStr[];
+	static const int spaceStrLen;
 };
 
 __always_inline double TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,

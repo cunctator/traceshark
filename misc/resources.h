@@ -58,6 +58,7 @@
 #define RESSRC_PNG_CLEAR_LEGEND  ":/traceshark/images/clearlegend30x30.png"
 #define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
 #define RESSRC_PNG_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
+#define RESSRC_PNG_EXPORTEVENTS  ":/traceshark/images/exportevents30x30.png"
 #define RESSRC_PNG_MOVE_BLUE     ":/traceshark/images/moveblue30x30.png"
 #define RESSRC_PNG_MOVE_RED      ":/traceshark/images/movered30x30.png"
 #define RESSRC_PNG_OPEN          ":/traceshark/images/open30x30.png"

@@ -91,6 +91,8 @@
 
 #define TOOLTIP_RESETFILTERS \
 	"Reset all filters"
+#define TOOLTIP_EXPORTEVENTS \
+	"Export the filtered events"
 
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
@@ -979,6 +981,12 @@ void MainWindow::createActions()
 	resetFiltersAction->setEnabled(false);
 	tsconnect(resetFiltersAction, triggered(), this, resetFilters());
 
+	exportEventsAction = new QAction(tr("Export events to a file"), this);
+	exportEventsAction->setIcon(QIcon(RESSRC_PNG_EXPORTEVENTS));
+	exportEventsAction->setToolTip(tr(TOOLTIP_EXPORTEVENTS));
+	exportEventsAction->setEnabled(false);
+	tsconnect(exportEventsAction, triggered(), this, exportEvents());
+
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
 	exitAction->setStatusTip(tr("Exit traceshark"));
@@ -1018,6 +1026,7 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(showEventsAction);
 	viewToolBar->addAction(timeFilterAction);
 	viewToolBar->addAction(resetFiltersAction);
+	viewToolBar->addAction(exportEventsAction);
 }
 
 void MainWindow::createMenus()
@@ -1034,6 +1043,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(showEventsAction);
 	viewMenu->addAction(timeFilterAction);
 	viewMenu->addAction(resetFiltersAction);
+	viewMenu->addAction(exportEventsAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
@@ -1204,10 +1214,13 @@ void MainWindow::scrollTo(double time)
 
 void MainWindow::updateResetFiltersEnabled(void)
 {
-	if (analyzer->isFiltered())
+	if (analyzer->isFiltered()) {
 		resetFiltersAction->setEnabled(true);
-	else
+		exportEventsAction->setEnabled(true);
+	} else {
 		resetFiltersAction->setEnabled(false);
+		exportEventsAction->setEnabled(false);
+	}
 }
 
 void MainWindow::timeFilter(void)
@@ -1300,6 +1313,29 @@ void MainWindow::resetFilters()
 	eventsWidget->endResetModel();
 	scrollTo(saved);
 	updateResetFiltersEnabled();
+}
+
+void MainWindow::exportEvents()
+{
+	QFileDialog dialog(this);
+	QStringList fileNameList;
+	QString fileName;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+	dialog.setNameFilter(tr("ASCII Text (*.asc *.txt)"));
+	dialog.setViewMode(QFileDialog::Detail);
+	dialog.setAcceptMode(QFileDialog::AcceptSave);
+	dialog.setDefaultSuffix(QString("asc"));
+
+	if (dialog.exec())
+		fileNameList = dialog.selectedFiles();
+
+	if (fileNameList.size() != 1)
+		return;
+
+	fileName = fileNameList.at(0);
+
+	(void) analyzer->exportTraceFile(fileName.toLocal8Bit().data());
 }
 
 void MainWindow::addTaskGraph(unsigned int pid)
