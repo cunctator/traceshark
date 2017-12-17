@@ -14,17 +14,15 @@ sched_wakeup_new
 Over time, I hope to add more events.
 
 The program can be built by doing something like this, assuming that you have
-Qt4 development packages installed:
+Qt5 development packages installed:
 
-qmake-qt4
+qmake-qt5 (or just qmake)
 
 make -j5
 
-Please note that the software will compile for Qt 5 but that it has not been as
-tested with Qt 5. Previously scrolling and zooming when built for Qt 5 were
-very bad, although it now appears that the latest QCustomPlot improvements have
-fixed that.  For that reason you might still want to build with Qt 4, unless
-you feel adventurous or just happen to prefer Qt 5.
+Please note that the software will compile for Qt 4 but that it has not been as
+tested with Qt 4. For that reason you might want to build with Qt 5, unless
+you happen to prefer Qt 4.
 
 You can get an Ftrace trace to view by doing the following:
 

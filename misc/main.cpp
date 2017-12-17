@@ -56,12 +56,12 @@
 #include "ui/mainwindow.h"
 #include "ui/tracesharkstyle.h"
 
-#define QT5_WARNING \
+#define QT4_WARNING \
 "WARNING!!! WARNING!!! WARNING!!!\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
 "\n" \
-"You are using a Qt version that is >= 5.0.0. This may go well but is\n"  \
-"not recommended unless you want to help testing it for Qt 5.\n" \
+"You are using a Qt version that is < 5.0.0. This may go well but is\n"  \
+"not recommended unless you have a preference for Qt 4.\n" \
 "\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
 "WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!"
@@ -105,8 +105,7 @@ int main(int argc, char* argv[])
 /* Set graphicssystem to opengl if we have old enough Qt */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 	QApplication::setGraphicsSystem("opengl");
-#else
-#pragma message(QT5_WARNING)
+#pragma message(QT4_WARNING)
 #endif
 
 	app.setStyle(new TraceSharkStyle);
