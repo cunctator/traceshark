@@ -87,8 +87,8 @@ public:
 	__always_inline void setHeightFromChildren();
 	class AVLNode<T, U> *small;
 	class AVLNode<T, U> *large;
-	class AVLNode<T, U> *parent;
 	int height;
+	class AVLNode<T, U> *parent;
 	T key;
 	U value;
 };
@@ -655,10 +655,10 @@ __always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
 	entry = newentry;
 	*aentry = entry;
 
-	entry->parent = parent;
-	entry->height = 0;
 	entry->small = nullptr;
 	entry->large = nullptr;
+	entry->height = 0;
+	entry->parent = parent;
 	if (parent == nullptr)
 		return newentry;
 
@@ -782,10 +782,10 @@ __always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
 	entry = newentry;
 	*aentry = entry;
 
-	entry->parent = parent;
-	entry->height = 0;
 	entry->small = nullptr;
 	entry->large = nullptr;
+	entry->height = 0;
+	entry->parent = parent;
 	if (parent == nullptr)
 		return newentry;
 
