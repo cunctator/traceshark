@@ -52,7 +52,7 @@
 #ifndef TRACESHARK_H
 #define TRACESHARK_H
 
-#define TRACESHARK_VERSION_STRING "0.3.0-alpha"
+#define TRACESHARK_VERSION_STRING "0.3.1-alpha"
 #define QCUSTOMPLOT_VERSION_STRING "2.0.0"
 
 #include <QtCore>
