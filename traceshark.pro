@@ -59,6 +59,7 @@ HEADERS       = qcustomplot/qcustomplot.h
 
 HEADERS      +=  ui/cursor.h
 HEADERS      +=  ui/cursorinfo.h
+HEADERS      +=  ui/errordialog.h
 HEADERS      +=  ui/eventinfodialog.h
 HEADERS      +=  ui/eventselectdialog.h
 HEADERS      +=  ui/eventselectmodel.h
@@ -136,6 +137,7 @@ SOURCES       = qcustomplot/qcustomplot.cpp
 
 SOURCES      +=  ui/cursor.cpp
 SOURCES      +=  ui/cursorinfo.cpp
+SOURCES      +=  ui/errordialog.cpp
 SOURCES      +=  ui/eventinfodialog.cpp
 SOURCES      +=  ui/eventselectdialog.cpp
 SOURCES      +=  ui/eventselectmodel.cpp
