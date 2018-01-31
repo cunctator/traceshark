@@ -120,6 +120,7 @@ HEADERS      +=  mm/mempool.h
 HEADERS      +=  mm/stringpool.h
 HEADERS      +=  mm/stringtree.h
 
+HEADERS      +=  misc/errors.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
 HEADERS      +=  misc/traceshark.h
@@ -190,6 +191,7 @@ SOURCES      +=  mm/mempool.cpp
 SOURCES      +=  mm/stringpool.cpp
 SOURCES      +=  mm/stringtree.cpp
 
+SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
 
 ###############################################################################

@@ -57,6 +57,7 @@
 #include "ui/eventinfodialog.h"
 #include "ui/eventswidget.h"
 #include "analyzer/traceanalyzer.h"
+#include "ui/errordialog.h"
 #include "ui/infowidget.h"
 #include "ui/legendgraph.h"
 #include "ui/licensedialog.h"
@@ -69,6 +70,7 @@
 #include "parser/traceevent.h"
 #include "ui/traceplot.h"
 #include "ui/yaxisticker.h"
+#include "misc/errors.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "threads/workqueue.h"
@@ -135,6 +137,7 @@ MainWindow::MainWindow():
 	cursors[TShark::RED_CURSOR] = nullptr;
 	cursors[TShark::BLUE_CURSOR] = nullptr;
 
+	errorDialog = new ErrorDialog();
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
 	taskSelectDialog = new TaskSelectDialog();
@@ -1320,6 +1323,7 @@ void MainWindow::exportEvents()
 	QFileDialog dialog(this);
 	QStringList fileNameList;
 	QString fileName;
+	int ts_errno;
 
 	dialog.setFileMode(QFileDialog::AnyFile);
 	dialog.setNameFilter(tr("ASCII Text (*.asc *.txt)"));
@@ -1335,7 +1339,17 @@ void MainWindow::exportEvents()
 
 	fileName = fileNameList.at(0);
 
-	(void) analyzer->exportTraceFile(fileName.toLocal8Bit().data());
+	if (!analyzer->exportTraceFile(fileName.toLocal8Bit().data(),
+				       &ts_errno)) {
+		if (ts_errno > 0) {
+			errorDialog->setErrno(ts_errno);
+			errorDialog->show();
+		} else if (ts_errno < 0) {
+			QString errString(ts_strerror(-ts_errno));
+			errorDialog->setText(errString);
+			errorDialog->show();
+		}
+	}
 }
 
 void MainWindow::addTaskGraph(unsigned int pid)

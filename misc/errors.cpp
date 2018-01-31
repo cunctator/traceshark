@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,82 +49,20 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "misc/resources.h"
-#include "misc/traceshark.h"
-#include "ui/errordialog.h"
+#include "misc/errors.h"
 
-#include <QFile>
-#include <QString>
-#include <QTextStream>
-#include <QTextEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+/* Do not change the order of these without updating the enum in
+ * errors.h */
 
-extern "C" {
-#include <string.h>
-}
+static const char noerror[] = "No error has occurred.";
+static const char interne[] = "A serious internal error has occurred.";
 
-ErrorDialog::ErrorDialog(QWidget *parent)
-	:QDialog(parent, Qt::WindowCloseButtonHint)
+static const char *errorstrings[TS_NR_ERRORS] = {
+	noerror,
+	interne
+};
+
+const char *ts_strerror(int ts_errno)
 {
-	textEdit = new QTextEdit();
-	textEdit->setAcceptRichText(false);
-	textEdit->setReadOnly(true);
-	textEdit->setLineWrapMode(QTextEdit::NoWrap);
-
-	QVBoxLayout *vlayout = new QVBoxLayout;
-	setLayout(vlayout);
-	vlayout->addWidget(textEdit);
-
-	QHBoxLayout *hlayout = new QHBoxLayout;
-	vlayout->addLayout(hlayout);
-	hlayout->addStretch();
-
-	QPushButton *button = new QPushButton(tr("OK"));
-	hlayout->addWidget(button);
-
-	hlayout->addStretch();
-	setModal(true);
-	updateSize();
-
-	hide();
-	tsconnect(button, clicked(), this, hide());
-}
-
-void ErrorDialog::setText(const QString &text)
-{
-	textEdit->setPlainText(text);
-	updateSize();
-}
-
-void ErrorDialog::setErrno(int d_errno)
-{
-	QString text(strerror(d_errno));
-	textEdit->setPlainText(text);
-	updateSize();
-}
-
-void ErrorDialog::updateSize()
-{
-	QTextStream qout(stdout);
-	QSize screenSize;
-	int wscreen;
-	int hscreen;
-	int width = 640;
-	int height = 350;
-
-	screenSize = QApplication::desktop()->availableGeometry(QCursor::pos())
-		.size();
-
-	wscreen = screenSize.width();
-	hscreen = screenSize.height();
-
-	width = TSMIN(width, wscreen);
-	height = TSMIN(height, hscreen);
-
-	setGeometry(wscreen / 2 - width / 2, hscreen / 2 - height / 2,
-		    width, height);
-	setFixedWidth(width);
-	setFixedHeight(height);
+	return errorstrings[ts_errno];
 }

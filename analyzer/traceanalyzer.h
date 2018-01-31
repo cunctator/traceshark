@@ -155,7 +155,7 @@ public:
 	bool filterActive(FilterState::filter_t filter);
 	double getStartTime();
 	double getEndTime();
-	bool exportTraceFile(const char *fileName);
+	bool exportTraceFile(const char *fileName, int *ts_errno);
 private:
 	TraceParser *parser;
 	void prepareDataStructures();

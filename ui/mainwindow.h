@@ -76,6 +76,7 @@ class EventsWidget;
 class InfoWidget;
 class Cursor;
 class CPUTask;
+class ErrorDialog;
 class LicenseDialog;
 class EventInfoDialog;
 class QCPAbstractPlottable;
@@ -206,6 +207,7 @@ private:
 
 	TraceAnalyzer *analyzer;
 
+	ErrorDialog *errorDialog;
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;
 	TaskSelectDialog *taskSelectDialog;

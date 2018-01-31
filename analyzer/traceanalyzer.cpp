@@ -58,6 +58,8 @@ extern "C" {
 #include <fcntl.h>
 }
 
+#include <cerrno>
+
 #include <QtGlobal>
 #include <QList>
 #include <QString>
@@ -70,6 +72,7 @@ extern "C" {
 #include "parser/genericparams.h"
 #include "analyzer/traceanalyzer.h"
 #include "parser/traceparser.h"
+#include "misc/errors.h"
 #include "misc/traceshark.h"
 #include "threads/workthread.h"
 #include "threads/workitem.h"
@@ -962,7 +965,7 @@ const char TraceAnalyzer::spaceStr[] = \
 	"                                     ";
 const int TraceAnalyzer::spaceStrLen = sizeof(spaceStr) / sizeof(char);
 
-bool TraceAnalyzer::exportTraceFile(const char *fileName)
+bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 {
 	bool isFtrace = false, isPerf = false;
 	char *wbuf, *wb;
@@ -976,8 +979,12 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName)
 	bool rval = true;
 	const char *ename;
 
-	if (!isOpen())
+	*ts_errno = 0;
+
+	if (!isOpen()) {
+		*ts_errno = - TS_ERROR_INTERNAL;
 		return false;
+	}
 
 	switch (getTraceType()) {
 	case TRACE_TYPE_FTRACE:
@@ -987,6 +994,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName)
 		isPerf = true;
 		break;
 	default:
+		*ts_errno = - TS_ERROR_INTERNAL;
 		return false;
 	}
 
@@ -994,14 +1002,19 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName)
 			    PROT_READ|PROT_WRITE,
 			    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-	if (wbuf == MAP_FAILED)
+	if (wbuf == MAP_FAILED) {
+		*ts_errno = errno;
 		return false;
+	}
 
 	fd =  clib_open(fileName, O_WRONLY | O_CREAT | O_DIRECT,
 			(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
 
-	if (fd < 0)
+	if (fd < 0) {
+		rval = false;
+		*ts_errno = errno;
 		goto error_munmap;
+	}
 
 	idx = 0;
 
@@ -1089,6 +1102,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName)
 				}
 				if (write_rval < 0 && errno != EINTR) {
 					rval = false;
+					*ts_errno = errno;
 					goto skip_ftrace;
 				}
 			} while(written_io < written);
@@ -1104,10 +1118,18 @@ skip_perf:
 /* Insert ftrace code here */
 
 skip_ftrace:
-	clib_close(fd);
+	if (clib_close(fd)) {
+		if (errno != EINTR) {
+			rval = false;
+			*ts_errno = errno;
+		}
+	}
 
 error_munmap:
-	munmap(wbuf, WRITE_BUFFER_SIZE);
+	if (munmap(wbuf, WRITE_BUFFER_SIZE) != 0) {
+		rval = false;
+		*ts_errno = errno;
+	}
 
 	return rval;
 }
