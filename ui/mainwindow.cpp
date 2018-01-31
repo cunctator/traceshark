@@ -1169,7 +1169,7 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 
 void MainWindow::addTaskToLegend(unsigned int pid)
 {
-	CPUTask *cpuTask;
+	CPUTask *cpuTask = nullptr;
 	unsigned int cpu;
 
 	/*
@@ -1359,7 +1359,7 @@ void MainWindow::addTaskGraph(unsigned int pid)
 	TaskRange *taskRange;
 	TaskGraph *taskGraph;
 	unsigned int cpu;
-	CPUTask *cpuTask;
+	CPUTask *cpuTask = nullptr;
 
 	taskRange = taskRangeAllocator->getTaskRange(pid, isNew);
 
