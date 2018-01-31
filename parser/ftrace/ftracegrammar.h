@@ -310,22 +310,26 @@ __always_inline bool FtraceGrammar::parseLine(TraceLine &line,
 			if (!NamePidMatch(str, event))
 				return false;
 			NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_CPU:
 			if (!CPUMatch(str, event)) {
 				state = STATE_NAMEPID;
 				break;
 			}
 			NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_TIME:
 			if (!TimeMatch(str, event)) {
 				state = STATE_NAMEPID;
 				break;
 			}
 			NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_EVENT:
 			if (!EventMatch(str, event))
 				return false;
 			NEXTTOKEN(true);
+			ts_fallthrough;
 		case STATE_ARG:
 			while (ArgMatch(str, event))
 				NEXTTOKEN(true);

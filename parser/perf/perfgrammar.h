@@ -345,22 +345,26 @@ __always_inline bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
 			if (!NameMatch(str, event))
 				return false;
 			NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_PID:
 			if (!PidMatch(str, event))
 				return false;
 			NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_CPU:
 			if (!CPUMatch(str, event)) {
 				state = STATE_PID;
 				break;
 			}
 			NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_TIME:
 			if (!TimeMatch(str, event)) {
 				state = STATE_PID;
 				break;
 			}
 			NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_INTARG:
 			/*
 			 * Intarg is optional, if it's here we fetch the
@@ -369,10 +373,12 @@ __always_inline bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
 			 */
 			if (IntArgMatch(str, event))
 				NEXTTOKEN(false);
+			ts_fallthrough;
 		case STATE_EVENT:
 			if (!EventMatch(str, event))
 				return false;
 			NEXTTOKEN(true);
+			ts_fallthrough;
 		case STATE_ARG:
 			while (ArgMatch(str, event))
 				NEXTTOKEN(true);

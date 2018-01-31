@@ -68,6 +68,16 @@
 #include <QtWidgets>
 #endif
 
+#define TS_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+
+#if TS_HAS_CPP_ATTRIBUTE(fallthrough)
+#define ts_fallthrough [[fallthrough]]
+#elif TS_HAS_CPP_ATTRIBUTE(gnu::fallthrough)
+#define ts_fallthrough [[gnu::fallthrough]]
+#else
+#define ts_fallthrough (void)0
+#endif
+
 #ifdef __GNUC__
 
 #define likely(x)   __builtin_expect(!!(x), 1)
