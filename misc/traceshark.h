@@ -68,7 +68,11 @@
 #include <QtWidgets>
 #endif
 
-#define TS_HAS_CPP_ATTRIBUTE __has_cpp_attribute
+#ifdef __has_cpp_attribute
+#define TS_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+#else
+#define TS_HAS_CPP_ATTRIBUTE(x) 0
+#endif
 
 #if TS_HAS_CPP_ATTRIBUTE(fallthrough)
 #define ts_fallthrough [[fallthrough]]
