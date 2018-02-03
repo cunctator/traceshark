@@ -96,6 +96,7 @@ void ErrorDialog::setText(const QString &text)
 {
 	textEdit->setPlainText(text);
 	updateSize();
+	show();
 }
 
 void ErrorDialog::setErrno(int d_errno)
@@ -103,6 +104,7 @@ void ErrorDialog::setErrno(int d_errno)
 	QString text(strerror(d_errno));
 	textEdit->setPlainText(text);
 	updateSize();
+	show();
 }
 
 void ErrorDialog::updateSize()

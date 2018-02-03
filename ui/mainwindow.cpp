@@ -1343,11 +1343,9 @@ void MainWindow::exportEvents()
 				       &ts_errno)) {
 		if (ts_errno > 0) {
 			errorDialog->setErrno(ts_errno);
-			errorDialog->show();
 		} else if (ts_errno < 0) {
 			QString errString(ts_strerror(-ts_errno));
 			errorDialog->setText(errString);
-			errorDialog->show();
 		}
 	}
 }
