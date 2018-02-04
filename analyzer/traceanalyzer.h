@@ -451,7 +451,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		return;
 
 	/* This is done to update the names of existing tasks */
-	if (event.pid != 0) {
+	if (event.pid > 0) {
 		task = &taskMap[event.pid].getTask();
 		task->checkName(event.taskName->ptr);
 		if (task->isNew)

@@ -294,7 +294,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 	CPUTask *cpuTask;
 	Task *task;
 
-	if (epid != 0) {
+	if (epid > 0) {
 		cpuTask = &cpuTaskMaps[cpu][epid];
 		Q_ASSERT(!cpuTask->isNew);
 		Q_ASSERT(!cpuTask->schedTimev.isEmpty());
@@ -309,7 +309,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		task->schedData.append(FLOOR_HEIGHT);
 	}
 
-	if (oldpid != 0) {
+	if (oldpid > 0) {
 		cpuTask = &cpuTaskMaps[cpu][oldpid];
 		if (cpuTask->isNew) {
 			cpuTask->pid = oldpid;

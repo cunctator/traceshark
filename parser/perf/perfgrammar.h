@@ -78,7 +78,7 @@ private:
 	__always_inline bool StoreMatch(TString *str, TraceEvent &event);
 	__always_inline bool NameMatch(TString *str, TraceEvent &event);
 	__always_inline bool IntArgMatch(TString *str, TraceEvent &event);
-	__always_inline int pidFromString(const TString &str);
+	__always_inline int pidFromString(const TString &str, bool &ok);
 	__always_inline bool PidMatch(TString *str, TraceEvent &event);
 	__always_inline bool CPUMatch(TString *str, TraceEvent &event);
 	__always_inline bool TimeMatch(TString *str, TraceEvent &event);
@@ -192,26 +192,36 @@ error:
 	return false;
 }
 
-__always_inline int PerfGrammar::pidFromString(const TString &str)
+__always_inline int PerfGrammar::pidFromString(const TString &str,
+					       bool &ok)
 {
 	char *lastChr = str.ptr + str.len - 1;
 	int pid;
 	int digit;
 	char *c;
+	bool neg = false;
+	ok = true;
 
 	if (str.len < 1 || str.len > 10)
 		return false;
 
 	pid = 0;
-	for (c = str.ptr; c <= lastChr; c++) {
+	c = str.ptr;
+	if (*c == '-') {
+		neg = true;
+		c++;
+	}
+	for (; c <= lastChr; c++) {
 		pid *= 10;
 		digit = *c - '0';
 		if (digit <= 9 && digit >= 0)
 			pid += digit;
-		else
-			return -1;
+		else {
+			ok = false;
+			return 0;
+		}
 	}
-	return pid;
+	return (neg ? -pid:pid);
 }
 
 __always_inline bool PerfGrammar::TimeMatch(TString *str,
@@ -225,6 +235,7 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str,
 	unsigned int i;
 	int pid;
 	uint32_t hash;
+	bool ok;
 
 	namestr.ptr = cstr;
 	namestr.len = 0;
@@ -241,8 +252,8 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str,
 		if (event.argc < 3)
 			return false;
 
-		pid = pidFromString(*event.argv[event.argc - 2]);
-		if (pid < 0)
+		pid = pidFromString(*event.argv[event.argc - 2], ok);
+		if (!ok)
 			return false;
 		event.pid = pid;
 
