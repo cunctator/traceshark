@@ -119,7 +119,7 @@ bool TraceAnalyzer::open(const QString &fileName)
 
 void TraceAnalyzer::prepareDataStructures()
 {
-	cpuTaskMaps = new vtl::AVLTree<unsigned int, CPUTask,
+	cpuTaskMaps = new vtl::AVLTree<int, CPUTask,
 				       vtl::AVLBALANCE_USEPOINTERS>
 		[NR_CPUS_ALLOWED];
 	cpuFreq = new CpuFreq[NR_CPUS_ALLOWED];
@@ -286,10 +286,10 @@ void TraceAnalyzer::processFreqAddTail()
  */
 void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 					 unsigned int cpu,
-					 CPU *eventCPU, unsigned int oldpid,
+					 CPU *eventCPU, int oldpid,
 					 double oldtime)
 {
-	unsigned int epid = eventCPU->pidOnCPU;
+	int epid = eventCPU->pidOnCPU;
 	double prevtime, faketime;
 	CPUTask *cpuTask;
 	Task *task;
@@ -484,7 +484,7 @@ int TraceAnalyzer::findFilteredIndexBefore(double time) const
 }
 
 const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
-							unsigned int pid,
+							int pid,
 							int *index) const
 {
 	int start = findIndexBefore(time);
@@ -530,7 +530,7 @@ const TraceEvent *TraceAnalyzer::findFilteredEvent(int index,
 }
 
 const TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
-							 unsigned int pid,
+							 int pid,
 							 int *index) const
 {
 	int i;
@@ -765,7 +765,7 @@ void TraceAnalyzer::processAllFilters()
 	}
 }
 
-void TraceAnalyzer::createPidFilter(QMap<unsigned int, unsigned int> &map,
+void TraceAnalyzer::createPidFilter(QMap<int, int> &map,
 				    bool orlogic, bool inclusive)
 {
 	/*
@@ -869,7 +869,7 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 		filteredEvents.clear();
 }
 
-void TraceAnalyzer::addPidToFilter(unsigned int pid) {
+void TraceAnalyzer::addPidToFilter(int pid) {
 	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
 
 	iter = filterPidMap.find(pid);
@@ -891,7 +891,7 @@ epilogue:
 	processAllFilters();
 }
 
-void TraceAnalyzer::removePidFromFilter(unsigned int pid) {
+void TraceAnalyzer::removePidFromFilter(int pid) {
 	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
 
 	if (!filterState.isEnabled(FilterState::FILTER_PID))

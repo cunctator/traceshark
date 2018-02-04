@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2017, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -56,7 +56,7 @@ class CPU {
 public:
 	CPU(): pidOnCPU(0), hasBeenScheduled(false), lastSched(0),
 		lastEnterIdle(0), lastExitIdle(0) {}
-	unsigned int pidOnCPU;
+	int pidOnCPU;
 	bool hasBeenScheduled;
 
 	/* Time when pidOnCPU was scheduled */

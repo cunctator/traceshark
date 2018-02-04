@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -60,40 +60,40 @@
 #include <cstdint>
 
 #define ftrace_cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
-#define ftrace_cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
-#define ftrace_cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '='))
+#define ftrace_cpufreq_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
+#define ftrace_cpufreq_freq(EVENT) (uint_after_char(EVENT, 0, '='))
 
 #define ftrace_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
-#define ftrace_cpuidle_cpu(EVENT) (param_after_char(EVENT, 1, '='))
+#define ftrace_cpuidle_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
 static __always_inline int ftrace_cpuidle_state(const TraceEvent &event)
 {
 	int32_t state;
 	uint32_t ustate;
-	ustate = param_after_char(event, 0, '=');
+	ustate = uint_after_char(event, 0, '=');
 	state = *((int*) &ustate); /* the string is a signed printed as 
 				    * unsigned :) */
 	return state;
 }
 
 #define ftrace_sched_migrate_args_ok(EVENT) (EVENT.argc >= 5)
-#define ftrace_sched_migrate_destCPU(EVENT) (param_after_char(EVENT, \
-							      EVENT.argc - 1, \
-							      '='))
-#define ftrace_sched_migrate_origCPU(EVENT) (param_after_char(EVENT, \
-							      EVENT.argc - 2, \
-							      '='))
-#define ftrace_sched_migrate_prio(EVENT) (param_after_char(EVENT, \
-							   EVENT.argc - 3, \
-							   '='))
-#define ftrace_sched_migrate_pid(EVENT) (param_after_char(EVENT, \
-							  EVENT.argc - 4, \
+#define ftrace_sched_migrate_destCPU(EVENT) (uint_after_char(EVENT, \
+							     EVENT.argc - 1, \
+							     '='))
+#define ftrace_sched_migrate_origCPU(EVENT) (uint_after_char(EVENT, \
+							     EVENT.argc - 2, \
+							     '='))
+#define ftrace_sched_migrate_prio(EVENT) (uint_after_char(EVENT,	\
+							  EVENT.argc - 3, \
 							  '='))
+#define ftrace_sched_migrate_pid(EVENT) (int_after_char(EVENT, \
+							EVENT.argc - 4, \
+							'='))
 
 #define ftrace_sched_switch_args_ok(EVENT) (EVENT.argc >= 6)
 #define ftrace_sched_switch_newprio(EVENT) (param_inside_braces(EVENT, \
 								EVENT.argc - 1))
 #define ftrace_sched_switch_newpid(EVENT)  \
-	(param_after_char(EVENT, EVENT.argc - 2, ':'))
+	(int_after_char(EVENT, EVENT.argc - 2, ':'))
 
 static __always_inline taskstate_t
 	ftrace_sched_switch_state(const TraceEvent &event)
@@ -119,8 +119,7 @@ ftrace_sched_switch_oldprio(const TraceEvent &event)
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline unsigned int
-ftrace_sched_switch_oldpid(const TraceEvent &event)
+static __always_inline int ftrace_sched_switch_oldpid(const TraceEvent &event)
 {
 	unsigned int i;
 	for (i = 3; i < event.argc; i++) {
@@ -128,8 +127,8 @@ ftrace_sched_switch_oldpid(const TraceEvent &event)
 			break;
 	}
 	if (i < event.argc)
-		return param_after_char(event, i - 3, ':');
-	return ABSURD_UNSIGNED;
+		return int_after_char(event, i - 3, ':');
+	return ABSURD_INT;
 }
 
 static __always_inline const char
@@ -288,8 +287,8 @@ const char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
 					       StringPool *pool);
 
 #define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
-#define ftrace_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, \
-							 EVENT.argc - 1, ':'))
+#define ftrace_sched_wakeup_cpu(EVENT) (uint_after_char(EVENT, \
+							EVENT.argc - 1, ':'))
 
 static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 {
@@ -301,9 +300,9 @@ static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 
 #define ftrace_sched_wakeup_prio(EVENT) (param_inside_braces(EVENT, \
 							     EVENT.argc - 3))
-#define ftrace_sched_wakeup_pid(EVENT) (param_after_char(EVENT, \
-							 EVENT.argc - 4, \
-							 ':'))
+#define ftrace_sched_wakeup_pid(EVENT) (int_after_char(EVENT, \
+						       EVENT.argc - 4,	\
+						       ':'))
 /* Todo, code could be shrared with the other two *_strup() functions */
 static __always_inline const char
 *__ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
@@ -379,15 +378,15 @@ const char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
 
 #define ftrace_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define ftrace_sched_process_fork_childpid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 1, '='))
+	(int_after_char(EVENT, EVENT.argc - 1, '='))
 
-static __always_inline unsigned int
+static __always_inline int
 ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 	unsigned int i;
 	unsigned int endidx;
 
 	if (event.argc < 4)
-		return ABSURD_UNSIGNED;
+		return ABSURD_INT;
 
 	endidx = event.argc - 2;
 
@@ -397,9 +396,9 @@ ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 			break;
 	}
 	if (i < 2)
-		return ABSURD_UNSIGNED;
+		return ABSURD_INT;
 
-	return param_after_char(event, i - 1, '=');
+	return int_after_char(event, i - 1, '=');
 }
 
 static __always_inline const char *
@@ -467,17 +466,17 @@ const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 
 #define ftrace_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define ftrace_sched_process_exit_pid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 2, '='))
+	(int_after_char(EVENT, EVENT.argc - 2, '='))
 
 #define ftrace_irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
 #define ftrace_irq_handler_entry_irq(EVENT) \
-	(param_after_char(EVENT, 0, '='))
+	(uint_after_char(EVENT, 0, '='))
 #define ftrace_irq_handler_entry_name(EVENT, LEN_UINTPTR) \
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
 #define ftrace_irq_handler_exit_args_ok(EVENT)	(EVENT.argc >= 2)
 #define ftrace_irq_handler_exit_irq(EVENT) \
-	(param_after_char(EVENT, 0, '='))
+	(uint_after_char(EVENT, 0, '='))
 #define ftrace_irq_handler_exit_handled(EVENT) \
 	(strncmp(EVENT.argv[1]->ptr, "ret=handled", EVENT.argv[1]->len) == 0)
 #define ftrace_irq_handler_exit_ret(EVENT, LEN_UINTPTR) \

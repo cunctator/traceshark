@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -102,12 +102,9 @@ InfoWidget::InfoWidget(QWidget *parent):
 		   valueChanged(double, int));
 	sigconnect(cursorInfos[1], valueChanged(double, int), this,
 		   valueChanged(double, int));
-	sigconnect(taskInfo, findWakeup(unsigned int), this,
-		   findWakeup(unsigned int));
-	sigconnect(taskInfo, addTaskGraph(unsigned int), this,
-		   addTaskGraph(unsigned int));
-	sigconnect(taskInfo, removeTaskGraph(unsigned int), this,
-		   removeTaskGraph(unsigned int));
+	sigconnect(taskInfo, findWakeup(int), this, findWakeup(int));
+	sigconnect(taskInfo, addTaskGraph(int), this, addTaskGraph(int));
+	sigconnect(taskInfo, removeTaskGraph(int), this, removeTaskGraph(int));
 	tsconnect(cursorInfos[0], valueChanged(double, int), this,
 		  updateChange(double, int));
 	tsconnect(cursorInfos[1], valueChanged(double, int), this,
@@ -180,7 +177,7 @@ void InfoWidget::checkGraphSelection()
 	taskInfo->checkGraphSelection();
 }
 
-void InfoWidget::pidRemoved(unsigned int pid)
+void InfoWidget::pidRemoved(int pid)
 {
 	taskInfo->pidRemoved(pid);
 }

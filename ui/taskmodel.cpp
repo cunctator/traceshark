@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -77,7 +77,7 @@ TaskModel::~TaskModel()
 	delete idleTask;
 }
 
-void TaskModel::setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map)
+void TaskModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map)
 {
 	taskList->clear();
 
@@ -116,7 +116,7 @@ int TaskModel::columnCount(const QModelIndex & /* index */) const
 	return 2; /* Number from data() and headerData() */
 }
 
-unsigned int TaskModel::rowToPid(int row, bool &ok) const
+int TaskModel::rowToPid(int row, bool &ok) const
 {
 	unsigned int urow;
 
@@ -168,7 +168,7 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 	if (role == Qt::DisplayRole) {
 		int row = index.row();
 		int column = index.column();
-		unsigned int pid;
+		int pid;
 		QString name;
 
 		switch(column) {

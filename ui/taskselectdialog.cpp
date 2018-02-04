@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -127,7 +127,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 	tsconnect(addFilterButton, clicked(), this, addFilterClicked());
 	sigconnect(resetFilterButton, clicked(), this, resetFilter());
 
-	filterMap = new QMap<unsigned int, unsigned int>();
+	filterMap = new QMap<int, int>();
 }
 
 TaskSelectDialog::~TaskSelectDialog()
@@ -135,7 +135,7 @@ TaskSelectDialog::~TaskSelectDialog()
 	delete filterMap;
 }
 
-void TaskSelectDialog::setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map)
+void TaskSelectDialog::setTaskMap(vtl::AVLTree<int, TaskHandle> *map)
 {
 	taskModel->setTaskMap(map);
 }
@@ -181,7 +181,7 @@ void TaskSelectDialog::closeClicked()
 void TaskSelectDialog::addUnifiedClicked()
 {
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
-	unsigned int pid;
+	int pid;
 	bool ok;
 	int i, s;
 
@@ -198,7 +198,7 @@ void TaskSelectDialog::addUnifiedClicked()
 void TaskSelectDialog::addLegendClicked()
 {
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
-	unsigned int pid;
+	int pid;
 	bool ok;
 	int i, s;
 
@@ -215,7 +215,7 @@ void TaskSelectDialog::addLegendClicked()
 void TaskSelectDialog::addFilterClicked()
 {
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
-	unsigned int pid;
+	int pid;
 	bool ok;
 	int i, s;
 	bool orlogic, inclusive;

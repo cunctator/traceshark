@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -94,14 +94,14 @@ DECLARE_GENERIC_TRACEFN(sched_migrate_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(sched_migrate_destCPU, unsigned int)
 DECLARE_GENERIC_TRACEFN(sched_migrate_origCPU, unsigned int)
 DECLARE_GENERIC_TRACEFN(sched_migrate_prio, unsigned int)
-DECLARE_GENERIC_TRACEFN(sched_migrate_pid, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_migrate_pid, int)
 
 DECLARE_GENERIC_TRACEFN(sched_switch_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(sched_switch_newprio, unsigned int)
-DECLARE_GENERIC_TRACEFN(sched_switch_newpid, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_switch_newpid, int)
 DECLARE_GENERIC_TRACEFN(sched_switch_state, taskstate_t)
 DECLARE_GENERIC_TRACEFN(sched_switch_oldprio, unsigned int)
-DECLARE_GENERIC_TRACEFN(sched_switch_oldpid, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_switch_oldpid, int)
 DECLARE_GENERIC_TRACEFN_POOL(sched_switch_oldname_strdup, const char *)
 DECLARE_GENERIC_TRACEFN_POOL(sched_switch_newname_strdup, const char *)
 
@@ -109,16 +109,16 @@ DECLARE_GENERIC_TRACEFN(sched_wakeup_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(sched_wakeup_cpu, unsigned int)
 DECLARE_GENERIC_TRACEFN(sched_wakeup_success, bool)
 DECLARE_GENERIC_TRACEFN(sched_wakeup_prio, unsigned int)
-DECLARE_GENERIC_TRACEFN(sched_wakeup_pid, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_wakeup_pid, int)
 DECLARE_GENERIC_TRACEFN_POOL(sched_wakeup_name_strdup, const char *)
 
 DECLARE_GENERIC_TRACEFN(sched_process_fork_args_ok, bool)
-DECLARE_GENERIC_TRACEFN(sched_process_fork_childpid, unsigned int)
-DECLARE_GENERIC_TRACEFN(sched_process_fork_parent_pid, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_process_fork_childpid, int)
+DECLARE_GENERIC_TRACEFN(sched_process_fork_parent_pid, int)
 DECLARE_GENERIC_TRACEFN_POOL(sched_process_fork_childname_strdup, const char *)
 
 DECLARE_GENERIC_TRACEFN(sched_process_exit_args_ok, bool)
-DECLARE_GENERIC_TRACEFN(sched_process_exit_pid, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_process_exit_pid, int)
 
 DECLARE_GENERIC_TRACEFN(irq_handler_entry_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(irq_handler_entry_irq, unsigned int)

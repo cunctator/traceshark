@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -151,7 +151,7 @@ class StringTree;
 class TraceEvent {
 public:
 	const TString *taskName;
-	unsigned int pid;
+	int pid;
 	unsigned int cpu;
 	double time;
 	int intArg;

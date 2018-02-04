@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -67,7 +67,7 @@
 #include "qcustomplot/qcustomplot.h"
 
 #define DEFINE_PIDMAP_ITERATOR(name) \
-	QMap<unsigned int, TaskGraph*>::iterator name
+	QMap<int, TaskGraph*>::iterator name
 
 #define FIND_TOOLTIP \
 	"Find the wakeup of this task that precedes the active cursor"
@@ -304,7 +304,7 @@ void TaskInfo::checkGraphSelection()
 	removeTaskGraph();
 }
 
-void TaskInfo::pidRemoved(unsigned int pid)
+void TaskInfo::pidRemoved(int pid)
 {
 	legendPidMap.remove(pid);
 }

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -56,7 +56,7 @@ class TaskRange {
 public:
 	double upper;
 	double lower;
-	unsigned int pid;
+	int pid;
 	TaskRange *next;
 	TaskRange *prev;
 };
@@ -66,8 +66,8 @@ public:
 	TaskRangeAllocator(double decValue);
 	~TaskRangeAllocator();
 	void setStart(double topValue);
-	TaskRange *getTaskRange(unsigned int pid, bool &isNew);
-	void putTaskRange(unsigned int pid);
+	TaskRange *getTaskRange(int pid, bool &isNew);
+	void putTaskRange(int pid);
 	void putTaskRange(TaskRange *range);
 	void clearAll();
 	double getBottom();

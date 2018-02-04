@@ -77,8 +77,7 @@ private:
 	void setupEventTree();
 	__always_inline bool NamePidMatch(TString *str, TraceEvent &event);
 	__always_inline bool CPUMatch(TString *str, TraceEvent &event);
-	__always_inline bool extractNameAndPid(unsigned int &pid,
-					       TString &compound);
+	__always_inline bool extractNameAndPid(int &pid, TString &compound);
 	__always_inline bool TimeMatch(TString *str, TraceEvent &event);
 	__always_inline bool EventMatch(TString *str, TraceEvent &event);
 	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
@@ -141,7 +140,7 @@ error:
 	return false;
 }
 
-__always_inline bool FtraceGrammar::extractNameAndPid(unsigned int &pid,
+__always_inline bool FtraceGrammar::extractNameAndPid(int &pid,
 						      TString &compound)
 {
 	char *nullChr = compound.ptr + compound.len;

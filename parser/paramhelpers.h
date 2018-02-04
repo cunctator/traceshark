@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -52,12 +52,14 @@
 #ifndef PARAMHELPERS_H
 #define PARAMHELPERS_H
 
+#include <climits>
 #include "parser/traceevent.h"
 
 /* Should be enough, I wouldn't expect more than about 16 */
 #define TASKNAME_MAXLEN (128)
 
-#define ABSURD_UNSIGNED (2147483647)
+#define ABSURD_UNSIGNED ((unsigned int)INT_MAX)
+#define ABSURD_INT (INT_MAX)
 
 #define is_this_event(EVENTNAME, EVENT) (EVENT.type == EVENTNAME)
 
@@ -149,8 +151,8 @@ merge_args_into_cstring(const TraceEvent &event,
 	len++;
 }
 
-static __always_inline unsigned int param_after_char(const TraceEvent &event,
-						     int n_param, char ch)
+static __always_inline unsigned int uint_after_char(const TraceEvent &event,
+						    int n_param, char ch)
 {
 	char *last;
 	char *first;
@@ -177,6 +179,41 @@ static __always_inline unsigned int param_after_char(const TraceEvent &event,
 		param += digit;
 	}
 	return param;
+}
+
+static __always_inline int int_after_char(const TraceEvent &event,
+					  int n_param, char ch)
+{
+	char *last;
+	char *first;
+	char *c;
+	bool found = false;
+	int param = 0;
+	int digit;
+	bool neg = false;
+
+
+	last = event.argv[n_param]->ptr + event.argv[n_param]->len - 1;
+	first = event.argv[n_param]->ptr;
+	for (c = last; c >= first; c--) {
+		if (*c == ch) {
+			found = true;
+			break;
+		}
+	}
+	if (!found)
+		return ABSURD_INT; /* return absurd if error */
+	c++;
+	if (*c == '-') {
+		neg = true;
+		c++;
+	}
+	for (; c <= last; c++) {
+		digit = *c - '0';
+		param *= 10;
+		param += digit;
+	}
+	return (neg ? -param:param);
 }
 
 static __always_inline unsigned int param_inside_braces(const TraceEvent &event,

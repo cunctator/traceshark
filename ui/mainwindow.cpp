@@ -147,25 +147,19 @@ MainWindow::MainWindow():
 		  this, plotDoubleClicked(QMouseEvent*));
 	tsconnect(infoWidget, valueChanged(double, int),
 		  this, infoValueChanged(double, int));
-	tsconnect(infoWidget, addTaskGraph(unsigned int), this,
-		  addTaskGraph(unsigned int));
-	tsconnect(infoWidget, findWakeup(unsigned int), this,
-		  showWakeup(unsigned int));
-	tsconnect(infoWidget, removeTaskGraph(unsigned int), this,
-		  removeTaskGraph(unsigned int));
+	tsconnect(infoWidget, addTaskGraph(int), this, addTaskGraph(int));
+	tsconnect(infoWidget, findWakeup(int), this, showWakeup(int));
+	tsconnect(infoWidget, removeTaskGraph(int), this, removeTaskGraph(int));
 
 	tsconnect(eventsWidget, timeSelected(double), this,
 		  moveActiveCursor(double));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
 		  this, showEventInfo(const TraceEvent &));
-	tsconnect(taskSelectDialog, addTaskGraph(unsigned int),
-		  this, addTaskGraph(unsigned int));
-	tsconnect(taskSelectDialog, addTaskToLegend(unsigned int),
-		  this, addTaskToLegend(unsigned int));
-	tsconnect(taskSelectDialog, createFilter(QMap<unsigned int,
-						 unsigned int> &, bool, bool),
-		  this, createPidFilter(QMap<unsigned int, unsigned int> &,
-					bool, bool));
+	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
+	tsconnect(taskSelectDialog, addTaskToLegend(int), this,
+		  addTaskToLegend(int));
+	tsconnect(taskSelectDialog, createFilter(QMap<int, int> &, bool, bool),
+		  this, createPidFilter(QMap<int, int> &, bool, bool));
 	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
 	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
 						  bool),
@@ -1167,7 +1161,7 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	infoWidget->pidRemoved(legendGraph->pid);
 }
 
-void MainWindow::addTaskToLegend(unsigned int pid)
+void MainWindow::addTaskToLegend(int pid)
 {
 	CPUTask *cpuTask = nullptr;
 	unsigned int cpu;
@@ -1244,7 +1238,7 @@ void MainWindow::timeFilter(void)
 	updateResetFiltersEnabled();
 }
 
-void MainWindow::createPidFilter(QMap<unsigned int, unsigned int> &map,
+void MainWindow::createPidFilter(QMap<int, int> &map,
 				 bool orlogic, bool inclusive)
 {
 	double saved = eventsWidget->getSavedScroll();
@@ -1350,7 +1344,7 @@ void MainWindow::exportEvents()
 	}
 }
 
-void MainWindow::addTaskGraph(unsigned int pid)
+void MainWindow::addTaskGraph(int pid)
 {
 	/* Add a unified scheduling graph for pid */
 	bool isNew;
@@ -1468,7 +1462,7 @@ out:
 	tracePlot->replot();
 }
 
-void MainWindow::removeTaskGraph(unsigned int pid)
+void MainWindow::removeTaskGraph(int pid)
 {
 	Task *task = analyzer->findTask(pid);
 
@@ -1514,7 +1508,7 @@ void MainWindow::showEventFilter()
 	eventSelectDialog->show();
 }
 
-void MainWindow::showWakeup(unsigned int pid)
+void MainWindow::showWakeup(int pid)
 {
 	int activeIdx = infoWidget->getCursorIdx();
 	int inactiveIdx;
@@ -1579,7 +1573,7 @@ void MainWindow::showWakeup(unsigned int pid)
 	}
 
 	unsigned int wcpu = wakeupevent->cpu;
-	unsigned int wpid = wakeupevent->pid;
+	int wpid = wakeupevent->pid;
 
 	/*
 	 * If the wakeup task was run with pid 0 = swapper, then leave the

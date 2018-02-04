@@ -121,13 +121,13 @@ private slots:
 			      QMouseEvent *event);
 	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
 			       *abstractItem);
-	void addTaskGraph(unsigned int pid);
-	void addTaskToLegend(unsigned int pid);
-	void removeTaskGraph(unsigned int pid);
+	void addTaskGraph(int pid);
+	void addTaskToLegend(int pid);
+	void removeTaskGraph(int pid);
 	void showTaskSelector();
 	void showEventFilter();
-	void showWakeup(unsigned int pid);
-	void createPidFilter(QMap<unsigned int, unsigned int> &map,
+	void showWakeup(int pid);
+	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void resetPidFilter();

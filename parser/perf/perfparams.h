@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -60,16 +60,16 @@
 #include <cstdint>
 
 #define perf_cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
-#define perf_cpufreq_cpu(EVENT) (param_after_char(EVENT, 1, '='))
-#define perf_cpufreq_freq(EVENT) (param_after_char(EVENT, 0, '='))
+#define perf_cpufreq_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
+#define perf_cpufreq_freq(EVENT) (uint_after_char(EVENT, 0, '='))
 
 #define perf_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
-#define perf_cpuidle_cpu(EVENT) (param_after_char(EVENT, 1, '='))
+#define perf_cpuidle_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
 static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 {
 	int32_t state;
 	uint32_t ustate;
-	ustate = param_after_char(event, 0, '=');
+	ustate = uint_after_char(event, 0, '=');
 
 	/* the string is a signed printed as unsigned :) */
 	state = *((int*) &ustate);
@@ -78,20 +78,20 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 }
 
 #define perf_sched_migrate_args_ok(EVENT) (EVENT.argc >= 5)
-#define perf_sched_migrate_destCPU(EVENT) (param_after_char(EVENT, EVENT.argc \
-							    - 1, '='))
-#define perf_sched_migrate_origCPU(EVENT) (param_after_char(EVENT, EVENT.argc \
-							    - 2, '='))
-#define perf_sched_migrate_prio(EVENT) (param_after_char(EVENT, EVENT.argc - 3,\
-							 '='))
-#define perf_sched_migrate_pid(EVENT) (param_after_char(EVENT, EVENT.argc - 4, \
+#define perf_sched_migrate_destCPU(EVENT) (uint_after_char(EVENT, EVENT.argc \
+							   - 1, '='))
+#define perf_sched_migrate_origCPU(EVENT) (uint_after_char(EVENT, EVENT.argc \
+							   - 2, '='))
+#define perf_sched_migrate_prio(EVENT) (uint_after_char(EVENT, EVENT.argc - 3,\
 							'='))
+#define perf_sched_migrate_pid(EVENT) (int_after_char(EVENT, EVENT.argc - 4, \
+						      '='))
 
 #define perf_sched_switch_args_ok(EVENT) (EVENT.argc >= 8)
 #define perf_sched_switch_newprio(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 1, '='))
-#define perf_sched_switch_newpid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 2, '='))
+	(uint_after_char(EVENT, EVENT.argc - 1, '='))
+#define perf_sched_switch_newpid(EVENT)			\
+	(int_after_char(EVENT, EVENT.argc - 2, '='))
 
 #define SWITCH_PPID_PFIX "prev_pid="
 #define SWITCH_PPRI_PFIX "prev_prio="
@@ -169,18 +169,18 @@ perf_sched_switch_oldprio(const TraceEvent &event)
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i != 0)
-		return param_after_char(event, i - 2, '=');
+		return uint_after_char(event, i - 2, '=');
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline unsigned int
+static __always_inline int
 perf_sched_switch_oldpid(const TraceEvent &event)
 {
 	unsigned int i;
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i != 0)
-		return param_after_char(event, i - 3, '=');
+		return int_after_char(event, i - 3, '=');
 	return ABSURD_UNSIGNED;
 }
 
@@ -307,8 +307,8 @@ const char *perf_sched_switch_newname_strdup(const TraceEvent &event,
 #define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 
 /* The last argument is target_cpu, regardless of old or new */
-#define perf_sched_wakeup_cpu(EVENT) (param_after_char(EVENT, EVENT.argc - 1, \
-						       '='))
+#define perf_sched_wakeup_cpu(EVENT) (uint_after_char(EVENT, EVENT.argc - 1, \
+						      '='))
 
 static __always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 {
@@ -331,28 +331,27 @@ perf_sched_wakeup_prio(const TraceEvent &event)
 	/* Check if we are on the new format */
 	if (!strncmp(event.argv[newidx]->ptr, WAKE_PRIO_PFIX,
 		     WAKE_PRIO_PFIX_LEN)) {
-		return param_after_char(event, newidx, '=');
+		return uint_after_char(event, newidx, '=');
 	}
 
 	/* Assume that this is the old format */
 	oldidx = event.argc - 3;
-	return param_after_char(event, oldidx, '=');
+	return uint_after_char(event, oldidx, '=');
 }
 
-static __always_inline unsigned int
-perf_sched_wakeup_pid(const TraceEvent &event)
+static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 {
 	unsigned int newidx = event.argc - 3;
 	unsigned int oldidx;
 	/* Check if we are on the new format */
 	if (!strncmp(event.argv[newidx]->ptr, WAKE_PID_PFIX,
 		     WAKE_PID_PFIX_LEN)) {
-		return param_after_char(event, newidx, '=');
+		return int_after_char(event, newidx, '=');
 	}
 
 	/* Assume that this is the old format */
 	oldidx = event.argc - 4;
-	return param_after_char(event, oldidx, '=');
+	return int_after_char(event, oldidx, '=');
 }
 
 static __always_inline const char *
@@ -412,9 +411,9 @@ const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
 
 #define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define perf_sched_process_fork_childpid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 1, '='))
+	(int_after_char(EVENT, EVENT.argc - 1, '='))
 
-static __always_inline unsigned int
+static __always_inline int
 perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 	unsigned int i;
 	unsigned int endidx;
@@ -429,7 +428,7 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 	if (i < 2)
 		return ABSURD_UNSIGNED;
 
-	return param_after_char(event, i - 1, '=');
+	return int_after_char(event, i - 1, '=');
 }
 
 static __always_inline const char *
@@ -486,17 +485,17 @@ const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 
 #define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define perf_sched_process_exit_pid(EVENT) \
-	(param_after_char(EVENT, EVENT.argc - 2, '='));
+	(int_after_char(EVENT, EVENT.argc - 2, '='));
 
 #define perf_irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_irq_handler_entry_irq(EVENT) \
-	(param_after_char(EVENT, 0, '='))
+	(uint_after_char(EVENT, 0, '='))
 #define perf_irq_handler_entry_name(EVENT, LEN_UINTPTR)			\
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
 #define perf_irq_handler_exit_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_irq_handler_exit_irq(EVENT) \
-	(param_after_char(EVENT, 0, '='))
+	(uint_after_char(EVENT, 0, '='))
 #define perf_irq_handler_exit_handled(EVENT) \
 	(strncmp(EVENT.argv[1]->ptr, "ret=handled", EVENT.argv[1]->len) == 0)
 #define perf_irq_handler_exit_ret(EVENT, LEN_UINTPTR) \

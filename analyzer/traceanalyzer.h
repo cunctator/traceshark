@@ -109,10 +109,10 @@ public:
 	void processTrace();
 	vtl::TList<TraceEvent> events;
 	vtl::TList <const TraceEvent*> filteredEvents;
-	const TraceEvent *findPreviousSchedEvent(double time, unsigned int pid,
+	const TraceEvent *findPreviousSchedEvent(double time, int pid,
 						 int *index) const;
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
-						  unsigned int pid,
+						  int pid,
 						  int *index) const;
 	const TraceEvent *findFilteredEvent(int index, int *filterIndex);
 	__always_inline unsigned int getMaxCPU() const;
@@ -121,9 +121,9 @@ public:
 	__always_inline double getEndTime() const;
 	__always_inline int getMinIdleState() const;
 	__always_inline int getMaxIdleState() const;
-	__always_inline CPUTask *findCPUTask(unsigned int pid,
+	__always_inline CPUTask *findCPUTask(int pid,
 					     unsigned int cpu);
-	__always_inline QColor getTaskColor(unsigned int pid) const;
+	__always_inline QColor getTaskColor(int pid) const;
 	__always_inline tracetype_t getTraceType() const;
 	void setSchedOffset(unsigned int cpu, double offset);
 	void setSchedScale(unsigned int cpu, double scale);
@@ -135,21 +135,21 @@ public:
 	void setMigrationScale(double scale);
 	void doScale();
 	void setQCustomPlot(QCustomPlot *plot);
-	__always_inline Task *findTask(unsigned int pid);
-	vtl::AVLTree<unsigned int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
+	__always_inline Task *findTask(int pid);
+	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
 		*cpuTaskMaps;
-	vtl::AVLTree<unsigned int, TaskHandle> taskMap;
+	vtl::AVLTree<int, TaskHandle> taskMap;
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
 	QList<MigrationArrow*> migrationArrows;
-	void createPidFilter(QMap<unsigned int, unsigned int> &map,
+	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void createTimeFilter(double low, double high, bool orlogic);
 	void disableFilter(FilterState::filter_t filter);
-	void addPidToFilter(unsigned int pid);
-	void removePidFromFilter(unsigned int pid);
+	void addPidToFilter(int pid);
+	void removePidFromFilter(int pid);
 	void disableAllFilters();
 	bool isFiltered();
 	bool filterActive(FilterState::filter_t filter);
@@ -166,9 +166,9 @@ private:
 	void colorizeTasks();
 	int findIndexBefore(double time) const;
 	int findFilteredIndexBefore(double time) const;
-	__always_inline unsigned int
+	__always_inline int
 		generic_sched_switch_newpid(const TraceEvent &event) const;
-	__always_inline unsigned int
+	__always_inline int
 		generic_sched_wakeup_pid(const TraceEvent &event) const;
 	__always_inline double estimateWakeUpNew(const CPU *eventCPU,
 						 double newTime,
@@ -178,8 +178,7 @@ private:
 					      double newTime,
 					      bool &valid) const;
 	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
-				  CPU *eventCPU, unsigned int oldpid,
-				  double oldtime);
+				  CPU *eventCPU, int oldpid, double oldtime);
 	__always_inline void __processSwitchEvent(tracetype_t ttype,
 						  TraceEvent &event);
 	__always_inline void __processWakeupEvent(tracetype_t ttype,
@@ -214,11 +213,11 @@ private:
 	void processAllFilters();
 	__always_inline
 		bool __processPidFilter(const TraceEvent &event,
-					QMap<unsigned int, unsigned int> &map,
+					QMap<int, int> &map,
 					bool inclusive);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
-	vtl::AVLTree <unsigned int, TColor> colorMap;
+	vtl::AVLTree <int, TColor> colorMap;
 	TColor black;
 	TColor white;
 	QVector<double> schedOffset;
@@ -242,8 +241,8 @@ private:
 	QCustomPlot *customPlot;
 	FilterState filterState;
 	FilterState OR_filterState;
-	QMap<unsigned int, unsigned int> filterPidMap;
-	QMap<unsigned int, unsigned int> OR_filterPidMap;
+	QMap<int, int> filterPidMap;
+	QMap<int, int> OR_filterPidMap;
 	QMap<event_t, event_t> filterEventMap;
 	QMap<event_t, event_t> OR_filterEventMap;
 	bool pidFilterInclusive;
@@ -293,19 +292,19 @@ __always_inline double TraceAnalyzer::estimateWakeUp(const Task *task,
 	return delay;
 }
 
-__always_inline unsigned int
+__always_inline int
 TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 {
 	if (!tracetype_is_valid(getTraceType()))
-		return UINT_MAX;
+		return INT_MAX;
 	return sched_switch_newpid(getTraceType(), event);
 }
 
-__always_inline unsigned int
+__always_inline int
 TraceAnalyzer::generic_sched_wakeup_pid(const TraceEvent &event) const
 {
 	if (!tracetype_is_valid(getTraceType()))
-		return UINT_MAX;
+		return INT_MAX;
 	return sched_wakeup_pid(getTraceType(), event);
 }
 
@@ -339,13 +338,13 @@ __always_inline int TraceAnalyzer::getMaxIdleState() const
 	return maxIdleState;
 }
 
-__always_inline QColor TraceAnalyzer::getTaskColor(unsigned int pid) const
+__always_inline QColor TraceAnalyzer::getTaskColor(int pid) const
 {
 	TColor taskColor = colorMap.value(pid, black);
 	return taskColor.toQColor();
 }
 
-__always_inline CPUTask *TraceAnalyzer::findCPUTask(unsigned int pid,
+__always_inline CPUTask *TraceAnalyzer::findCPUTask(int pid,
 						    unsigned int cpu)
 {
 	if (cpuTaskMaps[cpu].contains(pid))
@@ -359,7 +358,7 @@ __always_inline tracetype_t TraceAnalyzer::getTraceType() const
 	return parser->traceType;
 }
 
-__always_inline Task *TraceAnalyzer::findTask(unsigned int pid)
+__always_inline Task *TraceAnalyzer::findTask(int pid)
 {
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.find(pid);
 	if (iter == taskMap.end())
@@ -436,8 +435,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	unsigned int cpu = event.cpu;
 	double oldtime = event.time - FAKE_DELTA;
 	double newtime = event.time + FAKE_DELTA;
-	unsigned int oldpid = sched_switch_oldpid(ttype, event);
-	unsigned int newpid = sched_switch_newpid(ttype, event);
+	int oldpid = sched_switch_oldpid(ttype, event);
+	int newpid = sched_switch_newpid(ttype, event);
 	CPUTask *cpuTask;
 	Task *task;
 	double delay;
@@ -588,7 +587,7 @@ out:
 __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 							 TraceEvent &event)
 {
-	unsigned int pid;
+	int pid;
 	Task *task;
 	double time;
 	const char *name;
@@ -752,14 +751,14 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 
 __always_inline
 bool TraceAnalyzer::__processPidFilter(const TraceEvent &event,
-				       QMap<unsigned int, unsigned int> &map,
+				       QMap<int, int> &map,
 				       bool inclusive)
 {
 	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
 	iter = map.find(event.pid);
 	if (iter == map.end()) {
 		tracetype_t ttype = getTraceType();
-		unsigned int pid = UINT_MAX;
+		int pid = INT_MAX;
 		if (!inclusive)
 			return true;
 		switch (event.type) {

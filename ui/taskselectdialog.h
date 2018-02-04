@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -73,17 +73,16 @@ class TaskSelectDialog : public QDialog {
 public:
 	TaskSelectDialog(QWidget *parent = 0);
 	~TaskSelectDialog();
-	void setTaskMap(vtl::AVLTree<unsigned int, TaskHandle> *map);
+	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map);
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
 	void show();
 signals:
-	void addTaskGraph(unsigned int pid);
-	void addTaskToLegend(unsigned int pid);
+	void addTaskGraph(int pid);
+	void addTaskToLegend(int pid);
 	void resetFilter(void);
-	void createFilter(QMap<unsigned int, unsigned int> &map,
-			  bool orlogic, bool inclusive);
+	void createFilter(QMap<int, int> &map, bool orlogic, bool inclusive);
 private slots:
 	void closeClicked();
 	void addUnifiedClicked();
@@ -94,7 +93,7 @@ private:
 	TaskModel *taskModel;
 	QComboBox *logicBox;
 	QCheckBox *includeBox;
-	QMap<unsigned int, unsigned int> *filterMap;
+	QMap<int, int> *filterMap;
 	int savedHeight;
 };
 

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -75,12 +75,12 @@ public:
 	void removeTaskGraph();
 	void checkGraphSelection();
 	void clear();
-	void pidRemoved(unsigned int pid);
+	void pidRemoved(int pid);
 	void setTraceActionsEnabled(bool e);
 signals:
-	void findWakeup(unsigned int pid);
-	void addTaskGraph(unsigned int pid);
-	void removeTaskGraph(unsigned int pid);
+	void findWakeup(int pid);
+	void addTaskGraph(int pid);
+	void removeTaskGraph(int pid);
 private slots:
 	void addTaskGraphTriggered();
 	void addToLegendTriggered();
@@ -102,7 +102,7 @@ private:
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
 	TaskGraph *taskGraph;
-	QMap <unsigned int, TaskGraph*> legendPidMap;
+	QMap <int, TaskGraph*> legendPidMap;
 };
 
 #endif /* TASKINFO_H */
