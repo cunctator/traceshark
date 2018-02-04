@@ -455,10 +455,17 @@ void MainWindow::showTrace()
 	/* Show CPU frequency and idle graphs */
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
 		QPen pen = QPen();
+		QPen penF = QPen();
 
 		QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 						      tracePlot->yAxis);
 		QString name = QString(tr("cpuidle")) + QString::number(cpu);
+		QCPScatterStyle style =
+			QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+
+		pen.setColor(Qt::red);
+		style.setPen(pen);
+		graph->setScatterStyle(style);
 		pen.setColor(Qt::green);
 		graph->setPen(pen);
 		graph->setName(name);
@@ -469,6 +476,9 @@ void MainWindow::showTrace()
 
 		graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
 		name = QString(tr("cpufreq")) + QString::number(cpu);
+		penF.setColor(Qt::blue);
+		penF.setWidth(2);
+		graph->setPen(penF);
 		graph->setName(name);
 		graph->setAdaptiveSampling(true);
 		graph->setLineStyle(QCPGraph::lsStepLeft);
