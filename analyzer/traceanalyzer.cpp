@@ -939,25 +939,6 @@ bool TraceAnalyzer::filterActive(FilterState::filter_t filter)
 		OR_filterState.isEnabled(filter);
 }
 
-double TraceAnalyzer::getStartTime()
-{
-	double rval = 0;
-
-	if (events.size() > 0)
-		rval = events[0].time;
-	return rval;
-}
-
-double TraceAnalyzer::getEndTime()
-{
-	double rval = 0;
-	unsigned int s = events.size();
-
-	if (s > 0)
-		rval = events[s - 1].time;
-	return rval;
-}
-
 #define WRITE_BUFFER_SIZE (256 * sysconf(_SC_PAGESIZE))
 #define WRITE_BUFFER_LIMIT ((size_t)(WRITE_BUFFER_SIZE - 64 * 1024))
 
