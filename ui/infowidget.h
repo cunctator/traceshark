@@ -54,6 +54,7 @@
 
 #include <QDockWidget>
 #include "misc/traceshark.h"
+#include "vtl/time.h"
 
 class CursorInfo;
 class TaskInfo;
@@ -68,7 +69,7 @@ public:
 	InfoWidget(QWidget *parent = 0);
 	virtual ~InfoWidget();
 	void addTaskGraphToLegend(TaskGraph *graph);
-	void setTime(double time, int cursorIdx);
+	void setTime(const vtl::Time &time, int cursorIdx);
 	int getCursorIdx();
 	void setTaskGraph(TaskGraph *graph);
 	void removeTaskGraph();
@@ -77,19 +78,19 @@ public:
 	void clear();
 	void setTraceActionsEnabled(bool e);
 signals:
-	void valueChanged(double value, int nr);
+	void valueChanged(vtl::Time value, int nr);
 	void findWakeup(int pid);
 	void addTaskGraph(int pid);
 	void removeTaskGraph(int pid);
 	void requestTaskSelector();
 private slots:
-	void updateChange(double value, int nr);
+	void updateChange(const vtl::Time &value, int nr);
 private:
 	CursorInfo *cursorInfos[TShark::NR_CURSORS];
 	QLineEdit *diffLine;
 	QComboBox *cursorComboBox;
 	TaskInfo *taskInfo;
-	double cursorValues[TShark::NR_CURSORS];
+	vtl::Time cursorValues[TShark::NR_CURSORS];
 	void updateDifference();
 };
 

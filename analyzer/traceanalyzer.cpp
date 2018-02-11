@@ -92,9 +92,9 @@ __always_inline static int clib_close(int fd)
 TraceAnalyzer::TraceAnalyzer()
 	: cpuTaskMaps(nullptr), cpuFreq(nullptr), cpuIdle(nullptr),
 	  black(0, 0, 0), white(255, 255, 255), migrationOffset(0),
-	  migrationScale(0), maxCPU(0), nrCPUs(0), endTime(0), startTime(0),
-	  maxFreq(0), minFreq(0), maxIdleState(0), minIdleState(0),
-	  CPUs(nullptr), customPlot(nullptr)
+	  migrationScale(0), maxCPU(0), nrCPUs(0), endTimeDbl(0),
+	  startTimeDbl(0), maxFreq(0), minFreq(0), maxIdleState(0),
+	  minIdleState(0), timePrecision(0), CPUs(nullptr), customPlot(nullptr)
 {
 	taskNamePool = new StringPool(16384, 256);
 	parser = new TraceParser(&events);
@@ -183,12 +183,15 @@ void TraceAnalyzer::close()
 void TraceAnalyzer::resetProperties()
 {
 	maxCPU = 0;
-	startTime = 0;
-	endTime = 0;
+	startTime = VTL_TIME_ZERO;
+	startTimeDbl = 0;
+	endTime = VTL_TIME_ZERO;
+	endTimeDbl = 0;
 	minFreq = UINT_MAX;
 	maxFreq = 0;
 	minIdleState = INT_MAX;
 	maxIdleState = INT_MIN;
+	timePrecision = 0;
 }
 
 void TraceAnalyzer::processTrace()
@@ -240,10 +243,10 @@ void TraceAnalyzer::processSchedAddTail()
 				continue;
 			/* Check if tail is necessary */
 			lastTime = task.schedTimev[lastIndex];
-			if (lastTime >= getEndTime())
+			if (lastTime >= endTimeDbl)
 				continue;
 			d = task.schedData[task.schedData.size() - 1];
-			task.schedTimev.append(getEndTime());
+			task.schedTimev.append(endTimeDbl);
 			task.schedData.append(d);
 		}
 	}
@@ -259,10 +262,11 @@ void TraceAnalyzer::processSchedAddTail()
 		if (s <= 0)
 			continue;
 		lastTime = task.schedTimev[s - 1];
-		if (lastTime >= getEndTime() || task.exitStatus == STATUS_FINAL)
+		if (lastTime >= endTimeDbl
+		    || task.exitStatus == STATUS_FINAL)
 			continue;
 		d = task.schedData[task.schedData.size() - 1];
-		task.schedTimev.append(getEndTime());
+		task.schedTimev.append(endTimeDbl);
 		task.schedData.append(d);
 	}
 }
@@ -270,14 +274,39 @@ void TraceAnalyzer::processSchedAddTail()
 void TraceAnalyzer::processFreqAddTail()
 {
 	unsigned int cpu;
+	double end = getEndTime().toDouble();
 
 	for (cpu = 0; cpu <= maxCPU; cpu++) {
 		if (!cpuFreq[cpu].data.isEmpty()) {
 			double freq = cpuFreq[cpu].data.last();
 			cpuFreq[cpu].data.append(freq);
-			cpuFreq[cpu].timev.append(endTime);
+			cpuFreq[cpu].timev.append(end);
 		}
 	}
+}
+
+unsigned int TraceAnalyzer::guessTimePrecision()
+{
+	unsigned int s = events.size();
+	unsigned int r, p;
+
+	r = 0;
+	if (s < 1)
+		return r;
+
+	p = events[0].time.getPrecision();
+	if (p > r)
+		r = p;
+
+	p = events[s / 2].time.getPrecision();
+	if (p > r)
+		r = p;
+
+	p = events[s - 1].time.getPrecision();
+	if (p > r)
+		r = p;
+
+	return r;
 }
 
 /*
@@ -287,10 +316,11 @@ void TraceAnalyzer::processFreqAddTail()
 void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 					 unsigned int cpu,
 					 CPU *eventCPU, int oldpid,
-					 double oldtime)
+					 const vtl::Time &oldtime)
 {
 	int epid = eventCPU->pidOnCPU;
-	double prevtime, faketime;
+	vtl::Time prevtime, faketime;
+	double fakeDbl;
 	CPUTask *cpuTask;
 	Task *task;
 
@@ -300,12 +330,13 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		Q_ASSERT(!cpuTask->schedTimev.isEmpty());
 		prevtime = cpuTask->schedTimev.last();
 		faketime = prevtime + FAKE_DELTA;
-		cpuTask->schedTimev.append(faketime);
+		fakeDbl = faketime.toDouble();
+		cpuTask->schedTimev.append(fakeDbl);
 		cpuTask->schedData.append(FLOOR_HEIGHT);
 		task = findTask(epid);
 		Q_ASSERT(task != nullptr);
 		task->lastSleepEntry = faketime;
-		task->schedTimev.append(faketime);
+		task->schedTimev.append(fakeDbl);
 		task->schedData.append(FLOOR_HEIGHT);
 	}
 
@@ -316,7 +347,8 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		}
 		cpuTask->isNew = false;
 		faketime = oldtime - FAKE_DELTA;
-		cpuTask->schedTimev.append(faketime);
+		fakeDbl = faketime.toDouble();
+		cpuTask->schedTimev.append(fakeDbl);
 		cpuTask->schedData.append(SCHED_HEIGHT);
 
 		task = &taskMap[oldpid].getTask();
@@ -324,7 +356,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 			task->pid = oldpid;
 		}
 		task->isNew = false;
-		task->schedTimev.append(faketime);
+		task->schedTimev.append(fakeDbl);
 		task->schedData.append(SCHED_HEIGHT);
 	}
 }
@@ -421,7 +453,8 @@ retry:
 }
 
 
-int TraceAnalyzer::binarySearch(double time, int start, int end) const
+int TraceAnalyzer::binarySearch(const vtl::Time &time, int start, int end)
+	const
 {
 	int pivot = (end + start) / 2;
 	if (pivot == start)
@@ -432,7 +465,8 @@ int TraceAnalyzer::binarySearch(double time, int start, int end) const
 		return binarySearch(time, pivot, end);
 }
 
-int TraceAnalyzer::binarySearchFiltered(double time, int start, int end) const
+int TraceAnalyzer::binarySearchFiltered(const vtl::Time &time, int start,
+					int end) const
 {
 	int pivot = (end + start) / 2;
 	if (pivot == start)
@@ -443,7 +477,7 @@ int TraceAnalyzer::binarySearchFiltered(double time, int start, int end) const
 		return binarySearchFiltered(time, pivot, end);
 }
 
-int TraceAnalyzer::findIndexBefore(double time) const
+int TraceAnalyzer::findIndexBefore(const vtl::Time &time) const
 {
 	if (events.size() < 1)
 		return -1;
@@ -463,7 +497,7 @@ int TraceAnalyzer::findIndexBefore(double time) const
 	return c;
 }
 
-int TraceAnalyzer::findFilteredIndexBefore(double time) const
+int TraceAnalyzer::findFilteredIndexBefore(const vtl::Time &time) const
 {
 	if (filteredEvents.size() < 1)
 		return -1;
@@ -483,7 +517,7 @@ int TraceAnalyzer::findFilteredIndexBefore(double time) const
 	return c;
 }
 
-const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(double time,
+const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(const vtl::Time &time,
 							int pid,
 							int *index) const
 {
@@ -509,7 +543,7 @@ const TraceEvent *TraceAnalyzer::findFilteredEvent(int index,
 						   int *filterIndex)
 {
 	TraceEvent *eptr = &events[index];
-	double time = eptr->time;
+	vtl::Time time = eptr->time;
 	int s = filteredEvents.size();
 	int i;
 	int start = findFilteredIndexBefore(time);
@@ -665,7 +699,8 @@ void TraceAnalyzer::scaleMigration()
 		double s = migrationOffset + (m.oldcpu + 1) * unit;
 		double e = migrationOffset + (m.newcpu + 1) * unit;
 		QColor color = getTaskColor(m.pid);
-		a = new MigrationArrow(s, e, m.time, color, customPlot);
+		a = new MigrationArrow(s, e, m.time.toDouble(), color,
+				       customPlot);
 		migrationArrows.append(a);
 	}
 }
@@ -818,11 +853,12 @@ void TraceAnalyzer::createEventFilter(QMap<event_t, event_t> &map,
 		processAllFilters();
 }
 
-void TraceAnalyzer::createTimeFilter(double low, double high, bool
-				     orlogic)
+void TraceAnalyzer::createTimeFilter(const vtl::Time &low,
+				     const vtl::Time &high,
+				     bool orlogic)
 {
-	double start = getStartTime();
-	double end = getEndTime();
+	vtl::Time start = getStartTime();
+	vtl::Time end = getEndTime();
 
 	if (low < start && high > end)
 		return;
@@ -959,6 +995,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 	const TraceEvent *eptr;
 	bool rval = true;
 	const char *ename;
+	char tbuf[40];
 
 	*ts_errno = 0;
 
@@ -1010,10 +1047,11 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 		while (idx < nr_elements && written < WRITE_BUFFER_LIMIT) {
 			eptr = filteredEvents[idx];
 			idx++;
+			eptr->time.sprint(tbuf);
 			w = snprintf(wb, space,
-				     "%s %5u [%03u] %lf: ",
+				     "%s %5u [%03u] %s: ",
 				     eptr->taskName->ptr, eptr->pid,
-				     eptr->cpu, eptr->time);
+				     eptr->cpu, tbuf);
 			if (w > 0) {
 				written += w;
 				space   -= w;

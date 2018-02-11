@@ -113,8 +113,8 @@ private slots:
 	void mouseWheel();
 	void mousePress();
 	void plotDoubleClicked(QMouseEvent *event);
-	void infoValueChanged(double value, int nr);
-	void moveActiveCursor(double time);
+	void infoValueChanged(vtl::Time value, int nr);
+	void moveActiveCursor(vtl::Time time);
 	void showEventInfo(const TraceEvent &event);
 	void selectionChanged();
 	void plottableClicked(QCPAbstractPlottable *plottable, int dataIndex,
@@ -160,7 +160,7 @@ private:
 
 	void setTraceActionsEnabled(bool e);
 	void setEventsWidgetEvents();
-	void scrollTo(double time);
+	void scrollTo(const vtl::Time &time);
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;

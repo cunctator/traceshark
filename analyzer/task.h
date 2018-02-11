@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,6 +55,7 @@
 #include <QString>
 
 #include "analyzer/abstracttask.h"
+#include "vtl/time.h"
 
 class QCPGraph;
 class TaskGraph;
@@ -94,9 +95,9 @@ public:
 	exitstatus_t exitStatus;
 
 	/* lastWakeUP is only used during extraction */
-	double lastWakeUP;
+	vtl::Time lastWakeUP;
 
-	double lastSleepEntry;
+	vtl::Time lastSleepEntry;
 
 	/*
 	 * The unified task needs to save pointers to these graphs so that they

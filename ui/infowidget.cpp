@@ -53,6 +53,7 @@
 #include "ui/cursorinfo.h"
 #include "ui/taskinfo.h"
 #include "misc/traceshark.h"
+#include "vtl/time.h"
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -78,7 +79,7 @@ InfoWidget::InfoWidget(QWidget *parent):
 
 	diffLine = new QLineEdit(widget);
 	diffLine->setReadOnly(true);
-	diffLine->setText(QString::number((double) 0, 'f', 7));
+	diffLine->setText(VTL_TIME_ZERO.toQString());
 	diffLine->setMaxLength(18);
 	mainLayout->addWidget(diffLine);
 
@@ -98,17 +99,17 @@ InfoWidget::InfoWidget(QWidget *parent):
 		cursorValues[i] = 0;
 
 	mainLayout->addStretch();
-	sigconnect(cursorInfos[0], valueChanged(double, int), this,
-		   valueChanged(double, int));
-	sigconnect(cursorInfos[1], valueChanged(double, int), this,
-		   valueChanged(double, int));
+	sigconnect(cursorInfos[0], valueChanged(vtl::Time, int), this,
+		   valueChanged(vtl::Time, int));
+	sigconnect(cursorInfos[1], valueChanged(vtl::Time, int), this,
+		   valueChanged(vtl::Time, int));
 	sigconnect(taskInfo, findWakeup(int), this, findWakeup(int));
 	sigconnect(taskInfo, addTaskGraph(int), this, addTaskGraph(int));
 	sigconnect(taskInfo, removeTaskGraph(int), this, removeTaskGraph(int));
-	tsconnect(cursorInfos[0], valueChanged(double, int), this,
-		  updateChange(double, int));
-	tsconnect(cursorInfos[1], valueChanged(double, int), this,
-		  updateChange(double, int));
+	tsconnect(cursorInfos[0], valueChanged(vtl::Time, int), this,
+		  updateChange(vtl::Time, int));
+	tsconnect(cursorInfos[1], valueChanged(vtl::Time, int), this,
+		  updateChange(vtl::Time, int));
 }
 
 InfoWidget::~InfoWidget()
@@ -120,7 +121,7 @@ void InfoWidget::addTaskGraphToLegend(TaskGraph *graph)
 	taskInfo->addTaskGraphToLegend(graph);
 }
 
-void InfoWidget::setTime(double time, int cursorIdx)
+void InfoWidget::setTime(const vtl::Time &time, int cursorIdx)
 {
 	if (cursorIdx == TShark::RED_CURSOR ||
 	    cursorIdx == TShark::BLUE_CURSOR) {
@@ -131,7 +132,7 @@ void InfoWidget::setTime(double time, int cursorIdx)
 }
 
 
-void InfoWidget::updateChange(double value, int nr)
+void InfoWidget::updateChange(const vtl::Time &value, int nr)
 {
 	if (nr == TShark::RED_CURSOR || nr == TShark::BLUE_CURSOR) {
 		cursorValues[nr] = value;
@@ -141,16 +142,9 @@ void InfoWidget::updateChange(double value, int nr)
 
 void InfoWidget::updateDifference()
 {
-	int precision = 7;
-	double extra = 0;
-	double diff = fabs(cursorValues[TShark::RED_CURSOR]
-			   - cursorValues[TShark::BLUE_CURSOR]);
-
-	if (diff >= 10)
-		extra = floor (log(diff) / log(10));
-
-	precision += (int) extra;
-	diffLine->setText(QString::number(diff, 'f', precision));
+	vtl::Time diff = (cursorValues[TShark::RED_CURSOR]
+			  - cursorValues[TShark::BLUE_CURSOR]).fabs();
+	diffLine->setText(diff.toQString());
 }
 
 int InfoWidget::getCursorIdx()

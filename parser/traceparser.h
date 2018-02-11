@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -106,7 +106,7 @@ private:
 	__always_inline bool parseLinePerf(TraceLine &line, TraceEvent &event);
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
-	bool parseLineBugFixup(TraceEvent* event, const double &prevTime);
+	bool parseLineBugFixup(TraceEvent* event, const vtl::Time &prevTime);
 	TraceFile *traceFile;
 	MemPool *ptrPool;
 	MemPool *postEventPool;

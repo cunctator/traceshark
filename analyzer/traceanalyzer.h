@@ -82,8 +82,9 @@
 #include "threads/workitem.h"
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
+#include "vtl/time.h"
 
-#define FAKE_DELTA ((double) 0.00000005)
+#define FAKE_DELTA (vtl::Time(false, 0, 50))
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
@@ -109,7 +110,8 @@ public:
 	void processTrace();
 	vtl::TList<TraceEvent> events;
 	vtl::TList <const TraceEvent*> filteredEvents;
-	const TraceEvent *findPreviousSchedEvent(double time, int pid,
+	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
+						 int pid,
 						 int *index) const;
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
 						  int pid,
@@ -117,10 +119,11 @@ public:
 	const TraceEvent *findFilteredEvent(int index, int *filterIndex);
 	__always_inline unsigned int getMaxCPU() const;
 	__always_inline unsigned int getNrCPUs() const;
-	__always_inline double getStartTime() const;
-	__always_inline double getEndTime() const;
+	__always_inline vtl::Time getStartTime() const;
+	__always_inline vtl::Time getEndTime() const;
 	__always_inline int getMinIdleState() const;
 	__always_inline int getMaxIdleState() const;
+	__always_inline unsigned int getTimePrecision() const;
 	__always_inline CPUTask *findCPUTask(int pid,
 					     unsigned int cpu);
 	__always_inline QColor getTaskColor(int pid) const;
@@ -146,7 +149,8 @@ public:
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
-	void createTimeFilter(double low, double high, bool orlogic);
+	void createTimeFilter(const vtl::Time &low,
+			      const vtl::Time &high, bool orlogic);
 	void disableFilter(FilterState::filter_t filter);
 	void addPidToFilter(int pid);
 	void removePidFromFilter(int pid);
@@ -159,24 +163,26 @@ private:
 	void prepareDataStructures();
 	void resetProperties();
 	void threadProcess();
-	int binarySearch(double time, int start, int end) const;
-	int binarySearchFiltered(double time, int start, int end) const;
+	int binarySearch(const vtl::Time &time, int start, int end) const;
+	int binarySearchFiltered(const vtl::Time &time, int start, int end)
+		const;
 	void colorizeTasks();
-	int findIndexBefore(double time) const;
-	int findFilteredIndexBefore(double time) const;
+	int findIndexBefore(const vtl::Time &time) const;
+	int findFilteredIndexBefore(const vtl::Time &time) const;
 	__always_inline int
 		generic_sched_switch_newpid(const TraceEvent &event) const;
 	__always_inline int
 		generic_sched_wakeup_pid(const TraceEvent &event) const;
-	__always_inline double estimateWakeUpNew(const CPU *eventCPU,
-						 double newTime,
-						 double startTime,
+	__always_inline vtl::Time estimateWakeUpNew(const CPU *eventCPU,
+						    const vtl::Time &newTime,
+						    const vtl::Time &startTime,
+						    bool &valid) const;
+	__always_inline vtl::Time estimateWakeUp(const Task *task,
+						 const vtl::Time &newTime,
 						 bool &valid) const;
-	__always_inline double estimateWakeUp(const Task *task,
-					      double newTime,
-					      bool &valid) const;
 	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
-				  CPU *eventCPU, int oldpid, double oldtime);
+				  CPU *eventCPU, int oldpid,
+				  const vtl::Time &oldtime);
 	__always_inline void __processSwitchEvent(tracetype_t ttype,
 						  TraceEvent &event);
 	__always_inline void __processWakeupEvent(tracetype_t ttype,
@@ -200,6 +206,7 @@ private:
 	void scaleMigration();
 	void processSchedAddTail();
 	void processFreqAddTail();
+	unsigned int guessTimePrecision();
 	__always_inline void __processGeneric(tracetype_t ttype);
 	__always_inline void updateMaxCPU(unsigned int cpu);
 	__always_inline void updateMaxFreq(unsigned int freq);
@@ -228,12 +235,15 @@ private:
 	double migrationScale;
 	unsigned int maxCPU;
 	unsigned int nrCPUs;
-	double endTime;
-	double startTime;
+	vtl::Time endTime;
+	vtl::Time startTime;
+	double endTimeDbl;
+	double startTimeDbl;
 	unsigned int maxFreq;
 	unsigned int minFreq;
 	int maxIdleState;
 	int minIdleState;
+	unsigned int timePrecision;
 	CPU *CPUs;
 	StringPool *taskNamePool;
 	QCustomPlot *customPlot;
@@ -245,20 +255,21 @@ private:
 	QMap<event_t, event_t> OR_filterEventMap;
 	bool pidFilterInclusive;
 	bool OR_pidFilterInclusive;
-	double filterTimeLow;
-	double filterTimeHigh;
-	double OR_filterTimeLow;
-	double OR_filterTimeHigh;
+	vtl::Time filterTimeLow;
+	vtl::Time filterTimeHigh;
+	vtl::Time OR_filterTimeLow;
+	vtl::Time OR_filterTimeHigh;
 	static const char spaceStr[];
 	static const int spaceStrLen;
 };
 
-__always_inline double TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,
-							double newTime,
-							double startTime,
-							bool &valid) const
+__always_inline
+vtl::Time TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,
+					   const vtl::Time &newTime,
+					   const vtl::Time &startTime,
+					   bool &valid) const
 {
-	double delay;
+	vtl::Time delay;
 
 	if (!eventCPU->hasBeenScheduled)
 		goto regular;
@@ -273,11 +284,12 @@ regular:
 	return delay;
 }
 
-__always_inline double TraceAnalyzer::estimateWakeUp(const Task *task,
-						     double newTime,
-						     bool &valid) const
+__always_inline
+vtl::Time TraceAnalyzer::estimateWakeUp(const Task *task,
+					const vtl::Time &newTime,
+					bool &valid) const
 {
-	double delay;
+	vtl::Time delay;
 
 	/* Is this reasonable ? */
 	if (task->lastWakeUP < task->lastSleepEntry) {
@@ -316,12 +328,12 @@ __always_inline unsigned int TraceAnalyzer::getNrCPUs() const
 	return nrCPUs;
 }
 
-__always_inline double  TraceAnalyzer::getStartTime() const
+__always_inline vtl::Time TraceAnalyzer::getStartTime() const
 {
 	return startTime;
 }
 
-__always_inline double TraceAnalyzer::getEndTime() const
+__always_inline vtl::Time TraceAnalyzer::getEndTime() const
 {
 	return endTime;
 }
@@ -334,6 +346,11 @@ __always_inline int TraceAnalyzer::getMinIdleState() const
 __always_inline int TraceAnalyzer::getMaxIdleState() const
 {
 	return maxIdleState;
+}
+
+__always_inline unsigned int TraceAnalyzer::getTimePrecision() const
+{
+	return timePrecision;
 }
 
 __always_inline QColor TraceAnalyzer::getTaskColor(int pid) const
@@ -402,7 +419,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 		/* This should be very likely for a task that just forked !*/
 		task->isNew = false;
 		task->pid = m.pid;
-		task->schedTimev.append(event.time);
+		task->schedTimev.append(event.time.toDouble());
 		task->schedData.append(FLOOR_HEIGHT);
 		childname = sched_process_fork_childname_strdup(ttype, event,
 								taskNamePool);
@@ -431,13 +448,14 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 							 TraceEvent &event)
 {
 	unsigned int cpu = event.cpu;
-	double oldtime = event.time - FAKE_DELTA;
-	double newtime = event.time + FAKE_DELTA;
+	vtl::Time oldtime = event.time - FAKE_DELTA;
+	vtl::Time newtime = event.time + FAKE_DELTA;
+	double oldtimeDbl, newtimeDbl;
 	int oldpid = sched_switch_oldpid(ttype, event);
 	int newpid = sched_switch_newpid(ttype, event);
 	CPUTask *cpuTask;
 	Task *task;
-	double delay;
+	vtl::Time delay;
 	bool delayOK;
 	CPU *eventCPU = &CPUs[cpu];
 	taskstate_t state;
@@ -464,6 +482,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		goto skip; /* We don't care about the idle task */
 	}
 
+	oldtimeDbl = oldtime.toDouble();
+
 	/* Handle the outgoing task */
 	cpuTask = &cpuTaskMaps[cpu][oldpid];
 	task = &taskMap[oldpid].getTask();
@@ -478,15 +498,15 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->checkName(name);
 
 		/* Apparently this task was running when we started tracing */
-		task->schedTimev.append(startTime);
+		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(SCHED_HEIGHT);
 
-		task->schedTimev.append(oldtime);
+		task->schedTimev.append(oldtimeDbl);
 		task->schedData.append(FLOOR_HEIGHT);
 	}
 	if (task->exitStatus == STATUS_EXITCALLED)
 		task->exitStatus = STATUS_FINAL;
-	task->schedTimev.append(oldtime);
+	task->schedTimev.append(oldtimeDbl);
 	task->schedData.append(FLOOR_HEIGHT);
 
 	runnable = task_state_is_runnable(state);
@@ -494,10 +514,10 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	if (runnable) {
 		preempted = task_state_is_flag_set(state, TASK_FLAG_PREEMPT);
 		if (preempted) {
-			task->preemptedTimev.append(oldtime);
+			task->preemptedTimev.append(oldtimeDbl);
 			task->preemptedData.append(FLOOR_HEIGHT);
 		} else {
-			task->runningTimev.append(oldtime);
+			task->runningTimev.append(oldtimeDbl);
 			task->runningData.append(FLOOR_HEIGHT);
 		}
 		task->lastWakeUP = oldtime;
@@ -512,17 +532,17 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		cpuTask->isNew = false;
 
 		/* Apparently this task was on CPU when we started tracing */
-		cpuTask->schedTimev.append(startTime);
+		cpuTask->schedTimev.append(startTimeDbl);
 		cpuTask->schedData.append(SCHED_HEIGHT);
 	}
-	cpuTask->schedTimev.append(oldtime);
+	cpuTask->schedTimev.append(oldtimeDbl);
 	cpuTask->schedData.append(FLOOR_HEIGHT);
 	if (runnable) {
 		if (preempted) {
-			cpuTask->preemptedTimev.append(oldtime);
+			cpuTask->preemptedTimev.append(oldtimeDbl);
 			cpuTask->preemptedData.append(FLOOR_HEIGHT);
 		} else {
-			cpuTask->runningTimev.append(oldtime);
+			cpuTask->runningTimev.append(oldtimeDbl);
 			cpuTask->runningData.append(FLOOR_HEIGHT);
 		}
 	}
@@ -532,6 +552,8 @@ skip:
 		eventCPU->lastEnterIdle = newtime;
 		goto out; /* We don't care about the idle task */
 	}
+
+	newtimeDbl = newtime.toDouble();
 
 	/* Handle the incoming task */
 	task = &taskMap[newpid].getTask();
@@ -544,17 +566,20 @@ skip:
 		delay = estimateWakeUpNew(eventCPU, newtime, startTime,
 					  delayOK);
 
-		task->schedTimev.append(startTime);
+		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(FLOOR_HEIGHT);
 	} else
 		delay = estimateWakeUp(task, newtime, delayOK);
 
+	double delayDbl;
+
 	if (delayOK) {
-		task->wakeTimev.append(newtime);
-		task->wakeDelay.append(delay);
+		delayDbl = delay.toDouble();
+		task->wakeTimev.append(newtimeDbl);
+		task->wakeDelay.append(delayDbl);
 	}
 
-	task->schedTimev.append(newtime);
+	task->schedTimev.append(newtimeDbl);
 	task->schedData.append(SCHED_HEIGHT);
 
 	cpuTask = &cpuTaskMaps[cpu][newpid];
@@ -563,16 +588,16 @@ skip:
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
 
-		cpuTask->schedTimev.append(startTime);
+		cpuTask->schedTimev.append(startTimeDbl);
 		cpuTask->schedData.append(FLOOR_HEIGHT);
 	}
 
 	if (delayOK) {
-		cpuTask->wakeTimev.append(newtime);
-		cpuTask->wakeDelay.append(delay);
+		cpuTask->wakeTimev.append(newtimeDbl);
+		cpuTask->wakeDelay.append(delayDbl);
 	}
 
-	cpuTask->schedTimev.append(newtime);
+	cpuTask->schedTimev.append(newtimeDbl);
 	cpuTask->schedData.append(SCHED_HEIGHT);
 
 out:
@@ -587,7 +612,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 {
 	int pid;
 	Task *task;
-	double time;
+	vtl::Time time;
 	const char *name;
 
 	/* Only interested in success */
@@ -606,7 +631,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 		name = sched_wakeup_name_strdup(ttype, event, taskNamePool);
 		if (name != nullptr)
 			task->checkName(name);
-		task->schedTimev.append(startTime);
+		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(FLOOR_HEIGHT);
 	}
 }
@@ -615,7 +640,7 @@ __always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 							  TraceEvent &event)
 {
 	unsigned int cpu = cpufreq_cpu(ttype, event);
-	double time = event.time;
+	vtl::Time time = event.time;
 	unsigned int freq = cpufreq_freq(ttype, event);
 
 	if (!isValidCPU(cpu))
@@ -631,7 +656,7 @@ __always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 	 */
 	if (cpuFreq[cpu].timev.isEmpty())
 		time = startTime;
-	cpuFreq[cpu].timev.append(time);
+	cpuFreq[cpu].timev.append(time.toDouble());
 	cpuFreq[cpu].data.append((double) freq);
 }
 
@@ -639,7 +664,7 @@ __always_inline void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
 							  TraceEvent &event)
 {
 	unsigned int cpu = cpuidle_cpu(ttype, event);
-	double time = event.time;
+	double time = event.time.toDouble();
 	unsigned int state = cpuidle_state(ttype, event) + 1;
 
 	if (!isValidCPU(cpu))
@@ -697,6 +722,7 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 		return;
 
 	startTime = events[0].time;
+	startTimeDbl = startTime.toDouble();
 
 	while(true) {
 		for (i = prevIndex; i < indexReady; i++) {
@@ -744,7 +770,9 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 		parser->waitForNextBatch(eof, indexReady);
 	}
 	endTime = events.last().time;
+	endTimeDbl = endTime.toDouble();
 	nrCPUs = maxCPU + 1;
+	timePrecision = guessTimePrecision();
 }
 
 __always_inline

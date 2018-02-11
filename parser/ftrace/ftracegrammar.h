@@ -56,6 +56,7 @@
 #include "mm/stringpool.h"
 #include "mm/stringtree.h"
 #include "parser/traceevent.h"
+#include "vtl/time.h"
 
 #define NEXTTOKEN(IS_LEAF)			\
 	{					\
@@ -199,7 +200,7 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 	 * atof() and sscanf() are not up to the task because they are
 	 * too slow and get confused by locality issues.
 	 */
-	event.time = TShark::timeStrToDouble(str->ptr, rval);
+	event.time = vtl::Time::fromString(str->ptr, rval);;
 
 	/*
 	 * This is the time field, if it is successful we need to assemble

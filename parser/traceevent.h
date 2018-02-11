@@ -54,6 +54,7 @@
 
 #include "parser/traceline.h"
 #include "misc/tstring.h"
+#include "vtl/time.h"
 
 #include <cstdint>
 
@@ -153,7 +154,7 @@ public:
 	const TString *taskName;
 	int pid;
 	unsigned int cpu;
-	double time;
+	vtl::Time time;
 	int intArg;
 	event_t type;
 	const TString **argv;

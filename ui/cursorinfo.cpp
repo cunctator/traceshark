@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,6 +57,7 @@
 #include <QString>
 #include <QWidget>
 #include <cmath>
+#include <cstdio>
 
 #include "ui/cursorinfo.h"
 #include "misc/resources.h"
@@ -74,7 +75,7 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	line = new QLineEdit(this);
 
 	line->setReadOnly(false);
-	line->setInputMask(QString("0000000.0000000"));
+	line->setInputMask(QString("0000000.000000"));
 
 	switch (nr) {
 	case TShark::RED_CURSOR:
@@ -103,7 +104,7 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	layout->addWidget(moveToolBar);
 	moveToolBar->addAction(moveCursorAction);
 
-	updateValue(0);
+	updateValue(VTL_TIME_ZERO);
 	tsconnect(moveCursorAction, triggered(), this, moveTriggered());
 }
 
@@ -111,22 +112,23 @@ CursorInfo::~CursorInfo()
 {
 }
 
-void CursorInfo::updateValue(double value)
+void CursorInfo::updateValue(vtl::Time value)
 {
-	int precision = 7;
-	double extra = 0;
-
-	if (value >= 10)
-		extra = floor (log(value) / log(10));
-
-	precision += (int) extra;
-	line->setText(QString::number((value), 'f', precision));
+	unsigned int p = value.getPrecision();
+	QString mask = createInputMask(p);
+	line->setInputMask(mask);
+	line->setText(value.toQString());
 }
 
 void CursorInfo::moveTriggered()
 {
-	if (line->hasAcceptableInput())
-		emit valueChanged(line->text().toDouble(), id);
+	if (line->hasAcceptableInput()) {
+		bool ok;
+		vtl::Time t = vtl::Time::fromSpacedString(
+			line->text().toLocal8Bit().data(), ok);
+		if (ok)
+			emit valueChanged(t, id);
+	}
 }
 
 void CursorInfo::setTraceActionsEnabled(bool e)
@@ -135,4 +137,22 @@ void CursorInfo::setTraceActionsEnabled(bool e)
 		line->clear();
 	line->setEnabled(e);
 	moveCursorAction->setEnabled(e);
+}
+
+QString CursorInfo::createInputMask(unsigned int precision)
+{
+	char buf[40];
+	int s = sprintf(buf, "0000000.");
+	char *c = &buf[s];
+	unsigned int i;
+
+	for (i = 0; i < precision; i++) {
+		*c = '0';
+		c++;
+	}
+
+	*c = '\0';
+
+	QString qstr(buf);
+	return qstr;
 }

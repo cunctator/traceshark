@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -295,13 +295,13 @@ void TraceParser::prepareParse()
 	perfLineData.prevEvent = &fakeEvent;
 	perfLineData.nrEvents = 0;
 	perfLineData.prevLineIsEvent = true;
-	perfLineData.prevTime = std::numeric_limits<double>::lowest();
+	perfLineData.prevTime = VTL_TIME_MIN;
 
 	ftraceLineData.infoBegin = traceFile->mappedFile;
 	ftraceLineData.prevEvent = &fakeEvent;
 	ftraceLineData.nrEvents = 0;
 	ftraceLineData.prevLineIsEvent = true;
-	ftraceLineData.prevTime = std::numeric_limits<double>::lowest();
+	ftraceLineData.prevTime = VTL_TIME_MIN;
 
 	events->clear();
 }
@@ -347,13 +347,17 @@ void TraceParser::fixLastEvent()
 	}
 }
 
-bool TraceParser::parseLineBugFixup(TraceEvent* event, const double &prevTime)
+#define CORR_DELTA vtl::Time(false, 0, 900000000)
+#define TIME_10MS  vtl::Time(false, 0, 10000000)
+
+bool TraceParser::parseLineBugFixup(TraceEvent* event,
+				    const vtl::Time &prevTime)
 {
-	double corrtime = event->time + 0.9;
-	double delta = corrtime - prevTime;
+	vtl::Time corrtime = event->time + CORR_DELTA;
+	vtl::Time delta = corrtime - prevTime;
 	bool retval = false;
 
-	if (delta >= (double)0 && delta < 0.00001) {
+	if (delta >= VTL_TIME_ZERO && delta < TIME_10MS) {
 		event->time = corrtime;
 		retval = true;
 	}

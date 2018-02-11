@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,6 +54,7 @@
 
 #include <QDockWidget>
 #include "misc/traceshark.h"
+#include "vtl/time.h"
 
 class QTableView;
 class EventsModel;
@@ -76,13 +77,13 @@ public:
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
-	void scrollTo(double time);
+	void scrollTo(const vtl::Time &time);
 	void scrollTo(int n);
 	void scrollToSaved();
 	void show();
-	double getSavedScroll();
+	vtl::Time getSavedScroll();
 signals:
-	void timeSelected(double time);
+	void timeSelected(vtl::Time time);
 	void infoDoubleClicked(const TraceEvent &event);
 private slots:
 	void handleClick(const QModelIndex &index);
@@ -93,9 +94,9 @@ private:
 	vtl::TList<TraceEvent> *events;
 	vtl::TList<const TraceEvent*> *eventsPtrs;
 	bool saveScrollTime;
-	double scrollTime;
-	int findBestMatch(double time);
-	int binarySearch(double time, int start, int end);
+	vtl::Time scrollTime;
+	int findBestMatch(const vtl::Time &time);
+	int binarySearch(const vtl::Time &time, int start, int end);
 	const TraceEvent* getEventAt(int index) const;
 	unsigned int getSize() const;
 };

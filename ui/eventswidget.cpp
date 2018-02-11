@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -59,7 +59,7 @@
 
 EventsWidget::EventsWidget(QWidget *parent):
 	QDockWidget(tr("Events"), parent), events(nullptr),
-	eventsPtrs(nullptr), saveScrollTime(false), scrollTime(0)
+	eventsPtrs(nullptr), saveScrollTime(false)
 {
 	tableView = new QTableView(this);
 	eventsModel = new EventsModel(tableView);
@@ -134,7 +134,7 @@ void EventsWidget::endResetModel()
 	resizeColumnsToContents();
 }
 
-void EventsWidget::scrollTo(double time)
+void EventsWidget::scrollTo(const vtl::Time &time)
 {
 	if (events != nullptr || eventsPtrs != nullptr) {
 		int n = findBestMatch(time);
@@ -168,14 +168,14 @@ void EventsWidget::scrollToSaved()
 /* This function checks the value at, before and after the value found 
  * with binary search in order to determine the one with smallest difference
  */
-int EventsWidget::findBestMatch(double time)
+int EventsWidget::findBestMatch(const vtl::Time &time)
 {
 	int n = 0;
 	int c, next, prev;
 	int end;
 	int cand[3];
-	double diffs[3];
-	double best;
+	vtl::Time diffs[3];
+	vtl::Time best;
 	int bestN;
 	int i;
 
@@ -187,7 +187,7 @@ int EventsWidget::findBestMatch(double time)
 	c =  binarySearch(time, 0, end);
 
 	cand[n] = c;
-	diffs[n] = fabs(getEventAt(c)->time - time);
+	diffs[n] = (getEventAt(c)->time - time).fabs();
 	bestN = c;
 	best = diffs[n];
 	n++;
@@ -197,13 +197,13 @@ int EventsWidget::findBestMatch(double time)
 
 	if (next <= end) {
 		cand[n] = next;
-		diffs[n] = fabs(getEventAt(next)->time - time);
+		diffs[n] = (getEventAt(next)->time - time).fabs();
 		n++;
 	}
 
 	if (prev >= 0) {
 		cand[n] = prev;
-		diffs[n] = fabs(getEventAt(prev)->time - time);
+		diffs[n] = (getEventAt(prev)->time - time).fabs();
 		n++;
 	}
 
@@ -224,7 +224,7 @@ int EventsWidget::findBestMatch(double time)
 	return bestN;
 }
 
-int EventsWidget::binarySearch(double time, int start, int end)
+int EventsWidget::binarySearch(const vtl::Time &time, int start, int end)
 {
 	int pivot = (end + start) / 2;
 	if (pivot == start)
@@ -238,7 +238,7 @@ int EventsWidget::binarySearch(double time, int start, int end)
 void EventsWidget::handleClick(const QModelIndex &index)
 {
 	if (index.column() == 0) {
-		double time = getEventAt(index.row())->time;
+		vtl::Time time = getEventAt(index.row())->time;
 		emit timeSelected(time);
 	}
 }
@@ -283,7 +283,7 @@ unsigned int EventsWidget::getSize() const
 	return 0;
 }
 
-double EventsWidget::getSavedScroll()
+vtl::Time EventsWidget::getSavedScroll()
 {
 	if (saveScrollTime)
 		return scrollTime;

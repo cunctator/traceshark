@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -117,7 +117,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		const TraceEvent &event = *getEventAt(row);
 		switch(column) {
 		case 0:
-			return QString::number(event.time, 'f', 6);
+			return event.time.toQString();
 		case 1:
 			return QString(event.taskName->ptr);
 		case 2:

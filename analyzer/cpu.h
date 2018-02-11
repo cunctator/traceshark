@@ -52,6 +52,8 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include "vtl/time.h"
+
 class CPU {
 public:
 	CPU(): pidOnCPU(0), hasBeenScheduled(false), lastSched(0),
@@ -60,10 +62,10 @@ public:
 	bool hasBeenScheduled;
 
 	/* Time when pidOnCPU was scheduled */
-	double lastSched;
+	vtl::Time lastSched;
 
-	double lastEnterIdle;
-	double lastExitIdle;
+	vtl::Time lastEnterIdle;
+	vtl::Time lastExitIdle;
 };
 
 #endif /* CPU_H */

@@ -52,12 +52,14 @@
 #ifndef MIGRATION_H
 #define MIGRATION_H
 
+#include "vtl/time.h"
+
 class Migration {
 public:
 	int pid;
 	int oldcpu;
 	int newcpu;
-	double time;
+	vtl::Time time;
 };
 
 #endif /* MIGRATION */

@@ -145,14 +145,14 @@ MainWindow::MainWindow():
 
 	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
-	tsconnect(infoWidget, valueChanged(double, int),
-		  this, infoValueChanged(double, int));
+	tsconnect(infoWidget, valueChanged(vtl::Time, int),
+		  this, infoValueChanged(vtl::Time, int));
 	tsconnect(infoWidget, addTaskGraph(int), this, addTaskGraph(int));
 	tsconnect(infoWidget, findWakeup(int), this, showWakeup(int));
 	tsconnect(infoWidget, removeTaskGraph(int), this, removeTaskGraph(int));
 
-	tsconnect(eventsWidget, timeSelected(double), this,
-		  moveActiveCursor(double));
+	tsconnect(eventsWidget, timeSelected(vtl::Time), this,
+		  moveActiveCursor(vtl::Time));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
 		  this, showEventInfo(const TraceEvent &));
 	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
@@ -349,8 +349,8 @@ void MainWindow::computeLayout()
 	double start, end;
 	QColor color;
 
-	start = analyzer->getStartTime();
-	end = analyzer->getEndTime();
+	start = analyzer->getStartTime().toDouble();
+	end = analyzer->getEndTime().toDouble();
 
 	bottom = bugWorkAroundOffset;
 	offset = bottom + migrateSectionOffset;
@@ -436,8 +436,8 @@ void MainWindow::showTrace()
 	double extra = 0;
 	QColor color;
 
-	start = analyzer->getStartTime();
-	end = analyzer->getEndTime();
+	start = analyzer->getStartTime().toDouble();
+	end = analyzer->getEndTime().toDouble();
 
 	if (end >= 10)
 		extra = floor (log(end) / log(10));
@@ -508,8 +508,8 @@ void MainWindow::setupCursors()
 {
 	double start, end, red, blue;
 
-	start = analyzer->getStartTime();
-	end = analyzer->getEndTime();
+	start = analyzer->getStartTime().toDouble();
+	end = analyzer->getEndTime().toDouble();
 
 	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot, Qt::red);
 	cursors[TShark::BLUE_CURSOR] = new Cursor(tracePlot, Qt::blue);
@@ -518,15 +518,19 @@ void MainWindow::setupCursors()
 	cursors[TShark::BLUE_CURSOR]->setLayer(cursorLayer);
 
 	red = (start + end) / 2;
+	vtl::Time redtime = vtl::Time::fromDouble(red);
+	redtime.setPrecision(analyzer->getTimePrecision());
 	cursors[TShark::RED_CURSOR]->setPosition(red);
 	cursorPos[TShark::RED_CURSOR] = red;
-	infoWidget->setTime(red, TShark::RED_CURSOR);
+	infoWidget->setTime(redtime, TShark::RED_CURSOR);
 	blue = (start + end) / 2 + (end - start) / 10;
+	vtl::Time bluetime = vtl::Time::fromDouble(blue);
+	bluetime.setPrecision(analyzer->getTimePrecision());
 	cursors[TShark::BLUE_CURSOR]->setPosition(blue);
 	cursorPos[TShark::BLUE_CURSOR] = blue;
-	infoWidget->setTime(blue, TShark::BLUE_CURSOR);
+	infoWidget->setTime(bluetime, TShark::BLUE_CURSOR);
 
-	scrollTo(red);
+	scrollTo(redtime);
 }
 
 void MainWindow::setupSettings()
@@ -902,28 +906,32 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 	if (cursor != nullptr) {
 		double pixel = (double) event->x();
 		double coord = tracePlot->xAxis->pixelToCoord(pixel);
+		vtl::Time time = vtl::Time::fromDouble(coord);
+		time.setPrecision(analyzer->getTimePrecision());
 		cursorPos[cursorIdx] = coord;
 		cursor->setPosition(coord);
-		eventsWidget->scrollTo(coord);
-		infoWidget->setTime(coord, cursorIdx);
+		eventsWidget->scrollTo(time);
+		infoWidget->setTime(time, cursorIdx);
 	}
 }
 
-void MainWindow::infoValueChanged(double value, int nr)
+void MainWindow::infoValueChanged(vtl::Time value, int nr)
 {
 	Cursor *cursor;
+	double dblValue = value.toDouble();
 	if (nr == TShark::RED_CURSOR || nr == TShark::BLUE_CURSOR) {
 		cursor = cursors[nr];
 		if (cursor != nullptr)
-			cursor->setPosition(value);
+			cursor->setPosition(dblValue);
 		eventsWidget->scrollTo(value);
-		cursorPos[nr] = value;
+		cursorPos[nr] = dblValue;
 	}
 }
 
-void MainWindow::moveActiveCursor(double time)
+void MainWindow::moveActiveCursor(vtl::Time time)
 {
 	int cursorIdx;
+	double dblTime = time.toDouble();
 
 	cursorIdx = infoWidget->getCursorIdx();
 	if (cursorIdx != TShark::RED_CURSOR && cursorIdx != TShark::BLUE_CURSOR)
@@ -931,9 +939,9 @@ void MainWindow::moveActiveCursor(double time)
 
 	Cursor *cursor = cursors[cursorIdx];
 	if (cursor != nullptr) {
-		cursor->setPosition(time);
+		cursor->setPosition(dblTime);
 		infoWidget->setTime(time, cursorIdx);
-		cursorPos[cursorIdx] = time;
+		cursorPos[cursorIdx] = dblTime;
 	}
 }
 
@@ -1201,9 +1209,9 @@ void MainWindow::setEventsWidgetEvents()
 		eventsWidget->setEvents(&analyzer->events);
 }
 
-void MainWindow::scrollTo(double time)
+void MainWindow::scrollTo(const vtl::Time &time)
 {
-	double start, end;
+	vtl::Time start, end;
 	start = analyzer->getStartTime();
 	end = analyzer->getEndTime();
 
@@ -1233,15 +1241,18 @@ void MainWindow::updateResetFiltersEnabled(void)
 void MainWindow::timeFilter(void)
 {
 	double min, max;
-	double saved = eventsWidget->getSavedScroll();
+	vtl::Time saved = eventsWidget->getSavedScroll();
 
 	min = TSMIN(cursorPos[TShark::RED_CURSOR],
 		    cursorPos[TShark::BLUE_CURSOR]);
 	max = TSMAX(cursorPos[TShark::RED_CURSOR],
 		    cursorPos[TShark::BLUE_CURSOR]);
 
+	vtl::Time tmin = vtl::Time::fromDouble(min);
+	vtl::Time tmax = vtl::Time::fromDouble(max);
+
 	eventsWidget->beginResetModel();
-	analyzer->createTimeFilter(min, max, false);
+	analyzer->createTimeFilter(tmin, tmax, false);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
@@ -1251,7 +1262,7 @@ void MainWindow::timeFilter(void)
 void MainWindow::createPidFilter(QMap<int, int> &map,
 				 bool orlogic, bool inclusive)
 {
-	double saved = eventsWidget->getSavedScroll();
+	vtl::Time saved = eventsWidget->getSavedScroll();
 
 	eventsWidget->beginResetModel();
 	analyzer->createPidFilter(map, orlogic, inclusive);
@@ -1263,7 +1274,7 @@ void MainWindow::createPidFilter(QMap<int, int> &map,
 
 void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
 {
-	double saved = eventsWidget->getSavedScroll();
+	vtl::Time saved = eventsWidget->getSavedScroll();
 
 	eventsWidget->beginResetModel();
 	analyzer->createEventFilter(map, orlogic);
@@ -1276,7 +1287,7 @@ void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
 
 void MainWindow::resetPidFilter()
 {
-	double saved;
+	vtl::Time saved;
 
 	if (!analyzer->filterActive(FilterState::FILTER_PID))
 		return;
@@ -1292,7 +1303,7 @@ void MainWindow::resetPidFilter()
 
 void MainWindow::resetEventFilter()
 {
-	double saved;
+	vtl::Time saved;
 
 	if (!analyzer->filterActive(FilterState::FILTER_EVENT))
 		return;
@@ -1308,7 +1319,7 @@ void MainWindow::resetEventFilter()
 
 void MainWindow::resetFilters()
 {
-	double saved;
+	vtl::Time saved;
 
 	if (!analyzer->isFiltered())
 		return;
@@ -1547,7 +1558,8 @@ void MainWindow::showWakeup(int pid)
 	 */
 	double zerotime = activeCursor->getPosition();
 	const TraceEvent *schedevent =
-		analyzer->findPreviousSchedEvent(zerotime, pid, &schedIndex);
+		analyzer->findPreviousSchedEvent(
+			vtl::Time::fromDouble(zerotime), pid, &schedIndex);
 	if (schedevent == nullptr)
 		return;
 
@@ -1562,12 +1574,12 @@ void MainWindow::showWakeup(int pid)
 	 * the task that was doing the wakeup. This way we can push the button
 	 * again to see who woke up the task that was doing the wakeup
 	 */
-	activeCursor->setPosition(wakeupevent->time);
-	inactiveCursor->setPosition(schedevent->time);
+	activeCursor->setPosition(wakeupevent->time.toDouble());
+	inactiveCursor->setPosition(schedevent->time.toDouble());
 	infoWidget->setTime(wakeupevent->time, activeIdx);
 	infoWidget->setTime(schedevent->time, inactiveIdx);
-	cursorPos[activeIdx] = wakeupevent->time;
-	cursorPos[inactiveIdx] = schedevent->time;
+	cursorPos[activeIdx] = wakeupevent->time.toDouble();
+	cursorPos[inactiveIdx] = schedevent->time.toDouble();
 
 	if (!analyzer->isFiltered()) {
 		eventsWidget->scrollTo(wakeUpIndex);

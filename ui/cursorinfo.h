@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -53,6 +53,7 @@
 #define CURSORINFO_H
 
 #include <QWidget>
+#include "vtl/time.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -66,13 +67,14 @@ class CursorInfo : public QWidget
 public:
 	CursorInfo(int nr, QWidget *parent = 0);
 	virtual ~CursorInfo();
-	void updateValue(double value);
+	void updateValue(vtl::Time value);
 	void setTraceActionsEnabled(bool e);
 signals:
-	void valueChanged(double value, int nr);
+	void valueChanged(vtl::Time value, int nr);
 private slots:
 	void moveTriggered();
 private:
+	QString createInputMask(unsigned int precision);
 	QAction *moveCursorAction;
 	QToolBar *moveToolBar;
 	QLineEdit *line;

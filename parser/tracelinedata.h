@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -52,11 +52,13 @@
 #ifndef TRACELINEDATA_H
 #define TRACELINEDATA_H
 
+#include "vtl/time.h"
+
 class TraceEvent;
 
 class TraceLineData {
 public:
-	double prevTime;
+	vtl::Time prevTime;
 	bool prevLineIsEvent;
 	TraceEvent *prevEvent;
 	char *infoBegin;
