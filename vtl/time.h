@@ -99,8 +99,6 @@ namespace vtl {
 		__always_inline bool sprint(char *buf) const;
 		__always_inline double toDouble() const;
 		__always_inline Time fabs() const;
-		__always_inline timeuint_t getSec() const;
-		__always_inline timeuint_t getNSec() const;
 		__always_inline unsigned int getPrecision() const;
 		__always_inline void setPrecision(unsigned int p);
 	private:
@@ -123,6 +121,10 @@ namespace vtl {
 			r.sec = sec + other.sec;
 			r.nsec = nsec + other.nsec;
 			r.negative = negative;
+			if (r.nsec > NSECS_PER_SEC) {
+				r.nsec -= NSECS_PER_SEC;
+				r.sec++;
+			}
 			return r;
 		}
 		bool greater = sec > other.sec ||
@@ -405,7 +407,7 @@ namespace vtl {
 		mdiv = NSECS_PER_SEC / 10;
 		rdiv = mdiv;
 
-		/* rdif is used for rounding */
+		/* rdiv is used for rounding */
 		for (i = 0; i < len; i++) {
 			rdiv /= 10;
 		}
@@ -439,16 +441,6 @@ namespace vtl {
 		t.negative = false;
 		t.precision = precision;
 		return t;
-	}
-
-	__always_inline vtl::Time::timeuint_t Time::getSec() const
-	{
-		return sec;
-	}
-
-	__always_inline vtl::Time::timeuint_t Time::getNSec() const
-	{
-		return nsec;
 	}
 
 	__always_inline unsigned int Time::getPrecision() const
