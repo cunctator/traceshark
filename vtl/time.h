@@ -55,6 +55,8 @@
 #include <QString>
 #include <climits>
 
+#include "vtl/compiler.h"
+
 namespace vtl {
 
 #define VTL_TIME_MAX vtl::Time(false, UINT_MAX, UINT_MAX)
@@ -117,7 +119,7 @@ namespace vtl {
 		Time r;
 		r.precision = __TIME_MAX(precision, other.precision);
 
-		if (negative == other.negative) {
+		if (likely(negative == other.negative)) {
 			r.sec = sec + other.sec;
 			r.nsec = nsec + other.nsec;
 			r.negative = negative;
@@ -166,7 +168,7 @@ namespace vtl {
 		Time r;
 		r.precision = __TIME_MAX(precision, other.precision);
 
-		if (negative != other.negative) {
+		if (unlikely(negative != other.negative)) {
 			r.sec = sec + other.sec;
 			r.nsec = nsec + other.nsec;
 			if (r.nsec >= NSECS_PER_SEC) {
@@ -212,7 +214,7 @@ namespace vtl {
 
 	__always_inline bool Time::operator>(const Time &other) const
 	{
-		if (negative != other.negative)
+		if (unlikely(negative != other.negative))
 			return other.negative == 0x1;
 		bool greater = sec > other.sec ||
 			(sec == other.sec && nsec > other.nsec);
@@ -227,7 +229,7 @@ namespace vtl {
 
 	__always_inline bool Time::operator<(const Time &other) const
 	{
-		if (negative != other.negative)
+		if (unlikely(negative != other.negative))
 			return negative == 0x1;
 		bool greater = sec > other.sec ||
 			(sec == other.sec && nsec > other.nsec);
@@ -242,7 +244,7 @@ namespace vtl {
 
 	__always_inline bool Time::operator>=(const Time &other) const
 	{
-		if (negative != other.negative)
+		if (unlikely(negative != other.negative))
 			return other.negative == 0x1;
 		bool greater = sec > other.sec ||
 			(sec == other.sec && nsec > other.nsec);
@@ -257,7 +259,7 @@ namespace vtl {
 
 	__always_inline bool Time::operator<=(const Time &other) const
 	{
-		if (negative != other.negative)
+		if (unlikely(negative != other.negative))
 			return negative == 0x1;
 		bool greater = sec > other.sec ||
 			(sec == other.sec && nsec > other.nsec);
