@@ -138,7 +138,7 @@ namespace vtl {
 				r.sec--;
 			}
 			r.sec -= other.sec;
-			r.sec -= other.nsec;
+			r.nsec -= other.nsec;
 			return r;
 		}
 		bool smaller = sec < other.sec ||
