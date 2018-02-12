@@ -59,6 +59,7 @@
 #include <cstdint>
 #include <cstdio>
 #include "misc/tstring.h"
+#include "vtl/compiler.h"
 
 #define EVENT_MAX_NR_ARGS (128)
 
@@ -67,50 +68,6 @@
 #else
 #include <QtWidgets>
 #endif
-
-#ifdef __has_cpp_attribute
-#define TS_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
-#else
-#define TS_HAS_CPP_ATTRIBUTE(x) 0
-#endif
-
-#if TS_HAS_CPP_ATTRIBUTE(fallthrough)
-#define ts_fallthrough [[fallthrough]]
-#elif TS_HAS_CPP_ATTRIBUTE(gnu::fallthrough)
-#define ts_fallthrough [[gnu::fallthrough]]
-#else
-#define ts_fallthrough (void)0
-#endif
-
-#ifdef __GNUC__
-
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
-
-/*
- * locality must be between [0, 3]
- *
- * 0 no temporal locality
- * 1 low temporal locality
- * 2 moderate degree of temporal locality
- * 3 high degree of temporal locality
- */
-#define prefetch_read(addr, locality) \
-	__builtin_prefetch(addr, 0, locality)
-#define prefetch_write(addr, locality) \
-	__builtin_prefetch(addr, 1, locality)
-#define prefetch(addr) \
-	__builtin_prefetch(addr)
-
-#else /* __GNUC__ not defined */
-
-#define likely(x)   (x)
-#define unlikely(x) (x)
-#define prefetch_read(addr, locality)
-#define prefetch_write(addr, locality)
-#define prefetch(addr)
-
-#endif /* __GNUC__ */
 
 typedef enum {
 	TRACE_TYPE_FTRACE = 0,

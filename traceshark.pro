@@ -127,8 +127,10 @@ HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/tstring.h
 
 HEADERS      +=  vtl/avltree.h
+HEADERS      +=  vtl/compiler.h
 HEADERS      +=  vtl/heapsort.h
 HEADERS      +=  vtl/tlist.h
+HEADERS      +=  vtl/time.h
 
 ###############################################################################
 # Source files
