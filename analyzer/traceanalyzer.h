@@ -90,11 +90,14 @@
 #define FULL_HEIGHT  ((double) 1)
 #define WAKEUP_HEIGHT ((double) 0.6)
 #define WAKEUP_SIZE ((double) 0.4)
+/*
+ * This delay (20 ms) rerpresents the "full height" of the error graphs that
+ * are used to display wakups in the CPU scheduling graphs
+ */
+#define WAKEUP_MAX ((double) 0.020)
 #define VERT_WAKEUP_HEIGHT ((double) 0.6)
 #define SCHED_HEIGHT ((double) 0.5)
 #define FLOOR_HEIGHT ((double) 0)
-
-#define FULLDELAY (0.02)
 
 class TraceFile;
 class QCustomPlot;

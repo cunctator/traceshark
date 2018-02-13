@@ -52,9 +52,6 @@
 #include "analyzer/cputask.h"
 #include "analyzer/traceanalyzer.h"
 
-/* This delays (20 ms) rerpresents the "full length" of the error */
-#define WAKEUP_MAX ((double) 0.020)
-
 CPUTask::CPUTask() :
 	AbstractTask()
 {}
