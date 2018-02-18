@@ -213,15 +213,205 @@ OBJECTS_DIR=obj
 MOC_DIR=obj
 
 ###############################################################################
-# Flags
+# Architecture Flags
 #
 
-QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -g -std=c++11
-QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c99
-QMAKE_LFLAGS_RELEASE =
-CONFIG += DEBUG
-# Uncomment the line below to enable OpenGl through the new method. Seems flaky,
-# so for now is better to use Qt4 and rely on on OpenGl being enabled in main()
+# Architecture flags, uncomment those that suits your machine best
+# NB: Only a few of these have been tested. Could be spelling mistakes in any
+# of the commented out flags.
+
+# Automatic detection. Does not necessarily work
+# MARCH_FLAG = -march=native
+# MTUNE_FLAG = -mtune=native
+
+##### x86-32 Section
+
+# i386
+# MARCH_FLAG = -march=i386
+# MTUNE_FLAG = -mtune=i386
+
+# i486
+# MARCH_FLAG = -march=i486
+# MTUNE_FLAG = -mtune=i486
+
+# Pentium
+# MARCH_FLAG = -march=pentium
+# MTUNE_FLAG = -mtune=pentium
+
+# Lakemont
+# MARCH_FLAG = -march=lakemont
+# MTUNE_FLAG = -mtune=lakemont
+
+# Pentium MMX
+# MARCH_FLAG = -march=pentium-mmx
+# MTUNE_FLAG = -mtune=pentium-mmx
+
+# Pentium Pro
+# MARCH_FLAG = -march=pentiumpro
+# MTUNE_FLAG = -mtune=pentiumpro
+
+# i686
+# MARCH_FLAG = -march=i686
+# MTUNE_FLAG = -mtune=i686
+
+# Pentium 2
+# MARCH_FLAG = -march=pentium2
+# MTUNE_FLAG = -mtune=pentium2
+
+# Pentium 3
+# MARCH_FLAG = -march=pentium3
+# MTUNE_FLAG = -mtune=pentium3
+
+# Pentium M
+# MARCH_FLAG = -march=pentium-m
+# MTUNE_FLAG = -mtune=pentium-m
+
+# Pentium 4
+# MARCH_FLAG = -march=pentium4
+# MTUNE_FLAG = -mtune=pentium4
+
+# Prescott
+# MARCH_FLAG = -march=prescott
+# MTUNE_FLAG = -mtune=prescott
+
+### x86-64 Section
+
+### AMD
+
+# Athlon 64
+# MARCH_FLAG = -march=athlon64
+# MTUNE_FLAG = -mtune=athlon64
+
+# Athlon 64 SSE3
+# MARCH_FLAG = -march=athlon64-sse3
+# MTUNE_FLAG = -mtune=athlon64-sse3
+
+# Barcelona
+# MARCH_FLAG = -march=barcelona
+# MTUNE_FLAG = -mtune=barcelona
+
+# Bulldozer v1
+# MARCH_FLAG = -march=bdver1
+# MTUNE_FLAG = -mtune=bdver1
+
+# Bulldozer v2
+# MARCH_FLAG = -march=bdver2
+# MTUNE_FLAG = -mtune=bdver2
+
+# Bulldozer v3
+# MARCH_FLAG = -march=bdver3
+# MTUNE_FLAG = -mtune=bdver3
+
+# Bulldozer v4
+# MARCH_FLAG = -march=bdver4
+# MTUNE_FLAG = -mtune=bdver4
+
+# Zen v1
+# MARCH_FLAG = -march=znver1
+# MTUNE_FLAG = -mtune=znver1
+
+# Bobcat v1
+# MARCH_FLAG = -march=btver1
+# MTUNE_FLAG = -mtune=btver1
+
+# Bobcat v2
+# MARCH_FLAG = -march=btver2
+# MTUNE_FLAG = -mtune=btver2
+
+### Intel
+
+# Cocona
+# MARCH_FLAG = -march=nocona
+# MTUNE_FLAG = -mtune=nocona
+
+# Core2
+# MARCH_FLAG = -march=core2
+# MTUNE_FLAG = -mtune=core2
+
+# Nehalem
+# MARCH_FLAG = -march=nehalem
+# MTUNE_FLAG = -mtune=nehalem
+
+# Westmere
+# MARCH_FLAG = -march=westmere
+# MTUNE_FLAG = -mtune=westmere
+
+# Sandybridge
+# MARCH_FLAG = -march=sandybridge
+# MTUNE_FLAG = -mtune=sandybridge
+
+# Ivybridge
+# MARCH_FLAG = -march=ivybridge
+# MTUNE_FLAG = -mtune=ivybridge
+
+# Haswell
+# MARCH_FLAG = -march=haswell
+# MTUNE_FLAG = -mtune=haswell
+
+# Broadwell
+# MARCH_FLAG = -march=broadwell
+# MTUNE_FLAG = -mtune=broadwell
+
+# Skylake
+# MARCH_FLAG = -march=skylake
+# MTUNE_FLAG = -mtune=skylake
+
+# Bonnell
+# MARCH_FLAG = -march=bonnell
+# MTUNE_FLAG = -mtune=bonnell
+
+# Silvermont
+# MARCH_FLAG = -march=silvermont
+# MTUNE_FLAG = -mtune=silvermont
+
+# KNL
+# MARCH_FLAG = -march=knl
+# MTUNE_FLAG = -mtune=nkl
+
+# KNM
+# MARCH_FLAG = -march=knm
+# MTUNE_FLAG = -mtune=knm
+
+# Skylake-AVX512
+# MARCH_FLAG = -march=skylake-avx512
+# MTUNE_FLAG = -mtune=skylake-avx512
+
+# Cannonlake
+# MARCH_FLAG = -march=cannonlake
+# MTUNE_FLAG = -mtune=cannonlake
+
+# Icelake
+# MARCH_FLAG = -march=icelake
+# MTUNE_FLAG = -mtune=icelake
+
+### Raspberry PI section
+
+# RPI 3 - this does not seem to help much, if at all
+# MARCH_FLAG = -mcpu=cortex-a53
+# MTUNE_FLAG = -mtune=cortex-a53
+
+###############################################################################
+# Generic compiler flags
+#
+
+# Uncomment for debug build
+# DEBUG_FLAG = -g
+
+# These optimization options do not seem to help, so leave them commented out
+# EXTRA_OPTS  = -fpredictive-commoning -fvect-cost-model -fsplit-paths -ftree-vectorize -funswitch-loops -floop-interchange
+
+# EXTRA_OPTS += -funsafe-math-optimizations
+
+OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${DEBUG_FLAG} $${EXTRA_OPTS}
+
+QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -std=c++11 $${OUR_FLAGS}
+QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c11 $${OUR_FLAGS}
+QMAKE_LFLAGS_RELEASE = -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
+
+# Uncomment for debug build
+# CONFIG += DEBUG
+
+# Uncomment the line below to enable OpenGl through the new method. Seems flaky.
 # DEFINES += QCUSTOMPLOT_USE_OPENGL
 
 ###############################################################################
