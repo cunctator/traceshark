@@ -128,6 +128,7 @@ HEADERS      +=  misc/tstring.h
 
 HEADERS      +=  vtl/avltree.h
 HEADERS      +=  vtl/compiler.h
+HEADERS      +=  vtl/error.h
 HEADERS      +=  vtl/heapsort.h
 HEADERS      +=  vtl/tlist.h
 HEADERS      +=  vtl/time.h
@@ -195,6 +196,8 @@ SOURCES      +=  mm/stringtree.cpp
 
 SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
+
+SOURCES      +=  vtl/error.cpp
 
 ###############################################################################
 # Qt Modules
