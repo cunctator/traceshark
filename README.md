@@ -20,6 +20,24 @@ qmake-qt5 (or just qmake)
 
 make -j5
 
+It is not necessary but you can customize your build by editing traceshark.pro.
+
+For example, you can uncomment the following if you want the try to detect and
+optmize for your build machine:
+
+# MARCH_FLAG = -march=native
+# MTUNE_FLAG = -mtune=native
+
+, or you can uncomment some specific flags to build for a certain machine, e.g.
+uncomment this to build for Broadwell:
+
+# MARCH_FLAG = -march=broadwell
+# MTUNE_FLAG = -mtune=broadwell
+
+The recommended default compiler is g++ but you can compile with clang if you
+like, by uncommenting the following in traceshark.pro:
+# QMAKE_CXX=clang-6.0
+
 Please note that the software will compile for Qt 4 but that it has not been as
 tested with Qt 4. For that reason you might want to build with Qt 5, unless
 you happen to prefer Qt 4.

@@ -411,6 +411,13 @@ QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -std=c++11 $${OUR_FLAGS}
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c11 $${OUR_FLAGS}
 QMAKE_LFLAGS_RELEASE = -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
 
+# Uncomment this to compile with clang, or change to the C++ compiler of your
+# choice
+# QMAKE_CXX=clang-6.0
+# I have not figured out how to link with clang but here you can specify a
+# linker of your choice, g++ is default.
+# QMAKE_LINK=g++
+
 # Uncomment for debug build
 # CONFIG += DEBUG
 

@@ -66,7 +66,7 @@
 #define ts_fallthrough (void)0
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined (__clang__)
 
 #define likely(x)   __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
@@ -95,5 +95,18 @@
 #define prefetch(addr)
 
 #endif /* __GNUC__ */
+
+#define vtl_str(a) __vtl_str(a)
+#define __vtl_str(a) #a
+
+#if defined(__clang__)
+#define VTL_COMPILER "clang-" vtl_str(__clang_major__) "." \
+	vtl_str(__clang_minor__) "." vtl_str(__clang_patchlevel__)
+#elif defined(__GNUC__)
+#define VTL_COMPILER "gcc-" vtl_str(__GNUC__) "." vtl_str(__GNUC_MINOR__) "." \
+	vtl_str(__GNUC_PATCHLEVEL__)
+#else
+#define VTL_COMPILER "unknown compiler, how about updating " __FILE__
+#endif
 
 #endif /* VTL_COMPILER_H */

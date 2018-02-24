@@ -76,6 +76,7 @@
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
 #include "qcustomplot/qcustomplot.h"
+#include "vtl/compiler.h"
 
 
 #define TOOLTIP_OPEN \
@@ -753,6 +754,8 @@ void MainWindow::about()
 	textAboutCaption = QMessageBox::tr(
 	       "<h1>About Traceshark</h1>"
 	       "<p>This is version %1.</p>"
+	       "<p>Built with " VTL_COMPILER " at " __DATE__ " " __TIME__
+	       "</p>"
 		).arg(QLatin1String(TRACESHARK_VERSION_STRING));
 	textAbout = QMessageBox::tr(
 	       "<p>Copyright &copy; 2014-2018 Viktor Rosendahl"
