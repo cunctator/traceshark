@@ -1,10 +1,9 @@
-traceshark
-==========
-
-# Introduction
+# Introduction to Traceshark
 
 This is an early version of a graphical viewer for Ftrace and Perf events that
 can be captured by the Linux kernel. It visualizes the following events:
+
+```
 cpu_frequency
 sched_migrate_task
 sched_process_exit
@@ -12,6 +11,7 @@ sched_process_fork
 sched_switch
 sched_wakeup
 sched_wakeup_new
+```
 
 Over time, I hope to add more events.
 
@@ -20,9 +20,10 @@ Over time, I hope to add more events.
 The program can be built by doing something like this, assuming that you have
 Qt5 development packages installed:
 
+```
 qmake-qt5 (or just qmake)
-
 make -j5
+```
 
 It is not necessary but you can customize your build by editing traceshark.pro.
 
@@ -57,7 +58,10 @@ you happen to prefer Qt 4.
 
 You can get an Ftrace trace to view by doing the following:
 
+```
 trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new
+```
+In order to open it with traceshark, it must first be converted to ASCII:
 
 ```
 trace-cmd report trace.dat > file_to_open_with_traceshark.asc
