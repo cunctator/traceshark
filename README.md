@@ -50,6 +50,14 @@ like, by uncommenting the following in traceshark.pro:
 # QMAKE_CXX=clang-6.0
 ```
 
+If you want to build a debug build, uncomment the following two lines:
+
+```
+# DEBUG_FLAG = -g
+...
+# CONFIG += DEBUG
+```
+
 Please note that the software will compile for Qt 4 but that it has not been as
 tested with Qt 4. For that reason you might want to build with Qt 5, unless
 you happen to prefer Qt 4.
