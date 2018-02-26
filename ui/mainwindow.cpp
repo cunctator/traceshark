@@ -246,22 +246,21 @@ void MainWindow::openTrace()
 
 void MainWindow::openFile(const QString &name)
 {
-	eventsWidget->beginResetModel();
-	eventsWidget->clear();
-	eventsWidget->endResetModel();
-	eventsWidget->clearScrollTime();
-
-	taskSelectDialog->beginResetModel();
-	taskSelectDialog->setTaskMap(nullptr);
-	taskSelectDialog->endResetModel();
-
-	eventSelectDialog->beginResetModel();
-	eventSelectDialog->setStringTree(nullptr);
-	eventSelectDialog->endResetModel();
+	int ts_errno;
 
 	if (analyzer->isOpen())
-		analyzer->close();
-	loadTraceFile(name);
+		closeTrace();
+	ts_errno = loadTraceFile(name);
+
+	if (ts_errno != 0) {
+		if (ts_errno > 0) {
+			errorDialog->setErrno(ts_errno);
+		} else {
+			QString errString(ts_strerror(-ts_errno));
+			errorDialog->setText(errString);
+		}
+		return;
+	}
 
 	if (analyzer->isOpen()) {
 		QTextStream qout(stdout);
@@ -1095,10 +1094,11 @@ void MainWindow::setStatus(status_t status, const QString *fileName)
 	statusLabel->setText(string);
 }
 
-void MainWindow::loadTraceFile(const QString &fileName)
+int MainWindow::loadTraceFile(const QString &fileName)
 {
 	qint64 start, stop;
 	QTextStream qout(stdout);
+        int rval;
 
 	qout.setRealNumberPrecision(6);
 	qout.setRealNumberNotation(QTextStream::FixedNotation);
@@ -1106,29 +1106,15 @@ void MainWindow::loadTraceFile(const QString &fileName)
 	qout << "opening " << fileName << "\n";
 	
 	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
-	if (!analyzer->open(fileName)) {
-		qout << "failed to open " << fileName << "\n";
-	}
+	rval = analyzer->open(fileName);
 	stop = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 	stop = stop - start;
 
 	qout << "Loading took " << (double) stop / 1000 << " s\n";
 	qout.flush();
-#if 0
-	int i, s;
-	unsigned int j;
-	s = analyzer->events.size();
-	for (i = 0; i < s; i++) {
-		TraceEvent &event = analyzer->events[i];
-		qout << event.taskName->ptr << " " << event.pid << " " <<
-			event.time << " " << event.getEventName()->ptr;
-		for (j = 0; j < event.argc; j++) {
-			qout << " " << event.argv[j]->ptr;
-		}
-		qout << "\n";
-        }
-#endif
+
+	return rval;
 }
 
 void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,

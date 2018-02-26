@@ -109,10 +109,10 @@ TraceAnalyzer::~TraceAnalyzer()
 	delete taskNamePool;
 }
 
-bool TraceAnalyzer::open(const QString &fileName)
+int TraceAnalyzer::open(const QString &fileName)
 {
-	bool retval = parser->open(fileName);
-	if (retval)
+	int retval = parser->open(fileName);
+	if (retval == 0)
 		prepareDataStructures();
 	return retval;
 }

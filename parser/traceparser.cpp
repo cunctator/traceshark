@@ -62,6 +62,7 @@
 #include "parser/perf/perfgrammar.h"
 #include "parser/tracefile.h"
 #include "parser/traceparser.h"
+#include "misc/errors.h"
 #include "misc/traceshark.h"
 #include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
@@ -106,21 +107,21 @@ TraceParser::~TraceParser()
 	delete traceTypeWatcher;
 }
 
-bool TraceParser::open(const QString &fileName)
+int TraceParser::open(const QString &fileName)
 {
-	bool ok = false;
+	int ts_errno;
 	unsigned int i;
 
 	if (traceFile != nullptr)
-		return ok;
+		return -TS_ERROR_INTERNAL;
 
-	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ok,
+	traceFile = new TraceFile(fileName.toLocal8Bit().data(), ts_errno,
 				  1024 * 1024 * 2);
 
-	if (!ok) {
+	if (ts_errno != 0) {
 		delete traceFile;
 		traceFile = nullptr;
-		return ok;
+		return ts_errno;
 	}
 
 	/* These buffers will be deleted by the parserThread */
@@ -131,7 +132,7 @@ bool TraceParser::open(const QString &fileName)
 	readerThread->start();
 	parserThread->start();
 
-	return true;
+	return 0;
 }
 
 bool TraceParser::isOpen() const

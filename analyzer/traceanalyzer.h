@@ -107,7 +107,7 @@ class TraceAnalyzer
 public:
 	TraceAnalyzer();
 	~TraceAnalyzer();
-	bool open(const QString &fileName);
+	int open(const QString &fileName);
 	bool isOpen();
 	void close();
 	void processTrace();

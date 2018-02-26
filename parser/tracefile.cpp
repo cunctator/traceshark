@@ -64,28 +64,28 @@ extern "C" {
 #include <unistd.h>
 }
 
-TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
+TraceFile::TraceFile(char *name, int &ts_errno, unsigned int bsize)
 	: mappedFile(nullptr), fileSize(0), bufferSwitch(false), nRead(0),
 	  lastBuf(0), lastPos(0), endOfLine(false)
 {
 	unsigned int i;
 	struct stat sbuf;
+	bool succ;
 
 	fd = open(name, O_RDONLY);
-	if (fd >= 0)
-		ok = true;
-	else
-		ok = false;
+	succ = fd >= 0;
 
-	if (ok) {
+	ts_errno = succ ? 0:errno;
+
+	if (succ) {
 		if (fstat(fd, &sbuf) != 0)
-			ok = false;
+			ts_errno = errno;
 		else {
 			fileSize = sbuf.st_size;
 			mappedFile = (char*) mmap(nullptr, fileSize, PROT_READ,
 						  MAP_PRIVATE, fd, 0);
 			if (mappedFile == MAP_FAILED) {
-				ok = false;
+				ts_errno = errno;
 				mappedFile = nullptr;
 			}
 		}
@@ -99,7 +99,7 @@ TraceFile::TraceFile(char *name, bool &ok, unsigned int bsize)
 	 * Don't start thread if something failed earlier, we go this far in
 	 * order to avoid problems in the destructor
 	 */
-	if (!ok)
+	if (ts_errno != 0)
 		return;
 	loadThread->start();
 }

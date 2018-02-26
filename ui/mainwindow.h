@@ -179,7 +179,7 @@ private:
 	void createStatusBar();
 
 	void setStatus(status_t status, const QString *fileName = nullptr);
-	void loadTraceFile(const QString &);
+	int loadTraceFile(const QString &);
 
 	QMenu *fileMenu;
 	QMenu *viewMenu;

@@ -84,7 +84,7 @@ class TraceParser
 public:
 	TraceParser(vtl::TList<TraceEvent> *analyzerEvents);
 	~TraceParser();
-	bool open(const QString &fileName);
+	int open(const QString &fileName);
 	bool isOpen() const;
 	void close();
 	void threadParser();
