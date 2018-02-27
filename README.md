@@ -13,8 +13,6 @@ sched_wakeup
 sched_wakeup_new
 ```
 
-Over time, I hope to add more events.
-
 ![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/6c82bceacf272617de2692b5e2efd4ec1b0ecdde/doc/ts-screenshot1.png)
 
 Above is a screenshot of traceshark. The four uppermost graphs are for displaying CPU idle and frequency states. They are four because the measurment was made on a system with four virtual CPUs. The green graphs with red circles show the CPU idle states while the thicker blue graphs show the CPU frequency changes.
