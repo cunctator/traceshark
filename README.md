@@ -1,10 +1,10 @@
 # Introduction to Traceshark
 
-This is an early version of a graphical viewer for Ftrace and Perf events that
-can be captured by the Linux kernel. It visualizes the following events:
+This is a graphical viewer for the Ftrace and Perf events that can be captured by the Linux kernel. It visualizes the following events:
 
 ```
 cpu_frequency
+cpu_idle
 sched_migrate_task
 sched_process_exit
 sched_process_fork
@@ -14,6 +14,20 @@ sched_wakeup_new
 ```
 
 Over time, I hope to add more events.
+
+![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/6c82bceacf272617de2692b5e2efd4ec1b0ecdde/doc/ts-screenshot1.png)
+
+Above is a screenshot of traceshark. The four uppermost graphs are for displaying CPU idle and frequency states. They are four because the measurment was made on a system with four virtual CPUs. The green graphs with red circles show the CPU idle states while the thicker blue graphs show the CPU frequency changes.
+
+Below these four graphs are the per CPU scheduling graphs, the different colors of these graphs are for different tasks. The small vertical bars that are shown just above the per CPU graphs indicates the waiting time between wakeup and being scheduled, the highest height is equal to 20 ms, i.e. a full lenght means that the waiting time was at least 20 ms, possibly more.
+
+Below the scheduling graphs are the migration graphs. Task migrations between CPUs are shown with arrows. Fork/exit is shown with an arrow from/to `fork/exit`.
+
+Below the migration arrows are the unified task graphs, where tasks are shown without caring about which CPU it is running on. Here the time between wakeup and being scheduled in shown by horizontal bars.
+
+These graphs will only be shown if requested by the user. It is necessary to select a task and click the `Add a unified graph for this task`, button or the `Add a unified graph` in the task select dialog.
+
+The task select dialog can be shown by clicking `View -> Show task list`, or by clicking the dedicated button for it on the left panel.
 
 # Building traceshark
 
