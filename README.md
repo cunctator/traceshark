@@ -23,7 +23,7 @@ Below the scheduling graphs are the migration graphs. Task migrations between CP
 
 Below the migration arrows are the unified task graphs, where tasks are shown without caring about which CPU it is running on. Here the time between wakeup and being scheduled in shown by horizontal bars.
 
-These graphs will only be shown if requested by the user. It is necessary to select a task and click the ![Add task graph button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) button or the `Add a unified graph` in the task select dialog.
+These graphs will only be shown if requested by the user. It is necessary to select a task and click the ![Add task graph button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) button or the `Add a unified graph` button in the task select dialog.
 
 The task select dialog can be shown by clicking `View -> Show task list`, or by clicking the dedicated ![show task dialog button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) button for it on the left panel.
 
