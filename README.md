@@ -27,16 +27,16 @@ These graphs will only be shown if requested by the user. It is necessary to sel
 
 The task select dialog can be shown by clicking `View -> Show task list`, or by clicking the dedicated ![show task dialog button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) button for it on the left panel.
 
-## 1.1 Brief summary of the functionality of the UI
+## 1.1 Brief summary of the functionality of the GUI
 
 ### 1.1.1 Functionality of the buttons
 
 There are a number of buttons in the GUI, here is a description of the buttons in the left panel:
 
-* ![open button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/open30x30.png) This button is used to open a new trace file.
+* ![open button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/open30x30.png) This button is used to open a trace file.
 * ![close button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/close30x30.png) Closes the currently open trace.
 * ![screenshot button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/screenshot30x30.png) Take a screenshot of the plot and save it to a file.
-* ![taske select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) Show the task select dialog. This makes it possible to filter the events view by task, to show a task in the legend, or to show a unified graph.
+* ![taske select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) Show the task select dialog. This makes it possible to filter the events view by task, to show a task in the legend, or to show a unified graph. This button is very useful when the user knows the name of a task of interest but cannot find it easily among the scheduling graphs.
 * ![Event list](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/eventfilter30x30.png) Show a list of the different event types and it's possible to filter the events view by event type.
 * ![Time filter](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/timefilter30x30.png) This will filter the events view so that only events in the interval between the cursors are displayed.
 * ![Reset all filters](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/resetfilters30x30.png) This button resets all filters.
@@ -46,7 +46,7 @@ The top widget has some buttons as well:
 
 * ![Move the red cursor](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/movered30x30.png) Move the red cursor to the time specified in the time text box.
 * ![Add the blue cursor](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/moveblue30x30.png) Move the blue cursor to the time specified in the time text box.
-* ![Add to legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtolegend30x30.png) Adds the currently select task, from the scheduling graphs, to the legend.
+* ![Add to legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtolegend30x30.png) Adds the currently selected task, from the scheduling graphs, to the legend.
 * ![Clear legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/clearlegend30x30.png) Removes all tasks from the legend.
 * ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/wakeup30x30.png) This moves the non-active cursor to the immediately preceeding scheduling of the currently selected task. The active cursor is moved to the wakeup event. The events view is scrolled to the wakeup event. This makes it convenient to easily check which task is waiting for which. It is a good idea to double click on the info field of the wakeup event, in order to see the backtrace so that one can determine whether the wakeup was caused by an interrupt or not. If all IRQs are traced it may also be possible to form a conclusion by looking at the surrounding IRQ related events.
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
@@ -54,7 +54,7 @@ The top widget has some buttons as well:
 
 ### 1.1.2 The Events view
 
-At the bottom of the screen is the events view. The events view will be automatically scrolled when a cursor is moved. It is also possible to move the currently active cursor by clickin on a time in the events view. Another very important feature is that by double clickin on the info field, a dialog will open that displays the backtrace of that particular event.
+At the bottom of the screen is the events view. The events view will be automatically scrolled when a cursor is moved. It is also possible to move the currently active cursor by clicking on a time in the events view. Another very important feature is that by double clicking on the info field, a dialog will open that displays the backtrace of that particular event.
 
 # 2. Building traceshark
 
