@@ -1,4 +1,4 @@
-# Introduction to Traceshark
+# 1. Introduction to Traceshark
 
 This is a graphical viewer for the Ftrace and Perf events that can be captured by the Linux kernel. It visualizes the following events:
 
@@ -29,6 +29,8 @@ The task select dialog can be shown by clicking `View -> Show task list`, or by 
 
 ## 1.1 Brief summary of the functionality of the UI
 
+### 1.1.1 Functionality of the buttons
+
 There are a number of buttons in the GUI, here is a description of the buttons in the left panel:
 
 * ![open button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/open30x30.png) This button is used to open a new trace file.
@@ -36,7 +38,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
 * ![screenshot button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/screenshot30x30.png) Take a screenshot of the plot and save it to a file.
 * ![taske select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) Show the task select dialog. This makes it possible to filter the events view by task, to show a task in the legend, or to show a unified graph.
 * ![Event list](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/eventfilter30x30.png) Show a list of the different event types and it's possible to filter the events view by event type.
-* ![Time filter](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/timefilter30x30.png) This will filter the events filter to that only events in the interval between the cursors are displayed.
+* ![Time filter](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/timefilter30x30.png) This will filter the events view so that only events in the interval between the cursors are displayed.
 * ![Reset all filters](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/resetfilters30x30.png) This button resets all filters.
 * ![Export filtered events](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/exportevents30x30.png) Opens a dialog that allows the filtered events to be saved to a file. The output format is more or less the same as from perf, so that if one has filtered on the `cycles` events, it's possible to generate a CPU Flame Graph with the tools [here](https://github.com/brendangregg/FlameGraph), or [here](https://github.com/cunctator/FlameGraph).
 
@@ -47,12 +49,14 @@ The top widget has some buttons as well:
 * ![Add to legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtolegend30x30.png) Adds the currently select task, from the scheduling graphs, to the legend.
 * ![Clear legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/clearlegend30x30.png) Removes all tasks from the legend.
 * ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/wakeup30x30.png) This moves the non-active cursor to the immediately preceeding scheduling of the currently selected task. The active cursor is moved to the wakeup event. The events view is scrolled to the wakeup event. This makes it convenient to easily check which task is waiting for which. It is a good idea to double click on the info field of the wakeup event, in order to see the backtrace so that one can determine whether the wakeup was caused by an interrupt or not. If all IRQs are traced it may also be possible to form a conclusion by looking at the surrounding IRQ related events.
-* ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) This adds a unified scheduling graph for the currently selected task.
-* ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/removetask30x30.png)
+* ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
+* ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/removetask30x30.png) Removes the currently selected unified graph. 
+
+### 1.1.2 The Events view
 
 At the bottom of the screen is the events view. The events view will be automatically scrolled when a cursor is moved. It is also possible to move the currently active cursor by clickin on a time in the events view. Another very important feature is that by double clickin on the info field, a dialog will open that displays the backtrace of that particular event.
 
-# Building traceshark
+# 2. Building traceshark
 
 The program can be built by doing something like this, assuming that you have
 Qt5 development packages installed:
@@ -99,7 +103,7 @@ Please note that the software will compile for Qt 4 but that it has not been as
 tested with Qt 4. For that reason you might want to build with Qt 5, unless
 you happen to prefer Qt 4.
 
-# Capturing a trace
+# 3. Capturing a trace
 
 You can get an Ftrace trace to view by doing the following:
 
