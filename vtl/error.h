@@ -55,9 +55,18 @@
 #include <cstdarg>
 
 namespace vtl {
-	void set_error_handler(void (*efunc)(const char *fmt, va_list ap));
-	void err_exit(int ecode, const char *fmt, ...);
-	void err_msg(const char *fmt, ...);
+	class ErrorHandler {
+	public:
+		virtual void Error(int vtl_errno, const char *fmt, va_list ap)
+			= 0;
+		virtual void ErrorX(const char *fmt, va_list ap) = 0;
+	};
+	void set_strerror(const char *(*func)(int errnum));
+	void set_error_handler(ErrorHandler *eh);
+	void errx(int ecode, const char *fmt, ...);
+	void warnx(const char *fmt, ...);
+	void err(int ecode, int vtl_errno, const char *fmt, ...);
+	void warn(int vtl_errno, const char *fmt, ...);
 }
 
 #endif /* _VTL_ERROR_H */

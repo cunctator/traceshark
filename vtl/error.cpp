@@ -51,32 +51,87 @@
 
 #include <cstdlib>
 
+extern "C" {
+#include <err.h>
+}
+#include <cstdio>
+#include <cstring>
 #include "vtl/error.h"
 
-static void (*errorfunc)(const char *fmt, va_list ap) = nullptr;
+static vtl::ErrorHandler *handler;
+static const char *(*strerror_func)(int errnum);
 
-void vtl::set_error_handler(void (*efunc)(const char *fmt, va_list ap))
-{
-	errorfunc = efunc;
+void vtl::set_strerror(const char *(*func)(int errnum)) {
+	strerror_func = func;
 }
 
-void vtl::err_exit(int ecode, const char *fmt, ...)
+void vtl::set_error_handler(vtl::ErrorHandler *eh)
+{
+	handler = eh;
+}
+
+static void __vwarnx(const char *fmt, va_list args)
+{
+	if (handler != nullptr)
+		handler->ErrorX(fmt, args);
+	else
+		vwarnx(fmt, args);
+}
+
+static void __vwarn(int vtl_errno, const char *fmt, va_list args)
+{
+	if (handler != nullptr)
+		handler->Error(vtl_errno, fmt, args);
+	else {
+		vwarn(fmt, args);
+		if (vtl_errno > 0) {
+			const char *msg = strerror(vtl_errno);
+			fprintf(stderr, "%s", msg);
+		} else if (vtl_errno < 0) {
+			const char *msg = strerror_func(-vtl_errno);
+			fprintf(stderr, "%s", msg);
+		} else {
+			/* vtl_errno = 0, do nothing */
+		}
+	}
+}
+
+void vtl::errx(int ecode, const char *fmt, ...)
 {
 	va_list args;
 
 	va_start(args, fmt);
-	if (errorfunc != nullptr)
-		errorfunc(fmt, args);
+	__vwarnx(fmt, args);
 	va_end(args);
 	exit(ecode);
 }
 
-void vtl::err_msg(const char *fmt, ...)
+void vtl::warnx(const char *fmt, ...)
 {
 	va_list args;
 
 	va_start(args, fmt);
-	if (errorfunc != nullptr)
-		errorfunc(fmt, args);
+	__vwarnx(fmt, args);
 	va_end(args);
 }
+
+void vtl::err(int ecode, int vtl_errno, const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	__vwarn(vtl_errno, fmt, args);
+	va_end(args);
+	exit(ecode);
+}
+
+
+void vtl::warn(int vtl_errno, const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	__vwarn(vtl_errno, fmt, args);
+	va_end(args);
+}
+
