@@ -55,6 +55,7 @@
 typedef enum {
 	TS_ERROR_NOERROR = 0,
 	TS_ERROR_INTERNAL,
+	TS_ERROR_ERROR,
 	TS_NR_ERRORS
 } tserror_t;
 

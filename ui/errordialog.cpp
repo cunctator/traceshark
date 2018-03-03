@@ -49,6 +49,9 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdio>
+
+#include "misc/errors.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "ui/errordialog.h"
@@ -68,6 +71,9 @@ extern "C" {
 ErrorDialog::ErrorDialog(QWidget *parent)
 	:QDialog(parent, Qt::WindowCloseButtonHint)
 {
+	/* One extra character for null termination */
+	buf = new char[bufSize + 1];
+
 	textEdit = new QTextEdit();
 	textEdit->setAcceptRichText(false);
 	textEdit->setReadOnly(true);
@@ -92,6 +98,11 @@ ErrorDialog::ErrorDialog(QWidget *parent)
 	tsconnect(button, clicked(), this, hide());
 }
 
+ErrorDialog::~ErrorDialog()
+{
+	delete[] buf;
+}
+
 void ErrorDialog::setText(const QString &text)
 {
 	textEdit->setPlainText(text);
@@ -105,6 +116,37 @@ void ErrorDialog::setErrno(int d_errno)
 	textEdit->setPlainText(text);
 	updateSize();
 	show();
+}
+
+void ErrorDialog::Error(int vtl_errno, const char *fmt, va_list ap)
+{
+	const char *emsg = nullptr;
+
+	if (vtl_errno < 0)
+		emsg = ts_strerror(-vtl_errno);
+	else if (vtl_errno > 0)
+		emsg = strerror(vtl_errno);
+	else
+		emsg = "unknown error";
+
+	QString qemsg = QString(emsg);
+
+	vsnprintf(buf, bufSize, fmt, ap);
+	buf[bufSize] = '\0';
+
+	QString qmsg(buf);
+
+	QString wholeMessage = qmsg + QString(tr(":\n")) + qemsg;
+	setText(wholeMessage);
+}
+
+void ErrorDialog::ErrorX(const char *fmt, va_list ap)
+{
+	snprintf(buf, bufSize, fmt, ap);
+	buf[bufSize] = '\0';
+
+	QString qmsg(buf);
+	setText(qmsg);
 }
 
 void ErrorDialog::updateSize()

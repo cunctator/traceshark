@@ -52,9 +52,11 @@
 #include <QApplication>
 #include <QString>
 #include <QtCore>
+#include "misc/errors.h"
 #include "misc/resources.h"
 #include "ui/mainwindow.h"
 #include "ui/tracesharkstyle.h"
+#include "vtl/error.h"
 
 #define QT4_WARNING \
 "WARNING!!! WARNING!!! WARNING!!!\n" \
@@ -100,6 +102,8 @@ int main(int argc, char* argv[])
 	QRect geometry;
 	int width, height;
 	QString fileName;
+
+	vtl::set_strerror(ts_strerror);
 
 	parseArguments(&fileName, argc, argv);
 /* Set graphicssystem to opengl if we have old enough Qt */

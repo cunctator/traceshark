@@ -52,20 +52,26 @@
 #ifndef ERRORDIALOG_H
 #define ERRORDIALOG_H
 
+#include "vtl/error.h"
 #include <QDialog>
 
 QT_BEGIN_NAMESPACE
 class QTextEdit;
 QT_END_NAMESPACE
 
-class ErrorDialog : public QDialog {
+class ErrorDialog : public QDialog, public vtl::ErrorHandler {
 	Q_OBJECT
 
 public:
 	ErrorDialog(QWidget *parent = 0);
+	~ErrorDialog();
 	void setText(const QString &text);
 	void setErrno(int d_errno);
+	void Error(int vtl_errno, const char *fmt, va_list ap);
+	void ErrorX(const char *fmt, va_list ap);
 private:
+	char *buf;
+	static const size_t bufSize = 4095;
 	void updateSize();
 	QTextEdit *textEdit;
 };

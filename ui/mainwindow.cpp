@@ -77,6 +77,7 @@
 #include "threads/workitem.h"
 #include "qcustomplot/qcustomplot.h"
 #include "vtl/compiler.h"
+#include "vtl/error.h"
 
 
 #define TOOLTIP_OPEN \
@@ -143,6 +144,8 @@ MainWindow::MainWindow():
 	eventInfoDialog = new EventInfoDialog();
 	taskSelectDialog = new TaskSelectDialog();
 	eventSelectDialog = new EventSelectDialog();
+
+	vtl::set_error_handler(errorDialog);
 
 	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
 		  this, plotDoubleClicked(QMouseEvent*));
@@ -253,12 +256,8 @@ void MainWindow::openFile(const QString &name)
 	ts_errno = loadTraceFile(name);
 
 	if (ts_errno != 0) {
-		if (ts_errno > 0) {
-			errorDialog->setErrno(ts_errno);
-		} else {
-			QString errString(ts_strerror(-ts_errno));
-			errorDialog->setText(errString);
-		}
+		vtl::warn(ts_errno, "Failed to open trace file %s",
+			  name.toLocal8Bit().data());
 		return;
 	}
 
@@ -1338,19 +1337,18 @@ void MainWindow::exportEvents()
 	if (dialog.exec())
 		fileNameList = dialog.selectedFiles();
 
-	if (fileNameList.size() != 1)
+	if (fileNameList.size() != 1) {
+		vtl::warnx("You can only select one filename, not %d",
+			   fileNameList.size());
 		return;
+	}
 
 	fileName = fileNameList.at(0);
 
 	if (!analyzer->exportTraceFile(fileName.toLocal8Bit().data(),
 				       &ts_errno)) {
-		if (ts_errno > 0) {
-			errorDialog->setErrno(ts_errno);
-		} else if (ts_errno < 0) {
-			QString errString(ts_strerror(-ts_errno));
-			errorDialog->setText(errString);
-		}
+		vtl::warn(ts_errno, "Failed to export trace to %s",
+			  fileName.toLocal8Bit().data());
 	}
 }
 

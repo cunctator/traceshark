@@ -56,13 +56,17 @@
 
 static const char noerror[] = "No error has occurred.";
 static const char interne[] = "A serious internal error has occurred.";
+static const char errerro[] = "An error in the error reporting has occurred.";
 
 static const char *errorstrings[TS_NR_ERRORS] = {
 	noerror,
-	interne
+	interne,
+	errerro
 };
 
 const char *ts_strerror(int ts_errno)
 {
+	if (ts_errno >= TS_NR_ERRORS || ts_errno < 0)
+		ts_errno = TS_ERROR_ERROR;
 	return errorstrings[ts_errno];
 }

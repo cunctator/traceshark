@@ -86,10 +86,10 @@ static void __vwarn(int vtl_errno, const char *fmt, va_list args)
 		vwarn(fmt, args);
 		if (vtl_errno > 0) {
 			const char *msg = strerror(vtl_errno);
-			fprintf(stderr, "%s", msg);
+			fprintf(stderr, ": %s\n", msg);
 		} else if (vtl_errno < 0) {
 			const char *msg = strerror_func(-vtl_errno);
-			fprintf(stderr, "%s", msg);
+			fprintf(stderr, ": %s\n", msg);
 		} else {
 			/* vtl_errno = 0, do nothing */
 		}
