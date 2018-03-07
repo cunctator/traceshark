@@ -56,7 +56,7 @@ The top widget has some buttons as well:
   5. Locate the wakup event in the events view. It should be selected.
   6. Double click on the `Info` field to display the backtrace.
   7. If the backtrace leads to an interrupt (including software interrupts), then the wakeup source has been found.
-  8. If the backtrace does not lead to an interrupt, then go back to 4.
+  8. If the backtrace does not lead to an interrupt, then go back to IV.
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
 * ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/removetask30x30.png) Removes the currently selected unified graph. 
 
