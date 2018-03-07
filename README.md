@@ -48,7 +48,15 @@ The top widget has some buttons as well:
 * ![Add the blue cursor](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/moveblue30x30.png) Move the blue cursor to the time specified in the time text box.
 * ![Add to legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtolegend30x30.png) Adds the currently selected task, from the scheduling graphs, to the legend.
 * ![Clear legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/clearlegend30x30.png) Removes all tasks from the legend.
-* ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/wakeup30x30.png) This moves the non-active cursor to the immediately preceeding scheduling of the currently selected task. The active cursor is moved to the wakeup event. The events view is scrolled to the wakeup event. This makes it convenient to easily check which task is waiting for which. It is a good idea to double click on the info field of the wakeup event, in order to see the backtrace so that one can determine whether the wakeup was caused by an interrupt or not. If all IRQs are traced it may also be possible to form a conclusion by looking at the surrounding IRQ related events.
+* ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/wakeup30x30.png) This moves the non-active cursor to the immediately preceeding scheduling of the currently selected task. The active cursor is moved to the wakeup event. The selected task is unselected and instead the task of the wakeup event is selected. The events view is scrolled to the wakeup event. This makes it convenient to easily check which task is waiting for which. It is a good idea to double click on the info field of the wakeup event, in order to see the backtrace so that one can determine whether the wakeup was caused by an interrupt or not. If all IRQs are traced it may also be possible to form a conclusion by looking at the surrounding IRQ related events. A typical way to use this button would be something like this:
+  1. Choose a task whose wakeup sequence is of interest
+  2. Double click to move the cursor to just after the scheduling of interest
+  3. Make sure that the task is selected.
+  4. Click on the ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/wakeup30x30.png) button.
+  5. Locate the wakup event in the events view. It should be selected.
+  6. Double click on the `Info` field to display the backtrace.
+  7. If the backtrace leads to an interrupt (including software interrupts), then the wakeup source has been found.
+  8. If the backtrace does not lead to an interrupt, then go back to 4.
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
 * ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/removetask30x30.png) Removes the currently selected unified graph. 
 
