@@ -1334,8 +1334,10 @@ void MainWindow::exportEvents()
 	dialog.setAcceptMode(QFileDialog::AcceptSave);
 	dialog.setDefaultSuffix(QString("asc"));
 
-	if (dialog.exec())
-		fileNameList = dialog.selectedFiles();
+	if (!dialog.exec())
+		return;
+
+	fileNameList = dialog.selectedFiles();
 
 	if (fileNameList.size() != 1) {
 		vtl::warnx("You can only select one filename, not %d",
