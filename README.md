@@ -15,7 +15,7 @@ sched_wakeup_new
 
 ![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/6c82bceacf272617de2692b5e2efd4ec1b0ecdde/doc/ts-screenshot1.png)
 
-Above is a screenshot of traceshark. The four uppermost graphs are for displaying CPU idle and frequency states. They are four because the measurment was made on a system with four virtual CPUs. The green graphs with red circles show the CPU idle states while the thicker blue graphs show the CPU frequency changes.
+Above is a screenshot of traceshark. The four uppermost graphs are for displaying CPU idle and frequency states. They are four because the measurment was made on a system with four virtual CPUs. The green graphs with red circles ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/eb46ef87526687ec139be16d444f1379f9d5c8a0/doc/idle-graph.png) show the CPU idle states while the thicker blue graphs ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/eb46ef87526687ec139be16d444f1379f9d5c8a0/doc/freq-graph.png) show the CPU frequency changes.
 
 Below these four graphs are the per CPU scheduling graphs, the different colors of these graphs are for different tasks. The small vertical bars that are shown just above the per CPU graphs indicates the waiting time between wakeup and being scheduled, the highest height is equal to 20 ms, i.e. a full lenght means that the waiting time was at least 20 ms, possibly more.
 
