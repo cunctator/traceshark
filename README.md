@@ -36,11 +36,32 @@ There are a number of buttons in the GUI, here is a description of the buttons i
 * ![open button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/open30x30.png) This button is used to open a trace file.
 * ![close button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/close30x30.png) Closes the currently open trace.
 * ![screenshot button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/screenshot30x30.png) Take a screenshot of the plot and save it to a file.
-* ![taske select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) Show the task select dialog. This makes it possible to filter the events view by task, to show a task in the legend, or to show a unified graph. This button is very useful when the user knows the name of a task of interest but cannot find it easily among the scheduling graphs.
+* ![task select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) Show the task select dialog. This makes it possible to filter the events view by task, to show a task in the legend, or to show a unified graph. This button is very useful when the user knows the name of a task of interest but cannot find it easily among the scheduling graphs.
 * ![Event list](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/eventfilter30x30.png) Show a list of the different event types and it's possible to filter the events view by event type.
 * ![Time filter](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/timefilter30x30.png) This will filter the events view so that only events in the interval between the cursors are displayed.
 * ![Reset all filters](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/resetfilters30x30.png) This button resets all filters.
-* ![Export filtered events](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/exportevents30x30.png) Opens a dialog that allows the filtered events to be saved to a file. The output format is more or less the same as from perf, so that if one has filtered on the `cycles` events, it's possible to generate a CPU Flame Graph with the tools [here](https://github.com/brendangregg/FlameGraph), or [here](https://github.com/cunctator/FlameGraph).
+* ![Export filtered events](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/exportevents30x30.png) Opens a dialog that allows the filtered events to be saved to a file. The output format is more or less the same as from perf, so that if one has filtered on the `cycles` events, it's possible to generate a CPU Flame Graph with the tools [here](https://github.com/brendangregg/FlameGraph), or [here](https://github.com/cunctator/FlameGraph). A typical way to use this would be something like this:
+  1. Move the blue and red cursors so that they define a time interval that is of interest.
+  2. Click on the ![Time filter](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/timefilter30x30.png) button to limit the events to this interval.
+  3. Click on the ![Event list](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/eventfilter30x30.png) button. Select the `cycles` event and click on the `Create events filter` button.
+  4. Click on the ![task select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) and select a task or a set of tasks that is of interest. Unselect the `Include wakeup/fork/switch from other PIDs` checkbox. Click on the `Create events filter` button.
+  5. Click on the ![Export filtered events](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/exportevents30x30.png) button and type in the filename `filtered.asc`. Click on the `Save` button.
+  6. Download the flamegraph software by giving one of the following commands in your home directory:
+  ```
+  git clone https://github.com/cunctator/FlameGraph.git
+  ````
+  or
+  ```
+  git clone https://github.com/brendangregg/FlameGraph.git
+  ```
+  7. Create the flamegraph of the filtered events:
+  ```
+  ~/FlameGraph/stackcollapse-perf.pl --kernel  filtered.asc > filtered.folded
+  ~/FlameGraph/flamegraph.pl --hash --color=java filtered.folded > filtered.svg
+  ```
+  8. If all went well, your file `filtered.svg` should now contain an image like this:
+  ![flamegraph image](https://raw.githubusercontent.com/cunctator/traceshark/2c741e9857179ef8247c6f4dd0e246612b03d932/doc/filtered.svg)
+
 
 The top widget has some buttons as well:
 
