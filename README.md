@@ -44,7 +44,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   1. Move the blue and red cursors so that they define a time interval that is of interest.
   2. Click on the ![Time filter](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/timefilter30x30.png) button to limit the events to this interval.
   3. Click on the ![Event list](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/eventfilter30x30.png) button. Select the `cycles` event and click on the `Create events filter` button.
-  4. Click on the ![task select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) and select a task or a set of tasks that is of interest. Unselect the `Include wakeup/fork/switch from other PIDs` checkbox. Click on the `Create events filter` button.
+  4. Click on the ![task select button](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/taskselector30x30.png) button and select a task or a set of tasks that is of interest. Unselect the `Include wakeup/fork/switch from other PIDs` checkbox. Click on the `Create events filter` button.
   5. Click on the ![Export filtered events](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/exportevents30x30.png) button and type in the filename `filtered.asc`. Click on the `Save` button.
   6. Download the flamegraph software by giving one of the following commands in your home directory:
   ```
