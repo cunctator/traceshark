@@ -60,7 +60,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   ~/FlameGraph/flamegraph.pl --hash --color=java filtered.folded > filtered.svg
   ```
   8. If all went well, your file `filtered.svg` should now contain an image like this:
-  ![flamegraph image](https://raw.githubusercontent.com/cunctator/traceshark/2c741e9857179ef8247c6f4dd0e246612b03d932/doc/filtered.svg)
+  ![flamegraph image](https://raw.githubusercontent.com/cunctator/traceshark/4d0380b0dcbccdf9bafd4e489b2d4409735f3e06/doc/filtered.svg)
 
 
 The top widget has some buttons as well:
