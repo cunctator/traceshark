@@ -61,7 +61,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   ```
   8. If all went well, your file `filtered.svg` should now contain an image like this:
 
-[![Flamegraph image](http://raw.githubusercontent.com/cunctator/traceshark/ce24ad54552cc45ab952c6fc961274fae50105b9/doc/filtered.svg)](http://raw.githubusercontent.com/cunctator/traceshark/ce24ad54552cc45ab952c6fc961274fae50105b9/doc/filtered.svg)
+[![Flamegraph image](https://raw.githubusercontent.com/cunctator/traceshark/ce24ad54552cc45ab952c6fc961274fae50105b9/doc/filtered.svg)](https://raw.githubusercontent.com/cunctator/traceshark/ce24ad54552cc45ab952c6fc961274fae50105b9/doc/filtered.svg)
 
 
 The top widget has some buttons as well:
