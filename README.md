@@ -59,8 +59,9 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   ~/FlameGraph/stackcollapse-perf.pl --kernel  filtered.asc > filtered.folded
   ~/FlameGraph/flamegraph.pl --hash --color=java filtered.folded > filtered.svg
   ```
-  8. If all went well, your file `filtered.svg` should now contain an image, that can be displayed by a web browser such as Chromium or Firefox (click to zoom):
-  [![filtered.svg](https://svgshare.com/i/5xC.svg)](https://svgshare.com/i/5xC.svg)
+  8. If all went well, your file `filtered.svg` should now contain an image, that can be displayed by a web browser such as Chromium or Firefox (check the file doc/filtered.svg in this repository, it can be zoomed, unlike the png representation below):
+  [![filtered.png](https://raw.githubusercontent.com/cunctator/traceshark/4672e40d57e57ce5c276b22a8e91da8047338087/doc/filtered.png)](https://raw.githubusercontent.com/cunctator/traceshark/4672e40d57e57ce5c276b22a8e91da8047338087/doc/filtered.png)
+  You can read more about flame graphs [here](http://www.brendangregg.com/flamegraphs.html).
 
 The top widget has some buttons as well:
 
