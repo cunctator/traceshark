@@ -134,31 +134,54 @@ you happen to prefer Qt 4.
 
 # 3. Capturing a trace
 
+There are two ways to capture a trace: Ftrace and perf. Perf is the recommended method because it is able to generate backtraces that are understood by traceshark. However, Ftrace has the benefit that it often works right out of the box on many distros. The same cannot be said of perf, which often requires some fiddling, especially if you want backtraces.
+
+For both Ftrace and perf it is very desirable to avoid lost events because traceshark cannot visualize correctly with lost events, nor can it find a wakeup event that has been lost.
+
+## 3.1 Capturing a trace with Ftrace
+
 You can get an Ftrace trace to view by doing the following:
 
 ```
 trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new
 ```
-In order to open it with traceshark, it must first be converted to ASCII:
 
+If you get problem with lost events, then you may want to try the `-r' and `-b` options. For example:
+```
+trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new -b 32768 -r 99
+```
+
+The above will use kernel buffers that are a whopping 32 MB per cpu and run the capture threads with a real time priority of 99. You may want to adjust these values to suit your system.
+
+You may also want to add additional events to the above command that are of interest to your software. You can get a list of available events by running the following command as root:
+```
+trace-cmd list
+```
+In order to open the trace with traceshark, it must first be converted to ASCII:
 ```
 trace-cmd report trace.dat > file_to_open_with_traceshark.asc
 ```
 
-If you prefer Perf, the trace can be obtained by doing something like this:
+## 3.2 Capturing a trace with perf
+
+With perf you may also want to consider additional events. A list of all events can be obtained by running the following command as root:
+```
+perf list
+```
+
+A perf trace can be obtained by doing something like this:
 
 ```
-perf record -e power:cpu_frequency -e power:cpu_idle -e sched:sched_kthread_stop -e sched:sched_kthread_stop_ret -e sched:sched_migrate_task -e sched:sched_move_numa -e sched:sched_pi_setprio -e sched:sched_process_exec -e sched:sched_process_exit -e sched:sched_process_fork -e sched:sched_process_free -e sched:sched_process_wait -e sched:sched_stick_numa -e sched:sched_swap_numa -e sched:sched_switch -e sched:sched_wait_task -e sched:sched_wake_idle_without_ipi -e sched:sched_wakeup -e sched:sched_wakeup_new -a --call-graph=dwarf,65528 -m 128M
+perf record -e power:cpu_frequency -e power:cpu_idle -e sched:sched_kthread_stop -e sched:sched_kthread_stop_ret -e sched:sched_migrate_task -e sched:sched_move_numa -e sched:sched_pi_setprio -e sched:sched_process_exec -e sched:sched_process_exit -e sched:sched_process_fork -e sched:sched_process_free -e sched:sched_process_wait -e sched:sched_stick_numa -e sched:sched_swap_numa -e sched:sched_switch -e sched:sched_wait_task -e sched:sched_wake_idle_without_ipi -e sched:sched_wakeup -e sched:sched_wakeup_new -e cycles -a --call-graph=dwarf,20480 -m 128M
 ```
 
-The `--call-graph=dwarf,65528` option is needed, if you want to get stack traces
-for your events. I believe that you can use the `-g` option instead if your
-software is compiled with frame pointer. The option `-m 128M` is needed to
-increase the memory used by perf. The stack trace of an event will be displayed
-by traceshark if you double click on the event's info field in the events view.
+The `--call-graph=dwarf,20480` option is needed, if you want to get stack traces for your events. You might need to adjust the size 20480, the maximum is 65528. The benefit with larger sizes is that you can capture bigger stacks, the downside is that the traces will be larger, tracing will have more overhead, and the probability that perf will lose some events is higher. I believe that you can use the `-g` option instead if your software is compiled with frame pointers.
+
+The option `-m 128M` is needed to increase the memory used by perf for buffering in order to avoid lost events, especially when using the `--call-graph` option. This is necessary because traceshark doesn't cope well with lost events.
+
+The stack trace of an event will be displayed by traceshark if you double click on the event's info field in the events view.
 
 In order to get an ASCII representation that can be parsed by traceshark:
-
 ```
 perf script -f > file_to_open_with_traceshark.asc
 ```
