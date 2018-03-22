@@ -132,13 +132,20 @@ Please note that the software will compile for Qt 4 but that it has not been as
 tested with Qt 4. For that reason you might want to build with Qt 5, unless
 you happen to prefer Qt 4.
 
-# 3. Capturing a trace
+# 3. Obtaining a trace
 
 There are two ways to capture a trace: Ftrace and perf. Perf is the recommended method because it is able to generate backtraces that are understood by traceshark. However, Ftrace has the benefit that it often works right out of the box on many distros. The same cannot be said of perf, which often requires some fiddling, especially if you want backtraces.
 
 For both Ftrace and perf it is very desirable to avoid lost events because traceshark cannot visualize correctly with lost events, nor can it find a wakeup event that has been lost.
 
-## 3.1 Capturing a trace with Ftrace
+## 3.1 Sample traces
+
+If you are not anxious to trace anything in particular but only want to play around with traceshark, then you can find sample traces [here](https://github.com/cunctator/traceshark-resources), or just clone the repo with the samples:
+```
+git clone https://github.com/cunctator/traceshark-resources.git
+```
+
+## 3.2 Capturing a trace with Ftrace
 
 You can get an Ftrace trace to view by doing the following:
 
@@ -162,7 +169,7 @@ In order to open the trace with traceshark, it must first be converted to ASCII:
 trace-cmd report trace.dat > file_to_open_with_traceshark.asc
 ```
 
-## 3.2 Capturing a trace with perf
+## 3.3 Capturing a trace with perf
 
 With perf you may also want to consider additional events. A list of all events can be obtained by running the following command as root:
 ```
