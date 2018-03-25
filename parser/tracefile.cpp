@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -64,6 +64,8 @@ extern "C" {
 #include <unistd.h>
 }
 
+#include "vtl/error.h"
+
 TraceFile::TraceFile(char *name, int &ts_errno, unsigned int bsize)
 	: mappedFile(nullptr), fileSize(0), bufferSwitch(false), nRead(0),
 	  lastBuf(0), lastPos(0), endOfLine(false)
@@ -84,10 +86,8 @@ TraceFile::TraceFile(char *name, int &ts_errno, unsigned int bsize)
 			fileSize = sbuf.st_size;
 			mappedFile = (char*) mmap(nullptr, fileSize, PROT_READ,
 						  MAP_PRIVATE, fd, 0);
-			if (mappedFile == MAP_FAILED) {
-				ts_errno = errno;
-				mappedFile = nullptr;
-			}
+			if (mappedFile == MAP_FAILED)
+				mmap_err();
 		}
 	}
 
@@ -111,6 +111,8 @@ TraceFile::~TraceFile()
 	delete loadThread;
 	for (i = 0; i < NR_BUFFERS; i++)
 		delete loadBuffers[i];
-	if (mappedFile != nullptr)
-		munmap(mappedFile, fileSize);
+	if (mappedFile != nullptr) {
+		if (munmap(mappedFile, fileSize) != 0)
+			munmap_err();
+	}
 }

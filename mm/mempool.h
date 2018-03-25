@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -53,11 +53,13 @@
 #define MEMPOOL_H
 
 #include <QList>
-#include <QTextStream>
 
 extern "C" {
 #include <sys/mman.h>
 }
+
+#include "vtl/compiler.h"
+#include "vtl/error.h"
 
 class MemPool
 {
@@ -83,8 +85,8 @@ private:
 	unsigned long long used;
 	unsigned int objSize;
 	QList <void*> exhaustList;
-	__always_inline bool newMap();
-	bool addMemory();
+	__always_inline void newMap();
+	void addMemory();
 };
 
 __always_inline void* MemPool::allocObj()
@@ -120,8 +122,9 @@ __always_inline void* MemPool::allocBytes(unsigned int bytes)
 			return ptr;
 		}
 		used -= bytes;
-		if (used == 0 || !addMemory())
+		if (used == 0)
 			return nullptr;
+		addMemory();
 		retries++;
 	} while(retries < 2);
 	return nullptr;
@@ -142,8 +145,7 @@ __always_inline void* MemPool::preallocBytes(unsigned int bytes)
 			return next;
 		if (used == 0)
 			return nullptr;
-		if (!addMemory())
-			return nullptr;
+		addMemory();
 		maxused = bytes; /* used will be 0 here */
 		retries++;
 	} while(retries < 2);
@@ -171,19 +173,18 @@ __always_inline bool MemPool::commitChars(unsigned int chars)
 	return commitBytes(sizeof(char) * chars);
 }
 
-__always_inline bool MemPool::newMap()
+__always_inline void MemPool::newMap()
 {
 	quint8 *ptr;
 	ptr = (quint8*) mmap(nullptr, (size_t) poolSize, PROT_READ|PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	if (ptr != MAP_FAILED) {
+	if (likely(ptr != MAP_FAILED)) {
 		memory = ptr;
 		next = ptr;
 		used = 0ULL;
-		return true;
+		return;
 	}
-	QTextStream(stderr) << "mmap() failed\n";
-	return false;
+	mmap_err();
 }
 
 #endif /* MEMPOOL_H */

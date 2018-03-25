@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,6 +55,7 @@
 #include <cstring>
 #include "misc/tstring.h"
 #include "threads/loadbuffer.h"
+#include "vtl/error.h"
 
 extern "C" {
 #include <unistd.h>
@@ -73,15 +74,14 @@ LoadBuffer::LoadBuffer(unsigned int size):
 	memory = (char*) mmap(nullptr, 2 * size + 1, PROT_READ | PROT_WRITE,
 			      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (memory == MAP_FAILED)
-		abort();
+		mmap_err();
 	readBegin = memory + size;
 }
 
 LoadBuffer::~LoadBuffer()
 {
-	int uval;
-	uval = munmap(memory, bufSize * 2 + 1);
-	assert(uval == 0);
+	if (munmap(memory, bufSize * 2 + 1) != 0)
+		munmap_err();
 }
 
 /*

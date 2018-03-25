@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,52 +49,28 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mm/mempool.h"
+#ifndef BSDEXITS_H
 
-extern "C" {
-#include <sys/mman.h>
-}
+/*
+ * These values have been taken from:
+ * https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+11.1-RELEASE&arch=default&format=html
+ */
 
-extern "C" {
-#include <unistd.h>
-}
+#define BSD_EX_OK (0)
+#define BSD_EX_USAGE (64)
+#define BSD_EX_DATAERR (65)
+#define BSD_EX_NOINPUT (66)
+#define BSD_EX_NOUSER (67)
+#define BSD_EX_NOHOST (68)
+#define BSD_EX_UNAVAILABLE (69)
+#define BSD_EX_SOFTWARE (70)
+#define BSD_EX_OSERR (71)
+#define BSD_EX_OSFILE (72)
+#define BSD_EX_CANTCREAT (73)
+#define BSD_EX_IOERR (74)
+#define BSD_EX_TEMPFAIL (75)
+#define BSD_EX_PROTOCOL (76)
+#define BSD_EX_NOPERM (77)
+#define BSD_EX_CONFIG (78)
 
-MemPool::MemPool(unsigned int nr_pages, unsigned int objsize)
-{
-	poolSize = nr_pages * sysconf(_SC_PAGESIZE);
-	objSize = objsize;
-	next = nullptr;
-	memory = nullptr;
-	newMap();
-}
-
-MemPool::~MemPool()
-{
-	int i;
-	int len = exhaustList.size();
-	for (i = 0; i < len; i++) {
-		if (munmap(exhaustList[i], poolSize) != 0)
-			munmap_err();
-	}
-	if (memory != nullptr && munmap(memory, poolSize) != 0)
-		munmap_err();
-}
-
-void MemPool::addMemory()
-{
-	exhaustList.append(memory);
-	newMap();
-}
-
-void MemPool::reset()
-{
-	int i;
-	int len = exhaustList.size();
-	for (i = 0; i < len; i++) {
-		if (munmap(exhaustList[i], poolSize) != 0)
-			munmap_err();
-	}
-	exhaustList.clear();
-	used = 0ULL;
-	next = memory;
-}
+#endif /* BSDEXITS_H  */

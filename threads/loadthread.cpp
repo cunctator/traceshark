@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -51,11 +51,11 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <QTextStream>
 
 #include "misc/tstring.h"
 #include "threads/loadbuffer.h"
 #include "threads/loadthread.h"
+#include "vtl/error.h"
 
 extern "C" {
 #include <sys/mman.h>
@@ -75,13 +75,11 @@ void LoadThread::run()
 	char *filePos = mappedFile;
 	TString lineBegin;
 	size_t bufSize = loadBuffers[0]->bufSize;
-	int uval, eval;
-	QTextStream qout(stdout);
 
 	lineBegin.ptr = (char*) mmap(nullptr, bufSize, PROT_READ|PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (lineBegin.ptr == MAP_FAILED)
-		abort();
+		mmap_err();
 	lineBegin.len = 0;
 
 	do {
@@ -91,19 +89,9 @@ void LoadThread::run()
 			i = 0;
 	} while(!eof);
 
-	uval = close(fd);
-	eval = errno;
-	if (uval != 0) {
-		qout << "Warning, error in " << __FUNCTION__
-		     <<	"(), close() failed because: " << strerror(eval)
-		     << "\n";
-	}
+	if (close(fd) != 0)
+		close_warn();
 
-	uval = munmap(lineBegin.ptr, bufSize);
-	eval = errno;
-	if (uval != 0) {
-		qout << "Warning, error in " << __FUNCTION__
-		     <<	"(), munmap() failed because: " << strerror(eval)
-		     << "\n";
-	}
+	if (munmap(lineBegin.ptr, bufSize) != 0)
+		munmap_err();
 }

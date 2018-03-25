@@ -65,6 +65,7 @@ extern "C" {
 #include <QString>
 #include <QTextStream>
 
+#include "vtl/error.h"
 #include "vtl/tlist.h"
 
 #include "analyzer/cpufreq.h"
@@ -1020,10 +1021,8 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 			    PROT_READ|PROT_WRITE,
 			    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-	if (wbuf == MAP_FAILED) {
-		*ts_errno = errno;
-		return false;
-	}
+	if (wbuf == MAP_FAILED)
+		mmap_err();
 
 	fd =  clib_open(fileName, O_WRONLY | O_CREAT | O_DIRECT,
 			(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
@@ -1137,7 +1136,7 @@ skip_perf:
 /* Insert ftrace code here */
 
 skip_ftrace:
-	if (clib_close(fd)) {
+	if (clib_close(fd) != 0) {
 		if (errno != EINTR) {
 			rval = false;
 			*ts_errno = errno;
@@ -1145,10 +1144,8 @@ skip_ftrace:
 	}
 
 error_munmap:
-	if (munmap(wbuf, WRITE_BUFFER_SIZE) != 0) {
-		rval = false;
-		*ts_errno = errno;
-	}
+	if (munmap(wbuf, WRITE_BUFFER_SIZE) != 0)
+		munmap_err();
 
 	return rval;
 }

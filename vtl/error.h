@@ -53,6 +53,19 @@
 #define _VTL_ERROR_H
 
 #include <cstdarg>
+#include <cerrno>
+#include "vtl/bsdexits.h"
+
+#define mmap_err() 						\
+	vtl::err(BSD_EX_OSERR, errno, "mmap() failed at %s:%d", \
+		 __FILE__, __LINE__)
+
+#define munmap_err()						  \
+	vtl::err(BSD_EX_OSERR, errno, "munmap() failed at %s:%d", \
+		 __FILE__, __LINE__)
+
+#define close_warn()							\
+	vtl::warn(errno, "close() failed at %s:%d", __FILE__, __LINE__)
 
 namespace vtl {
 	class ErrorHandler {

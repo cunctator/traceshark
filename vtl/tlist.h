@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -58,6 +58,8 @@
 extern "C" {
 #include <sys/mman.h>
 }
+
+#include "vtl/error.h"
 
 namespace vtl {
 
@@ -159,7 +161,7 @@ void TList<T>::setupMem()
 			     PROT_READ | PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (mapArray == MAP_FAILED)
-		abort();
+		mmap_err();
 	addMem();
 }
 
@@ -170,15 +172,19 @@ void TList<T>::addMem()
 				sizeof(T), PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (mapArray[nrMaps] == MAP_FAILED)
-		abort();
+		mmap_err();
 	nrMaps++;
 }
 
 template<class T>
 void TList<T>::decMem()
 {
+	int r;
+
 	nrMaps--;
-	munmap(mapArray[nrMaps], TLIST_MAP_NR_ELEMENTS * sizeof(T));
+	r = munmap(mapArray[nrMaps], TLIST_MAP_NR_ELEMENTS * sizeof(T));
+	if (r != 0)
+		munmap_err();
 }
 
 template<class T>
@@ -186,9 +192,15 @@ void TList<T>::clearAll()
 {
 	unsigned int maxNrMaps = mapFromIndex(TLIST_MAP_MASK) + 1;
 	unsigned int i;
-	for (i = 0; i < nrMaps; i++)
-		munmap(mapArray[i], TLIST_MAP_NR_ELEMENTS * sizeof(T));
-	munmap(mapArray, maxNrMaps * sizeof(T*));
+	int r;
+	for (i = 0; i < nrMaps; i++) {
+		r = munmap(mapArray[i], TLIST_MAP_NR_ELEMENTS * sizeof(T));
+		if (r != 0)
+			munmap_err();
+	}
+	r = munmap(mapArray, maxNrMaps * sizeof(T*));
+	if (r != 0)
+		munmap_err();
 	nrMaps = 0;
 	nrElements = 0;
 }
