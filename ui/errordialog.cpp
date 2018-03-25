@@ -50,16 +50,19 @@
  */
 
 #include <cstdio>
+#include <cstdlib>
 
 #include "misc/errors.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
+#include "threads/tthread.h"
 #include "ui/errordialog.h"
 
 #include <QFile>
 #include <QString>
 #include <QTextStream>
 #include <QTextEdit>
+#include <QThread>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -67,6 +70,10 @@
 extern "C" {
 #include <string.h>
 }
+
+#define NEEDS_TO_CLOSE_MSG \
+"\n\nUnfortunately, the application has encountered a serious internal error\n"\
+"and needs to close."
 
 ErrorDialog::ErrorDialog(QWidget *parent)
 	:QDialog(parent, Qt::WindowCloseButtonHint)
@@ -96,6 +103,8 @@ ErrorDialog::ErrorDialog(QWidget *parent)
 
 	hide();
 	tsconnect(button, clicked(), this, hide());
+	tsconnect(this, messageInThread(QString, bool, int), this,
+		  handleMessageFromThread(QString, bool, int));
 }
 
 ErrorDialog::~ErrorDialog()
@@ -107,7 +116,7 @@ void ErrorDialog::setText(const QString &text)
 {
 	textEdit->setPlainText(text);
 	updateSize();
-	show();
+	exec();
 }
 
 void ErrorDialog::setErrno(int d_errno)
@@ -118,7 +127,59 @@ void ErrorDialog::setErrno(int d_errno)
 	show();
 }
 
-void ErrorDialog::Error(int vtl_errno, const char *fmt, va_list ap)
+void ErrorDialog::killThreads()
+{
+	QList<QThread*>::iterator iter;
+	QThread *current = QThread::currentThread();
+	QList<QThread*> list;
+	TThread::listThreads(list);
+	int s = list.size();
+	int i;
+
+	/* Terminate all other threads */
+	for (i = 0; i < s; i++) {
+		QThread *thr = list[i];
+		if (thr != current) {
+			thr->terminate();
+			thr->wait();
+		}
+	}
+
+	/*
+	 * Then ourselves. After this, only the main thread and some Qt
+	 * internal threads should remain.
+	 */
+	current->terminate();
+	current->wait();
+}
+
+void ErrorDialog::setTextThreadSafe(const QString &text, bool doExit,
+				    int ecode)
+{
+	if (isMainThread()) {
+		handleMessageFromThread(text, doExit, ecode);
+	} else {
+		emit messageInThread(text, doExit, ecode);
+		if (doExit) {
+			killThreads();
+		}
+	}
+}
+
+bool ErrorDialog::isMainThread()
+{
+	return QApplication::instance()->thread() == QThread::currentThread();
+}
+
+void ErrorDialog::handleMessageFromThread(QString text, bool doExit, int ecode)
+{
+	setText(text);
+	if (doExit)
+		exit(ecode);
+}
+
+void ErrorDialog::_warn(int vtl_errno, const char *fmt, va_list ap,
+			bool doExit, int ecode)
 {
 	const char *emsg = nullptr;
 
@@ -137,16 +198,40 @@ void ErrorDialog::Error(int vtl_errno, const char *fmt, va_list ap)
 	QString qmsg(buf);
 
 	QString wholeMessage = qmsg + QString(tr(":\n")) + qemsg;
-	setText(wholeMessage);
+	if (doExit)
+		wholeMessage = wholeMessage + tr(NEEDS_TO_CLOSE_MSG);
+	setTextThreadSafe(wholeMessage, doExit, ecode);
 }
 
-void ErrorDialog::ErrorX(const char *fmt, va_list ap)
+void ErrorDialog::_warnX(const char *fmt, va_list ap, bool doExit, int ecode)
 {
 	snprintf(buf, bufSize, fmt, ap);
 	buf[bufSize] = '\0';
 
 	QString qmsg(buf);
-	setText(qmsg);
+	if (doExit)
+		qmsg = qmsg + tr(NEEDS_TO_CLOSE_MSG);
+	setTextThreadSafe(qmsg, doExit, ecode);
+}
+
+void ErrorDialog::warn(int vtl_errno, const char *fmt, va_list ap)
+{
+	_warn(vtl_errno, fmt, ap, false, 0);
+}
+
+void ErrorDialog::warnX(const char *fmt, va_list ap)
+{
+	_warnX(fmt, ap, false, 0);
+}
+
+void ErrorDialog::error(int ecode, int vtl_errno, const char *fmt, va_list ap)
+{
+	_warn(vtl_errno, fmt, ap, true, ecode);
+}
+
+void ErrorDialog::errorX(int ecode, const char *fmt, va_list ap)
+{
+	_warnX(fmt, ap, true, ecode);
 }
 
 void ErrorDialog::updateSize()

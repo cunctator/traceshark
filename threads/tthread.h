@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,6 +55,8 @@
  /* We are going to piggyback on QThread */
 #include <QThread>
 
+#include <QList>
+#include <QMap>
 #include <QtCore>
 #include <QString>
 
@@ -85,10 +87,12 @@ public:
 	void terminate();
 	bool wait(unsigned long time = ULONG_MAX);
 	void quit();
+	static void listThreads(QList<QThread*> &list);
 protected:
 	virtual void run()=0;
 private:
 	__TThread *threadPtr;
+	static QMap<__TThread*, __TThread*> threadMap;
 };
 
 class __TThread : public QThread {

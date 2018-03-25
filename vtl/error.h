@@ -57,9 +57,12 @@
 namespace vtl {
 	class ErrorHandler {
 	public:
-		virtual void Error(int vtl_errno, const char *fmt, va_list ap)
+		virtual void error(int ecode, int vtl_errno, const char *fmt,
+				   va_list ap) = 0;
+		virtual void errorX(int ecode, const char *fmt, va_list ap) = 0;
+		virtual void warn(int vtl_errno, const char *fmt, va_list ap)
 			= 0;
-		virtual void ErrorX(const char *fmt, va_list ap) = 0;
+		virtual void warnX(const char *fmt, va_list ap) = 0;
 	};
 	void set_strerror(const char *(*func)(int errnum));
 	void set_error_handler(ErrorHandler *eh);

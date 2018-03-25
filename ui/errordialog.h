@@ -67,13 +67,25 @@ public:
 	~ErrorDialog();
 	void setText(const QString &text);
 	void setErrno(int d_errno);
-	void Error(int vtl_errno, const char *fmt, va_list ap);
-	void ErrorX(const char *fmt, va_list ap);
+	void error(int ecode, int vtl_errno, const char *fmt, va_list ap);
+	void errorX(int ecode, const char *fmt, va_list ap);
+	void warn(int vtl_errno, const char *fmt, va_list ap);
+	void warnX(const char *fmt, va_list ap);
 private:
+	void _warn(int vtl_errno, const char *fmt, va_list ap, bool doExit,
+		   int ecode);
+	void _warnX(const char *fmt, va_list ap, bool doExit, int ecode);
+	bool isMainThread();
+	void killThreads();
+	void setTextThreadSafe(const QString &text, bool doExit, int ecode);
 	char *buf;
 	static const size_t bufSize = 4095;
 	void updateSize();
 	QTextEdit *textEdit;
+signals:
+	void messageInThread(QString text, bool doExit, int ecode);
+private slots:
+	void handleMessageFromThread(QString text, bool doExit, int ecode);
 };
 
 #endif /* ERRORDIALOG_H */

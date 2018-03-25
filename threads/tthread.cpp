@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -52,6 +52,8 @@
 /* Let's piggy back on QThread. This will make TThread a mere container which
  * through a pointer isolates us from having to intherit QObject in our thread
  * classes */
+#include <QList>
+#include <QMap>
 #include <QThread>
 #include "threads/tthread.h"
 
@@ -73,15 +75,18 @@ TThread::TThread()
 {
 	const QString name("TThread");
 	threadPtr = new __TThread(this, name);
+	threadMap[threadPtr] = threadPtr;
 }
 
 TThread::TThread(const QString &name)
 {
 	threadPtr = new __TThread(this, name);
+	threadMap[threadPtr] = threadPtr;
 }
 
 TThread::~TThread()
 {
+	threadMap.remove(threadPtr);
 	delete threadPtr;
 }
 
@@ -146,3 +151,12 @@ void TThread::quit()
 {
 	threadPtr->quit();
 }
+
+void TThread::listThreads(QList<QThread*> &list)
+{
+	QMap<__TThread*, __TThread*>::iterator iter;
+	for (iter = threadMap.begin(); iter != threadMap.end(); iter++)
+		list.append(static_cast<QThread*>(iter.value()));
+}
+
+QMap<__TThread*, __TThread*> TThread::threadMap;
