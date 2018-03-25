@@ -124,7 +124,7 @@ void ErrorDialog::setErrno(int d_errno)
 	QString text(strerror(d_errno));
 	textEdit->setPlainText(text);
 	updateSize();
-	show();
+	exec();
 }
 
 void ErrorDialog::killThreads()
