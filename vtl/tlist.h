@@ -59,6 +59,7 @@ extern "C" {
 #include <sys/mman.h>
 }
 
+#include "vtl/compiler.h"
 #include "vtl/error.h"
 
 namespace vtl {
@@ -160,7 +161,7 @@ void TList<T>::setupMem()
 	mapArray = (T**) mmap(nullptr, (size_t) maxNrMaps * sizeof(T*),
 			     PROT_READ | PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	if (mapArray == MAP_FAILED)
+	if (unlikely(mapArray == MAP_FAILED))
 		mmap_err();
 	addMem();
 }
@@ -171,7 +172,7 @@ void TList<T>::addMem()
 	mapArray[nrMaps] = (T*) mmap(nullptr, (size_t) TLIST_MAP_NR_ELEMENTS *
 				sizeof(T), PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	if (mapArray[nrMaps] == MAP_FAILED)
+	if (unlikely(mapArray[nrMaps] == MAP_FAILED))
 		mmap_err();
 	nrMaps++;
 }
@@ -183,7 +184,7 @@ void TList<T>::decMem()
 
 	nrMaps--;
 	r = munmap(mapArray[nrMaps], TLIST_MAP_NR_ELEMENTS * sizeof(T));
-	if (r != 0)
+	if (unlikely(r != 0))
 		munmap_err();
 }
 
@@ -193,13 +194,14 @@ void TList<T>::clearAll()
 	unsigned int maxNrMaps = mapFromIndex(TLIST_MAP_MASK) + 1;
 	unsigned int i;
 	int r;
+
 	for (i = 0; i < nrMaps; i++) {
 		r = munmap(mapArray[i], TLIST_MAP_NR_ELEMENTS * sizeof(T));
-		if (r != 0)
+		if (unlikely(r != 0))
 			munmap_err();
 	}
 	r = munmap(mapArray, maxNrMaps * sizeof(T*));
-	if (r != 0)
+	if (unlikely(r != 0))
 		munmap_err();
 	nrMaps = 0;
 	nrElements = 0;
