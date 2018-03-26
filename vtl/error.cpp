@@ -72,7 +72,7 @@ void vtl::set_error_handler(vtl::ErrorHandler *eh)
 }
 
 static __always_inline void vtl__vwarnx(const char *fmt, va_list args,
-				     bool doexit, int ecode)
+					bool doexit, int ecode)
 {
 	if (handler != nullptr) {
 		if (doexit) {
@@ -89,7 +89,7 @@ static __always_inline void vtl__vwarnx(const char *fmt, va_list args,
 }
 
 static __always_inline void vtl__vwarn(int vtl_errno, const char *fmt,
-				    va_list args, bool doexit, int ecode)
+				       va_list args, bool doexit, int ecode)
 {
 	if (handler != nullptr) {
 		if (doexit) {
