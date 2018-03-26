@@ -60,7 +60,6 @@
 
 #include <QFile>
 #include <QString>
-#include <QTextStream>
 #include <QTextEdit>
 #include <QThread>
 #include <QPushButton>
@@ -236,7 +235,6 @@ void ErrorDialog::errorX(int ecode, const char *fmt, va_list ap)
 
 void ErrorDialog::updateSize()
 {
-	QTextStream qout(stdout);
 	QSize screenSize;
 	int wscreen;
 	int hscreen;

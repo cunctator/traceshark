@@ -53,8 +53,6 @@
 #include <cstring>
 #include <limits>
 
-#include <QTextStream>
-
 #include "misc/tstring.h"
 #include "parser/genericparams.h"
 #include "mm/mempool.h"
@@ -191,7 +189,7 @@ void TraceParser::threadReader()
 		}
 	}
 
-	QTextStream(stdout) << nr << "\n";
+	printf("%llu\n", nr);
 }
 
 

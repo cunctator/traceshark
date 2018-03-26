@@ -63,7 +63,6 @@ extern "C" {
 #include <QtGlobal>
 #include <QList>
 #include <QString>
-#include <QTextStream>
 
 #include "vtl/error.h"
 #include "vtl/tlist.h"
@@ -381,7 +380,6 @@ void TraceAnalyzer::colorizeTasks()
 	TColor gray;
 	TColor tmp;
 	long int rnd = 0;
-	QTextStream qout(stdout);
 
 	srand48_r(290876, &rdata);
 
@@ -425,7 +423,8 @@ retry:
 		s = s * 0.95;
 		if (s >= 1) {
 			colorList.clear();
-			qout << "retrying colors...\n";
+			vtl::warnx("Retrying colors in %s:%d\n", __FILE__,
+				   __LINE__);
 			goto retry;
 		}
 	}

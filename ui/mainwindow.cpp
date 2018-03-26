@@ -49,7 +49,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QTextStream>
+#include <cstdio>
+
 #include <QDateTime>
 #include <QToolBar>
 
@@ -176,9 +177,6 @@ MainWindow::MainWindow():
 
 void MainWindow::createTracePlot()
 {
-	QTextStream qout(stdout);
-	qout.setRealNumberPrecision(6);
-	qout.setRealNumberNotation(QTextStream::FixedNotation);
 	QString mainLayerName = QString("main");
 	QString cursorLayerName = QString("cursor");
 	QCPLayer *mainLayer;
@@ -262,9 +260,6 @@ void MainWindow::openFile(const QString &name)
 	}
 
 	if (analyzer->isOpen()) {
-		QTextStream qout(stdout);
-		qout.setRealNumberPrecision(6);
-		qout.setRealNumberNotation(QTextStream::FixedNotation);
 		quint64 start, process, layout, rescale, showt, eventsw;
 		quint64 scursor, tshow;
 
@@ -305,28 +300,21 @@ void MainWindow::openFile(const QString &name)
 
 		setStatus(STATUS_FILE, &name);
 
-		qout << "processTrace() took "
-		     << (double) (process - start) / 1000;
-		qout << " s\n";
-		qout << "computeLayout() took "
-		     << (double) (layout - process) / 1000;
-		qout << " s\n";
-		qout << "updating EventsWidget took "
-		     << (double) (eventsw - layout) / 1000;
-		qout << " s\n";
-		qout << "setupCursors() took "
-		     << (double) (scursor - eventsw) / 1000;
-		qout << " s\n";
-		qout << "rescaleTrace() took "
-		     << (double) (rescale - scursor) / 1000;
-		qout << " s\n";
-		qout << "showTrace() took "
-		     << (double) (showt - rescale) / 1000;
-		qout << " s\n";
-		qout << "tracePlot->show() took "
-		     << (double) (tshow - showt) / 1000;
-		qout << " s\n";
-		qout.flush();
+		printf("processTrace() took %.6lf s\n"
+		       "computeLayout() took %.6lf s\n"
+		       "updating EventsWidget took %.6lf s\n"
+		       "setupCursors() took %.6lf s\n"
+		       "rescaleTrace() took %.6lf s\n"
+		       "showTrace() took %.6lf s\n"
+		       "tracePlot->show() took %.6lf s\n",
+		       (double) (process - start) / 1000,
+		       (double) (layout - process) / 1000,
+		       (double) (eventsw - layout) / 1000,
+		       (double) (scursor - eventsw) / 1000,
+		       (double) (rescale - scursor) / 1000,
+		       (double) (showt - rescale) / 1000,
+		       (double) (tshow - showt) / 1000);
+		fflush(stdout);
 		tracePlot->legend->setVisible(true);
 		setTraceActionsEnabled(true);
 	} else
@@ -1096,13 +1084,9 @@ void MainWindow::setStatus(status_t status, const QString *fileName)
 int MainWindow::loadTraceFile(const QString &fileName)
 {
 	qint64 start, stop;
-	QTextStream qout(stdout);
         int rval;
 
-	qout.setRealNumberPrecision(6);
-	qout.setRealNumberNotation(QTextStream::FixedNotation);
-
-	qout << "opening " << fileName << "\n";
+	printf("opening %s\n", fileName.toLocal8Bit().data());
 	
 	start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 	rval = analyzer->open(fileName);
@@ -1110,9 +1094,7 @@ int MainWindow::loadTraceFile(const QString &fileName)
 
 	stop = stop - start;
 
-	qout << "Loading took " << (double) stop / 1000 << " s\n";
-	qout.flush();
-
+	printf("Loading took %.6lf s\n", (double) stop / 1000);
 	return rval;
 }
 

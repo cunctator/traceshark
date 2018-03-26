@@ -59,7 +59,6 @@
 #include <QList>
 #include <QMap>
 #include <QtGlobal>
-#include <QTextStream>
 #include <limits>
 
 #include "vtl/avltree.h"

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,17 +49,18 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "misc/resources.h"
-#include "misc/traceshark.h"
-#include "ui/licensedialog.h"
-
 #include <QFile>
 #include <QString>
-#include <QTextStream>
 #include <QTextEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTextStream>
+
+#include "misc/resources.h"
+#include "misc/traceshark.h"
+#include "ui/licensedialog.h"
+#include "vtl/error.h"
 
 
 LicenseDialog::LicenseDialog(QWidget *parent)
@@ -68,7 +69,7 @@ LicenseDialog::LicenseDialog(QWidget *parent)
 	QFile file(QLatin1String(RESSRC_TEXT_LICENSE));
 
 	if (!file.open(QIODevice::ReadOnly))
-		qDebug() << "Warning, could not read license!\n";
+		vtl::warnx("Warning, could not read license!\n");
 
 	QTextStream textStream(&file);
 	QString text = textStream.readAll();
@@ -100,7 +101,6 @@ LicenseDialog::LicenseDialog(QWidget *parent)
 
 void LicenseDialog::updateSize()
 {
-	QTextStream qout(stdout);
 	QSize screenSize;
 	int wscreen;
 	int hscreen;
