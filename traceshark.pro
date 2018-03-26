@@ -127,6 +127,7 @@ HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/tstring.h
 
 HEADERS      +=  vtl/avltree.h
+HEADERS      +=  vtl/bsdexits.h
 HEADERS      +=  vtl/compiler.h
 HEADERS      +=  vtl/error.h
 HEADERS      +=  vtl/heapsort.h
