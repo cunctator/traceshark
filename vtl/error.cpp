@@ -55,6 +55,7 @@ extern "C" {
 #include <err.h>
 }
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include "vtl/error.h"
 
@@ -70,38 +71,44 @@ void vtl::set_error_handler(vtl::ErrorHandler *eh)
 	handler = eh;
 }
 
-static __always_inline void __vwarnx(const char *fmt, va_list args,
+static __always_inline void vtl__vwarnx(const char *fmt, va_list args,
 				     bool doexit, int ecode)
 {
 	if (handler != nullptr) {
-		if (doexit)
+		if (doexit) {
 			handler->errorX(ecode, fmt, args);
-		else
+			/* We should never get here but exit if we do */
+			exit(ecode);
+		} else
 			handler->warnX(fmt, args);
 	} else {
 		vwarnx(fmt, args);
+		if (doexit)
+			exit(ecode);
 	}
 }
 
-static __always_inline void __vwarn(int vtl_errno, const char *fmt,
+static __always_inline void vtl__vwarn(int vtl_errno, const char *fmt,
 				    va_list args, bool doexit, int ecode)
 {
 	if (handler != nullptr) {
-		if (doexit)
+		if (doexit) {
 			handler->error(ecode, vtl_errno, fmt, args);
-		else
+			/* We should never get here but exit if we do */
+			exit(ecode);
+		} else
 			handler->warn(vtl_errno, fmt, args);
 	} else {
-		vwarn(fmt, args);
+		vwarnx(fmt, args);
 		if (vtl_errno > 0) {
 			const char *msg = strerror(vtl_errno);
 			fprintf(stderr, ": %s\n", msg);
-		} else if (vtl_errno < 0) {
+		} else if (vtl_errno < 0 && strerror_func != nullptr) {
 			const char *msg = strerror_func(-vtl_errno);
 			fprintf(stderr, ": %s\n", msg);
-		} else {
-			/* vtl_errno = 0, do nothing */
 		}
+		if (doexit)
+			exit(ecode);
 	}
 }
 
@@ -110,7 +117,7 @@ void vtl::errx(int ecode, const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	__vwarnx(fmt, args, true, ecode);
+	vtl__vwarnx(fmt, args, true, ecode);
 	va_end(args);
 }
 
@@ -119,7 +126,7 @@ void vtl::warnx(const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	__vwarnx(fmt, args, false, 0);
+	vtl__vwarnx(fmt, args, false, 0);
 	va_end(args);
 }
 
@@ -128,7 +135,7 @@ void vtl::err(int ecode, int vtl_errno, const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	__vwarn(vtl_errno, fmt, args, true, ecode);
+	vtl__vwarn(vtl_errno, fmt, args, true, ecode);
 	va_end(args);
 }
 
@@ -138,7 +145,7 @@ void vtl::warn(int vtl_errno, const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	__vwarn(vtl_errno, fmt, args, false, 0);
+	vtl__vwarn(vtl_errno, fmt, args, false, 0);
 	va_end(args);
 }
 
