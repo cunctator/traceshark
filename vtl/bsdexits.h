@@ -50,27 +50,28 @@
  */
 
 #ifndef BSDEXITS_H
+#define BSDEXITS_H
 
 /*
  * These values have been taken from:
  * https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+11.1-RELEASE&arch=default&format=html
  */
 
-#define BSD_EX_OK (0)
-#define BSD_EX_USAGE (64)
-#define BSD_EX_DATAERR (65)
-#define BSD_EX_NOINPUT (66)
-#define BSD_EX_NOUSER (67)
-#define BSD_EX_NOHOST (68)
+#define BSD_EX_OK          (0)
+#define BSD_EX_USAGE       (64)
+#define BSD_EX_DATAERR     (65)
+#define BSD_EX_NOINPUT     (66)
+#define BSD_EX_NOUSER      (67)
+#define BSD_EX_NOHOST      (68)
 #define BSD_EX_UNAVAILABLE (69)
-#define BSD_EX_SOFTWARE (70)
-#define BSD_EX_OSERR (71)
-#define BSD_EX_OSFILE (72)
-#define BSD_EX_CANTCREAT (73)
-#define BSD_EX_IOERR (74)
-#define BSD_EX_TEMPFAIL (75)
-#define BSD_EX_PROTOCOL (76)
-#define BSD_EX_NOPERM (77)
-#define BSD_EX_CONFIG (78)
+#define BSD_EX_SOFTWARE    (70)
+#define BSD_EX_OSERR       (71)
+#define BSD_EX_OSFILE      (72)
+#define BSD_EX_CANTCREAT   (73)
+#define BSD_EX_IOERR       (74)
+#define BSD_EX_TEMPFAIL    (75)
+#define BSD_EX_PROTOCOL    (76)
+#define BSD_EX_NOPERM      (77)
+#define BSD_EX_CONFIG      (78)
 
 #endif /* BSDEXITS_H  */
