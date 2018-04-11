@@ -406,11 +406,26 @@ MOC_DIR=obj
 
 # EXTRA_OPTS += -funsafe-math-optimizations
 
+HARDENING_CXXFLAGS += -fPIE -pie
+HARDENING_CXXFLAGS += -D_FORTIFY_SOURCE=2
+HARDENING_CXXFLAGS += -Wformat -Wformat-security -Werror=format-security
+HARDENING_CXXFLAGS += -fstack-protector-strong
+
+HARDENING_LFLAGS += -Wl,-z,relro,-z,now
+
 OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${DEBUG_FLAG} $${EXTRA_OPTS}
+
+# Not really needed, unless browsing data controlled by a non-trusted source
+# or for testing purposes.
+# OUR_FLAGS += $${HARDENING_CXXFLAGS}
 
 QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -std=c++11 $${OUR_FLAGS}
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c11 $${OUR_FLAGS}
 QMAKE_LFLAGS_RELEASE = -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
+
+# Not really needed, unless browsing data controlled by a non-trusted source
+# or for testing purposes.
+# QMAKE_LFLAGS_RELEASE += $${HARDENING_LFLAGS}
 
 # Uncomment this to compile with clang, or change to the C++ compiler of your
 # choice
