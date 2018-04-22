@@ -59,6 +59,7 @@
 #include "ui/eventswidget.h"
 #include "analyzer/traceanalyzer.h"
 #include "ui/errordialog.h"
+#include "ui/graphenabledialog.h"
 #include "ui/infowidget.h"
 #include "ui/legendgraph.h"
 #include "ui/licensedialog.h"
@@ -93,6 +94,9 @@
 	"Show a list of event types and it's possible to select which to filter on"
 #define TOOLTIP_TIMEFILTER \
 	"Filter on the time interval specified by the current position of the cursors"
+
+#define TOOLTIP_GRAPHENABLE \
+	"Select which types of graphs should be enabled"
 
 #define TOOLTIP_RESETFILTERS \
 	"Reset all filters"
@@ -140,11 +144,14 @@ MainWindow::MainWindow():
 	cursors[TShark::RED_CURSOR] = nullptr;
 	cursors[TShark::BLUE_CURSOR] = nullptr;
 
+	setupSettings();
+
 	errorDialog = new ErrorDialog();
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
 	taskSelectDialog = new TaskSelectDialog();
 	eventSelectDialog = new EventSelectDialog();
+	graphEnableDialog = new GraphEnableDialog();
 
 	vtl::set_error_handler(errorDialog);
 
@@ -170,7 +177,8 @@ MainWindow::MainWindow():
 						  bool),
 		  this, createEventFilter(QMap<event_t, event_t> &, bool));
 	tsconnect(eventSelectDialog, resetFilter(), this, resetEventFilter());
-	setupSettings();
+	tsconnect(graphEnableDialog, settingsChanged(),
+		  this, consumeSettings());
 	cursorPos[TShark::RED_CURSOR] = 0;
 	cursorPos[TShark::BLUE_CURSOR] = 0;
 }
@@ -223,6 +231,7 @@ MainWindow::~MainWindow()
 	delete eventInfoDialog;
 	delete taskSelectDialog;
 	delete eventSelectDialog;
+	delete graphEnableDialog;
 
 	for (i = 0; i < STATUS_NR; i++)
 		delete statusStrings[i];
@@ -340,58 +349,66 @@ void MainWindow::computeLayout()
 	end = analyzer->getEndTime().toDouble();
 
 	bottom = bugWorkAroundOffset;
-	offset = bottom + migrateSectionOffset;
-
+	offset = bottom;
+	nrCPUs = analyzer->getNrCPUs();
 	ticks.resize(0);
 	tickLabels.resize(0);
-	nrCPUs = analyzer->getNrCPUs();
 
-	analyzer->setMigrationOffset(offset);
-	inc = nrCPUs * 315 + 67.5;
-	analyzer->setMigrationScale(inc);
+	if (Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS)) {
+		offset += migrateSectionOffset;
 
-	/* add labels and lines here for the migration graph */
-	color = QColor(135, 206, 250); /* Light sky blue */
-	label = QString("fork/exit");
-	ticks.append(offset);
-	new MigrationLine(start, end, offset, color, tracePlot);
-	tickLabels.append(label);
-	o = offset;
-	p = inc / nrCPUs ;
-	for (cpu = 0; cpu < nrCPUs; cpu++) {
-		o += p;
-		label = QString("cpu") + QString::number(cpu);
-		ticks.append(o);
+		analyzer->setMigrationOffset(offset);
+		inc = nrCPUs * 315 + 67.5;
+		analyzer->setMigrationScale(inc);
+
+		/* add labels and lines here for the migration graph */
+		color = QColor(135, 206, 250); /* Light sky blue */
+		label = QString("fork/exit");
+		ticks.append(offset);
+		new MigrationLine(start, end, offset, color, tracePlot);
 		tickLabels.append(label);
-		new MigrationLine(start, end, o, color, tracePlot);
+		o = offset;
+		p = inc / nrCPUs ;
+		for (cpu = 0; cpu < nrCPUs; cpu++) {
+			o += p;
+			label = QString("cpu") + QString::number(cpu);
+			ticks.append(o);
+			tickLabels.append(label);
+			new MigrationLine(start, end, o, color, tracePlot);
+		}
+
+		offset += inc;
+		offset += p;
 	}
 
-	offset += inc;
-	offset += p;
+	if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS)) {
+		offset += schedSectionOffset;
 
-	offset += schedSectionOffset;
-
-	/* Set the offset and scale of the scheduling graphs */
-	for (cpu = 0; cpu < nrCPUs; cpu++) {
-		analyzer->setSchedOffset(cpu, offset);
-		analyzer->setSchedScale(cpu, schedHeight);
-		label = QString("cpu") + QString::number(cpu);
-		ticks.append(offset);
-		tickLabels.append(label);
-		offset += schedHeight + schedSpacing;
+		/* Set the offset and scale of the scheduling graphs */
+		for (cpu = 0; cpu < nrCPUs; cpu++) {
+			analyzer->setSchedOffset(cpu, offset);
+			analyzer->setSchedScale(cpu, schedHeight);
+			label = QString("cpu") + QString::number(cpu);
+			ticks.append(offset);
+			tickLabels.append(label);
+			offset += schedHeight + schedSpacing;
+		}
 	}
 
-	offset += cpuSectionOffset;
+	if (Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS) ||
+	    Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS)) {
+		offset += cpuSectionOffset;
 
-	for (cpu = 0; cpu < nrCPUs; cpu++) {
-		analyzer->setCpuFreqOffset(cpu, offset);
-		analyzer->setCpuIdleOffset(cpu, offset);
-		analyzer->setCpuFreqScale(cpu, cpuHeight);
-		analyzer->setCpuIdleScale(cpu, cpuHeight);
-		label = QString("cpu") + QString::number(cpu);
-		ticks.append(offset);
-		tickLabels.append(label);
-		offset += cpuHeight + cpuSpacing;
+		for (cpu = 0; cpu < nrCPUs; cpu++) {
+			analyzer->setCpuFreqOffset(cpu, offset);
+			analyzer->setCpuIdleOffset(cpu, offset);
+			analyzer->setCpuFreqScale(cpu, cpuHeight);
+			analyzer->setCpuIdleScale(cpu, cpuHeight);
+			label = QString("cpu") + QString::number(cpu);
+			ticks.append(offset);
+			tickLabels.append(label);
+			offset += cpuHeight + cpuSpacing;
+		}
 	}
 
 	top = offset;
@@ -439,39 +456,56 @@ void MainWindow::showTrace()
 	yaxisTicker->setTickVectorLabels(tickLabels);
 	tracePlot->yAxis->setTicks(true);
 
+
+	if (!Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS) &&
+	    !Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS))
+		goto skipIdleFreqGraphs;
+
 	/* Show CPU frequency and idle graphs */
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
 		QPen pen = QPen();
 		QPen penF = QPen();
 
-		QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
-						      tracePlot->yAxis);
-		QString name = QString(tr("cpuidle")) + QString::number(cpu);
-		QCPScatterStyle style =
-			QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+		QCPGraph *graph;
+		QString name;
+		QCPScatterStyle style;
 
-		pen.setColor(Qt::red);
-		style.setPen(pen);
-		graph->setScatterStyle(style);
-		pen.setColor(Qt::green);
-		graph->setPen(pen);
-		graph->setName(name);
-		graph->setAdaptiveSampling(true);
-		graph->setLineStyle(QCPGraph::lsStepLeft);
-		graph->setData(analyzer->cpuIdle[cpu].timev,
-			       analyzer->cpuIdle[cpu].scaledData);
+		if (Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS)) {
+			graph = tracePlot->addGraph(tracePlot->xAxis,
+						    tracePlot->yAxis);
+			name = QString(tr("cpuidle")) + QString::number(cpu);
+			style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+			pen.setColor(Qt::red);
+			style.setPen(pen);
+			graph->setScatterStyle(style);
+			pen.setColor(Qt::green);
+			graph->setPen(pen);
+			graph->setName(name);
+			graph->setAdaptiveSampling(true);
+			graph->setLineStyle(QCPGraph::lsStepLeft);
+			graph->setData(analyzer->cpuIdle[cpu].timev,
+				       analyzer->cpuIdle[cpu].scaledData);
+		}
 
-		graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
-		name = QString(tr("cpufreq")) + QString::number(cpu);
-		penF.setColor(Qt::blue);
-		penF.setWidth(2);
-		graph->setPen(penF);
-		graph->setName(name);
-		graph->setAdaptiveSampling(true);
-		graph->setLineStyle(QCPGraph::lsStepLeft);
-		graph->setData(analyzer->cpuFreq[cpu].timev,
-			       analyzer->cpuFreq[cpu].scaledData);
+		if (Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS)) {
+			graph = tracePlot->addGraph(tracePlot->xAxis,
+						    tracePlot->yAxis);
+			name = QString(tr("cpufreq")) + QString::number(cpu);
+			penF.setColor(Qt::blue);
+			penF.setWidth(2);
+			graph->setPen(penF);
+			graph->setName(name);
+			graph->setAdaptiveSampling(true);
+			graph->setLineStyle(QCPGraph::lsStepLeft);
+			graph->setData(analyzer->cpuFreq[cpu].timev,
+				       analyzer->cpuFreq[cpu].scaledData);
+		}
 	}
+
+skipIdleFreqGraphs:
+
+	if(!Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
+		goto skipSchedGraphs;
 
 	/* Show scheduling graphs */
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
@@ -488,6 +522,8 @@ void MainWindow::showTrace()
 			addStillRunningGraph(task);
 		}
 	}
+
+skipSchedGraphs:
 	tracePlot->replot();
 }
 
@@ -522,9 +558,35 @@ void MainWindow::setupCursors()
 
 void MainWindow::setupSettings()
 {
-	settings[Setting::HORIZONTAL_WAKEUP].isEnabled = false;
-	settings[Setting::HORIZONTAL_WAKEUP].name =
-		tr("Show horizontal wakeup");
+	SettingDependency schedDep;
+	schedDep.index = Setting::SHOW_SCHED_GRAPHS;
+	schedDep.desiredValue = true;
+
+	Setting::setName(Setting::HORIZONTAL_WAKEUP,
+			 tr("Show horizontal wakeup"));
+	Setting::setEnabled(Setting::HORIZONTAL_WAKEUP, false);
+	Setting::addDependency(Setting::HORIZONTAL_WAKEUP, schedDep);
+
+	Setting::setName(Setting::VERTICAL_WAKEUP,
+			 tr("Show vertical wakeup"));
+	Setting::setEnabled(Setting::VERTICAL_WAKEUP, true);
+	Setting::addDependency(Setting::VERTICAL_WAKEUP, schedDep);
+
+	Setting::setName(Setting::SHOW_SCHED_GRAPHS,
+			 tr("Show scheduling graphs"));
+	Setting::setEnabled(Setting::SHOW_SCHED_GRAPHS, true);
+
+	Setting::setName(Setting::SHOW_CPUFREQ_GRAPHS,
+			 tr("Show CPU frequency graphs"));
+	Setting::setEnabled(Setting::SHOW_CPUFREQ_GRAPHS, true);
+
+	Setting::setName(Setting::SHOW_CPUIDLE_GRAPHS,
+			 tr("Show CPU idle graphs"));
+	Setting::setEnabled(Setting::SHOW_CPUIDLE_GRAPHS, true);
+
+	Setting::setName(Setting::SHOW_MIGRATION_GRAPHS,
+			 tr("Show migration graphs"));
+	Setting::setEnabled(Setting::SHOW_MIGRATION_GRAPHS, true);
 }
 
 void MainWindow::addSchedGraph(CPUTask &cpuTask)
@@ -548,7 +610,7 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask)
 
 void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 {
-	if (!settings[Setting::HORIZONTAL_WAKEUP].isEnabled)
+	if (!Setting::isEnabled(Setting::HORIZONTAL_WAKEUP))
 		return;
 
 	/* Add wakeup graph on top of scheduling */
@@ -576,6 +638,9 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 
 void MainWindow::addWakeupGraph(CPUTask &task)
 {
+	if (!Setting::isEnabled(Setting::VERTICAL_WAKEUP))
+		return;
+
 	/* Add wakeup graph on top of scheduling */
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
@@ -941,7 +1006,7 @@ void MainWindow::showEventInfo(const TraceEvent &event)
 
 void MainWindow::createActions()
 {
-	openAction = new QAction(tr("&Open"), this);
+	openAction = new QAction(tr("&Open..."), this);
 	openAction->setIcon(QIcon(RESSRC_PNG_OPEN));
 	openAction->setShortcuts(QKeySequence::Open);
 	openAction->setToolTip(tr(TOOLTIP_OPEN));
@@ -961,13 +1026,13 @@ void MainWindow::createActions()
 	saveAction->setEnabled(false);
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
 
-	showTasksAction = new QAction(tr("Show task list"), this);
+	showTasksAction = new QAction(tr("Show task list..."), this);
 	showTasksAction->setIcon(QIcon(RESSRC_PNG_TASKSELECT));
 	showTasksAction->setToolTip(tr(TOOLTIP_SHOWTASKS));
 	showTasksAction->setEnabled(false);
 	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
 
-	showEventsAction = new QAction(tr("Filter on event type"), this);
+	showEventsAction = new QAction(tr("Filter on event type..."), this);
 	showEventsAction->setIcon(QIcon(RESSRC_PNG_EVENTFILTER));
 	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
 	showEventsAction->setEnabled(false);
@@ -979,13 +1044,19 @@ void MainWindow::createActions()
 	timeFilterAction->setEnabled(false);
 	tsconnect(timeFilterAction, triggered(), this, timeFilter());
 
+	graphEnableAction = new QAction(tr("Select graphs..."), this);
+	graphEnableAction->setIcon(QIcon(RESSRC_PNG_GRAPHENABLE));
+	graphEnableAction->setToolTip(tr(TOOLTIP_GRAPHENABLE));
+	graphEnableAction->setEnabled(true);
+	tsconnect(graphEnableAction, triggered(), this, showGraphEnable());
+
 	resetFiltersAction = new QAction(tr("Reset all filters"), this);
 	resetFiltersAction->setIcon(QIcon(RESSRC_PNG_RESETFILTERS));
 	resetFiltersAction->setToolTip(tr(TOOLTIP_RESETFILTERS));
 	resetFiltersAction->setEnabled(false);
 	tsconnect(resetFiltersAction, triggered(), this, resetFilters());
 
-	exportEventsAction = new QAction(tr("Export events to a file"), this);
+	exportEventsAction = new QAction(tr("Export events to a file..."), this);
 	exportEventsAction->setIcon(QIcon(RESSRC_PNG_EXPORTEVENTS));
 	exportEventsAction->setToolTip(tr(TOOLTIP_EXPORTEVENTS));
 	exportEventsAction->setEnabled(false);
@@ -1031,6 +1102,7 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(timeFilterAction);
 	viewToolBar->addAction(resetFiltersAction);
 	viewToolBar->addAction(exportEventsAction);
+	viewToolBar->addAction(graphEnableAction);
 }
 
 void MainWindow::createMenus()
@@ -1048,6 +1120,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(timeFilterAction);
 	viewMenu->addAction(resetFiltersAction);
 	viewMenu->addAction(exportEventsAction);
+	viewMenu->addAction(graphEnableAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
@@ -1336,6 +1409,19 @@ void MainWindow::exportEvents()
 	}
 }
 
+void MainWindow::consumeSettings()
+{
+	if (!analyzer->isOpen())
+		return;
+
+	clearPlot();
+	computeLayout();
+	setupCursors();
+	rescaleTrace();
+	showTrace();
+	tracePlot->show();
+}
+
 void MainWindow::addTaskGraph(int pid)
 {
 	/* Add a unified scheduling graph for pid */
@@ -1498,6 +1584,11 @@ void MainWindow::showTaskSelector()
 void MainWindow::showEventFilter()
 {
 	eventSelectDialog->show();
+}
+
+void MainWindow::showGraphEnable()
+{
+	graphEnableDialog->show();
 }
 
 void MainWindow::showWakeup(int pid)

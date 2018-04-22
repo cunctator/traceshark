@@ -73,6 +73,7 @@ extern "C" {
 #include "analyzer/traceanalyzer.h"
 #include "parser/traceparser.h"
 #include "misc/errors.h"
+#include "misc/setting.h"
 #include "misc/traceshark.h"
 #include "threads/workthread.h"
 #include "threads/workitem.h"
@@ -710,24 +711,38 @@ void TraceAnalyzer::doScale()
 	QList<AbstractWorkItem*> workList;
 	unsigned int cpu;
 	int i, s;
+	bool useWorkList =
+		Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS) ||
+		Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS) ||
+		Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS);
 
-	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
-		/* CpuFreq items */
-		addCpuFreqWork(cpu, workList);
-		/* CpuIdle items */
-		addCpuIdleWork(cpu, workList);
-		/* Task items */
-		addCpuSchedWork(cpu, workList);
+	if (useWorkList) {
+		for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
+			/* CpuFreq items */
+			if (Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS))
+				addCpuFreqWork(cpu, workList);
+			/* CpuIdle items */
+			if (Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS))
+				addCpuIdleWork(cpu, workList);
+			/* Task items */
+			if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
+				addCpuSchedWork(cpu, workList);
+		}
+		s = workList.size();
+		for (i = 0; i < s; i++)
+			scalingQueue.addWorkItem(workList[i]);
+		scalingQueue.start();
 	}
-	s = workList.size();
-	for (i = 0; i < s; i++)
-		scalingQueue.addWorkItem(workList[i]);
-	scalingQueue.start();
+
 	/* Migration scaling is done from the mainthread */
-	scaleMigration();
-	scalingQueue.wait();
-	for (i = 0; i < s; i++)
-		delete workList[i];
+	if (Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS))
+		scaleMigration();
+
+	if (useWorkList) {
+		scalingQueue.wait();
+		for (i = 0; i < s; i++)
+			delete workList[i];
+	}
 }
 
 void TraceAnalyzer::processFtrace()

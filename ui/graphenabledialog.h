@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,70 +49,35 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SETTING_H
-#define SETTING_H
+#ifndef GRAPHENABLEDIALOG_H
+#define GRAPHENABLEDIALOG_H
 
-#include <QObject>
-#include <QString>
+#include "misc/setting.h"
+#include "vtl/error.h"
+#include <QDialog>
 
 QT_BEGIN_NAMESPACE
-class QCheckBox;
+class QTextEdit;
+template <typename T, typename U> class QMap;
 QT_END_NAMESPACE
 
-class GraphEnableDialog;
+class TCheckBox;
 
-class SettingDependency
-{
-public:
-	int index;
-	bool desiredValue;
-};
-
-class Setting : QObject
-{
+class GraphEnableDialog : public QDialog {
 	Q_OBJECT
+
 public:
-	Setting();
-	enum SettingIndex {
-		SHOW_SCHED_GRAPHS = 0,
-		HORIZONTAL_WAKEUP,
-		VERTICAL_WAKEUP,
-		SHOW_CPUFREQ_GRAPHS,
-		SHOW_CPUIDLE_GRAPHS,
-		SHOW_MIGRATION_GRAPHS,
-		MAX_SETTINGS
-	};
-	static void setName(enum SettingIndex idx, const QString &n);
-	static void setEnabled(enum SettingIndex idx, bool e);
-	static void clearDependencies(enum SettingIndex idx);
-	static void addDependency(enum SettingIndex idx,
-				  const SettingDependency &d);
-	static unsigned int getNrDependencies(enum SettingIndex idx);
-	static unsigned int getNrDependents(enum SettingIndex idx);
-	static const QString &getName(enum SettingIndex idx);
-	static bool isEnabled(enum SettingIndex idx);
-	static const SettingDependency &getDependency(enum SettingIndex idx,
-						      unsigned int nr);
-	static const SettingDependency &getDependent(enum SettingIndex idx,
-						     unsigned int nr);
-	static void addCheckBox(enum SettingIndex idx, QCheckBox *checkBox);
-	static void addGraphEnableDialog(GraphEnableDialog *dialog);
-	static void backupState();
-	static void restoreState();
-private:
-	bool enabled;
-	QString name;
-	SettingDependency dependency[4];
-	SettingDependency dependent[4];
-	unsigned int nrDep;
-	unsigned int nrDependents;
-	static Setting settings[];
-	static bool backup[];
-	QCheckBox *checkBox;
+	GraphEnableDialog(QWidget *parent = 0);
+	~GraphEnableDialog();
 signals:
-	void clicked(enum SettingIndex idx);
+	void settingsChanged();
+private:
+	QMap<Setting::SettingIndex, TCheckBox*> *checkBoxMap;
+	int savedHeight;
 private slots:
-	void clicked();
+	void okClicked();
+	void cancelClicked();
+	void handleBoxClicked(TCheckBox *, bool);
 };
 
-#endif /* SETTING_H */
+#endif /* GRAPHENABLEDIALOG_H */

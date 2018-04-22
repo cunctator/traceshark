@@ -77,6 +77,7 @@ class InfoWidget;
 class Cursor;
 class CPUTask;
 class ErrorDialog;
+class GraphEnableDialog;
 class LicenseDialog;
 class EventInfoDialog;
 class QCPAbstractPlottable;
@@ -126,6 +127,7 @@ private slots:
 	void removeTaskGraph(int pid);
 	void showTaskSelector();
 	void showEventFilter();
+	void showGraphEnable();
 	void showWakeup(int pid);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
@@ -135,6 +137,7 @@ private slots:
 	void resetFilters();
 	void timeFilter();
 	void exportEvents();
+	void consumeSettings();
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
@@ -198,6 +201,7 @@ private:
 	QAction *showTasksAction;
 	QAction *showEventsAction;
 	QAction *timeFilterAction;
+	QAction *graphEnableAction;
 	QAction *resetFiltersAction;
 	QAction *exportEventsAction;
 	QAction *aboutAction;
@@ -212,6 +216,7 @@ private:
 	EventInfoDialog *eventInfoDialog;
 	TaskSelectDialog *taskSelectDialog;
 	EventSelectDialog *eventSelectDialog;
+	GraphEnableDialog *graphEnableDialog;
 
 	const double bugWorkAroundOffset = 100;
 	const double schedSectionOffset = 100;
