@@ -29,7 +29,13 @@ The task select dialog can be shown by clicking `View -> Show task list`, or by 
 
 ## 1.1 Brief summary of the functionality of the GUI
 
-### 1.1.1 Functionality of the buttons
+### 1.1.1 How to zoom and scroll vertically
+
+The graphs are by default zoomed and scrolled horizontally, i.e. timewise. You can scroll by grabbing the graph with your mouse pointer and zoom with the mouse wheel.
+
+If you instead want to zoom or scroll vertically, you need to select the vertical axis by left clicking on it with your mouse pointer. N.B, you should click directly on the line representing the axis, not on the labels, such as "cpu0", "cpu1", etc. As long as the vertical axis is selected, all scrolling and zooming will be vertical. If you want to switch back to horizontal, then you just need to deselect the axis by clicking on it again. Vertical zooming and scrolling may be particularly useful if you are looking at a trace of a sytem with a large number of CPUs or if you are short of vertical screen space.
+
+### 1.1.2 Functionality of the buttons
 
 There are a number of buttons in the GUI, here is a description of the buttons in the left panel:
 
@@ -81,7 +87,7 @@ The top widget has some buttons as well:
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
 * ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/removetask30x30.png) Removes the currently selected unified graph. 
 
-### 1.1.2 The Events view
+### 1.1.3 The Events view
 
 At the bottom of the screen is the events view. The events view will be automatically scrolled when a cursor is moved. It is also possible to move the currently active cursor by clicking on a time in the events view. Another very important feature is that by double clicking on the info field, a dialog will open that displays the backtrace of that particular event.
 
