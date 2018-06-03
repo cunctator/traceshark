@@ -1411,10 +1411,44 @@ void MainWindow::exportEvents()
 
 void MainWindow::consumeSettings()
 {
+	unsigned int cpu;
+
 	if (!analyzer->isOpen())
 		return;
 
 	clearPlot();
+
+	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
+		DEFINE_CPUTASKMAP_ITERATOR(iter);
+		for (iter = analyzer->cpuTaskMaps[cpu].begin();
+		     iter != analyzer->cpuTaskMaps[cpu].end();
+		     iter++) {
+			CPUTask &task = iter.value();
+			delete task.graph;
+			task.graph = nullptr;
+		}
+	}
+
+	DEFINE_TASKMAP_ITERATOR(iter);
+	for (iter = analyzer->taskMap.begin();
+	     iter != analyzer->taskMap.end();
+	     iter++) {
+		Task *task = iter.value().task;
+		if (task->graph != nullptr) {
+			/*
+			 * This implies that the task had a task graph added.
+			 * We delete the TaskGraph object and set the pointers
+			 * to nullptr. The actual QCPGraph objects is already
+			 * deleted by the clearPlot() function above.
+			 */
+			delete task->graph;
+			task->graph = nullptr;
+			task->wakeUpGraph = nullptr;
+			task->runningGraph = nullptr;
+			task->preemptedGraph = nullptr;
+		}
+	}
+
 	computeLayout();
 	setupCursors();
 	rescaleTrace();
