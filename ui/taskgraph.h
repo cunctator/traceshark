@@ -54,7 +54,7 @@
 
 #include <QString>
 #include <QVector>
-#include <QHash>
+#include <QMap>
 
 class LegendGraph;
 class Task;
@@ -86,7 +86,7 @@ private:
 	TaskGraph *taskGraph;
 	QCPGraph *graph;
 	QCPGraph *legendGraph;
-	static QHash<QCPGraph *, TaskGraph *> graphDir;
+	static QMap<QCPGraph *, TaskGraph *> graphDir;
 };
 
 #endif /* TASKGRAPH_H */

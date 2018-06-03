@@ -53,7 +53,7 @@
 #include "ui/taskgraph.h"
 #include "analyzer/task.h"
 
-QHash<QCPGraph *, TaskGraph *> TaskGraph::graphDir;
+QMap<QCPGraph *, TaskGraph *> TaskGraph::graphDir;
 
 TaskGraph::TaskGraph(QCustomPlot *parent):
 	plot(parent), task(nullptr), taskGraph(nullptr)
@@ -131,7 +131,7 @@ void TaskGraph::setData(const QVector<double > &keys,
 
 TaskGraph *TaskGraph::fromQCPGraph(QCPGraph *g)
 {
-	QHash<QCPGraph *, TaskGraph *>::iterator i = graphDir.find(g);
+	QMap<QCPGraph *, TaskGraph *>::iterator i = graphDir.find(g);
 	if (i == graphDir.end())
 		return nullptr;
 	return i.value();
