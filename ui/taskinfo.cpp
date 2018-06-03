@@ -219,7 +219,7 @@ void TaskInfo::addTaskGraphToLegend(TaskGraph *graph)
 	 * We use the legendPidMap to keep track of pids that have been added
 	 * to the legend, otherwise it could happen that someone added the same
 	 * task multiple times to the legend and that looks a bit crazy. While
-	 * QCustomPlot prevents the same the same LegendGraph object being
+	 * QCustomPlot prevents the same the same QCPGraph object being
 	 * added twice we can have multiple identical objects, since tasks can
 	 * migrate between CPUs.
 	 */

@@ -61,7 +61,6 @@
 #include "ui/errordialog.h"
 #include "ui/graphenabledialog.h"
 #include "ui/infowidget.h"
-#include "ui/legendgraph.h"
 #include "ui/licensedialog.h"
 #include "ui/mainwindow.h"
 #include "ui/migrationline.h"
@@ -1230,7 +1229,7 @@ void MainWindow::handleLegendGraphDoubleClick(QCPGraph *graph)
 	 * Inform the TaskInfo class (inside InfoWidget) that the pid has
 	 * been removed. This is needed because InfoWidget keeps track of this
 	 * for the purpose of preventing the same pid being added twice from
-	 * different LegendGraphs, there might be "identical" LegendGraphs
+	 * different legend graphs, there might be "identical" legend graphs
 	 * when the same pid has migrated between CPUs
 	 */
 	infoWidget->pidRemoved(task->pid);
