@@ -1202,16 +1202,30 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 {
 	QCPPlottableLegendItem *plottableItem;
 	QCPAbstractPlottable *plottable;
-	LegendGraph *legendGraph;
+	QCPGraph *legendGraph;
 
 	plottableItem = qobject_cast<QCPPlottableLegendItem*>(abstractItem);
 	if (plottableItem == nullptr)
 		return;
 	plottable = plottableItem->plottable();
-	legendGraph = qobject_cast<LegendGraph*>(plottable);
+	legendGraph = qobject_cast<QCPGraph*>(plottable);
 	if (legendGraph == nullptr)
 		return;
-	legendGraph->removeFromLegend();
+
+	handleLegendGraphDoubleClick(legendGraph);
+}
+
+void MainWindow::handleLegendGraphDoubleClick(QCPGraph *graph)
+{
+	TaskGraph *tgraph = TaskGraph::fromQCPGraph(graph);
+	const Task *task;
+
+	if (tgraph == nullptr)
+		return;
+	tgraph->removeFromLegend();
+	task = tgraph->getTask();
+	if (task == nullptr)
+		return;
 	/*
 	 * Inform the TaskInfo class (inside InfoWidget) that the pid has
 	 * been removed. This is needed because InfoWidget keeps track of this
@@ -1219,8 +1233,9 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 	 * different LegendGraphs, there might be "identical" LegendGraphs
 	 * when the same pid has migrated between CPUs
 	 */
-	infoWidget->pidRemoved(legendGraph->pid);
+	infoWidget->pidRemoved(task->pid);
 }
+
 
 void MainWindow::addTaskToLegend(int pid)
 {

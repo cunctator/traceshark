@@ -65,6 +65,7 @@
 #include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "qcustomplot/qcustomplot.h"
+#include "vtl/error.h"
 
 #define DEFINE_PIDMAP_ITERATOR(name) \
 	QMap<int, TaskGraph*>::iterator name
@@ -306,5 +307,9 @@ void TaskInfo::checkGraphSelection()
 
 void TaskInfo::pidRemoved(int pid)
 {
-	legendPidMap.remove(pid);
+	if (legendPidMap.contains(pid))
+		legendPidMap.remove(pid);
+	else
+		vtl::warnx(BSD_EX_SOFTWARE, "Something went wrong in %s:%d",
+			  __FILE__, __LINE__);
 }

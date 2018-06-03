@@ -164,6 +164,7 @@ private:
 	void setTraceActionsEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
+	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;
