@@ -310,6 +310,5 @@ void TaskInfo::pidRemoved(int pid)
 	if (legendPidMap.contains(pid))
 		legendPidMap.remove(pid);
 	else
-		vtl::warnx(BSD_EX_SOFTWARE, "Something went wrong in %s:%d",
-			  __FILE__, __LINE__);
+		vtl::warnx("Unexpected state in %s:%d", __FILE__, __LINE__);
 }
