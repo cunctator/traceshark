@@ -503,9 +503,6 @@ void MainWindow::showTrace()
 
 skipIdleFreqGraphs:
 
-	if(!Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
-		goto skipSchedGraphs;
-
 	/* Show scheduling graphs */
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = analyzer->
@@ -515,14 +512,15 @@ skipIdleFreqGraphs:
 			iter++;
 
 			addSchedGraph(task);
-			addHorizontalWakeupGraph(task);
-			addWakeupGraph(task);
-			addPreemptedGraph(task);
-			addStillRunningGraph(task);
+			if(Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS)) {
+				addHorizontalWakeupGraph(task);
+				addWakeupGraph(task);
+				addPreemptedGraph(task);
+				addStillRunningGraph(task);
+			}
 		}
 	}
 
-skipSchedGraphs:
 	tracePlot->replot();
 }
 
@@ -599,7 +597,8 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask)
 	pen.setColor(color);
 	graph->setPen(pen);
 	graph->setTask(task);
-	graph->setData(cpuTask.schedTimev, cpuTask.scaledSchedData);
+	if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
+		graph->setData(cpuTask.schedTimev, cpuTask.scaledSchedData);
 	/*
 	 * Save a pointer to the graph object in the task. The destructor of
 	 * AbstractClass will delete this when it is destroyed.
