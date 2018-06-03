@@ -1430,6 +1430,7 @@ void MainWindow::consumeSettings()
 		return;
 
 	clearPlot();
+	infoWidget->clear();
 
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter);
