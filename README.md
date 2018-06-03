@@ -68,6 +68,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   8. If all went well, your file `filtered.svg` should now contain an image, that can be displayed by a web browser such as Chromium or Firefox. For an example, check the file doc/filtered.svg in this repository, it can be zoomed, unlike the png representation below:
   [![filtered.png](https://raw.githubusercontent.com/cunctator/traceshark/4672e40d57e57ce5c276b22a8e91da8047338087/doc/filtered.png)](https://raw.githubusercontent.com/cunctator/traceshark/4672e40d57e57ce5c276b22a8e91da8047338087/doc/filtered.png)
   You can read more about flame graphs [here](http://www.brendangregg.com/flamegraphs.html).
+* ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/master/images/graphenabledialog30x30.png) Pressing this button will open a dialog that allows the user to select which types of graphs will be displayed. Here it is possible to disable certain graphs, for example CPU idle graphs that frequently may be of little interest. It is also possible to enable horizontal wakeup graphs for the per CPU task graphs that are disabled by default, becase they will frequently overlap each other.
 
 The top widget has some buttons as well:
 
