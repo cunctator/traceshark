@@ -84,10 +84,17 @@ TraceFile::TraceFile(char *name, int &ts_errno, unsigned int bsize)
 			ts_errno = errno;
 		else {
 			fileSize = sbuf.st_size;
-			mappedFile = (char*) mmap(nullptr, fileSize, PROT_READ,
-						  MAP_PRIVATE, fd, 0);
-			if (mappedFile == MAP_FAILED)
-				mmap_err();
+			if (sbuf.st_size > 0) {
+				mappedFile = (char*) mmap(nullptr,
+							  fileSize,
+							  PROT_READ,
+							  MAP_PRIVATE,
+							  fd,
+							  0);
+				if (mappedFile == MAP_FAILED)
+					mmap_err();
+			} else
+				ts_errno = EINVAL;
 		}
 	}
 
