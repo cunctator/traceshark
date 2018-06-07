@@ -92,7 +92,7 @@ public:
 			pools.nodePool->allocObj();
 		node->key.len = key.len;
 		node->key.ptr = (char*) pools.charPool->allocChars(key.len + 1);
-		strncpy(node->key.ptr, key.ptr, key.len + 1);
+		strcpy(node->key.ptr, key.ptr);
 		return node;
 	}
 	__always_inline int clear() {
@@ -120,7 +120,7 @@ class StringPoolEntry {
 	friend class StringPool;
 public:
 StringPoolEntry(void *data): cachePtr(nullptr), avlTree(data) {
-		bzero(cache, SP_CACHE_SIZE + 1);
+		bzero(cache, SP_CACHE_SIZE);
 	}
 protected:
 	char cache[SP_CACHE_SIZE];
@@ -184,7 +184,7 @@ __always_inline const TString *StringPool::allocString(const TString *str,
 				countAllocs[hval]++;
 		} else {
 			if (refStr.len < SP_CACHE_SIZE) {
-				strncpy(entry->cache, refStr.ptr, refStr.len);
+				strcpy(entry->cache, refStr.ptr);
 				entry->cachePtr = &refStr;
 			}
 			if (cutoff != 0)
@@ -215,7 +215,7 @@ __always_inline const TString *StringPool::allocUniqueString(const TString *str)
 	newstr->ptr = (char*) coldCharPool->allocChars(str->len + 1);
 	if (newstr->ptr == nullptr)
 		return nullptr;
-	strncpy(newstr->ptr, str->ptr, str->len + 1);
+	strcpy(newstr->ptr, str->ptr);
 	return newstr;
 }
 
