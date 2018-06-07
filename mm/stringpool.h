@@ -107,8 +107,9 @@ private:
 	PoolBundleSP pools;
 };
 
-#define AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, __DummySP, vtl::AVLBALANCE_USEPOINTERS, \
-AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>))
+#define AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, __DummySP, \
+vtl::AVLBALANCE_USEPOINTERS, AVLAllocatorSP<TString, __DummySP>, \
+			     AVLCompareSP<TString>>))
 #define TSTRING_PTR_SIZE (sizeof(TString*))
 #define TYPICAL_CACHE_LINE_SIZE (64)
 
