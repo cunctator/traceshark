@@ -238,7 +238,7 @@ private:
 	QVector<double> ticks;
 	QVector<QString> tickLabels;
 	Cursor *cursors[TShark::NR_CURSORS];
-	Setting settings[Setting::MAX_SETTINGS];
+	Setting settings[Setting::NR_SETTINGS];
 	bool filterActive;
 	double cursorPos[TShark::NR_CURSORS];
 };

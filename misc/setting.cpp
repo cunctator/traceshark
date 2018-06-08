@@ -131,14 +131,14 @@ const SettingDependency &Setting::getDependent(enum SettingIndex idx,
 	return settings[idx].dependent[nr];
 }
 
-Setting Setting::settings[MAX_SETTINGS];
+Setting Setting::settings[NR_SETTINGS];
 
-bool Setting::backup[MAX_SETTINGS];
+bool Setting::backup[NR_SETTINGS];
 
 void Setting::backupState()
 {
 	int idx;
-	for (idx = 0; idx < MAX_SETTINGS; idx++) {
+	for (idx = 0; idx < NR_SETTINGS; idx++) {
 		backup[idx] = settings[idx].enabled;
 	}
 }
@@ -146,7 +146,7 @@ void Setting::backupState()
 void Setting::restoreState()
 {
 	int idx;
-	for (idx = 0; idx < MAX_SETTINGS; idx++) {
+	for (idx = 0; idx < NR_SETTINGS; idx++) {
 		settings[idx].enabled = backup[idx];
 	}
 }
@@ -163,7 +163,7 @@ void Setting::clicked()
 	int idx = (int) (this - &settings[0]);
 	bool en;
 
-	if (idx < 0 || idx > MAX_SETTINGS)
+	if (idx < 0 || idx >= NR_SETTINGS)
 		vtl::errx(BSD_EX_SOFTWARE, "Something went wrong in %s:%d",
 			  __FILE__,__LINE__);
 
@@ -185,7 +185,7 @@ void Setting::addGraphEnableDialog(GraphEnableDialog *dialog)
 {
 	int idx;
 
-	for (idx = 0; idx < MAX_SETTINGS; idx++) {
+	for (idx = 0; idx < NR_SETTINGS; idx++) {
 		tsconnect(&settings[idx], clicked(enum SettingIndex),
 			  dialog, settingClicked(enum SettingIndex));
 	}

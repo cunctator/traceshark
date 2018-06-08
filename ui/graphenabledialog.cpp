@@ -73,7 +73,7 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent):
 	QPushButton *cancelButton;
 
 	checkBoxMap = new QMap<Setting::SettingIndex, TCheckBox*>;
-	for (idx = 0; idx < Setting::MAX_SETTINGS; idx++) {
+	for (idx = 0; idx < Setting::NR_SETTINGS; idx++) {
 		idxn = (Setting::SettingIndex) idx;
 		if (checkBoxMap->contains(idxn))
 			continue;

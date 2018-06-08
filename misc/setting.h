@@ -80,7 +80,7 @@ public:
 		SHOW_CPUFREQ_GRAPHS,
 		SHOW_CPUIDLE_GRAPHS,
 		SHOW_MIGRATION_GRAPHS,
-		MAX_SETTINGS
+		NR_SETTINGS
 	};
 	static void setName(enum SettingIndex idx, const QString &n);
 	static void setEnabled(enum SettingIndex idx, bool e);
