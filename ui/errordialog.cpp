@@ -191,8 +191,8 @@ void ErrorDialog::_warn(int vtl_errno, const char *fmt, va_list ap,
 
 	QString qemsg = QString(emsg);
 
-	vsnprintf(buf, bufSize, fmt, ap);
-	buf[bufSize] = '\0';
+	if (vsnprintf(buf, bufSize, fmt, ap) >= bufSize)
+		buf[bufSize] = '\0';
 
 	QString qmsg(buf);
 
@@ -204,8 +204,8 @@ void ErrorDialog::_warn(int vtl_errno, const char *fmt, va_list ap,
 
 void ErrorDialog::_warnX(const char *fmt, va_list ap, bool doExit, int ecode)
 {
-	snprintf(buf, bufSize, fmt, ap);
-	buf[bufSize] = '\0';
+	if (snprintf(buf, bufSize, fmt, ap) >= bufSize)
+		buf[bufSize] = '\0';
 
 	QString qmsg(buf);
 	if (doExit)
