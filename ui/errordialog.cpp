@@ -181,6 +181,7 @@ void ErrorDialog::_warn(int vtl_errno, const char *fmt, va_list ap,
 			bool doExit, int ecode)
 {
 	const char *emsg = nullptr;
+	int r;
 
 	if (vtl_errno < 0)
 		emsg = ts_strerror(-vtl_errno);
@@ -191,7 +192,8 @@ void ErrorDialog::_warn(int vtl_errno, const char *fmt, va_list ap,
 
 	QString qemsg = QString(emsg);
 
-	if (vsnprintf(buf, bufSize, fmt, ap) >= bufSize)
+	r = vsnprintf(buf, bufSize, fmt, ap);
+	if (r < 0 || r >= (int) bufSize)
 		buf[bufSize] = '\0';
 
 	QString qmsg(buf);
@@ -204,7 +206,8 @@ void ErrorDialog::_warn(int vtl_errno, const char *fmt, va_list ap,
 
 void ErrorDialog::_warnX(const char *fmt, va_list ap, bool doExit, int ecode)
 {
-	if (snprintf(buf, bufSize, fmt, ap) >= bufSize)
+	int r = snprintf(buf, bufSize, fmt, ap);
+	if (r < 0 || r >= (int) bufSize)
 		buf[bufSize] = '\0';
 
 	QString qmsg(buf);
