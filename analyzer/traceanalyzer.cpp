@@ -95,7 +95,8 @@ TraceAnalyzer::TraceAnalyzer()
 	  black(0, 0, 0), white(255, 255, 255), migrationOffset(0),
 	  migrationScale(0), maxCPU(0), nrCPUs(0), endTimeDbl(0),
 	  startTimeDbl(0), maxFreq(0), minFreq(0), maxIdleState(0),
-	  minIdleState(0), timePrecision(0), CPUs(nullptr), customPlot(nullptr)
+	  minIdleState(0), timePrecision(0), CPUs(nullptr), customPlot(nullptr),
+	  pidFilterInclusive(false), OR_pidFilterInclusive(false)
 {
 	taskNamePool = new StringPool(16384, 256);
 	parser = new TraceParser(&events);
