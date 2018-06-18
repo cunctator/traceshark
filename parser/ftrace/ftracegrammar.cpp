@@ -49,15 +49,20 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+extern "C" {
+#include <strings.h>
+}
+
 #include "parser/ftrace/ftracegrammar.h"
 #include "parser/traceevent.h"
 
 FtraceGrammar::FtraceGrammar() :
-	unknownTypeCounter(EVENT_UNKNOWN)
+	unknownTypeCounter(EVENT_UNKNOWN), tmp_argc(0)
 {
 	argPool = new StringPool(2048, 1024 * 1024);
 	namePool =  new StringPool(1024, 65536);
 	eventTree = new StringTree(8, 256, 4096);
+	bzero(tmp_argv, sizeof(tmp_argv));
 	setupEventTree();
 }
 
