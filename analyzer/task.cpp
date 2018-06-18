@@ -54,7 +54,7 @@
 #include "misc/traceshark.h"
 
 TaskName::TaskName():
-	str(nullptr), prev(nullptr)
+	str(nullptr), prev(nullptr), forkname(false)
 {}
 
 Task::Task():
