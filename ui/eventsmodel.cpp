@@ -62,7 +62,7 @@ EventsModel::EventsModel(QObject *parent):
 {}
 
 EventsModel::EventsModel(vtl::TList<TraceEvent> *e, QObject *parent):
-	QAbstractTableModel(parent), events(e)
+	QAbstractTableModel(parent), events(e), eventsPtrs(nullptr)
 {}
 
 void EventsModel::setEvents(vtl::TList<TraceEvent> *e)
