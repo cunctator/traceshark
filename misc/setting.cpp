@@ -56,8 +56,11 @@
 
 #include <QCheckBox>
 
-Setting::Setting(): enabled(true), nrDep(0), nrDependents(0)
-{}
+Setting::Setting(): enabled(true), nrDep(0), nrDependents(0), checkBox(nullptr)
+{
+	bzero(dependency, sizeof(dependency));
+	bzero(dependent, sizeof(dependent));
+}
 
 void Setting::setName(enum SettingIndex idx, const QString &n)
 {
