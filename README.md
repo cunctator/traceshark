@@ -257,24 +257,11 @@ installed on your machine. Here is a list of development packages that you can
 try to install on Debian Stretch:
 
 ```
-binutils-dev
-binutils-multiarch-dev
-bison
-elfutils
-flex
-libaudit-dev
-libbfd-dev
-libdw-dev
-libelf-dev
-libelf1
-libgtk2.0-dev
-libiberty-dev
-liblzma-dev
-libnuma-dev
-libperl-dev
-libslang-dev
-libslang2
-libunwind*
-libunwind8
-python-dev
+apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang-dev libslang2 'libunwind*' libunwind8 python-dev
+```
+
+On Ubunut Bionic the following might work:
+```
+sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex   25.79s user 11.65s system 68% cpu 54.468 total
+zenion perf 19 sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang2-dev libslang2 'libunwind*' libunwind8 python-dev
 ```
