@@ -1039,7 +1039,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 	if (wbuf == MAP_FAILED)
 		mmap_err();
 
-	fd =  clib_open(fileName, O_WRONLY | O_CREAT | O_DIRECT,
+	fd =  clib_open(fileName, O_WRONLY | O_CREAT,
 			(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
 
 	if (fd < 0) {
