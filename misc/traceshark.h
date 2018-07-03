@@ -53,7 +53,6 @@
 #define TRACESHARK_H
 
 #define TRACESHARK_VERSION_STRING "0.3.3-alpha"
-#define QCUSTOMPLOT_VERSION_STRING "2.0.1"
 
 #include <QtCore>
 #include <cstdint>
