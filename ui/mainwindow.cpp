@@ -868,7 +868,7 @@ void MainWindow::aboutQCustomPlot()
 	       "<p>This program contains a modified version of QCustomPlot %1.</p>"
 		).arg(QLatin1String(QCUSTOMPLOT_VERSION_STR));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2011-2017 Emanuel Eichhammer"
+	       "<p>Copyright &copy; 2011-2018 Emanuel Eichhammer"
 	       "<p>QCustomPlot is licensed under GNU General Public License as "
 	       "published by the Free Software Foundation, either version 3 of "
 	       " the License, or (at your option) any later version.</p>"
