@@ -83,8 +83,10 @@ namespace vtl {
 #endif
 	Time(bool n = false, timeuint_t s = 0, timeuint_t ns = 0,
 	     unsigned int p = 0):
-		sec(s), nsec(ns), negative(n), precision(p)
-		{}
+		sec(s), nsec(ns), precision(p)
+		{
+			negative = n ? 0x1 : 0x0;
+		}
 		__always_inline Time operator+(const Time &other) const;
 		__always_inline Time operator-(const Time &other) const;
 		__always_inline bool operator<(const Time &other) const;
@@ -287,9 +289,9 @@ namespace vtl {
 		Time r;
 		double a = t;
 
-		r.negative = false;
+		r.negative = 0x0;
 		if (t < 0) {
-			r.negative = true;
+			r.negative = 0x1;
 			a = - a;
 		}
 		r.sec = (unsigned long) a;
@@ -319,12 +321,12 @@ namespace vtl {
 
 		r.sec = 0;
 		r.nsec = 0;
-		r.negative = false;
+		r.negative = 0x0;
 		ok = true;
 
 		if (*str == '-') {
 			str++;
-			r.negative = true;
+			r.negative = 0x1;
 		}
 
 		for (c = str; *c != '\0'; c++) {
@@ -440,7 +442,7 @@ namespace vtl {
 
 		t.sec = sec;
 		t.nsec = nsec;
-		t.negative = false;
+		t.negative = 0x0;
 		t.precision = precision;
 		return t;
 	}
