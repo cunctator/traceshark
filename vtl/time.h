@@ -83,10 +83,8 @@ namespace vtl {
 #endif
 	Time(bool n = false, timeuint_t s = 0, timeuint_t ns = 0,
 	     unsigned int p = 0):
-		sec(s), nsec(ns), precision(p)
-		{
-			negative = n ? 0x1 : 0x0;
-		}
+		sec(s), nsec(ns), negative(n ? 0x1 : 0x0), precision(p)
+		{}
 		__always_inline Time operator+(const Time &other) const;
 		__always_inline Time operator-(const Time &other) const;
 		__always_inline bool operator<(const Time &other) const;
