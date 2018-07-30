@@ -123,7 +123,7 @@ namespace vtl {
 			r.sec = sec + other.sec;
 			r.nsec = nsec + other.nsec;
 			r.negative = negative;
-			if (r.nsec > NSECS_PER_SEC) {
+			if (r.nsec >= NSECS_PER_SEC) {
 				r.nsec -= NSECS_PER_SEC;
 				r.sec++;
 			}
