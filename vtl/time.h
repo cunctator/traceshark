@@ -54,6 +54,7 @@
 
 #include <QString>
 #include <climits>
+#include <cstdint>
 
 #include "vtl/compiler.h"
 
@@ -63,30 +64,55 @@ namespace vtl {
 #define VTL_TIME_MIN vtl::Time(true, UINT_MAX, UINT_MAX)
 #define VTL_TIME_ZERO vtl::Time(false, 0, 0)
 
-#define __TIME_MAX(A, B) (A > B ? A:B)
-#define __TIME_MIN(A, B) (A < B ? A:B)
+#define _TIME_MAX(A, B) (A > B ? A:B)
+#define _TIME_MIN(A, B) (A < B ? A:B)
 
-#define USECS_PER_MSEC (1000)
-#define NSECS_PER_USEC (1000)
-#define MSECS_PER_SEC (1000)
+#define _TIMEINT_REQ (1000000000000000000LL)
+
+#if INT_MAX >= _TIMEINT_REQ && INT_MIN < -_TIMEINT_REQ
+#define	_TIME_MILLE (1000)
+#define TIME_USE_INT
+#define _TIME_FMT_STRING  "%d"
+
+#elif LONG_MAX >= _TIMEINT_REQ && LONG_MIN < -_TIMEINT_REQ
+#define	_TIME_MILLE (1000L)
+#define TIME_USE_LONG
+#define _TIME_FMT_STRING  "%ld"
+
+#elif LLONG_MAX >= _TIMEINT_REQ && LLONG_MIN < -_TIMEINT_REQ
+#define	_TIME_MILLE (1000LL)
+#define TIME_USE_LLONG
+#define _TIME_FMT_STRING  "%lld"
+
+#else
+#error "A longer long long is required!"
+#endif
+
+#define USECS_PER_MSEC (_TIME_MILLE)
+#define NSECS_PER_USEC (_TIME_MILLE)
+#define MSECS_PER_SEC (_TIME_MILLE)
 #define USECS_PER_SEC (MSECS_PER_SEC * USECS_PER_MSEC)
 #define NSECS_PER_SEC (USECS_PER_SEC * NSECS_PER_USEC)
 
 	typedef class Time final {
 	public:
-#if UINT_MAX > NSECS_PER_SEC
-		typedef unsigned int timeuint_t;
-#define __TIME_FMT_STRING          "%u"
-#else
-		typedef unsigned long timeuint_t;
-#define __TIME_FMT_STRING          "%lu"
+
+#ifdef TIME_USE_INT
+		typedef int timeint_t;
+#elif defined(TIME_USE_LONG)
+		typedef long timeint_t;
+#elif defined(TIME_USE_LLONG)
+		typedef long long timeint_t;
 #endif
-	Time(bool n = false, timeuint_t s = 0, timeuint_t ns = 0,
+	Time(bool n = false, timeint_t s = 0, timeint_t ns = 0,
 	     unsigned int p = 0):
-		sec(s), nsec(ns), negative(n ? 0x1 : 0x0), precision(p)
+		time(n ? (- s * NSECS_PER_SEC + ns) : (s * NSECS_PER_SEC + ns)),
+			precision(p)
 		{}
 		__always_inline Time operator+(const Time &other) const;
+		__always_inline void operator+=(const Time &other);
 		__always_inline Time operator-(const Time &other) const;
+		__always_inline void operator-=(const Time &other);
 		__always_inline bool operator<(const Time &other) const;
 		__always_inline bool operator>(const Time &other) const;
 		__always_inline bool operator<=(const Time &other) const;
@@ -108,192 +134,71 @@ namespace vtl {
 							 bool &ok,
 							 bool spaced,
 							 bool colonatend);
-		timeuint_t sec;
-		timeuint_t nsec;
-		unsigned int negative : 1;
+		timeint_t time;
 		unsigned int precision : 4;
 	} time_t;
 
 	__always_inline Time Time::operator+(const Time &other) const
 	{
 		Time r;
-		r.precision = __TIME_MAX(precision, other.precision);
-
-		if (likely(negative == other.negative)) {
-			r.sec = sec + other.sec;
-			r.nsec = nsec + other.nsec;
-			r.negative = negative;
-			if (r.nsec >= NSECS_PER_SEC) {
-				r.nsec -= NSECS_PER_SEC;
-				r.sec++;
-			}
-			return r;
-		}
-		bool greater = sec > other.sec ||
-			(sec == other.sec && nsec > other.nsec);
-		if (greater) {
-			r.sec = sec;
-			r.nsec = nsec;
-			r.negative = negative;
-			if (other.nsec > nsec) {
-				r.nsec += NSECS_PER_SEC;
-				r.sec--;
-			}
-			r.sec -= other.sec;
-			r.nsec -= other.nsec;
-			return r;
-		}
-		bool smaller = sec < other.sec ||
-			(sec == other.sec && nsec < other.nsec);
-		if (smaller) {
-			r.sec = other.sec;
-			r.nsec = other.nsec;
-			r.negative = other.negative;
-			if (nsec > other.nsec) {
-				r.nsec += NSECS_PER_SEC;
-				r.sec--;
-			}
-			r.sec -= sec;
-			r.nsec -= nsec;
-			return r;
-		}
-		r.sec = 0;
-		r.nsec = 0;
-		r.negative = 0x0;
+		r.precision = _TIME_MAX(precision, other.precision);
+		r.time = time + other.time;
 		return r;
+	}
+
+	__always_inline void Time::operator+=(const Time &other)
+	{
+		precision = _TIME_MAX(precision, other.precision);
+		time = time + other.time;
 	}
 
 	__always_inline Time Time::operator-(const Time &other) const
 	{
 		Time r;
-		r.precision = __TIME_MAX(precision, other.precision);
-
-		if (unlikely(negative != other.negative)) {
-			r.sec = sec + other.sec;
-			r.nsec = nsec + other.nsec;
-			if (r.nsec >= NSECS_PER_SEC) {
-				r.nsec -= NSECS_PER_SEC;
-				r.sec++;
-			}
-			r.negative = negative;
-			return r;
-		}
-		bool greater = sec > other.sec ||
-			(sec == other.sec && nsec > other.nsec);
-		if (greater) {
-			r.sec = sec;
-			r.nsec = nsec;
-			r.negative = negative;
-			if (other.nsec > nsec) {
-				r.nsec += NSECS_PER_SEC;
-				r.sec--;
-			}
-			r.sec -= other.sec;
-			r.nsec -= other.nsec;
-			return r;
-		}
-		bool smaller = sec < other.sec ||
-			(sec == other.sec && nsec < other.nsec);
-		if (smaller) {
-			r.sec = other.sec;
-			r.nsec = other.nsec;
-			r.negative = other.negative;
-			if (nsec > other.nsec) {
-				r.nsec += NSECS_PER_SEC;
-				r.sec--;
-			}
-			r.sec -= sec;
-			r.nsec -= nsec;
-			return r;
-		}
-		r.sec = 0;
-		r.nsec = 0;
-		r.negative = 0x0;
+		r.precision = _TIME_MAX(precision, other.precision);
+		r.time = time - other.time;
 		return r;
+	}
+
+	__always_inline void Time::operator-=(const Time &other)
+	{
+		precision = _TIME_MAX(precision, other.precision);
+		time = time - other.time;
 	}
 
 	__always_inline bool Time::operator>(const Time &other) const
 	{
-		if (unlikely(negative != other.negative))
-			return other.negative == 0x1;
-		bool greater = sec > other.sec ||
-			(sec == other.sec && nsec > other.nsec);
-		if (greater)
-			return negative == 0x0;
-		bool smaller = sec < other.sec ||
-			(sec == other.sec && nsec < other.nsec);
-		if (smaller)
-			return negative == 0x1;
-		return false;
+		return time > other.time;
 	}
 
 	__always_inline bool Time::operator<(const Time &other) const
 	{
-		if (unlikely(negative != other.negative))
-			return negative == 0x1;
-		bool greater = sec > other.sec ||
-			(sec == other.sec && nsec > other.nsec);
-		if (greater)
-			return negative == 0x1;
-		bool smaller = sec < other.sec ||
-			(sec == other.sec && nsec < other.nsec);
-		if (smaller)
-			return negative == 0x0;
-		return false;
+		return time < other.time;
 	}
 
 	__always_inline bool Time::operator>=(const Time &other) const
 	{
-		if (unlikely(negative != other.negative))
-			return other.negative == 0x1;
-		bool greater = sec > other.sec ||
-			(sec == other.sec && nsec > other.nsec);
-		if (greater)
-			return negative == 0x0;
-		bool smaller = sec < other.sec ||
-			(sec == other.sec && nsec < other.nsec);
-		if (smaller)
-			return negative == 0x1;
-		return true;
+		return time >= other.time;
 	}
 
 	__always_inline bool Time::operator<=(const Time &other) const
 	{
-		if (unlikely(negative != other.negative))
-			return negative == 0x1;
-		bool greater = sec > other.sec ||
-			(sec == other.sec && nsec > other.nsec);
-		if (greater)
-			return negative == 0x1;
-		bool smaller = sec < other.sec ||
-			(sec == other.sec && nsec < other.nsec);
-		if (smaller)
-			return negative == 0x0;
-		return true;
+		return time <= other.time;
 	}
 
 	__always_inline bool Time::operator==(const Time &other) const
 	{
-		if (other.sec == 0 && sec == 0 && other.nsec == 0 &&
-		    nsec == 0)
-			return true;
-		return sec == other.sec && nsec == other.nsec &&
-		negative == other.negative;
+		return time == other.time;
 	}
 
 
 	__always_inline Time Time::fromDouble(const double &t)
 	{
 		Time r;
-		double a = t;
 
-		r.negative = 0x0;
-		if (t < 0) {
-			r.negative = 0x1;
-			a = - a;
-		}
-		r.sec = (unsigned long) a;
-		r.nsec = (a - (double) r.sec) * NSECS_PER_SEC;
+		r.time = (timeint_t)
+			(t * NSECS_PER_SEC +
+			 (((double) 5) / ((double)(NSECS_PER_SEC * 10))));
 		r.precision = 9;
 		return r;
 	}
@@ -312,19 +217,20 @@ namespace vtl {
 						bool spaced, bool colonatend)
 	{
 		Time r;
-		timeuint_t base = 0;
-		unsigned int d;
-		timeuint_t mulint;
+		uint32_t base = 0;
+		uint32_t d;
+		uint32_t mulint;
 		const char *c;
+		timeint_t tt;
 
-		r.sec = 0;
-		r.nsec = 0;
-		r.negative = 0x0;
+		uint32_t sec = 0;
+		uint32_t nsec = 0;
+		bool negative = false;
 		ok = true;
 
 		if (*str == '-') {
 			str++;
-			r.negative = 0x1;
+			negative = true;
 		}
 
 		for (c = str; *c != '\0'; c++) {
@@ -337,7 +243,7 @@ namespace vtl {
 			base += d;
 		}
 
-		r.sec = base;
+		sec = base;
 		r.precision = 0;
 
 		if (*c == '.') {
@@ -354,16 +260,15 @@ namespace vtl {
 				base += d;
 				mulint /= 10;
 			}
-			r.nsec = mulint * base;
+			nsec = mulint * base;
 		}
 
+		tt = sec * NSECS_PER_SEC + nsec;
+		r.time = negative ? -tt : tt;
 		if (colonatend && *c != ':')
-			goto error;
+			ok = false;
 
 		return r;
-	error:
-		ok = false;
-		return 0;
 	}
 
 	__always_inline QString Time::toQString() const
@@ -379,30 +284,38 @@ namespace vtl {
 
 	__always_inline bool Time::sprint(char *buf) const
 	{
-		unsigned int i, len;
-		timeuint_t acc;
-		timeuint_t mdiv;
-		timeuint_t rdiv;
+		int i, len;
+		uint32_t acc;
+		uint32_t mdiv;
+		uint32_t rdiv;
+		unsigned int sec;
+		uint32_t nsec;
+		timeint_t t = time;
 		int digit;
 
 		char *b = &buf[0];
 		int s;
 
-		if (nsec > NSECS_PER_SEC)
-			return false;
-
-		if (negative == 0x1) {
+		if (t < 0) {
 			*b = '-';
 			b++;
+			t = -t;
 		}
 
-		s = sprintf(b, __TIME_FMT_STRING, sec);
+		sec = t / NSECS_PER_SEC;
+		nsec = t % NSECS_PER_SEC;
+
+		s = sprintf(b, "%u", sec);
 		if (s < 0)
 			return false;
 		b += s;
 
-		*b = '.';
-		b++;
+		if (precision > 0) {
+			*b = '.';
+			b++;
+		} else {
+			goto out;
+		}
 
 		len = precision;
 		acc = nsec;
@@ -422,6 +335,7 @@ namespace vtl {
 			b++;
 			mdiv /= 10;
 		}
+	out:
 		*b = '\0';
 
 		return true;
@@ -429,20 +343,17 @@ namespace vtl {
 
 	__always_inline double Time::toDouble() const
 	{
-		double r = (double)sec;
-		r += (double) nsec / NSECS_PER_SEC;
+		double r = ((double) time) / NSECS_PER_SEC;
 		return r;
 	}
 
 	__always_inline Time Time::fabs() const
 	{
-		Time t;
+		Time r;
 
-		t.sec = sec;
-		t.nsec = nsec;
-		t.negative = 0x0;
-		t.precision = precision;
-		return t;
+		r.time = time < 0 ? -time : time;
+		r.precision = precision;
+		return r;
 	}
 
 	__always_inline unsigned int Time::getPrecision() const
