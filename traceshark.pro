@@ -128,6 +128,7 @@ HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/tstring.h
 
 HEADERS      +=  vtl/avltree.h
+HEADERS      +=  vtl/bitvector.h
 HEADERS      +=  vtl/bsdexits.h
 HEADERS      +=  vtl/compiler.h
 HEADERS      +=  vtl/error.h
@@ -201,6 +202,7 @@ SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
 SOURCES      +=  misc/setting.cpp
 
+SOURCES      +=  vtl/bitvector.cpp
 SOURCES      +=  vtl/error.cpp
 
 ###############################################################################

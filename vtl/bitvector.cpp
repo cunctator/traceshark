@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,47 +49,28 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ABSTRACTTASK_H
-#define ABSTRACTTASK_H
-
-#include <QVector>
 #include "vtl/bitvector.h"
 
-class TaskGraph;
+namespace vtl {
 
-class AbstractTask {
-public:
-	AbstractTask();
-	~AbstractTask();
+BitVector::BitVector() :
+word(0), nrElements(0), nrWords(0)
+{}
 
-	/* is really tid as all other pids here */
-	int pid;
+void BitVector::clear()
+{
+	QVector<bitint_t>().swap(array);
+	word = 0x0;
+	nrWords = 0;
+	nrElements = 0;
+}
 
-	QVector<double> schedTimev;
-	vtl::BitVector schedData;
-	QVector<double> scaledSchedData;
-	QVector<double> wakeTimev;
-	QVector<double> wakeDelay;
-	QVector<double> wakeHeight;
-	QVector<double> wakeZero;
-	QVector<double> preemptedTimev;
-	QVector<double> runningTimev;
-	QVector<double> scaledPreemptedData;
-	QVector<double> scaledRunningData;
+void BitVector::softclear()
+{
+	array.clear();
+	word = 0x0;
+	nrWords = 0;
+	nrElements = 0;
+}
 
-	/* Only used during extraction */
-	bool isNew;
-
-	/* These are for scaling purposes */
-	double offset;
-	double scale;
-
-	bool doScale();
-	bool doScaleWakeup();
-	bool doScaleRunning();
-	bool doScalePreempted();
-
-	TaskGraph *graph;
-};
-
-#endif /* ABSTRACTTASK_H */
+}

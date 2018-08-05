@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,47 +49,104 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ABSTRACTTASK_H
-#define ABSTRACTTASK_H
+#ifndef _VTL_BITVECTOR_H
+#define _VTL_BITVECTOR_H
 
+#include <cstdint>
 #include <QVector>
-#include "vtl/bitvector.h"
 
-class TaskGraph;
-
-class AbstractTask {
+namespace vtl {
+class BitVector
+{
 public:
-	AbstractTask();
-	~AbstractTask();
-
-	/* is really tid as all other pids here */
-	int pid;
-
-	QVector<double> schedTimev;
-	vtl::BitVector schedData;
-	QVector<double> scaledSchedData;
-	QVector<double> wakeTimev;
-	QVector<double> wakeDelay;
-	QVector<double> wakeHeight;
-	QVector<double> wakeZero;
-	QVector<double> preemptedTimev;
-	QVector<double> runningTimev;
-	QVector<double> scaledPreemptedData;
-	QVector<double> scaledRunningData;
-
-	/* Only used during extraction */
-	bool isNew;
-
-	/* These are for scaling purposes */
-	double offset;
-	double scale;
-
-	bool doScale();
-	bool doScaleWakeup();
-	bool doScaleRunning();
-	bool doScalePreempted();
-
-	TaskGraph *graph;
+	BitVector();
+	__always_inline bool readbool(unsigned int index) const;
+	__always_inline void appendbool(bool value);
+	__always_inline unsigned int read(unsigned int index) const;
+	__always_inline void append(unsigned int value);
+	__always_inline unsigned int size() const;
+	void clear();
+	void softclear();
+private:
+	typedef unsigned int bitint_t;
+	bitint_t word;
+	static const unsigned int BITVECTOR_BITS_PER_WORD = sizeof(word) * 8;
+	unsigned int nrElements;
+	unsigned int nrWords;
+	QVector<bitint_t> array;
 };
 
-#endif /* ABSTRACTTASK_H */
+__always_inline bool BitVector::readbool(unsigned int index) const
+{
+	return BitVector::read(index) == 0x1;
+}
+
+__always_inline void BitVector::appendbool(bool value)
+{
+	unsigned int bitnr = nrElements % BITVECTOR_BITS_PER_WORD;
+	bitint_t mask;
+	unsigned int nrw;
+
+	if (value) {
+		mask = 0x1 << bitnr;
+		word = word | mask;
+	} else {
+		mask = ~(0x1 << bitnr);
+		word = word & mask;
+	}
+
+	nrElements++;
+	nrw = nrElements / BITVECTOR_BITS_PER_WORD;
+	if (nrw > nrWords) {
+		array.append(word);
+		nrWords = nrw;
+		word = 0x0;
+	}
+}
+
+__always_inline unsigned int BitVector::read(unsigned int index) const
+{
+	unsigned int windex = index / BITVECTOR_BITS_PER_WORD;
+	bitint_t w;
+        unsigned int r;
+	unsigned int bitnr = index % BITVECTOR_BITS_PER_WORD;
+
+	/*
+	 * Here, we could check that index < nrElements but we are deliberately
+	 * not checking in order to maximize speed. If the user is dumb enough
+	 * to read out of bounds, he will get an arbitrary bit from the last
+	 * BITVECTOR_BITS_PER_WORD bits.
+	 */
+	w = windex < nrWords ? array[windex] : word;
+	r = (w >> bitnr) & 0x1;
+	return r;
+}
+
+__always_inline void BitVector::append(unsigned int value)
+{
+	unsigned int bitnr = nrElements % BITVECTOR_BITS_PER_WORD;
+	bitint_t mask_and, mask_xor;
+	unsigned int nrw;
+
+	mask_xor = (value & 0x1) << bitnr;
+	mask_and = ~ (0x1 << bitnr);
+	word &= mask_and;
+	word ^= mask_xor;
+
+	nrElements++;
+	nrw = nrElements / BITVECTOR_BITS_PER_WORD;
+	if (nrw > nrWords) {
+		array.append(word);
+		nrWords = nrw;
+		word = 0x0;
+	}
+}
+
+__always_inline unsigned int BitVector::size() const
+{
+	return nrElements;
+}
+
+}
+
+#endif /* _BITVECTOR_H */

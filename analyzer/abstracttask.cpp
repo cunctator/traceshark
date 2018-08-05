@@ -53,6 +53,10 @@
 #include "analyzer/traceanalyzer.h"
 #include "ui/taskgraph.h"
 
+#define SCHED_HEIGHT ((double) 0.5)
+#define FLOOR_HEIGHT ((double) 0)
+
+
 AbstractTask::AbstractTask() :
 	pid(0), isNew(true), offset(0), scale(0), graph(nullptr)
 {}
@@ -66,27 +70,27 @@ AbstractTask::~AbstractTask()
 bool AbstractTask::doScale() {
 	int i;
 	int s = schedData.size();
+	double schedScale = scale * SCHED_HEIGHT;
 	scaledSchedData.resize(s);
 	for (i = 0; i < s; i++)
-		scaledSchedData[i] = schedData[i] * scale + offset;
+		scaledSchedData[i] = schedData.read(i) * schedScale + offset;
 	return false; /* No error */
 }
 
 bool AbstractTask::doScaleRunning() {
-	int i;
-	int s = runningData.size();
+	int s = runningTimev.size();
+	double scaledHeight = FLOOR_HEIGHT * scale + offset;
+
 	scaledRunningData.resize(s);
-	for (i = 0; i < s; i++)
-		scaledRunningData[i] = runningData[i] * scale + offset;
+	scaledRunningData.fill(scaledHeight, s);
 	return false; /* No error */
 }
 
 bool AbstractTask::doScalePreempted() {
-	int i;
-	int s = preemptedData.size();
+	int s = preemptedTimev.size();
 	scaledPreemptedData.resize(s);
-	for (i = 0; i < s; i++)
-		scaledPreemptedData[i] = preemptedData[i] * scale + offset;
+	double scaledHeight = FLOOR_HEIGHT * scale + offset;
+	scaledPreemptedData.fill(scaledHeight, s);
 	return false; /* No error */
 }
 
@@ -96,6 +100,5 @@ bool AbstractTask::doScaleWakeup() {
 	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
 	wakeZero.fill(0, s);
 	wakeHeight.fill(scaledHeight, s);
-
 	return false; /* No error */
 }

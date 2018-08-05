@@ -94,9 +94,10 @@
  * are used to display wakups in the CPU scheduling graphs
  */
 #define WAKEUP_MAX ((double) 0.020)
-#define VERT_WAKEUP_HEIGHT ((double) 0.6)
-#define SCHED_HEIGHT ((double) 0.5)
-#define FLOOR_HEIGHT ((double) 0)
+
+#define SCHED_BIT 0x1
+#define FLOOR_BIT 0x0
+
 
 class TraceFile;
 class QCustomPlot;
@@ -422,7 +423,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 		task->isNew = false;
 		task->pid = m.pid;
 		task->schedTimev.append(event.time.toDouble());
-		task->schedData.append(FLOOR_HEIGHT);
+		task->schedData.append(FLOOR_BIT);
 		childname = sched_process_fork_childname_strdup(ttype, event,
 								taskNamePool);
 		task->checkName(childname, true);
@@ -501,15 +502,15 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 		/* Apparently this task was running when we started tracing */
 		task->schedTimev.append(startTimeDbl);
-		task->schedData.append(SCHED_HEIGHT);
+		task->schedData.append(SCHED_BIT);
 
 		task->schedTimev.append(oldtimeDbl);
-		task->schedData.append(FLOOR_HEIGHT);
+		task->schedData.append(FLOOR_BIT);
 	}
 	if (task->exitStatus == STATUS_EXITCALLED)
 		task->exitStatus = STATUS_FINAL;
 	task->schedTimev.append(oldtimeDbl);
-	task->schedData.append(FLOOR_HEIGHT);
+	task->schedData.append(FLOOR_BIT);
 
 	runnable = task_state_is_runnable(state);
 
@@ -517,10 +518,8 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		preempted = task_state_is_flag_set(state, TASK_FLAG_PREEMPT);
 		if (preempted) {
 			task->preemptedTimev.append(oldtimeDbl);
-			task->preemptedData.append(FLOOR_HEIGHT);
 		} else {
 			task->runningTimev.append(oldtimeDbl);
-			task->runningData.append(FLOOR_HEIGHT);
 		}
 		task->lastWakeUP = oldtime;
 	} else {
@@ -535,17 +534,15 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 
 		/* Apparently this task was on CPU when we started tracing */
 		cpuTask->schedTimev.append(startTimeDbl);
-		cpuTask->schedData.append(SCHED_HEIGHT);
+		cpuTask->schedData.append(SCHED_BIT);
 	}
 	cpuTask->schedTimev.append(oldtimeDbl);
-	cpuTask->schedData.append(FLOOR_HEIGHT);
+	cpuTask->schedData.append(FLOOR_BIT);
 	if (runnable) {
 		if (preempted) {
 			cpuTask->preemptedTimev.append(oldtimeDbl);
-			cpuTask->preemptedData.append(FLOOR_HEIGHT);
 		} else {
 			cpuTask->runningTimev.append(oldtimeDbl);
-			cpuTask->runningData.append(FLOOR_HEIGHT);
 		}
 	}
 
@@ -569,7 +566,7 @@ skip:
 					  delayOK);
 
 		task->schedTimev.append(startTimeDbl);
-		task->schedData.append(FLOOR_HEIGHT);
+		task->schedData.append(FLOOR_BIT);
 	} else
 		delay = estimateWakeUp(task, newtime, delayOK);
 
@@ -582,7 +579,7 @@ skip:
 	}
 
 	task->schedTimev.append(newtimeDbl);
-	task->schedData.append(SCHED_HEIGHT);
+	task->schedData.append(SCHED_BIT);
 
 	cpuTask = &cpuTaskMaps[cpu][newpid];
 	if (cpuTask->isNew) {
@@ -591,7 +588,7 @@ skip:
 		cpuTask->isNew = false;
 
 		cpuTask->schedTimev.append(startTimeDbl);
-		cpuTask->schedData.append(FLOOR_HEIGHT);
+		cpuTask->schedData.append(FLOOR_BIT);
 	}
 
 	if (delayOK) {
@@ -600,7 +597,7 @@ skip:
 	}
 
 	cpuTask->schedTimev.append(newtimeDbl);
-	cpuTask->schedData.append(SCHED_HEIGHT);
+	cpuTask->schedData.append(SCHED_BIT);
 
 out:
 	eventCPU->hasBeenScheduled = true;
@@ -634,7 +631,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 		if (name != nullptr)
 			task->checkName(name);
 		task->schedTimev.append(startTimeDbl);
-		task->schedData.append(FLOOR_HEIGHT);
+		task->schedData.append(FLOOR_BIT);
 	}
 }
 

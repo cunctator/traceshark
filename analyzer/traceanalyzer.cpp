@@ -232,7 +232,7 @@ void TraceAnalyzer::processSchedAddTail()
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
 		while (iter != cpuTaskMaps[cpu].end()) {
 			CPUTask &task = iter.value();
-			double d;
+			unsigned int d;
 			double lastTime;
 			int lastIndex = task.schedTimev.size() - 1;
 			iter++;
@@ -247,7 +247,7 @@ void TraceAnalyzer::processSchedAddTail()
 			lastTime = task.schedTimev[lastIndex];
 			if (lastTime >= endTimeDbl)
 				continue;
-			d = task.schedData[task.schedData.size() - 1];
+			d = task.schedData.read(task.schedData.size() - 1);
 			task.schedTimev.append(endTimeDbl);
 			task.schedData.append(d);
 		}
@@ -256,7 +256,7 @@ void TraceAnalyzer::processSchedAddTail()
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.begin();
 	while (iter != taskMap.end()) {
 		Task &task = *iter.value().task;
-		double d;
+		unsigned int d;
 		double lastTime;
 		int s = task.schedTimev.size();
 		iter++;
@@ -267,7 +267,7 @@ void TraceAnalyzer::processSchedAddTail()
 		if (lastTime >= endTimeDbl
 		    || task.exitStatus == STATUS_FINAL)
 			continue;
-		d = task.schedData[task.schedData.size() - 1];
+		d = task.schedData.read(task.schedData.size() - 1);
 		task.schedTimev.append(endTimeDbl);
 		task.schedData.append(d);
 	}
@@ -334,12 +334,12 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		faketime = prevtime + FAKE_DELTA;
 		fakeDbl = faketime.toDouble();
 		cpuTask->schedTimev.append(fakeDbl);
-		cpuTask->schedData.append(FLOOR_HEIGHT);
+		cpuTask->schedData.append(FLOOR_BIT);
 		task = findTask(epid);
 		Q_ASSERT(task != nullptr);
 		task->lastSleepEntry = faketime;
 		task->schedTimev.append(fakeDbl);
-		task->schedData.append(FLOOR_HEIGHT);
+		task->schedData.append(FLOOR_BIT);
 	}
 
 	if (oldpid > 0) {
@@ -351,7 +351,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		faketime = oldtime - FAKE_DELTA;
 		fakeDbl = faketime.toDouble();
 		cpuTask->schedTimev.append(fakeDbl);
-		cpuTask->schedData.append(SCHED_HEIGHT);
+		cpuTask->schedData.append(SCHED_BIT);
 
 		task = &taskMap[oldpid].getTask();
 		if (task->isNew) {
@@ -359,7 +359,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		}
 		task->isNew = false;
 		task->schedTimev.append(fakeDbl);
-		task->schedData.append(SCHED_HEIGHT);
+		task->schedData.append(SCHED_BIT);
 	}
 }
 
