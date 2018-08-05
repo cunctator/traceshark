@@ -70,6 +70,7 @@
 #include "analyzer/filterstate.h"
 #include "parser/genericparams.h"
 #include "mm/mempool.h"
+#include "analyzer/abstracttask.h"
 #include "analyzer/cputask.h"
 #include "analyzer/tcolor.h"
 #include "parser/traceevent.h"
@@ -94,10 +95,6 @@
  * are used to display wakups in the CPU scheduling graphs
  */
 #define WAKEUP_MAX ((double) 0.020)
-
-#define SCHED_BIT 0x1
-#define FLOOR_BIT 0x0
-
 
 class TraceFile;
 class QCustomPlot;
@@ -140,6 +137,8 @@ public:
 	void setMigrationOffset(double offset);
 	void setMigrationScale(double scale);
 	void doScale();
+	void doStats();
+	void doLimitedStats();
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(int pid);
 	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
@@ -185,21 +184,29 @@ private:
 						 bool &valid) const;
 	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, int oldpid,
-				  const vtl::Time &oldtime);
+				  const vtl::Time &oldtime,
+				  unsigned int idx);
 	__always_inline void __processSwitchEvent(tracetype_t ttype,
-						  TraceEvent &event);
+						  TraceEvent &event,
+						  int idx);
 	__always_inline void __processWakeupEvent(tracetype_t ttype,
-						  TraceEvent &event);
+						  TraceEvent &event,
+						  int idx);
 	__always_inline void __processCPUfreqEvent(tracetype_t ttype,
-						   TraceEvent &event);
+						   TraceEvent &event,
+						   int idx);
 	__always_inline void __processCPUidleEvent(tracetype_t ttype,
-						   TraceEvent &event);
+						   TraceEvent &event,
+						   int idx);
 	__always_inline void __processMigrateEvent(tracetype_t ttype,
-						   TraceEvent &event);
+						   TraceEvent &event,
+						   int idx);
 	__always_inline void __processForkEvent(tracetype_t ttype,
-						TraceEvent &event);
+						TraceEvent &event,
+						int idx);
 	__always_inline void __processExitEvent(tracetype_t ttype,
-						TraceEvent &event);
+						TraceEvent &event,
+						int idx);
 	void addCpuFreqWork(unsigned int cpu,
 			    QList<AbstractWorkItem*> &list);
 	void addCpuIdleWork(unsigned int cpu,
@@ -225,6 +232,8 @@ private:
 					bool inclusive);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
+	WorkQueue statsQueue;
+	WorkQueue statsLimitedQueue;
 	vtl::AVLTree <int, TColor> colorMap;
 	TColor black;
 	TColor white;
@@ -242,6 +251,7 @@ private:
 	vtl::Time startTime;
 	double endTimeDbl;
 	double startTimeDbl;
+	unsigned int endTimeIdx;
 	unsigned int maxFreq;
 	unsigned int minFreq;
 	int maxIdleState;
@@ -386,7 +396,8 @@ __always_inline Task *TraceAnalyzer::findTask(int pid)
 }
 
 __always_inline void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
-							  TraceEvent &event)
+							  TraceEvent &event,
+							  int /* idx */)
 {
 	Migration m;
 	unsigned int oldcpu = sched_migrate_origCPU(ttype, event);
@@ -406,7 +417,8 @@ __always_inline void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
 }
 
 __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
-						       TraceEvent &event)
+						       TraceEvent &event,
+						       int idx)
 {
 	Migration m;
 	const char *childname;
@@ -422,8 +434,10 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 		/* This should be very likely for a task that just forked !*/
 		task->isNew = false;
 		task->pid = m.pid;
+		task->events = &events;
 		task->schedTimev.append(event.time.toDouble());
 		task->schedData.append(FLOOR_BIT);
+		task->schedEventIdx.append(idx);
 		childname = sched_process_fork_childname_strdup(ttype, event,
 								taskNamePool);
 		task->checkName(childname, true);
@@ -431,7 +445,8 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 }
 
 __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
-						       TraceEvent &event)
+						       TraceEvent &event,
+						       int /* idx */)
 {
 	Migration m;
 
@@ -442,13 +457,16 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 	migrations.append(m);
 
 	Task *task = &taskMap[m.pid].getTask();
-	if (task->isNew)
+	if (task->isNew) {
 		task->pid = m.pid;
+		task->events = &events;
+	}
 	task->exitStatus = STATUS_EXITCALLED;
 }
 
 __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
-							 TraceEvent &event)
+							 TraceEvent &event,
+							 int idx)
 {
 	unsigned int cpu = event.cpu;
 	vtl::Time oldtime = event.time - FAKE_DELTA;
@@ -473,12 +491,15 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	if (event.pid > 0) {
 		task = &taskMap[event.pid].getTask();
 		task->checkName(event.taskName->ptr);
-		if (task->isNew)
+		if (task->isNew) {
 			task->pid = event.pid;
+			task->events = &events;
+		}
 	}
 
 	if (eventCPU->pidOnCPU != oldpid && eventCPU->hasBeenScheduled)
-		handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid, oldtime);
+		handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid, oldtime,
+				     idx);
 
 	if (oldpid == 0) {
 		eventCPU->lastExitIdle = oldtime;
@@ -497,20 +518,24 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		/* true means task is newly constructed above */
 		task->pid = oldpid;
 		task->isNew = false;
+		task->events = &events;
 		name = sched_switch_oldname_strdup(ttype, event, taskNamePool);
 		task->checkName(name);
 
 		/* Apparently this task was running when we started tracing */
 		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(SCHED_BIT);
+		task->schedEventIdx.append(0);
 
 		task->schedTimev.append(oldtimeDbl);
 		task->schedData.append(FLOOR_BIT);
+		task->schedEventIdx.append(idx);
 	}
 	if (task->exitStatus == STATUS_EXITCALLED)
 		task->exitStatus = STATUS_FINAL;
 	task->schedTimev.append(oldtimeDbl);
 	task->schedData.append(FLOOR_BIT);
+	task->schedEventIdx.append(idx);
 
 	runnable = task_state_is_runnable(state);
 
@@ -531,13 +556,16 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		/* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
+		cpuTask->events = &events;
 
 		/* Apparently this task was on CPU when we started tracing */
 		cpuTask->schedTimev.append(startTimeDbl);
 		cpuTask->schedData.append(SCHED_BIT);
+		cpuTask->schedEventIdx.append(0);
 	}
 	cpuTask->schedTimev.append(oldtimeDbl);
 	cpuTask->schedData.append(FLOOR_BIT);
+	cpuTask->schedEventIdx.append(idx);
 	if (runnable) {
 		if (preempted) {
 			cpuTask->preemptedTimev.append(oldtimeDbl);
@@ -559,6 +587,7 @@ skip:
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
+		task->events = &events;
 		name = sched_switch_newname_strdup(ttype, event, taskNamePool);
 		if (name != nullptr)
 			task->checkName(name);
@@ -567,6 +596,7 @@ skip:
 
 		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(FLOOR_BIT);
+		task->schedEventIdx.append(0);
 	} else
 		delay = estimateWakeUp(task, newtime, delayOK);
 
@@ -580,15 +610,18 @@ skip:
 
 	task->schedTimev.append(newtimeDbl);
 	task->schedData.append(SCHED_BIT);
+	task->schedEventIdx.append(idx);
 
 	cpuTask = &cpuTaskMaps[cpu][newpid];
 	if (cpuTask->isNew) {
 		/* true means task is newly constructed above */
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
+		cpuTask->events = &events;
 
 		cpuTask->schedTimev.append(startTimeDbl);
 		cpuTask->schedData.append(FLOOR_BIT);
+		cpuTask->schedEventIdx.append(idx);
 	}
 
 	if (delayOK) {
@@ -598,6 +631,7 @@ skip:
 
 	cpuTask->schedTimev.append(newtimeDbl);
 	cpuTask->schedData.append(SCHED_BIT);
+	cpuTask->schedEventIdx.append(idx);
 
 out:
 	eventCPU->hasBeenScheduled = true;
@@ -607,7 +641,8 @@ out:
 }
 
 __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
-							 TraceEvent &event)
+							 TraceEvent &event,
+							 int /* idx */)
 {
 	int pid;
 	Task *task;
@@ -627,16 +662,19 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	if (task->isNew) {
 		task->pid = pid;
 		task->isNew = false;
+		task->events = &events;
 		name = sched_wakeup_name_strdup(ttype, event, taskNamePool);
 		if (name != nullptr)
 			task->checkName(name);
 		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(FLOOR_BIT);
+		task->schedEventIdx.append(0);
 	}
 }
 
 __always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
-							  TraceEvent &event)
+							  TraceEvent &event,
+							  int /* idx */)
 {
 	unsigned int cpu = cpufreq_cpu(ttype, event);
 	vtl::Time time = event.time;
@@ -660,7 +698,8 @@ __always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 }
 
 __always_inline void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
-							  TraceEvent &event)
+							  TraceEvent &event,
+							  int /* idx */)
 {
 	unsigned int cpu = cpuidle_cpu(ttype, event);
 	double time = event.time.toDouble();
@@ -721,6 +760,7 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 		return;
 
 	startTime = events[0].time;
+	AbstractTask::setStartTime(startTime);
 	startTimeDbl = startTime.toDouble();
 
 	while(true) {
@@ -732,32 +772,32 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 			switch (event.type) {
 			case CPU_FREQUENCY:
 				if (cpufreq_args_ok(ttype, event))
-					__processCPUfreqEvent(ttype, event);
+					__processCPUfreqEvent(ttype, event, i);
 				break;
 			case CPU_IDLE:
 				if (cpuidle_args_ok(ttype, event))
-					__processCPUidleEvent(ttype, event);
+					__processCPUidleEvent(ttype, event, i);
 				break;
 			case SCHED_MIGRATE_TASK:
 				if (sched_migrate_args_ok(ttype, event))
-					__processMigrateEvent(ttype, event);
+					__processMigrateEvent(ttype, event, i);
 				break;
 			case SCHED_SWITCH:
 				if (sched_switch_args_ok(ttype, event))
-					__processSwitchEvent(ttype, event);
+					__processSwitchEvent(ttype, event, i);
 				break;
 			case SCHED_WAKEUP:
 			case SCHED_WAKEUP_NEW:
 				if (sched_wakeup_args_ok(ttype, event))
-					__processWakeupEvent(ttype, event);
+					__processWakeupEvent(ttype, event, i);
 				break;
 			case SCHED_PROCESS_FORK:
 				if (sched_process_fork_args_ok(ttype, event))
-					__processForkEvent(ttype, event);
+					__processForkEvent(ttype, event, i);
 				break;
 			case SCHED_PROCESS_EXIT:
 				if (sched_process_exit_args_ok(ttype, event))
-					__processExitEvent(ttype, event);
+					__processExitEvent(ttype, event, i);
 				break;
 			default:
 				break;
@@ -769,6 +809,8 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 		parser->waitForNextBatch(eof, indexReady);
 	}
 	endTime = events.last().time;
+	endTimeIdx = events.size() - 1;
+	AbstractTask::setEndTime(endTime);
 	endTimeDbl = endTime.toDouble();
 	nrCPUs = maxCPU + 1;
 	timePrecision = guessTimePrecision();

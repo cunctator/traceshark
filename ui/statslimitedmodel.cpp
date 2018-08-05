@@ -53,13 +53,13 @@
 #include "vtl/heapsort.h"
 #include "vtl/tlist.h"
 
-#include "ui/taskmodel.h"
+#include "ui/statslimitedmodel.h"
 #include "misc/traceshark.h"
 #include "analyzer/task.h"
 
 static const char swappername[] = "swapper";
 
-TaskModel::TaskModel(QObject *parent):
+StatsLimitedModel::StatsLimitedModel(QObject *parent):
 	AbstractTaskModel(parent)
 {
 	taskList = new vtl::TList<const Task*>;
@@ -70,27 +70,37 @@ TaskModel::TaskModel(QObject *parent):
 	idleTask->generateDisplayName();
 }
 
-TaskModel::~TaskModel()
+StatsLimitedModel::~StatsLimitedModel()
 {
 	delete taskList;
 	delete errorStr;
 	delete idleTask;
 }
 
-void TaskModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
-			   unsigned int nrcpus)
+void StatsLimitedModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
+				   unsigned int nrcpus)
 {
+	vtl::Time delta =
+		AbstractTask::higherTimeLimit - AbstractTask::lowerTimeLimit;
+
 	taskList->clear();
 
 	if (map == nullptr)
 		return;
 
+	idleTask->cursorTime = delta * nrcpus;
+
 	DEFINE_TASKMAP_ITERATOR(iter) = map->begin();
 	while (iter != map->end()) {
 		Task *task = iter.value().task;
 		taskList->append(task);
+		idleTask->cursorTime -= task->cursorTime;
 		iter++;
 	}
+
+	idleTask->cursorPct = (unsigned)
+		(10000 * (idleTask->cursorTime.toDouble() / delta.toDouble() +
+			  0.00005));
 
 	/* Add a fake idle task for event filtering purposes */
 	taskList->append(idleTask);
@@ -99,6 +109,12 @@ void TaskModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 		*taskList, [] (const Task *&a, const Task *&b) -> int {
 			const QString &as = *a->displayName;
 			const QString &bs = *b->displayName;
+
+			if (a->cursorTime < b->cursorTime)
+				return 1;
+			if (a->cursorTime > b->cursorTime)
+				return -1;
+
 			int cmp1 = as.compare(bs);
 			if (cmp1 != 0)
 				return cmp1;
@@ -107,17 +123,17 @@ void TaskModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 		});
 }
 
-int TaskModel::rowCount(const QModelIndex & /* index */) const
+int StatsLimitedModel::rowCount(const QModelIndex & /* index */) const
 {
 	return taskList->size();
 }
 
-int TaskModel::columnCount(const QModelIndex & /* index */) const
+int StatsLimitedModel::columnCount(const QModelIndex & /* index */) const
 {
-	return 2; /* Number from data() and headerData() */
+	return 4; /* Number from data() and headerData() */
 }
 
-int TaskModel::rowToPid(int row, bool &ok) const
+int StatsLimitedModel::rowToPid(int row, bool &ok) const
 {
 	unsigned int urow;
 
@@ -136,7 +152,7 @@ int TaskModel::rowToPid(int row, bool &ok) const
 	return task->pid;
 }
 
-const QString &TaskModel::rowToName(int row, bool &ok) const
+const QString &StatsLimitedModel::rowToName(int row, bool &ok) const
 {
 	unsigned int urow;
 
@@ -156,7 +172,80 @@ const QString &TaskModel::rowToName(int row, bool &ok) const
 	return *task->displayName;
 }
 
-QVariant TaskModel::data(const QModelIndex &index, int role) const
+void StatsLimitedModel::rowToPct(QString &str, int row, bool &ok) const
+{
+	unsigned int urow;
+	char buf[7];
+	unsigned int p;
+
+	if (row < 0) {
+		ok = false;
+		return;
+	}
+	urow = (unsigned int) row;
+	if (urow >= taskList->size()) {
+		ok = false;
+		return;
+	}
+
+	ok = true;
+	const Task *task = taskList->at(row);
+	unsigned pct = task->cursorPct;
+
+	unsigned pcti = pct / 100;
+	unsigned pctd = pct % 100;
+
+	if (pcti >= 1000) {
+		ok = false;
+		return;
+	}
+
+	p = pcti  / 100;
+	if (p == 0)
+		buf[0] = ' ';
+	else
+		buf[0] = '0' + p;
+
+	p = (pcti % 100) / 10;
+	if (buf[0] == 0 && p == 0)
+		buf[1] = ' ';
+	else
+		buf[1] = '0' + p;
+
+	p = pcti % 10;
+	buf[2] = '0' + p;
+	buf[3] = '.';
+
+	p = pctd / 10;
+	buf[4] = '0' + p;
+	p = pctd % 10;
+	buf[5] = '0' + p;
+	buf[6] = '\0';
+
+	str = QString(&buf[0]);
+}
+
+void StatsLimitedModel::rowToTime(QString &str, int row, bool &ok) const
+{
+	unsigned int urow;
+
+	if (row < 0) {
+		ok = false;
+		return;
+	}
+	urow = (unsigned int) row;
+	if (urow >= taskList->size()) {
+		ok = false;
+		return;
+	}
+
+	ok = true;
+	const Task *task = taskList->at(row);
+	str = task->cursorTime.toQString();
+}
+
+
+QVariant StatsLimitedModel::data(const QModelIndex &index, int role) const
 {
 	bool ok;
 
@@ -170,18 +259,28 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 		int row = index.row();
 		int column = index.column();
 		int pid;
-		QString name;
+		QString str;
 
 		switch(column) {
 		case 0:
-			name = rowToName(row, ok);
+			str = rowToName(row, ok);
 			if (ok)
-				return name;
+				return str;
 			break;
 		case 1:
 			pid = rowToPid(row, ok);
 			if (ok)
 				return QString::number(pid);
+			break;
+		case 2:
+			rowToPct(str, row, ok);
+			if (ok)
+				return str;
+			break;
+		case 3:
+			rowToTime(str, row, ok);
+			if (ok)
+				return str;
 			break;
 		default:
 			break;
@@ -190,15 +289,15 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-bool TaskModel::setData(const QModelIndex &/*index*/, const QVariant
+bool StatsLimitedModel::setData(const QModelIndex &/*index*/, const QVariant
 			&/*value*/, int /*role*/)
 {
 	return false;
 }
 
-QVariant TaskModel::headerData(int section,
-				 Qt::Orientation orientation,
-				 int role) const
+QVariant StatsLimitedModel::headerData(int section,
+				       Qt::Orientation orientation,
+				       int role) const
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
 		switch(section) {
@@ -206,6 +305,10 @@ QVariant TaskModel::headerData(int section,
 			return QString(tr("Name"));
 		case 1:
 			return QString(tr("PID(TID)"));
+		case 2:
+			return QString(tr("CPU(%)"));
+		case 3:
+			return QString(tr("CPU(s)"));
 		default:
 			return *errorStr;
 		}
@@ -213,18 +316,18 @@ QVariant TaskModel::headerData(int section,
 	return QVariant();
 }
 
-Qt::ItemFlags TaskModel::flags(const QModelIndex &index) const
+Qt::ItemFlags StatsLimitedModel::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags flags = QAbstractItemModel::flags(index);
 	return flags;
 }
 
-void TaskModel::beginResetModel()
+void StatsLimitedModel::beginResetModel()
 {
 	QAbstractTableModel::beginResetModel();
 }
 
-void TaskModel::endResetModel()
+void StatsLimitedModel::endResetModel()
 {
 	QAbstractTableModel::endResetModel();
 }

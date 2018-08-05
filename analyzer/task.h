@@ -91,23 +91,23 @@ public:
 	void generateDisplayName();
 	QString getLastName() const;
 
-	TaskName *taskName;
+	TaskName     *taskName;
 	exitstatus_t exitStatus;
 
 	/* lastWakeUP is only used during extraction */
-	vtl::Time lastWakeUP;
+	vtl::Time    lastWakeUP;
 
-	vtl::Time lastSleepEntry;
+	vtl::Time    lastSleepEntry;
 
 	/*
 	 * The unified task needs to save pointers to these graphs so that they
 	 * can be deleted when the user requests the unified task to be 
 	 * removed
 	 */
-	QCPGraph *wakeUpGraph;
-	QCPGraph *preemptedGraph;
-	QCPGraph *runningGraph;
-	QString *displayName;
+	QCPGraph     *wakeUpGraph;
+	QCPGraph     *preemptedGraph;
+	QCPGraph     *runningGraph;
+	QString      *displayName;
 private:
 	__always_inline void appendName(const TaskName *name, bool isnewest);
 };

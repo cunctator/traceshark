@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -59,6 +59,9 @@
 #define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
 #define RESSRC_PNG_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
 #define RESSRC_PNG_EXPORTEVENTS  ":/traceshark/images/exportevents30x30.png"
+#define RESSRC_PNG_GETSTATS      ":/traceshark/images/getstats30x30.png"
+#define RESSRC_PNG_GETSTATS_TIMELIMIT \
+	                         ":/traceshark/images/getstatstimelimit30x30.png"
 #define RESSRC_PNG_GRAPHENABLE   ":/traceshark/images/graphenabledialog30x30.png"
 #define RESSRC_PNG_MOVE_BLUE     ":/traceshark/images/moveblue30x30.png"
 #define RESSRC_PNG_MOVE_RED      ":/traceshark/images/movered30x30.png"

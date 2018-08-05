@@ -118,6 +118,14 @@ namespace vtl {
 		__always_inline bool operator<=(const Time &other) const;
 		__always_inline bool operator>=(const Time &other) const;
 		__always_inline bool operator==(const Time &other) const;
+		__always_inline Time operator*(long other) const;
+		__always_inline Time operator*(int other) const;
+		__always_inline Time operator*(unsigned long other) const;
+		__always_inline Time operator*(unsigned other) const;
+		__always_inline void operator*=(long other);
+		__always_inline void operator*=(int other);
+		__always_inline void operator*=(unsigned long other);
+		__always_inline void operator*=(unsigned other);
 		__always_inline static Time fromDouble(const double &t);
 		__always_inline static Time fromString(const char *str,
 						       bool &ok);
@@ -191,6 +199,57 @@ namespace vtl {
 		return time == other.time;
 	}
 
+	__always_inline Time Time::operator*(long other) const
+	{
+		Time r;
+		r.precision = precision;
+		r.time = time * other;
+		return r;
+	}
+
+	__always_inline Time Time::operator*(int other) const
+	{
+		Time r;
+		r.precision = precision;
+		r.time = time * other;
+		return r;
+	}
+
+	__always_inline Time Time::operator*(unsigned long other) const
+	{
+		Time r;
+		r.precision = precision;
+		r.time = time * other;
+		return r;
+	}
+
+	__always_inline Time Time::operator*(unsigned other) const
+	{
+		Time r;
+		r.precision = precision;
+		r.time = time * other;
+		return r;
+	}
+
+	__always_inline void Time::operator*=(long other)
+	{
+		time *= other;
+	}
+
+	__always_inline void Time::operator*=(int other)
+	{
+		time *= other;
+	}
+
+	__always_inline void Time::operator*=(unsigned long other)
+	{
+		time *= other;
+	}
+
+	__always_inline void Time::operator*=(unsigned other)
+	{
+		time *= other;
+	}
 
 	__always_inline Time Time::fromDouble(const double &t)
 	{

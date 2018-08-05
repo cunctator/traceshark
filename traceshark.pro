@@ -57,6 +57,7 @@
 
 HEADERS       = qcustomplot/qcustomplot.h
 
+HEADERS      +=  ui/abstracttaskmodel.h
 HEADERS      +=  ui/cursor.h
 HEADERS      +=  ui/cursorinfo.h
 HEADERS      +=  ui/errordialog.h
@@ -72,6 +73,8 @@ HEADERS      +=  ui/licensedialog.h
 HEADERS      +=  ui/mainwindow.h
 HEADERS      +=  ui/migrationarrow.h
 HEADERS      +=  ui/migrationline.h
+HEADERS      +=  ui/statslimitedmodel.h
+HEADERS      +=  ui/statsmodel.h
 HEADERS      +=  ui/taskgraph.h
 HEADERS      +=  ui/taskinfo.h
 HEADERS      +=  ui/taskmodel.h
@@ -142,6 +145,7 @@ HEADERS      +=  vtl/time.h
 
 SOURCES       = qcustomplot/qcustomplot.cpp
 
+SOURCES      +=  ui/abstracttaskmodel.cpp
 SOURCES      +=  ui/cursor.cpp
 SOURCES      +=  ui/cursorinfo.cpp
 SOURCES      +=  ui/errordialog.cpp
@@ -157,6 +161,8 @@ SOURCES      +=  ui/licensedialog.cpp
 SOURCES      +=  ui/mainwindow.cpp
 SOURCES      +=  ui/migrationarrow.cpp
 SOURCES      +=  ui/migrationline.cpp
+SOURCES      +=  ui/statslimitedmodel.cpp
+SOURCES      +=  ui/statsmodel.cpp
 SOURCES      +=  ui/taskgraph.cpp
 SOURCES      +=  ui/taskinfo.cpp
 SOURCES      +=  ui/taskmodel.cpp

@@ -102,6 +102,11 @@
 #define TOOLTIP_EXPORTEVENTS \
 	"Export the filtered events"
 
+#define TOOLTIP_GETSTATS \
+	"Show the statistics dialog"
+#define TOOLTIP_GETSTATS_TIMELIMITED \
+	"Show the dialog with statistics that are time limited by the cursors"
+
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
 {
@@ -149,6 +154,11 @@ MainWindow::MainWindow():
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
 	taskSelectDialog = new TaskSelectDialog();
+	statsDialog = new TaskSelectDialog(nullptr,
+					   TaskSelectDialog::TaskSelectStats);
+	statsLimitedDialog =
+		new TaskSelectDialog(nullptr,
+				     TaskSelectDialog::TaskSelectStatsLimited);
 	eventSelectDialog = new EventSelectDialog();
 	graphEnableDialog = new GraphEnableDialog();
 
@@ -162,22 +172,48 @@ MainWindow::MainWindow():
 	tsconnect(infoWidget, findWakeup(int), this, showWakeup(int));
 	tsconnect(infoWidget, removeTaskGraph(int), this, removeTaskGraph(int));
 
+	/* Events widget */
 	tsconnect(eventsWidget, timeSelected(vtl::Time), this,
 		  moveActiveCursor(vtl::Time));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
 		  this, showEventInfo(const TraceEvent &));
+
+	/* task select dialog */
 	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
 	tsconnect(taskSelectDialog, addTaskToLegend(int), this,
 		  addTaskToLegend(int));
 	tsconnect(taskSelectDialog, createFilter(QMap<int, int> &, bool, bool),
 		  this, createPidFilter(QMap<int, int> &, bool, bool));
 	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
+
+	/* statistics Dialog */
+	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
+	tsconnect(statsDialog, addTaskToLegend(int), this,
+		  addTaskToLegend(int));
+	tsconnect(statsDialog, createFilter(QMap<int, int> &, bool, bool),
+		  this, createPidFilter(QMap<int, int> &, bool, bool));
+	tsconnect(statsDialog, resetFilter(), this, resetPidFilter());
+
+	/* Time limited statistics Dialog */
+	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
+		  addTaskGraph(int));
+	tsconnect(statsLimitedDialog, addTaskToLegend(int), this,
+		  addTaskToLegend(int));
+	tsconnect(statsLimitedDialog,
+		  createFilter(QMap<int, int> &, bool, bool),
+		  this, createPidFilter(QMap<int, int> &, bool, bool));
+	tsconnect(statsLimitedDialog, resetFilter(), this, resetPidFilter());
+
+	/* event select dialog */
 	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
 						  bool),
 		  this, createEventFilter(QMap<event_t, event_t> &, bool));
 	tsconnect(eventSelectDialog, resetFilter(), this, resetEventFilter());
+
+	/* graph enable dialog */
 	tsconnect(graphEnableDialog, settingsChanged(),
 		  this, consumeSettings());
+
 	cursorPos[TShark::RED_CURSOR] = 0;
 	cursorPos[TShark::BLUE_CURSOR] = 0;
 }
@@ -229,6 +265,8 @@ MainWindow::~MainWindow()
 	delete licenseDialog;
 	delete eventInfoDialog;
 	delete taskSelectDialog;
+	delete statsDialog;
+	delete statsLimitedDialog;
 	delete eventSelectDialog;
 	delete graphEnableDialog;
 
@@ -241,6 +279,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	/* Here is a great place to save settings, if we ever want to do it */
 	taskSelectDialog->hide();
 	eventSelectDialog->hide();
+	statsDialog->hide();
+	statsLimitedDialog->hide();
 	event->accept();
 	/* event->ignore() could be used to refuse to close the window */
 }
@@ -285,7 +325,8 @@ void MainWindow::openFile(const QString &name)
 		eventsWidget->endResetModel();
 
 		taskSelectDialog->beginResetModel();
-		taskSelectDialog->setTaskMap(&analyzer->taskMap);
+		taskSelectDialog->setTaskMap(&analyzer->taskMap,
+					     analyzer->getNrCPUs());
 		taskSelectDialog->endResetModel();
 
 		eventSelectDialog->beginResetModel();
@@ -299,6 +340,17 @@ void MainWindow::openFile(const QString &name)
 
 		rescaleTrace();
 		rescale = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+		computeStats();
+		statsDialog->beginResetModel();
+		statsDialog->setTaskMap(&analyzer->taskMap,
+					analyzer->getNrCPUs());
+		statsDialog->endResetModel();
+
+		statsLimitedDialog->beginResetModel();
+		statsLimitedDialog->setTaskMap(&analyzer->taskMap,
+					       analyzer->getNrCPUs());
+		statsLimitedDialog->endResetModel();
 
 		showTrace();
 		showt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
@@ -418,6 +470,11 @@ void MainWindow::rescaleTrace()
 	analyzer->doScale();
 }
 
+void MainWindow::computeStats()
+{
+	analyzer->doStats();
+}
+
 void MainWindow::clearPlot()
 {
 	cursors[TShark::RED_CURSOR] = nullptr;
@@ -531,8 +588,10 @@ void MainWindow::setupCursors()
 	start = analyzer->getStartTime().toDouble();
 	end = analyzer->getEndTime().toDouble();
 
-	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot, Qt::red);
-	cursors[TShark::BLUE_CURSOR] = new Cursor(tracePlot, Qt::blue);
+	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot,
+						 TShark::RED_CURSOR);
+	cursors[TShark::BLUE_CURSOR] = new Cursor(tracePlot,
+						  TShark::BLUE_CURSOR);
 
 	cursors[TShark::RED_CURSOR]->setLayer(cursorLayer);
 	cursors[TShark::BLUE_CURSOR]->setLayer(cursorLayer);
@@ -540,15 +599,16 @@ void MainWindow::setupCursors()
 	red = (start + end) / 2;
 	vtl::Time redtime = vtl::Time::fromDouble(red);
 	redtime.setPrecision(analyzer->getTimePrecision());
-	cursors[TShark::RED_CURSOR]->setPosition(red);
+	cursors[TShark::RED_CURSOR]->setPosition(redtime);
 	cursorPos[TShark::RED_CURSOR] = red;
 	infoWidget->setTime(redtime, TShark::RED_CURSOR);
 	blue = (start + end) / 2 + (end - start) / 10;
 	vtl::Time bluetime = vtl::Time::fromDouble(blue);
 	bluetime.setPrecision(analyzer->getTimePrecision());
-	cursors[TShark::BLUE_CURSOR]->setPosition(blue);
+	cursors[TShark::BLUE_CURSOR]->setPosition(bluetime);
 	cursorPos[TShark::BLUE_CURSOR] = blue;
 	infoWidget->setTime(bluetime, TShark::BLUE_CURSOR);
+	checkStatsTimeLimited();
 
 	scrollTo(redtime);
 }
@@ -709,6 +769,8 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	showTasksAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
 	timeFilterAction->setEnabled(e);
+	showStatsAction->setEnabled(e);
+	showStatsTimeLimitedAction->setEnabled(e);
 
 	infoWidget->setTraceActionsEnabled(e);
 }
@@ -723,8 +785,16 @@ void MainWindow::closeTrace()
 	eventsWidget->clearScrollTime();
 
 	taskSelectDialog->beginResetModel();
-	taskSelectDialog->setTaskMap(nullptr);
+	taskSelectDialog->setTaskMap(nullptr, 0);
 	taskSelectDialog->endResetModel();
+
+	statsDialog->beginResetModel();
+	statsDialog->setTaskMap(nullptr, 0);
+	statsDialog->endResetModel();
+
+	statsLimitedDialog->beginResetModel();
+	statsLimitedDialog->setTaskMap(nullptr, 0);
+	statsLimitedDialog->endResetModel();
 
 	eventSelectDialog->beginResetModel();
 	eventSelectDialog->setStringTree(nullptr);
@@ -961,7 +1031,8 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 		vtl::Time time = vtl::Time::fromDouble(coord);
 		time.setPrecision(analyzer->getTimePrecision());
 		cursorPos[cursorIdx] = coord;
-		cursor->setPosition(coord);
+		cursor->setPosition(time);
+		checkStatsTimeLimited();
 		eventsWidget->scrollTo(time);
 		infoWidget->setTime(time, cursorIdx);
 	}
@@ -973,8 +1044,10 @@ void MainWindow::infoValueChanged(vtl::Time value, int nr)
 	double dblValue = value.toDouble();
 	if (nr == TShark::RED_CURSOR || nr == TShark::BLUE_CURSOR) {
 		cursor = cursors[nr];
-		if (cursor != nullptr)
-			cursor->setPosition(dblValue);
+		if (cursor != nullptr) {
+			cursor->setPosition(value);
+			checkStatsTimeLimited();
+		}
 		eventsWidget->scrollTo(value);
 		cursorPos[nr] = dblValue;
 	}
@@ -991,7 +1064,8 @@ void MainWindow::moveActiveCursor(vtl::Time time)
 
 	Cursor *cursor = cursors[cursorIdx];
 	if (cursor != nullptr) {
-		cursor->setPosition(dblTime);
+		cursor->setPosition(time);
+		checkStatsTimeLimited();
 		infoWidget->setTime(time, cursorIdx);
 		cursorPos[cursorIdx] = dblTime;
 	}
@@ -1060,6 +1134,21 @@ void MainWindow::createActions()
 	exportEventsAction->setEnabled(false);
 	tsconnect(exportEventsAction, triggered(), this, exportEvents());
 
+	showStatsAction = new QAction(tr("Show stats..."), this);
+	showStatsAction->setIcon(QIcon(RESSRC_PNG_GETSTATS));
+	showStatsAction->setToolTip(TOOLTIP_GETSTATS);
+	showStatsAction->setEnabled(false);
+	tsconnect(showStatsAction, triggered(), this, showStats());
+
+	showStatsTimeLimitedAction = new QAction(
+		tr("Show stats cursor time..."), this);
+	showStatsTimeLimitedAction->setIcon(
+		QIcon(RESSRC_PNG_GETSTATS_TIMELIMIT));
+	showStatsTimeLimitedAction->setToolTip(TOOLTIP_GETSTATS_TIMELIMITED);
+	showStatsTimeLimitedAction->setEnabled(false);
+	tsconnect(showStatsTimeLimitedAction, triggered(), this,
+		  showStatsTimeLimited());
+
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
 	exitAction->setStatusTip(tr("Exit traceshark"));
@@ -1101,6 +1190,8 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(resetFiltersAction);
 	viewToolBar->addAction(exportEventsAction);
 	viewToolBar->addAction(graphEnableAction);
+	viewToolBar->addAction(showStatsAction);
+	viewToolBar->addAction(showStatsTimeLimitedAction);
 }
 
 void MainWindow::createMenus()
@@ -1119,6 +1210,8 @@ void MainWindow::createMenus()
 	viewMenu->addAction(resetFiltersAction);
 	viewMenu->addAction(exportEventsAction);
 	viewMenu->addAction(graphEnableAction);
+	viewMenu->addAction(showStatsAction);
+	viewMenu->addAction(showStatsTimeLimitedAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
@@ -1639,6 +1732,21 @@ void MainWindow::showGraphEnable()
 	graphEnableDialog->show();
 }
 
+void MainWindow::showStats()
+{
+	statsDialog->show();
+}
+
+void MainWindow::showStatsTimeLimited()
+{
+	statsLimitedDialog->beginResetModel();
+	analyzer->doLimitedStats();
+	statsLimitedDialog->setTaskMap(&analyzer->taskMap,
+				       analyzer->getNrCPUs());
+	statsLimitedDialog->endResetModel();
+	statsLimitedDialog->show();
+}
+
 void MainWindow::showWakeup(int pid)
 {
 	int activeIdx = infoWidget->getCursorIdx();
@@ -1684,8 +1792,9 @@ void MainWindow::showWakeup(int pid)
 	 * the task that was doing the wakeup. This way we can push the button
 	 * again to see who woke up the task that was doing the wakeup
 	 */
-	activeCursor->setPosition(wakeupevent->time.toDouble());
-	inactiveCursor->setPosition(schedevent->time.toDouble());
+	activeCursor->setPosition(wakeupevent->time);
+	inactiveCursor->setPosition(schedevent->time);
+	checkStatsTimeLimited();
 	infoWidget->setTime(wakeupevent->time, activeIdx);
 	infoWidget->setTime(schedevent->time, inactiveIdx);
 	cursorPos[activeIdx] = wakeupevent->time.toDouble();
@@ -1753,4 +1862,15 @@ void MainWindow::showWakeup(int pid)
 		return;
 	}
 	infoWidget->setTaskGraph(graph);
+}
+
+void MainWindow::checkStatsTimeLimited()
+{
+	if (statsLimitedDialog->isVisible()) {
+		statsLimitedDialog->beginResetModel();
+		analyzer->doLimitedStats();
+		statsLimitedDialog->setTaskMap(&analyzer->taskMap,
+					       analyzer->getNrCPUs());
+		statsLimitedDialog->endResetModel();
+	}
 }

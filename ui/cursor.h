@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -52,18 +52,29 @@
 #ifndef CURSOR_H
 #define CURSOR_H
 
+#include <QColor>
+
+#include "misc/traceshark.h"
 #include "qcustomplot/qcustomplot.h"
+
+namespace vtl {
+	class Time;
+}
 
 class Cursor : public QCPItemLine
 {
 	Q_OBJECT
 public:
-	Cursor(QCustomPlot *parent, const QColor &color);
+	Cursor(QCustomPlot *parent, TShark::CursorIdx idx);
 	double getPosition();
 	void setPosition(double pos);
+	void setPosition(const vtl::Time &time);
 	void setColor(const QColor &color);
 private:
+	void _setPosition(double pos);
+	void advertiseTime(const vtl::Time &time);
 	double position;
+	TShark::CursorIdx cursorIdx;
 };
 
 #endif /* CURSOR_H */

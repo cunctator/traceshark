@@ -67,13 +67,21 @@ QT_END_NAMESPACE
 
 class TaskModel;
 class TaskView;
+class AbstractTaskModel;
 
 class TaskSelectDialog : public QDialog {
 	Q_OBJECT
 public:
-	TaskSelectDialog(QWidget *parent = 0);
+	enum TaskSelectType {
+		TaskSelectStats = 0,
+		TaskSelectStatsLimited,
+		TaskSelectRegular
+	};
+	TaskSelectDialog(QWidget *parent = 0,
+			 enum TaskSelectType type = TaskSelectRegular);
 	~TaskSelectDialog();
-	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map);
+	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
+			unsigned int nrcpus);
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
@@ -90,7 +98,7 @@ private slots:
 	void addFilterClicked();
 private:
 	TaskView *taskView;
-	TaskModel *taskModel;
+	AbstractTaskModel *taskModel;
 	QComboBox *logicBox;
 	QCheckBox *includeBox;
 	QMap<int, int> *filterMap;

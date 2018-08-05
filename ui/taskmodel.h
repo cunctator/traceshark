@@ -52,7 +52,7 @@
 #ifndef TASKMODEL_H
 #define TASKMODEL_H
 
-#include <QAbstractTableModel>
+#include "abstracttaskmodel.h"
 #include "vtl/avltree.h"
 #include "misc/traceshark.h"
 
@@ -68,13 +68,14 @@ QT_BEGIN_NAMESPACE
 class QStringList;
 QT_END_NAMESPACE
 
-class TaskModel : public QAbstractTableModel
+class TaskModel : public AbstractTaskModel
 {
 	Q_OBJECT
 public:
 	TaskModel(QObject *parent = 0);
 	~TaskModel();
-	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map);
+	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
+			unsigned int nrcpus);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;

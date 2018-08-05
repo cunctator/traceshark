@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -51,21 +51,55 @@
 
 #include <QColor>
 #include <QPen>
-#include "ui/cursor.h"
 
-Cursor::Cursor(QCustomPlot *parent, const QColor &color):
-	QCPItemLine(parent)
+#include "analyzer/abstracttask.h"
+#include "ui/cursor.h"
+#include "vtl/time.h"
+
+Cursor::Cursor(QCustomPlot *parent, TShark::CursorIdx idx):
+	QCPItemLine(parent), position(0), cursorIdx(idx)
 {
+	QColor color;
+
+	switch (idx) {
+	case TShark::BLUE_CURSOR:
+		color = Qt::blue;
+		break;
+	case TShark::RED_CURSOR:
+		color = Qt::red;
+		break;
+	default:
+		color = Qt::magenta;
+		break;
+	}
+
 	QPen pen;
 	pen.setStyle(Qt::DashLine);
 	pen.setWidth(2);
 	pen.setColor(color);
 	setPen(pen);
 	setPosition(0);
-	position = 0;
 }
 
 void Cursor::setPosition(double pos)
+{
+	vtl::Time time = vtl::Time::fromDouble(pos);
+	/*
+	 * Fixme: Make some functions so that the precision can be propagated
+	 * from the TraceAnalyzer class, via MainWindow.
+	 */
+	time.setPrecision(6);
+	advertiseTime(time);
+	_setPosition(pos);
+}
+
+void Cursor::setPosition(const vtl::Time &time)
+{
+	advertiseTime(time);
+	_setPosition(time.toDouble());
+}
+
+void Cursor::_setPosition(double pos)
 {
 	start->setCoords(pos, -10000000000000000);
 	end->setCoords(pos, +10000000000000000);
@@ -76,4 +110,9 @@ void Cursor::setPosition(double pos)
 double Cursor::getPosition()
 {
 	return position;
+}
+
+void Cursor::advertiseTime(const vtl::Time &time)
+{
+	AbstractTask::setCursorTime(cursorIdx, time);
 }

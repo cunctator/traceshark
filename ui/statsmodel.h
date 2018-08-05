@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,90 +49,51 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ABSTRACTTASK_H
-#define ABSTRACTTASK_H
+#ifndef _STATSMODEL_H
+#define _STATSMODEL_H
 
-#include <QVector>
-#include "vtl/bitvector.h"
-
-#include "vtl/time.h"
+#include "abstracttaskmodel.h"
+#include "vtl/avltree.h"
 #include "misc/traceshark.h"
 
-class TaskGraph;
-class TraceEvent;
-class TraceAnalyzer;
-
-#define SCHED_BIT 0x1
-#define FLOOR_BIT 0x0
-
 namespace vtl {
-	template<class T> class TList;
+       template<class T> class TList;
 }
 
-class AbstractTask {
-	friend class StatsModel;
-	friend class StatsLimitedModel;
-	friend class TraceAnalyzer;
+
+class Task;
+class TaskHandle;
+
+QT_BEGIN_NAMESPACE
+class QStringList;
+QT_END_NAMESPACE
+
+class StatsModel : public AbstractTaskModel
+{
+	Q_OBJECT
 public:
-	AbstractTask();
-	~AbstractTask();
-
-	/* is really tid as all other pids here */
-	int pid;
-
-	QVector<double> schedTimev;
-	QVector<int>    schedEventIdx;
-	vtl::BitVector  schedData;
-	QVector<double> scaledSchedData;
-	QVector<double> wakeTimev;
-	QVector<double> wakeDelay;
-	QVector<double> wakeHeight;
-	QVector<double> wakeZero;
-	QVector<double> preemptedTimev;
-	QVector<double> runningTimev;
-	QVector<double> scaledPreemptedData;
-	QVector<double> scaledRunningData;
-
-	vtl::Time accTime;             /* Total time consumption        */
-	unsigned  accPct;              /* Percentage of the above       */
-	vtl::Time cursorTime;          /* Consumed time between cursors */
-	unsigned  cursorPct;           /* Percentage of the above       */
-
-	/* Only used during extraction */
-	bool isNew;
-
-	/* These are for scaling purposes */
-	double offset;
-	double scale;
-
-	bool doScale();
-	bool doStats();
-	bool doStatsTimeLimited();
-	bool doScaleWakeup();
-	bool doScaleRunning();
-	bool doScalePreempted();
-
-	static void setCursorTime(enum TShark::CursorIdx cursor,
-				  const vtl::Time &time);
-	static void setStartTime(const vtl::Time &time);
-	static void setEndTime(const vtl::Time &time);
-
-	TaskGraph *graph;
-
+	StatsModel(QObject *parent = 0);
+	~StatsModel();
+	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
+			unsigned int nrcpus);
+	int rowCount(const QModelIndex &parent) const;
+	int columnCount(const QModelIndex &parent) const;
+	QVariant data(const QModelIndex &index, int role) const;
+	bool setData(const QModelIndex &index, const QVariant &value,
+		     int role);
+	QVariant headerData(int section, Qt::Orientation orientation,
+			    int role) const;
+	int rowToPid(int row, bool &ok) const;
+	const QString &rowToName(int row, bool &ok) const;
+	void rowToPct(QString &str, int row, bool &ok) const;
+	void rowToTime(QString &str, int row, bool &ok) const;
+	void beginResetModel();
+	void endResetModel();
+	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
-	int _binarySearch(const vtl::Time &time, int lowerIdx,
-					  int higherIdx);
-	__always_inline int binarySearch(const vtl::Time &time);
-	int findLower(const vtl::Time &time);
-	int findHigher(const vtl::Time &time);
-protected:
-	static vtl::Time lowerTimeLimit;
-	static vtl::Time higherTimeLimit;
-	static vtl::Time startTime;
-	static vtl::Time endTime;
-	static vtl::Time cursorValues[];
-	vtl::TList<TraceEvent> *events;
+	vtl::TList<const Task*> *taskList;
+	QString *errorStr;
+	Task *idleTask;
 };
 
-#endif /* ABSTRACTTASK_H */
-
+#endif /* _STATSMODEL_H */

@@ -138,6 +138,8 @@ private slots:
 	void timeFilter();
 	void exportEvents();
 	void consumeSettings();
+	void showStats();
+	void showStatsTimeLimited();
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
@@ -148,6 +150,7 @@ private:
 
 	void processTrace();
 	void computeLayout();
+	void computeStats();
 	void rescaleTrace();
 	void clearPlot();
 	void showTrace();
@@ -165,6 +168,8 @@ private:
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
+
+	void checkStatsTimeLimited();
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;
@@ -205,6 +210,8 @@ private:
 	QAction *graphEnableAction;
 	QAction *resetFiltersAction;
 	QAction *exportEventsAction;
+	QAction *showStatsAction;
+	QAction *showStatsTimeLimitedAction;
 	QAction *aboutAction;
 	QAction *licenseAction;
 	QAction *aboutQtAction;
@@ -216,6 +223,8 @@ private:
 	LicenseDialog *licenseDialog;
 	EventInfoDialog *eventInfoDialog;
 	TaskSelectDialog *taskSelectDialog;
+	TaskSelectDialog *statsDialog;
+	TaskSelectDialog *statsLimitedDialog;
 	EventSelectDialog *eventSelectDialog;
 	GraphEnableDialog *graphEnableDialog;
 

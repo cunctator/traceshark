@@ -93,8 +93,9 @@ __always_inline static int clib_close(int fd)
 TraceAnalyzer::TraceAnalyzer()
 	: cpuTaskMaps(nullptr), cpuFreq(nullptr), cpuIdle(nullptr),
 	  black(0, 0, 0), white(255, 255, 255), migrationOffset(0),
-	  migrationScale(0), maxCPU(0), nrCPUs(0), endTimeDbl(0),
-	  startTimeDbl(0), maxFreq(0), minFreq(0), maxIdleState(0),
+	  migrationScale(0), maxCPU(0), nrCPUs(0), endTime(false, 0, 0, 6),
+	  startTime(false, 0, 0, 6), endTimeDbl(0), startTimeDbl(0),
+	  endTimeIdx(0), maxFreq(0), minFreq(0), maxIdleState(0),
 	  minIdleState(0), timePrecision(0), CPUs(nullptr), customPlot(nullptr),
 	  pidFilterInclusive(false), OR_pidFilterInclusive(false)
 {
@@ -189,6 +190,7 @@ void TraceAnalyzer::resetProperties()
 	startTimeDbl = 0;
 	endTime = VTL_TIME_ZERO;
 	endTimeDbl = 0;
+	endTimeIdx = 0;
 	minFreq = UINT_MAX;
 	maxFreq = 0;
 	minIdleState = INT_MAX;
@@ -250,6 +252,7 @@ void TraceAnalyzer::processSchedAddTail()
 			d = task.schedData.read(task.schedData.size() - 1);
 			task.schedTimev.append(endTimeDbl);
 			task.schedData.append(d);
+			task.schedEventIdx.append(endTimeIdx);
 		}
 	}
 
@@ -270,6 +273,7 @@ void TraceAnalyzer::processSchedAddTail()
 		d = task.schedData.read(task.schedData.size() - 1);
 		task.schedTimev.append(endTimeDbl);
 		task.schedData.append(d);
+		task.schedEventIdx.append(endTimeIdx);
 	}
 }
 
@@ -318,7 +322,8 @@ unsigned int TraceAnalyzer::guessTimePrecision()
 void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 					 unsigned int cpu,
 					 CPU *eventCPU, int oldpid,
-					 const vtl::Time &oldtime)
+					 const vtl::Time &oldtime,
+					 unsigned int idx)
 {
 	int epid = eventCPU->pidOnCPU;
 	vtl::Time prevtime, faketime;
@@ -335,11 +340,14 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		fakeDbl = faketime.toDouble();
 		cpuTask->schedTimev.append(fakeDbl);
 		cpuTask->schedData.append(FLOOR_BIT);
+		cpuTask->schedEventIdx.append(idx);
+
 		task = findTask(epid);
 		Q_ASSERT(task != nullptr);
 		task->lastSleepEntry = faketime;
 		task->schedTimev.append(fakeDbl);
 		task->schedData.append(FLOOR_BIT);
+		task->schedEventIdx.append(idx);
 	}
 
 	if (oldpid > 0) {
@@ -352,6 +360,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		fakeDbl = faketime.toDouble();
 		cpuTask->schedTimev.append(fakeDbl);
 		cpuTask->schedData.append(SCHED_BIT);
+		cpuTask->schedEventIdx.append(idx);
 
 		task = &taskMap[oldpid].getTask();
 		if (task->isNew) {
@@ -360,6 +369,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 		task->isNew = false;
 		task->schedTimev.append(fakeDbl);
 		task->schedData.append(SCHED_BIT);
+		task->schedEventIdx.append(idx);
 	}
 }
 
@@ -635,7 +645,7 @@ void TraceAnalyzer::setQCustomPlot(QCustomPlot *plot)
 }
 
 void TraceAnalyzer::addCpuFreqWork(unsigned int cpu,
-				 QList<AbstractWorkItem*> &list)
+				   QList<AbstractWorkItem*> &list)
 {
 	double scale = cpuFreqScale.value(cpu);
 	double offset = cpuFreqOffset.value(cpu);
@@ -648,7 +658,7 @@ void TraceAnalyzer::addCpuFreqWork(unsigned int cpu,
 }
 
 void TraceAnalyzer::addCpuIdleWork(unsigned int cpu,
-				 QList<AbstractWorkItem*> &list)
+				   QList<AbstractWorkItem*> &list)
 {
 	double scale = cpuIdleScale.value(cpu);
 	double offset = cpuIdleOffset.value(cpu);
@@ -661,7 +671,7 @@ void TraceAnalyzer::addCpuIdleWork(unsigned int cpu,
 }
 
 void TraceAnalyzer::addCpuSchedWork(unsigned int cpu,
-				  QList<AbstractWorkItem*> &list)
+				    QList<AbstractWorkItem*> &list)
 {
 	double scale = schedScale.value(cpu);
 	double offset = schedOffset.value(cpu);
@@ -744,6 +754,50 @@ void TraceAnalyzer::doScale()
 		for (i = 0; i < s; i++)
 			delete workList[i];
 	}
+}
+
+void TraceAnalyzer::doStats()
+{
+	QList<AbstractWorkItem*> workList;
+	int i, s;
+
+	DEFINE_TASKMAP_ITERATOR(iter);
+	for(iter = taskMap.begin(); iter != taskMap.end(); iter++) {
+		Task *task = iter.value().task;
+		WorkItem<Task> *taskItem = new WorkItem<Task>
+			(task, &Task::doStats);
+		workList.append(taskItem);
+		statsQueue.addWorkItem(taskItem);
+	}
+
+	statsQueue.start();
+	statsQueue.wait();
+
+	s = workList.size();
+	for (i = 0; i < s; i++)
+		delete workList[i];
+}
+
+void TraceAnalyzer::doLimitedStats()
+{
+	QList<AbstractWorkItem*> workList;
+	int i, s;
+
+	DEFINE_TASKMAP_ITERATOR(iter);
+	for(iter = taskMap.begin(); iter != taskMap.end(); iter++) {
+		Task *task = iter.value().task;
+		WorkItem<Task> *taskItem = new WorkItem<Task>
+			(task, &Task::doStatsTimeLimited);
+		workList.append(taskItem);
+		statsLimitedQueue.addWorkItem(taskItem);
+	}
+
+	statsLimitedQueue.start();
+	statsLimitedQueue.wait();
+
+	s = workList.size();
+	for (i = 0; i < s; i++)
+		delete workList[i];
 }
 
 void TraceAnalyzer::processFtrace()

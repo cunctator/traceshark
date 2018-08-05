@@ -58,16 +58,19 @@
 #include <QHBoxLayout>
 
 #include "vtl/avltree.h"
+#include "vtl/error.h"
 
 #include "ui/taskselectdialog.h"
 #include "ui/taskmodel.h"
+#include "ui/statsmodel.h"
+#include "ui/statslimitedmodel.h"
 #include "ui/taskview.h"
 #include "misc/traceshark.h"
 
 #define CBOX_INDEX_AND 0
 #define CBOX_INDEX_OR  1
 
-TaskSelectDialog::TaskSelectDialog(QWidget *parent)
+TaskSelectDialog::TaskSelectDialog(QWidget *parent, enum TaskSelectType type)
 	: QDialog(parent, Qt::WindowCloseButtonHint), savedHeight(900)
 {
 	QVBoxLayout *mainLayout =  new QVBoxLayout(this);
@@ -76,7 +79,19 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent)
 	QHBoxLayout *settingLayout = new QHBoxLayout();
 
 	taskView = new TaskView(this);
-	taskModel = new TaskModel(taskView);
+	switch (type) {
+	case TaskSelectStats:
+		taskModel = new StatsModel(taskView);
+		break;
+	case TaskSelectStatsLimited:
+		taskModel = new StatsLimitedModel(taskView);
+		break;
+	case TaskSelectRegular:
+		taskModel = new TaskModel(taskView);
+		break;
+	default:
+		vtl::errx(BSD_EX_SOFTWARE, "Unexpected type in %s:%d", __FILE__, __LINE__);
+	}
 	taskView->setModel(taskModel);
 
 	mainLayout->addWidget(taskView);
@@ -135,9 +150,10 @@ TaskSelectDialog::~TaskSelectDialog()
 	delete filterMap;
 }
 
-void TaskSelectDialog::setTaskMap(vtl::AVLTree<int, TaskHandle> *map)
+void TaskSelectDialog::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
+				  unsigned int nrcpus)
 {
-	taskModel->setTaskMap(map);
+	taskModel->setTaskMap(map, nrcpus);
 }
 
 void TaskSelectDialog::beginResetModel()
