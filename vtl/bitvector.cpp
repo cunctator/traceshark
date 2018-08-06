@@ -54,21 +54,23 @@
 namespace vtl {
 
 BitVector::BitVector() :
-word(0), nrElements(0), nrWords(0)
-{}
+nrElements(0), nrWords(INCREASE_NR)
+{
+	array.resize(INCREASE_NR);
+}
 
 void BitVector::clear()
 {
-	QVector<bitint_t>().swap(array);
-	word = 0x0;
-	nrWords = 0;
+	QVector<word_t>().swap(array);
+	nrWords = INCREASE_NR;
+	array.resize(INCREASE_NR);
 	nrElements = 0;
 }
 
 void BitVector::softclear()
 {
 	array.clear();
-	word = 0x0;
+	array.resize(INCREASE_NR);
 	nrWords = 0;
 	nrElements = 0;
 }

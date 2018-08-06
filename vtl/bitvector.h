@@ -68,12 +68,13 @@ public:
 	void clear();
 	void softclear();
 private:
-	typedef unsigned int bitint_t;
-	bitint_t word;
-	static const unsigned int BITVECTOR_BITS_PER_WORD = sizeof(word) * 8;
+	static const unsigned int INCREASE_NR = 1024;
+	typedef unsigned int word_t;
+	static const unsigned int BITVECTOR_BITS_PER_WORD = sizeof(word_t)
+		* 8;
 	unsigned int nrElements;
 	unsigned int nrWords;
-	QVector<bitint_t> array;
+	QVector<word_t> array;
 };
 
 __always_inline bool BitVector::readbool(unsigned int index) const
@@ -84,8 +85,15 @@ __always_inline bool BitVector::readbool(unsigned int index) const
 __always_inline void BitVector::appendbool(bool value)
 {
 	unsigned int bitnr = nrElements % BITVECTOR_BITS_PER_WORD;
-	bitint_t mask;
-	unsigned int nrw;
+	word_t mask;
+	unsigned int windex = nrElements / BITVECTOR_BITS_PER_WORD;
+
+	if (windex >= nrWords) {
+		nrWords += INCREASE_NR;
+		array.resize(nrWords);
+	}
+
+	word_t &word = array[windex];
 
 	if (value) {
 		mask = 0x1 << bitnr;
@@ -96,37 +104,31 @@ __always_inline void BitVector::appendbool(bool value)
 	}
 
 	nrElements++;
-	nrw = nrElements / BITVECTOR_BITS_PER_WORD;
-	if (nrw > nrWords) {
-		array.append(word);
-		nrWords = nrw;
-		word = 0x0;
-	}
 }
 
 __always_inline unsigned int BitVector::read(unsigned int index) const
 {
 	unsigned int windex = index / BITVECTOR_BITS_PER_WORD;
-	bitint_t w;
         unsigned int r;
 	unsigned int bitnr = index % BITVECTOR_BITS_PER_WORD;
 
-	/*
-	 * Here, we could check that index < nrElements but we are deliberately
-	 * not checking in order to maximize speed. If the user is dumb enough
-	 * to read out of bounds, he will get an arbitrary bit from the last
-	 * BITVECTOR_BITS_PER_WORD bits.
-	 */
-	w = windex < nrWords ? array[windex] : word;
-	r = (w >> bitnr) & 0x1;
+	const word_t &word = array[windex];
+	r = (word >> bitnr) & 0x1;
 	return r;
 }
 
 __always_inline void BitVector::append(unsigned int value)
 {
 	unsigned int bitnr = nrElements % BITVECTOR_BITS_PER_WORD;
-	bitint_t mask_and, mask_xor;
-	unsigned int nrw;
+	word_t mask_and, mask_xor;
+	unsigned int windex = nrElements / BITVECTOR_BITS_PER_WORD;
+
+	if (windex >= nrWords) {
+		nrWords += INCREASE_NR;
+		array.resize(nrWords);
+	}
+
+	word_t &word = array[windex];
 
 	mask_xor = (value & 0x1) << bitnr;
 	mask_and = ~ (0x1 << bitnr);
@@ -134,12 +136,6 @@ __always_inline void BitVector::append(unsigned int value)
 	word ^= mask_xor;
 
 	nrElements++;
-	nrw = nrElements / BITVECTOR_BITS_PER_WORD;
-	if (nrw > nrWords) {
-		array.append(word);
-		nrWords = nrw;
-		word = 0x0;
-	}
 }
 
 __always_inline unsigned int BitVector::size() const
