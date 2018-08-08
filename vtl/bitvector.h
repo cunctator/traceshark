@@ -120,7 +120,7 @@ __always_inline unsigned int BitVector::read(unsigned int index) const
 __always_inline void BitVector::append(unsigned int value)
 {
 	unsigned int bitnr = nrElements % BITVECTOR_BITS_PER_WORD;
-	word_t mask_and, mask_xor;
+	word_t mask_and, mask_or;
 	unsigned int windex = nrElements / BITVECTOR_BITS_PER_WORD;
 
 	if (windex >= nrWords) {
@@ -130,10 +130,10 @@ __always_inline void BitVector::append(unsigned int value)
 
 	word_t &word = array[windex];
 
-	mask_xor = (value & 0x1) << bitnr;
+	mask_or  = (value & 0x1) << bitnr;
 	mask_and = ~ (0x1 << bitnr);
 	word &= mask_and;
-	word ^= mask_xor;
+	word |= mask_or;
 
 	nrElements++;
 }
