@@ -399,6 +399,10 @@ MOC_DIR=obj
 # MARCH_FLAG = -mcpu=cortex-a53
 # MTUNE_FLAG = -mtune=cortex-a53
 
+# Asus Tinkerboard
+# MARCH_FLAG = -mcpu=cortex-a17
+# MTUNE_FLAG = -mtune=cortex-a17
+
 ###############################################################################
 # Generic compiler flags
 #
