@@ -436,12 +436,10 @@ QMAKE_LFLAGS_RELEASE = -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
 # or for testing purposes.
 # QMAKE_LFLAGS_RELEASE += $${HARDENING_LFLAGS}
 
-# Uncomment this to compile with clang, or change to the C++ compiler of your
-# choice
-# QMAKE_CXX=clang-6.0
-# I have not figured out how to link with clang but here you can specify a
-# linker of your choice, g++ is default.
-# QMAKE_LINK=g++
+# Uncomment the follwoing two lines to compile with clang, or change to the C++
+# compiler of your choice
+# QMAKE_CXX=clang++-6.0
+# QMAKE_LINK=clang++-6.0
 
 # Uncomment for debug build
 # CONFIG += DEBUG
