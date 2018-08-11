@@ -375,7 +375,7 @@ MOC_DIR=obj
 
 # KNL
 # MARCH_FLAG = -march=knl
-# MTUNE_FLAG = -mtune=nkl
+# MTUNE_FLAG = -mtune=knl
 
 # KNM
 # MARCH_FLAG = -march=knm
