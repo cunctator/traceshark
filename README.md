@@ -124,15 +124,17 @@ The recommended default compiler is g++ but you can compile with clang if you
 like, by uncommenting the following in traceshark.pro:
 
 ```
-# QMAKE_CXX=clang-6.0
+# USE_CLANG_COMPILER = clang++-6.0
 ```
 
-If you want to build a debug build, uncomment the following two lines:
+If you want to build a debug build, uncomment one of the following two lines:
 
 ```
-# DEBUG_FLAG = -g
-...
-# CONFIG += DEBUG
+# Uncomment this for debug build:
+# USE_DEBUG_FLAG = -g
+
+# Uncomment this for debug build without optimization:
+# USE_DEBUG_FLAG = -g -O0
 ```
 
 Please note that the software will compile for Qt 4 but that it has not been as

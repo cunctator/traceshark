@@ -404,16 +404,42 @@ MOC_DIR=obj
 # MTUNE_FLAG = -mtune=cortex-a17
 
 ###############################################################################
-# Generic compiler flags
+# Build configuration options used to compute generic compiler flags
+# These are meant to be edit by the user in order to configure the build
 #
 
-# Uncomment for debug build
-# DEBUG_FLAG = -g
+# Uncomment this for debug build:
+# USE_DEBUG_FLAG = -g
 
-# These optimization options do not seem to help, so leave them commented out
-# EXTRA_OPTS  = -fpredictive-commoning -fvect-cost-model -fsplit-paths -ftree-vectorize -funswitch-loops -floop-interchange
+# Uncomment this for debug build without optimization:
+# USE_DEBUG_FLAG = -g -O0
 
-# EXTRA_OPTS += -funsafe-math-optimizations
+# Uncomment if you want to use hardening flags
+# Not really needed, unless browsing data controlled by a non-trusted source
+# or for testing purposes.
+# USE_HARDENING_CXXFLAGS = yes
+
+# If you want to compile with clang, then uncomment and change to your (clang)
+# compiler of choice
+# USE_CLANG_COMPILER = clang++-6.0
+
+# These optimization options do not seem to help, so leave them commented out.
+# Only play with these if you are interested in playing with obscure compiler
+# optimizations.
+# USE_EXTRA_OPTS  = -fpredictive-commoning -fvect-cost-model -fsplit-paths -ftree-vectorize -funswitch-loops -floop-interchange
+# USE_EXTRA_OPTS += -funsafe-math-optimizations
+# USE_EXTRA_OPTS += -O3
+
+
+#############################################################################
+# Compute generic compiler flags
+# Do not edit anything below this line, unless you are developing traceshark
+# with respect to the compiler usage. This section is not mean to be changed by
+# regular users.
+
+!isEmpty(USE_DEBUG_FLAG) {
+CONFIG += DEBUG
+}
 
 HARDENING_CXXFLAGS += -fPIE -pie
 HARDENING_CXXFLAGS += -D_FORTIFY_SOURCE=2
@@ -422,27 +448,25 @@ HARDENING_CXXFLAGS += -fstack-protector-strong
 
 HARDENING_LFLAGS += -Wl,-z,relro,-z,now
 
-OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${DEBUG_FLAG} $${EXTRA_OPTS}
+OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${USE_DEBUG_FLAG} $${USE_EXTRA_OPTS}
 
-# Not really needed, unless browsing data controlled by a non-trusted source
-# or for testing purposes.
-# OUR_FLAGS += $${HARDENING_CXXFLAGS}
+!isEmpty (USE_HARDENING_CXXFLAGS) {
+OUR_FLAGS += $${HARDENING_CXXFLAGS}
+}
 
 QMAKE_CXXFLAGS_RELEASE += -pedantic -Wall -std=c++11 $${OUR_FLAGS}
 QMAKE_CFLAGS_RELEASE += -pedantic -Wall -std=c11 $${OUR_FLAGS}
-QMAKE_LFLAGS_RELEASE = -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
+QMAKE_LFLAGS_RELEASE += -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
 
-# Not really needed, unless browsing data controlled by a non-trusted source
-# or for testing purposes.
-# QMAKE_LFLAGS_RELEASE += $${HARDENING_LFLAGS}
+!isEmpty (USE_HARDENING_CXXFLAGS) {
+QMAKE_LFLAGS_RELEASE += $${HARDENING_LFLAGS}
+}
 
-# Uncomment the follwoing two lines to compile with clang, or change to the C++
-# compiler of your choice
-# QMAKE_CXX=clang++-6.0
-# QMAKE_LINK=clang++-6.0
+!isEmpty (USE_CLANG_COMPILER) {
+QMAKE_CXX = $${USE_CLANG_COMPILER}
+QMAKE_LINK = $${USE_CLANG_COMPILER}
+}
 
-# Uncomment for debug build
-# CONFIG += DEBUG
 
 # Uncomment the line below to enable OpenGl through the new method. Seems flaky.
 # DEFINES += QCUSTOMPLOT_USE_OPENGL
