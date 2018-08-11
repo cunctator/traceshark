@@ -120,11 +120,11 @@ uncomment this to build for Broadwell:
 # MTUNE_FLAG = -mtune=broadwell
 ```
 
-The recommended default compiler is g++ but you can compile with clang if you
-like, by uncommenting the following in traceshark.pro:
+The recommended default compiler is g++ but you can compile with clang, or another version of g++, if you like, by uncommenting and possibly editing one of the following in traceshark.pro:
 
 ```
-# USE_CLANG_COMPILER = clang++-6.0
+# USE_ALTERNATIVE_COMPILER = clang++-6.0
+# USE_ALTERNATIVE_COMPILER = g++-8
 ```
 
 If you want to build a debug build, uncomment one of the following two lines:

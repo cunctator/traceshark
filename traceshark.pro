@@ -419,9 +419,10 @@ MOC_DIR=obj
 # or for testing purposes.
 # USE_HARDENING_CXXFLAGS = yes
 
-# If you want to compile with clang, then uncomment and change to your (clang)
-# compiler of choice
-# USE_CLANG_COMPILER = clang++-6.0
+# If you want to compile with another compiler than the defaul g++, then
+# uncomment and change to the compiler of your choice
+# USE_ALTERNATIVE_COMPILER = clang++-6.0
+# USE_ALTERNATIVE_COMPILER = g++-8
 
 # These optimization options do not seem to help, so leave them commented out.
 # Only play with these if you are interested in playing with obscure compiler
@@ -462,9 +463,9 @@ QMAKE_LFLAGS_RELEASE += -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
 QMAKE_LFLAGS_RELEASE += $${HARDENING_LFLAGS}
 }
 
-!isEmpty (USE_CLANG_COMPILER) {
-QMAKE_CXX = $${USE_CLANG_COMPILER}
-QMAKE_LINK = $${USE_CLANG_COMPILER}
+!isEmpty (USE_ALTERNATIVE_COMPILER) {
+QMAKE_CXX = $${USE_ALTERNATIVE_COMPILER}
+QMAKE_LINK = $${USE_ALTERNATIVE_COMPILER}
 }
 
 
