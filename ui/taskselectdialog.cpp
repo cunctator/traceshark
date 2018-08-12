@@ -56,6 +56,7 @@
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QWidget>
 
 #include "vtl/avltree.h"
 #include "vtl/error.h"
@@ -70,10 +71,13 @@
 #define CBOX_INDEX_AND 0
 #define CBOX_INDEX_OR  1
 
-TaskSelectDialog::TaskSelectDialog(QWidget *parent, enum TaskSelectType type)
-	: QDialog(parent, Qt::WindowCloseButtonHint), savedHeight(900)
+TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
+				   enum TaskSelectType type)
+	: QDockWidget(title, parent), savedHeight(900)
 {
-	QVBoxLayout *mainLayout =  new QVBoxLayout(this);
+	QWidget *widget = new QWidget(this);
+	QVBoxLayout *mainLayout =  new QVBoxLayout(widget);
+	setWidget(widget);
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	QHBoxLayout *filterLayout = new QHBoxLayout();
 	QHBoxLayout *settingLayout = new QHBoxLayout();
@@ -172,26 +176,27 @@ void TaskSelectDialog::endResetModel()
  */
 void TaskSelectDialog::resizeColumnsToContents()
 {
-	if (QDialog::isVisible())
+	if (QDockWidget::isVisible())
 		taskView->resizeColumnsToContents();
 }
 
 void TaskSelectDialog::show()
 {
-	QSize size;
-	QDialog::show();
-	QDialog::activateWindow();
+	//QSize size;
+	QDockWidget::show();
+	//QDockWidget::activateWindow();
 	taskView->resizeColumnsToContents();
-	size = QDialog::size();
-	size.setHeight(savedHeight);
-	QDialog::resize(size);
+	//size = QDockWidget::size();
+	//size.setHeight(savedHeight);
+	//QDockWidget::resize(size);
 }
 
 void TaskSelectDialog::closeClicked()
 {
-	QSize size = QDialog::size();
-	savedHeight = size.height();
-	QDialog::hide();
+	//QSize size = QDockWidget::size();
+	//savedHeight = size.height();
+	QDockWidget::hide();
+	emit QDockWidgetNeedsRemoval(this);
 }
 
 void TaskSelectDialog::addUnifiedClicked()

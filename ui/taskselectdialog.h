@@ -69,7 +69,7 @@ class TaskModel;
 class TaskView;
 class AbstractTaskModel;
 
-class TaskSelectDialog : public QDialog {
+class TaskSelectDialog : public QDockWidget {
 	Q_OBJECT
 public:
 	enum TaskSelectType {
@@ -77,8 +77,8 @@ public:
 		TaskSelectStatsLimited,
 		TaskSelectRegular
 	};
-	TaskSelectDialog(QWidget *parent = 0,
-			 enum TaskSelectType type = TaskSelectRegular);
+	TaskSelectDialog(QWidget *parent, const QString &title,
+			 enum TaskSelectType type);
 	~TaskSelectDialog();
 	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 			unsigned int nrcpus);
@@ -91,6 +91,7 @@ signals:
 	void addTaskToLegend(int pid);
 	void resetFilter(void);
 	void createFilter(QMap<int, int> &map, bool orlogic, bool inclusive);
+	void QDockWidgetNeedsRemoval(QDockWidget *widget);
 private slots:
 	void closeClicked();
 	void addUnifiedClicked();

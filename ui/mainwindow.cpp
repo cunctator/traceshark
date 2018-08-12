@@ -153,11 +153,13 @@ MainWindow::MainWindow():
 	errorDialog = new ErrorDialog();
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
-	taskSelectDialog = new TaskSelectDialog();
-	statsDialog = new TaskSelectDialog(nullptr,
+	taskSelectDialog =
+		new TaskSelectDialog(nullptr, tr("Task Selector"),
+				     TaskSelectDialog::TaskSelectRegular);
+	statsDialog = new TaskSelectDialog(nullptr, tr("Global Statistics"),
 					   TaskSelectDialog::TaskSelectStats);
 	statsLimitedDialog =
-		new TaskSelectDialog(nullptr,
+		new TaskSelectDialog(nullptr, tr("Cursor Statistics"),
 				     TaskSelectDialog::TaskSelectStatsLimited);
 	eventSelectDialog = new EventSelectDialog();
 	graphEnableDialog = new GraphEnableDialog();
@@ -185,6 +187,8 @@ MainWindow::MainWindow():
 	tsconnect(taskSelectDialog, createFilter(QMap<int, int> &, bool, bool),
 		  this, createPidFilter(QMap<int, int> &, bool, bool));
 	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
+	tsconnect(taskSelectDialog, QDockWidgetNeedsRemoval(QDockWidget*),
+		  this, removeQDockWidget(QDockWidget*));
 
 	/* statistics Dialog */
 	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
@@ -193,6 +197,8 @@ MainWindow::MainWindow():
 	tsconnect(statsDialog, createFilter(QMap<int, int> &, bool, bool),
 		  this, createPidFilter(QMap<int, int> &, bool, bool));
 	tsconnect(statsDialog, resetFilter(), this, resetPidFilter());
+	tsconnect(statsDialog, QDockWidgetNeedsRemoval(QDockWidget*),
+		  this, removeQDockWidget(QDockWidget*));
 
 	/* Time limited statistics Dialog */
 	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
@@ -203,6 +209,8 @@ MainWindow::MainWindow():
 		  createFilter(QMap<int, int> &, bool, bool),
 		  this, createPidFilter(QMap<int, int> &, bool, bool));
 	tsconnect(statsLimitedDialog, resetFilter(), this, resetPidFilter());
+	tsconnect(statsLimitedDialog, QDockWidgetNeedsRemoval(QDockWidget*),
+		  this, removeQDockWidget(QDockWidget*));
 
 	/* event select dialog */
 	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
@@ -1720,6 +1728,8 @@ void MainWindow::removeTaskGraph(int pid)
 void MainWindow::showTaskSelector()
 {
 	taskSelectDialog->show();
+	if (dockWidgetArea(taskSelectDialog) == Qt::NoDockWidgetArea)
+		addDockWidget(Qt::LeftDockWidgetArea, taskSelectDialog);
 }
 
 void MainWindow::showEventFilter()
@@ -1735,6 +1745,8 @@ void MainWindow::showGraphEnable()
 void MainWindow::showStats()
 {
 	statsDialog->show();
+	if (dockWidgetArea(statsDialog) == Qt::NoDockWidgetArea)
+		addDockWidget(Qt::LeftDockWidgetArea, statsDialog);
 }
 
 void MainWindow::showStatsTimeLimited()
@@ -1745,6 +1757,14 @@ void MainWindow::showStatsTimeLimited()
 				       analyzer->getNrCPUs());
 	statsLimitedDialog->endResetModel();
 	statsLimitedDialog->show();
+	if (dockWidgetArea(statsLimitedDialog) == Qt::NoDockWidgetArea)
+		addDockWidget(Qt::RightDockWidgetArea, statsLimitedDialog);
+}
+
+void MainWindow::removeQDockWidget(QDockWidget *widget)
+{
+	if (dockWidgetArea(widget) != Qt::NoDockWidgetArea)
+		removeDockWidget(widget);
 }
 
 void MainWindow::showWakeup(int pid)

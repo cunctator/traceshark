@@ -140,6 +140,7 @@ private slots:
 	void consumeSettings();
 	void showStats();
 	void showStatsTimeLimited();
+	void removeQDockWidget(QDockWidget *widget);
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
