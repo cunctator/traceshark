@@ -138,9 +138,13 @@ MainWindow::MainWindow():
 					       QMouseEvent*), this,
 		  legendDoubleClick(QCPLegend*, QCPAbstractLegendItem*));
 	eventsWidget = new EventsWidget(this);
+	eventsWidget->setAllowedAreas(Qt::TopDockWidgetArea |
+				      Qt::BottomDockWidgetArea);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
 
 	infoWidget = new InfoWidget(this);
+	infoWidget->setAllowedAreas(Qt::TopDockWidgetArea |
+				    Qt::BottomDockWidgetArea);
 	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
 
 	cursors[TShark::RED_CURSOR] = nullptr;
@@ -159,6 +163,11 @@ MainWindow::MainWindow():
 	statsLimitedDialog =
 		new TaskSelectDialog(nullptr, tr("Cursor Statistics"),
 				     TaskSelectDialog::TaskSelectStatsLimited);
+
+	taskSelectDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
+	statsDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
+	statsLimitedDialog->setAllowedAreas(Qt::RightDockWidgetArea);
+
 	eventSelectDialog = new EventSelectDialog();
 	graphEnableDialog = new GraphEnableDialog();
 
