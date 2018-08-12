@@ -131,6 +131,7 @@ namespace vtl {
 						       bool &ok);
 		__always_inline static Time fromSpacedString(const char *str,
 							     bool &ok);
+		__always_inline bool isZero();
 		__always_inline QString toQString() const;
 		__always_inline bool sprint(char *buf) const;
 		__always_inline double toDouble() const;
@@ -270,6 +271,11 @@ namespace vtl {
 	__always_inline Time Time::fromSpacedString(const char *str, bool &ok)
 	{
 		return __fromString(str, ok, true, false);
+	}
+
+	__always_inline bool Time::isZero()
+	{
+		return time == 0;
 	}
 
 	__always_inline Time Time::__fromString(const char *str, bool &ok,

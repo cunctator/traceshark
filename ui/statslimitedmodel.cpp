@@ -93,8 +93,10 @@ void StatsLimitedModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 	DEFINE_TASKMAP_ITERATOR(iter) = map->begin();
 	while (iter != map->end()) {
 		Task *task = iter.value().task;
-		taskList->append(task);
-		idleTask->cursorTime -= task->cursorTime;
+		if (!task->cursorTime.isZero()) {
+			taskList->append(task);
+			idleTask->cursorTime -= task->cursorTime;
+		}
 		iter++;
 	}
 
