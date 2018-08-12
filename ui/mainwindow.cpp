@@ -1730,6 +1730,9 @@ void MainWindow::showTaskSelector()
 	taskSelectDialog->show();
 	if (dockWidgetArea(taskSelectDialog) == Qt::NoDockWidgetArea)
 		addDockWidget(Qt::LeftDockWidgetArea, taskSelectDialog);
+
+	if (dockWidgetArea(statsDialog) == Qt::LeftDockWidgetArea)
+		tabifyDockWidget(statsDialog, taskSelectDialog);
 }
 
 void MainWindow::showEventFilter()
@@ -1747,6 +1750,9 @@ void MainWindow::showStats()
 	statsDialog->show();
 	if (dockWidgetArea(statsDialog) == Qt::NoDockWidgetArea)
 		addDockWidget(Qt::LeftDockWidgetArea, statsDialog);
+
+	if (dockWidgetArea(taskSelectDialog) == Qt::LeftDockWidgetArea)
+		tabifyDockWidget(taskSelectDialog, statsDialog);
 }
 
 void MainWindow::showStatsTimeLimited()
