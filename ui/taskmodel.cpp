@@ -78,7 +78,7 @@ TaskModel::~TaskModel()
 }
 
 void TaskModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
-			   unsigned int nrcpus)
+			   unsigned int /*nrcpus*/)
 {
 	taskList->clear();
 
