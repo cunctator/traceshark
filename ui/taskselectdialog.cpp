@@ -182,19 +182,12 @@ void TaskSelectDialog::resizeColumnsToContents()
 
 void TaskSelectDialog::show()
 {
-	//QSize size;
 	QDockWidget::show();
-	//QDockWidget::activateWindow();
 	taskView->resizeColumnsToContents();
-	//size = QDockWidget::size();
-	//size.setHeight(savedHeight);
-	//QDockWidget::resize(size);
 }
 
 void TaskSelectDialog::closeClicked()
 {
-	//QSize size = QDockWidget::size();
-	//savedHeight = size.height();
 	QDockWidget::hide();
 	emit QDockWidgetNeedsRemoval(this);
 }

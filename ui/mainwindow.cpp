@@ -112,8 +112,6 @@ MainWindow::MainWindow():
 {
 	analyzer = new TraceAnalyzer;
 
-	//setCentralWidget(traceLabel);
-
 	createActions();
 	createToolBars();
 	createMenus();
@@ -969,7 +967,6 @@ void MainWindow::aboutQCustomPlot()
 
 void MainWindow::license()
 {
-	// Figure out some way to display the whole GPL nicely here
 	licenseDialog->show();
 }
 

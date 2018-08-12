@@ -64,7 +64,6 @@ class LicenseDialog : public QDialog {
 public:
 	LicenseDialog(QWidget *parent = 0);
 private:
-	// QTextEdit *textEdit;
 	void updateSize();
 };
 

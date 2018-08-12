@@ -52,7 +52,6 @@
 #ifndef WORKITEM_H
 #define WORKITEM_H
 
-//#include <QObject>
 #include "misc/traceshark.h"
 
 class WorkQueue;
