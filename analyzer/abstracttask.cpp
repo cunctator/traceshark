@@ -72,8 +72,8 @@ AbstractTask::~AbstractTask()
 
 bool AbstractTask::doScale()
 {
-	int i;
-	int s = schedData.size();
+	unsigned int i;
+	unsigned int s = schedData.size();
 	double schedScale = scale * SCHED_HEIGHT;
 	scaledSchedData.resize(s);
 	for (i = 0; i < s; i++)
@@ -83,12 +83,12 @@ bool AbstractTask::doScale()
 
 bool AbstractTask::doStats()
 {
-	int startidx, endidx;
-	int i;
+	unsigned int startidx, endidx;
+	unsigned int i;
 	vtl::Time start, end;
 	vtl::Time startIdxTime, endIdxTime;
 	vtl::Time delta;
-	int s = schedEventIdx.size();
+	unsigned int s = schedEventIdx.size();
 	unsigned int prevState;
 	vtl::Time prevTime;
 	vtl::Time t;
@@ -164,11 +164,11 @@ bool AbstractTask::doStats()
 
 bool AbstractTask::doStatsTimeLimited()
 {
-	int startidx, endidx;
-	int i;
+	unsigned int startidx, endidx;
+	unsigned int i;
 	vtl::Time startIdxTime, endIdxTime;
 	vtl::Time delta;
-	int s = schedEventIdx.size();
+	unsigned int s = schedEventIdx.size();
 	unsigned int prevState;
 	vtl::Time prevTime;
 	vtl::Time t;
@@ -259,7 +259,7 @@ bool AbstractTask::doStatsTimeLimited()
 
 bool AbstractTask::doScaleRunning()
 {
-	int s = runningTimev.size();
+	unsigned int s = runningTimev.size();
 	double scaledHeight = FLOOR_HEIGHT * scale + offset;
 
 	scaledRunningData.resize(s);
@@ -269,7 +269,7 @@ bool AbstractTask::doScaleRunning()
 
 bool AbstractTask::doScalePreempted()
 {
-	int s = preemptedTimev.size();
+	unsigned int s = preemptedTimev.size();
 	scaledPreemptedData.resize(s);
 	double scaledHeight = FLOOR_HEIGHT * scale + offset;
 	scaledPreemptedData.fill(scaledHeight, s);
@@ -278,7 +278,7 @@ bool AbstractTask::doScalePreempted()
 
 bool AbstractTask::doScaleWakeup()
 {
-	int s = wakeDelay.size();
+	unsigned int s = wakeDelay.size();
 	/* Create the dummy vector needed for horizontal display */
 	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
 	wakeZero.fill(0, s);
@@ -312,11 +312,11 @@ void AbstractTask::setEndTime(const vtl::Time &time)
 	endTime = time;
 }
 
-int AbstractTask::_binarySearch(const vtl::Time &time, int lowerIdx,
-			       int higherIdx)
+int AbstractTask::_binarySearch(const vtl::Time &time, unsigned int lowerIdx,
+				unsigned int higherIdx)
 {
-	int pivot = (lowerIdx + higherIdx) / 2;
-	int width = higherIdx - lowerIdx;
+	unsigned int pivot = (lowerIdx + higherIdx) / 2;
+	unsigned int width = higherIdx - lowerIdx;
 	const vtl::Time &pTime = (*events)[schedEventIdx[pivot]].time;
 	bool pSmaller = pTime < time;
 
@@ -332,7 +332,7 @@ int AbstractTask::_binarySearch(const vtl::Time &time, int lowerIdx,
 
 int AbstractTask::binarySearch(const vtl::Time &time)
 {
-	int s = schedEventIdx.size();
+	unsigned int s = schedEventIdx.size();
 
 	return _binarySearch(time, 0, s - 1);
 }
@@ -340,8 +340,8 @@ int AbstractTask::binarySearch(const vtl::Time &time)
 
 int AbstractTask::findLower(const vtl::Time &time)
 {
-	int idxmax = schedEventIdx.size() - 1;
-	int idx = _binarySearch(time, 0, idxmax);
+	unsigned int idxmax = schedEventIdx.size() - 1;
+	unsigned int idx = _binarySearch(time, 0, idxmax);
 
 	vtl::Time idxtime = (*events)[schedEventIdx[idx]].time;
 	/*
@@ -360,8 +360,8 @@ int AbstractTask::findLower(const vtl::Time &time)
 
 int AbstractTask::findHigher(const vtl::Time &time)
 {
-	int idxmax = schedEventIdx.size() - 1;
-	int idx = _binarySearch(time, 0, idxmax);
+	unsigned int idxmax = schedEventIdx.size() - 1;
+	unsigned int idx = _binarySearch(time, 0, idxmax);
 
 	vtl::Time idxtime = (*events)[schedEventIdx[idx]].time;
 	/*
