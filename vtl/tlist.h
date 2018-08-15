@@ -68,13 +68,13 @@ namespace vtl {
 #define TLIST_MIN(A, B) ((A) < (B) ? A:B)
 
 /*
- * Here we assume that UINT_MAX can be expressed as 2^N - 1
+ * Here we assume that INT_MAX can be expressed as 2^N - 1
  * This is a bit theoretical, if we have for example 64-bit unsigned ints, then
  * the idea is that we want to keep the array of pointers at a size of no more
  * than one million elements, in order to avoid execessive use of address space
  * and overcommit of memory, or rather address space
  */
-#define TLIST_INDEX_MAX (TLIST_MIN(0xffffffffff, UINT_MAX))
+#define TLIST_INDEX_MAX (TLIST_MIN(0x7fffffff, INT_MAX))
 
 /*
  * This code is needed in order to take into account platforms with small
@@ -82,7 +82,7 @@ namespace vtl {
  * I have to say that I don't think traceshark would run well on a platform with
  * 16-bit ints.
  */
-#if UINT_MAX > 0x100000
+#if INT_MAX > 0x100000
 /* This is the normal case */
 #define TLIST_MAP_NR_ELEMENTS (0x100000)
 #define TLIST_MAP_SHIFT (20) /* Number of zero bits above */
@@ -105,26 +105,26 @@ public:
 	__always_inline T& increase();
 	__always_inline T& preAlloc();
 	__always_inline void commit();
-	__always_inline T value(unsigned int index) const;
-	__always_inline const T& at(unsigned int index) const;
+	__always_inline T value(int index) const;
+	__always_inline const T& at(int index) const;
 	__always_inline T& last();
-	__always_inline unsigned int size() const;
+	__always_inline int size() const;
 	void clear();
 	void softclear();
-	__always_inline T& operator[](unsigned int index);
-	__always_inline const T& operator[](unsigned int index) const;
-	__always_inline void swap(unsigned int a, unsigned int b);
+	__always_inline T& operator[](int index);
+	__always_inline const T& operator[](int index) const;
+	__always_inline void swap(int a, int b);
 private:
-	__always_inline T& subscript(unsigned int index) const;
-	__always_inline unsigned int mapFromIndex(unsigned int index) const;
-	__always_inline unsigned int mapIndexFromIndex(unsigned int index)
+	__always_inline T& subscript(int index) const;
+	__always_inline int mapFromIndex(int index) const;
+	__always_inline int mapIndexFromIndex(int index)
 		const;
 	void clearAll();
 	void setupMem();
 	void addMem();
 	void decMem();
-	unsigned int nrMaps;
-	unsigned int nrElements;
+	int nrMaps;
+	int nrElements;
 	T **mapArray;
 };
 
@@ -142,13 +142,13 @@ TList<T>::~TList()
 }
 
 template<class T>
-__always_inline unsigned int TList<T>::mapFromIndex(unsigned int index) const
+__always_inline int TList<T>::mapFromIndex(int index) const
 {
 	return (index >> TLIST_MAP_SHIFT);
 }
 
 template<class T>
-__always_inline unsigned int TList<T>::mapIndexFromIndex(unsigned int index)
+__always_inline int TList<T>::mapIndexFromIndex(int index)
 const
 {
 	return (index & TLIST_MAP_ELEMENT_MASK);
@@ -157,7 +157,7 @@ const
 template<class T>
 void TList<T>::setupMem()
 {
-	unsigned int maxNrMaps = mapFromIndex(TLIST_MAP_MASK) + 1;
+	int maxNrMaps = mapFromIndex(TLIST_MAP_MASK) + 1;
 	mapArray = (T**) mmap(nullptr, (size_t) maxNrMaps * sizeof(T*),
 			     PROT_READ | PROT_WRITE,
 			     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -191,8 +191,8 @@ void TList<T>::decMem()
 template<class T>
 void TList<T>::clearAll()
 {
-	unsigned int maxNrMaps = mapFromIndex(TLIST_MAP_MASK) + 1;
-	unsigned int i;
+	int maxNrMaps = mapFromIndex(TLIST_MAP_MASK) + 1;
+	int i;
 	int r;
 
 	for (i = 0; i < nrMaps; i++) {
@@ -210,8 +210,8 @@ void TList<T>::clearAll()
 template<class T>
 __always_inline T& TList<T>::increase()
 {
-	unsigned int map = mapFromIndex(nrElements);
-	unsigned int mapIndex = mapIndexFromIndex(nrElements);
+	int map = mapFromIndex(nrElements);
+	int mapIndex = mapIndexFromIndex(nrElements);
 	nrElements++;
 	if (map == nrMaps)
 		addMem();
@@ -221,8 +221,8 @@ __always_inline T& TList<T>::increase()
 template<class T>
 __always_inline T& TList<T>::preAlloc()
 {
-	unsigned int map = mapFromIndex(nrElements);
-	unsigned int mapIndex = mapIndexFromIndex(nrElements);
+	int map = mapFromIndex(nrElements);
+	int mapIndex = mapIndexFromIndex(nrElements);
 	if (map == nrMaps)
 		addMem();
 	return mapArray[map][mapIndex];
@@ -237,8 +237,8 @@ __always_inline void TList<T>::commit()
 template<class T>
 __always_inline void TList<T>::append(const T &element)
 {
-	unsigned int map = mapFromIndex(nrElements);
-	unsigned int mapIndex = mapIndexFromIndex(nrElements);
+	int map = mapFromIndex(nrElements);
+	int mapIndex = mapIndexFromIndex(nrElements);
 	nrElements++;
 	if (map == nrMaps)
 		addMem();
@@ -246,15 +246,15 @@ __always_inline void TList<T>::append(const T &element)
 }
 
 template<class T>
-__always_inline const T& TList<T>::at(unsigned int index) const
+__always_inline const T& TList<T>::at(int index) const
 {
-	unsigned int map = mapFromIndex(index);
-	unsigned int mapIndex = mapIndexFromIndex(index);
+	int map = mapFromIndex(index);
+	int mapIndex = mapIndexFromIndex(index);
 	return mapArray[map][mapIndex];
 }
 
 template<class T>
-__always_inline T TList<T>::value(unsigned int index) const
+__always_inline T TList<T>::value(int index) const
 {
 	if (index >= nrElements) {
 		T dvalue;
@@ -266,15 +266,15 @@ __always_inline T TList<T>::value(unsigned int index) const
 template<class T>
 __always_inline T& TList<T>::last()
 {
-	unsigned int index = nrElements - 1;
-	unsigned int map = mapFromIndex(index);
-	unsigned int mapIndex = mapIndexFromIndex(index);
+	int index = nrElements - 1;
+	int map = mapFromIndex(index);
+	int mapIndex = mapIndexFromIndex(index);
 	return mapArray[map][mapIndex];
 	
 }
 
 template<class T>
-__always_inline unsigned int TList<T>::size() const
+__always_inline int TList<T>::size() const
 {
 	return nrElements;
 }
@@ -293,7 +293,7 @@ void TList<T>::softclear()
 }
 
 template<class T>
-__always_inline void TList<T>::swap(unsigned int a, unsigned int b)
+__always_inline void TList<T>::swap(int a, int b)
 {
 	T foo;
 	T &ta = subscript(a);
@@ -304,21 +304,21 @@ __always_inline void TList<T>::swap(unsigned int a, unsigned int b)
 }
 
 template<class T>
-__always_inline T& TList<T>::subscript(unsigned int index) const
+__always_inline T& TList<T>::subscript(int index) const
 {
-	unsigned int map = mapFromIndex(index);
-	unsigned int mapIndex = mapIndexFromIndex(index);
+	int map = mapFromIndex(index);
+	int mapIndex = mapIndexFromIndex(index);
 	return mapArray[map][mapIndex];
 }
 
 template<class T>
-__always_inline T& TList<T>::operator[](unsigned int index)
+__always_inline T& TList<T>::operator[](int index)
 {
 	return subscript(index);
 }
 
 template<class T>
-__always_inline const T& TList<T>::operator[](unsigned int index) const
+__always_inline const T& TList<T>::operator[](int index) const
 {
 	return subscript(index);
 }

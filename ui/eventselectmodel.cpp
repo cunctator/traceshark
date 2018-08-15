@@ -110,14 +110,11 @@ int EventSelectModel::columnCount(const QModelIndex & /* index */) const
 
 event_t EventSelectModel::rowToEvent(int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return (event_t)0;
 	}
-	urow = (unsigned int) row;
-	if (urow >= eventList->size()) {
+	if (row >= eventList->size()) {
 		ok = false;
 		return (event_t)0;
 	}
@@ -128,15 +125,13 @@ event_t EventSelectModel::rowToEvent(int row, bool &ok) const
 
 QString EventSelectModel::rowToName(int row, bool &ok) const
 {
-	unsigned int urow;
 	QString name;
 	const TString *str;
 	event_t event;
 
 	if (row < 0)
 		goto error;
-	urow = (unsigned int) row;
-	if (urow >= eventList->size())
+	if (row >= eventList->size())
 		goto error;
 
 	event = eventList->at(row);

@@ -137,14 +137,11 @@ int StatsLimitedModel::columnCount(const QModelIndex & /* index */) const
 
 int StatsLimitedModel::rowToPid(int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return 0;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return 0;
 	}
@@ -156,14 +153,11 @@ int StatsLimitedModel::rowToPid(int row, bool &ok) const
 
 const QString &StatsLimitedModel::rowToName(int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return *errorStr;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return *errorStr;
 	}
@@ -176,7 +170,6 @@ const QString &StatsLimitedModel::rowToName(int row, bool &ok) const
 
 void StatsLimitedModel::rowToPct(QString &str, int row, bool &ok) const
 {
-	unsigned int urow;
 	char buf[7];
 	unsigned int p;
 
@@ -184,8 +177,7 @@ void StatsLimitedModel::rowToPct(QString &str, int row, bool &ok) const
 		ok = false;
 		return;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return;
 	}
@@ -229,14 +221,11 @@ void StatsLimitedModel::rowToPct(QString &str, int row, bool &ok) const
 
 void StatsLimitedModel::rowToTime(QString &str, int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return;
 	}
