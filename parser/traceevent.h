@@ -158,7 +158,7 @@ public:
 	int intArg;
 	event_t type;
 	const TString **argv;
-	unsigned int argc;
+	int argc;
 
 	/*
 	 * postEventInfo most likely will contain a backtrace that will occur

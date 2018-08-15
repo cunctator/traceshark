@@ -119,14 +119,11 @@ int TaskModel::columnCount(const QModelIndex & /* index */) const
 
 int TaskModel::rowToPid(int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return 0;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return 0;
 	}
@@ -138,14 +135,11 @@ int TaskModel::rowToPid(int row, bool &ok) const
 
 const QString &TaskModel::rowToName(int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return *errorStr;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return *errorStr;
 	}

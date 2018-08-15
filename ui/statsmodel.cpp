@@ -134,14 +134,11 @@ int StatsModel::columnCount(const QModelIndex & /* index */) const
 
 int StatsModel::rowToPid(int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return 0;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return 0;
 	}
@@ -153,14 +150,11 @@ int StatsModel::rowToPid(int row, bool &ok) const
 
 const QString &StatsModel::rowToName(int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return *errorStr;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return *errorStr;
 	}
@@ -173,7 +167,6 @@ const QString &StatsModel::rowToName(int row, bool &ok) const
 
 void StatsModel::rowToPct(QString &str, int row, bool &ok) const
 {
-	unsigned int urow;
 	char buf[7];
 	unsigned int p;
 
@@ -181,8 +174,7 @@ void StatsModel::rowToPct(QString &str, int row, bool &ok) const
 		ok = false;
 		return;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return;
 	}
@@ -226,14 +218,11 @@ void StatsModel::rowToPct(QString &str, int row, bool &ok) const
 
 void StatsModel::rowToTime(QString &str, int row, bool &ok) const
 {
-	unsigned int urow;
-
 	if (row < 0) {
 		ok = false;
 		return;
 	}
-	urow = (unsigned int) row;
-	if (urow >= taskList->size()) {
+	if (row >= taskList->size()) {
 		ok = false;
 		return;
 	}

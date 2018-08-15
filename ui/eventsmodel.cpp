@@ -96,7 +96,7 @@ int EventsModel::columnCount(const QModelIndex & /* parent */) const
 QVariant EventsModel::data(const QModelIndex &index, int role) const
 {
 	QString str;
-	unsigned int i;
+	int i;
 
 	if (!index.isValid())
 		return QVariant();
@@ -110,7 +110,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 
 		if (events == nullptr && eventsPtrs == nullptr)
 			return QVariant();
-		size = (int) TSMIN(INT_MAX, getSize());
+		size = getSize();
 		if ( row >= size || row < 0)
 			return QVariant();
 
@@ -207,7 +207,7 @@ const TraceEvent* EventsModel::getEventAt(int index) const
 	return nullptr;
 }
 
-unsigned int EventsModel::getSize() const
+int EventsModel::getSize() const
 {
 	if (events != nullptr)
 		return events->size();

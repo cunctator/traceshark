@@ -82,7 +82,7 @@ private:
 	vtl::TList<TraceEvent> *events;
 	vtl::TList<const TraceEvent*> *eventsPtrs;
 	const TraceEvent* getEventAt(int index) const;
-	unsigned int getSize() const;
+	int getSize() const;
 };
 
 #endif /* EVENTSMODEL_H */
