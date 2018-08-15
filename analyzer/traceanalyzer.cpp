@@ -1046,7 +1046,7 @@ bool TraceAnalyzer::filterActive(FilterState::filter_t filter)
 }
 
 #define WRITE_BUFFER_SIZE (256 * sysconf(_SC_PAGESIZE))
-#define WRITE_BUFFER_LIMIT ((size_t)(WRITE_BUFFER_SIZE - 64 * 1024))
+#define WRITE_BUFFER_LIMIT ((WRITE_BUFFER_SIZE - 64 * 1024))
 
 const char TraceAnalyzer::spaceStr[] = \
 	"                                     ";
@@ -1057,11 +1057,10 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 	bool isFtrace = false, isPerf = false;
 	char *wbuf, *wb;
 	int fd, w;
-	size_t written, written_io, space, nrspaces;
-	ssize_t write_rval;
-	unsigned int nr_elements = filteredEvents.size();
-	unsigned int idx;
-	unsigned int i;
+	int written, written_io, space, nrspaces, write_rval;
+	int nr_elements = filteredEvents.size();
+	int idx;
+	int i;
 	const TraceEvent *eptr;
 	bool rval = true;
 	const char *ename;

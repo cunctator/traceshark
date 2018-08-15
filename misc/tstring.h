@@ -57,18 +57,18 @@
 class TString {
 public:
 	char *ptr;
-	unsigned int len;
+	int len;
 	static __always_inline int cmp(const TString *a, const TString *b);
 	static __always_inline int strcmp(const TString *a, const TString *b);
 	static __always_inline int strcmp(const TString *a, const TString *b,
-					  unsigned short skip,
-					  unsigned short *neq);
-	__always_inline bool merge(const TString *s, unsigned int maxlen);
-	__always_inline bool set(const TString *s, unsigned int maxlen);
+					  short skip,
+					  short *neq);
+	__always_inline bool merge(const TString *s, int maxlen);
+	__always_inline bool set(const TString *s, int maxlen);
 };
 
 __always_inline int TString::cmp(const TString *a, const TString *b) {
-	unsigned int clen;
+	int clen;
 	int rval;
 	int diff;
 
@@ -82,7 +82,7 @@ __always_inline int TString::cmp(const TString *a, const TString *b) {
 }
 
 __always_inline int TString::strcmp(const TString *a, const TString *b,
-				    unsigned short skip, unsigned short *eqn)
+				    short skip, short *eqn)
 {
 	int rval = (int) a->len - (int)  b->len;
 	int cval;
@@ -119,9 +119,9 @@ __always_inline int TString::strcmp(const TString *a, const TString *b)
 	return rval;
 }
 
-__always_inline bool TString::merge(const TString *s, unsigned int maxlen)
+__always_inline bool TString::merge(const TString *s, int maxlen)
 {
-	unsigned int newlen;
+	int newlen;
 
 	newlen = len + 1 + s->len;
 	if (newlen > maxlen)
@@ -133,7 +133,7 @@ __always_inline bool TString::merge(const TString *s, unsigned int maxlen)
 	return true;
 }
 
-__always_inline bool TString::set(const TString *s, unsigned int maxlen)
+__always_inline bool TString::set(const TString *s, int maxlen)
 {
 	if (s->len > maxlen)
 		return false;

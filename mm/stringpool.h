@@ -107,10 +107,10 @@ private:
 	PoolBundleSP pools;
 };
 
-#define AVLTREE_SIZE (sizeof(vtl::AVLTree<TString, __DummySP, \
+#define AVLTREE_SIZE ((int)sizeof(vtl::AVLTree<TString, __DummySP,	 \
 vtl::AVLBALANCE_USEPOINTERS, AVLAllocatorSP<TString, __DummySP>, \
 			     AVLCompareSP<TString>>))
-#define TSTRING_PTR_SIZE (sizeof(TString*))
+#define TSTRING_PTR_SIZE ((int)sizeof(TString*))
 #define TYPICAL_CACHE_LINE_SIZE (64)
 
 #define SP_CACHE_SIZE (TYPICAL_CACHE_LINE_SIZE - TSTRING_PTR_SIZE - \

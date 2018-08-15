@@ -226,14 +226,14 @@ __always_inline int PerfGrammar::pidFromString(const TString &str,
 }
 
 __always_inline bool PerfGrammar::TimeMatch(TString *str,
-					      TraceEvent &event)
+					    TraceEvent &event)
 {
 	bool rval;
 	TString namestr;
 	const TString *newname;
 	char cstr[256];
 	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
-	unsigned int i;
+	int i;
 	int pid;
 	uint32_t hash;
 	bool ok;

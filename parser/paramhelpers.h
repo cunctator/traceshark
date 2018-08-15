@@ -79,12 +79,12 @@
 static __always_inline void __copy_tstring_after_char(const TString *str,
 						      char delim,
 						      char *&dest,
-						      unsigned int &len,
-						      unsigned int maxlen,
+						      int &len,
+						      int maxlen,
 						      bool &ok)
 {
-	unsigned int i;
-	unsigned int flen;
+	int i;
+	int flen;
 	char *src;
 	ok = true;
 	/* Find the char 'delim' in the string */
@@ -121,14 +121,14 @@ err:
  */
 static __always_inline void
 merge_args_into_cstring(const TraceEvent &event,
-			unsigned int beginidx,
-			unsigned int endidx,
+			int beginidx,
+			int endidx,
 			char *&c,
-			unsigned int &len,
-			unsigned int maxlen,
+			int &len,
+			int maxlen,
 			bool &ok)
 {
-	unsigned int i;
+	int i;
 	ok = true;
 
 	for (i = beginidx; i <= endidx; i++) {
@@ -217,9 +217,9 @@ static __always_inline int int_after_char(const TraceEvent &event,
 }
 
 static __always_inline unsigned int param_inside_braces(const TraceEvent &event,
-							unsigned int n_param)
+							int n_param)
 {
-	unsigned int len = event.argv[n_param]->len;
+	int len = event.argv[n_param]->len;
 	char *first = event.argv[n_param]->ptr;
 	char *end = first + len - 1; /* now pointing to the final ']' */
 	char *c;
@@ -240,11 +240,11 @@ static __always_inline unsigned int param_inside_braces(const TraceEvent &event,
 }
 
 static __always_inline const char *substr_after_char(const char *str,
-						     unsigned int len,
+						     int len,
 						     char c,
-						     unsigned int *sublen)
+						     int *sublen)
 {
-	unsigned int i;
+	int i;
 
 	for (i = 0; i < len; i++) {
 		if (*str == c) {
@@ -263,7 +263,7 @@ static __always_inline const char *substr_after_char(const char *str,
 static __always_inline taskstate_t
 __sched_state_from_tstring(const TString *str)
 {
-	unsigned int i;
+	int i;
 	char c;
 	taskstate_t state = 0;
 	taskstate_t flag;

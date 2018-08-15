@@ -119,10 +119,10 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
  *
  * In a nutshell, this protects us against weirdos but not against lunatics :)
  */
-static __always_inline unsigned int
+static __always_inline int
 ___perf_sched_switch_find_arrow(const TraceEvent &event)
 {
-	unsigned int i;
+	int i;
 	for (i = 4; i < event.argc - 3; i++) {
 		const char *c1 = event.argv[i - 3]->ptr;
 		const char *c2 = event.argv[i - 2]->ptr;
@@ -144,8 +144,8 @@ ___perf_sched_switch_find_arrow(const TraceEvent &event)
 static __always_inline taskstate_t
 perf_sched_switch_state(const TraceEvent &event)
 {
-	unsigned int i;
-	unsigned int j;
+	int i;
+	int j;
 	TString stateStr;
 
 	i = ___perf_sched_switch_find_arrow(event);
@@ -165,7 +165,7 @@ perf_sched_switch_state(const TraceEvent &event)
 static __always_inline unsigned int
 perf_sched_switch_oldprio(const TraceEvent &event)
 {
-	unsigned int i;
+	int i;
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i != 0)
@@ -176,22 +176,22 @@ perf_sched_switch_oldprio(const TraceEvent &event)
 static __always_inline int
 perf_sched_switch_oldpid(const TraceEvent &event)
 {
-	unsigned int i;
+	int i;
 
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i != 0)
 		return int_after_char(event, i - 3, '=');
-	return ABSURD_UNSIGNED;
+	return ABSURD_INT;
 }
 
 static __always_inline const char *
 __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 				   StringPool *pool)
 {
-	unsigned int i;
-	unsigned int beginidx;
-	unsigned int endidx;
-	unsigned int len = 0;
+	int i;
+	int beginidx;
+	int endidx;
+	int len = 0;
 	char *c;
 	const TString *first;
 	bool ok;
@@ -236,10 +236,10 @@ const char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
 static __always_inline const char *
 __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 {
-	unsigned int i;
-	unsigned int beginidx;
-	unsigned int endidx;
-	unsigned int len = 0;
+	int i;
+	int beginidx;
+	int endidx;
+	int len = 0;
 	char *c;
 	const TString *first;
 	bool ok;
@@ -341,8 +341,8 @@ perf_sched_wakeup_prio(const TraceEvent &event)
 
 static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 {
-	unsigned int newidx = event.argc - 3;
-	unsigned int oldidx;
+	int newidx = event.argc - 3;
+	int oldidx;
 	/* Check if we are on the new format */
 	if (!strncmp(event.argv[newidx]->ptr, WAKE_PID_PFIX,
 		     WAKE_PID_PFIX_LEN)) {
@@ -357,10 +357,10 @@ static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 static __always_inline const char *
 __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
-	unsigned int i;
-	unsigned int beginidx;
-	unsigned int endidx;
-	unsigned int len = 0;
+	int i;
+	int beginidx;
+	int endidx;
+	int len = 0;
 	char *c;
 	const TString *first;
 	bool ok;
@@ -415,8 +415,8 @@ const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
 
 static __always_inline int
 perf_sched_process_fork_parent_pid(const TraceEvent &event) {
-	unsigned int i;
-	unsigned int endidx;
+	int i;
+	int endidx;
 
 	endidx = event.argc - 2;
 
@@ -426,7 +426,7 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 			break;
 	}
 	if (i < 2)
-		return ABSURD_UNSIGNED;
+		return ABSURD_INT;
 
 	return int_after_char(event, i - 1, '=');
 }
@@ -435,11 +435,11 @@ static __always_inline const char *
 __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 					   StringPool *pool)
 {
-	unsigned int i;
-	unsigned int beginidx;
-	const unsigned int endidx = event.argc - 2;
+	int i;
+	int beginidx;
+	const int endidx = event.argc - 2;
 	char *c;
-	unsigned int len = 0;
+	int len = 0;
 	bool ok;
 	const TString *first;
 	char sbuf[TASKNAME_MAXLEN + 1];
