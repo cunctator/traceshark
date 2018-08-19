@@ -293,8 +293,8 @@ void TraceAnalyzer::processFreqAddTail()
 
 unsigned int TraceAnalyzer::guessTimePrecision()
 {
-	unsigned int s = events.size();
-	unsigned int r, p;
+	int s = events.size();
+	int r, p;
 
 	r = 0;
 	if (s < 1)
@@ -323,7 +323,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
 					 unsigned int cpu,
 					 CPU *eventCPU, int oldpid,
 					 const vtl::Time &oldtime,
-					 unsigned int idx)
+					 int idx)
 {
 	int epid = eventCPU->pidOnCPU;
 	vtl::Time prevtime, faketime;
@@ -377,15 +377,15 @@ void TraceAnalyzer::colorizeTasks()
 {
 	unsigned int cpu;
 	double nf;
-	unsigned int n;
-	unsigned int ncolor;
+	int n;
+	int ncolor;
 	double s;
 	int step;
 	int red;
 	int green;
 	int blue;
 	struct drand48_data rdata;
-	unsigned int i, j;
+	int i, j;
 	QList<TColor> colorList;
 	const TColor black(0, 0, 0);
 	const TColor white(255, 255, 255);
@@ -413,7 +413,7 @@ void TraceAnalyzer::colorizeTasks()
 	s = TSMIN(s, 128.0);
 	s = TSMAX(s, 1.0);
 retry:
-	step = (unsigned int) s;
+	step = (int) s;
 	for (red = 0; red < 256; red += step) {
 		for (green = 0; green < 256; green += step)  {
 			for (blue = 0; blue < 256; blue += step) {
@@ -812,8 +812,8 @@ void TraceAnalyzer::processPerf()
 
 void TraceAnalyzer::processAllFilters()
 {
-	unsigned int i;
-	unsigned int s = events.size();
+	int i;
+	int s = events.size();
 	const TraceEvent *eptr;
 
 	filteredEvents.clear();

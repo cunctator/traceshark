@@ -185,7 +185,7 @@ private:
 	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, int oldpid,
 				  const vtl::Time &oldtime,
-				  unsigned int idx);
+				  int idx);
 	__always_inline void __processSwitchEvent(tracetype_t ttype,
 						  TraceEvent &event,
 						  int idx);
@@ -251,7 +251,7 @@ private:
 	vtl::Time startTime;
 	double endTimeDbl;
 	double startTimeDbl;
-	unsigned int endTimeIdx;
+	int endTimeIdx;
 	unsigned int maxFreq;
 	unsigned int minFreq;
 	int maxIdleState;
