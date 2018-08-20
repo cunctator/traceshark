@@ -115,6 +115,88 @@ err:
 }
 
 /*
+ * WARNING: This function does not null terminate the string!
+ * This function copies everything after the delim char into the cstring
+ * pointed to by c and adds the length to len
+ */
+static __always_inline void __copy_tstring_before_char(const TString *str,
+						       char delim,
+						       char *&dest,
+						       int &len,
+						       int maxlen,
+						       bool &ok)
+{
+	int i;
+	int flen;
+	char *src;
+	/* Find the char 'delim' in the string */
+	for (i = str->len - 1; i >= 0; i--) {
+		if (str->ptr[i] == delim)
+			break;
+	}
+	if (i < 0)
+		goto err;
+
+	/*
+	 * ...then copy everything before the delim char into the name, if there
+	 * is anything to copy
+	 */
+	if (i > 0) {
+		flen = i;
+		if (flen > maxlen)
+			goto err;
+		src = str->ptr;
+		strncpy(dest, src, flen);
+		len += flen;
+		dest += flen;
+		*dest = '\0';
+		dest++;
+		len++;
+		return;
+	}
+err:
+	ok = false;
+	return;
+}
+
+/*
+ * This function will merge event arguments from beginidx to endix into
+ * a cstring. Such cases exists because tasknames that contains spaces have
+ * been split into several arguments due to parsing with space as delimiter
+ */
+static __always_inline void
+merge_args_into_cstring_nullterminate(const TraceEvent &event,
+				      int beginidx,
+				      int endidx,
+				      char *&c,
+				      int &len,
+				      int maxlen,
+				      bool &ok)
+{
+	int i;
+	ok = true;
+
+	for (i = beginidx; i <= endidx; i++) {
+		len += event.argv[i]->len;
+		len++;
+		if (len > maxlen) {
+			ok = false;
+			return;
+		}
+		*c = ' ';
+		c++;
+		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
+		c += event.argv[i]->len;
+	}
+	/*
+	 * Terminate the string, it's assumed that maxlen is maximum length
+	 * *excluding* terminating null character :)
+	 */
+	*c = '\0';
+	len++;
+}
+
+/*
  * This function will merge event arguments from beginidx to endix into
  * a cstring. Such cases exists because tasknames that contains spaces have
  * been split into several arguments due to parsing with space as delimiter
@@ -143,12 +225,6 @@ merge_args_into_cstring(const TraceEvent &event,
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 	}
-	/*
-	 * Terminate the string, it's assumed that maxlen is maximum length
-	 * *excluding* terminating null character :)
-	 */
-	*c = '\0';
-	len++;
 }
 
 static __always_inline unsigned int uint_after_char(const TraceEvent &event,
@@ -214,6 +290,48 @@ static __always_inline int int_after_char(const TraceEvent &event,
 		param += digit;
 	}
 	return (neg ? -param:param);
+}
+
+static __always_inline int int_after_char2(const TraceEvent &event,
+					   int n_param, char ch1, char ch2)
+{
+	char *last;
+	char *first;
+	char *c;
+	bool found = false;
+	int param = 0;
+	int digit;
+	bool neg = false;
+
+
+	last = event.argv[n_param]->ptr + event.argv[n_param]->len - 1;
+	first = event.argv[n_param]->ptr;
+	for (c = last; c >= first; c--) {
+		if (*c == ch1 || *c == ch2) {
+			found = true;
+			break;
+		}
+	}
+	if (!found)
+		return ABSURD_INT; /* return absurd if error */
+	c++;
+	if (*c == '-') {
+		neg = true;
+		c++;
+	}
+	for (; c <= last; c++) {
+		digit = *c - '0';
+		param *= 10;
+		param += digit;
+	}
+	return (neg ? -param:param);
+}
+
+static __always_inline bool is_param_inside_braces(const TString *str)
+{
+	int s = str->len;
+	bool r =  s > 2 && str->ptr[0] == '[' && str->ptr[s - 1] == ']';
+	return r;
 }
 
 static __always_inline unsigned int param_inside_braces(const TraceEvent &event,

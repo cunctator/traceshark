@@ -87,11 +87,11 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 #define perf_sched_migrate_pid(EVENT) (int_after_char(EVENT, EVENT.argc - 4, \
 						      '='))
 
-#define perf_sched_switch_args_ok(EVENT) (EVENT.argc >= 8)
+#define perf_sched_switch_args_ok(EVENT) (EVENT.argc >= 6)
 #define perf_sched_switch_newprio(EVENT) \
 	(uint_after_char(EVENT, EVENT.argc - 1, '='))
-#define perf_sched_switch_newpid(EVENT)			\
-	(int_after_char(EVENT, EVENT.argc - 2, '='))
+#define perf_sched_switch_newpid(EVENT)				\
+	(int_after_char2(EVENT, EVENT.argc - 2, '=', ':'))
 
 #define SWITCH_PPID_PFIX "prev_pid="
 #define SWITCH_PPRI_PFIX "prev_prio="
@@ -123,20 +123,39 @@ static __always_inline int
 ___perf_sched_switch_find_arrow(const TraceEvent &event)
 {
 	int i;
-	for (i = 4; i < event.argc - 3; i++) {
+	for (i = 3; i < event.argc - 2; i++) {
+		const TString *arrow = event.argv[i];
+		if (!isArrowStr(arrow))
+			continue;
 		const char *c1 = event.argv[i - 3]->ptr;
 		const char *c2 = event.argv[i - 2]->ptr;
 		const char *c3 = event.argv[i - 1]->ptr;
-		const TString *c4 = event.argv[i];
-		const char *c5 = event.argv[i + 1]->ptr;
+		const char *c4 = event.argv[i + 1]->ptr;
+		/* Check if it is regular mainline format */
 		if (!strncmp(c1, SWITCH_PPID_PFIX, strlen(SWITCH_PPID_PFIX)) &&
 		    !strncmp(c2, SWITCH_PPRI_PFIX, strlen(SWITCH_PPRI_PFIX)) &&
 		    !strncmp(c3, SWITCH_PSTA_PFIX, strlen(SWITCH_PSTA_PFIX)) &&
-		    isArrowStr(c4) &&
-		    !strncmp(c5, SWITCH_NCOM_PFIX, strlen(SWITCH_NCOM_PFIX)))
+		    !strncmp(c4, SWITCH_NCOM_PFIX, strlen(SWITCH_NCOM_PFIX)))
 			break;
+		else {
+			/*
+			 * Check if it is distro format. We do this by
+			 * checking that the priority fields have their
+			 * [] braces
+			 */
+			const TString *t1 = event.argv[i - 2];
+			const TString *t2 = event.argv[event.argc - 1];
+			if (is_param_inside_braces(t1) &&
+			    is_param_inside_braces(t2))
+				break;
+		}
+		/*
+		 * If we reach this point, there are two possibilities:
+		 * - Some weirdo has a ' ==> ' inside a task name
+		 * - Unknown format
+		 */
 	}
-	if (!(i < event.argc - 3))
+	if (!(i < event.argc - 2))
 		return 0;
 	return i;
 }
@@ -149,8 +168,11 @@ perf_sched_switch_state(const TraceEvent &event)
 	TString stateStr;
 
 	i = ___perf_sched_switch_find_arrow(event);
-	if (i != 0 && event.argv[i - 1]->len > 2) {
-		const TString *stateArgStr = event.argv[i - 1];
+	if( i <= 0)
+		return TASK_STATE_PARSER_ERROR;
+	const TString *stateArgStr = event.argv[i - 1];
+
+	if (event.argv[i - 1]->len > 2) {
 		for (j = stateArgStr->len - 2; j > 0; j--) {
 			if (stateArgStr->ptr[j] == '=') {
 				stateStr.len = stateArgStr->len - 1 - j;
@@ -158,7 +180,10 @@ perf_sched_switch_state(const TraceEvent &event)
 				return __sched_state_from_tstring(&stateStr);
 			}
 		}
+	} else if (event.argv[i - 1]->len == 1) {
+		return __sched_state_from_tstring(stateArgStr);
 	}
+
 	return TASK_STATE_PARSER_ERROR;
 }
 
@@ -166,10 +191,18 @@ static __always_inline unsigned int
 perf_sched_switch_oldprio(const TraceEvent &event)
 {
 	int i;
+	//unsigned int r;
 
 	i = ___perf_sched_switch_find_arrow(event);
-	if (i != 0)
+	if (i <= 3)
+		return ABSURD_UNSIGNED;
+	const TString *str = event.argv[i - 2];
+
+	if (is_param_inside_braces(str)) {
+		return param_inside_braces(event, i - 2);
+	} else {
 		return uint_after_char(event, i - 2, '=');
+	}
 	return ABSURD_UNSIGNED;
 }
 
@@ -177,12 +210,19 @@ static __always_inline int
 perf_sched_switch_oldpid(const TraceEvent &event)
 {
 	int i;
+	int r;
 
 	i = ___perf_sched_switch_find_arrow(event);
-	if (i != 0)
-		return int_after_char(event, i - 3, '=');
+	if (i != 0)  {
+		r = int_after_char(event, i - 3, '=');
+		if (r == ABSURD_INT)
+			r = int_after_char(event, i - 3, ':');
+		return r;
+	}
 	return ABSURD_INT;
 }
+
+#define PERF_PREVCOMM_PREFIX "prev_comm="
 
 static __always_inline const char *
 __perf_sched_switch_oldname_strdup(const TraceEvent &event,
@@ -194,6 +234,7 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	int len = 0;
 	char *c;
 	const TString *first;
+	const TString *second;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
@@ -205,23 +246,45 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i == 0)
 		return nullptr;
-	beginidx = 1;
-	endidx = i - 4;
 
 	/*
 	 * This will copy the first part of the name, that is the portion
 	 * of first that is suceeded by the '=' character
 	 */
 	first = event.argv[0];
-	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
-	if (!ok)
-		return nullptr;
 
-	merge_args_into_cstring(event, beginidx, endidx, c, len,
-				TASKNAME_MAXLEN, ok);
-	if (!ok)
-		return nullptr;
+	if (strncmp(first->ptr, PERF_PREVCOMM_PREFIX,
+		    strlen(PERF_PREVCOMM_PREFIX)) == 0) {
+		beginidx = 1;
+		endidx = i - 4;
+		__copy_tstring_after_char(first, '=', c, len,
+					  TASKNAME_MAXLEN, ok);
+		if (!ok)
+			return nullptr;
 
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
+			return nullptr;
+
+	} else {
+		beginidx = 0;
+		endidx = i - 4;
+
+		merge_args_into_cstring(event, beginidx, endidx,
+					c, len, TASKNAME_MAXLEN,
+					ok);
+		if (!ok)
+			return nullptr;
+
+		__copy_tstring_before_char(first, ':',
+					   c, len, TASKNAME_MAXLEN,
+					   ok);
+
+		if (!ok)
+			return nullptr;
+	}
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
@@ -232,6 +295,8 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 
 const char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
 					     StringPool *pool);
+
+#define PERF_NEXTCOMM_PREFIX "next_comm="
 
 static __always_inline const char *
 __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
@@ -253,23 +318,42 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 	i = ___perf_sched_switch_find_arrow(event);
 	if (i == 0)
 		return nullptr;
-	beginidx = i + 2;
-	endidx = event.argc - 3;
-
 
 	/*
 	 * This will copy the first part of the name, that is the portion
 	 * of first that is suceeded by the '=' character.
 	 */
 	first = event.argv[i + 1];
-	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
-	if (!ok)
-		return nullptr;
 
-	merge_args_into_cstring(event, beginidx, endidx, c, len,
-				TASKNAME_MAXLEN, ok);
-	if (!ok)
-		return nullptr;
+	if (strncmp(first->ptr, PERF_NEXTCOMM_PREFIX,
+		    strlen(PERF_NEXTCOMM_PREFIX)) == 0) {
+		beginidx = i + 2;
+		endidx = event.argc - 3;
+		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+					  ok);
+		if (!ok)
+			return nullptr;
+
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
+			return nullptr;
+	} else {
+		beginidx = i + 1;
+		endidx = event.argc - 3;
+
+		merge_args_into_cstring(event, beginidx, endidx,
+					c, len, TASKNAME_MAXLEN,
+					ok);
+		if (!ok)
+			return nullptr;
+
+		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
+					   ok);
+		if (!ok)
+			return nullptr;
+	}
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
@@ -343,10 +427,18 @@ static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 {
 	int newidx = event.argc - 3;
 	int oldidx;
+
 	/* Check if we are on the new format */
 	if (!strncmp(event.argv[newidx]->ptr, WAKE_PID_PFIX,
 		     WAKE_PID_PFIX_LEN)) {
 		return int_after_char(event, newidx, '=');
+	}
+
+	const TString *priostr = event.argv[event.argc - 3];
+	if (is_param_inside_braces(priostr)) {
+		/* This must be distro format */
+	        int name_pid_idx =event.argc - 4;
+		return int_after_char(event, name_pid_idx, ':');
 	}
 
 	/* Assume that this is the old format */
@@ -379,24 +471,40 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 		    !strncmp(c2, WAKE_PRIO_PFIX, WAKE_PRIO_PFIX_LEN))
 			break;
 	}
-	if (!(i <= event.argc - 2))
-		return nullptr;
-	beginidx = 1;
-	endidx = i - 1;
+	if (!(i <= event.argc - 2)) {
+		beginidx = 0;
+		endidx = event.argc - 5;
+		merge_args_into_cstring(event, beginidx, endidx, c, len,
+					TASKNAME_MAXLEN, ok);
+		if (!ok)
+			return nullptr;
 
-	/*
-	 * This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character
-	 */
-	first = event.argv[0];
-	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
-	if (!ok)
-		return nullptr;
+		first = event.argv[0];
+		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
+					   ok);
+		if (!ok)
+			return nullptr;
+	} else {
 
-	merge_args_into_cstring(event, beginidx, endidx, c, len,
-				TASKNAME_MAXLEN, ok);
-	if (!ok)
-		return nullptr;
+		beginidx = 1;
+		endidx = i - 1;
+
+		/*
+		 * This will copy the first part of the name, that is the
+		 * portion of first that is suceeded by the '=' character
+		 */
+		first = event.argv[0];
+		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+					  ok);
+		if (!ok)
+			return nullptr;
+
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
+			return nullptr;
+	}
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
@@ -467,8 +575,8 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	if (!ok)
 		return nullptr;
 
-	merge_args_into_cstring(event, beginidx, endidx, c, len,
-				TASKNAME_MAXLEN, ok);
+	merge_args_into_cstring_nullterminate(event, beginidx, endidx, c, len,
+					      TASKNAME_MAXLEN, ok);
 	if (!ok)
 		return nullptr;
 
