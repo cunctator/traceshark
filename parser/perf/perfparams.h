@@ -121,7 +121,7 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
  * In a nutshell, this protects us against weirdos but not against lunatics :)
  */
 static __always_inline int
-___perf_sched_switch_find_arrow(const TraceEvent &event)
+___perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 {
 	int i;
 	for (i = 3; i < event.argc - 2; i++) {
@@ -136,9 +136,10 @@ ___perf_sched_switch_find_arrow(const TraceEvent &event)
 		if (!prefixcmp(c1, SWITCH_PPID_PFIX) &&
 		    !prefixcmp(c2, SWITCH_PPRI_PFIX) &&
 		    !prefixcmp(c3, SWITCH_PSTA_PFIX) &&
-		    !prefixcmp(c4, SWITCH_NCOM_PFIX))
+		    !prefixcmp(c4, SWITCH_NCOM_PFIX)) {
+			is_distro_style = false;
 			break;
-		else {
+		} else {
 			/*
 			 * Check if it is distro format. We do this by
 			 * checking that the priority fields have their
@@ -147,8 +148,10 @@ ___perf_sched_switch_find_arrow(const TraceEvent &event)
 			const TString *t1 = event.argv[i - 2];
 			const TString *t2 = event.argv[event.argc - 1];
 			if (is_param_inside_braces(t1) &&
-			    is_param_inside_braces(t2))
+			    is_param_inside_braces(t2)) {
+				is_distro_style = true;
 				break;
+			}
 		}
 		/*
 		 * If we reach this point, there are two possibilities:
@@ -167,8 +170,9 @@ perf_sched_switch_state(const TraceEvent &event)
 	int i;
 	int j;
 	TString stateStr;
+	bool is_distro_style;
 
-	i = ___perf_sched_switch_find_arrow(event);
+	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
 	if( i <= 0)
 		return TASK_STATE_PARSER_ERROR;
 	const TString *stateArgStr = event.argv[i - 1];
@@ -192,14 +196,13 @@ static __always_inline unsigned int
 perf_sched_switch_oldprio(const TraceEvent &event)
 {
 	int i;
-	//unsigned int r;
+	bool is_distro_style;
 
-	i = ___perf_sched_switch_find_arrow(event);
+	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
 	if (i <= 3)
 		return ABSURD_UNSIGNED;
-	const TString *str = event.argv[i - 2];
 
-	if (is_param_inside_braces(str)) {
+	if (is_distro_style) {
 		return param_inside_braces(event, i - 2);
 	} else {
 		return uint_after_char(event, i - 2, '=');
@@ -211,14 +214,15 @@ static __always_inline int
 perf_sched_switch_oldpid(const TraceEvent &event)
 {
 	int i;
-	int r;
+	bool is_distro_style;
 
-	i = ___perf_sched_switch_find_arrow(event);
+	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
 	if (i != 0)  {
-		r = int_after_char(event, i - 3, '=');
-		if (r == ABSURD_INT)
-			r = int_after_char(event, i - 3, ':');
-		return r;
+		if (is_distro_style) {
+			return int_after_char(event, i - 3, ':');
+		} else {
+			return int_after_char(event, i - 3, '=');
+		}
 	}
 	return ABSURD_INT;
 }
@@ -240,11 +244,12 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
 	const TString *retstr;
+	bool is_distro_style;
 
 	c = &sbuf[0];
 	ts.ptr = c;
 
-	i = ___perf_sched_switch_find_arrow(event);
+	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
 	if (i == 0)
 		return nullptr;
 
@@ -254,7 +259,7 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	 */
 	first = event.argv[0];
 
-	if (prefixcmp(first->ptr, PERF_PREVCOMM_PREFIX) == 0) {
+	if (!is_distro_style) {
 		beginidx = 1;
 		endidx = i - 4;
 		__copy_tstring_after_char(first, '=', c, len,
@@ -311,11 +316,12 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
 	const TString *retstr;
+	bool is_distro_style;
 
 	c = &sbuf[0];
 	ts.ptr = c;
 
-	i = ___perf_sched_switch_find_arrow(event);
+	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
 	if (i == 0)
 		return nullptr;
 
@@ -325,7 +331,7 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 	 */
 	first = event.argv[i + 1];
 
-	if (prefixcmp(first->ptr, PERF_NEXTCOMM_PREFIX) == 0) {
+	if (!is_distro_style) {
 		beginidx = i + 2;
 		endidx = event.argc - 3;
 		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
