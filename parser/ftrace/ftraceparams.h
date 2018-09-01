@@ -55,6 +55,7 @@
 #include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
+#include "misc/string.h"
 #include "misc/traceshark.h"
 #include <cstring>
 #include <cstdint>
@@ -391,8 +392,8 @@ ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 	endidx = event.argc - 2;
 
 	for (i = endidx; i > 0; i--) {
-		if (strncmp(event.argv[i]->ptr, "child_comm=", 11) == 0 &&
-		    strncmp(event.argv[i - 1]->ptr, "pid=", 4) == 0)
+		if (prefixcmp(event.argv[i]->ptr, "child_comm=") == 0 &&
+		    prefixcmp(event.argv[i - 1]->ptr, "pid=") == 0)
 			break;
 	}
 	if (i < 2)
@@ -421,7 +422,7 @@ __ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 		return nullptr;
 
 	for (i = 2; i <= endidx; i++) {
-		if (!strncmp(event.argv[i]->ptr, "child_comm=", 11))
+		if (!prefixcmp(event.argv[i]->ptr, "child_comm="))
 			goto found;
 	}
 	return nullptr;

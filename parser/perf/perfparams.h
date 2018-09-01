@@ -55,6 +55,7 @@
 #include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
+#include "misc/string.h"
 #include "misc/traceshark.h"
 #include <cstring>
 #include <cstdint>
@@ -132,10 +133,10 @@ ___perf_sched_switch_find_arrow(const TraceEvent &event)
 		const char *c3 = event.argv[i - 1]->ptr;
 		const char *c4 = event.argv[i + 1]->ptr;
 		/* Check if it is regular mainline format */
-		if (!strncmp(c1, SWITCH_PPID_PFIX, strlen(SWITCH_PPID_PFIX)) &&
-		    !strncmp(c2, SWITCH_PPRI_PFIX, strlen(SWITCH_PPRI_PFIX)) &&
-		    !strncmp(c3, SWITCH_PSTA_PFIX, strlen(SWITCH_PSTA_PFIX)) &&
-		    !strncmp(c4, SWITCH_NCOM_PFIX, strlen(SWITCH_NCOM_PFIX)))
+		if (!prefixcmp(c1, SWITCH_PPID_PFIX) &&
+		    !prefixcmp(c2, SWITCH_PPRI_PFIX) &&
+		    !prefixcmp(c3, SWITCH_PSTA_PFIX) &&
+		    !prefixcmp(c4, SWITCH_NCOM_PFIX))
 			break;
 		else {
 			/*
@@ -253,8 +254,7 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	 */
 	first = event.argv[0];
 
-	if (strncmp(first->ptr, PERF_PREVCOMM_PREFIX,
-		    strlen(PERF_PREVCOMM_PREFIX)) == 0) {
+	if (prefixcmp(first->ptr, PERF_PREVCOMM_PREFIX) == 0) {
 		beginidx = 1;
 		endidx = i - 4;
 		__copy_tstring_after_char(first, '=', c, len,
@@ -325,8 +325,7 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 	 */
 	first = event.argv[i + 1];
 
-	if (strncmp(first->ptr, PERF_NEXTCOMM_PREFIX,
-		    strlen(PERF_NEXTCOMM_PREFIX)) == 0) {
+	if (prefixcmp(first->ptr, PERF_NEXTCOMM_PREFIX) == 0) {
 		beginidx = i + 2;
 		endidx = event.argc - 3;
 		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
@@ -383,11 +382,6 @@ const char *perf_sched_switch_newname_strdup(const TraceEvent &event,
 #define WAKE_PRIO_PFIX "prio="
 #define WAKE_TCPU_PFIX "target_cpu="
 
-#define WAKE_SUCC_PFIX_LEN (sizeof(WAKE_SUCC_PFIX) / sizeof(char) - 1)
-#define WAKE_PID_PFIX_LEN  (sizeof(WAKE_PID_PFIX)  / sizeof(char) - 1)
-#define WAKE_PRIO_PFIX_LEN (sizeof(WAKE_PRIO_PFIX) / sizeof(char) - 1)
-#define WAKE_TCPU_PFIX_LEN (sizeof(WAKE_TCPU_PFIX) / sizeof(char) - 1)
-
 #define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 
 /* The last argument is target_cpu, regardless of old or new */
@@ -399,7 +393,7 @@ static __always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 	const TString *ss = event.argv[event.argc - 2];
 
 	/* Assume that wakeup is successful if no success field is found */
-	if (strncmp(ss->ptr, WAKE_SUCC_PFIX,WAKE_SUCC_PFIX_LEN) != 0)
+	if (prefixcmp(ss->ptr, WAKE_SUCC_PFIX) != 0)
 		return true;
 
 	/* Empty string should not be produced by parser */
@@ -413,8 +407,7 @@ perf_sched_wakeup_prio(const TraceEvent &event)
 	unsigned int newidx = event.argc - 2;
 	unsigned int oldidx;
 	/* Check if we are on the new format */
-	if (!strncmp(event.argv[newidx]->ptr, WAKE_PRIO_PFIX,
-		     WAKE_PRIO_PFIX_LEN)) {
+	if (!prefixcmp(event.argv[newidx]->ptr, WAKE_PRIO_PFIX)) {
 		return uint_after_char(event, newidx, '=');
 	}
 
@@ -429,8 +422,7 @@ static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 	int oldidx;
 
 	/* Check if we are on the new format */
-	if (!strncmp(event.argv[newidx]->ptr, WAKE_PID_PFIX,
-		     WAKE_PID_PFIX_LEN)) {
+	if (!prefixcmp(event.argv[newidx]->ptr, WAKE_PID_PFIX)) {
 		return int_after_char(event, newidx, '=');
 	}
 
@@ -467,8 +459,8 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 	for (i = 1; i <= event.argc - 2; i++) {
 		char *c1 = event.argv[i + 0]->ptr;
 		char *c2 = event.argv[i + 1]->ptr;
-		if (!strncmp(c1, WAKE_PID_PFIX, WAKE_PID_PFIX_LEN) &&
-		    !strncmp(c2, WAKE_PRIO_PFIX, WAKE_PRIO_PFIX_LEN))
+		if (!prefixcmp(c1, WAKE_PID_PFIX) &&
+		    !prefixcmp(c2, WAKE_PRIO_PFIX))
 			break;
 	}
 	if (!(i <= event.argc - 2)) {
@@ -529,8 +521,8 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 	endidx = event.argc - 2;
 
 	for (i = endidx; i > 0; i--) {
-		if (strncmp(event.argv[i]->ptr, "child_comm=", 11) == 0 &&
-		    strncmp(event.argv[i - 1]->ptr, "pid=", 4) == 0)
+		if (prefixcmp(event.argv[i]->ptr, "child_comm=") == 0 &&
+		    prefixcmp(event.argv[i - 1]->ptr, "pid=") == 0)
 			break;
 	}
 	if (i < 2)
@@ -558,8 +550,8 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	ts.ptr = c;
 
 	for (i = 2; i <= endidx; i++) {
-		if (!strncmp(event.argv[i - 1]->ptr, "pid=", 4) &&
-		    !strncmp(event.argv[i]->ptr,     "child_comm=", 11))
+		if (!prefixcmp(event.argv[i - 1]->ptr, "pid=") &&
+		    !prefixcmp(event.argv[i]->ptr,     "child_comm="))
 			break;
 	}
 	if (i > endidx)

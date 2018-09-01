@@ -127,6 +127,7 @@ HEADERS      +=  mm/stringtree.h
 HEADERS      +=  misc/errors.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
+HEADERS      +=  misc/string.h
 HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/tstring.h
 
