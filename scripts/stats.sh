@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #  average.sh - a script to compute the average of traceshark processing time
-#  Copyright (C) 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2017, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 #  This file is dual licensed: you can use it either under the terms of
 #  the GPL, or the BSD license, at your option.
