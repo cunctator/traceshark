@@ -239,7 +239,6 @@ __perf_sched_switch_oldname_strdup(const TraceEvent &event,
 	int len = 0;
 	char *c;
 	const TString *first;
-	const TString *second;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
