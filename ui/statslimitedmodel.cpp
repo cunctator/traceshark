@@ -57,8 +57,6 @@
 #include "misc/traceshark.h"
 #include "analyzer/task.h"
 
-#include <cstdio>
-
 static const char swappername[] = "swapper";
 
 StatsLimitedModel::StatsLimitedModel(QObject *parent):
