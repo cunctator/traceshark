@@ -105,7 +105,7 @@ typedef enum {
 #define TSABS(A) ((A) >= 0 ? A:-A)
 
 /*  Don't increase this number, buy a system with fewer CPUs instead */
-#define NR_CPUS_ALLOWED (256)
+#define NR_CPUS_ALLOWED (9999)
 #define isValidCPU(CPU) (CPU < NR_CPUS_ALLOWED)
 
 /* C++ syntax for calling the pointer to a member function for an object */

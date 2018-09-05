@@ -57,6 +57,8 @@
 #include "misc/traceshark.h"
 #include "analyzer/task.h"
 
+#include <cstdio>
+
 static const char swappername[] = "swapper";
 
 StatsLimitedModel::StatsLimitedModel(QObject *parent):
@@ -170,8 +172,12 @@ const QString &StatsLimitedModel::rowToName(int row, bool &ok) const
 
 void StatsLimitedModel::rowToPct(QString &str, int row, bool &ok) const
 {
-	char buf[7];
+	char buf[10];
 	unsigned int p;
+	unsigned int div;
+	unsigned int rest;
+	int i, n;
+	bool nonzero;
 
 	if (row < 0) {
 		ok = false;
@@ -186,36 +192,34 @@ void StatsLimitedModel::rowToPct(QString &str, int row, bool &ok) const
 	const Task *task = taskList->at(row);
 	unsigned pct = task->cursorPct;
 
-	unsigned pcti = pct / 100;
-	unsigned pctd = pct % 100;
-
-	if (pcti >= 1000) {
+	/* We assume no system has more than 9999 CPUs */
+	if (pct > 99990000) {
 		ok = false;
 		return;
 	}
 
-	p = pcti  / 100;
-	if (p == 0)
-		buf[0] = ' ';
-	else
-		buf[0] = '0' + p;
-
-	p = (pcti % 100) / 10;
-	if (buf[0] == 0 && p == 0)
-		buf[1] = ' ';
-	else
-		buf[1] = '0' + p;
-
-	p = pcti % 10;
-	buf[2] = '0' + p;
-	buf[3] = '.';
-
-	p = pctd / 10;
-	buf[4] = '0' + p;
-	p = pctd % 10;
-	buf[5] = '0' + p;
-	buf[6] = '\0';
-
+	div = 10000000;
+	n = 0;
+	rest = pct;
+	nonzero = false;
+	for (i = 0; i <= 7; i++) {
+		if (i == 6) {
+			buf[n] = '.';
+			n++;
+		}
+		p = rest / div;
+		if (i >= 5 || p != 0 || nonzero) {
+			nonzero = true;
+			buf[n] = '0' + p;
+			n++;
+		} else if (i >= 3) {
+			buf[n] = ' ';
+			n++;
+		}
+		rest = rest % div;
+		div = div / 10;
+	}
+	buf[n] = '\0';
 	str = QString(&buf[0]);
 }
 
