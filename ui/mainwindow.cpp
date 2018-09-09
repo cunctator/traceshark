@@ -336,7 +336,7 @@ void MainWindow::openFile(const QString &name)
 		layout = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 		eventsWidget->beginResetModel();
-		eventsWidget->setEvents(&analyzer->events);
+		eventsWidget->setEvents(analyzer->events);
 		eventsWidget->endResetModel();
 
 		taskSelectDialog->beginResetModel();
@@ -1369,7 +1369,7 @@ void MainWindow::setEventsWidgetEvents()
 	if (analyzer->isFiltered())
 		eventsWidget->setEvents(&analyzer->filteredEvents);
 	else
-		eventsWidget->setEvents(&analyzer->events);
+		eventsWidget->setEvents(analyzer->events);
 }
 
 void MainWindow::scrollTo(const vtl::Time &time)

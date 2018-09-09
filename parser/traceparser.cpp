@@ -51,6 +51,7 @@
 
 #include <climits>
 #include <cstring>
+#include <cstdio>
 #include <limits>
 
 #include "misc/tstring.h"
@@ -66,9 +67,10 @@
 #include "threads/threadbuffer.h"
 
 #define CLEAR_VARIABLE(VAR) memset(&VAR, 0, sizeof(VAR))
+#define TRACE_TYPE_CONFIDENCE_FACTOR (100)
 
-TraceParser::TraceParser(vtl::TList<TraceEvent> *analyzerEvents)
-	: traceType(TRACE_TYPE_NONE)
+TraceParser::TraceParser()
+	: traceType(TRACE_TYPE_NONE), events(nullptr)
 {
 	traceFile = nullptr;
 	ptrPool = new MemPool(16384, sizeof(TString*));
@@ -82,9 +84,10 @@ TraceParser::TraceParser(vtl::TList<TraceEvent> *analyzerEvents)
 		(QString("parserThread"), this, &TraceParser::threadParser);
 	readerThread = new WorkThread<TraceParser>
 		(QString("readerThread"), this, &TraceParser::threadReader);
-	events = analyzerEvents;
 	eventsWatcher = new IndexWatcher(10000);
 	traceTypeWatcher = new IndexWatcher;
+	ftraceEvents = new vtl::TList<TraceEvent>();
+	perfEvents = new vtl::TList<TraceEvent>();
 
 	CLEAR_VARIABLE(fakeEvent);
 	CLEAR_VARIABLE(fakePostEventInfo);
@@ -146,7 +149,10 @@ void TraceParser::close()
 	}
 	ptrPool->reset();
 	perfGrammar->clear();
+	perfEvents->clear();
 	ftraceGrammar->clear();
+	ftraceEvents->clear();
+	events = nullptr;
 	traceType = TRACE_TYPE_NONE;
 }
 
@@ -208,7 +214,13 @@ void TraceParser::threadParser()
 		determineTraceType();
 		if (eof)
 			break;
-		eventsWatcher->sendNextIndex(events->size());
+		/*
+		 * We cannot send next index, unless trace type has been
+		 * determined, because before that the events pointer will not
+		 * be determined either.
+		 */
+		if (traceType != TRACE_TYPE_NONE)
+			eventsWatcher->sendNextIndex(events->size());
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
@@ -219,8 +231,11 @@ void TraceParser::threadParser()
 	}
 	/*
 	 * Must have been a short trace or a lot of unknown garbage in the
-	 * trace if we end up here
+	 * trace if we end up here. Make sure that the processing thread can
+	 * continue even if no trace type was detected, otherwise it would wait
+	 * forever in waitForTraceType()
 	 */
+	guessTraceType();
 	goto out;
 
 	/*
@@ -231,7 +246,7 @@ ftrace:
 	while(true) {
 		if (parseFtraceBuffer(i))
 			break;
-		eventsWatcher->sendNextIndex(events->size());
+		eventsWatcher->sendNextIndex(ftraceEvents->size());
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
@@ -242,19 +257,12 @@ perf:
 	while(true) {
 		if (parsePerfBuffer(i))
 			break;
-		eventsWatcher->sendNextIndex(events->size());
+		eventsWatcher->sendNextIndex(perfEvents->size());
 		i++;
 		if (i == NR_TBUFFERS)
 			i = 0;
 	}
 out:
-	/*
-	 * Make sure that the processing thread can continue even if no trace
-	 * type was detected, otherwise it would wait forever in
-	 * waitForTraceType()
-	 */
-	sendTraceType();
-
 	/*
 	 * It's probable that at this point, one of the sendNextIndex() calls
 	 * above has already been issued with and index value that corresponds
@@ -302,7 +310,9 @@ void TraceParser::prepareParse()
 	ftraceLineData.prevLineIsEvent = true;
 	ftraceLineData.prevTime = VTL_TIME_MIN;
 
-	events->clear();
+	ftraceEvents->clear();
+	perfEvents->clear();
+	events = nullptr;
 }
 
 /*
@@ -365,18 +375,36 @@ bool TraceParser::parseLineBugFixup(TraceEvent* event,
 
 void TraceParser::determineTraceType()
 {
-	if (ftraceLineData.nrEvents > 0 && perfLineData.nrEvents == 0) {
+	if (ftraceLineData.nrEvents > (TSMAX(1, perfLineData.nrEvents)
+				       * TRACE_TYPE_CONFIDENCE_FACTOR)) {
 		traceType = TRACE_TYPE_FTRACE;
 		TraceEvent::setStringTree(ftraceGrammar->eventTree);
+		events = ftraceEvents;
 		sendTraceType();
 		return;
-	} else if (ftraceLineData.nrEvents  == 0 && perfLineData.nrEvents > 0) {
+	} else if (perfLineData.nrEvents > (TSMAX(1, ftraceLineData.nrEvents)
+					    * TRACE_TYPE_CONFIDENCE_FACTOR)) {
 		traceType = TRACE_TYPE_PERF;
 		TraceEvent::setStringTree(perfGrammar->eventTree);
+		events = perfEvents;
 		sendTraceType();
 		return;
 	}
 	traceType = TRACE_TYPE_NONE;
+}
+
+void TraceParser::guessTraceType()
+{
+	if (perfLineData.nrEvents >=  ftraceLineData.nrEvents) {
+		traceType = TRACE_TYPE_PERF;
+		TraceEvent::setStringTree(perfGrammar->eventTree);
+		events = perfEvents;
+	} else {
+		traceType = TRACE_TYPE_FTRACE;
+		TraceEvent::setStringTree(ftraceGrammar->eventTree);
+		events = ftraceEvents;
+	}
+	sendTraceType();
 }
 
 /* This parses a buffer regardless if it's perf or ftrace */
@@ -384,23 +412,30 @@ bool TraceParser::parseBuffer(unsigned int index)
 {
 	unsigned int i, s;
 	bool eof;
+	const TString **argv;
 
 	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
 	tbuf->beginConsumeBuffer();
 
 	s = tbuf->list.size();
+	argv = (const TString**)
+		ptrPool->preallocN(EVENT_MAX_NR_ARGS);;
 
 	for(i = 0; i < s; i++) {
 		TraceLine &line = tbuf->list[i];
-		TraceEvent &event = events->preAlloc();
-		event.argc = 0;
-		event.argv = (const TString**)
-			ptrPool->preallocN(EVENT_MAX_NR_ARGS);
-		if (parseLineFtrace(line, event))
-			continue;
-		else {
-			event.argc = 0;
-			parseLinePerf(line, event);
+		TraceEvent &ft_event = ftraceEvents->preAlloc();
+		ft_event.argc = 0;
+		ft_event.argv = argv;
+		if (parseLineFtrace(line, ft_event)) {
+			argv = (const TString**)
+				ptrPool->preallocN(EVENT_MAX_NR_ARGS);;
+		}
+		TraceEvent &p_event = perfEvents->preAlloc();
+		p_event.argc = 0;
+		p_event.argv = argv;
+		if (parseLinePerf(line, p_event)) {
+			argv = (const TString**)
+				ptrPool->preallocN(EVENT_MAX_NR_ARGS);;
 		}
 	}
 	eof = tbuf->loadBuffer->isEOF();

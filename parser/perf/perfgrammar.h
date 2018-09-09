@@ -106,8 +106,7 @@ private:
 	} grammarstate_t;
 };
 
-__always_inline bool PerfGrammar::StoreMatch(TString *str,
-					       TraceEvent &event)
+__always_inline bool PerfGrammar::StoreMatch(TString *str, TraceEvent &event)
 {
 	/*
 	 * We temporarily store the process name string(s) into the
@@ -124,14 +123,12 @@ __always_inline bool PerfGrammar::StoreMatch(TString *str,
 	return true;
 }
 
-__always_inline bool PerfGrammar::NameMatch(TString *str,
-					      TraceEvent &event)
+__always_inline bool PerfGrammar::NameMatch(TString *str, TraceEvent &event)
 {
 	return StoreMatch(str, event);
 }
 
-__always_inline bool PerfGrammar::IntArgMatch(TString *str,
-					      TraceEvent &event)
+__always_inline bool PerfGrammar::IntArgMatch(TString *str, TraceEvent &event)
 {
 	char *lastChr = str->ptr + str->len - 1;
 	char *c = str->ptr;
@@ -160,14 +157,12 @@ __always_inline bool PerfGrammar::IntArgMatch(TString *str,
 	return true;
 }
 
-__always_inline bool PerfGrammar::PidMatch(TString *str,
-					      TraceEvent &event)
+__always_inline bool PerfGrammar::PidMatch(TString *str, TraceEvent &event)
 {
 	return StoreMatch(str, event);
 }
 
-__always_inline bool PerfGrammar::CPUMatch(TString *str,
-					     TraceEvent &event)
+__always_inline bool PerfGrammar::CPUMatch(TString *str, TraceEvent &event)
 {
 	char *c;
 	unsigned int cpu = 0;
@@ -193,8 +188,7 @@ error:
 	return false;
 }
 
-__always_inline int PerfGrammar::pidFromString(const TString &str,
-					       bool &ok)
+__always_inline int PerfGrammar::pidFromString(const TString &str, bool &ok)
 {
 	char *lastChr = str.ptr + str.len - 1;
 	int pid;
@@ -225,8 +219,7 @@ __always_inline int PerfGrammar::pidFromString(const TString &str,
 	return (neg ? -pid:pid);
 }
 
-__always_inline bool PerfGrammar::TimeMatch(TString *str,
-					    TraceEvent &event)
+__always_inline bool PerfGrammar::TimeMatch(TString *str, TraceEvent &event)
 {
 	bool rval;
 	TString namestr;
@@ -280,8 +273,7 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str,
 	return rval;
 }
 
-__always_inline bool PerfGrammar::EventMatch(TString *str,
-					       TraceEvent &event)
+__always_inline bool PerfGrammar::EventMatch(TString *str, TraceEvent &event)
 {
 	char *lastChr = str->ptr + str->len - 1;
 	char *c;
@@ -326,8 +318,7 @@ __always_inline bool PerfGrammar::EventMatch(TString *str,
 	return true;
 }
 
-__always_inline bool PerfGrammar::ArgMatch(TString *str,
-					   TraceEvent &event)
+__always_inline bool PerfGrammar::ArgMatch(TString *str, TraceEvent &event)
 {
 	const TString *newstr;
 	if (event.argc < EVENT_MAX_NR_ARGS) {

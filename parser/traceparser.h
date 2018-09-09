@@ -82,19 +82,21 @@ class TraceParser
 {
 	friend class TraceAnalyzer;
 public:
-	TraceParser(vtl::TList<TraceEvent> *analyzerEvents);
+	TraceParser();
 	~TraceParser();
 	int open(const QString &fileName);
 	bool isOpen() const;
 	void close();
 	void threadParser();
 	void threadReader();
+	__always_inline vtl::TList<TraceEvent> *getEventsTList() const;
 protected:
 	tracetype_t traceType;
 	__always_inline void waitForNextBatch(bool &eof, int &index);
 	void waitForTraceType();
 private:
 	void determineTraceType();
+	void guessTraceType();
 	void sendTraceType();
 	void prepareParse();
 	__always_inline bool __parseBuffer(tracetype_t ttppe,
@@ -119,6 +121,8 @@ private:
 	WorkThread<TraceParser> *readerThread;
 	TraceLineData ftraceLineData;
 	TraceLineData perfLineData;
+	vtl::TList<TraceEvent> *ftraceEvents;
+	vtl::TList<TraceEvent> *perfEvents;
 	vtl::TList<TraceEvent> *events;
 	IndexWatcher *eventsWatcher;
 	/* This IndexWatcher isn't really watching an index, it's to synchronize
@@ -157,14 +161,19 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 
 	for(i = 0; i < s; i++) {
 		TraceLine &line = tbuf->list[i];
-		TraceEvent &event = events->preAlloc();
-		event.argc = 0;
-		event.argv = (const TString**)
-			ptrPool->preallocN(EVENT_MAX_NR_ARGS);
-		if (ttype == TRACE_TYPE_FTRACE)
+		if (ttype == TRACE_TYPE_FTRACE) {
+			TraceEvent &event = ftraceEvents->preAlloc();
+			event.argc = 0;
+			event.argv = (const TString**)
+				ptrPool->preallocN(EVENT_MAX_NR_ARGS);
 			parseLineFtrace(line, event);
-		else if (ttype == TRACE_TYPE_PERF)
+		} else if (ttype == TRACE_TYPE_PERF) {
+			TraceEvent &event = perfEvents->preAlloc();
+			event.argc = 0;
+			event.argv = (const TString**)
+				ptrPool->preallocN(EVENT_MAX_NR_ARGS);
 			parseLinePerf(line, event);
+		}
 	}
 	eof = tbuf->loadBuffer->isEOF();
 	tbuf->endConsumeBuffer();
@@ -185,7 +194,7 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
 		ftraceLineData.prevTime = event.time;
 
 		ptrPool->commitN(event.argc);
-		events->commit();
+		ftraceEvents->commit();
 
 		event.postEventInfo = nullptr;
 		ftraceLineData.nrEvents++;
@@ -211,7 +220,7 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine &line,
 		perfLineData.prevTime = event.time;
 
 		ptrPool->commitN(event.argc);
-		events->commit();
+		perfEvents->commit();
 
 		if (perfLineData.prevLineIsEvent) {
 			perfLineData.prevEvent->postEventInfo = nullptr;
@@ -233,6 +242,11 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine &line,
 		}
 		return false;
 	}
+}
+
+__always_inline vtl::TList<TraceEvent> *TraceParser::getEventsTList() const
+{
+	return events;
 }
 
 #endif /* TRACEPARSER_H */

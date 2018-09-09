@@ -91,16 +91,17 @@ __always_inline static int clib_close(int fd)
 }
 
 TraceAnalyzer::TraceAnalyzer()
-	: cpuTaskMaps(nullptr), cpuFreq(nullptr), cpuIdle(nullptr),
-	  black(0, 0, 0), white(255, 255, 255), migrationOffset(0),
-	  migrationScale(0), maxCPU(0), nrCPUs(0), endTime(false, 0, 0, 6),
-	  startTime(false, 0, 0, 6), endTimeDbl(0), startTimeDbl(0),
-	  endTimeIdx(0), maxFreq(0), minFreq(0), maxIdleState(0),
-	  minIdleState(0), timePrecision(0), CPUs(nullptr), customPlot(nullptr),
-	  pidFilterInclusive(false), OR_pidFilterInclusive(false)
+	: events(nullptr), cpuTaskMaps(nullptr), cpuFreq(nullptr),
+	  cpuIdle(nullptr), black(0, 0, 0), white(255, 255, 255),
+	  migrationOffset(0), migrationScale(0), maxCPU(0), nrCPUs(0),
+	  endTime(false, 0, 0, 6), startTime(false, 0, 0, 6), endTimeDbl(0),
+	  startTimeDbl(0), endTimeIdx(0), maxFreq(0), minFreq(0),
+	  maxIdleState(0), minIdleState(0), timePrecision(0), CPUs(nullptr),
+	  customPlot(nullptr), pidFilterInclusive(false),
+	  OR_pidFilterInclusive(false)
 {
 	taskNamePool = new StringPool(16384, 256);
-	parser = new TraceParser(&events);
+	parser = new TraceParser();
 	filterState.disableAll();
 	OR_filterState.disableAll();
 }
@@ -174,7 +175,6 @@ void TraceAnalyzer::close()
 	}
 
 	taskMap.clear();
-	events.clear();
 	disableAllFilters();
 	migrations.clear();
 	migrationArrows.clear();
@@ -196,6 +196,7 @@ void TraceAnalyzer::resetProperties()
 	minIdleState = INT_MAX;
 	maxIdleState = INT_MIN;
 	timePrecision = 0;
+	events = nullptr;
 }
 
 void TraceAnalyzer::processTrace()
@@ -212,6 +213,7 @@ void TraceAnalyzer::processTrace()
 void TraceAnalyzer::threadProcess()
 {
 	parser->waitForTraceType();
+	events = parser->getEventsTList();
 	switch (getTraceType()) {
 	case TRACE_TYPE_FTRACE:
 		processFtrace();
@@ -293,22 +295,22 @@ void TraceAnalyzer::processFreqAddTail()
 
 unsigned int TraceAnalyzer::guessTimePrecision()
 {
-	int s = events.size();
+	int s = events->size();
 	int r, p;
 
 	r = 0;
 	if (s < 1)
 		return r;
 
-	p = events[0].time.getPrecision();
+	p = events->at(0).time.getPrecision();
 	if (p > r)
 		r = p;
 
-	p = events[s / 2].time.getPrecision();
+	p = events->at(s / 2).time.getPrecision();
 	if (p > r)
 		r = p;
 
-	p = events[s - 1].time.getPrecision();
+	p = events->at(s - 1).time.getPrecision();
 	if (p > r)
 		r = p;
 
@@ -471,7 +473,7 @@ int TraceAnalyzer::binarySearch(const vtl::Time &time, int start, int end)
 	int pivot = (end + start) / 2;
 	if (pivot == start)
 		return pivot;
-	if (time < events.at(pivot).time)
+	if (time < events->at(pivot).time)
 		return binarySearch(time, start, pivot);
 	else
 		return binarySearch(time, pivot, end);
@@ -491,20 +493,20 @@ int TraceAnalyzer::binarySearchFiltered(const vtl::Time &time, int start,
 
 int TraceAnalyzer::findIndexBefore(const vtl::Time &time) const
 {
-	if (events.size() < 1)
+	if (events->size() < 1)
 		return -1;
 
-	int end = events.size() - 1;
+	int end = events->size() - 1;
 
 	/* Basic sanity checks */
-	if (time > events.at(end).time)
+	if (time > events->at(end).time)
 		return end;
-	if (time < events.at(0).time)
+	if (time < events->at(0).time)
 		return 0;
 
 	int c = binarySearch(time, 0, end);
 
-	while (c > 0 && events.at(c).time >= time)
+	while (c > 0 && events->at(c).time >= time)
 		c--;
 	return c;
 }
@@ -540,7 +542,7 @@ const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(const vtl::Time &time,
 		return nullptr;
 
 	for (i = start; i >= 0; i--) {
-		const TraceEvent &event = events[i];
+		const TraceEvent &event = events->at(i);
 		if (event.type == SCHED_SWITCH  &&
 		    generic_sched_switch_newpid(event) == pid) {
 			if (index != nullptr)
@@ -554,7 +556,7 @@ const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(const vtl::Time &time,
 const TraceEvent *TraceAnalyzer::findFilteredEvent(int index,
 						   int *filterIndex)
 {
-	TraceEvent *eptr = &events[index];
+	const TraceEvent *eptr = &events->at(index);
 	vtl::Time time = eptr->time;
 	int s = filteredEvents.size();
 	int i;
@@ -581,11 +583,11 @@ const TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
 {
 	int i;
 
-	if (startidx < 0 || startidx >= (int) events.size())
+	if (startidx < 0 || startidx >= (int) events->size())
 		return nullptr;
 
 	for (i = startidx; i >= 0; i--) {
-		const TraceEvent &event = events[i];
+		const TraceEvent &event = events->at(i);
 		if ((event.type == SCHED_WAKEUP ||
 		     event.type == SCHED_WAKEUP_NEW) &&
 				generic_sched_wakeup_pid(event) == pid) {
@@ -813,13 +815,13 @@ void TraceAnalyzer::processPerf()
 void TraceAnalyzer::processAllFilters()
 {
 	int i;
-	int s = events.size();
+	int s = events->size();
 	const TraceEvent *eptr;
 
 	filteredEvents.clear();
 
 	for (i = 0; i < s; i++) {
-		const TraceEvent &event = events[i];
+		const TraceEvent &event = events->at(i);
 		eptr = &event;
 		/* OR filters */
 		if (OR_filterState.isEnabled(FilterState::FILTER_PID) &&

@@ -108,8 +108,6 @@ public:
 	bool isOpen();
 	void close();
 	void processTrace();
-	vtl::TList<TraceEvent> events;
-	vtl::TList <const TraceEvent*> filteredEvents;
 	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
 						 int pid,
 						 int *index) const;
@@ -141,13 +139,6 @@ public:
 	void doLimitedStats();
 	void setQCustomPlot(QCustomPlot *plot);
 	__always_inline Task *findTask(int pid);
-	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
-		*cpuTaskMaps;
-	vtl::AVLTree<int, TaskHandle> taskMap;
-	CpuFreq *cpuFreq;
-	CpuIdle *cpuIdle;
-	QList<Migration> migrations;
-	QList<MigrationArrow*> migrationArrows;
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
@@ -160,6 +151,15 @@ public:
 	bool isFiltered();
 	bool filterActive(FilterState::filter_t filter);
 	bool exportTraceFile(const char *fileName, int *ts_errno);
+	vtl::TList<TraceEvent> *events;
+	vtl::TList <const TraceEvent*> filteredEvents;
+	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
+		*cpuTaskMaps;
+	vtl::AVLTree<int, TaskHandle> taskMap;
+	CpuFreq *cpuFreq;
+	CpuIdle *cpuIdle;
+	QList<Migration> migrations;
+	QList<MigrationArrow*> migrationArrows;
 private:
 	TraceParser *parser;
 	void prepareDataStructures();
@@ -434,7 +434,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 		/* This should be very likely for a task that just forked !*/
 		task->isNew = false;
 		task->pid = m.pid;
-		task->events = &events;
+		task->events = events;
 		task->schedTimev.append(event.time.toDouble());
 		task->schedData.append(FLOOR_BIT);
 		task->schedEventIdx.append(idx);
@@ -459,7 +459,7 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 	Task *task = &taskMap[m.pid].getTask();
 	if (task->isNew) {
 		task->pid = m.pid;
-		task->events = &events;
+		task->events = events;
 	}
 	task->exitStatus = STATUS_EXITCALLED;
 }
@@ -493,7 +493,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->checkName(event.taskName->ptr);
 		if (task->isNew) {
 			task->pid = event.pid;
-			task->events = &events;
+			task->events = events;
 		}
 	}
 
@@ -518,7 +518,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		/* true means task is newly constructed above */
 		task->pid = oldpid;
 		task->isNew = false;
-		task->events = &events;
+		task->events = events;
 		name = sched_switch_oldname_strdup(ttype, event, taskNamePool);
 		task->checkName(name);
 
@@ -556,7 +556,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		/* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
-		cpuTask->events = &events;
+		cpuTask->events = events;
 
 		/* Apparently this task was on CPU when we started tracing */
 		cpuTask->schedTimev.append(startTimeDbl);
@@ -587,7 +587,7 @@ skip:
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
-		task->events = &events;
+		task->events = events;
 		name = sched_switch_newname_strdup(ttype, event, taskNamePool);
 		if (name != nullptr)
 			task->checkName(name);
@@ -617,7 +617,7 @@ skip:
 		/* true means task is newly constructed above */
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
-		cpuTask->events = &events;
+		cpuTask->events = events;
 
 		cpuTask->schedTimev.append(startTimeDbl);
 		cpuTask->schedData.append(FLOOR_BIT);
@@ -662,7 +662,7 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	if (task->isNew) {
 		task->pid = pid;
 		task->isNew = false;
-		task->events = &events;
+		task->events = events;
 		name = sched_wakeup_name_strdup(ttype, event, taskNamePool);
 		if (name != nullptr)
 			task->checkName(name);
@@ -759,13 +759,13 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 	if (indexReady <= 0)
 		return;
 
-	startTime = events[0].time;
+	startTime = (*events)[0].time;
 	AbstractTask::setStartTime(startTime);
 	startTimeDbl = startTime.toDouble();
 
 	while(true) {
 		for (i = prevIndex; i < indexReady; i++) {
-			TraceEvent &event = events[i];
+			TraceEvent &event = (*events)[i];
 			if (!isValidCPU(event.cpu))
 				continue;
 			updateMaxCPU(event.cpu);
@@ -808,8 +808,8 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 		prevIndex = indexReady;
 		parser->waitForNextBatch(eof, indexReady);
 	}
-	endTime = events.last().time;
-	endTimeIdx = events.size() - 1;
+	endTime = events->last().time;
+	endTimeIdx = events->size() - 1;
 	AbstractTask::setEndTime(endTime);
 	endTimeDbl = endTime.toDouble();
 	nrCPUs = maxCPU + 1;
