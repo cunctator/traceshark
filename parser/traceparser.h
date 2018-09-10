@@ -153,26 +153,32 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 {
 	unsigned int i, s;
 	bool eof;
+	const TString **argv;
 
 	ThreadBuffer<TraceLine> *tbuf = tbuffers[index];
 	tbuf->beginConsumeBuffer();
 
 	s = tbuf->list.size();
+	argv = (const TString**) ptrPool->preallocN(EVENT_MAX_NR_ARGS);
 
 	for(i = 0; i < s; i++) {
 		TraceLine &line = tbuf->list[i];
 		if (ttype == TRACE_TYPE_FTRACE) {
 			TraceEvent &event = ftraceEvents->preAlloc();
 			event.argc = 0;
-			event.argv = (const TString**)
-				ptrPool->preallocN(EVENT_MAX_NR_ARGS);
-			parseLineFtrace(line, event);
+			event.argv = argv;
+			if (parseLineFtrace(line, event)) {
+				argv = (const TString**)
+					ptrPool->preallocN(EVENT_MAX_NR_ARGS);
+			}
 		} else if (ttype == TRACE_TYPE_PERF) {
 			TraceEvent &event = perfEvents->preAlloc();
 			event.argc = 0;
-			event.argv = (const TString**)
-				ptrPool->preallocN(EVENT_MAX_NR_ARGS);
-			parseLinePerf(line, event);
+			event.argv = argv;
+			if (parseLinePerf(line, event)) {
+				argv = (const TString**)
+					ptrPool->preallocN(EVENT_MAX_NR_ARGS);
+			}
 		}
 	}
 	eof = tbuf->loadBuffer->isEOF();
