@@ -48,7 +48,6 @@
  *     OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef TRACEANALYZER_H
 #define TRACEANALYZER_H
 
@@ -188,7 +187,9 @@ private:
 				  int idx);
 	__always_inline void __processSwitchEvent(tracetype_t ttype,
 						  TraceEvent &event,
-						  int idx);
+						  int idx,
+						  const sched_switch_handle_t
+						  &handle);
 	__always_inline void __processWakeupEvent(tracetype_t ttype,
 						  TraceEvent &event,
 						  int idx);
@@ -318,9 +319,14 @@ vtl::Time TraceAnalyzer::estimateWakeUp(const Task *task,
 __always_inline int
 TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 {
-	if (!tracetype_is_valid(getTraceType()))
+	sched_switch_handle_t handle;
+	tracetype_t ttype = getTraceType();
+
+	if (!tracetype_is_valid(ttype))
 		return INT_MAX;
-	return sched_switch_newpid(getTraceType(), event);
+	if (!sched_switch_parse(ttype, event, handle))
+		return INT_MAX;
+	return sched_switch_handle_newpid(ttype, event, handle);;
 }
 
 __always_inline int
@@ -464,16 +470,18 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 	task->exitStatus = STATUS_EXITCALLED;
 }
 
-__always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
-							 TraceEvent &event,
-							 int idx)
+__always_inline
+void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
+					 TraceEvent &event,
+					 int idx,
+					 const sched_switch_handle_t &handle)
 {
 	unsigned int cpu = event.cpu;
 	vtl::Time oldtime = event.time - FAKE_DELTA;
 	vtl::Time newtime = event.time + FAKE_DELTA;
 	double oldtimeDbl, newtimeDbl;
-	int oldpid = sched_switch_oldpid(ttype, event);
-	int newpid = sched_switch_newpid(ttype, event);
+	int oldpid = sched_switch_handle_oldpid(ttype, event, handle);
+	int newpid = sched_switch_handle_newpid(ttype, event, handle);
 	CPUTask *cpuTask;
 	Task *task;
 	vtl::Time delay;
@@ -511,7 +519,7 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	/* Handle the outgoing task */
 	cpuTask = &cpuTaskMaps[cpu][oldpid];
 	task = &taskMap[oldpid].getTask();
-	state = sched_switch_state(ttype, event);
+	state = sched_switch_handle_state(ttype, event, handle);
 
 	/* First handle the global task */
 	if (task->isNew) {
@@ -519,7 +527,10 @@ __always_inline void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->pid = oldpid;
 		task->isNew = false;
 		task->events = events;
-		name = sched_switch_oldname_strdup(ttype, event, taskNamePool);
+		name = sched_switch_handle_oldname_strdup(ttype,
+							  event,
+							  taskNamePool,
+							  handle);
 		task->checkName(name);
 
 		/* Apparently this task was running when we started tracing */
@@ -588,7 +599,10 @@ skip:
 		task->pid = newpid;
 		task->isNew = false;
 		task->events = events;
-		name = sched_switch_newname_strdup(ttype, event, taskNamePool);
+		name = sched_switch_handle_newname_strdup(ttype,
+							  event,
+							  taskNamePool,
+							  handle);
 		if (name != nullptr)
 			task->checkName(name);
 		delay = estimateWakeUpNew(eventCPU, newtime, startTime,
@@ -752,6 +766,7 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 	bool eof = false;
 	int indexReady = 0;
 	int prevIndex = 0;
+	sched_switch_handle_t sw_handle;
 
 	while (!eof && indexReady <= 0)
 		parser->waitForNextBatch(eof, indexReady);
@@ -783,8 +798,11 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 					__processMigrateEvent(ttype, event, i);
 				break;
 			case SCHED_SWITCH:
-				if (sched_switch_args_ok(ttype, event))
-					__processSwitchEvent(ttype, event, i);
+				if (sched_switch_parse(ttype, event,
+						       sw_handle)) {
+					__processSwitchEvent(ttype, event, i,
+							     sw_handle);
+				}
 				break;
 			case SCHED_WAKEUP:
 			case SCHED_WAKEUP_NEW:
@@ -821,6 +839,7 @@ bool TraceAnalyzer::__processPidFilter(const TraceEvent &event,
 				       QMap<int, int> &map,
 				       bool inclusive)
 {
+	sched_switch_handle sw_handle;
 	DEFINE_FILTER_PIDMAP_ITERATOR(iter);
 	iter = map.find(event.pid);
 	if (iter == map.end()) {
@@ -841,9 +860,10 @@ bool TraceAnalyzer::__processPidFilter(const TraceEvent &event,
 			pid = sched_process_fork_childpid(ttype, event);
 			break;
 		case SCHED_SWITCH:
-			if (!sched_switch_args_ok(ttype, event))
+			if (!sched_switch_parse(ttype, event, sw_handle))
 				return true;
-			pid = sched_switch_newpid(ttype, event);
+			pid = sched_switch_handle_newpid(ttype, event,
+							 sw_handle);
 			if (pid == 0)
 				return true;
 			break;

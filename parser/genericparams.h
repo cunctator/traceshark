@@ -82,6 +82,31 @@ static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
 		return perf_##FNAME(event, pool);		   \
 }
 
+#define DECLARE_GENERIC_TRACEFN_HANDLE(FNAME, RETTYPE, HANDLETYPE)	\
+	static __always_inline RETTYPE FNAME(tracetype_t tt,		\
+					     const TraceEvent &event,	\
+					     HANDLETYPE handle		\
+		)							\
+	{								\
+		if (tt == TRACE_TYPE_FTRACE)				\
+			return ftrace_##FNAME(event, handle);		\
+		else /* (tt == TRACE_TYPE_PERF) */			\
+			return perf_##FNAME(event, handle);		\
+	}
+
+
+#define DECLARE_GENERIC_TRACEFN_POOL_HANDLE(FNAME, RETTYPE, HANDLETYPE)	\
+	static __always_inline RETTYPE FNAME(tracetype_t tt,		\
+					     const TraceEvent &event,	\
+					     StringPool *pool,		\
+					     HANDLETYPE handle)		\
+	{								\
+		if (tt == TRACE_TYPE_FTRACE)				\
+			return ftrace_##FNAME(event, pool, handle);	\
+		else /* (tt == TRACE_TYPE_PERF) */			\
+			return perf_##FNAME(event, pool, handle);	\
+	}
+
 DECLARE_GENERIC_TRACEFN(cpufreq_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(cpufreq_cpu, unsigned int)
 DECLARE_GENERIC_TRACEFN(cpufreq_freq, unsigned int)
@@ -104,6 +129,23 @@ DECLARE_GENERIC_TRACEFN(sched_switch_oldprio, unsigned int)
 DECLARE_GENERIC_TRACEFN(sched_switch_oldpid, int)
 DECLARE_GENERIC_TRACEFN_POOL(sched_switch_oldname_strdup, const char *)
 DECLARE_GENERIC_TRACEFN_POOL(sched_switch_newname_strdup, const char *)
+
+DECLARE_GENERIC_TRACEFN_HANDLE(sched_switch_parse,		\
+			       bool,				\
+			       sched_switch_handle&)
+DECLARE_GENERIC_TRACEFN_HANDLE(sched_switch_handle_newpid, int, \
+			       const sched_switch_handle&)
+DECLARE_GENERIC_TRACEFN_HANDLE(sched_switch_handle_state,   \
+			       taskstate_t,		    \
+			       const sched_switch_handle&)
+DECLARE_GENERIC_TRACEFN_HANDLE(sched_switch_handle_oldpid, int,	\
+			       const sched_switch_handle&)
+DECLARE_GENERIC_TRACEFN_POOL_HANDLE(sched_switch_handle_oldname_strdup, \
+				    const char *,			\
+				    const sched_switch_handle&)
+DECLARE_GENERIC_TRACEFN_POOL_HANDLE(sched_switch_handle_newname_strdup, \
+				    const char *,			\
+				    const sched_switch_handle&)
 
 DECLARE_GENERIC_TRACEFN(sched_wakeup_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(sched_wakeup_cpu, unsigned int)

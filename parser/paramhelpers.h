@@ -55,6 +55,25 @@
 #include <climits>
 #include "parser/traceevent.h"
 
+class perf_sched_switch_handle {
+public:
+	bool is_distro_style;
+	int index;
+};
+
+class ftrace_sched_switch_handle {
+public:
+	int index;
+};
+
+typedef class sched_switch_handle {
+public:
+	union {
+		perf_sched_switch_handle perf;
+		ftrace_sched_switch_handle ftrace;
+	};
+} sched_switch_handle_t;
+
 /* Should be enough, I wouldn't expect more than about 16 */
 #define TASKNAME_MAXLEN (128)
 

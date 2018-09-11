@@ -370,6 +370,205 @@ __perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
 const char *perf_sched_switch_newname_strdup(const TraceEvent &event,
 					     StringPool *pool);
 
+
+static __always_inline bool perf_sched_switch_parse(const TraceEvent &event,
+						    sched_switch_handle& handle)
+{
+	int i;
+
+	i = ___perf_sched_switch_find_arrow(event, handle.perf.is_distro_style);
+	if( i <= 0)
+		return false;
+	handle.perf.index = i;
+	return true;
+}
+
+static __always_inline taskstate_t
+perf_sched_switch_handle_state(const TraceEvent &event,
+			       const sched_switch_handle &handle)
+{
+	int i = handle.perf.index;
+	int j;
+	TString stateStr;
+
+	i = handle.perf.index;
+	const TString *stateArgStr = event.argv[i - 1];
+
+	if (event.argv[i - 1]->len > 2) {
+		for (j = stateArgStr->len - 2; j > 0; j--) {
+			if (stateArgStr->ptr[j] == '=') {
+				stateStr.len = stateArgStr->len - 1 - j;
+				stateStr.ptr = stateArgStr->ptr + j + 1;
+				return  __sched_state_from_tstring(&stateStr);
+			}
+		}
+	} else if (event.argv[i - 1]->len == 1) {
+		return __sched_state_from_tstring(stateArgStr);
+	}
+
+	return TASK_STATE_PARSER_ERROR;
+}
+
+static __always_inline taskstate_t
+perf_sched_switch_handle_oldpid(const TraceEvent &event,
+				const sched_switch_handle &handle)
+{
+	int i = handle.perf.index;
+	int oldpid;
+
+	if (handle.perf.is_distro_style) {
+		oldpid = int_after_char(event, i - 3, ':');
+	} else {
+		oldpid = int_after_char(event, i - 3, '=');
+	}
+	return oldpid;
+}
+
+static __always_inline int
+perf_sched_switch_handle_newpid(const TraceEvent &event,
+				const sched_switch_handle &/*handle*/)
+{
+	return int_after_char2(event, event.argc - 2, '=', ':');
+}
+
+static __always_inline const char *
+__perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
+					  StringPool *pool,
+					  const sched_switch_handle &handle)
+{
+	int i;
+	int beginidx;
+	int endidx;
+	int len = 0;
+	char *c;
+	const TString *first;
+	bool ok;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	const TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
+
+	i = handle.perf.index;
+	/*
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character.
+	 */
+	first = event.argv[i + 1];
+
+	if (!handle.perf.is_distro_style) {
+		beginidx = i + 2;
+		endidx = event.argc - 3;
+		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+					  ok);
+		if (!ok)
+			return nullptr;
+
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
+			return nullptr;
+	} else {
+		beginidx = i + 1;
+		endidx = event.argc - 3;
+
+		merge_args_into_cstring(event, beginidx, endidx,
+					c, len, TASKNAME_MAXLEN,
+					ok);
+		if (!ok)
+			return nullptr;
+
+		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
+					   ok);
+		if (!ok)
+			return nullptr;
+	}
+
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
+}
+
+const char *
+perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
+					StringPool *pool,
+					const sched_switch_handle &handle);
+
+static __always_inline const char *
+__perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
+					  StringPool *pool,
+					  const sched_switch_handle &handle)
+{
+	int i;
+	int beginidx;
+	int endidx;
+	int len = 0;
+	char *c;
+	const TString *first;
+	bool ok;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	const TString *retstr;
+
+	c = &sbuf[0];
+	ts.ptr = c;
+
+	i = handle.perf.index;
+	/*
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character
+	 */
+	first = event.argv[0];
+
+	if (!handle.perf.is_distro_style) {
+		beginidx = 1;
+		endidx = i - 4;
+		__copy_tstring_after_char(first, '=', c, len,
+					  TASKNAME_MAXLEN, ok);
+		if (!ok)
+			return nullptr;
+
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
+			return nullptr;
+
+	} else {
+		beginidx = 0;
+		endidx = i - 4;
+
+		merge_args_into_cstring(event, beginidx, endidx,
+					c, len, TASKNAME_MAXLEN,
+					ok);
+		if (!ok)
+			return nullptr;
+
+		__copy_tstring_before_char(first, ':',
+					   c, len, TASKNAME_MAXLEN,
+					   ok);
+
+		if (!ok)
+			return nullptr;
+	}
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+
+	return retstr->ptr;
+}
+
+const char *
+perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
+					StringPool *pool,
+					const sched_switch_handle &handle);
+
 /*
  * These functions for sched_wakeup assumes that the format is either the "old"
  * or "new", that

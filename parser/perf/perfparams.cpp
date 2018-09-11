@@ -74,3 +74,19 @@ const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 {
 	return __perf_sched_process_fork_childname_strdup(event, pool);
 }
+
+const char
+*perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
+					 StringPool *pool,
+					 const sched_switch_handle &handle)
+{
+	return __perf_sched_switch_handle_oldname_strdup(event, pool, handle);
+}
+
+const char *
+perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
+					StringPool *pool,
+					const sched_switch_handle &handle)
+{
+	return __perf_sched_switch_handle_newname_strdup(event, pool, handle);
+}
