@@ -321,7 +321,7 @@ unsigned int TraceAnalyzer::guessTimePrecision()
  * This function is supposed to be called seldom, thus it's ok to not have it
  * as optimized as the other functions, e.g. in terms of inlining
  */
-void TraceAnalyzer::handleWrongTaskOnCPU(TraceEvent &/*event*/,
+void TraceAnalyzer::handleWrongTaskOnCPU(const TraceEvent &/*event*/,
 					 unsigned int cpu,
 					 CPU *eventCPU, int oldpid,
 					 const vtl::Time &oldtime,

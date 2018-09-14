@@ -181,32 +181,32 @@ private:
 	__always_inline vtl::Time estimateWakeUp(const Task *task,
 						 const vtl::Time &newTime,
 						 bool &valid) const;
-	void handleWrongTaskOnCPU(TraceEvent &event, unsigned int cpu,
+	void handleWrongTaskOnCPU(const TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, int oldpid,
 				  const vtl::Time &oldtime,
 				  int idx);
 	__always_inline void __processSwitchEvent(tracetype_t ttype,
-						  TraceEvent &event,
+						  const TraceEvent &event,
 						  int idx,
 						  const sched_switch_handle_t
 						  &handle);
 	__always_inline void __processWakeupEvent(tracetype_t ttype,
-						  TraceEvent &event,
+						  const TraceEvent &event,
 						  int idx);
 	__always_inline void __processCPUfreqEvent(tracetype_t ttype,
-						   TraceEvent &event,
+						   const TraceEvent &event,
 						   int idx);
 	__always_inline void __processCPUidleEvent(tracetype_t ttype,
-						   TraceEvent &event,
+						   const TraceEvent &event,
 						   int idx);
 	__always_inline void __processMigrateEvent(tracetype_t ttype,
-						   TraceEvent &event,
+						   const TraceEvent &event,
 						   int idx);
 	__always_inline void __processForkEvent(tracetype_t ttype,
-						TraceEvent &event,
+						const TraceEvent &event,
 						int idx);
 	__always_inline void __processExitEvent(tracetype_t ttype,
-						TraceEvent &event,
+						const TraceEvent &event,
 						int idx);
 	void addCpuFreqWork(unsigned int cpu,
 			    QList<AbstractWorkItem*> &list);
@@ -401,9 +401,10 @@ __always_inline Task *TraceAnalyzer::findTask(int pid)
 		return iter.value().task;
 }
 
-__always_inline void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
-							  TraceEvent &event,
-							  int /* idx */)
+__always_inline
+void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
+					  const TraceEvent &event,
+					  int /* idx */)
 {
 	Migration m;
 	unsigned int oldcpu = sched_migrate_origCPU(ttype, event);
@@ -423,7 +424,7 @@ __always_inline void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
 }
 
 __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
-						       TraceEvent &event,
+						       const TraceEvent &event,
 						       int idx)
 {
 	Migration m;
@@ -451,7 +452,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 }
 
 __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
-						       TraceEvent &event,
+						       const TraceEvent &event,
 						       int /* idx */)
 {
 	Migration m;
@@ -472,7 +473,7 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 
 __always_inline
 void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
-					 TraceEvent &event,
+					 const TraceEvent &event,
 					 int idx,
 					 const sched_switch_handle_t &handle)
 {
@@ -654,9 +655,10 @@ out:
 	return;
 }
 
-__always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
-							 TraceEvent &event,
-							 int /* idx */)
+__always_inline
+void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
+					 const TraceEvent &event,
+					 int /* idx */)
 {
 	int pid;
 	Task *task;
@@ -686,9 +688,10 @@ __always_inline void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	}
 }
 
-__always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
-							  TraceEvent &event,
-							  int /* idx */)
+__always_inline
+void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
+					  const TraceEvent &event,
+					  int /* idx */)
 {
 	unsigned int cpu = cpufreq_cpu(ttype, event);
 	vtl::Time time = event.time;
@@ -711,9 +714,10 @@ __always_inline void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 	cpuFreq[cpu].data.append((double) freq);
 }
 
-__always_inline void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
-							  TraceEvent &event,
-							  int /* idx */)
+__always_inline
+void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
+					  const TraceEvent &event,
+					  int /* idx */)
 {
 	unsigned int cpu = cpuidle_cpu(ttype, event);
 	double time = event.time.toDouble();
