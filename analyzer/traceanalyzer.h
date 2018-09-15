@@ -187,9 +187,7 @@ private:
 				  int idx);
 	__always_inline void __processSwitchEvent(tracetype_t ttype,
 						  const TraceEvent &event,
-						  int idx,
-						  const sched_switch_handle_t
-						  &handle);
+						  int idx);
 	__always_inline void __processWakeupEvent(tracetype_t ttype,
 						  const TraceEvent &event,
 						  int idx);
@@ -407,8 +405,14 @@ void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
 					  int /* idx */)
 {
 	Migration m;
-	unsigned int oldcpu = sched_migrate_origCPU(ttype, event);
-	unsigned int newcpu = sched_migrate_destCPU(ttype, event);
+	unsigned int oldcpu;
+	unsigned int newcpu;
+
+	if (!sched_migrate_args_ok(ttype, event))
+		return;
+
+	oldcpu = sched_migrate_origCPU(ttype, event);
+	newcpu = sched_migrate_destCPU(ttype, event);
 
 	if (!isValidCPU(oldcpu) || !isValidCPU(newcpu))
 		return;
@@ -429,6 +433,9 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 {
 	Migration m;
 	const char *childname;
+
+	if (!sched_process_fork_args_ok(ttype, event))
+		return;
 
 	m.pid = sched_process_fork_childpid(ttype, event);
 	m.oldcpu = -1;
@@ -457,6 +464,9 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 {
 	Migration m;
 
+	if (!sched_process_exit_args_ok(ttype, event))
+		return;
+
 	m.pid = sched_process_exit_pid(ttype, event);
 	m.oldcpu = event.cpu;
 	m.newcpu = -1;
@@ -474,15 +484,15 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 __always_inline
 void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 					 const TraceEvent &event,
-					 int idx,
-					 const sched_switch_handle_t &handle)
+					 int idx)
 {
+	sched_switch_handle_t handle;
 	unsigned int cpu = event.cpu;
 	vtl::Time oldtime = event.time - FAKE_DELTA;
 	vtl::Time newtime = event.time + FAKE_DELTA;
 	double oldtimeDbl, newtimeDbl;
-	int oldpid = sched_switch_handle_oldpid(ttype, event, handle);
-	int newpid = sched_switch_handle_newpid(ttype, event, handle);
+	int oldpid;
+	int newpid;
 	CPUTask *cpuTask;
 	Task *task;
 	vtl::Time delay;
@@ -492,6 +502,12 @@ void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	const char *name;
 	bool runnable;
 	bool preempted;
+
+	if (!sched_switch_parse(ttype, event, handle))
+		return;
+
+	oldpid = sched_switch_handle_oldpid(ttype, event, handle);
+	newpid = sched_switch_handle_newpid(ttype, event, handle);
 
 	if (!isValidCPU(cpu))
 		return;
@@ -665,6 +681,9 @@ void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	vtl::Time time;
 	const char *name;
 
+	if (!sched_wakeup_args_ok(ttype, event))
+		return;
+
 	/* Only interested in success */
 	if (!sched_wakeup_success(ttype, event))
 		return;
@@ -693,9 +712,15 @@ void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 					  const TraceEvent &event,
 					  int /* idx */)
 {
-	unsigned int cpu = cpufreq_cpu(ttype, event);
+	unsigned int cpu;
+	unsigned int freq;
 	vtl::Time time = event.time;
-	unsigned int freq = cpufreq_freq(ttype, event);
+
+	if(!cpufreq_args_ok(ttype, event))
+		return;
+
+	cpu = cpufreq_cpu(ttype, event);
+	freq = cpufreq_freq(ttype, event);
 
 	if (!isValidCPU(cpu))
 		return;
@@ -719,9 +744,16 @@ void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
 					  const TraceEvent &event,
 					  int /* idx */)
 {
-	unsigned int cpu = cpuidle_cpu(ttype, event);
-	double time = event.time.toDouble();
-	unsigned int state = cpuidle_state(ttype, event) + 1;
+	unsigned int cpu;
+	double time;
+	unsigned int state;
+
+	if (!cpuidle_args_ok(ttype, event))
+		return;
+
+	cpu = cpuidle_cpu(ttype, event);
+	time = event.time.toDouble();
+	state = cpuidle_state(ttype, event) + 1;
 
 	if (!isValidCPU(cpu))
 		return;
@@ -770,7 +802,6 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 	bool eof = false;
 	int indexReady = 0;
 	int prevIndex = 0;
-	sched_switch_handle_t sw_handle;
 
 	while (!eof && indexReady <= 0)
 		parser->waitForNextBatch(eof, indexReady);
@@ -790,36 +821,26 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 			updateMaxCPU(event.cpu);
 			switch (event.type) {
 			case CPU_FREQUENCY:
-				if (cpufreq_args_ok(ttype, event))
-					__processCPUfreqEvent(ttype, event, i);
+				__processCPUfreqEvent(ttype, event, i);
 				break;
 			case CPU_IDLE:
-				if (cpuidle_args_ok(ttype, event))
-					__processCPUidleEvent(ttype, event, i);
+				__processCPUidleEvent(ttype, event, i);
 				break;
 			case SCHED_MIGRATE_TASK:
-				if (sched_migrate_args_ok(ttype, event))
-					__processMigrateEvent(ttype, event, i);
+				__processMigrateEvent(ttype, event, i);
 				break;
 			case SCHED_SWITCH:
-				if (sched_switch_parse(ttype, event,
-						       sw_handle)) {
-					__processSwitchEvent(ttype, event, i,
-							     sw_handle);
-				}
+				__processSwitchEvent(ttype, event, i);
 				break;
 			case SCHED_WAKEUP:
 			case SCHED_WAKEUP_NEW:
-				if (sched_wakeup_args_ok(ttype, event))
-					__processWakeupEvent(ttype, event, i);
+				__processWakeupEvent(ttype, event, i);
 				break;
 			case SCHED_PROCESS_FORK:
-				if (sched_process_fork_args_ok(ttype, event))
-					__processForkEvent(ttype, event, i);
+				__processForkEvent(ttype, event, i);
 				break;
 			case SCHED_PROCESS_EXIT:
-				if (sched_process_exit_args_ok(ttype, event))
-					__processExitEvent(ttype, event, i);
+				__processExitEvent(ttype, event, i);
 				break;
 			default:
 				break;
