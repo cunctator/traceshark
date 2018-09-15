@@ -213,9 +213,16 @@ perf_sched_switch_handle_oldpid(const TraceEvent &event,
 
 static __always_inline int
 perf_sched_switch_handle_newpid(const TraceEvent &event,
-				const sched_switch_handle &/*handle*/)
+				const sched_switch_handle &handle)
 {
-	return int_after_char2(event, event.argc - 2, '=', ':');
+	int newpid;
+
+	if (handle.perf.is_distro_style) {
+		newpid = int_after_char(event, event.argc - 2, ':');
+	} else {
+		newpid = int_after_char(event, event.argc - 2, '=');
+	}
+	return newpid;
 }
 
 static __always_inline unsigned int

@@ -311,41 +311,6 @@ static __always_inline int int_after_char(const TraceEvent &event,
 	return (neg ? -param:param);
 }
 
-static __always_inline int int_after_char2(const TraceEvent &event,
-					   int n_param, char ch1, char ch2)
-{
-	char *last;
-	char *first;
-	char *c;
-	bool found = false;
-	int param = 0;
-	int digit;
-	bool neg = false;
-
-
-	last = event.argv[n_param]->ptr + event.argv[n_param]->len - 1;
-	first = event.argv[n_param]->ptr;
-	for (c = last; c >= first; c--) {
-		if (*c == ch1 || *c == ch2) {
-			found = true;
-			break;
-		}
-	}
-	if (!found)
-		return ABSURD_INT; /* return absurd if error */
-	c++;
-	if (*c == '-') {
-		neg = true;
-		c++;
-	}
-	for (; c <= last; c++) {
-		digit = *c - '0';
-		param *= 10;
-		param += digit;
-	}
-	return (neg ? -param:param);
-}
-
 static __always_inline bool is_param_inside_braces(const TString *str)
 {
 	int s = str->len;
