@@ -51,18 +51,6 @@
 
 #include "parser/perf/perfparams.h"
 
-const char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
-					     StringPool *pool)
-{
-	return __perf_sched_switch_oldname_strdup(event, pool);
-}
-
-const char *perf_sched_switch_newname_strdup(const TraceEvent &event,
-					     StringPool *pool)
-{
-	return __perf_sched_switch_newname_strdup(event, pool);
-}
-
 const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
 					  StringPool *pool)
 {

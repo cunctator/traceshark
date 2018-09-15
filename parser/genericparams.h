@@ -121,15 +121,6 @@ DECLARE_GENERIC_TRACEFN(sched_migrate_origCPU, unsigned int)
 DECLARE_GENERIC_TRACEFN(sched_migrate_prio, unsigned int)
 DECLARE_GENERIC_TRACEFN(sched_migrate_pid, int)
 
-DECLARE_GENERIC_TRACEFN(sched_switch_args_ok, bool)
-DECLARE_GENERIC_TRACEFN(sched_switch_newprio, unsigned int)
-DECLARE_GENERIC_TRACEFN(sched_switch_newpid, int)
-DECLARE_GENERIC_TRACEFN(sched_switch_state, taskstate_t)
-DECLARE_GENERIC_TRACEFN(sched_switch_oldprio, unsigned int)
-DECLARE_GENERIC_TRACEFN(sched_switch_oldpid, int)
-DECLARE_GENERIC_TRACEFN_POOL(sched_switch_oldname_strdup, const char *)
-DECLARE_GENERIC_TRACEFN_POOL(sched_switch_newname_strdup, const char *)
-
 DECLARE_GENERIC_TRACEFN_HANDLE(sched_switch_parse,		\
 			       bool,				\
 			       sched_switch_handle&)

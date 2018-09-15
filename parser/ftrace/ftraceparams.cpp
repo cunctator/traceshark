@@ -51,16 +51,6 @@
 
 #include "parser/ftrace/ftraceparams.h"
 
-const char *ftrace_sched_switch_oldname_strdup(const TraceEvent &event,
-					       StringPool *pool) {
-	return __ftrace_sched_switch_oldname_strdup(event, pool);
-}
-
-const char *ftrace_sched_switch_newname_strdup(const TraceEvent &event,
-					       StringPool *pool) {
-	return __ftrace_sched_switch_newname_strdup(event, pool);
-}
-
 const char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
 					    StringPool *pool) {
 	return __ftrace_sched_wakeup_name_strdup(event, pool);

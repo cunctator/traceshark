@@ -88,12 +88,6 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 #define perf_sched_migrate_pid(EVENT) (int_after_char(EVENT, EVENT.argc - 4, \
 						      '='))
 
-#define perf_sched_switch_args_ok(EVENT) (EVENT.argc >= 6)
-#define perf_sched_switch_newprio(EVENT) \
-	(uint_after_char(EVENT, EVENT.argc - 1, '='))
-#define perf_sched_switch_newpid(EVENT)				\
-	(int_after_char2(EVENT, EVENT.argc - 2, '=', ':'))
-
 #define SWITCH_PPID_PFIX "prev_pid="
 #define SWITCH_PPRI_PFIX "prev_prio="
 #define SWITCH_PSTA_PFIX "prev_state="
@@ -164,213 +158,6 @@ ___perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 	return i;
 }
 
-static __always_inline taskstate_t
-perf_sched_switch_state(const TraceEvent &event)
-{
-	int i;
-	int j;
-	TString stateStr;
-	bool is_distro_style;
-
-	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
-	if( i <= 0)
-		return TASK_STATE_PARSER_ERROR;
-	const TString *stateArgStr = event.argv[i - 1];
-
-	if (event.argv[i - 1]->len > 2) {
-		for (j = stateArgStr->len - 2; j > 0; j--) {
-			if (stateArgStr->ptr[j] == '=') {
-				stateStr.len = stateArgStr->len - 1 - j;
-				stateStr.ptr = stateArgStr->ptr + j + 1;
-				return __sched_state_from_tstring(&stateStr);
-			}
-		}
-	} else if (event.argv[i - 1]->len == 1) {
-		return __sched_state_from_tstring(stateArgStr);
-	}
-
-	return TASK_STATE_PARSER_ERROR;
-}
-
-static __always_inline unsigned int
-perf_sched_switch_oldprio(const TraceEvent &event)
-{
-	int i;
-	bool is_distro_style;
-
-	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
-	if (i <= 3)
-		return ABSURD_UNSIGNED;
-
-	if (is_distro_style) {
-		return param_inside_braces(event, i - 2);
-	} else {
-		return uint_after_char(event, i - 2, '=');
-	}
-	return ABSURD_UNSIGNED;
-}
-
-static __always_inline int
-perf_sched_switch_oldpid(const TraceEvent &event)
-{
-	int i;
-	bool is_distro_style;
-
-	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
-	if (i != 0)  {
-		if (is_distro_style) {
-			return int_after_char(event, i - 3, ':');
-		} else {
-			return int_after_char(event, i - 3, '=');
-		}
-	}
-	return ABSURD_INT;
-}
-
-#define PERF_PREVCOMM_PREFIX "prev_comm="
-
-static __always_inline const char *
-__perf_sched_switch_oldname_strdup(const TraceEvent &event,
-				   StringPool *pool)
-{
-	int i;
-	int beginidx;
-	int endidx;
-	int len = 0;
-	char *c;
-	const TString *first;
-	bool ok;
-	char sbuf[TASKNAME_MAXLEN + 1];
-	TString ts;
-	const TString *retstr;
-	bool is_distro_style;
-
-	c = &sbuf[0];
-	ts.ptr = c;
-
-	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
-	if (i == 0)
-		return nullptr;
-
-	/*
-	 * This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character
-	 */
-	first = event.argv[0];
-
-	if (!is_distro_style) {
-		beginidx = 1;
-		endidx = i - 4;
-		__copy_tstring_after_char(first, '=', c, len,
-					  TASKNAME_MAXLEN, ok);
-		if (!ok)
-			return nullptr;
-
-		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
-						      c, len, TASKNAME_MAXLEN,
-						      ok);
-		if (!ok)
-			return nullptr;
-
-	} else {
-		beginidx = 0;
-		endidx = i - 4;
-
-		merge_args_into_cstring(event, beginidx, endidx,
-					c, len, TASKNAME_MAXLEN,
-					ok);
-		if (!ok)
-			return nullptr;
-
-		__copy_tstring_before_char(first, ':',
-					   c, len, TASKNAME_MAXLEN,
-					   ok);
-
-		if (!ok)
-			return nullptr;
-	}
-	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
-	if (retstr == nullptr)
-		return nullptr;
-
-	return retstr->ptr;
-}
-
-const char *perf_sched_switch_oldname_strdup(const TraceEvent &event,
-					     StringPool *pool);
-
-#define PERF_NEXTCOMM_PREFIX "next_comm="
-
-static __always_inline const char *
-__perf_sched_switch_newname_strdup(const TraceEvent &event, StringPool *pool)
-{
-	int i;
-	int beginidx;
-	int endidx;
-	int len = 0;
-	char *c;
-	const TString *first;
-	bool ok;
-	char sbuf[TASKNAME_MAXLEN + 1];
-	TString ts;
-	const TString *retstr;
-	bool is_distro_style;
-
-	c = &sbuf[0];
-	ts.ptr = c;
-
-	i = ___perf_sched_switch_find_arrow(event, is_distro_style);
-	if (i == 0)
-		return nullptr;
-
-	/*
-	 * This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character.
-	 */
-	first = event.argv[i + 1];
-
-	if (!is_distro_style) {
-		beginidx = i + 2;
-		endidx = event.argc - 3;
-		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
-					  ok);
-		if (!ok)
-			return nullptr;
-
-		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
-						      c, len, TASKNAME_MAXLEN,
-						      ok);
-		if (!ok)
-			return nullptr;
-	} else {
-		beginidx = i + 1;
-		endidx = event.argc - 3;
-
-		merge_args_into_cstring(event, beginidx, endidx,
-					c, len, TASKNAME_MAXLEN,
-					ok);
-		if (!ok)
-			return nullptr;
-
-		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
-					   ok);
-		if (!ok)
-			return nullptr;
-	}
-
-	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
-	if (retstr == nullptr)
-		return nullptr;
-
-	return retstr->ptr;
-}
-
-const char *perf_sched_switch_newname_strdup(const TraceEvent &event,
-					     StringPool *pool);
-
-
 static __always_inline bool perf_sched_switch_parse(const TraceEvent &event,
 						    sched_switch_handle& handle)
 {
@@ -409,7 +196,7 @@ perf_sched_switch_handle_state(const TraceEvent &event,
 	return TASK_STATE_PARSER_ERROR;
 }
 
-static __always_inline taskstate_t
+static __always_inline int
 perf_sched_switch_handle_oldpid(const TraceEvent &event,
 				const sched_switch_handle &handle)
 {
@@ -429,6 +216,33 @@ perf_sched_switch_handle_newpid(const TraceEvent &event,
 				const sched_switch_handle &/*handle*/)
 {
 	return int_after_char2(event, event.argc - 2, '=', ':');
+}
+
+static __always_inline unsigned int
+perf_sched_switch_handle_oldprio(const TraceEvent &event,
+				 const sched_switch_handle &handle)
+{
+	int i = handle.perf.index;
+
+	if (i <= 3)
+		return ABSURD_UNSIGNED;
+
+	if (handle.perf.is_distro_style) {
+		return param_inside_braces(event, i - 2);
+	} else {
+		return uint_after_char(event, i - 2, '=');
+	}
+}
+
+static __always_inline unsigned int
+perf_sched_switch_handle_newprio(const TraceEvent &event,
+				 const sched_switch_handle &handle)
+{
+	if (handle.perf.is_distro_style) {
+		return param_inside_braces(event, event.argc - 1);
+	} else {
+		return uint_after_char(event, event.argc - 1, '=');
+	}
 }
 
 static __always_inline const char *
