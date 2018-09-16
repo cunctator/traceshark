@@ -330,9 +330,13 @@ TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 __always_inline int
 TraceAnalyzer::generic_sched_wakeup_pid(const TraceEvent &event) const
 {
-	if (!tracetype_is_valid(getTraceType()))
+	tracetype_t ttype = getTraceType();
+
+	if (!tracetype_is_valid(ttype))
 		return INT_MAX;
-	return sched_wakeup_pid(getTraceType(), event);
+	if (!sched_wakeup_args_ok(ttype, event))
+		return INT_MAX;
+	return sched_wakeup_pid(ttype, event);
 }
 
 __always_inline unsigned int TraceAnalyzer::getMaxCPU() const
