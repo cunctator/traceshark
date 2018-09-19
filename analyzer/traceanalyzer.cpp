@@ -337,19 +337,19 @@ void TraceAnalyzer::handleWrongTaskOnCPU(const TraceEvent &/*event*/,
 		cpuTask = &cpuTaskMaps[cpu][epid];
 		Q_ASSERT(!cpuTask->isNew);
 		Q_ASSERT(!cpuTask->schedTimev.isEmpty());
-		prevtime = cpuTask->schedTimev.last();
+		prevtime = eventCPU->lastSched;
 		faketime = prevtime + FAKE_DELTA;
 		fakeDbl = faketime.toDouble();
 		cpuTask->schedTimev.append(fakeDbl);
 		cpuTask->schedData.append(FLOOR_BIT);
-		cpuTask->schedEventIdx.append(idx);
+		cpuTask->schedEventIdx.append(eventCPU->lastSchedIdx);
 
 		task = findTask(epid);
 		Q_ASSERT(task != nullptr);
 		task->lastSleepEntry = faketime;
 		task->schedTimev.append(fakeDbl);
 		task->schedData.append(FLOOR_BIT);
-		task->schedEventIdx.append(idx);
+		task->schedEventIdx.append(eventCPU->lastSchedIdx);
 	}
 
 	if (oldpid > 0) {

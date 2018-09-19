@@ -516,8 +516,16 @@ void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	if (!isValidCPU(cpu))
 		return;
 
-	/* This is done to update the names of existing tasks */
-	if (event.pid > 0) {
+	/*
+	 * This is done to update the names of existing tasks. Here we will
+	 * accept the negative pids of ghost processes. The idea is that they
+	 * get added to the taskMap, so that they can be selected by the user
+	 * when filtering. I never liked negative pids but the reality is that
+	 * some kernel versions have them, at least 4.14.x does use a negative
+	 * pid in the final switch event when an exited process is being
+	 * switched out after exit has been called.
+	 */
+	if (event.pid != 0) {
 		task = &taskMap[event.pid].getTask();
 		task->checkName(event.taskName->ptr);
 		if (task->isNew) {
@@ -530,9 +538,15 @@ void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid, oldtime,
 				     idx);
 
-	if (oldpid == 0) {
+	if (oldpid <= 0) {
 		eventCPU->lastExitIdle = oldtime;
-		goto skip; /* We don't care about the idle task */
+		/*
+		 * We don't care about the idle task. Neither do we care if the
+		 * pid is negative. I am not aware of any kernel version that
+		 * would have a negative oldpid but let's include that case as
+		 * well.
+		 */
+		goto skip;
 	}
 
 	oldtimeDbl = oldtime.toDouble();
@@ -607,9 +621,15 @@ void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	}
 
 skip:
-	if (newpid == 0) {
+	if (newpid <= 0) {
 		eventCPU->lastEnterIdle = newtime;
-		goto out; /* We don't care about the idle task */
+		/*
+		 * We don't care about the idle task. Neither do we care if the
+		 * pid is negative. I am not aware of any kernel version that
+		 * would have a negative newpid but let's include that case as
+		 * well.
+		 */
+		goto out;
 	}
 
 	newtimeDbl = newtime.toDouble();
@@ -672,6 +692,7 @@ out:
 	eventCPU->hasBeenScheduled = true;
 	eventCPU->pidOnCPU = newpid;
 	eventCPU->lastSched = newtime;
+	eventCPU->lastSchedIdx = idx;
 	return;
 }
 

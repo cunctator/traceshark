@@ -63,6 +63,7 @@ public:
 
 	/* Time when pidOnCPU was scheduled */
 	vtl::Time lastSched;
+	int lastSchedIdx;
 
 	vtl::Time lastEnterIdle;
 	vtl::Time lastExitIdle;
