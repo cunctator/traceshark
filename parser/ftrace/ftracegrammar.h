@@ -55,6 +55,7 @@
 #include "misc/traceshark.h"
 #include "mm/stringpool.h"
 #include "mm/stringtree.h"
+#include "parser/paramhelpers.h"
 #include "parser/traceevent.h"
 #include "vtl/time.h"
 
@@ -72,16 +73,19 @@ public:
 	FtraceGrammar();
 	~FtraceGrammar();
 	void clear();
-	__always_inline bool parseLine(TraceLine &line, TraceEvent &event);
+	__always_inline bool parseLine(const TraceLine &line,
+				       TraceEvent &event);
 	StringTree *eventTree;
 private:
 	void setupEventTree();
-	__always_inline bool NamePidMatch(TString *str, TraceEvent &event);
-	__always_inline bool CPUMatch(TString *str, TraceEvent &event);
+	__always_inline bool NamePidMatch(const TString *str,
+					  TraceEvent &event);
+	__always_inline bool CPUMatch(const TString *str,
+				      TraceEvent &event);
 	__always_inline bool extractNameAndPid(int &pid, TString &compound);
-	__always_inline bool TimeMatch(TString *str, TraceEvent &event);
-	__always_inline bool EventMatch(TString *str, TraceEvent &event);
-	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
+	__always_inline bool TimeMatch(const TString *str, TraceEvent &event);
+	__always_inline bool EventMatch(const TString *str, TraceEvent &event);
+	__always_inline bool ArgMatch(const TString *str, TraceEvent &event);
 	StringPool *argPool;
 	StringPool *namePool;
 	int unknownTypeCounter;
@@ -92,11 +96,11 @@ private:
 		STATE_EVENT,
 		STATE_ARG
 	} grammarstate_t;
-	unsigned int tmp_argc;
-	TString *tmp_argv[EVENT_MAX_NR_ARGS];
+	int tmp_argc;
+	const TString *tmp_argv[EVENT_MAX_NR_ARGS];
 };
 
-__always_inline bool FtraceGrammar::NamePidMatch(TString *str,
+__always_inline bool FtraceGrammar::NamePidMatch(const TString *str,
 						 TraceEvent &/*event*/)
 {
 	/*
@@ -114,7 +118,7 @@ __always_inline bool FtraceGrammar::NamePidMatch(TString *str,
 	return true;
 }
 
-__always_inline bool FtraceGrammar::CPUMatch(TString *str,
+__always_inline bool FtraceGrammar::CPUMatch(const TString *str,
 					     TraceEvent &event)
 {
 	char *c;
@@ -181,20 +185,24 @@ found1:
 	return true;
 }
 
-__always_inline bool FtraceGrammar::TimeMatch(TString *str,
+__always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 					      TraceEvent &event)
 {
 	bool rval;
 	TString namestr;
+	TString finistr;
 	const TString *newname;
-	char cstr[256];
-	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
-	unsigned int i;
-	unsigned int fini;
+	char nbuf[256];
+	char fbuf[256];
+	const int maxlen = sizeof(nbuf) / sizeof(char) - 1;
+	int i;
+	int fini;
 	uint32_t hash;
 
-	namestr.ptr = cstr;
+	namestr.ptr = nbuf;
 	namestr.len = 0;
+	finistr.ptr = fbuf;
+	finistr.len = 0;
 
 	/*
 	 * atof() and sscanf() are not up to the task because they are
@@ -216,7 +224,8 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 		 * Extract the pid and the final portion of the name from
 		 * tmp_argv[fini]
 		 */
-		if (!extractNameAndPid(event.pid, *tmp_argv[fini]))
+		finistr.set(tmp_argv[fini], maxlen);
+		if (!extractNameAndPid(event.pid, finistr))
 			return false;
 
 		if (tmp_argc > 2) {
@@ -226,17 +235,18 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 			 * name; those that have been broken up by spaces in
 			 * the name.
 			 */
-			for (i = 1; i < tmp_argc - 1; i++) {
+			for (i = 1; i < tmp_argc - 2; i++) {
 				if (!namestr.merge(tmp_argv[i], maxlen))
 					return false;
 			}
+			if (!namestr.merge(&finistr, maxlen))
+				return false;
 			hash = TShark::StrHash32(&namestr);
 			newname = namePool->allocString(&namestr, hash, 0);
 		} else {
 			/* This is the common case, no spaces in the name. */
-			hash = TShark::StrHash32(tmp_argv[fini]);
-			newname = namePool->allocString(tmp_argv[fini], hash,
-							0);
+			hash = TShark::StrHash32(&finistr);
+			newname = namePool->allocString(&finistr, hash, 0);
 		}
 
 		if (newname == nullptr)
@@ -246,22 +256,28 @@ __always_inline bool FtraceGrammar::TimeMatch(TString *str,
 	return rval;
 }
 
-__always_inline bool FtraceGrammar::EventMatch(TString *str,
+__always_inline bool FtraceGrammar::EventMatch(const TString *str,
 					       TraceEvent &event)
 {
-	char *lastChr = str->ptr + str->len - 1;
+	char buf[512];
+	TString estr;
+	estr.len = 0;
+	estr.ptr = buf;
+	const int maxlen = sizeof(buf) / sizeof(char) - 1;
+	estr.set(str, maxlen);
+	char *lastChr = estr.ptr + estr.len - 1;
 	event_t type;
 
-	if (str->len < 1)
+	if (estr.len < 1)
 		return false;
 
 	if (*lastChr == ':') {
 		*lastChr = '\0';
-		str->len--;
+		estr.len--;
 	} else
 		return false;
 
-	type = eventTree->searchAllocString(str, TShark::StrHash32(str),
+	type = eventTree->searchAllocString(&estr, TShark::StrHash32(str),
 					    (event_t) unknownTypeCounter);
 	if (type == EVENT_ERROR)
 		return false;
@@ -277,7 +293,7 @@ __always_inline bool FtraceGrammar::EventMatch(TString *str,
 	return true;
 }
 
-__always_inline bool FtraceGrammar::ArgMatch(TString *str,
+__always_inline bool FtraceGrammar::ArgMatch(const TString *str,
 					     TraceEvent &event)
 {
 	const TString *newstr;
@@ -293,11 +309,11 @@ __always_inline bool FtraceGrammar::ArgMatch(TString *str,
 }
 
 
-__always_inline bool FtraceGrammar::parseLine(TraceLine &line,
+__always_inline bool FtraceGrammar::parseLine(const TraceLine &line,
 					      TraceEvent &event)
 {
-	TString *str = line.strings;
-	unsigned int n = line.nStrings;
+	const TString *str = line.strings;
+	int n = line.nStrings;
 	grammarstate_t state = STATE_NAMEPID;
 	tmp_argc = 0;
 
