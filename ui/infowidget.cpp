@@ -51,7 +51,6 @@
 
 #include "ui/infowidget.h"
 #include "ui/cursorinfo.h"
-#include "ui/taskinfo.h"
 #include "misc/traceshark.h"
 #include "vtl/time.h"
 #include <QComboBox>
@@ -66,7 +65,7 @@ InfoWidget::InfoWidget(QWidget *parent):
 {
 	unsigned int i;
 	QWidget *widget = new QWidget(this);
-	QHBoxLayout *mainLayout = new QHBoxLayout(widget);
+	mainLayout = new QHBoxLayout(widget);
 	setWidget(widget);
 
 	cursorInfos[0] = new CursorInfo(0, widget);
@@ -92,20 +91,13 @@ InfoWidget::InfoWidget(QWidget *parent):
 	cursorComboBox->setCurrentIndex(0);
 	mainLayout->addWidget(cursorComboBox);
 
-	taskInfo = new TaskInfo(widget);
-	mainLayout->addWidget(taskInfo);
-
 	for (i = 0; i < TShark::NR_CURSORS; i++)
 		cursorValues[i] = 0;
 
-	mainLayout->addStretch();
 	sigconnect(cursorInfos[0], valueChanged(vtl::Time, int), this,
 		   valueChanged(vtl::Time, int));
 	sigconnect(cursorInfos[1], valueChanged(vtl::Time, int), this,
 		   valueChanged(vtl::Time, int));
-	sigconnect(taskInfo, findWakeup(int), this, findWakeup(int));
-	sigconnect(taskInfo, addTaskGraph(int), this, addTaskGraph(int));
-	sigconnect(taskInfo, removeTaskGraph(int), this, removeTaskGraph(int));
 	tsconnect(cursorInfos[0], valueChanged(vtl::Time, int), this,
 		  updateChange(vtl::Time, int));
 	tsconnect(cursorInfos[1], valueChanged(vtl::Time, int), this,
@@ -114,11 +106,6 @@ InfoWidget::InfoWidget(QWidget *parent):
 
 InfoWidget::~InfoWidget()
 {
-}
-
-void InfoWidget::addTaskGraphToLegend(TaskGraph *graph)
-{
-	taskInfo->addTaskGraphToLegend(graph);
 }
 
 void InfoWidget::setTime(const vtl::Time &time, int cursorIdx)
@@ -130,7 +117,6 @@ void InfoWidget::setTime(const vtl::Time &time, int cursorIdx)
 		updateDifference();
 	}
 }
-
 
 void InfoWidget::updateChange(const vtl::Time &value, int nr)
 {
@@ -156,34 +142,19 @@ int InfoWidget::getCursorIdx()
 	return 0;
 }
 
-void InfoWidget::setTaskGraph(TaskGraph *graph)
-{
-	taskInfo->setTaskGraph(graph);
-}
-
-void InfoWidget::removeTaskGraph()
-{
-	taskInfo->removeTaskGraph();
-}
-
-void InfoWidget::checkGraphSelection()
-{
-	taskInfo->checkGraphSelection();
-}
-
-void InfoWidget::pidRemoved(int pid)
-{
-	taskInfo->pidRemoved(pid);
-}
-
-void InfoWidget::clear()
-{
-	taskInfo->clear();
-}
-
 void InfoWidget::setTraceActionsEnabled(bool e)
 {
-	taskInfo->setTraceActionsEnabled(e);
 	cursorInfos[0]->setTraceActionsEnabled(e);
 	cursorInfos[1]->setTraceActionsEnabled(e);
+}
+
+void InfoWidget::addToolBar(QToolBar *toolbar)
+{
+	mainLayout->addWidget(toolbar);
+	mainLayout->addStretch();
+}
+
+void InfoWidget::addStretch()
+{
+	mainLayout->addStretch();
 }

@@ -49,19 +49,20 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include <QHBoxLayout>
 #include <QIcon>
+#include <QHBoxLayout>
 #include <QMap>
 #include <QPushButton>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPixmap>
 #include <QString>
+#include <QToolBar>
+#include <QWidget>
 
 #include "analyzer/task.h"
 #include "ui/taskgraph.h"
-#include "ui/taskinfo.h"
+#include "ui/tasktoolbar.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "qcustomplot/qcustomplot.h"
@@ -70,19 +71,15 @@
 #define DEFINE_PIDMAP_ITERATOR(name) \
 	QMap<int, TaskGraph*>::iterator name
 
-#define FIND_TOOLTIP \
-	"Find the wakeup of this task that precedes the active cursor"
-#define REMOVE_TASK_TOOLTIP \
-	"Remove the unified graph for this task"
-
-TaskInfo::TaskInfo(QWidget *parent):
-	QWidget(parent), taskGraph(nullptr)
+TaskToolBar::TaskToolBar(const QString &title, QWidget *parent):
+	QToolBar(title, parent), taskGraph(nullptr)
 {
-	QHBoxLayout *layout  = new QHBoxLayout(this);
+	QWidget *widget = new QWidget();
+	QHBoxLayout *layout  = new QHBoxLayout(widget);
 	QLabel *colonLabel = new QLabel(tr(":"));
 
-	nameLine = new QLineEdit(this);
-	pidLine = new QLineEdit(this);
+	nameLine = new QLineEdit();
+	pidLine = new QLineEdit();
 
 	nameLine->setReadOnly(true);
 	pidLine->setReadOnly(true);
@@ -90,78 +87,14 @@ TaskInfo::TaskInfo(QWidget *parent):
 	layout->addWidget(nameLine);
 	layout->addWidget(colonLabel);
 	layout->addWidget(pidLine);
-
-	createActions();
-	createToolBar();
-
-	layout->addWidget(taskToolBar);
-	layout->addStretch();
-
-	tsconnect(addToLegendAction, triggered(), this,
-		addToLegendTriggered());
-	tsconnect(addTaskGraphAction, triggered(), this,
-		addTaskGraphTriggered());
-	tsconnect(removeTaskGraphAction, triggered(), this,
-		removeTaskGraphTriggered());
-	tsconnect(clearAction, triggered(), this, clearTriggered());
-	tsconnect(findAction, triggered(), this, findTriggered());
-}
-
-void TaskInfo::createActions()
-{
-	addTaskGraphAction = new QAction(tr("Add task graph"), this);
-	addTaskGraphAction->setIcon(QIcon(RESSRC_PNG_ADD_TASK));
-	/* addTaskGraphAction->setShortcuts(I_dont_know); */
-	addTaskGraphAction->setToolTip(tr("Add a unified graph for this task"));
-
-	addToLegendAction = new QAction(tr("Add task to the legend"), this);
-	addToLegendAction->setIcon(QIcon(RESSRC_PNG_ADD_TO_LEGEND));
-	/* addToLegendAction->setShortcuts(I_dont_know); */
-	addToLegendAction->setToolTip(tr("Add this task to the legend"));
-
-	clearAction = new QAction(tr("Clear the legend"), this);
-	clearAction->setIcon(QIcon(RESSRC_PNG_CLEAR_LEGEND));
-	/* clearAction->setShortcuts(I_dont_know) */
-	clearAction->setToolTip(tr("Remove all tasks from the legend"));
-
-	findAction = new QAction(tr("Find wakeup"), this);
-	findAction->setIcon(QIcon(RESSRC_PNG_FIND_WAKEUP));
-	/* findAction->setShortCuts(I_dont_know) */
-	findAction->setToolTip(tr(FIND_TOOLTIP));
-
-	removeTaskGraphAction = new QAction(tr("Remove task graph"), this);
-	removeTaskGraphAction->setIcon(QIcon(RESSRC_PNG_REMOVE_TASK));
-	/* removeTaskGraphAction->setShortCuts(I_dont_know) */
-	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
-
-	setTraceActionsEnabled(false);
-}
-
-void TaskInfo::createToolBar()
-{
-	taskToolBar = new QToolBar(tr("Task Toolbar"), this);
-	taskToolBar->addAction(addToLegendAction);
-	taskToolBar->addAction(clearAction);
-	taskToolBar->addAction(findAction);
-	taskToolBar->addAction(addTaskGraphAction);
-	taskToolBar->addAction(removeTaskGraphAction);
-}
-
-void TaskInfo::setTraceActionsEnabled(bool e)
-{
-	addToLegendAction->setEnabled(e);
-	clearAction->setEnabled(e);
-	findAction->setEnabled(e);
-	addTaskGraphAction->setEnabled(e);
-	removeTaskGraphAction->setEnabled(e);
-}
-
-TaskInfo::~TaskInfo()
-{
+	addWidget(widget);
 }
 
 
-void TaskInfo::setTaskGraph(TaskGraph *graph)
+TaskToolBar::~TaskToolBar()
+{}
+
+void TaskToolBar::setTaskGraph(TaskGraph *graph)
 {
 	TaskGraph *legendGraph;
 	Task *task = graph->getTask();
@@ -183,20 +116,20 @@ void TaskInfo::setTaskGraph(TaskGraph *graph)
 	taskGraph = legendGraph != nullptr ? legendGraph : graph;
 }
 
-void TaskInfo::removeTaskGraph()
+void TaskToolBar::removeTaskGraph()
 {
 	taskGraph = nullptr;
 	nameLine->setText(tr(""));
 	pidLine->setText(tr(""));
 }
 
-void TaskInfo::clear()
+void TaskToolBar::clear()
 {
 	removeTaskGraph();
 	legendPidMap.clear();
 }
 
-void TaskInfo::addToLegendTriggered()
+void TaskToolBar::addCurrentTaskToLegend()
 {
 	if (taskGraph == nullptr)
 		return;
@@ -205,7 +138,7 @@ void TaskInfo::addToLegendTriggered()
 }
 
 
-void TaskInfo::addTaskGraphToLegend(TaskGraph *graph)
+void TaskToolBar::addTaskGraphToLegend(TaskGraph *graph)
 {
 	QObject *obj;
 	QCustomPlot *plot;
@@ -235,7 +168,7 @@ void TaskInfo::addTaskGraphToLegend(TaskGraph *graph)
 }
 
 
-void TaskInfo::clearTriggered()
+void TaskToolBar::clearLegend()
 {
 	QCustomPlot *plot = nullptr;
 	QObject *obj;
@@ -254,49 +187,7 @@ void TaskInfo::clearTriggered()
 	legendPidMap.clear();
 }
 
-void TaskInfo::findTriggered()
-{
-	Task *task;
-
-	if (taskGraph == nullptr)
-		return;
-
-	task = taskGraph->getTask();
-	if (task == nullptr)
-		return;
-
-	emit findWakeup(task->pid);
-}
-
-void TaskInfo::addTaskGraphTriggered()
-{
-	Task *task;
-
-	if (taskGraph == nullptr)
-		return;
-
-	task = taskGraph->getTask();
-	if (task == nullptr)
-		return;
-
-	emit addTaskGraph(task->pid);
-}
-
-void TaskInfo::removeTaskGraphTriggered()
-{
-	Task *task;
-
-	if (taskGraph == nullptr)
-		return;
-
-	task = taskGraph->getTask();
-	if (task == nullptr)
-		return;
-
-	emit removeTaskGraph(task->pid);
-}
-
-void TaskInfo::checkGraphSelection()
+void TaskToolBar::checkGraphSelection()
 {
 	if (taskGraph == nullptr)
 		return;
@@ -305,10 +196,33 @@ void TaskInfo::checkGraphSelection()
 	removeTaskGraph();
 }
 
-void TaskInfo::pidRemoved(int pid)
+void TaskToolBar::pidRemoved(int pid)
 {
 	if (legendPidMap.contains(pid))
 		legendPidMap.remove(pid);
 	else
 		vtl::warnx("Unexpected state in %s:%d", __FILE__, __LINE__);
+}
+
+
+int TaskToolBar::getPid()
+{
+	Task *task;
+
+	if (taskGraph == nullptr)
+		return 0;
+
+	task = taskGraph->getTask();
+	if (task == nullptr)
+		return 0;
+
+	return task->pid;
+}
+
+void TaskToolBar::addStretch()
+{
+	QWidget *widget = new QWidget();
+	QHBoxLayout *layout  = new QHBoxLayout(widget);
+	layout->addStretch();
+	addWidget(widget);
 }

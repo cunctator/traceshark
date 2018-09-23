@@ -51,6 +51,7 @@
 
 #include <cstdio>
 
+#include <QApplication>
 #include <QDateTime>
 #include <QToolBar>
 
@@ -67,6 +68,7 @@
 #include "ui/taskgraph.h"
 #include "ui/taskrangeallocator.h"
 #include "ui/taskselectdialog.h"
+#include "ui/tasktoolbar.h"
 #include "ui/eventselectdialog.h"
 #include "parser/traceevent.h"
 #include "ui/traceplot.h"
@@ -107,10 +109,20 @@
 #define TOOLTIP_GETSTATS_TIMELIMITED \
 	"Show the dialog with statistics that are time limited by the cursors"
 
+#define FIND_WAKEUP_TOOLTIP \
+	"Find the wakeup of this task that precedes the active cursor"
+#define REMOVE_TASK_TOOLTIP \
+	"Remove the unified graph for this task"
+
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
 {
 	analyzer = new TraceAnalyzer;
+
+	infoWidget = new InfoWidget(this);
+	infoWidget->setAllowedAreas(Qt::TopDockWidgetArea |
+				    Qt::BottomDockWidgetArea);
+	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
 
 	createActions();
 	createToolBars();
@@ -142,11 +154,6 @@ MainWindow::MainWindow():
 				      Qt::BottomDockWidgetArea);
 	addDockWidget(Qt::BottomDockWidgetArea, eventsWidget);
 
-	infoWidget = new InfoWidget(this);
-	infoWidget->setAllowedAreas(Qt::TopDockWidgetArea |
-				    Qt::BottomDockWidgetArea);
-	addDockWidget(Qt::TopDockWidgetArea, infoWidget);
-
 	cursors[TShark::RED_CURSOR] = nullptr;
 	cursors[TShark::BLUE_CURSOR] = nullptr;
 
@@ -177,9 +184,6 @@ MainWindow::MainWindow():
 		  this, plotDoubleClicked(QMouseEvent*));
 	tsconnect(infoWidget, valueChanged(vtl::Time, int),
 		  this, infoValueChanged(vtl::Time, int));
-	tsconnect(infoWidget, addTaskGraph(int), this, addTaskGraph(int));
-	tsconnect(infoWidget, findWakeup(int), this, showWakeup(int));
-	tsconnect(infoWidget, removeTaskGraph(int), this, removeTaskGraph(int));
 
 	/* Events widget */
 	tsconnect(eventsWidget, timeSelected(vtl::Time), this,
@@ -786,8 +790,11 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	timeFilterAction->setEnabled(e);
 	showStatsAction->setEnabled(e);
 	showStatsTimeLimitedAction->setEnabled(e);
-
-	infoWidget->setTraceActionsEnabled(e);
+	addToLegendAction->setEnabled(e);
+	clearLegendAction->setEnabled(e);
+	findWakeupAction->setEnabled(e);
+	addTaskGraphAction->setEnabled(e);
+	removeTaskGraphAction->setEnabled(e);
 }
 
 void MainWindow::closeTrace()
@@ -818,7 +825,7 @@ void MainWindow::closeTrace()
 	clearPlot();
 	if(analyzer->isOpen())
 		analyzer->close();
-	infoWidget->clear();
+	taskToolBar->clear();
 	setTraceActionsEnabled(false);
 	setStatus(STATUS_NOFILE);
 }
@@ -1102,38 +1109,32 @@ void MainWindow::createActions()
 	closeAction->setIcon(QIcon(RESSRC_PNG_CLOSE));
 	closeAction->setShortcuts(QKeySequence::Close);
 	closeAction->setToolTip(tr(TOOLTIP_CLOSE));
-	closeAction->setEnabled(false);
 	tsconnect(closeAction, triggered(), this, closeTrace());
 
 	saveAction = new QAction(tr("&Save screenshot as..."), this);
 	saveAction->setIcon(QIcon(RESSRC_PNG_SCREENSHOT));
 	saveAction->setShortcuts(QKeySequence::SaveAs);
 	saveAction->setToolTip(tr(TOOLTIP_SAVESCREEN));
-	saveAction->setEnabled(false);
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
 
 	showTasksAction = new QAction(tr("Show task list..."), this);
 	showTasksAction->setIcon(QIcon(RESSRC_PNG_TASKSELECT));
 	showTasksAction->setToolTip(tr(TOOLTIP_SHOWTASKS));
-	showTasksAction->setEnabled(false);
 	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
 
 	showEventsAction = new QAction(tr("Filter on event type..."), this);
 	showEventsAction->setIcon(QIcon(RESSRC_PNG_EVENTFILTER));
 	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
-	showEventsAction->setEnabled(false);
 	tsconnect(showEventsAction, triggered(), this, showEventFilter());
 
 	timeFilterAction = new QAction(tr("Filter on time"), this);
 	timeFilterAction->setIcon(QIcon(RESSRC_PNG_TIMEFILTER));
 	timeFilterAction->setToolTip(tr(TOOLTIP_TIMEFILTER));
-	timeFilterAction->setEnabled(false);
 	tsconnect(timeFilterAction, triggered(), this, timeFilter());
 
 	graphEnableAction = new QAction(tr("Select graphs..."), this);
 	graphEnableAction->setIcon(QIcon(RESSRC_PNG_GRAPHENABLE));
 	graphEnableAction->setToolTip(tr(TOOLTIP_GRAPHENABLE));
-	graphEnableAction->setEnabled(true);
 	tsconnect(graphEnableAction, triggered(), this, showGraphEnable());
 
 	resetFiltersAction = new QAction(tr("Reset all filters"), this);
@@ -1142,7 +1143,8 @@ void MainWindow::createActions()
 	resetFiltersAction->setEnabled(false);
 	tsconnect(resetFiltersAction, triggered(), this, resetFilters());
 
-	exportEventsAction = new QAction(tr("Export events to a file..."), this);
+	exportEventsAction = new QAction(tr("Export events to a file..."),
+					 this);
 	exportEventsAction->setIcon(QIcon(RESSRC_PNG_EXPORTEVENTS));
 	exportEventsAction->setToolTip(tr(TOOLTIP_EXPORTEVENTS));
 	exportEventsAction->setEnabled(false);
@@ -1151,7 +1153,6 @@ void MainWindow::createActions()
 	showStatsAction = new QAction(tr("Show stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_PNG_GETSTATS));
 	showStatsAction->setToolTip(TOOLTIP_GETSTATS);
-	showStatsAction->setEnabled(false);
 	tsconnect(showStatsAction, triggered(), this, showStats());
 
 	showStatsTimeLimitedAction = new QAction(
@@ -1159,37 +1160,67 @@ void MainWindow::createActions()
 	showStatsTimeLimitedAction->setIcon(
 		QIcon(RESSRC_PNG_GETSTATS_TIMELIMIT));
 	showStatsTimeLimitedAction->setToolTip(TOOLTIP_GETSTATS_TIMELIMITED);
-	showStatsTimeLimitedAction->setEnabled(false);
 	tsconnect(showStatsTimeLimitedAction, triggered(), this,
 		  showStatsTimeLimited());
 
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
-	exitAction->setStatusTip(tr("Exit traceshark"));
+	exitAction->setToolTip(tr("Exit traceshark"));
 	tsconnect(exitAction, triggered(), this, close());
 
 	aboutQtAction = new QAction(tr("About &Qt"), this);
 	aboutQtAction->setIcon(QIcon(RESSRC_PNG_QT_LOGO));
-	aboutQtAction->setStatusTip(tr("Show info about Qt"));
+	aboutQtAction->setToolTip(tr("Show info about Qt"));
 	tsconnect(aboutQtAction, triggered(), qApp, aboutQt());
 
 	aboutAction = new QAction(tr("&About Traceshark"), this);
 	aboutAction->setIcon(QIcon(RESSRC_PNG_SHARK));
-	aboutAction->setStatusTip(tr("Show info about Traceshark"));
+	aboutAction->setToolTip(tr("Show info about Traceshark"));
 	tsconnect(aboutAction, triggered(), this, about());
 
 	aboutQCPAction = new QAction(tr("About QCustom&Plot"), this);
 	aboutQCPAction->setIcon(QIcon(RESSRC_PNG_QCP_LOGO));
-	aboutAction->setStatusTip(tr("Show info about QCustomPlot"));
+	aboutAction->setToolTip(tr("Show info about QCustomPlot"));
 	tsconnect(aboutQCPAction, triggered(), this, aboutQCustomPlot());
 
 	licenseAction = new QAction(tr("&License"), this);
-	aboutAction->setStatusTip(tr("Show the license of Traceshark"));
+	licenseAction->setToolTip(tr("Show the license of Traceshark"));
 	tsconnect(licenseAction, triggered(), this, license());
+
+	addTaskGraphAction = new QAction(tr("Add task graph"), this);
+	addTaskGraphAction->setIcon(QIcon(RESSRC_PNG_ADD_TASK));
+	addTaskGraphAction->setToolTip(tr("Add a unified graph for this task"));
+	tsconnect(addTaskGraphAction, triggered(), this,
+		  addTaskGraphTriggered());
+
+	addToLegendAction = new QAction(tr("Add task to the legend"), this);
+	addToLegendAction->setIcon(QIcon(RESSRC_PNG_ADD_TO_LEGEND));
+	addToLegendAction->setToolTip(tr("Add this task to the legend"));
+	tsconnect(addToLegendAction, triggered(), this,addToLegendTriggered());
+
+	clearLegendAction = new QAction(tr("Clear the legend"), this);
+	clearLegendAction->setIcon(QIcon(RESSRC_PNG_CLEAR_LEGEND));
+	clearLegendAction->setToolTip(tr("Remove all tasks from the legend"));
+	tsconnect(clearLegendAction, triggered(), this, clearLegendTriggered());
+
+	findWakeupAction = new QAction(tr("Find wakeup"), this);
+	findWakeupAction->setIcon(QIcon(RESSRC_PNG_FIND_WAKEUP));
+	findWakeupAction->setToolTip(tr(FIND_WAKEUP_TOOLTIP));
+	tsconnect(findWakeupAction, triggered(), this, findWakeupTriggered());
+
+	removeTaskGraphAction = new QAction(tr("Remove task graph"), this);
+	removeTaskGraphAction->setIcon(QIcon(RESSRC_PNG_REMOVE_TASK));
+	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
+	tsconnect(removeTaskGraphAction, triggered(), this,
+		  removeTaskGraphTriggered());
+
+	setTraceActionsEnabled(false);
 }
 
 void MainWindow::createToolBars()
 {
+	bool widescreen = isWideScreen();
+
 	fileToolBar = new QToolBar(tr("&File"));
 	addToolBar(Qt::LeftToolBarArea, fileToolBar);
 	fileToolBar->addAction(openAction);
@@ -1206,6 +1237,21 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(graphEnableAction);
 	viewToolBar->addAction(showStatsAction);
 	viewToolBar->addAction(showStatsTimeLimitedAction);
+
+	taskToolBar = new TaskToolBar(tr("Task"));
+	if (widescreen) {
+		infoWidget->addToolBar(taskToolBar);
+	} else {
+		addToolBar(Qt::TopToolBarArea, taskToolBar);
+		infoWidget->addStretch();
+	}
+
+	taskToolBar->addAction(addToLegendAction);
+	taskToolBar->addAction(clearLegendAction);
+	taskToolBar->addAction(findWakeupAction);
+	taskToolBar->addAction(addTaskGraphAction);
+	taskToolBar->addAction(removeTaskGraphAction);
+	taskToolBar->addStretch();
 }
 
 void MainWindow::createMenus()
@@ -1226,6 +1272,13 @@ void MainWindow::createMenus()
 	viewMenu->addAction(graphEnableAction);
 	viewMenu->addAction(showStatsAction);
 	viewMenu->addAction(showStatsTimeLimitedAction);
+
+	taskMenu = menuBar()->addMenu(tr("&Task"));
+	taskMenu->addAction(addTaskGraphAction);
+	taskMenu->addAction(addToLegendAction);
+	taskMenu->addAction(clearLegendAction);
+	taskMenu->addAction(findWakeupAction);
+	taskMenu->addAction(removeTaskGraphAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
@@ -1292,14 +1345,14 @@ void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,
 		return;
 
 	if (qcpGraph->selected())
-		infoWidget->setTaskGraph(graph);
+		taskToolBar->setTaskGraph(graph);
 	else
-		infoWidget->removeTaskGraph();
+		taskToolBar->removeTaskGraph();
 }
 
 void MainWindow::selectionChanged()
 {
-	infoWidget->checkGraphSelection();
+	taskToolBar->checkGraphSelection();
 }
 
 void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
@@ -1332,13 +1385,13 @@ void MainWindow::handleLegendGraphDoubleClick(QCPGraph *graph)
 	if (task == nullptr)
 		return;
 	/*
-	 * Inform the TaskInfo class (inside InfoWidget) that the pid has
-	 * been removed. This is needed because InfoWidget keeps track of this
-	 * for the purpose of preventing the same pid being added twice from
-	 * different legend graphs, there might be "identical" legend graphs
-	 * when the same pid has migrated between CPUs
+	 * Inform the TaskToolBar class that the pid has been removed. This is
+	 * needed because TaskToolBar keeps track of this for the purpose of
+	 * preventing the same pid being added twice from different legend 
+	 * graphs, there might be "identical" legend graphs when the same pid
+	 * has migrated between CPUs
 	 */
-	infoWidget->pidRemoved(task->pid);
+	taskToolBar->pidRemoved(task->pid);
 }
 
 
@@ -1361,7 +1414,7 @@ void MainWindow::addTaskToLegend(int pid)
 	if (cpuTask == nullptr)
 		return;
 
-	infoWidget->addTaskGraphToLegend(cpuTask->graph);
+	taskToolBar->addTaskGraphToLegend(cpuTask->graph);
 }
 
 void MainWindow::setEventsWidgetEvents()
@@ -1537,7 +1590,7 @@ void MainWindow::consumeSettings()
 		return;
 
 	clearPlot();
-	infoWidget->clear();
+	taskToolBar->clear();
 
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter);
@@ -1887,13 +1940,13 @@ void MainWindow::showWakeup(int pid)
 	qcpGraph->setSelection(wholeSelection);
 	tracePlot->replot();
 
-	/* Finally update the infoWidget to reflect the change in selection */
+	/* Finally update the TaskToolBar to reflect the change in selection */
 	TaskGraph *graph = TaskGraph::fromQCPGraph(qcpGraph);
 	if (graph == nullptr) {
-		infoWidget->removeTaskGraph();
+		taskToolBar->removeTaskGraph();
 		return;
 	}
-	infoWidget->setTaskGraph(graph);
+	taskToolBar->setTaskGraph(graph);
 }
 
 void MainWindow::checkStatsTimeLimited()
@@ -1905,4 +1958,42 @@ void MainWindow::checkStatsTimeLimited()
 					       analyzer->getNrCPUs());
 		statsLimitedDialog->endResetModel();
 	}
+}
+
+/* Add a task graph for the currently selected task */
+void MainWindow::addTaskGraphTriggered()
+{
+	addTaskGraph(taskToolBar->getPid());
+}
+
+/* Adds the currently selected task to the legend */
+void MainWindow::addToLegendTriggered()
+{
+	taskToolBar->addCurrentTaskToLegend();
+}
+
+/* Clears the legend of all tasks */
+void MainWindow::clearLegendTriggered()
+{
+	taskToolBar->clearLegend();
+}
+
+/* Finds the preceding wakeup of the currently selected task */
+void MainWindow::findWakeupTriggered()
+{
+	showWakeup(taskToolBar->getPid());
+}
+
+/* Removes the task graph of the currently selected task */
+void MainWindow::removeTaskGraphTriggered()
+{
+	removeTaskGraph(taskToolBar->getPid());
+}
+
+bool MainWindow::isWideScreen()
+{
+	QRect geometry;
+
+	geometry = QApplication::desktop()->availableGeometry();
+	return geometry.width() > 1800;
 }

@@ -86,6 +86,7 @@ class QCPLayer;
 class QCPLegend;
 class QCustomPlot;
 class QCPAbstractLegendItem;
+class TaskToolBar;
 class TracePlot;
 class TraceEvent;
 class TaskRangeAllocator;
@@ -141,6 +142,13 @@ private slots:
 	void showStats();
 	void showStatsTimeLimited();
 	void removeQDockWidget(QDockWidget *widget);
+
+	void addTaskGraphTriggered();
+	void addToLegendTriggered();
+	void clearLegendTriggered();
+	void findWakeupTriggered();
+	void removeTaskGraphTriggered();
+
 private:
 	typedef enum {
 		STATUS_NOFILE = 0,
@@ -190,13 +198,16 @@ private:
 
 	void setStatus(status_t status, const QString *fileName = nullptr);
 	int loadTraceFile(const QString &);
+	bool isWideScreen();
 
 	QMenu *fileMenu;
 	QMenu *viewMenu;
 	QMenu *helpMenu;
+	QMenu *taskMenu;
 
 	QToolBar *fileToolBar;
 	QToolBar *viewToolBar;
+	TaskToolBar *taskToolBar;
 
 	QLabel *statusLabel;
 	QString *statusStrings[STATUS_NR];
@@ -217,6 +228,12 @@ private:
 	QAction *licenseAction;
 	QAction *aboutQtAction;
 	QAction *aboutQCPAction;
+
+	QAction *addTaskGraphAction;
+	QAction *addToLegendAction;
+	QAction *clearLegendAction;
+	QAction *findWakeupAction;
+	QAction *removeTaskGraphAction;
 
 	TraceAnalyzer *analyzer;
 

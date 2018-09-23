@@ -52,23 +52,24 @@
 #ifndef TASKINFO_H
 #define TASKINFO_H
 
-#include <QWidget>
+#include <QToolBar>
 #include <QMap>
 
 QT_BEGIN_NAMESPACE
 class QAction;
 class QLineEdit;
 class QToolBar;
+class QToolBar;
 QT_END_NAMESPACE
 
 class TaskGraph;
 
-class TaskInfo : public QWidget
+class TaskToolBar : public QToolBar
 {
 	Q_OBJECT
 public:
-	TaskInfo(QWidget *parent = 0);
-	virtual ~TaskInfo();
+	TaskToolBar(const QString &title, QWidget *parent = nullptr);
+	virtual ~TaskToolBar();
 
 	void addTaskGraphToLegend(TaskGraph *graph);
 	void setTaskGraph(TaskGraph *graph);
@@ -76,29 +77,12 @@ public:
 	void checkGraphSelection();
 	void clear();
 	void pidRemoved(int pid);
-	void setTraceActionsEnabled(bool e);
-signals:
-	void findWakeup(int pid);
-	void addTaskGraph(int pid);
-	void removeTaskGraph(int pid);
-private slots:
-	void addTaskGraphTriggered();
-	void addToLegendTriggered();
-	void clearTriggered();
-	void findTriggered();
-	void removeTaskGraphTriggered();
+	int getPid();
+	void clearLegend();
+	void addCurrentTaskToLegend();
+	void addStretch();
 private:
-	void createActions();
-	void createToolBar();
-
-	QAction *addTaskGraphAction;
-	QAction *addToLegendAction;
-	QAction *clearAction;
-	QAction *findAction;
-	QAction *removeTaskGraphAction;
-
 	QToolBar *taskToolBar;
-
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
 	TaskGraph *taskGraph;
