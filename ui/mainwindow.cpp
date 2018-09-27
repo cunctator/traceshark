@@ -1917,25 +1917,27 @@ void MainWindow::showWakeup(int pid)
 	unsigned int wcpu = wakeupevent->cpu;
 	int wpid = wakeupevent->pid;
 
-	/*
-	 * If the wakeup task was run with pid 0 = swapper, then leave the
-	 * orginially selected task selected.
-	 */
-	if (wpid == 0)
-		return;
+	/* Deselect the selected task */
+	tracePlot->deselectAll();
 
 	/*
-	 * If there is reason to believe that we should find a *potential*
-	 * wakeup task, then deselect the selected task.
+	 * If the wakeup task was run with pid 0 = swapper, then just remove
+	 * the task from the task toolbar and disable the task actions.
 	 */
-	tracePlot->deselectAll();
+	if (wpid == 0) {
+		taskToolBar->removeTaskGraph();
+		setTaskActionsEnabled(false);
+		tracePlot->replot();
+		return;
+	}
 
 	CPUTask *cpuTask = analyzer->findCPUTask(wpid, wcpu);
 
 	/*
 	 * If we can't find what we expected, we return, the advanced user
 	 * could notice that something fishy is going on by the fact that
-	 * no task is selected after this user interaction.
+	 * no task is selected after this user interaction, white there still
+	 * is a task in the task toolbar.
 	 */
 	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
 		tracePlot->replot();
