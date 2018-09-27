@@ -781,6 +781,9 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	graph->setData(task.runningTimev, task.scaledRunningData);
 }
 
+/*
+ * These are actions that should be enabled whenever we have a trace open
+ */
 void MainWindow::setTraceActionsEnabled(bool e)
 {
 	saveAction->setEnabled(e);
@@ -792,9 +795,16 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	showStatsTimeLimitedAction->setEnabled(e);
 	addToLegendAction->setEnabled(e);
 	clearLegendAction->setEnabled(e);
-	findWakeupAction->setEnabled(e);
 	addTaskGraphAction->setEnabled(e);
 	removeTaskGraphAction->setEnabled(e);
+}
+
+/*
+ * These are actions that should be enabled whenever a task is selected
+ */
+void MainWindow::setTaskActionsEnabled(bool e)
+{
+	findWakeupAction->setEnabled(e);
 }
 
 void MainWindow::closeTrace()
@@ -827,6 +837,7 @@ void MainWindow::closeTrace()
 		analyzer->close();
 	taskToolBar->clear();
 	setTraceActionsEnabled(false);
+	setTaskActionsEnabled(false);
 	setStatus(STATUS_NOFILE);
 }
 
@@ -1215,6 +1226,7 @@ void MainWindow::createActions()
 		  removeTaskGraphTriggered());
 
 	setTraceActionsEnabled(false);
+	setTaskActionsEnabled(false);
 }
 
 void MainWindow::createToolBars()
@@ -1344,15 +1356,19 @@ void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,
 	if (graph == nullptr)
 		return;
 
-	if (qcpGraph->selected())
+	if (qcpGraph->selected()) {
+		setTaskActionsEnabled(true);
 		taskToolBar->setTaskGraph(graph);
-	else
+	} else {
+		setTaskActionsEnabled(false);
 		taskToolBar->removeTaskGraph();
+	}
 }
 
 void MainWindow::selectionChanged()
 {
-	taskToolBar->checkGraphSelection();
+	if (taskToolBar->checkGraphSelection())
+		setTaskActionsEnabled(false);
 }
 
 void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
@@ -1944,9 +1960,11 @@ void MainWindow::showWakeup(int pid)
 	TaskGraph *graph = TaskGraph::fromQCPGraph(qcpGraph);
 	if (graph == nullptr) {
 		taskToolBar->removeTaskGraph();
+		setTaskActionsEnabled(false);
 		return;
 	}
 	taskToolBar->setTaskGraph(graph);
+	setTaskActionsEnabled(true);
 }
 
 void MainWindow::checkStatsTimeLimited()

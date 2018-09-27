@@ -174,6 +174,7 @@ private:
 	void addStillRunningGraph(CPUTask &task);
 
 	void setTraceActionsEnabled(bool e);
+	void setTaskActionsEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);

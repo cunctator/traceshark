@@ -187,13 +187,14 @@ void TaskToolBar::clearLegend()
 	legendPidMap.clear();
 }
 
-void TaskToolBar::checkGraphSelection()
+bool TaskToolBar::checkGraphSelection()
 {
 	if (taskGraph == nullptr)
-		return;
+		return false;
 	if (taskGraph->getQCPGraph()->selected())
-		return;
+		return false;
 	removeTaskGraph();
+	return true;
 }
 
 void TaskToolBar::pidRemoved(int pid)

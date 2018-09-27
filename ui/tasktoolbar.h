@@ -74,7 +74,7 @@ public:
 	void addTaskGraphToLegend(TaskGraph *graph);
 	void setTaskGraph(TaskGraph *graph);
 	void removeTaskGraph();
-	void checkGraphSelection();
+	bool checkGraphSelection();
 	void clear();
 	void pidRemoved(int pid);
 	int getPid();
