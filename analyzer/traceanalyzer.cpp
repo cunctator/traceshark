@@ -599,7 +599,39 @@ const TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
 	return nullptr;
 }
 
+const TraceEvent *TraceAnalyzer::findWakingEvent(const TraceEvent *wakeup,
+						 int *index)
+{
+	int i;
+	int startidx = findIndexBefore(wakeup->time);
+	int wpid = generic_sched_wakeup_pid(*wakeup);
+	int pid;
 
+	if (wpid == INT_MAX)
+		return nullptr;
+
+	if (startidx < 0 || startidx >= (int) events->size())
+		return nullptr;
+
+	for (i = startidx; i >= 0; i--) {
+		const TraceEvent &event = events->at(i);
+		if (event.type != SCHED_WAKING)
+			continue;
+		pid = generic_sched_waking_pid(event);
+		if (pid == wpid) {
+			if (index != nullptr)
+				*index = i;
+			return &event;
+		} else if (pid == INT_MAX) {
+			/*
+			 * If we encounter a single waking event where we
+			 * can not parse the arguments, then we give up
+			 */
+			return nullptr;
+		}
+	}
+	return nullptr;
+}
 
 void TraceAnalyzer::setSchedOffset(unsigned int cpu, double offset)
 {

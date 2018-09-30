@@ -159,4 +159,10 @@ DECLARE_GENERIC_TRACEFN(irq_handler_entry_irq, unsigned int)
 DECLARE_GENERIC_TRACEFN(irq_handler_exit_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(irq_handler_exit_irq, unsigned int)
 
+DECLARE_GENERIC_TRACEFN(sched_waking_args_ok, bool)
+DECLARE_GENERIC_TRACEFN(sched_waking_cpu, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_waking_prio, unsigned int)
+DECLARE_GENERIC_TRACEFN(sched_waking_pid, int)
+DECLARE_GENERIC_TRACEFN_POOL(sched_waking_name_strdup, const char *)
+
 #endif /* GENERICPARAMS_H */

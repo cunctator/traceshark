@@ -111,6 +111,8 @@
 
 #define FIND_WAKEUP_TOOLTIP \
 	"Find the wakeup of this task that precedes the active cursor"
+#define FIND_WAKING_TOOLTIP \
+	"Find the waking event that precedes this wakeup event"
 #define REMOVE_TASK_TOOLTIP \
 	"Remove the unified graph for this task"
 
@@ -190,6 +192,8 @@ MainWindow::MainWindow():
 		  moveActiveCursor(vtl::Time));
 	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
 		  this, showEventInfo(const TraceEvent &));
+	tsconnect(eventsWidget, eventSelected(const TraceEvent *),
+		  this, handleEventSelected(const TraceEvent *));
 
 	/* task select dialog */
 	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
@@ -807,6 +811,11 @@ void MainWindow::setTaskActionsEnabled(bool e)
 	findWakeupAction->setEnabled(e);
 }
 
+void MainWindow::setWakeupActionsEnabled(bool e)
+{
+	findWakingAction->setEnabled(e);
+}
+
 void MainWindow::closeTrace()
 {
 	resetFilters();
@@ -838,6 +847,7 @@ void MainWindow::closeTrace()
 	taskToolBar->clear();
 	setTraceActionsEnabled(false);
 	setTaskActionsEnabled(false);
+	setWakeupActionsEnabled(false);
 	setStatus(STATUS_NOFILE);
 }
 
@@ -1108,6 +1118,25 @@ void MainWindow::showEventInfo(const TraceEvent &event)
 	eventInfoDialog->show(event);
 }
 
+void MainWindow::handleEventSelected(const TraceEvent *event)
+{
+	if (event == nullptr) {
+		handleWakeUpChanged(false);
+		return;
+	}
+
+	if (event->type == SCHED_WAKEUP || event->type == SCHED_WAKEUP_NEW) {
+		handleWakeUpChanged(true);
+	} else {
+		handleWakeUpChanged(false);
+	}
+}
+
+void MainWindow::handleWakeUpChanged(bool selected)
+{
+	setWakeupActionsEnabled(selected);
+}
+
 void MainWindow::createActions()
 {
 	openAction = new QAction(tr("&Open..."), this);
@@ -1219,6 +1248,11 @@ void MainWindow::createActions()
 	findWakeupAction->setToolTip(tr(FIND_WAKEUP_TOOLTIP));
 	tsconnect(findWakeupAction, triggered(), this, findWakeupTriggered());
 
+	findWakingAction = new QAction(tr("Find waking"), this);
+	findWakingAction->setIcon(QIcon(RESSRC_PNG_FIND_WAKING));
+	findWakingAction->setToolTip(tr(FIND_WAKING_TOOLTIP));
+	tsconnect(findWakingAction, triggered(), this, findWakingTriggered());
+
 	removeTaskGraphAction = new QAction(tr("Remove task graph"), this);
 	removeTaskGraphAction->setIcon(QIcon(RESSRC_PNG_REMOVE_TASK));
 	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
@@ -1227,6 +1261,7 @@ void MainWindow::createActions()
 
 	setTraceActionsEnabled(false);
 	setTaskActionsEnabled(false);
+	setWakeupActionsEnabled(false);
 }
 
 void MainWindow::createToolBars()
@@ -1261,6 +1296,7 @@ void MainWindow::createToolBars()
 	taskToolBar->addAction(addToLegendAction);
 	taskToolBar->addAction(clearLegendAction);
 	taskToolBar->addAction(findWakeupAction);
+	taskToolBar->addAction(findWakingAction);
 	taskToolBar->addAction(addTaskGraphAction);
 	taskToolBar->addAction(removeTaskGraphAction);
 	taskToolBar->addStretch();
@@ -1286,10 +1322,11 @@ void MainWindow::createMenus()
 	viewMenu->addAction(showStatsTimeLimitedAction);
 
 	taskMenu = menuBar()->addMenu(tr("&Task"));
-	taskMenu->addAction(addTaskGraphAction);
 	taskMenu->addAction(addToLegendAction);
 	taskMenu->addAction(clearLegendAction);
 	taskMenu->addAction(findWakeupAction);
+	taskMenu->addAction(findWakingAction);
+	taskMenu->addAction(addTaskGraphAction);
 	taskMenu->addAction(removeTaskGraphAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -1409,7 +1446,6 @@ void MainWindow::handleLegendGraphDoubleClick(QCPGraph *graph)
 	 */
 	taskToolBar->pidRemoved(task->pid);
 }
-
 
 void MainWindow::addTaskToLegend(int pid)
 {
@@ -1969,6 +2005,96 @@ void MainWindow::showWakeup(int pid)
 	setTaskActionsEnabled(true);
 }
 
+void MainWindow::showWaking(const TraceEvent *wakeupevent)
+{
+	int activeIdx = infoWidget->getCursorIdx();
+	int wakingIndex;
+
+	if (activeIdx != TShark::RED_CURSOR &&
+	    activeIdx != TShark::BLUE_CURSOR) {
+		return;
+	}
+
+	Cursor *activeCursor = cursors[activeIdx];
+
+	if (activeCursor == nullptr)
+		return;
+
+	const TraceEvent *wakingevent =
+		analyzer->findWakingEvent(wakeupevent, &wakingIndex);
+	if (wakingevent == nullptr)
+		return;
+
+	activeCursor->setPosition(wakingevent->time);
+	infoWidget->setTime(wakingevent->time, activeIdx);
+	checkStatsTimeLimited();
+	cursorPos[activeIdx] = wakingevent->time.toDouble();
+
+	if (!analyzer->isFiltered()) {
+		eventsWidget->scrollTo(wakingIndex);
+	} else {
+		/*
+		 * If a filter is enabled we need to try to find the index in
+		 * analyzer->filteredEvents
+		 */
+		int filterIndex;
+		if (analyzer->findFilteredEvent(wakingIndex, &filterIndex)
+		    != nullptr)
+			eventsWidget->scrollTo(filterIndex);
+	}
+
+	unsigned int wcpu = wakingevent->cpu;
+	int wpid = wakingevent->pid;
+
+	/*
+	 * If the waking task was run with pid 0 = swapper, then just remove
+	 * the task from the task toolbar and disable the task actions.
+	 */
+	if (wpid == 0) {
+		taskToolBar->removeTaskGraph();
+		setTaskActionsEnabled(false);
+		tracePlot->replot();
+		return;
+	}
+
+	CPUTask *cpuTask = analyzer->findCPUTask(wpid, wcpu);
+
+	/*
+	 * If we can't find what we expected, we return, the advanced user
+	 * could notice that something fishy is going on by the fact that
+	 * no task is selected after this user interaction, white there still
+	 * is a task in the task toolbar.
+	 */
+	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
+		tracePlot->replot();
+		return;
+	}
+	QCPGraph *qcpGraph = cpuTask->graph->getQCPGraph();
+	if (qcpGraph == nullptr) {
+		tracePlot->replot();
+		return;
+	}
+
+	/* Finally, mark the potential wakeup task as selected */
+	int count = qcpGraph->dataCount();
+	if (count > 0)
+		count--;
+	QCPDataRange wholeRange(0,  count);
+	QCPDataSelection wholeSelection(wholeRange);
+	qcpGraph->setSelection(wholeSelection);
+	tracePlot->replot();
+
+	/* Finally update the TaskToolBar to reflect the change in selection */
+	TaskGraph *graph = TaskGraph::fromQCPGraph(qcpGraph);
+	if (graph == nullptr) {
+		taskToolBar->removeTaskGraph();
+		setTaskActionsEnabled(false);
+		return;
+	}
+	taskToolBar->setTaskGraph(graph);
+	setTaskActionsEnabled(true);
+}
+
 void MainWindow::checkStatsTimeLimited()
 {
 	if (statsLimitedDialog->isVisible()) {
@@ -2002,6 +2128,15 @@ void MainWindow::clearLegendTriggered()
 void MainWindow::findWakeupTriggered()
 {
 	showWakeup(taskToolBar->getPid());
+}
+
+/* Finds the preceding waking of the currently selected task */
+void MainWindow::findWakingTriggered()
+{
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+	if (event != nullptr &&
+	    (event->type == SCHED_WAKEUP || event->type == SCHED_WAKEUP_NEW))
+		showWaking(event);
 }
 
 /* Removes the task graph of the currently selected task */

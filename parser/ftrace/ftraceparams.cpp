@@ -76,3 +76,10 @@ ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 {
 	return __ftrace_sched_switch_handle_oldname_strdup(event, pool, handle);
 }
+
+
+const char *
+ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
+{
+	return __ftrace_sched_waking_name_strdup(event, pool);
+}

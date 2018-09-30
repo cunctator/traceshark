@@ -54,6 +54,7 @@
 #include "vtl/tlist.h"
 #include "ui/eventsmodel.h"
 #include "ui/eventswidget.h"
+#include "ui/tableview.h"
 #include "misc/traceshark.h"
 #include "parser/traceevent.h"
 
@@ -61,7 +62,7 @@ EventsWidget::EventsWidget(QWidget *parent):
 	QDockWidget(tr("Events"), parent), events(nullptr),
 	eventsPtrs(nullptr), saveScrollTime(false)
 {
-	tableView = new QTableView(this);
+	tableView = new TableView(this);
 	eventsModel = new EventsModel(tableView);
 	tableView->setModel(eventsModel);
 	setWidget(tableView);
@@ -72,12 +73,16 @@ EventsWidget::EventsWidget(QWidget *parent):
 		  this, handleClick(const QModelIndex &));
 	tsconnect(tableView, doubleClicked(const QModelIndex &),
 		  this, handleDoubleClick(const QModelIndex &));
+	tsconnect(tableView, sigSelectionChanged(const QItemSelection &,
+					      const QItemSelection &),
+		  this, handleSelectionChanged(const QItemSelection &,
+					       const QItemSelection &));
 }
 
 EventsWidget::EventsWidget(vtl::TList<TraceEvent> *e, QWidget *parent):
 	QDockWidget(parent)
 {
-	tableView = new QTableView(this);
+	tableView = new TableView(this);
 	eventsModel = new EventsModel(e, tableView);
 	events = e;
 	tableView->setModel(eventsModel);
@@ -89,6 +94,10 @@ EventsWidget::EventsWidget(vtl::TList<TraceEvent> *e, QWidget *parent):
 		  this, handleClick(const QModelIndex &));
 	tsconnect(tableView, doubleClicked(const QModelIndex &),
 		  this, handleDoubleClick(const QModelIndex &));
+	tsconnect(tableView, sigSelectionChanged(const QItemSelection &,
+					      const QItemSelection &),
+		  this, handleSelectionChanged(const QItemSelection &,
+					       const QItemSelection &));
 }
 
 EventsWidget::~EventsWidget()
@@ -249,6 +258,46 @@ void EventsWidget::handleDoubleClick(const QModelIndex &index)
 		const TraceEvent &event = *getEventAt(index.row());
 		emit infoDoubleClicked(event);
 	}
+}
+
+void EventsWidget::handleSelectionChanged(const QItemSelection &/*selected*/,
+					  const QItemSelection &/*deselected*/)
+{
+	const TraceEvent *event = getSelectedEvent();
+
+	if (event != selectedEvent) {
+		selectedEvent = event;
+		emit eventSelected(event);
+	}
+}
+
+const TraceEvent *EventsWidget::getSelectedEvent()
+{
+	int s, i, row;
+	const QModelIndexList list = tableView->modelIndexList();
+	const TraceEvent *event = nullptr;
+
+	s = list.size();
+	if (s < 1)
+		goto out;
+
+	row = list[0].row();
+
+	for (i = 1; i < s; i++) {
+		const QModelIndex &idx = list[i];
+		/* If more than one row is selected, don't bother */
+		if (idx.row() != row)
+			goto out;
+	}
+
+	if (events != nullptr) {
+		event = &events->at(row);
+	} else if (eventsPtrs != nullptr) {
+		event = eventsPtrs->at(row);
+	}
+
+out:
+	return event;
 }
 
 /* Apparently it's a bad idea to do tableView->resizeColumnsToContents() if we

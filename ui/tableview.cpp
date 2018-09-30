@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,34 +49,24 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RESOURCES_H
-#define RESOURCES_H
+#include "tableview.h"
 
-/* All pixmap resources for icons should be defined here  */
-#define RESSRC_PNG_ADD_TASK      ":/traceshark/images/addtask30x30.png"
-#define RESSRC_PNG_ADD_TO_LEGEND ":/traceshark/images/addtolegend30x30.png"
-#define RESSRC_PNG_CLEAR_LEGEND  ":/traceshark/images/clearlegend30x30.png"
-#define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
-#define RESSRC_PNG_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
-#define RESSRC_PNG_EXPORTEVENTS  ":/traceshark/images/exportevents30x30.png"
-#define RESSRC_PNG_GETSTATS      ":/traceshark/images/getstats30x30.png"
-#define RESSRC_PNG_GETSTATS_TIMELIMIT \
-	                         ":/traceshark/images/getstatstimelimit30x30.png"
-#define RESSRC_PNG_GRAPHENABLE   ":/traceshark/images/graphenabledialog30x30.png"
-#define RESSRC_PNG_MOVE_BLUE     ":/traceshark/images/moveblue30x30.png"
-#define RESSRC_PNG_MOVE_RED      ":/traceshark/images/movered30x30.png"
-#define RESSRC_PNG_OPEN          ":/traceshark/images/open30x30.png"
-#define RESSRC_PNG_REMOVE_TASK   ":/traceshark/images/removetask30x30.png"
-#define RESSRC_PNG_RESETFILTERS  ":/traceshark/images/resetfilters30x30.png"
-#define RESSRC_PNG_SCREENSHOT    ":/traceshark/images/screenshot30x30.png"
-#define RESSRC_PNG_SHARK         ":/traceshark/images/shark.png"
-#define RESSRC_PNG_TASKSELECT    ":/traceshark/images/taskselector30x30.png"
-#define RESSRC_PNG_TIMEFILTER    ":/traceshark/images/timefilter30x30.png"
-#define RESSRC_PNG_FIND_WAKEUP   ":/traceshark/images/wakeup30x30.png"
-#define RESSRC_PNG_FIND_WAKING   ":/traceshark/images/waking30x30.png"
-#define RESSRC_PNG_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
-#define RESSRC_PNG_QT_LOGO       ":/traceshark/images/qtlogo-64.png"
+TableView::TableView(QWidget *parent):
+	QTableView(parent)
+{}
 
-#define RESSRC_TEXT_LICENSE      ":/traceshark/LICENSE"
 
-#endif /* RESOURCES_H */
+void TableView::selectionChanged(const QItemSelection &selected,
+				 const QItemSelection &deselected)
+{
+	QTableView::selectionChanged(selected, deselected);
+	emit sigSelectionChanged(selected, deselected);
+}
+
+TableView::~TableView()
+{}
+
+QModelIndexList TableView::modelIndexList()
+{
+	return selectedIndexes();
+}

@@ -56,7 +56,7 @@
 #include "misc/traceshark.h"
 #include "vtl/time.h"
 
-class QTableView;
+class TableView;
 class EventsModel;
 class TraceEvent;
 namespace vtl {
@@ -82,19 +82,24 @@ public:
 	void scrollToSaved();
 	void show();
 	vtl::Time getSavedScroll();
+	const TraceEvent *getSelectedEvent();
 signals:
 	void timeSelected(vtl::Time time);
 	void infoDoubleClicked(const TraceEvent &event);
+	void eventSelected(const TraceEvent *event);
 private slots:
 	void handleClick(const QModelIndex &index);
 	void handleDoubleClick(const QModelIndex &index);
+	void handleSelectionChanged(const QItemSelection &selected,
+				    const QItemSelection &deselected);
 private:
-	QTableView *tableView;
+	TableView *tableView;
 	EventsModel *eventsModel;
 	vtl::TList<TraceEvent> *events;
 	vtl::TList<const TraceEvent*> *eventsPtrs;
 	bool saveScrollTime;
 	vtl::Time scrollTime;
+	const TraceEvent *selectedEvent;
 	int findBestMatch(const vtl::Time &time);
 	int binarySearch(const vtl::Time &time, int start, int end);
 	const TraceEvent* getEventAt(int index) const;

@@ -61,6 +61,7 @@ static char migratestr[] = "sched_migrate_task";
 static char sswitchstr[] = "sched_switch";
 static char swakeupstr[] = "sched_wakeup";
 static char swaknewstr[] = "sched_wakeup_new";
+static char swakingstr[] = "sched_waking";
 static char sprforkstr[] = "sched_process_fork";
 static char sprexitstr[] = "sched_process_exit";
 static char irqhdlrent[] = "irq_handler_entry";
@@ -73,6 +74,7 @@ char *eventstrings[NR_EVENTS] = {
 	sswitchstr,
 	swakeupstr,
 	swaknewstr,
+	swakingstr,
 	sprforkstr,
 	sprexitstr,
 	irqhdlrent,

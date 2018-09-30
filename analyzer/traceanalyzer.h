@@ -113,6 +113,7 @@ public:
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
 						  int pid,
 						  int *index) const;
+	const TraceEvent *findWakingEvent(const TraceEvent *wakeup, int *index);
 	const TraceEvent *findFilteredEvent(int index, int *filterIndex);
 	__always_inline unsigned int getMaxCPU() const;
 	__always_inline unsigned int getNrCPUs() const;
@@ -174,6 +175,8 @@ private:
 		generic_sched_switch_newpid(const TraceEvent &event) const;
 	__always_inline int
 		generic_sched_wakeup_pid(const TraceEvent &event) const;
+	__always_inline int
+		generic_sched_waking_pid(const TraceEvent &event) const;
 	__always_inline vtl::Time estimateWakeUpNew(const CPU *eventCPU,
 						    const vtl::Time &newTime,
 						    const vtl::Time &startTime,
@@ -337,6 +340,18 @@ TraceAnalyzer::generic_sched_wakeup_pid(const TraceEvent &event) const
 	if (!sched_wakeup_args_ok(ttype, event))
 		return INT_MAX;
 	return sched_wakeup_pid(ttype, event);
+}
+
+__always_inline int
+TraceAnalyzer::generic_sched_waking_pid(const TraceEvent &event) const
+{
+	tracetype_t ttype = getTraceType();
+
+	if (!tracetype_is_valid(ttype))
+		return INT_MAX;
+	if (!sched_waking_args_ok(ttype, event))
+		return INT_MAX;
+	return sched_waking_pid(ttype, event);
 }
 
 __always_inline unsigned int TraceAnalyzer::getMaxCPU() const

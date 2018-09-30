@@ -118,6 +118,7 @@ private slots:
 	void infoValueChanged(vtl::Time value, int nr);
 	void moveActiveCursor(vtl::Time time);
 	void showEventInfo(const TraceEvent &event);
+	void handleEventSelected(const TraceEvent *event);
 	void selectionChanged();
 	void plottableClicked(QCPAbstractPlottable *plottable, int dataIndex,
 			      QMouseEvent *event);
@@ -130,6 +131,7 @@ private slots:
 	void showEventFilter();
 	void showGraphEnable();
 	void showWakeup(int pid);
+	void showWaking(const TraceEvent *event);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
@@ -147,6 +149,7 @@ private slots:
 	void addToLegendTriggered();
 	void clearLegendTriggered();
 	void findWakeupTriggered();
+	void findWakingTriggered();
 	void removeTaskGraphTriggered();
 
 private:
@@ -175,9 +178,12 @@ private:
 
 	void setTraceActionsEnabled(bool e);
 	void setTaskActionsEnabled(bool e);
+	void setWakeupActionsEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
+
+	void handleWakeUpChanged(bool selected);
 
 	void checkStatsTimeLimited();
 
@@ -234,6 +240,7 @@ private:
 	QAction *addToLegendAction;
 	QAction *clearLegendAction;
 	QAction *findWakeupAction;
+	QAction *findWakingAction;
 	QAction *removeTaskGraphAction;
 
 	TraceAnalyzer *analyzer;

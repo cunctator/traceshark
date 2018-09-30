@@ -626,4 +626,16 @@ const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 #define perf_irq_handler_exit_ret(EVENT, LEN_UINTPTR) \
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
+/*
+ * As a first approximation we assume that waking events and wakeup can be
+ * parsed by the same code, through all kernel version where traceshark is
+ * supposed to work.
+ */
+#define perf_sched_waking_args_ok(EVENT) (perf_sched_wakeup_args_ok(EVENT))
+#define perf_sched_waking_cpu(EVENT) (perf_sched_wakeup_cpu(EVENT))
+#define perf_sched_waking_prio(EVENT) (perf_sched_wakeup_prio(EVENT))
+#define perf_sched_waking_pid(EVENT) (perf_sched_wakeup_pid(EVENT))
+#define perf_sched_waking_name_strdup(EVENT, POOL) \
+	perf_sched_wakeup_name_strdup(EVENT, POOL)
+
 #endif /* PERFPARAMS_H*/

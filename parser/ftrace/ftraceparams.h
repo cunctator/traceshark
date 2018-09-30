@@ -490,4 +490,71 @@ const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 #define ftrace_irq_handler_exit_ret(EVENT, LEN_UINTPTR) \
 	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_UINTPTR))
 
+#define FTRACE_WAKING_COMM_PFIX "comm="
+#define FTRACE_WAKING_PID_PFIX  "pid="
+#define FTRACE_WAKING_PRIO_PFIX "prio="
+#define FTRACE_WAKING_CPU_PFIX  "target_cpu="
+
+#define ftrace_sched_waking_args_ok(EVENT)				\
+	((EVENT.argc >= 4) &&						\
+	 !prefixcmp(EVENT.argv[0]->ptr, FTRACE_WAKING_COMM_PFIX) &&	\
+	 !prefixcmp(EVENT.argv[EVENT.argc - 3]->ptr, FTRACE_WAKING_PID_PFIX) \
+	 &&								\
+	 !prefixcmp(EVENT.argv[EVENT.argc - 2]->ptr, FTRACE_WAKING_PRIO_PFIX) \
+	 &&								\
+	 !prefixcmp(EVENT.argv[EVENT.argc - 1]->ptr, FTRACE_WAKING_CPU_PFIX))
+
+static __always_inline const char *
+__ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
+{
+	int beginidx;
+	int endidx;
+	int len = 0;
+	char *c;
+	const TString *first;
+	char sbuf[TASKNAME_MAXLEN + 1];
+	TString ts;
+	const TString *retstr;
+	bool ok;
+
+	c = &sbuf[0];
+	ts.ptr = c;
+
+	beginidx = 1;
+	endidx = event.argc - 4;
+
+	/*
+	 * This will copy the first part of the name, that is the
+	 * portion of first that is suceeded by the '=' character
+	 */
+	first = event.argv[0];
+	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+				  ok);
+	if (!ok)
+		return nullptr;
+
+	merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+					      c, len, TASKNAME_MAXLEN,
+					      ok);
+	if (!ok)
+		return nullptr;
+
+	ts.len = len;
+	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	if (retstr == nullptr)
+		return nullptr;
+	return retstr->ptr;
+}
+
+const char *
+ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool);
+
+#define ftrace_sched_waking_pid(EVENT) \
+	(int_after_char(EVENT, EVENT.argc - 3, '='))
+
+#define ftrace_sched_waking_prio(EVENT) \
+	(uint_after_char(EVENT, EVENT.argc - 2, '='))
+#define ftrace_sched_waking_cpu(EVENT)			\
+	(uint_after_char(EVENT, EVENT.argc - 1, '='))
+
 #endif
