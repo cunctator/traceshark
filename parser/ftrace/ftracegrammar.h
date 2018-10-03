@@ -277,7 +277,7 @@ __always_inline bool FtraceGrammar::EventMatch(const TString *str,
 	} else
 		return false;
 
-	type = eventTree->searchAllocString(&estr, TShark::StrHash32(str),
+	type = eventTree->searchAllocString(&estr, TShark::StrHash32(&estr),
 					    (event_t) unknownTypeCounter);
 	if (type == EVENT_ERROR)
 		return false;
