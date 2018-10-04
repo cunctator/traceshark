@@ -11,7 +11,10 @@ sched_process_fork
 sched_switch
 sched_wakeup
 sched_wakeup_new
+sched_waking
 ```
+
+The `sched_waking`events are not really visualized but there is a button to find the `sched_waking` event that has instigated a particular `sched_wakeup` event.
 
 ![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/6c82bceacf272617de2692b5e2efd4ec1b0ecdde/doc/ts-screenshot1.png)
 
@@ -69,6 +72,8 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   [![filtered.png](https://raw.githubusercontent.com/cunctator/traceshark/4672e40d57e57ce5c276b22a8e91da8047338087/doc/filtered.png)](https://raw.githubusercontent.com/cunctator/traceshark/4672e40d57e57ce5c276b22a8e91da8047338087/doc/filtered.png)
   You can read more about flame graphs [here](http://www.brendangregg.com/flamegraphs.html).
 * ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/master/images/graphenabledialog30x30.png) Pressing this button will open a dialog that allows the user to select which types of graphs will be displayed. Here it is possible to disable certain graphs, for example CPU idle graphs that frequently may be of little interest. It is also possible to enable horizontal wakeup graphs for the per CPU task graphs that are disabled by default, becase they will frequently overlap each other.
+* ![Show global statistics](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/getstats30x30.png) Pressing this button will show dialog with global statistics on the left side of the plot. The statistics show how many % of the CPU time each task has consumed as well as the time consumed. The percentages are percentage of a core. This means that the maximum for a normal task is 100% and for the idle task, swapper with pid 0, the maximum is `N * 100`, where N is the number of CPUs. The tasks are sorted so that those tasks that consume more CPU time are shown earlier. The dialog has buttons for adding selected tasks to the legend, to add them as task graphs, to filter the events view on them, or to reset the filtering. There is even a button to close the dialog.
+* ![Show statistics limited by cursors](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/getstatstimelimit30x30.png) Pressing this button will show dialog with the same statistics as the previous button but the scope will not be the whole trace but the time between cursors and the statistics will be shown on the right side of the plot. If the cursors are moved while the dialog is shown, then the statistics will be updated accordingly.
 
 The top widget has some buttons as well:
 
@@ -76,7 +81,7 @@ The top widget has some buttons as well:
 * ![Add the blue cursor](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/moveblue30x30.png) Move the blue cursor to the time specified in the time text box.
 * ![Add to legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtolegend30x30.png) Adds the currently selected task, from the scheduling graphs, to the legend. A task can be removed from the legend by double clicking on it in the legend.
 * ![Clear legend](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/clearlegend30x30.png) Removes all tasks from the legend.
-* ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/wakeup30x30.png) This moves the non-active cursor to the immediately preceeding scheduling of the currently selected task. The active cursor is moved to the wakeup event. The selected task is unselected and instead the task of the wakeup event is selected. The events view is scrolled to the wakeup event. This makes it convenient to easily check which task is waiting for which. It is a good idea to double click on the info field of the wakeup event, in order to see the backtrace so that one can determine whether the wakeup was caused by an interrupt or not. If all IRQs are traced it may also be possible to form a conclusion by looking at the surrounding IRQ related events. A typical way to use this button would be something like this:
+* ![Find Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/wakeup30x30.png) This moves the non-active cursor to the immediately preceding scheduling of the currently selected task. The active cursor is moved to the wakeup event. The selected task is unselected and instead the task of the wakeup event is selected. The events view is scrolled to the wakeup event. This makes it convenient to easily check which task is waiting for which. It is a good idea to double click on the info field of the wakeup event, in order to see the backtrace so that one can determine whether the wakeup was caused by an interrupt or not. If all IRQs are traced it may also be possible to form a conclusion by looking at the surrounding IRQ related events. A typical way to use this button would be something like this:
   1. Choose a task whose wakeup sequence is of interest
   2. Double click to move the cursor to just after the scheduling of interest
   3. Make sure that the task is selected.
@@ -84,7 +89,19 @@ The top widget has some buttons as well:
   5. Locate the wakup event in the events view. It should be selected.
   6. Double click on the `Info` field to display the backtrace.
   7. If the backtrace leads to an interrupt (including software interrupts), then the wakeup source has been found.
-  8. If the backtrace does not lead to an interrupt, then go back to IV.
+  8. If the `sched_wakeup` event is executed as pid 0, that is no new task has been autoselected, and/or, the backtrace leads to something like this:
+  ```
+  2863f8 ttwu_do_wakeup
+  286522 ttwu_do_activate
+  2878a7 sched_ttwu_pending
+  29fec6 do_idle
+  2a00ff cpu_startup_entry
+  237418 start_secondary
+  2000d5 [unknown]
+  ```
+  Then it's necessary to find the preceding `sched_waking` event and study its backtrace instead. Click on the ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png) button and go back to VII.
+  9. If none of the above is true, then go back to IV.
+* ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png). This button can be used to find the `sched_waking` event that is associated with and precedes a particular `sched_wakeup` event. A `sched_wakeup` event must be selected in the events view for this button to be enabled.
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
 * ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/removetask30x30.png) Removes the currently selected unified graph. 
 
@@ -159,12 +176,12 @@ git clone https://github.com/cunctator/traceshark-resources.git
 You can get an Ftrace trace to view by doing the following:
 
 ```
-trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new
+trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new -e sched_waking
 ```
 
 If you get problem with lost events, then you may want to try the `-r` and `-b` options. For example:
 ```
-trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new -b 32768 -r 99
+trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new -e sched_waking -b 32768 -r 99
 ```
 
 The above will use kernel buffers that are a whopping 32 MB per cpu and run the capture threads with a real time priority of 99. You may want to adjust these values to suit your system.
@@ -188,7 +205,7 @@ perf list
 A perf trace can be obtained by doing something like this:
 
 ```
-perf record -e power:cpu_frequency -e power:cpu_idle -e sched:sched_kthread_stop -e sched:sched_kthread_stop_ret -e sched:sched_migrate_task -e sched:sched_move_numa -e sched:sched_pi_setprio -e sched:sched_process_exec -e sched:sched_process_exit -e sched:sched_process_fork -e sched:sched_process_free -e sched:sched_process_wait -e sched:sched_stick_numa -e sched:sched_swap_numa -e sched:sched_switch -e sched:sched_wait_task -e sched:sched_wake_idle_without_ipi -e sched:sched_wakeup -e sched:sched_wakeup_new -e cycles -a --call-graph=dwarf,20480 -m 128M
+perf record -e power:cpu_frequency -e power:cpu_idle -e sched:sched_kthread_stop -e sched:sched_kthread_stop_ret -e sched:sched_migrate_task -e sched:sched_move_numa -e sched:sched_pi_setprio -e sched:sched_process_exec -e sched:sched_process_exit -e sched:sched_process_fork -e sched:sched_process_free -e sched:sched_process_wait -e sched:sched_stick_numa -e sched:sched_swap_numa -e sched:sched_switch -e sched:sched_wait_task -e sched:sched_wake_idle_without_ipi -e sched:sched_wakeup -e sched:sched_wakeup_new -e sched:sched_waking -e cycles -a --call-graph=dwarf,20480 -m 128M
 ```
 
 The `--call-graph=dwarf,20480` option is needed, if you want to get stack traces for your events. You might need to adjust the size 20480, the maximum is 65528. The benefit with larger sizes is that you can capture bigger stacks, the downside is that the traces will be larger, tracing will have more overhead, and the probability that perf will lose some events is higher. I believe that you can use the `-g` option instead if your software is compiled with frame pointers.
