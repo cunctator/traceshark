@@ -1594,7 +1594,14 @@ void MainWindow::resetFilters()
 	if (!analyzer->isFiltered())
 		return;
 
-	saved = eventsWidget->getSavedScroll();
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+
+	if (event != nullptr) {
+		saved = event->time;
+	} else {
+		saved = eventsWidget->getSavedScroll();
+	}
+
 	eventsWidget->beginResetModel();
 	analyzer->disableAllFilters();
 	setEventsWidgetEvents();

@@ -266,6 +266,10 @@ void EventsWidget::handleSelectionChanged(const QItemSelection &/*selected*/,
 	const TraceEvent *event = getSelectedEvent();
 
 	if (event != selectedEvent) {
+		if (event != nullptr) {
+			scrollTime = event->time;
+			saveScrollTime = true;
+		}
 		selectedEvent = event;
 		emit eventSelected(event);
 	}
