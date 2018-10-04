@@ -99,7 +99,7 @@ The top widget has some buttons as well:
      237418 start_secondary
      2000d5 [unknown]
      ```
-     Then it's necessary to find the preceding `sched_waking` event and study its backtrace instead. Click on the ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png) button and go back to VII.
+     Then it's necessary to find the preceding `sched_waking` event and study its backtrace instead. Click on the ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png) button and go back to VI.
   9. If none of the above is true, then go back to IV.
 * ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png) This is used to find the `sched_waking` event that is associated with and precedes a particular `sched_wakeup` event. A `sched_wakeup` event must be selected in the events view for this button to be enabled.
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
