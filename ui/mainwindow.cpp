@@ -790,6 +790,8 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
  */
 void MainWindow::setTraceActionsEnabled(bool e)
 {
+	infoWidget->setTraceActionsEnabled(e);
+
 	saveAction->setEnabled(e);
 	closeAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
