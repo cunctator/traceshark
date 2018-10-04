@@ -90,18 +90,18 @@ The top widget has some buttons as well:
   6. Double click on the `Info` field to display the backtrace.
   7. If the backtrace leads to an interrupt (including software interrupts), then the wakeup source has been found.
   8. If the `sched_wakeup` event is executed as pid 0, that is no new task has been autoselected, and/or, the backtrace leads to something like this:
-  ```
-  2863f8 ttwu_do_wakeup
-  286522 ttwu_do_activate
-  2878a7 sched_ttwu_pending
-  29fec6 do_idle
-  2a00ff cpu_startup_entry
-  237418 start_secondary
-  2000d5 [unknown]
-  ```
-  Then it's necessary to find the preceding `sched_waking` event and study its backtrace instead. Click on the ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png) button and go back to VII.
+     ```
+     2863f8 ttwu_do_wakeup
+     286522 ttwu_do_activate
+     2878a7 sched_ttwu_pending
+     29fec6 do_idle
+     2a00ff cpu_startup_entry
+     237418 start_secondary
+     2000d5 [unknown]
+     ```
+     Then it's necessary to find the preceding `sched_waking` event and study its backtrace instead. Click on the ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png) button and go back to VII.
   9. If none of the above is true, then go back to IV.
-* ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png). This button can be used to find the `sched_waking` event that is associated with and precedes a particular `sched_wakeup` event. A `sched_wakeup` event must be selected in the events view for this button to be enabled.
+* ![Find Waking](https://github.com/cunctator/traceshark/raw/26eee3377da7eba34beb030fb5ae29da71db1dbf/images/waking30x30.png) This is used to find the `sched_waking` event that is associated with and precedes a particular `sched_wakeup` event. A `sched_wakeup` event must be selected in the events view for this button to be enabled.
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
 * ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/808c9a1ed38acfd01e4a2d985b25c98867168f71/images/removetask30x30.png) Removes the currently selected unified graph. 
 
