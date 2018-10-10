@@ -68,13 +68,13 @@ public:
 	void enable(filter_t filter);
 	void disable(filter_t filter);
 	void disableAll();
-	bool isEnabled();
-	__always_inline bool isEnabled(filter_t filter);
+	bool isEnabled() const;
+	__always_inline bool isEnabled(filter_t filter) const;
 private:
 	bool state[NR_FILTERS];
 };
 
-__always_inline bool FilterState::isEnabled(filter_t filter)
+__always_inline bool FilterState::isEnabled(filter_t filter) const
 {
 	return state[filter];
 }

@@ -143,7 +143,7 @@ void TraceAnalyzer::prepareDataStructures()
 	cpuFreqScale.resize(NR_CPUS_ALLOWED);
 }
 
-bool TraceAnalyzer::isOpen()
+bool TraceAnalyzer::isOpen() const
 {
 	return parser->isOpen();
 }
@@ -554,7 +554,7 @@ const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(const vtl::Time &time,
 }
 
 const TraceEvent *TraceAnalyzer::findFilteredEvent(int index,
-						   int *filterIndex)
+						   int *filterIndex) const
 {
 	const TraceEvent *eptr = &events->at(index);
 	vtl::Time time = eptr->time;
@@ -600,7 +600,7 @@ const TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
 }
 
 const TraceEvent *TraceAnalyzer::findWakingEvent(const TraceEvent *wakeup,
-						 int *index)
+						 int *index) const
 {
 	int i;
 	int startidx = findIndexBefore(wakeup->time);
@@ -1064,7 +1064,7 @@ void TraceAnalyzer::disableAllFilters()
 	filteredEvents.clear();
 }
 
-bool TraceAnalyzer::isFiltered()
+bool TraceAnalyzer::isFiltered() const
 {
 	/*
 	 * No need to consider us filtered if we only have OR-filters, so we
@@ -1073,7 +1073,7 @@ bool TraceAnalyzer::isFiltered()
 	return filterState.isEnabled();
 }
 
-bool TraceAnalyzer::filterActive(FilterState::filter_t filter)
+bool TraceAnalyzer::filterActive(FilterState::filter_t filter) const
 {
 	return filterState.isEnabled(filter) ||
 		OR_filterState.isEnabled(filter);

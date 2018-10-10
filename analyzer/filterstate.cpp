@@ -74,7 +74,7 @@ void FilterState::disableAll()
 	}
 }
 
-bool FilterState::isEnabled()
+bool FilterState::isEnabled() const
 {
 	int i;
 

@@ -104,7 +104,7 @@ public:
 	TraceAnalyzer();
 	~TraceAnalyzer();
 	int open(const QString &fileName);
-	bool isOpen();
+	bool isOpen() const;
 	void close();
 	void processTrace();
 	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
@@ -113,8 +113,9 @@ public:
 	const TraceEvent *findPreviousWakeupEvent(int startidx,
 						  int pid,
 						  int *index) const;
-	const TraceEvent *findWakingEvent(const TraceEvent *wakeup, int *index);
-	const TraceEvent *findFilteredEvent(int index, int *filterIndex);
+	const TraceEvent *findWakingEvent(const TraceEvent *wakeup,
+					  int *index) const;
+	const TraceEvent *findFilteredEvent(int index, int *filterIndex) const;
 	__always_inline unsigned int getMaxCPU() const;
 	__always_inline unsigned int getNrCPUs() const;
 	__always_inline vtl::Time getStartTime() const;
@@ -148,8 +149,8 @@ public:
 	void addPidToFilter(int pid);
 	void removePidFromFilter(int pid);
 	void disableAllFilters();
-	bool isFiltered();
-	bool filterActive(FilterState::filter_t filter);
+	bool isFiltered() const;
+	bool filterActive(FilterState::filter_t filter) const;
 	bool exportTraceFile(const char *fileName, int *ts_errno);
 	vtl::TList<TraceEvent> *events;
 	vtl::TList <const TraceEvent*> filteredEvents;
