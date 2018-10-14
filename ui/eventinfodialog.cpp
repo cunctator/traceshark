@@ -96,8 +96,8 @@ void EventInfoDialog::updateSize()
 	QSize screenSize;
 	int wscreen;
 	int hscreen;
-	int width = 1024;
-	int height = 700;
+	int width = 1600;
+	int height = 850;
 
 	screenSize = QApplication::desktop()->availableGeometry(QCursor::pos())
 		.size();
