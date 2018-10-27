@@ -57,11 +57,13 @@
 static const char noerror[] = "No error has occurred.";
 static const char interne[] = "A serious internal error has occurred.";
 static const char errerro[] = "An error in the error reporting has occurred.";
+static const char errpars[] = "A parsing error has occurred.";
 
 static const char *errorstrings[TS_NR_ERRORS] = {
 	noerror,
 	interne,
-	errerro
+	errerro,
+	errpars
 };
 
 const char *ts_strerror(int ts_errno)
@@ -70,3 +72,11 @@ const char *ts_strerror(int ts_errno)
 		ts_errno = TS_ERROR_ERROR;
 	return errorstrings[ts_errno];
 }
+
+static const char parsingerr[] = "parsing error";
+
+/*
+ * All places were we wish to have a null string that doesn't crash the program
+ * like nullptr does, are essentially parsing problems.
+ */
+const char *const NullStr = &parsingerr[0];

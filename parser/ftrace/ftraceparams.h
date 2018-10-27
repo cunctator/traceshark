@@ -55,6 +55,7 @@
 #include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
+#include "misc/errors.h"
 #include "misc/string.h"
 #include "misc/traceshark.h"
 #include <cstring>
@@ -138,7 +139,7 @@ __ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 	for (i = startidx; i < endidx; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return nullptr;
+			return NullStr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		*c = ' ';
@@ -162,7 +163,7 @@ __ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)
-			return nullptr;
+			return NullStr;
 		*c = *d;
 		c++;
 	}
@@ -173,7 +174,7 @@ __ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }
@@ -211,7 +212,7 @@ __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 	for (i = 0; i < endidx; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return nullptr;
+			return NullStr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		*c = ' ';
@@ -235,7 +236,7 @@ __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)
-			return nullptr;
+			return NullStr;
 		*c = *d;
 		c++;
 	}
@@ -246,7 +247,7 @@ __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }
@@ -329,7 +330,7 @@ static __always_inline const char
 	ts.ptr = c;
 
 	if (event.argc < 4)
-		return nullptr;
+		return NullStr;
 
 	endidx = event.argc - 4;
 
@@ -340,7 +341,7 @@ static __always_inline const char
 	for(i = 0; i < event.argc - 4; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return nullptr;
+			return NullStr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		*c = ' ';
@@ -364,7 +365,7 @@ static __always_inline const char
 	for (d = event.argv[endidx]->ptr; d < end; d++) {
 		len++;
 		if (len > TASKNAME_MAXLEN)
-			return nullptr;
+			return NullStr;
 		*c = *d;
 		c++;
 	}
@@ -376,7 +377,7 @@ static __always_inline const char
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }
@@ -426,28 +427,28 @@ __ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 	ts.ptr = c;
 
 	if (event.argc < 4)
-		return nullptr;
+		return NullStr;
 
 	for (i = 2; i <= endidx; i++) {
 		if (!prefixcmp(event.argv[i]->ptr, "child_comm="))
 			goto found;
 	}
-	return nullptr;
+	return NullStr;
 
 found:
 	len = 0;
 
 	const char *d = substr_after_char(event.argv[i]->ptr,
 					  event.argv[i]->len, '=', &sublen);
-	if (d == nullptr || sublen > TASKNAME_MAXLEN)
-		return nullptr;
+	if (d == NullStr || sublen > TASKNAME_MAXLEN)
+		return NullStr;
 	strncpy(c, d, sublen);
 	i++;
 
 	for (;i <= endidx; i++) {
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
-			return nullptr;
+			return NullStr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
 		if (i == endidx)
@@ -464,7 +465,7 @@ finalize:
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }
@@ -531,18 +532,18 @@ __ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 				  ok);
 	if (!ok)
-		return nullptr;
+		return NullStr;
 
 	merge_args_into_cstring_nullterminate(event, beginidx, endidx,
 					      c, len, TASKNAME_MAXLEN,
 					      ok);
 	if (!ok)
-		return nullptr;
+		return NullStr;
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 	return retstr->ptr;
 }
 

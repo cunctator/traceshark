@@ -55,6 +55,7 @@
 #include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
+#include "misc/errors.h"
 #include "misc/string.h"
 #include "misc/traceshark.h"
 #include <cstring>
@@ -284,13 +285,13 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 					  ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 
 		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
 						      c, len, TASKNAME_MAXLEN,
 						      ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 	} else {
 		beginidx = i + 1;
 		endidx = event.argc - 3;
@@ -299,18 +300,18 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					c, len, TASKNAME_MAXLEN,
 					ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 
 		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
 					   ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 	}
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }
@@ -352,13 +353,13 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		__copy_tstring_after_char(first, '=', c, len,
 					  TASKNAME_MAXLEN, ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 
 		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
 						      c, len, TASKNAME_MAXLEN,
 						      ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 
 	} else {
 		beginidx = 0;
@@ -368,19 +369,19 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					c, len, TASKNAME_MAXLEN,
 					ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 
 		__copy_tstring_before_char(first, ':',
 					   c, len, TASKNAME_MAXLEN,
 					   ok);
 
 		if (!ok)
-			return nullptr;
+			return NullStr;
 	}
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }
@@ -494,13 +495,13 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 		merge_args_into_cstring(event, beginidx, endidx, c, len,
 					TASKNAME_MAXLEN, ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 
 		first = event.argv[0];
 		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
 					   ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 	} else {
 
 		beginidx = 1;
@@ -514,19 +515,19 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 					  ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 
 		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
 						      c, len, TASKNAME_MAXLEN,
 						      ok);
 		if (!ok)
-			return nullptr;
+			return NullStr;
 	}
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }
@@ -580,7 +581,7 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 			break;
 	}
 	if (i > endidx)
-		return nullptr;
+		return NullStr;
 	beginidx = i + 1;
 
 	/*
@@ -590,17 +591,17 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	first = event.argv[i];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return nullptr;
+		return NullStr;
 
 	merge_args_into_cstring_nullterminate(event, beginidx, endidx, c, len,
 					      TASKNAME_MAXLEN, ok);
 	if (!ok)
-		return nullptr;
+		return NullStr;
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
-		return nullptr;
+		return NullStr;
 
 	return retstr->ptr;
 }

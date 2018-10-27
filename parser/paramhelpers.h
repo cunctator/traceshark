@@ -53,6 +53,7 @@
 #define PARAMHELPERS_H
 
 #include <climits>
+#include "misc/errors.h"
 #include "parser/traceevent.h"
 
 class perf_sched_switch_handle {
@@ -352,14 +353,14 @@ static __always_inline const char *substr_after_char(const char *str,
 		if (*str == c) {
 			i++;
 			if (i == len)
-				return nullptr;
+				return NullStr;
 			str++;
 			*sublen = len - i;
 			return str;
 		}
 		str++;
 	}
-	return nullptr;
+	return NullStr;
 }
 
 static __always_inline taskstate_t

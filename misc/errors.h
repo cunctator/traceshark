@@ -56,9 +56,12 @@ typedef enum {
 	TS_ERROR_NOERROR = 0,
 	TS_ERROR_INTERNAL,
 	TS_ERROR_ERROR,
+	TS_ERROR_PARSER,
 	TS_NR_ERRORS
 } tserror_t;
 
 const char *ts_strerror(int ts_errno);
+
+extern const char *const NullStr;
 
 #endif /* ERRORS_H */
