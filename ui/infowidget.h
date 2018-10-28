@@ -58,7 +58,6 @@
 
 QT_BEGIN_NAMESPACE
 class CursorInfo;
-class TaskInfo;
 class QLineEdit;
 class QComboBox;
 class TaskGraph;
@@ -85,7 +84,6 @@ private:
 	CursorInfo *cursorInfos[TShark::NR_CURSORS];
 	QLineEdit *diffLine;
 	QComboBox *cursorComboBox;
-	TaskInfo *taskInfo;
 	vtl::Time cursorValues[TShark::NR_CURSORS];
 	void updateDifference();
 	QHBoxLayout *mainLayout;
