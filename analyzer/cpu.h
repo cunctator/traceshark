@@ -57,7 +57,7 @@
 class CPU {
 public:
 	CPU(): pidOnCPU(0), hasBeenScheduled(false), lastSched(0),
-		lastEnterIdle(0), lastExitIdle(0) {}
+		lastSchedIdx(0), lastEnterIdle(0), lastExitIdle(0) {}
 	int pidOnCPU;
 	bool hasBeenScheduled;
 
