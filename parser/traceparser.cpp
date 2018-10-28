@@ -106,6 +106,8 @@ TraceParser::~TraceParser()
 	delete readerThread;
 	delete eventsWatcher;
 	delete traceTypeWatcher;
+	delete ftraceEvents;
+	delete perfEvents;
 }
 
 int TraceParser::open(const QString &fileName)
