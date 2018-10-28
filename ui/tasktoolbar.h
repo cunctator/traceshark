@@ -82,7 +82,6 @@ public:
 	void addCurrentTaskToLegend();
 	void addStretch();
 private:
-	QToolBar *taskToolBar;
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
 	TaskGraph *taskGraph;
