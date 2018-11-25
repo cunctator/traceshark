@@ -130,7 +130,7 @@ private slots:
 	void showTaskSelector();
 	void showEventFilter();
 	void showGraphEnable();
-	void showWakeup(int pid);
+	void showWakeupOrWaking(int pid, event_t wakevent);
 	void showWaking(const TraceEvent *event);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
@@ -150,6 +150,7 @@ private slots:
 	void clearLegendTriggered();
 	void findWakeupTriggered();
 	void findWakingTriggered();
+	void findWakingDirectTriggered();
 	void removeTaskGraphTriggered();
 
 private:
@@ -241,6 +242,7 @@ private:
 	QAction *clearLegendAction;
 	QAction *findWakeupAction;
 	QAction *findWakingAction;
+	QAction *findWakingDirectAction;
 	QAction *removeTaskGraphAction;
 
 	TraceAnalyzer *analyzer;

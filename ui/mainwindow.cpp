@@ -113,6 +113,8 @@
 	"Find the wakeup of this task that precedes the active cursor"
 #define FIND_WAKING_TOOLTIP \
 	"Find the waking event that precedes this wakeup event"
+#define FIND_WAKING_DIRECT_TOOLTIP \
+	"Find the waking event of this task that precedes the active cursor"
 #define REMOVE_TASK_TOOLTIP \
 	"Remove the unified graph for this task"
 
@@ -811,6 +813,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 void MainWindow::setTaskActionsEnabled(bool e)
 {
 	findWakeupAction->setEnabled(e);
+	findWakingDirectAction->setEnabled(e);
 }
 
 void MainWindow::setWakeupActionsEnabled(bool e)
@@ -1255,6 +1258,12 @@ void MainWindow::createActions()
 	findWakingAction->setToolTip(tr(FIND_WAKING_TOOLTIP));
 	tsconnect(findWakingAction, triggered(), this, findWakingTriggered());
 
+	findWakingDirectAction = new QAction(tr("Find waking direct"), this);
+	findWakingDirectAction->setIcon(QIcon(RESSRC_PNG_FIND_WAKING_DIRECT));
+	findWakingDirectAction->setToolTip(tr(FIND_WAKING_DIRECT_TOOLTIP));
+	tsconnect(findWakingDirectAction, triggered(), this,
+		  findWakingDirectTriggered());
+
 	removeTaskGraphAction = new QAction(tr("Remove task graph"), this);
 	removeTaskGraphAction->setIcon(QIcon(RESSRC_PNG_REMOVE_TASK));
 	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
@@ -1299,6 +1308,7 @@ void MainWindow::createToolBars()
 	taskToolBar->addAction(clearLegendAction);
 	taskToolBar->addAction(findWakeupAction);
 	taskToolBar->addAction(findWakingAction);
+	taskToolBar->addAction(findWakingDirectAction);
 	taskToolBar->addAction(addTaskGraphAction);
 	taskToolBar->addAction(removeTaskGraphAction);
 	taskToolBar->addStretch();
@@ -1328,6 +1338,7 @@ void MainWindow::createMenus()
 	taskMenu->addAction(clearLegendAction);
 	taskMenu->addAction(findWakeupAction);
 	taskMenu->addAction(findWakingAction);
+	taskMenu->addAction(findWakingDirectAction);
 	taskMenu->addAction(addTaskGraphAction);
 	taskMenu->addAction(removeTaskGraphAction);
 
@@ -1893,7 +1904,7 @@ void MainWindow::removeQDockWidget(QDockWidget *widget)
 		removeDockWidget(widget);
 }
 
-void MainWindow::showWakeup(int pid)
+void MainWindow::showWakeupOrWaking(int pid, event_t wakevent)
 {
 	int activeIdx = infoWidget->getCursorIdx();
 	int inactiveIdx;
@@ -1928,7 +1939,7 @@ void MainWindow::showWakeup(int pid)
 		return;
 
 	const TraceEvent *wakeupevent = analyzer->
-		findPreviousWakeupEvent(schedIndex, pid, &wakeUpIndex);
+		findPreviousWakEvent(schedIndex, pid, wakevent, &wakeUpIndex);
 	if (wakeupevent == nullptr)
 		return;
 	/*
@@ -2136,16 +2147,22 @@ void MainWindow::clearLegendTriggered()
 /* Finds the preceding wakeup of the currently selected task */
 void MainWindow::findWakeupTriggered()
 {
-	showWakeup(taskToolBar->getPid());
+	showWakeupOrWaking(taskToolBar->getPid(), SCHED_WAKEUP);
 }
 
-/* Finds the preceding waking of the currently selected task */
+/* Finds the preceding waking of the currently selected wakeup event */
 void MainWindow::findWakingTriggered()
 {
 	const TraceEvent *event = eventsWidget->getSelectedEvent();
 	if (event != nullptr &&
 	    (event->type == SCHED_WAKEUP || event->type == SCHED_WAKEUP_NEW))
 		showWaking(event);
+}
+
+/* Finds the preceding waking of the currently selected task */
+void MainWindow::findWakingDirectTriggered()
+{
+	showWakeupOrWaking(taskToolBar->getPid(), SCHED_WAKING);
 }
 
 /* Removes the task graph of the currently selected task */

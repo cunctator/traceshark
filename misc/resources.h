@@ -74,6 +74,8 @@
 #define RESSRC_PNG_TIMEFILTER    ":/traceshark/images/timefilter30x30.png"
 #define RESSRC_PNG_FIND_WAKEUP   ":/traceshark/images/wakeup30x30.png"
 #define RESSRC_PNG_FIND_WAKING   ":/traceshark/images/waking30x30.png"
+#define RESSRC_PNG_FIND_WAKING_DIRECT \
+				 ":/traceshark/images/wakingdirect30x30.png"
 #define RESSRC_PNG_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
 #define RESSRC_PNG_QT_LOGO       ":/traceshark/images/qtlogo-64.png"
 

@@ -577,20 +577,32 @@ const TraceEvent *TraceAnalyzer::findFilteredEvent(int index,
 	return nullptr;
 }
 
-const TraceEvent *TraceAnalyzer::findPreviousWakeupEvent(int startidx,
-							 int pid,
-							 int *index) const
+const TraceEvent *TraceAnalyzer::findPreviousWakEvent(int startidx,
+						      int pid,
+						      event_t wanted,
+						      int *index) const
 {
 	int i;
+	int epid = 0;
 
 	if (startidx < 0 || startidx >= (int) events->size())
 		return nullptr;
 
+	if (wanted != SCHED_WAKEUP && wanted != SCHED_WAKEUP_NEW &&
+	    wanted != SCHED_WAKING)
+		return nullptr;
+
 	for (i = startidx; i >= 0; i--) {
 		const TraceEvent &event = events->at(i);
-		if ((event.type == SCHED_WAKEUP ||
-		     event.type == SCHED_WAKEUP_NEW) &&
-				generic_sched_wakeup_pid(event) == pid) {
+		if ((event.type == wanted ||
+		     (wanted == SCHED_WAKEUP &&
+		      event.type == SCHED_WAKEUP_NEW))) {
+			if (wanted == SCHED_WAKING)
+				epid = generic_sched_waking_pid(event);
+			else
+				epid = generic_sched_wakeup_pid(event);
+			if (epid != pid)
+				continue;
 			if (index != nullptr)
 				*index = i;
 			return &event;

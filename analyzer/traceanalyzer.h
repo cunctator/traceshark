@@ -110,9 +110,10 @@ public:
 	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
 						 int pid,
 						 int *index) const;
-	const TraceEvent *findPreviousWakeupEvent(int startidx,
-						  int pid,
-						  int *index) const;
+	const TraceEvent *findPreviousWakEvent(int startidx,
+					       int pid,
+					       event_t wanted,
+					       int *index) const;
 	const TraceEvent *findWakingEvent(const TraceEvent *wakeup,
 					  int *index) const;
 	const TraceEvent *findFilteredEvent(int index, int *filterIndex) const;
