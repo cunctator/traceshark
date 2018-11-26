@@ -110,13 +110,15 @@
 	"Show the dialog with statistics that are time limited by the cursors"
 
 #define FIND_WAKEUP_TOOLTIP \
-	"Find the wakeup of this task that precedes the active cursor"
+	"Find the wakeup of the selected task that precedes the active cursor"
 #define FIND_WAKING_TOOLTIP \
 	"Find the waking event that precedes this wakeup event"
 #define FIND_WAKING_DIRECT_TOOLTIP \
-	"Find the waking event of this task that precedes the active cursor"
+	"Find the waking event of the selected task that precedes the active cursor"
 #define REMOVE_TASK_TOOLTIP \
 	"Remove the unified graph for this task"
+#define TASK_FILTER_TOOLTIP \
+	"Filter on the selected task"
 
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
@@ -805,6 +807,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	clearLegendAction->setEnabled(e);
 	addTaskGraphAction->setEnabled(e);
 	removeTaskGraphAction->setEnabled(e);
+	taskFilterAction->setEnabled(e);
 }
 
 /*
@@ -1270,6 +1273,12 @@ void MainWindow::createActions()
 	tsconnect(removeTaskGraphAction, triggered(), this,
 		  removeTaskGraphTriggered());
 
+	taskFilterAction = new QAction(tr("Filter on selected task"), this);
+	taskFilterAction->setIcon(QIcon(RESSRC_PNG_FILTERCURRENT));
+	taskFilterAction->setToolTip(tr(TASK_FILTER_TOOLTIP));
+	tsconnect(taskFilterAction, triggered(), this,
+		  taskFilterTriggered());
+
 	setTraceActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
@@ -1311,6 +1320,7 @@ void MainWindow::createToolBars()
 	taskToolBar->addAction(findWakingDirectAction);
 	taskToolBar->addAction(addTaskGraphAction);
 	taskToolBar->addAction(removeTaskGraphAction);
+	taskToolBar->addAction(taskFilterAction);
 	taskToolBar->addStretch();
 }
 
@@ -1341,6 +1351,7 @@ void MainWindow::createMenus()
 	taskMenu->addAction(findWakingDirectAction);
 	taskMenu->addAction(addTaskGraphAction);
 	taskMenu->addAction(removeTaskGraphAction);
+	taskMenu->addAction(taskFilterAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
@@ -2169,6 +2180,26 @@ void MainWindow::findWakingDirectTriggered()
 void MainWindow::removeTaskGraphTriggered()
 {
 	removeTaskGraph(taskToolBar->getPid());
+}
+
+/* Filter on the currently selected task */
+void MainWindow::taskFilterTriggered()
+{
+	vtl::Time saved = eventsWidget->getSavedScroll();
+	int pid = taskToolBar->getPid();
+
+	if (pid == 0)
+		return;
+
+	QMap<int, int> map;
+	map[pid] = pid;
+
+	eventsWidget->beginResetModel();
+	analyzer->createPidFilter(map, false, true);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+	updateResetFiltersEnabled();
 }
 
 bool MainWindow::isWideScreen()

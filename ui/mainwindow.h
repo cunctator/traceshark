@@ -152,6 +152,7 @@ private slots:
 	void findWakingTriggered();
 	void findWakingDirectTriggered();
 	void removeTaskGraphTriggered();
+	void taskFilterTriggered();
 
 private:
 	typedef enum {
@@ -244,6 +245,7 @@ private:
 	QAction *findWakingAction;
 	QAction *findWakingDirectAction;
 	QAction *removeTaskGraphAction;
+	QAction *taskFilterAction;
 
 	TraceAnalyzer *analyzer;
 

@@ -59,6 +59,7 @@
 #define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
 #define RESSRC_PNG_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
 #define RESSRC_PNG_EXPORTEVENTS  ":/traceshark/images/exportevents30x30.png"
+#define RESSRC_PNG_FILTERCURRENT ":/traceshark/images/filtercurrent30x30.png"
 #define RESSRC_PNG_GETSTATS      ":/traceshark/images/getstats30x30.png"
 #define RESSRC_PNG_GETSTATS_TIMELIMIT \
 	                         ":/traceshark/images/getstatstimelimit30x30.png"
