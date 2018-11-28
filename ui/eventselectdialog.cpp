@@ -84,9 +84,9 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 	logicBox->setCurrentIndex(CBOX_INDEX_AND);
 
 	QPushButton *addFilterButton =
-		new QPushButton(tr("Create events filter"));
+		new QPushButton(tr("Create event filter"));
 	QPushButton *resetFilterButton =
-		new QPushButton(tr("Reset events filter"));
+		new QPushButton(tr("Reset event filter"));
 
 	filterLayout->addStretch();
 	filterLayout->addWidget(closeButton);

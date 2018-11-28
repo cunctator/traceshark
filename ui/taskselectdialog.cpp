@@ -120,9 +120,9 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	logicBox->setCurrentIndex(CBOX_INDEX_AND);
 
 	QPushButton *addFilterButton =
-		new QPushButton(tr("Create events filter"));
+		new QPushButton(tr("Create pid filter"));
 	QPushButton *resetFilterButton =
-		new QPushButton(tr("Reset events filter"));
+		new QPushButton(tr("Reset pid filter"));
 
 	filterLayout->addStretch();
 	filterLayout->addWidget(logicBox);
