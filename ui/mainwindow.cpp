@@ -803,11 +803,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	timeFilterAction->setEnabled(e);
 	showStatsAction->setEnabled(e);
 	showStatsTimeLimitedAction->setEnabled(e);
-	addToLegendAction->setEnabled(e);
 	clearLegendAction->setEnabled(e);
-	addTaskGraphAction->setEnabled(e);
-	removeTaskGraphAction->setEnabled(e);
-	taskFilterAction->setEnabled(e);
 }
 
 /*
@@ -817,6 +813,10 @@ void MainWindow::setTaskActionsEnabled(bool e)
 {
 	findWakeupAction->setEnabled(e);
 	findWakingDirectAction->setEnabled(e);
+	addToLegendAction->setEnabled(e);
+	addTaskGraphAction->setEnabled(e);
+	removeTaskGraphAction->setEnabled(e);
+	taskFilterAction->setEnabled(e);
 }
 
 void MainWindow::setWakeupActionsEnabled(bool e)
