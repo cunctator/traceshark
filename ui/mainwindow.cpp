@@ -134,6 +134,9 @@
 #define TASK_FILTER_TOOLTIP		\
 "Filter on the selected task"
 
+#define TASK_FILTER_TIMELIMIT_TOOLTIP	\
+"Filter on the selected task and time limited by the cursors"
+
 #define ADD_UNIFIED_TOOLTIP		\
 "Add a unified graph for this task"
 
@@ -852,6 +855,7 @@ void MainWindow::setTaskActionsEnabled(bool e)
 	addTaskGraphAction->setEnabled(e);
 	removeTaskGraphAction->setEnabled(e);
 	taskFilterAction->setEnabled(e);
+	taskFilterLimitedAction->setEnabled(e);
 }
 
 void MainWindow::setWakeupActionsEnabled(bool e)
@@ -1314,6 +1318,13 @@ void MainWindow::createActions()
 	tsconnect(taskFilterAction, triggered(), this,
 		  taskFilterTriggered());
 
+	taskFilterLimitedAction = new QAction(tr("Filter on selected task"),
+					      this);
+	taskFilterLimitedAction->setIcon(QIcon(RESSRC_PNG_FILTERCURRENT_LIMIT));
+	taskFilterLimitedAction->setToolTip(tr(TASK_FILTER_TIMELIMIT_TOOLTIP));
+	tsconnect(taskFilterLimitedAction, triggered(), this,
+		  taskFilterLimitedTriggered());
+
 	setTraceActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
@@ -1356,6 +1367,7 @@ void MainWindow::createToolBars()
 	taskToolBar->addAction(addTaskGraphAction);
 	taskToolBar->addAction(removeTaskGraphAction);
 	taskToolBar->addAction(taskFilterAction);
+	taskToolBar->addAction(taskFilterLimitedAction);
 	taskToolBar->addStretch();
 }
 
@@ -1387,6 +1399,7 @@ void MainWindow::createMenus()
 	taskMenu->addAction(addTaskGraphAction);
 	taskMenu->addAction(removeTaskGraphAction);
 	taskMenu->addAction(taskFilterAction);
+	taskMenu->addAction(taskFilterLimitedAction);
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
@@ -2218,7 +2231,7 @@ void MainWindow::removeTaskGraphTriggered()
 }
 
 /* Filter on the currently selected task */
-void MainWindow::taskFilterTriggered()
+void MainWindow::taskFilter()
 {
 	vtl::Time saved = eventsWidget->getSavedScroll();
 	int pid = taskToolBar->getPid();
@@ -2235,6 +2248,19 @@ void MainWindow::taskFilterTriggered()
 	eventsWidget->endResetModel();
 	scrollTo(saved);
 	updateResetFiltersEnabled();
+}
+
+/* Filter on the currently selected task */
+void MainWindow::taskFilterTriggered()
+{
+	taskFilter();
+}
+
+/* Filter on the currently selected task */
+void MainWindow::taskFilterLimitedTriggered()
+{
+	timeFilter();
+	taskFilter();
 }
 
 bool MainWindow::isWideScreen()

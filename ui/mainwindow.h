@@ -144,6 +144,7 @@ private slots:
 	void showStats();
 	void showStatsTimeLimited();
 	void removeQDockWidget(QDockWidget *widget);
+	void taskFilter();
 
 	void addTaskGraphTriggered();
 	void addToLegendTriggered();
@@ -153,6 +154,7 @@ private slots:
 	void findWakingDirectTriggered();
 	void removeTaskGraphTriggered();
 	void taskFilterTriggered();
+	void taskFilterLimitedTriggered();
 
 private:
 	typedef enum {
@@ -246,6 +248,7 @@ private:
 	QAction *findWakingDirectAction;
 	QAction *removeTaskGraphAction;
 	QAction *taskFilterAction;
+	QAction *taskFilterLimitedAction;
 
 	TraceAnalyzer *analyzer;
 
