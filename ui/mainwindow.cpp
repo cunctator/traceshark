@@ -83,42 +83,77 @@
 #include "vtl/error.h"
 
 
-#define TOOLTIP_OPEN \
-	"Open a new trace file"
-#define TOOLTIP_CLOSE \
-	"Close the currently open tracefile"
-#define TOOLTIP_SAVESCREEN \
-	"Take a screenshot of the current graph and save it to a file"
-#define TOOLTIP_SHOWTASKS \
-	"Show a list of all tasks and it's possible to select one"
-#define TOOLTIP_SHOWEVENTS \
-	"Show a list of event types and it's possible to select which to filter on"
-#define TOOLTIP_TIMEFILTER \
-	"Filter on the time interval specified by the current position of the cursors"
+#define TOOLTIP_OPEN			\
+"Open a new trace file"
 
-#define TOOLTIP_GRAPHENABLE \
-	"Select which types of graphs should be enabled"
+#define TOOLTIP_CLOSE			\
+"Close the currently open tracefile"
 
-#define TOOLTIP_RESETFILTERS \
-	"Reset all filters"
-#define TOOLTIP_EXPORTEVENTS \
-	"Export the filtered events"
+#define TOOLTIP_SAVESCREEN		\
+"Take a screenshot of the current graph and save it to a file"
 
-#define TOOLTIP_GETSTATS \
-	"Show the statistics dialog"
-#define TOOLTIP_GETSTATS_TIMELIMITED \
-	"Show the dialog with statistics that are time limited by the cursors"
+#define TOOLTIP_EXIT			\
+"Exit traceshark"
 
-#define FIND_WAKEUP_TOOLTIP \
-	"Find the wakeup of the selected task that precedes the active cursor"
-#define FIND_WAKING_TOOLTIP \
-	"Find the waking event that precedes this wakeup event"
-#define FIND_WAKING_DIRECT_TOOLTIP \
-	"Find the waking event of the selected task that precedes the active cursor"
-#define REMOVE_TASK_TOOLTIP \
-	"Remove the unified graph for this task"
-#define TASK_FILTER_TOOLTIP \
-	"Filter on the selected task"
+#define TOOLTIP_SHOWTASKS		\
+"Show a list of all tasks and it's possible to select one"
+
+#define TOOLTIP_SHOWEVENTS		\
+"Show a list of event types and it's possible to select which to filter on"
+
+#define TOOLTIP_TIMEFILTER		\
+"Filter on the time interval specified by the current position of the cursors"
+
+#define TOOLTIP_GRAPHENABLE		\
+"Select which types of graphs should be enabled"
+
+#define TOOLTIP_RESETFILTERS		\
+"Reset all filters"
+
+#define TOOLTIP_EXPORTEVENTS		\
+"Export the filtered events"
+
+#define TOOLTIP_GETSTATS		\
+"Show the statistics dialog"
+
+#define TOOLTIP_GETSTATS_TIMELIMITED	\
+"Show the dialog with statistics that are time limited by the cursors"
+
+#define FIND_WAKEUP_TOOLTIP		\
+"Find the wakeup of the selected task that precedes the active cursor"
+
+#define FIND_WAKING_TOOLTIP		\
+"Find the waking event that precedes this wakeup event"
+
+#define FIND_WAKING_DIRECT_TOOLTIP	\
+"Find the waking event of the selected task that precedes the active cursor"
+
+#define REMOVE_TASK_TOOLTIP		\
+"Remove the unified graph for this task"
+
+#define TASK_FILTER_TOOLTIP		\
+"Filter on the selected task"
+
+#define ADD_UNIFIED_TOOLTIP		\
+"Add a unified graph for this task"
+
+#define ADD_LEGEND_TOOLTIP		\
+"Add this task to the legend"
+
+#define CLEAR_LEGEND_TOOLTIP		\
+"Remove all tasks from the legend"
+
+#define ABOUT_QT_TOOLTIP		\
+"Show info about Qt"
+
+#define ABOUT_TSHARK_TOOLTIP		\
+"Show info about Traceshark"
+
+#define SHOW_QCP_TOOLTIP		\
+"Show info about QCustomPlot"
+
+#define SHOW_LICENSE_TOOLTIP		\
+"Show the license of Traceshark"
 
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
@@ -1213,42 +1248,42 @@ void MainWindow::createActions()
 
 	exitAction = new QAction(tr("E&xit"), this);
 	exitAction->setShortcuts(QKeySequence::Quit);
-	exitAction->setToolTip(tr("Exit traceshark"));
+	exitAction->setToolTip(tr(TOOLTIP_EXIT));
 	tsconnect(exitAction, triggered(), this, close());
 
 	aboutQtAction = new QAction(tr("About &Qt"), this);
 	aboutQtAction->setIcon(QIcon(RESSRC_PNG_QT_LOGO));
-	aboutQtAction->setToolTip(tr("Show info about Qt"));
+	aboutQtAction->setToolTip(tr(ABOUT_QT_TOOLTIP));
 	tsconnect(aboutQtAction, triggered(), qApp, aboutQt());
 
 	aboutAction = new QAction(tr("&About Traceshark"), this);
 	aboutAction->setIcon(QIcon(RESSRC_PNG_SHARK));
-	aboutAction->setToolTip(tr("Show info about Traceshark"));
+	aboutAction->setToolTip(tr(ABOUT_TSHARK_TOOLTIP));
 	tsconnect(aboutAction, triggered(), this, about());
 
 	aboutQCPAction = new QAction(tr("About QCustom&Plot"), this);
 	aboutQCPAction->setIcon(QIcon(RESSRC_PNG_QCP_LOGO));
-	aboutAction->setToolTip(tr("Show info about QCustomPlot"));
+	aboutAction->setToolTip(tr(SHOW_QCP_TOOLTIP));
 	tsconnect(aboutQCPAction, triggered(), this, aboutQCustomPlot());
 
 	licenseAction = new QAction(tr("&License"), this);
-	licenseAction->setToolTip(tr("Show the license of Traceshark"));
+	licenseAction->setToolTip(tr(SHOW_LICENSE_TOOLTIP));
 	tsconnect(licenseAction, triggered(), this, license());
 
 	addTaskGraphAction = new QAction(tr("Add task graph"), this);
 	addTaskGraphAction->setIcon(QIcon(RESSRC_PNG_ADD_TASK));
-	addTaskGraphAction->setToolTip(tr("Add a unified graph for this task"));
+	addTaskGraphAction->setToolTip(tr(ADD_UNIFIED_TOOLTIP));
 	tsconnect(addTaskGraphAction, triggered(), this,
 		  addTaskGraphTriggered());
 
 	addToLegendAction = new QAction(tr("Add task to the legend"), this);
 	addToLegendAction->setIcon(QIcon(RESSRC_PNG_ADD_TO_LEGEND));
-	addToLegendAction->setToolTip(tr("Add this task to the legend"));
+	addToLegendAction->setToolTip(tr(ADD_LEGEND_TOOLTIP));
 	tsconnect(addToLegendAction, triggered(), this,addToLegendTriggered());
 
 	clearLegendAction = new QAction(tr("Clear the legend"), this);
 	clearLegendAction->setIcon(QIcon(RESSRC_PNG_CLEAR_LEGEND));
-	clearLegendAction->setToolTip(tr("Remove all tasks from the legend"));
+	clearLegendAction->setToolTip(tr(CLEAR_LEGEND_TOOLTIP));
 	tsconnect(clearLegendAction, triggered(), this, clearLegendTriggered());
 
 	findWakeupAction = new QAction(tr("Find wakeup"), this);
