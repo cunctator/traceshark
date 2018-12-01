@@ -6,34 +6,39 @@ artistic talents whatsoever.
 
 HOW?
 
-1. Draw the image with the worlds best drawing program, xfig. Using it gives a
-   nice 1980s style to the icons.
+1.  Draw the image with the worlds best drawing program, xfig. Using it gives a
+    nice 1980s style to the icons.
 
-2. As a reference save the drawing in the native fig format.
+2.  As a reference save the drawing in the native fig format.
 
-3. In xfig, click File->Export
+3.  In xfig, click File->Export
 
-4. Select "Language", to PNG.
+4.  Select 'Language', to PNG.
 
-5. Export the file to a png file.
+5.  Export the file to a PNG file.
 
-6. Open the png file in gimp, if you are asked convert it to sRGB.
+6.  Open the PNG file in gimp, if you are asked convert it to sRGB, accept it by
+    pressing Convert.
 
-7. In the gimp menu, select Layer->Transparency->Color to Alpha
+7.  If the size is not square, then make it square by selecting the whole
+    picture and copying it into new picture. When you push 'New...' you can set
+    the size in the following dialog. Make the size square by setting the
+    smaller dimension to the same as the larger.
 
-8. The above should open a dialoge where you are allowed to convert a color to
-   transparency, white should be the default, so you should only have to click
-   OK.
+8.  If you have copied the picture, you will need to flatten it by selecting
+    'Image->Flatten Image'
 
-9. Change the image to quadratic size, if it isn't already. This can happen by
-   creating a new image of quadratic size and copying the image into it.
+9.  In the gimp menu, select 'Layer->Transparency->Color' to Alpha
 
-10. Save this intermediary result in gimp's native format, xcf, that is use
-    "Save As" in the menu.
+10. The above should open a dialog where you are allowed to convert a color to
+    transparency, white should be the default, so you should only have to click
+    OK.
 
-11. Scale the image to size 30x30. It happens with the menu "Image->Scale Image"
-    You should select Interpolation to be "Sinc (Lanczos3)".
+11. Save this intermediary result in the PNG format, that is use 'Export As' in
+    the menu.
 
-12. Save the scaled image as a png with "Export As". Add "30x30" to the base
+12. Scale the image to size 30x30. It happens with the menu 'Image->Scale Image'
+    You should select Interpolation to be 'Sinc (Lanczos3)'.
+
+13. Save the scaled image as a PNG with 'Export As'. Add '30x30' to the base
     file name.
-
