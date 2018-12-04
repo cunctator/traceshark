@@ -149,6 +149,7 @@ private slots:
 	void addTaskGraphTriggered();
 	void addToLegendTriggered();
 	void clearLegendTriggered();
+	void findSleepTriggered();
 	void findWakeupTriggered();
 	void findWakingTriggered();
 	void findWakingDirectTriggered();
@@ -243,6 +244,7 @@ private:
 	QAction *addTaskGraphAction;
 	QAction *addToLegendAction;
 	QAction *clearLegendAction;
+	QAction *findSleepAction;
 	QAction *findWakeupAction;
 	QAction *findWakingAction;
 	QAction *findWakingDirectAction;

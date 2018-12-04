@@ -110,6 +110,9 @@ public:
 	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
 						 int pid,
 						 int *index) const;
+	const TraceEvent *findNextSchedSleepEvent(const vtl::Time &time,
+						  int pid,
+						  int *index) const;
 	const TraceEvent *findPreviousWakEvent(int startidx,
 					       int pid,
 					       event_t wanted,
@@ -175,6 +178,10 @@ private:
 	int findFilteredIndexBefore(const vtl::Time &time) const;
 	__always_inline int
 		generic_sched_switch_newpid(const TraceEvent &event) const;
+	__always_inline int
+		generic_sched_switch_oldpid(const TraceEvent &event) const;
+	__always_inline taskstate_t
+		generic_sched_switch_state(const TraceEvent &event) const;
 	__always_inline int
 		generic_sched_wakeup_pid(const TraceEvent &event) const;
 	__always_inline int
@@ -330,6 +337,32 @@ TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 	if (!sched_switch_parse(ttype, event, handle))
 		return INT_MAX;
 	return sched_switch_handle_newpid(ttype, event, handle);;
+}
+
+__always_inline int
+TraceAnalyzer::generic_sched_switch_oldpid(const TraceEvent &event) const
+{
+	sched_switch_handle_t handle;
+	tracetype_t ttype = getTraceType();
+
+	if (!tracetype_is_valid(ttype))
+		return INT_MAX;
+	if (!sched_switch_parse(ttype, event, handle))
+		return INT_MAX;
+	return sched_switch_handle_oldpid(ttype, event, handle);;
+}
+
+__always_inline taskstate_t
+TraceAnalyzer::generic_sched_switch_state(const TraceEvent &event) const
+{
+	sched_switch_handle_t handle;
+	tracetype_t ttype = getTraceType();
+
+	if (!tracetype_is_valid(ttype))
+		return 0;
+	if (!sched_switch_parse(ttype, event, handle))
+		return 0;
+	return sched_switch_handle_state(ttype, event, handle);
 }
 
 __always_inline int

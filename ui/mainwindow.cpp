@@ -119,6 +119,9 @@
 #define TOOLTIP_GETSTATS_TIMELIMITED	\
 "Show the dialog with statistics that are time limited by the cursors"
 
+#define TOOLTIP_FIND_SLEEP		\
+"Find the next sched_switch event that puts the selected task to sleep"
+
 #define FIND_WAKEUP_TOOLTIP		\
 "Find the wakeup of the selected task that precedes the active cursor"
 
@@ -851,6 +854,7 @@ void MainWindow::setTaskActionsEnabled(bool e)
 {
 	findWakeupAction->setEnabled(e);
 	findWakingDirectAction->setEnabled(e);
+	findSleepAction->setEnabled(e);
 	addToLegendAction->setEnabled(e);
 	addTaskGraphAction->setEnabled(e);
 	removeTaskGraphAction->setEnabled(e);
@@ -1306,6 +1310,11 @@ void MainWindow::createActions()
 	tsconnect(findWakingDirectAction, triggered(), this,
 		  findWakingDirectTriggered());
 
+	findSleepAction = new QAction(tr("Find sched_switch sleep event"));
+	findSleepAction->setIcon(QIcon(RESSRC_PNG_FIND_SLEEP));
+	findSleepAction->setToolTip(tr(TOOLTIP_FIND_SLEEP));
+	tsconnect(findSleepAction, triggered(), this, findSleepTriggered());
+
 	removeTaskGraphAction = new QAction(tr("Remove task graph"), this);
 	removeTaskGraphAction->setIcon(QIcon(RESSRC_PNG_REMOVE_TASK));
 	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
@@ -1364,6 +1373,7 @@ void MainWindow::createToolBars()
 	taskToolBar->addAction(findWakeupAction);
 	taskToolBar->addAction(findWakingAction);
 	taskToolBar->addAction(findWakingDirectAction);
+	taskToolBar->addAction(findSleepAction);
 	taskToolBar->addAction(addTaskGraphAction);
 	taskToolBar->addAction(removeTaskGraphAction);
 	taskToolBar->addAction(taskFilterAction);
@@ -1396,6 +1406,7 @@ void MainWindow::createMenus()
 	taskMenu->addAction(findWakeupAction);
 	taskMenu->addAction(findWakingAction);
 	taskMenu->addAction(findWakingDirectAction);
+	taskMenu->addAction(findSleepAction);
 	taskMenu->addAction(addTaskGraphAction);
 	taskMenu->addAction(removeTaskGraphAction);
 	taskMenu->addAction(taskFilterAction);
@@ -2222,6 +2233,56 @@ void MainWindow::findWakingTriggered()
 void MainWindow::findWakingDirectTriggered()
 {
 	showWakeupOrWaking(taskToolBar->getPid(), SCHED_WAKING);
+}
+
+/* Finds the next sched_switch event that puts the task to sleep */
+void MainWindow::findSleepTriggered()
+{
+	int activeIdx = infoWidget->getCursorIdx();
+	int pid = taskToolBar->getPid();
+	int schedIndex;
+
+	if (pid == 0)
+		return;
+	if (activeIdx != TShark::RED_CURSOR &&
+	    activeIdx != TShark::BLUE_CURSOR) {
+		return;
+	}
+
+	Cursor *activeCursor = cursors[activeIdx];
+
+	if (activeCursor == nullptr)
+		return;
+
+	/*
+	 * The time of the active cursor is taken to be the time that the
+	 * user is interested in, i.e. finding the subsequent sched_swith event
+	 * relative to
+	 */
+	double zerotime = activeCursor->getPosition();
+	const TraceEvent *schedevent = analyzer->findNextSchedSleepEvent(
+		vtl::Time::fromDouble(zerotime), pid, &schedIndex);
+
+	if (schedevent == nullptr)
+		return;
+
+	activeCursor->setPosition(schedevent->time);
+	checkStatsTimeLimited();
+	infoWidget->setTime(schedevent->time, activeIdx);
+	cursorPos[activeIdx] = schedevent->time.toDouble();
+
+	if (!analyzer->isFiltered()) {
+		eventsWidget->scrollTo(schedIndex);
+	} else {
+		/*
+		 * If a filter is enabled we need to try to find the index in
+		 * analyzer->filteredEvents
+		 */
+		int filterIndex;
+		if (analyzer->findFilteredEvent(schedIndex, &filterIndex)
+		    != nullptr)
+			eventsWidget->scrollTo(filterIndex);
+	}
 }
 
 /* Removes the task graph of the currently selected task */

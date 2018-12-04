@@ -553,6 +553,30 @@ const TraceEvent *TraceAnalyzer::findPreviousSchedEvent(const vtl::Time &time,
 	return nullptr;
 }
 
+const TraceEvent *TraceAnalyzer::findNextSchedSleepEvent(const vtl::Time &time,
+							 int pid,
+							 int *index) const
+{
+	int start = findIndexBefore(time);
+	int i;
+	int s = events->size();
+
+	if (start < 0)
+		return nullptr;
+
+	for (i = start; i < s; i++) {
+		const TraceEvent &event = events->at(i);
+		if (event.type == SCHED_SWITCH &&
+		    generic_sched_switch_oldpid(event) == pid &&
+		    generic_sched_switch_state(event) != TASK_STATE_RUNNABLE) {
+			if (index != nullptr)
+				*index = i;
+			return &event;
+		}
+	}
+	return nullptr;
+}
+
 const TraceEvent *TraceAnalyzer::findFilteredEvent(int index,
 						   int *filterIndex) const
 {

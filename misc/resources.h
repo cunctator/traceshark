@@ -75,6 +75,7 @@
 #define RESSRC_PNG_SHARK         ":/traceshark/images/shark.png"
 #define RESSRC_PNG_TASKSELECT    ":/traceshark/images/taskselector30x30.png"
 #define RESSRC_PNG_TIMEFILTER    ":/traceshark/images/timefilter30x30.png"
+#define RESSRC_PNG_FIND_SLEEP    ":/traceshark/images/findsleep30x30.png"
 #define RESSRC_PNG_FIND_WAKEUP   ":/traceshark/images/wakeup30x30.png"
 #define RESSRC_PNG_FIND_WAKING   ":/traceshark/images/waking30x30.png"
 #define RESSRC_PNG_FIND_WAKING_DIRECT \
