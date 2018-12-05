@@ -1310,7 +1310,8 @@ void MainWindow::createActions()
 	tsconnect(findWakingDirectAction, triggered(), this,
 		  findWakingDirectTriggered());
 
-	findSleepAction = new QAction(tr("Find sched_switch sleep event"));
+	findSleepAction = new QAction(tr("Find sched_switch sleep event"),
+				      this);
 	findSleepAction->setIcon(QIcon(RESSRC_PNG_FIND_SLEEP));
 	findSleepAction->setToolTip(tr(TOOLTIP_FIND_SLEEP));
 	tsconnect(findSleepAction, triggered(), this, findSleepTriggered());
