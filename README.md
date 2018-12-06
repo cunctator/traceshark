@@ -77,7 +77,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
 
 The top widget has some buttons as well:
 
-* ![Move the red cursor](https://raw.githubusercontent.com/cunctator/traceshark//images/movered30x30.png) Move the red cursor to the time specified in the time text box.
+* ![Move the red cursor](https://raw.githubusercontent.com/cunctator/traceshark/master/images/movered30x30.png) Move the red cursor to the time specified in the time text box.
 * ![Add the blue cursor](https://raw.githubusercontent.com/cunctator/traceshark/master/images/moveblue30x30.png) Move the blue cursor to the time specified in the time text box.
 * ![Add to legend](https://raw.githubusercontent.com/cunctator/traceshark/master/images/addtolegend30x30.png) Adds the currently selected task, from the scheduling graphs, to the legend. A task can be removed from the legend by double clicking on it in the legend.
 * ![Clear legend](https://raw.githubusercontent.com/cunctator/traceshark/master/images/clearlegend30x30.png) Removes all tasks from the legend.
