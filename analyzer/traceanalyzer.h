@@ -175,6 +175,7 @@ private:
 		const;
 	void colorizeTasks();
 	int findIndexBefore(const vtl::Time &time) const;
+	int findIndexAfter(const vtl::Time &time) const;
 	int findFilteredIndexBefore(const vtl::Time &time) const;
 	__always_inline int
 		generic_sched_switch_newpid(const TraceEvent &event) const;

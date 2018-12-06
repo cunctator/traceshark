@@ -511,6 +511,26 @@ int TraceAnalyzer::findIndexBefore(const vtl::Time &time) const
 	return c;
 }
 
+int TraceAnalyzer::findIndexAfter(const vtl::Time &time) const
+{
+	if (events->size() < 1)
+		return -1;
+
+	int end = events->size() - 1;
+
+	/* Basic sanity checks */
+	if (time > events->at(end).time)
+		return end;
+	if (time < events->at(0).time)
+		return 0;
+
+	int c = binarySearch(time, 0, end);
+
+	while (c < end && events->at(c).time <= time)
+		c++;
+	return c;
+}
+
 int TraceAnalyzer::findFilteredIndexBefore(const vtl::Time &time) const
 {
 	if (filteredEvents.size() < 1)
@@ -557,7 +577,7 @@ const TraceEvent *TraceAnalyzer::findNextSchedSleepEvent(const vtl::Time &time,
 							 int pid,
 							 int *index) const
 {
-	int start = findIndexBefore(time);
+	int start = findIndexAfter(time);
 	int i;
 	int s = events->size();
 
