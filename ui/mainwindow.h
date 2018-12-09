@@ -118,6 +118,7 @@ private slots:
 	void infoValueChanged(vtl::Time value, int nr);
 	void moveActiveCursor(vtl::Time time);
 	void showEventInfo(const TraceEvent &event);
+	void taskTriggered(int pid);
 	void handleEventSelected(const TraceEvent *event);
 	void selectionChanged();
 	void plottableClicked(QCPAbstractPlottable *plottable, int dataIndex,

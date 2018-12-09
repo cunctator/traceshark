@@ -92,11 +92,13 @@ signals:
 	void resetFilter(void);
 	void createFilter(QMap<int, int> &map, bool orlogic, bool inclusive);
 	void QDockWidgetNeedsRemoval(QDockWidget *widget);
+	void taskDoubleClicked(int pid);
 private slots:
 	void closeClicked();
 	void addUnifiedClicked();
 	void addLegendClicked();
 	void addFilterClicked();
+	void handleDoubleClick(const QModelIndex &index);
 private:
 	TaskView *taskView;
 	AbstractTaskModel *taskModel;

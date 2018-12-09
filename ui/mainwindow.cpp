@@ -249,6 +249,8 @@ MainWindow::MainWindow():
 	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
 	tsconnect(taskSelectDialog, QDockWidgetNeedsRemoval(QDockWidget*),
 		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(taskSelectDialog, taskDoubleClicked(int),
+		  this, taskTriggered(int));
 
 	/* statistics Dialog */
 	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
@@ -259,6 +261,8 @@ MainWindow::MainWindow():
 	tsconnect(statsDialog, resetFilter(), this, resetPidFilter());
 	tsconnect(statsDialog, QDockWidgetNeedsRemoval(QDockWidget*),
 		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(statsDialog, taskDoubleClicked(int),
+		  this, taskTriggered(int));
 
 	/* Time limited statistics Dialog */
 	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
@@ -271,6 +275,8 @@ MainWindow::MainWindow():
 	tsconnect(statsLimitedDialog, resetFilter(), this, resetPidFilter());
 	tsconnect(statsLimitedDialog, QDockWidgetNeedsRemoval(QDockWidget*),
 		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(statsLimitedDialog, taskDoubleClicked(int),
+		  this, taskTriggered(int));
 
 	/* event select dialog */
 	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
@@ -597,6 +603,7 @@ void MainWindow::showTrace()
 		if (Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS)) {
 			graph = tracePlot->addGraph(tracePlot->xAxis,
 						    tracePlot->yAxis);
+			graph->setSelectable(QCP::stNone);
 			name = QString(tr("cpuidle")) + QString::number(cpu);
 			style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 			pen.setColor(Qt::red);
@@ -614,6 +621,7 @@ void MainWindow::showTrace()
 		if (Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS)) {
 			graph = tracePlot->addGraph(tracePlot->xAxis,
 						    tracePlot->yAxis);
+			graph->setSelectable(QCP::stNone);
 			name = QString(tr("cpufreq")) + QString::number(cpu);
 			penF.setColor(Qt::blue);
 			penF.setWidth(2);
@@ -1167,6 +1175,84 @@ void MainWindow::moveActiveCursor(vtl::Time time)
 void MainWindow::showEventInfo(const TraceEvent &event)
 {
 	eventInfoDialog->show(event);
+}
+
+void MainWindow::taskTriggered(int pid)
+{
+	Task *task;
+	unsigned int cpu;
+	CPUTask *cpuTask;
+	CPUTask *maxTask;
+	int maxSize;
+	QCPGraph *qcpGraph;
+	QCPDataRange range;
+	QCPDataSelection selection;
+	int end;
+	TaskGraph *taskGraph;
+	bool enableActions = false;
+
+	tracePlot->deselectAll();
+	taskToolBar->removeTaskGraph();
+	if (pid == 0)
+		goto out;
+
+	task = analyzer->findTask(pid);
+	if (task == nullptr)
+		goto out;
+
+	if (task->graph != nullptr) {
+		qcpGraph = task->graph->getQCPGraph();
+		if (qcpGraph == nullptr)
+			goto do_cpugraph;
+		range.setBegin(0);
+		end = task->schedTimev.size() - 1;
+		if (end < 0)
+			goto do_cpugraph;
+		range.setEnd(end);
+		selection.clear();
+		selection.addDataRange(range);
+		qcpGraph->setSelection(selection);
+		taskToolBar->setTaskGraph(task->graph);
+		enableActions = true;
+		goto out;
+	}
+
+do_cpugraph:
+	maxTask = nullptr;
+	maxSize = 0;
+	for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
+		cpuTask = analyzer->findCPUTask(pid, cpu);
+		if (cpuTask != nullptr) {
+			if (cpuTask->schedTimev.size() > maxSize) {
+				maxSize = cpuTask->schedTimev.size();
+				maxTask = cpuTask;
+			}
+		}
+	}
+
+	if (maxTask->graph != nullptr) {
+		qcpGraph = maxTask->graph->getQCPGraph();
+		if (qcpGraph == nullptr)
+			goto out;
+		range.setBegin(0);
+		end = maxTask->schedTimev.size() - 1;
+		if (end < 0)
+			goto out;
+		range.setEnd(end);
+		selection.clear();
+		selection.addDataRange(range);
+		qcpGraph->setSelection(selection);
+		taskGraph = TaskGraph::fromQCPGraph(qcpGraph);
+		/* Should not happen but check anyway */
+		if (taskGraph == nullptr)
+			goto out;
+		taskToolBar->setTaskGraph(taskGraph);
+		enableActions = true;
+	}
+
+out:
+	setTaskActionsEnabled(enableActions);
+	tracePlot->replot();
 }
 
 void MainWindow::handleEventSelected(const TraceEvent *event)

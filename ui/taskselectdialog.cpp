@@ -144,6 +144,8 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	tsconnect(addUnifiedButton, clicked(), this, addUnifiedClicked());
 	tsconnect(addLegendButton, clicked(), this, addLegendClicked());
 	tsconnect(addFilterButton, clicked(), this, addFilterClicked());
+	tsconnect(taskView, doubleClicked(const QModelIndex &),
+		  this, handleDoubleClick(const QModelIndex &));
 	sigconnect(resetFilterButton, clicked(), this, resetFilter());
 
 	filterMap = new QMap<int, int>();
@@ -246,4 +248,13 @@ void TaskSelectDialog::addFilterClicked()
 	orlogic = logicBox->currentIndex() == CBOX_INDEX_OR;
 	inclusive = includeBox->isChecked();
 	emit createFilter(*filterMap, orlogic, inclusive);
+}
+
+void TaskSelectDialog::handleDoubleClick(const QModelIndex &index)
+{
+	bool ok;
+	int pid = taskModel->rowToPid(index.row(), ok);
+
+	if (ok)
+		emit taskDoubleClicked(pid);
 }
