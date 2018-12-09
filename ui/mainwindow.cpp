@@ -1980,11 +1980,16 @@ out:
 void MainWindow::removeTaskGraph(int pid)
 {
 	Task *task = analyzer->findTask(pid);
+	QCPGraph *qcpGraph;
 
 	if (task == nullptr)
 		return;
 
 	if (task->graph != nullptr) {
+		qcpGraph = task->graph->getQCPGraph();
+		if (qcpGraph != nullptr && qcpGraph->selected() &&
+		    taskToolBar->getPid() == task->pid)
+			taskToolBar->removeTaskGraph();
 		task->graph->destroy();
 		task->graph = nullptr;
 	}
