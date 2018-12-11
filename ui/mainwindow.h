@@ -140,7 +140,9 @@ private slots:
 	void resetEventFilter();
 	void resetFilters();
 	void timeFilter();
-	void exportEvents();
+	void exportEvents(bool cpuonly);
+	void exportEventsTriggered();
+	void exportCPUTriggered();
 	void consumeSettings();
 	void showStats();
 	void showStatsTimeLimited();
@@ -235,6 +237,7 @@ private:
 	QAction *graphEnableAction;
 	QAction *resetFiltersAction;
 	QAction *exportEventsAction;
+	QAction *exportCPUAction;
 	QAction *showStatsAction;
 	QAction *showStatsTimeLimitedAction;
 	QAction *aboutAction;

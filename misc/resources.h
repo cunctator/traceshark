@@ -58,6 +58,8 @@
 #define RESSRC_PNG_CLEAR_LEGEND  ":/traceshark/images/clearlegend30x30.png"
 #define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
 #define RESSRC_PNG_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
+#define RESSRC_PNG_EXPORTCPUEVENTS  \
+	                         ":/traceshark/images/exportcpuevents30x30.png"
 #define RESSRC_PNG_EXPORTEVENTS  ":/traceshark/images/exportevents30x30.png"
 #define RESSRC_PNG_FILTERCURRENT ":/traceshark/images/filtercurrent30x30.png"
 #define RESSRC_PNG_FILTERCURRENT_LIMIT \

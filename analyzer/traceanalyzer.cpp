@@ -1143,7 +1143,43 @@ const char TraceAnalyzer::spaceStr[] = \
 	"                                     ";
 const int TraceAnalyzer::spaceStrLen = sizeof(spaceStr) / sizeof(char);
 
-bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
+const char *const TraceAnalyzer::cpuevents[] =
+{
+	"cpu-cycles", "cycles",
+};
+
+const int TraceAnalyzer::CPUEVENTS_NR = sizeof(cpuevents) / sizeof(char*);
+
+event_t TraceAnalyzer::determineCPUEvent(bool &ok)
+{
+	int i, j;
+	int maxevent;
+	const StringTree *stree = TraceEvent::getStringTree();
+	const TString *ename;
+	event_t rval = (event_t) 0;
+	event_t event;
+	ok = false;
+
+	maxevent = (int) stree->getMaxEvent();
+
+	for (i = 0; i <= maxevent; i++) {
+		event = (event_t) i;
+		ename = stree->stringLookup(event);
+		for (j = 0; j < CPUEVENTS_NR; j++) {
+			if (!strcmp(ename->ptr, cpuevents[j])) {
+				rval = event;
+				ok = true;
+				break;
+			}
+		}
+		if (ok)
+			break;
+	}
+	return rval;
+}
+
+bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
+				    bool cpuonly)
 {
 	bool isFtrace = false, isPerf = false;
 	char *wbuf, *wb;
@@ -1156,6 +1192,8 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 	bool rval = true;
 	const char *ename;
 	char tbuf[40];
+	event_t cpuevent_type;
+	bool ok;
 
 	*ts_errno = 0;
 
@@ -1194,6 +1232,14 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 
 	idx = 0;
 
+	if (cpuonly) {
+		cpuevent_type = determineCPUEvent(ok);
+		if (!ok) {
+			*ts_errno = - TS_ERROR_NOCPUEV;
+			goto error_munmap;
+		}
+	}
+
 	if (!isPerf)
 		goto skip_perf;
 
@@ -1205,6 +1251,8 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno)
 		while (idx < nr_elements && written < WRITE_BUFFER_LIMIT) {
 			eptr = filteredEvents[idx];
 			idx++;
+			if (cpuonly && eptr->type != cpuevent_type)
+				continue;
 			eptr->time.sprint(tbuf);
 			w = snprintf(wb, space,
 				     "%s %5u [%03u] %s: ",

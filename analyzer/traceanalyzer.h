@@ -155,7 +155,8 @@ public:
 	void disableAllFilters();
 	bool isFiltered() const;
 	bool filterActive(FilterState::filter_t filter) const;
-	bool exportTraceFile(const char *fileName, int *ts_errno);
+	bool exportTraceFile(const char *fileName, int *ts_errno,
+			     bool cpuonly);
 	vtl::TList<TraceEvent> *events;
 	vtl::TList <const TraceEvent*> filteredEvents;
 	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
@@ -174,6 +175,7 @@ private:
 	int binarySearchFiltered(const vtl::Time &time, int start, int end)
 		const;
 	void colorizeTasks();
+	event_t determineCPUEvent(bool &ok);
 	int findIndexBefore(const vtl::Time &time) const;
 	int findIndexAfter(const vtl::Time &time) const;
 	int findFilteredIndexBefore(const vtl::Time &time) const;
@@ -286,6 +288,8 @@ private:
 	vtl::Time OR_filterTimeHigh;
 	static const char spaceStr[];
 	static const int spaceStrLen;
+	static const char *const cpuevents[];
+	static const int CPUEVENTS_NR;
 };
 
 __always_inline

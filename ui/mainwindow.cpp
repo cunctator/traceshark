@@ -113,6 +113,9 @@
 #define TOOLTIP_EXPORTEVENTS		\
 "Export the filtered events"
 
+#define TOOLTIP_EXPORT_CPU		\
+"Export cycles/cpu-cycles events"
+
 #define TOOLTIP_GETSTATS		\
 "Show the statistics dialog"
 
@@ -847,6 +850,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 
 	saveAction->setEnabled(e);
 	closeAction->setEnabled(e);
+	exportCPUAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
 	timeFilterAction->setEnabled(e);
@@ -1325,7 +1329,16 @@ void MainWindow::createActions()
 	exportEventsAction->setIcon(QIcon(RESSRC_PNG_EXPORTEVENTS));
 	exportEventsAction->setToolTip(tr(TOOLTIP_EXPORTEVENTS));
 	exportEventsAction->setEnabled(false);
-	tsconnect(exportEventsAction, triggered(), this, exportEvents());
+	tsconnect(exportEventsAction, triggered(), this,
+		  exportEventsTriggered());
+
+	exportCPUAction = new QAction(
+		tr("Export cpu-cycles events to a file..."), this);
+	exportCPUAction->setIcon(QIcon(RESSRC_PNG_EXPORTCPUEVENTS));
+	exportCPUAction->setToolTip(tr(TOOLTIP_EXPORT_CPU));
+	exportCPUAction->setEnabled(false);
+	tsconnect(exportCPUAction, triggered(), this,
+		  exportCPUTriggered());
 
 	showStatsAction = new QAction(tr("Show stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_PNG_GETSTATS));
@@ -1435,6 +1448,8 @@ void MainWindow::createToolBars()
 	fileToolBar->addAction(openAction);
 	fileToolBar->addAction(closeAction);
 	fileToolBar->addAction(saveAction);
+	fileToolBar->addAction(exportEventsAction);
+	fileToolBar->addAction(exportCPUAction);
 
 	viewToolBar = new QToolBar(tr("&View"));
 	addToolBar(Qt::LeftToolBarArea, viewToolBar);
@@ -1442,7 +1457,6 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(showEventsAction);
 	viewToolBar->addAction(timeFilterAction);
 	viewToolBar->addAction(resetFiltersAction);
-	viewToolBar->addAction(exportEventsAction);
 	viewToolBar->addAction(graphEnableAction);
 	viewToolBar->addAction(showStatsAction);
 	viewToolBar->addAction(showStatsTimeLimitedAction);
@@ -1475,6 +1489,9 @@ void MainWindow::createMenus()
 	fileMenu->addAction(closeAction);
 	fileMenu->addAction(saveAction);
 	fileMenu->addSeparator();
+	fileMenu->addAction(exportEventsAction);
+	fileMenu->addAction(exportCPUAction);
+	fileMenu->addSeparator();
 	fileMenu->addAction(exitAction);
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
@@ -1482,7 +1499,6 @@ void MainWindow::createMenus()
 	viewMenu->addAction(showEventsAction);
 	viewMenu->addAction(timeFilterAction);
 	viewMenu->addAction(resetFiltersAction);
-	viewMenu->addAction(exportEventsAction);
 	viewMenu->addAction(graphEnableAction);
 	viewMenu->addAction(showStatsAction);
 	viewMenu->addAction(showStatsTimeLimitedAction);
@@ -1778,7 +1794,7 @@ void MainWindow::resetFilters()
 	updateResetFiltersEnabled();
 }
 
-void MainWindow::exportEvents()
+void MainWindow::exportEvents(bool cpuonly)
 {
 	QFileDialog dialog(this);
 	QStringList fileNameList;
@@ -1805,10 +1821,20 @@ void MainWindow::exportEvents()
 	fileName = fileNameList.at(0);
 
 	if (!analyzer->exportTraceFile(fileName.toLocal8Bit().data(),
-				       &ts_errno)) {
+				       &ts_errno, cpuonly)) {
 		vtl::warn(ts_errno, "Failed to export trace to %s",
 			  fileName.toLocal8Bit().data());
 	}
+}
+
+void MainWindow::exportCPUTriggered()
+{
+	exportEvents(true);
+}
+
+void MainWindow::exportEventsTriggered()
+{
+	exportEvents(false);
 }
 
 void MainWindow::consumeSettings()
