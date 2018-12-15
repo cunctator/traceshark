@@ -447,6 +447,12 @@ MOC_DIR=obj
 # with respect to the compiler usage. This section is not mean to be changed by
 # regular users.
 
+GIT_VERSION_FILES = misc/gitversion-template.h
+gitversion.output = obj/gitversion.h
+gitversion.commands = ./scripts/gitversion --input ${QMAKE_FILE_NAME} --output ${QMAKE_FILE_OUT}
+gitversion.input = GIT_VERSION_FILES
+QMAKE_EXTRA_COMPILERS += gitversion
+
 !isEmpty(USE_DEBUG_FLAG) {
 CONFIG += DEBUG
 }

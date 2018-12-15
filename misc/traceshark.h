@@ -52,7 +52,9 @@
 #ifndef TRACESHARK_H
 #define TRACESHARK_H
 
-#define TRACESHARK_VERSION_STRING "0.8.0-alpha"
+#include "gitversion.h"
+
+#define TRACESHARK_VERSION_STRING "0.8.0-alpha" TRACESHARK_GIT_VERSION
 
 #include <QtCore>
 #include <cstdint>

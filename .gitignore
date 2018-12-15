@@ -22,6 +22,10 @@
 *.patch
 *.gcno
 
+# Traceshark specials
+obj/gitversion.h
+traceshark
+
 # Qt Specials
 moc_*.cpp
 moc_*.h
@@ -67,5 +71,3 @@ GTAGS
 *.orig
 *~
 \#*#
-
-traceshark

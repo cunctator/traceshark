@@ -1,0 +1,90 @@
+#!/bin/sh
+
+usage()
+{
+    echo "usage $0 --input <infile> --output <outfile>"
+}
+
+errmsg()
+{
+    echo $1
+    exit 1
+}
+
+if [ $# -lt 4 ];then
+    usage
+    exit 1
+fi
+
+output_file=""
+input_file=""
+
+while [ $# -gt 1 ]
+do
+    case $1 in
+        -h | --help )
+            usage
+            exit 0
+            ;;
+        -i | --input )
+            if [ $# -lt 2 ];then
+                usage
+                exit 1
+            fi
+	    input_file=$2
+            ;;
+        -o | --output )
+            if [ $# -lt 2 ];then
+                usage
+                exit 1
+            fi
+            output_file=$2
+            ;;
+        * )
+            usage
+            exit 1
+            ;;
+    esac
+    shift 2
+done
+
+if [ "x" = "x"$input_file ];then
+    echo "Error empty input file name"
+    exit 1
+fi
+
+if [ "x" = "x"$output_file ];then
+    echo "Error empty output file name"
+    exit 1
+fi
+
+if [ ! -e $input_file ];then
+    echo "Input file "$input_file" does not exist"
+    exit 1
+fi
+
+if [ ! -f $input_file ];then
+    echo "Input file "$input_file" is not a regular file"
+    exit 1
+fi
+
+echo "x" > $output_file || errmsg "Cannot write to "$output_file
+
+if [ "x"$(which git) != "x" ];then
+    GIT_REVISION=$(git rev-parse --verify --short HEAD||echo '')
+
+    if [ "x"$GIT_REVISION != "x" ];then
+	if [ -n "$(git diff --stat)" ]; then
+	    GIT_VERSION="-"$GIT_REVISION"-dirty"
+	else
+	    GIT_VERSION="-"$GIT_REVISION
+	fi
+    else
+	GIT_VERSION=""
+    fi
+else
+    GIT_VERSION=""
+fi
+
+cat $input_file|sed -e "s/__INSERT_VERSION_HERE__/$GIT_VERSION/" > $output_file
+exit 0
