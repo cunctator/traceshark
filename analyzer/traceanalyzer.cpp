@@ -1179,7 +1179,7 @@ event_t TraceAnalyzer::determineCPUEvent(bool &ok)
 }
 
 bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
-				    bool cpuonly)
+				    exporttype_t export_type)
 {
 	bool isFtrace = false, isPerf = false;
 	char *wbuf, *wb;
@@ -1232,7 +1232,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 
 	idx = 0;
 
-	if (cpuonly) {
+	if (export_type == EXPORT_TYPE_CPU_CYCLES) {
 		cpuevent_type = determineCPUEvent(ok);
 		if (!ok) {
 			*ts_errno = - TS_ERROR_NOCPUEV;
@@ -1251,7 +1251,8 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 		while (idx < nr_elements && written < WRITE_BUFFER_LIMIT) {
 			eptr = filteredEvents[idx];
 			idx++;
-			if (cpuonly && eptr->type != cpuevent_type)
+			if (export_type == EXPORT_TYPE_CPU_CYCLES &&
+			    eptr->type != cpuevent_type)
 				continue;
 			eptr->time.sprint(tbuf);
 			w = snprintf(wb, space,

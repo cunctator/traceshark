@@ -101,6 +101,10 @@ class QCustomPlot;
 class TraceAnalyzer
 {
 public:
+	typedef enum {
+		EXPORT_TYPE_ALL = 0,
+		EXPORT_TYPE_CPU_CYCLES
+	} exporttype_t;
 	TraceAnalyzer();
 	~TraceAnalyzer();
 	int open(const QString &fileName);
@@ -156,7 +160,7 @@ public:
 	bool isFiltered() const;
 	bool filterActive(FilterState::filter_t filter) const;
 	bool exportTraceFile(const char *fileName, int *ts_errno,
-			     bool cpuonly);
+			     exporttype_t export_type);
 	vtl::TList<TraceEvent> *events;
 	vtl::TList <const TraceEvent*> filteredEvents;
 	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>

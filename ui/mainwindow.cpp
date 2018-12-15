@@ -1794,7 +1794,7 @@ void MainWindow::resetFilters()
 	updateResetFiltersEnabled();
 }
 
-void MainWindow::exportEvents(bool cpuonly)
+void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 {
 	QFileDialog dialog(this);
 	QStringList fileNameList;
@@ -1821,7 +1821,7 @@ void MainWindow::exportEvents(bool cpuonly)
 	fileName = fileNameList.at(0);
 
 	if (!analyzer->exportTraceFile(fileName.toLocal8Bit().data(),
-				       &ts_errno, cpuonly)) {
+				       &ts_errno, export_type)) {
 		vtl::warn(ts_errno, "Failed to export trace to %s",
 			  fileName.toLocal8Bit().data());
 	}
@@ -1829,12 +1829,12 @@ void MainWindow::exportEvents(bool cpuonly)
 
 void MainWindow::exportCPUTriggered()
 {
-	exportEvents(true);
+	exportEvents(TraceAnalyzer::EXPORT_TYPE_CPU_CYCLES);
 }
 
 void MainWindow::exportEventsTriggered()
 {
-	exportEvents(false);
+	exportEvents(TraceAnalyzer::EXPORT_TYPE_ALL);
 }
 
 void MainWindow::consumeSettings()

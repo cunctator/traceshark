@@ -56,6 +56,7 @@
 #include <QMainWindow>
 #include <QVector>
 #include <QString>
+#include "analyzer/traceanalyzer.h"
 #include "misc/setting.h"
 #include "misc/traceshark.h"
 #include "parser/traceevent.h"
@@ -140,7 +141,7 @@ private slots:
 	void resetEventFilter();
 	void resetFilters();
 	void timeFilter();
-	void exportEvents(bool cpuonly);
+	void exportEvents(TraceAnalyzer::exporttype_t export_type);
 	void exportEventsTriggered();
 	void exportCPUTriggered();
 	void consumeSettings();
