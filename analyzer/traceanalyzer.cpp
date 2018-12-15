@@ -1192,7 +1192,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 	bool rval = true;
 	const char *ename;
 	char tbuf[40];
-	event_t cpuevent_type;
+	event_t cpuevent_type = (event_t) 0;
 	bool ok;
 
 	*ts_errno = 0;
