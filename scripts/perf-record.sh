@@ -113,7 +113,7 @@ while [ "$1" != "" ]; do
 	    callgraph_opt="fp"
 	    ;;
 	-x | --max-freq )
-	    if [ $# -lt 2];then
+	    if [ $# -lt 2 ];then
 		usage
 		exit 0
 	    fi
@@ -121,7 +121,7 @@ while [ "$1" != "" ]; do
 	    shift
 	    ;;
 	-e | --event )
-	    if [ $# -lt 2];then
+	    if [ $# -lt 2 ];then
 		usage
 		exit 0
 	    fi
