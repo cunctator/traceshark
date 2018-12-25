@@ -1587,6 +1587,7 @@ void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,
 	QCPGraph *qcpGraph;
 	TaskGraph *graph;
 
+	tracePlot->replot();
 	qcpGraph = qobject_cast<QCPGraph *>(plottable);
 	if (qcpGraph == nullptr)
 		return;
