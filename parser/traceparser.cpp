@@ -345,6 +345,9 @@ void TraceParser::fixLastEvent()
 	/* Only perf traces will have backtraces after events, I think */
 	if (traceType != TRACE_TYPE_PERF)
 		return;
+	/* If no events were found in the trace, then there is nothing to fix */
+	if (events->size() <= 0)
+		return;
 	TraceEvent &lastEvent = events->last();
 	if (prevLineIsEvent) {
 		lastEvent.postEventInfo = nullptr;
