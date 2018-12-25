@@ -1249,7 +1249,7 @@ do_cpugraph:
 		}
 	}
 
-	if (maxTask->graph != nullptr) {
+	if (maxTask != nullptr && maxTask->graph != nullptr) {
 		qcpGraph = maxTask->graph->getQCPGraph();
 		if (qcpGraph == nullptr)
 			goto out;
