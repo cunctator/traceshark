@@ -186,6 +186,7 @@ private:
 	void addStillRunningGraph(CPUTask &task);
 
 	void setTraceActionsEnabled(bool e);
+	void setCloseActionsEnabled(bool e);
 	void setTaskActionsEnabled(bool e);
 	void setWakeupActionsEnabled(bool e);
 	void setEventsWidgetEvents();

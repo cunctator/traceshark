@@ -453,9 +453,15 @@ void MainWindow::openFile(const QString &name)
 		       (double) (tshow - showt) / 1000);
 		fflush(stdout);
 		tracePlot->legend->setVisible(true);
-		setTraceActionsEnabled(true);
-	} else
+		setCloseActionsEnabled(true);
+		if (analyzer->events->size() <= 0)
+			vtl::warnx("You have opened an empty trace!");
+		else
+			setTraceActionsEnabled(true);
+	} else {
 		setStatus(STATUS_ERROR);
+		vtl::warnx("Unknown error when opening trace!");
+	}
 }
 
 void MainWindow::processTrace()
@@ -842,14 +848,14 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 }
 
 /*
- * These are actions that should be enabled whenever we have a trace open
+ * These are actions that should be enabled whenever we have a non-empty
+ * trace open
  */
 void MainWindow::setTraceActionsEnabled(bool e)
 {
 	infoWidget->setTraceActionsEnabled(e);
 
 	saveAction->setEnabled(e);
-	closeAction->setEnabled(e);
 	exportCPUAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
@@ -857,6 +863,14 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	showStatsAction->setEnabled(e);
 	showStatsTimeLimitedAction->setEnabled(e);
 	clearLegendAction->setEnabled(e);
+}
+
+/*
+ * These are action that should be enabled whenever we have a trace open
+ */
+void MainWindow::setCloseActionsEnabled(bool e)
+{
+	closeAction->setEnabled(e);
 }
 
 /*
@@ -909,6 +923,7 @@ void MainWindow::closeTrace()
 		analyzer->close();
 	taskToolBar->clear();
 	setTraceActionsEnabled(false);
+	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
 	setStatus(STATUS_NOFILE);
@@ -1435,6 +1450,7 @@ void MainWindow::createActions()
 		  taskFilterLimitedTriggered());
 
 	setTraceActionsEnabled(false);
+	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
 }
