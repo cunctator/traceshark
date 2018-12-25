@@ -1801,6 +1801,16 @@ void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 	QString fileName;
 	int ts_errno;
 
+	if (analyzer->events->size() <= 0) {
+		vtl::warnx("The trace is empty. There is nothing to export");
+		return;
+	}
+
+	if (analyzer->getTraceType() != TRACE_TYPE_PERF) {
+		vtl::warnx("The trace type is not perf. Only perf traces can be exported");
+		return;
+	}
+
 	dialog.setFileMode(QFileDialog::AnyFile);
 	dialog.setNameFilter(tr("ASCII Text (*.asc *.txt)"));
 	dialog.setViewMode(QFileDialog::Detail);
