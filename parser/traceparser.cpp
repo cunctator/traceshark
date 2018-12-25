@@ -70,7 +70,7 @@
 #define TRACE_TYPE_CONFIDENCE_FACTOR (100)
 
 TraceParser::TraceParser()
-	: traceType(TRACE_TYPE_NONE), events(nullptr)
+	: traceType(TRACE_TYPE_UNKNOWN), events(nullptr)
 {
 	traceFile = nullptr;
 	ptrPool = new MemPool(16384, sizeof(TString*));
@@ -155,7 +155,7 @@ void TraceParser::close()
 	ftraceGrammar->clear();
 	ftraceEvents->clear();
 	events = nullptr;
-	traceType = TRACE_TYPE_NONE;
+	traceType = TRACE_TYPE_UNKNOWN;
 }
 
 
@@ -221,7 +221,7 @@ void TraceParser::threadParser()
 		 * determined, because before that the events pointer will not
 		 * be determined either.
 		 */
-		if (traceType != TRACE_TYPE_NONE)
+		if (traceType != TRACE_TYPE_UNKNOWN)
 			eventsWatcher->sendNextIndex(events->size());
 		i++;
 		if (i == NR_TBUFFERS)
@@ -392,19 +392,23 @@ void TraceParser::determineTraceType()
 		sendTraceType();
 		return;
 	}
-	traceType = TRACE_TYPE_NONE;
+	traceType = TRACE_TYPE_UNKNOWN;
 }
 
 void TraceParser::guessTraceType()
 {
-	if (perfLineData.nrEvents >=  ftraceLineData.nrEvents) {
+	if (perfLineData.nrEvents > ftraceLineData.nrEvents) {
 		traceType = TRACE_TYPE_PERF;
 		TraceEvent::setStringTree(perfGrammar->eventTree);
 		events = perfEvents;
-	} else {
+	} else if (perfLineData.nrEvents < ftraceLineData.nrEvents) {
 		traceType = TRACE_TYPE_FTRACE;
 		TraceEvent::setStringTree(ftraceGrammar->eventTree);
 		events = ftraceEvents;
+	} else {
+		traceType = TRACE_TYPE_UNKNOWN;
+		TraceEvent::setStringTree(perfGrammar->eventTree);
+		events = perfEvents;
 	}
 	sendTraceType();
 }

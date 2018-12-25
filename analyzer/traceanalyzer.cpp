@@ -222,7 +222,7 @@ void TraceAnalyzer::threadProcess()
 		processPerf();
 		break;
 	default:
-		break;
+		return;
 	}
 	processSchedAddTail();
 	processFreqAddTail();
