@@ -856,6 +856,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	infoWidget->setTraceActionsEnabled(e);
 
 	saveAction->setEnabled(e);
+	exportEventsAction->setEnabled(e);
 	exportCPUAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
@@ -1702,10 +1703,8 @@ void MainWindow::updateResetFiltersEnabled(void)
 {
 	if (analyzer->isFiltered()) {
 		resetFiltersAction->setEnabled(true);
-		exportEventsAction->setEnabled(true);
 	} else {
 		resetFiltersAction->setEnabled(false);
-		exportEventsAction->setEnabled(false);
 	}
 }
 

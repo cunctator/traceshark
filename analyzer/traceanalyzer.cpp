@@ -1185,7 +1185,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 	char *wbuf, *wb;
 	int fd, w;
 	int written, written_io, space, nrspaces, write_rval;
-	int nr_elements = filteredEvents.size();
+	int nr_elements;
 	int idx;
 	int i;
 	const TraceEvent *eptr;
@@ -1194,7 +1194,9 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 	char tbuf[40];
 	event_t cpuevent_type = (event_t) 0;
 	bool ok;
+	bool filtered = isFiltered();
 
+	nr_elements = filtered ? filteredEvents.size() : events->size();
 	*ts_errno = 0;
 
 	if (!isOpen()) {
@@ -1249,7 +1251,10 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 		wb = wbuf;
 
 		while (idx < nr_elements && written < WRITE_BUFFER_LIMIT) {
-			eptr = filteredEvents[idx];
+			if (filtered)
+				eptr = filteredEvents[idx];
+			else
+				eptr = &(*events)[idx];
 			idx++;
 			if (export_type == EXPORT_TYPE_CPU_CYCLES &&
 			    eptr->type != cpuevent_type)
