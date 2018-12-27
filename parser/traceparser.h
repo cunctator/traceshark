@@ -61,6 +61,7 @@
 #include "parser/tracelinedata.h"
 #include "parser/traceline.h"
 #include "parser/traceevent.h"
+#include "misc/chunk.h"
 #include "misc/traceshark.h"
 #include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
@@ -86,16 +87,17 @@ public:
 	~TraceParser();
 	int open(const QString &fileName);
 	bool isOpen() const;
-	void close();
+	void close(int *ts_errno);
 	void threadParser();
 	void threadReader();
 	__always_inline vtl::TList<TraceEvent> *getEventsTList() const;
 	const StringTree *getPerfEventTree();
 	const StringTree *getFtraceEventTree();
 protected:
-	tracetype_t traceType;
 	__always_inline void waitForNextBatch(bool &eof, int &index);
 	void waitForTraceType();
+	tracetype_t traceType;
+	TraceFile *traceFile;
 private:
 	void determineTraceType();
 	void guessTraceType();
@@ -111,11 +113,10 @@ private:
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
 	bool parseLineBugFixup(TraceEvent* event, const vtl::Time &prevTime);
-	TraceFile *traceFile;
 	MemPool *ptrPool;
 	MemPool *postEventPool;
 	TraceEvent fakeEvent;
-	TString fakePostEventInfo;
+	Chunk fakePostEventInfo;
 	FtraceGrammar *ftraceGrammar;
 	PerfGrammar *perfGrammar;
 	ThreadBuffer<TraceLine> **tbuffers;
@@ -233,11 +234,11 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine &line,
 		if (perfLineData.prevLineIsEvent) {
 			perfLineData.prevEvent->postEventInfo = nullptr;
 		} else {
-			TString *str = (TString*) postEventPool->
+			Chunk *chunk = (Chunk*) postEventPool->
 				allocObj();
-			str->ptr = perfLineData.infoBegin;
-			str->len = line.begin - perfLineData.infoBegin;
-			perfLineData.prevEvent->postEventInfo = str;
+			chunk->offset = perfLineData.infoBegin;
+			chunk->len = line.begin - perfLineData.infoBegin;
+			perfLineData.prevEvent->postEventInfo = chunk;
 			perfLineData.prevLineIsEvent = true;
 		}
 		perfLineData.prevEvent = &event;

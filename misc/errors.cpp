@@ -59,13 +59,17 @@ static const char interne[] = "A serious internal error has occurred.";
 static const char errerro[] = "An error in the error reporting has occurred.";
 static const char errpars[] = "A parsing error has occurred.";
 static const char errcpue[] = "Could not find cycles or cpu-cycles events.";
+static const char errchan[] = "The tracefile has changed on disk.";
+static const char errueof[] = "Unexpected end of file.";
 
 static const char *errorstrings[TS_NR_ERRORS] = {
 	noerror,
 	interne,
 	errerro,
 	errpars,
-	errcpue
+	errcpue,
+	errchan,
+	errueof
 };
 
 const char *ts_strerror(int ts_errno)

@@ -77,10 +77,10 @@ public:
 	char *readBegin;
 	size_t bufSize;
 	size_t nRead;
-	char *filePos;
+	long filePos;
 	bool IOerror;
 	int IOerrno;
-	bool produceBuffer(int fd, char ** filePosPtr, TString *lineBegin);
+	bool produceBuffer(int fd, long *filePosPtr, TString *lineBegin);
 	void beginProduceBuffer();
 	void endProduceBuffer();
 	void beginTokenizeBuffer();

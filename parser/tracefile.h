@@ -52,6 +52,9 @@
 #ifndef TRACEFILE_H
 #define TRACEFILE_H
 
+#include <cstdio>
+
+#include <QByteArray>
 #include <QtGlobal>
 #include <QVector>
 #include <QDebug>
@@ -59,25 +62,39 @@
 #include "threads/loadbuffer.h"
 #include "threads/threadbuffer.h"
 #include "mm/mempool.h"
+#include "parser/fileinfo.h"
 #include "parser/traceline.h"
+#include "misc/chunk.h"
+#include "misc/errors.h"
 #include "misc/traceshark.h"
 
 class LoadThread;
-
 class TraceFile
 {
 public:
 	TraceFile(char *name, int &ts_errno, unsigned int bsize = 1024 * 1024);
 	~TraceFile();
+	void close(int *ts_errno);
 	__always_inline unsigned int
 		ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer);
 	__always_inline bool atEnd() const;
 	__always_inline bool getBufferSwitch() const;
 	__always_inline void clearBufferSwitch();
-	char *mappedFile;
-	unsigned long fileSize;
+	FileInfo fileInfo;
 	__always_inline LoadBuffer *getLoadBuffer(int index) const;
+	QByteArray getChunkArray(const Chunk *chunk,
+						 int *ts_errno);
+	bool isIntact(int *ts_errno);
+	void readChunk(const Chunk *chunk, char *buf, int size,
+				       int *ts_errno);
+	long getFileSize();
+	bool allocMmap();
+	void freeMmap();
 private:
+	__always_inline QByteArray getChunkArray_(const Chunk *chunk,
+						  int *ts_errno);
+	__always_inline void readChunk_(const Chunk *chunk, char *buf,
+					int size, int *ts_errno);
 	__always_inline unsigned int nextBufferIdx(unsigned int n);
 	__always_inline unsigned int
 		ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer);
@@ -85,14 +102,19 @@ private:
 		CheckBufferSwitch(unsigned int pos,
 				  ThreadBuffer<TraceLine> *tbuffer);
 	int fd;
+	bool fd_is_open;
 	bool bufferSwitch;
 	unsigned int nRead;
 	unsigned lastBuf;
 	unsigned lastPos;
 	bool endOfLine;
+	char *mappedFile;
+	size_t mappedFileSize;
 	static const unsigned int NR_BUFFERS = 4;
 	LoadBuffer *loadBuffers[NR_BUFFERS];
 	LoadThread *loadThread;
+	char *buffer;
+	static const int BUFFER_SIZE = 131072;
 };
 
 
@@ -205,6 +227,100 @@ __always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
 __always_inline LoadBuffer *TraceFile::getLoadBuffer(int index) const
 {
 	return loadBuffers[index];
+}
+
+__always_inline QByteArray TraceFile::getChunkArray_(const Chunk *chunk,
+						     int *ts_errno)
+{
+	char *buf;
+	size_t count;
+	char *b;
+	ssize_t r;
+	QByteArray rval;
+
+	if (chunk->len <= BUFFER_SIZE) {
+		buf = buffer;
+	} else {
+		buf = new char[chunk->len];
+	}
+
+	if (lseek64(fd, chunk->offset, SEEK_SET) != chunk->offset) {
+		if (errno != 0)
+			*ts_errno = errno;
+		else
+			*ts_errno = - TS_ERROR_ERROR;
+		goto out;
+	}
+
+	count = chunk->len;
+	b = buf;
+
+	while (count > 0) {
+		r = read(fd, b, count);
+		if (r < 0) {
+			if (errno == EINTR)
+				continue;
+			if (errno != 0)
+				*ts_errno = errno;
+			else
+				*ts_errno = - TS_ERROR_ERROR;
+			goto out;
+		}
+		if (r == 0) {
+			*ts_errno = - TS_ERROR_EOF;
+			goto out;
+		}
+		b += r;
+		count -= r;
+	}
+	rval = QByteArray(buf, chunk->len);
+	*ts_errno = 0;
+
+out:
+	if (buf != buffer) {
+		delete[] buf;
+	}
+
+	return rval;
+}
+
+__always_inline void TraceFile::readChunk_(const Chunk *chunk, char *buf,
+					   int size, int *ts_errno)
+{
+	size_t count;
+	char *b;
+	ssize_t r;
+
+	if (lseek64(fd, chunk->offset, SEEK_SET) != chunk->offset) {
+		if (errno != 0)
+			*ts_errno = errno;
+		else
+			*ts_errno = - TS_ERROR_ERROR;
+		return;
+	}
+
+	count = TSMIN(chunk->len, size);
+	b = buf;
+
+	while (count > 0) {
+		r = read(fd, b, count);
+		if (r < 0) {
+			if (errno == EINTR)
+				continue;
+			if (errno != 0)
+				*ts_errno = errno;
+			else
+				*ts_errno = - TS_ERROR_ERROR;
+			return;
+		}
+		if (r == 0) {
+			*ts_errno = - TS_ERROR_EOF;
+			return;
+		}
+		b += r;
+		count -= r;
+	}
+	*ts_errno = 0;
 }
 
 #endif

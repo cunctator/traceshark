@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,16 +49,13 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TRACELINE_H
-#define TRACELINE_H
+#ifndef _TS_CHUNK_H
+#define _TS_CHUNK_H
 
-#include "misc/tstring.h"
-
-class TraceLine {
+class Chunk {
 public:
-	TString *strings;
-	unsigned int nStrings;
-	long begin;
+	long offset;
+	int len;
 };
 
-#endif
+#endif /* _TS_CHUNK_H */

@@ -59,8 +59,7 @@ class LoadBuffer;
 class LoadThread : public TThread
 {
 public:
-	LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
-		   char *fileStart);
+	LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd);
 protected:
 	void run();
 private:

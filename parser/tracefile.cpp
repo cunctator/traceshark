@@ -53,10 +53,14 @@
 #include "parser/traceline.h"
 #include "threads/loadthread.h"
 #include "mm/mempool.h"
+#include "misc/chunk.h"
+#include "misc/errors.h"
+#include "vtl/error.h"
 #include <QtGlobal>
 #include <new>
 
 extern "C" {
+#include <errno.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -64,48 +68,41 @@ extern "C" {
 #include <unistd.h>
 }
 
-#include "vtl/error.h"
+__always_inline static int clib_close(int fd)
+{
+	return close(fd);
+}
 
 TraceFile::TraceFile(char *name, int &ts_errno, unsigned int bsize)
-	: mappedFile(nullptr), fileSize(0), bufferSwitch(false), nRead(0),
-	  lastBuf(0), lastPos(0), endOfLine(false)
+	: fd_is_open(false), bufferSwitch(false), nRead(0), lastBuf(0),
+	  lastPos(0), endOfLine(false), mappedFile(nullptr)
 {
 	unsigned int i;
-	struct stat sbuf;
-	bool succ;
 
 	fd = open(name, O_RDONLY);
-	succ = fd >= 0;
-
-	ts_errno = succ ? 0:errno;
-
-	if (succ) {
-		if (fstat(fd, &sbuf) != 0)
+	if (fd >= 0) {
+		fd_is_open = true;
+		fileInfo.saveStat(fd, &ts_errno);
+	}
+	else {
+		if (errno != 0)
 			ts_errno = errno;
-		else {
-			fileSize = sbuf.st_size;
-			if (sbuf.st_size > 0) {
-				mappedFile = (char*) mmap(nullptr,
-							  fileSize,
-							  PROT_READ,
-							  MAP_PRIVATE,
-							  fd,
-							  0);
-				if (mappedFile == MAP_FAILED)
-					mmap_err();
-			} else
-				ts_errno = EINVAL;
-		}
+		else
+			ts_errno = - TS_ERROR_ERROR;
 	}
 
 	for (i = 0; i < NR_BUFFERS; i++) {
 		loadBuffers[i] = new LoadBuffer(bsize);
 	}
-	loadThread = new LoadThread(loadBuffers, NR_BUFFERS, fd, mappedFile);
+	loadThread = new LoadThread(loadBuffers, NR_BUFFERS, fd);
 	/*
 	 * Don't start thread if something failed earlier, we go this far in
 	 * order to avoid problems in the destructor
 	 */
+	buffer = (char *) mmap(nullptr, BUFFER_SIZE, PROT_READ | PROT_WRITE,
+			      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	if (buffer == MAP_FAILED)
+		mmap_err();
 	if (ts_errno != 0)
 		return;
 	loadThread->start();
@@ -118,8 +115,103 @@ TraceFile::~TraceFile()
 	delete loadThread;
 	for (i = 0; i < NR_BUFFERS; i++)
 		delete loadBuffers[i];
-	if (mappedFile != nullptr) {
-		if (munmap(mappedFile, fileSize) != 0)
-			munmap_err();
+	if (munmap(buffer, BUFFER_SIZE) != 0)
+		munmap_err();
+}
+
+void TraceFile::close(int *ts_errno)
+{
+	*ts_errno = 0;
+	freeMmap();
+	if (!fd_is_open)
+		return;
+	fd_is_open = false;
+	if (clib_close(fd) != 0) {
+		if (errno != 0)
+			*ts_errno = errno;
+		else
+			*ts_errno = - TS_ERROR_ERROR;
 	}
+}
+
+bool TraceFile::isIntact(int *ts_errno)
+{
+	bool intact;
+
+	intact = fileInfo.cmpStat(fd, ts_errno);
+	if (*ts_errno != 0)
+		return false;
+
+	return intact;
+}
+
+long TraceFile::getFileSize()
+{
+	return fileInfo.getFileSize();
+}
+
+bool TraceFile::allocMmap()
+{
+	mappedFileSize = fileInfo.getFileSize();
+	mappedFile = (char*) mmap(nullptr, mappedFileSize, PROT_READ,
+				  MAP_PRIVATE, fd, 0);
+	if (mappedFile == MAP_FAILED) {
+		mappedFile = nullptr;
+		return false;
+	}
+	return true;
+}
+
+void TraceFile::freeMmap()
+{
+	if (mappedFile == nullptr)
+		return;
+	if (munmap(mappedFile, mappedFileSize) != 0)
+		munmap_err();
+}
+
+void TraceFile::readChunk(const Chunk *chunk, char *buf, int size,
+			  int *ts_errno)
+{
+	size_t s;
+	if (mappedFile == nullptr) {
+		readChunk_(chunk, buf, size, ts_errno);
+		return;
+	}
+	s = TSMIN(size, chunk->len);
+	if (chunk->offset + s > mappedFileSize) {
+		*ts_errno = - TS_ERROR_EOF;
+		return;
+	}
+	strncpy(buf, mappedFile + chunk->offset, chunk->len);
+}
+
+QByteArray TraceFile::getChunkArray(const Chunk *chunk, int *ts_errno)
+{
+	char *buf;
+	QByteArray rval;
+
+	if (mappedFile == nullptr) {
+		return getChunkArray_(chunk, ts_errno);
+	}
+
+	if (chunk->offset + chunk->len > (long) mappedFileSize) {
+		*ts_errno = - TS_ERROR_EOF;
+		return rval;
+	}
+
+	if (chunk->len <= BUFFER_SIZE) {
+		buf = buffer;
+	} else {
+		buf = new char[chunk->len];
+	}
+
+	strncpy(buf, mappedFile + chunk->offset, chunk->len);
+	rval = QByteArray(buf, chunk->len);
+
+	if (buf != buffer) {
+		delete[] buf;
+	}
+
+	return rval;
 }

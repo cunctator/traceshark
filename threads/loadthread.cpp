@@ -62,17 +62,16 @@ extern "C" {
 #include <unistd.h>
 }
 
-LoadThread::LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd,
-		       char *map)
+LoadThread::LoadThread(LoadBuffer **buffers, unsigned int nBuf, int myfd)
 	: TThread(QString("LoadThread")), loadBuffers(buffers), nBuffers(nBuf),
-	  fd(myfd), mappedFile(map)
+	  fd(myfd)
 {}
 
 void LoadThread::run()
 {
 	unsigned int i = 0;
 	bool eof;
-	char *filePos = mappedFile;
+	long filePos = 0;
 	TString lineBegin;
 	size_t bufSize = loadBuffers[0]->bufSize;
 
@@ -88,9 +87,6 @@ void LoadThread::run()
 		if (i == nBuffers)
 			i = 0;
 	} while(!eof);
-
-	if (close(fd) != 0)
-		close_warn();
 
 	if (munmap(lineBegin.ptr, bufSize) != 0)
 		munmap_err();

@@ -62,6 +62,7 @@
 #include "parser/tracefile.h"
 #include "parser/traceparser.h"
 #include "misc/errors.h"
+#include "misc/chunk.h"
 #include "misc/traceshark.h"
 #include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
@@ -74,7 +75,7 @@ TraceParser::TraceParser()
 {
 	traceFile = nullptr;
 	ptrPool = new MemPool(16384, sizeof(TString*));
-	postEventPool = new MemPool(16384, sizeof(TString));
+	postEventPool = new MemPool(16384, sizeof(Chunk));
 
 	ftraceGrammar = new FtraceGrammar();
 	perfGrammar = new PerfGrammar();
@@ -143,11 +144,14 @@ bool TraceParser::isOpen() const
 	return (traceFile != nullptr);
 }
 
-void TraceParser::close()
+void TraceParser::close(int *ts_errno)
 {
 	if (traceFile != nullptr) {
+		traceFile->close(ts_errno);
 		delete traceFile;
 		traceFile = nullptr;
+	} else {
+		*ts_errno = 0;
 	}
 	ptrPool->reset();
 	perfGrammar->clear();
@@ -297,16 +301,17 @@ void TraceParser::sendTraceType()
 
 void TraceParser::prepareParse()
 {
-	fakePostEventInfo.ptr = traceFile->mappedFile;
+	fakePostEventInfo.offset = 0;
+	fakePostEventInfo.len = 0;
 	fakeEvent.postEventInfo = &fakePostEventInfo;
 
-	perfLineData.infoBegin = traceFile->mappedFile;
+	perfLineData.infoBegin = 0;
 	perfLineData.prevEvent = &fakeEvent;
 	perfLineData.nrEvents = 0;
 	perfLineData.prevLineIsEvent = true;
 	perfLineData.prevTime = VTL_TIME_MIN;
 
-	ftraceLineData.infoBegin = traceFile->mappedFile;
+	ftraceLineData.infoBegin = 0;
 	ftraceLineData.prevEvent = &fakeEvent;
 	ftraceLineData.nrEvents = 0;
 	ftraceLineData.prevLineIsEvent = true;
@@ -327,7 +332,7 @@ void TraceParser::prepareParse()
 void TraceParser::fixLastEvent()
 {
 	bool prevLineIsEvent = false;
-	char *infoBegin = nullptr;
+	long infoBegin = 0;
 
 	switch (traceType) {
 	case TRACE_TYPE_FTRACE:
@@ -352,12 +357,11 @@ void TraceParser::fixLastEvent()
 	if (prevLineIsEvent) {
 		lastEvent.postEventInfo = nullptr;
 	} else {
-		TString *str = (TString*) postEventPool->
+		Chunk *chunk = (Chunk*) postEventPool->
 			allocObj();
-		str->ptr = infoBegin;
-		str->len = traceFile->mappedFile + traceFile->fileSize
-			- infoBegin;
-		lastEvent.postEventInfo = str;
+		chunk->offset = infoBegin;
+		chunk->len =  traceFile->getFileSize() - infoBegin;
+		lastEvent.postEventInfo = chunk;
 	}
 }
 

@@ -201,6 +201,11 @@ namespace TShark {
 		uvalue.word8[0] = str->ptr[s - 1];
 		return uvalue.word32;
 	}
+
+	__always_inline bool cmp_timespec(const struct timespec &s1,
+					  const struct timespec &s2) {
+		return s1.tv_sec == s2.tv_sec && s1.tv_nsec == s2.tv_nsec;
+	}
 }
 
 #endif /* TRACESHARK_H */

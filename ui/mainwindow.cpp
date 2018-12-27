@@ -896,6 +896,7 @@ void MainWindow::setWakeupActionsEnabled(bool e)
 
 void MainWindow::closeTrace()
 {
+	int ts_errno = 0;
 	resetFilters();
 
 	eventsWidget->beginResetModel();
@@ -920,14 +921,17 @@ void MainWindow::closeTrace()
 	eventSelectDialog->endResetModel();
 
 	clearPlot();
-	if(analyzer->isOpen())
-		analyzer->close();
+	if(analyzer->isOpen()) {
+		analyzer->close(&ts_errno);
+	}
 	taskToolBar->clear();
 	setTraceActionsEnabled(false);
 	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
 	setStatus(STATUS_NOFILE);
+	if (ts_errno != 0)
+		vtl::warn(ts_errno, "Failed to close() trace file");
 }
 
 void MainWindow::saveScreenshot()
@@ -1194,7 +1198,7 @@ void MainWindow::moveActiveCursor(vtl::Time time)
 
 void MainWindow::showEventInfo(const TraceEvent &event)
 {
-	eventInfoDialog->show(event);
+	eventInfoDialog->show(event, *analyzer->getTraceFile());
 }
 
 void MainWindow::taskTriggered(int pid)

@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,16 +49,22 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TRACELINE_H
-#define TRACELINE_H
+#ifndef _FILE_INFO_H
+#define _FILE_INFO_H
 
-#include "misc/tstring.h"
+extern "C" {
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+}
 
-class TraceLine {
+class FileInfo {
 public:
-	TString *strings;
-	unsigned int nStrings;
-	long begin;
+	void saveStat(int fd, int *ts_errno);
+	bool cmpStat(int fd, int *ts_errno);
+	long getFileSize();
+private:
+	struct stat st;
 };
 
-#endif
+#endif /* _FILE_INFO_H */

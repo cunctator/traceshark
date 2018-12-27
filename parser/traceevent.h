@@ -149,6 +149,7 @@ typedef enum {
 #define EVENT_UNKNOWN (NR_EVENTS)
 
 class StringTree;
+class Chunk;
 
 class TraceEvent {
 public:
@@ -168,7 +169,7 @@ public:
 	 * cannot be null terminated, instead we will have to rely on the len
 	 * field to determine the length when using  this TString.
 	 */
-	TString *postEventInfo;
+	Chunk *postEventInfo;
 
 	const TString *getEventName() const;
 	static const TString *getEventName(event_t event);

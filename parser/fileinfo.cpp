@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -49,16 +49,51 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TRACELINE_H
-#define TRACELINE_H
+#include "parser/fileinfo.h"
 
-#include "misc/tstring.h"
+#include "misc/errors.h"
+#include "misc/traceshark.h"
 
-class TraceLine {
-public:
-	TString *strings;
-	unsigned int nStrings;
-	long begin;
-};
+extern "C" {
+#include <errno.h>
+}
 
-#endif
+using namespace TShark;
+
+void FileInfo::saveStat(int fd, int *ts_errno)
+{
+	if (fstat(fd, &st) == 0) {
+		*ts_errno = 0;
+	} else {
+		if (errno != 0)
+			*ts_errno = errno;
+		else
+			*ts_errno = - TS_ERROR_ERROR;
+	}
+}
+
+bool FileInfo::cmpStat(int fd, int *ts_errno)
+{
+	struct stat s;
+
+	if (fstat(fd, &s) == 0)
+		*ts_errno = 0;
+	else
+		goto error;
+
+	return  cmp_timespec(s.st_ctim, st.st_ctim) &&
+		cmp_timespec(s.st_mtim, st.st_mtim) &&
+		s.st_size == st.st_size;
+
+error:
+	if (errno != 0)
+		*ts_errno = errno;
+	else
+		*ts_errno = - TS_ERROR_ERROR;
+	return false;
+}
+
+long FileInfo::getFileSize()
+{
+	return st.st_size;
+}

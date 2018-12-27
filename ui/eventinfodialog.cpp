@@ -49,9 +49,12 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "misc/chunk.h"
+#include "misc/errors.h"
 #include "misc/traceshark.h"
 #include "ui/eventinfodialog.h"
 #include "parser/traceevent.h"
+#include "parser/tracefile.h"
 
 #include <QByteArray>
 #include <QFont>
@@ -114,15 +117,26 @@ void EventInfoDialog::updateSize()
 	setFixedHeight(height);
 }
 
-void EventInfoDialog::show(const TraceEvent &event)
+void EventInfoDialog::show(const TraceEvent &event, TraceFile &file)
 {
 	QByteArray array;
+	QString text;
+	int ts_errno = 0;
+
 	if (event.postEventInfo != nullptr && event.postEventInfo->len > 0)
-		array = QByteArray(event.postEventInfo->ptr,
-				   event.postEventInfo->len);
+		array = file.getChunkArray(event.postEventInfo, &ts_errno);
 	else
-		array = QByteArray();
-	QString text(array);
-	textEdit->setPlainText(text);
-	QDialog::show();
+		return;
+
+	if (ts_errno == 0) {
+		if (file.isIntact(&ts_errno)) {
+			text = QString(array);
+			textEdit->setPlainText(text);
+			QDialog::show();
+			return;
+		}
+		if (ts_errno == 0)
+			ts_errno = - TS_ERROR_FILECHANGED;
+	}
+	vtl::warn(ts_errno, "Could not retrieve event info");
 }

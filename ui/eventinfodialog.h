@@ -59,13 +59,14 @@ class QPlainTextEdit;
 QT_END_NAMESPACE
 
 class TraceEvent;
+class TraceFile;
 
 class EventInfoDialog : public QDialog {
 	Q_OBJECT
 
 public:
 	EventInfoDialog(QWidget *parent = 0);
-	void show(const TraceEvent &event);
+	void show(const TraceEvent &event, TraceFile &file);
 private:
 	QPlainTextEdit *textEdit;
 	void updateSize();

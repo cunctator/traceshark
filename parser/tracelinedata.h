@@ -61,7 +61,7 @@ public:
 	vtl::Time prevTime;
 	bool prevLineIsEvent;
 	TraceEvent *prevEvent;
-	char *infoBegin;
+	long infoBegin;
 	unsigned long nrEvents;
 };
 

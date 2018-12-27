@@ -71,6 +71,7 @@ extern "C" {
 #include "analyzer/cpuidle.h"
 #include "parser/genericparams.h"
 #include "analyzer/traceanalyzer.h"
+#include "parser/tracefile.h"
 #include "parser/traceparser.h"
 #include "misc/errors.h"
 #include "misc/setting.h"
@@ -108,7 +109,9 @@ TraceAnalyzer::TraceAnalyzer()
 
 TraceAnalyzer::~TraceAnalyzer()
 {
-	TraceAnalyzer::close();
+	int dummy;
+
+	TraceAnalyzer::close(&dummy);
 	delete parser;
 	delete taskNamePool;
 }
@@ -148,7 +151,7 @@ bool TraceAnalyzer::isOpen() const
 	return parser->isOpen();
 }
 
-void TraceAnalyzer::close()
+void TraceAnalyzer::close(int *ts_errno)
 {
 	if (cpuTaskMaps != nullptr) {
 		delete[] cpuTaskMaps;
@@ -179,7 +182,7 @@ void TraceAnalyzer::close()
 	migrations.clear();
 	migrationArrows.clear();
 	colorMap.clear();
-	parser->close();
+	parser->close(ts_errno);
 	taskNamePool->clear();
 }
 
@@ -1217,12 +1220,20 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 	}
 
 	wbuf = (char*) mmap(nullptr, (size_t) WRITE_BUFFER_SIZE,
-			    PROT_READ|PROT_WRITE,
-			    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+			    PROT_READ|PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
+			    -1, 0);
 
 	if (wbuf == MAP_FAILED)
 		mmap_err();
 
+	if (!parser->traceFile->isIntact(ts_errno)) {
+		rval = false;
+		if (*ts_errno == 0)
+			*ts_errno = - TS_ERROR_FILECHANGED;
+		goto error_munmap;
+	}
+
+	parser->traceFile->allocMmap();
 	fd =  clib_open(fileName, O_WRONLY | O_CREAT,
 			(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
 
@@ -1237,6 +1248,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 	if (export_type == EXPORT_TYPE_CPU_CYCLES) {
 		cpuevent_type = determineCPUEvent(ok);
 		if (!ok) {
+			rval = false;
 			*ts_errno = - TS_ERROR_NOCPUEV;
 			goto error_munmap;
 		}
@@ -1315,7 +1327,13 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 			    eptr->postEventInfo->len > 0) {
 				size_t cs = TSMIN(space,
 						  eptr->postEventInfo->len);
-				strncpy(wb, eptr->postEventInfo->ptr, cs);
+				parser->traceFile->readChunk(
+					eptr->postEventInfo, wb, space,
+					ts_errno);
+				if (*ts_errno != 0) {
+					rval = false;
+					goto error_munmap;
+				}
 				if (cs > 0) {
 					written += cs;
 					space   -= cs;
@@ -1334,13 +1352,20 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 				if (write_rval < 0 && errno != EINTR) {
 					rval = false;
 					*ts_errno = errno;
-					goto skip_ftrace;
+					goto error_munmap;
 				}
 			} while(written_io < written);
 		}
 		if (idx >= nr_elements)
 			break;
 	} while(true);
+
+	if (!parser->traceFile->isIntact(ts_errno)) {
+		rval = false;
+		if (*ts_errno == 0)
+			*ts_errno = - TS_ERROR_FILECHANGED;
+		goto error_munmap;
+	}
 
 skip_perf:
 	if (!isFtrace)
@@ -1357,8 +1382,14 @@ skip_ftrace:
 	}
 
 error_munmap:
+	parser->traceFile->freeMmap();
 	if (munmap(wbuf, WRITE_BUFFER_SIZE) != 0)
 		munmap_err();
 
 	return rval;
+}
+
+TraceFile *TraceAnalyzer::getTraceFile()
+{
+	return parser->traceFile;
 }

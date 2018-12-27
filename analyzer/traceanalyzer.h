@@ -109,7 +109,7 @@ public:
 	~TraceAnalyzer();
 	int open(const QString &fileName);
 	bool isOpen() const;
-	void close();
+	void close(int *ts_errno);
 	void processTrace();
 	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
 						 int pid,
@@ -161,6 +161,7 @@ public:
 	bool filterActive(FilterState::filter_t filter) const;
 	bool exportTraceFile(const char *fileName, int *ts_errno,
 			     exporttype_t export_type);
+	TraceFile *getTraceFile();
 	vtl::TList<TraceEvent> *events;
 	vtl::TList <const TraceEvent*> filteredEvents;
 	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>

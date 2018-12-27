@@ -98,6 +98,7 @@ HEADERS      +=  analyzer/task.h
 HEADERS      +=  analyzer/tcolor.h
 HEADERS      +=  analyzer/traceanalyzer.h
 
+HEADERS      +=  parser/fileinfo.h
 HEADERS      +=  parser/genericparams.h
 HEADERS      +=  parser/paramhelpers.h
 HEADERS      +=  parser/traceevent.h
@@ -125,6 +126,7 @@ HEADERS      +=  mm/mempool.h
 HEADERS      +=  mm/stringpool.h
 HEADERS      +=  mm/stringtree.h
 
+HEADERS      +=  misc/chunk.h
 HEADERS      +=  misc/errors.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
@@ -187,6 +189,7 @@ SOURCES      +=  analyzer/task.cpp
 SOURCES      +=  analyzer/tcolor.cpp
 SOURCES      +=  analyzer/traceanalyzer.cpp
 
+SOURCES      +=  parser/fileinfo.cpp
 SOURCES      +=  parser/traceevent.cpp
 SOURCES      +=  parser/tracefile.cpp
 SOURCES      +=  parser/traceparser.cpp

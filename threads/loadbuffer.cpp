@@ -64,7 +64,7 @@ extern "C" {
 }
 
 LoadBuffer::LoadBuffer(unsigned int size):
-	buffer(nullptr), bufSize(size), nRead(0), filePos(nullptr),
+	buffer(nullptr), bufSize(size), nRead(0), filePos(0),
 	IOerror(false), IOerrno(0), state(LOADSTATE_EMPTY), eof(false)
 {
 	/*
@@ -88,7 +88,7 @@ LoadBuffer::~LoadBuffer()
  * This function should be called from the IO thread until the function returns
  * true.
  */
-bool LoadBuffer::produceBuffer(int fd, char** filePosPtr, TString *lineBegin)
+bool LoadBuffer::produceBuffer(int fd, long *filePosPtr, TString *lineBegin)
 {
 	ssize_t nRawBytes;
 	char *c;
