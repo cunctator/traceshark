@@ -156,6 +156,13 @@ bool TraceFile::allocMmap()
 	mappedFile = (char*) mmap(nullptr, mappedFileSize, PROT_READ,
 				  MAP_PRIVATE, fd, 0);
 	if (mappedFile == MAP_FAILED) {
+		/*
+		 * It is normal for this mmap() to fail on 32-bit platforms, in
+		 * that case we record the failure by setting mappedFile to
+		 * nullptr, then readChunk() and getChunkArray() will use
+		 * the fallback readChunk_() and getChunkArray_() functions,
+		 * which uses lseek64() and read() to obtain the desired chunks.
+		 */
 		mappedFile = nullptr;
 		return false;
 	}
