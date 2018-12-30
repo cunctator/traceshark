@@ -57,24 +57,24 @@ fi
 
 file=$1
 
-average=$(cat $file|awk '/processTrace/ { sum+=$3;n++ } END {print sum/n}')
+average=$(cat $file|LC_NUMERIC="C" awk '/processTrace/ { sum+=$3;n++ } END {print sum/n}')
 
-minimum=$(cat $file|awk 'BEGIN {min=-1} $1~/processTrace/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
+minimum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {min=-1} $1~/processTrace/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
 
-maximum=$(cat $file|awk 'BEGIN {max=-1} $1~/processTrace/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
+maximum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {max=-1} $1~/processTrace/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
 
 
-st_average=$(cat $file|awk '/showTrace/ { sum+=$3;n++ } END {print sum/n}')
+st_average=$(cat $file|LC_NUMERIC="C" awk '/showTrace/ { sum+=$3;n++ } END {print sum/n}')
 
-st_minimum=$(cat $file|awk 'BEGIN {min=-1} $1~/showTrace/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
+st_minimum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {min=-1} $1~/showTrace/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
 
-st_maximum=$(cat $file|awk 'BEGIN {max=-1} $1~/showTrace/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
+st_maximum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {max=-1} $1~/showTrace/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
 
-tps_average=$(cat $file|awk '/tracePlot->show/ { sum+=$3;n++ } END {print sum/n}')
+tps_average=$(cat $file|LC_NUMERIC="C" awk '/tracePlot->show/ { sum+=$3;n++ } END {print sum/n}')
 
-tps_minimum=$(cat $file|awk 'BEGIN {min=-1} $1~/tracePlot->show/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
+tps_minimum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {min=-1} $1~/tracePlot->show/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
 
-tps_maximum=$(cat $file|awk 'BEGIN {max=-1} $1~/tracePlot->show/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
+tps_maximum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {max=-1} $1~/tracePlot->show/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
 
 echo "\nprocessTrace():"
 echo "minimum = "$minimum

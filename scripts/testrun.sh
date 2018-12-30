@@ -68,7 +68,7 @@ nr_iterations=$3
 
 for index in $(seq $nr_iterations)
 do
-    $prg_name $perf_name&
+    LC_NUMERIC="C" $prg_name $perf_name&
     sleep $sleeptime
     killall -9 $prg_name
 done
