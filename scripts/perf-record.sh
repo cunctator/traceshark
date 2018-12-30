@@ -65,6 +65,8 @@ usage()
     echo "\t-f|--frame-ponter\tUse frampointer callgraphs"
     echo "\t-x|--max-freq <N>\tSet the max sample rate to N"
     echo "\t-e|--event E\t\tAdd event E to the events to be traced"
+    echo "\t-r|--realtime\t\tRun with SCHED_FIFO, priority 99"
+    echo "\t-p|--rt-priority <P>\tRun with SCHED_FIFO, priority N"
 }
 
 recording_msg()
@@ -83,6 +85,8 @@ bufsize_opt=""
 timeout_opt=""
 callgraph_opt=""
 sample_freq_opt="100000"
+use_rt=""
+rt_priority="99"
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -129,6 +133,18 @@ while [ "$1" != "" ]; do
 	    default_events="$default_events $event"
 	    shift
 	    ;;
+	-r | --realtime )
+	    use_rt="yes"
+	    ;;
+	-p | --rt-priority )
+	    if [ $# -lt 2 ];then
+		usage
+		exit 0
+	    fi
+	    rt_priority=$2
+	    shift
+	    use_rt="yes"
+	    ;;
 	* )
 	    usage
 	    exit 0
@@ -150,7 +166,7 @@ do
     done
 done
 
-if [ "$bufsize_opt" = "" ];then
+if [ -z $bufsize_opt ];then
     memtotal=$(cat /proc/meminfo|grep MemTotal:|awk '{print $2}')
     nrcpus=$(cat /proc/cpuinfo|awk '$1=="processor" {nrcpus+=1} END {print nrcpus}')
 
@@ -186,6 +202,10 @@ case $callgraph_opt in
 esac
 
 perf_cmd="$perf_cmd -m $perfmem""K"
+
+if [ $use_rt = "yes" ];then
+    perf_cmd="$perf_cmd -r $rt_priority"
+fi
 
 if [ -e $SAMPLE_RATE_PROCFILE ];then
     echo "Setting "$SAMPLE_RATE_PROCFILE" to "$sample_freq_opt
