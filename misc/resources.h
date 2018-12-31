@@ -86,6 +86,6 @@
 #define RESSRC_PNG_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
 #define RESSRC_PNG_QT_LOGO       ":/traceshark/images/qtlogo-64.png"
 
-#define RESSRC_TEXT_LICENSE      ":/traceshark/licenses/LICENSE"
+#define RESSRC_TEXT_LICENSE      ":/traceshark/LICENSE"
 
 #endif /* RESOURCES_H */

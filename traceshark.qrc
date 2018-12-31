@@ -28,6 +28,6 @@
   <file>images/wakingdirect30x30.png</file>
   <file>images/qcp-logo.png</file>
   <file>images/qtlogo-64.png</file>
-  <file>licenses/LICENSE</file>
+  <file>LICENSE</file>
 </qresource>
 </RCC>
