@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause) -->
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/traceshark">
   <file>images/shark.png</file>
@@ -27,6 +28,6 @@
   <file>images/wakingdirect30x30.png</file>
   <file>images/qcp-logo.png</file>
   <file>images/qtlogo-64.png</file>
-  <file>LICENSE</file>
+  <file>licenses/LICENSE</file>
 </qresource>
 </RCC>
