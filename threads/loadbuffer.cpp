@@ -88,7 +88,7 @@ LoadBuffer::~LoadBuffer()
  * This function should be called from the IO thread until the function returns
  * true.
  */
-bool LoadBuffer::produceBuffer(int fd, long *filePosPtr, TString *lineBegin)
+bool LoadBuffer::produceBuffer(int fd, int64_t *filePosPtr, TString *lineBegin)
 {
 	ssize_t nRawBytes;
 	char *c;

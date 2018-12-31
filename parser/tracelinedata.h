@@ -52,6 +52,7 @@
 #ifndef TRACELINEDATA_H
 #define TRACELINEDATA_H
 
+#include <cstdint>
 #include "vtl/time.h"
 
 class TraceEvent;
@@ -61,7 +62,7 @@ public:
 	vtl::Time prevTime;
 	bool prevLineIsEvent;
 	TraceEvent *prevEvent;
-	long infoBegin;
+	int64_t infoBegin;
 	unsigned long nrEvents;
 };
 

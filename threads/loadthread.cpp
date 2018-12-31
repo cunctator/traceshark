@@ -49,6 +49,7 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 
@@ -71,7 +72,7 @@ void LoadThread::run()
 {
 	unsigned int i = 0;
 	bool eof;
-	long filePos = 0;
+	int64_t filePos = 0;
 	TString lineBegin;
 	size_t bufSize = loadBuffers[0]->bufSize;
 

@@ -53,6 +53,7 @@
 #define TRACEFILE_H
 
 #include <cstdio>
+#include <cstdint>
 
 #include <QByteArray>
 #include <QtGlobal>
@@ -87,7 +88,7 @@ public:
 	bool isIntact(int *ts_errno);
 	void readChunk(const Chunk *chunk, char *buf, int size,
 				       int *ts_errno);
-	long getFileSize();
+	int64_t getFileSize();
 	bool allocMmap();
 	void freeMmap();
 private:

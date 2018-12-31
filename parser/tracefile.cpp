@@ -145,7 +145,7 @@ bool TraceFile::isIntact(int *ts_errno)
 	return intact;
 }
 
-long TraceFile::getFileSize()
+int64_t TraceFile::getFileSize()
 {
 	return fileInfo.getFileSize();
 }

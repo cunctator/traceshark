@@ -332,7 +332,7 @@ void TraceParser::prepareParse()
 void TraceParser::fixLastEvent()
 {
 	bool prevLineIsEvent = false;
-	long infoBegin = 0;
+	int64_t infoBegin = 0;
 
 	switch (traceType) {
 	case TRACE_TYPE_FTRACE:

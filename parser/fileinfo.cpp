@@ -93,7 +93,7 @@ error:
 	return false;
 }
 
-long FileInfo::getFileSize()
+int64_t FileInfo::getFileSize()
 {
 	return st.st_size;
 }

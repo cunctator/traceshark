@@ -1,6 +1,6 @@
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -52,6 +52,8 @@
 #ifndef LOADBUFFER_H
 #define LOADBUFFER_H
 
+#include <cstdint>
+
 #include <QMutex>
 #include <QWaitCondition>
 
@@ -77,10 +79,10 @@ public:
 	char *readBegin;
 	size_t bufSize;
 	size_t nRead;
-	long filePos;
+	int64_t filePos;
 	bool IOerror;
 	int IOerrno;
-	bool produceBuffer(int fd, long *filePosPtr, TString *lineBegin);
+	bool produceBuffer(int fd, int64_t *filePosPtr, TString *lineBegin);
 	void beginProduceBuffer();
 	void endProduceBuffer();
 	void beginTokenizeBuffer();

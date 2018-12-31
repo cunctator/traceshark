@@ -52,6 +52,8 @@
 #ifndef _FILE_INFO_H
 #define _FILE_INFO_H
 
+#include <cstdint>
+
 extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,7 +64,7 @@ class FileInfo {
 public:
 	void saveStat(int fd, int *ts_errno);
 	bool cmpStat(int fd, int *ts_errno);
-	long getFileSize();
+	int64_t getFileSize();
 private:
 	struct stat st;
 };

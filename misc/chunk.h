@@ -52,10 +52,12 @@
 #ifndef _TS_CHUNK_H
 #define _TS_CHUNK_H
 
+#include <cstdint>
+
 class Chunk {
 public:
-	long offset;
-	int len;
+	int64_t offset;
+	int32_t len;
 };
 
 #endif /* _TS_CHUNK_H */
