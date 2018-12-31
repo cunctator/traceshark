@@ -67,6 +67,7 @@ usage()
     echo "\t-e|--event E\t\tAdd event E to the events to be traced"
     echo "\t-r|--realtime\t\tRun with SCHED_FIFO, priority 99"
     echo "\t-p|--rt-priority <P>\tRun with SCHED_FIFO, priority N"
+    echo "\t-t|--stack-size <S>\tUse S bytes as stack size for callgraphs"
 }
 
 recording_msg()
@@ -87,6 +88,7 @@ callgraph_opt=""
 sample_freq_opt="100000"
 use_rt=""
 rt_priority="99"
+stack_size="20480"
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -145,6 +147,14 @@ while [ "$1" != "" ]; do
 	    shift
 	    use_rt="yes"
 	    ;;
+	-t | --stack-size )
+	    if [ $# -lt 2 ];then
+		usage
+		exit 0
+	    fi
+	    stack_size=$2
+	    shift
+	    ;;
 	* )
 	    usage
 	    exit 0
@@ -192,7 +202,7 @@ fi
 
 case $callgraph_opt in
     "" )
-	perf_cmd="$perf_cmd --call-graph=dwarf,20480"
+	perf_cmd="$perf_cmd --call-graph=dwarf,$stack_size"
 	;;
     "fp" )
 	perf_cmd="$perf_cmd --call-graph=fp"
