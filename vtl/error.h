@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -64,6 +64,11 @@
 #define munmap_err()						  \
 	vtl::err(BSD_EX_OSERR, errno, "munmap() failed at %s:%d", \
 		 __FILE__, __LINE__)
+
+#define oops_warnx()					      \
+	vtl::warnx(					      \
+"The program encountered an unexpected condition at %s:%d\n", \
+__FILE__, __LINE__)
 
 #define close_warn()							\
 	vtl::warn(errno, "close() failed at %s:%d", __FILE__, __LINE__)

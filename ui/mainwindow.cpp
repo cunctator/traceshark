@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -1004,7 +1004,7 @@ void MainWindow::about()
 	       "</p>"
 		).arg(QLatin1String(TRACESHARK_VERSION_STRING));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2014-2018 Viktor Rosendahl"
+	       "<p>Copyright &copy; 2014-2019 Viktor Rosendahl"
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below."
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; select \"License\" under the \"Help\""
@@ -1204,80 +1204,7 @@ void MainWindow::showEventInfo(const TraceEvent &event)
 
 void MainWindow::taskTriggered(int pid)
 {
-	Task *task;
-	unsigned int cpu;
-	CPUTask *cpuTask;
-	CPUTask *maxTask;
-	int maxSize;
-	QCPGraph *qcpGraph;
-	QCPDataRange range;
-	QCPDataSelection selection;
-	int end;
-	TaskGraph *taskGraph;
-	bool enableActions = false;
-
-	tracePlot->deselectAll();
-	taskToolBar->removeTaskGraph();
-	if (pid == 0)
-		goto out;
-
-	task = analyzer->findTask(pid);
-	if (task == nullptr)
-		goto out;
-
-	if (task->graph != nullptr) {
-		qcpGraph = task->graph->getQCPGraph();
-		if (qcpGraph == nullptr)
-			goto do_cpugraph;
-		range.setBegin(0);
-		end = task->schedTimev.size() - 1;
-		if (end < 0)
-			goto do_cpugraph;
-		range.setEnd(end);
-		selection.clear();
-		selection.addDataRange(range);
-		qcpGraph->setSelection(selection);
-		taskToolBar->setTaskGraph(task->graph);
-		enableActions = true;
-		goto out;
-	}
-
-do_cpugraph:
-	maxTask = nullptr;
-	maxSize = 0;
-	for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
-		cpuTask = analyzer->findCPUTask(pid, cpu);
-		if (cpuTask != nullptr) {
-			if (cpuTask->schedTimev.size() > maxSize) {
-				maxSize = cpuTask->schedTimev.size();
-				maxTask = cpuTask;
-			}
-		}
-	}
-
-	if (maxTask != nullptr && maxTask->graph != nullptr) {
-		qcpGraph = maxTask->graph->getQCPGraph();
-		if (qcpGraph == nullptr)
-			goto out;
-		range.setBegin(0);
-		end = maxTask->schedTimev.size() - 1;
-		if (end < 0)
-			goto out;
-		range.setEnd(end);
-		selection.clear();
-		selection.addDataRange(range);
-		qcpGraph->setSelection(selection);
-		taskGraph = TaskGraph::fromQCPGraph(qcpGraph);
-		/* Should not happen but check anyway */
-		if (taskGraph == nullptr)
-			goto out;
-		taskToolBar->setTaskGraph(taskGraph);
-		enableActions = true;
-	}
-
-out:
-	setTaskActionsEnabled(enableActions);
-	tracePlot->replot();
+	selectTaskByPid(pid, nullptr);
 }
 
 void MainWindow::handleEventSelected(const TraceEvent *event)
@@ -2132,6 +2059,7 @@ void MainWindow::showWakeupOrWaking(int pid, event_t wakevent)
 
 	if (activeIdx != TShark::RED_CURSOR &&
 	    activeIdx != TShark::BLUE_CURSOR) {
+		oops_warnx();
 		return;
 	}
 
@@ -2142,8 +2070,10 @@ void MainWindow::showWakeupOrWaking(int pid, event_t wakevent)
 	Cursor *activeCursor = cursors[activeIdx];
 	Cursor *inactiveCursor = cursors[inactiveIdx];
 
-	if (activeCursor == nullptr || inactiveCursor == nullptr)
+	if (activeCursor == nullptr || inactiveCursor == nullptr) {
+		oops_warnx();
 		return;
+	}
 
 	/*
 	 * The time of the active cursor is taken to be the time that the
@@ -2192,56 +2122,7 @@ void MainWindow::showWakeupOrWaking(int pid, event_t wakevent)
 	unsigned int wcpu = wakeupevent->cpu;
 	int wpid = wakeupevent->pid;
 
-	/* Deselect the selected task */
-	tracePlot->deselectAll();
-
-	/*
-	 * If the wakeup task was run with pid 0 = swapper, then just remove
-	 * the task from the task toolbar and disable the task actions.
-	 */
-	if (wpid == 0) {
-		taskToolBar->removeTaskGraph();
-		setTaskActionsEnabled(false);
-		tracePlot->replot();
-		return;
-	}
-
-	CPUTask *cpuTask = analyzer->findCPUTask(wpid, wcpu);
-
-	/*
-	 * If we can't find what we expected, we return, the advanced user
-	 * could notice that something fishy is going on by the fact that
-	 * no task is selected after this user interaction, white there still
-	 * is a task in the task toolbar.
-	 */
-	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
-		tracePlot->replot();
-		return;
-	}
-	QCPGraph *qcpGraph = cpuTask->graph->getQCPGraph();
-	if (qcpGraph == nullptr) {
-		tracePlot->replot();
-		return;
-	}
-
-	/* Finally, mark the potential wakeup task as selected */
-	int count = qcpGraph->dataCount();
-	if (count > 0)
-		count--;
-	QCPDataRange wholeRange(0,  count);
-	QCPDataSelection wholeSelection(wholeRange);
-	qcpGraph->setSelection(wholeSelection);
-	tracePlot->replot();
-
-	/* Finally update the TaskToolBar to reflect the change in selection */
-	TaskGraph *graph = TaskGraph::fromQCPGraph(qcpGraph);
-	if (graph == nullptr) {
-		taskToolBar->removeTaskGraph();
-		setTaskActionsEnabled(false);
-		return;
-	}
-	taskToolBar->setTaskGraph(graph);
-	setTaskActionsEnabled(true);
+	selectTaskByPid(wpid, &wcpu);
 }
 
 void MainWindow::showWaking(const TraceEvent *wakeupevent)
@@ -2285,53 +2166,7 @@ void MainWindow::showWaking(const TraceEvent *wakeupevent)
 	unsigned int wcpu = wakingevent->cpu;
 	int wpid = wakingevent->pid;
 
-	/*
-	 * If the waking task was run with pid 0 = swapper, then just remove
-	 * the task from the task toolbar and disable the task actions.
-	 */
-	if (wpid == 0) {
-		taskToolBar->removeTaskGraph();
-		setTaskActionsEnabled(false);
-		tracePlot->replot();
-		return;
-	}
-
-	CPUTask *cpuTask = analyzer->findCPUTask(wpid, wcpu);
-
-	/*
-	 * If we can't find what we expected, we return, the advanced user
-	 * could notice that something fishy is going on by the fact that
-	 * no task is selected after this user interaction, white there still
-	 * is a task in the task toolbar.
-	 */
-	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
-		tracePlot->replot();
-		return;
-	}
-	QCPGraph *qcpGraph = cpuTask->graph->getQCPGraph();
-	if (qcpGraph == nullptr) {
-		tracePlot->replot();
-		return;
-	}
-
-	/* Finally, mark the potential wakeup task as selected */
-	int count = qcpGraph->dataCount();
-	if (count > 0)
-		count--;
-	QCPDataRange wholeRange(0,  count);
-	QCPDataSelection wholeSelection(wholeRange);
-	qcpGraph->setSelection(wholeSelection);
-	tracePlot->replot();
-
-	/* Finally update the TaskToolBar to reflect the change in selection */
-	TaskGraph *graph = TaskGraph::fromQCPGraph(qcpGraph);
-	if (graph == nullptr) {
-		taskToolBar->removeTaskGraph();
-		setTaskActionsEnabled(false);
-		return;
-	}
-	taskToolBar->setTaskGraph(graph);
-	setTaskActionsEnabled(true);
+	selectTaskByPid(wpid, &wcpu);
 }
 
 void MainWindow::checkStatsTimeLimited()
@@ -2345,10 +2180,110 @@ void MainWindow::checkStatsTimeLimited()
 	}
 }
 
+bool MainWindow::selectQCPGraph(QCPGraph *graph)
+{
+	int end = graph->dataCount() - 1;
+	if (end < 0)
+		return false;
+	QCPDataRange wholeRange(0,  end);
+	QCPDataSelection wholeSelection(wholeRange);
+	graph->setSelection(wholeSelection);
+	return true;
+}
+
 /* Add a task graph for the currently selected task */
 void MainWindow::addTaskGraphTriggered()
 {
 	addTaskGraph(taskToolBar->getPid());
+}
+
+void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu)
+{
+	Task *task;
+	QCPGraph *qcpGraph;
+	CPUTask *cpuTask;
+	TaskGraph *graph = nullptr;
+	unsigned int cpu;
+	int maxSize;
+	CPUTask *maxTask;
+
+	/* Deselect the selected task */
+	tracePlot->deselectAll();
+
+	/*
+	 * If the task to be selected is pid 0, that is swapper, then remove
+	 * the task from the task toolbar and disable the task actions.
+	 */
+	if (pid == 0)
+		goto out;
+
+	task = analyzer->findTask(pid);
+
+	/* task is always supposed to be != nullptr, so display warning */
+	if (task == nullptr) {
+		oops_warnx();
+		goto out;
+	}
+
+	if (task->graph == nullptr)
+		goto do_cpugraph;
+	qcpGraph = task->graph->getQCPGraph();
+	if (qcpGraph == nullptr)
+		goto do_cpugraph;
+	selectQCPGraph(qcpGraph);
+	graph = task->graph;
+	goto out;
+
+do_cpugraph:
+
+	/*
+	 * If no preference is given, we will selected the CPU graph with the
+	 * highest number of scheduling events.
+	 */
+	if (preferred_cpu == nullptr) {
+		maxTask = nullptr;
+		maxSize = -1;
+		for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
+			cpuTask = analyzer->findCPUTask(pid, cpu);
+			if (cpuTask != nullptr) {
+				if (cpuTask->schedTimev.size() > maxSize) {
+					maxSize = cpuTask->schedTimev.size();
+					maxTask = cpuTask;
+				}
+			}
+		}
+		cpuTask = maxTask;
+	} else {
+		cpuTask = analyzer->findCPUTask(pid, *preferred_cpu);
+	}
+	/* If we can't find what we expected we warn the user */
+	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
+		oops_warnx();
+		goto out;
+	}
+	qcpGraph = cpuTask->graph->getQCPGraph();
+	if (qcpGraph == nullptr) {
+		oops_warnx();
+		goto out;
+	}
+
+	selectQCPGraph(qcpGraph);
+
+	/* Finally update the TaskToolBar to reflect the change in selection */
+	graph = TaskGraph::fromQCPGraph(qcpGraph);
+	if (graph == nullptr) {
+		oops_warnx();
+	}
+
+out:
+	if (graph != nullptr) {
+		taskToolBar->setTaskGraph(graph);
+		setTaskActionsEnabled(true);
+	} else {
+		taskToolBar->removeTaskGraph();
+		setTaskActionsEnabled(false);
+	}
+	tracePlot->replot();
 }
 
 /* Adds the currently selected task to the legend */
