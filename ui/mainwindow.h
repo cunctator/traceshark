@@ -288,19 +288,35 @@ private:
 	EventSelectDialog *eventSelectDialog;
 	GraphEnableDialog *graphEnableDialog;
 
-	const double bugWorkAroundOffset = 100;
-	const double schedSectionOffset = 100;
-	const double schedSpacing = 250;
-	const double schedHeight = 950;
-	const double cpuSectionOffset = 100;
-	const double cpuSpacing = 100;
-	const double cpuHeight = 800;
+	static const double bugWorkAroundOffset;
+	static const double schedSectionOffset;
+	static const double schedSpacing;
+	static const double schedHeight;
+	static const double cpuSectionOffset;
+	static const double cpuSpacing;
+	static const double cpuHeight;
 	/*
 	 * const double migrateHeight doesn't exist. The value used is the
 	 * dynamically calculated inc variable in MainWindow::computeLayout()
 	 */
 
-	const double migrateSectionOffset = 250;
+	static const double migrateSectionOffset;
+
+	static const QString RUNNING_NAME;
+	static const QString PREEMPTED_NAME;
+	static const QString UNINT_NAME;
+
+	static const double RUNNING_SIZE;
+	static const double PREEMPTED_SIZE;
+	static const double UNINT_SIZE;
+
+	static const QCPScatterStyle::ScatterShape RUNNING_SHAPE;
+	static const QCPScatterStyle::ScatterShape PREEMPTED_SHAPE;
+	static const QCPScatterStyle::ScatterShape UNINT_SHAPE;
+
+	static const QColor RUNNING_COLOR;
+	static const QColor PREEMPTED_COLOR;
+	static const QColor UNINT_COLOR;
 
 	double bottom;
 	double top;

@@ -165,6 +165,39 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
+const double MainWindow::bugWorkAroundOffset = 100;
+const double MainWindow::schedSectionOffset = 100;
+const double MainWindow::schedSpacing = 250;
+const double MainWindow::schedHeight = 950;
+const double MainWindow::cpuSectionOffset = 100;
+const double MainWindow::cpuSpacing = 100;
+const double MainWindow::cpuHeight = 800;
+/*
+ * const double migrateHeight doesn't exist. The value used is the
+ * dynamically calculated inc variable in MainWindow::computeLayout()
+ */
+
+const double MainWindow::migrateSectionOffset = 250;
+
+const QString MainWindow::RUNNING_NAME = tr("is runnable");
+const QString MainWindow::PREEMPTED_NAME = tr("was preempted");
+const QString MainWindow::UNINT_NAME = tr("uninterruptible");
+
+const double MainWindow::RUNNING_SIZE = 5;
+const double MainWindow::PREEMPTED_SIZE = 5;
+const double MainWindow::UNINT_SIZE = 5;
+
+const QCPScatterStyle::ScatterShape MainWindow::RUNNING_SHAPE =
+	QCPScatterStyle::ssCircle;
+const QCPScatterStyle::ScatterShape MainWindow::PREEMPTED_SHAPE =
+	QCPScatterStyle::ssCircle;
+const QCPScatterStyle::ScatterShape MainWindow::UNINT_SHAPE =
+	QCPScatterStyle::ssCircle;
+
+const QColor MainWindow::RUNNING_COLOR = Qt::blue;
+const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
+const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
+
 MainWindow::MainWindow():
 	tracePlot(nullptr), filterActive(false)
 {
@@ -835,25 +868,27 @@ void MainWindow::addGenericAccessoryGraph(const QString &name,
 
 void MainWindow::addPreemptedGraph(CPUTask &task)
 {
-	addGenericAccessoryGraph(tr("was preempted"), task.preemptedTimev,
+	addGenericAccessoryGraph(PREEMPTED_NAME, task.preemptedTimev,
 				 task.scaledPreemptedData,
-				 QCPScatterStyle::ssCircle, 5, Qt::red);
+				 PREEMPTED_SHAPE, PREEMPTED_SIZE,
+				 PREEMPTED_COLOR);
 }
 
 void MainWindow::addStillRunningGraph(CPUTask &task)
 {
-	addGenericAccessoryGraph(tr("is runnable"), task.runningTimev,
+	addGenericAccessoryGraph(RUNNING_NAME, task.runningTimev,
 				 task.scaledRunningData,
-				 QCPScatterStyle::ssCircle, 5, Qt::blue);
+				 RUNNING_SHAPE, RUNNING_SIZE,
+				 RUNNING_COLOR);
 }
 
 void MainWindow::addUninterruptibleGraph(CPUTask &task)
 {
-	addGenericAccessoryGraph(tr("uninterruptible"),
+	addGenericAccessoryGraph(UNINT_NAME,
 				 task.uninterruptibleTimev,
 				 task.scaledUninterruptibleData,
-				 QCPScatterStyle::ssCircle, 5,
-				 QColor(205, 0, 205));
+				 UNINT_SHAPE, UNINT_SIZE,
+				 UNINT_COLOR);
 }
 
 /*
@@ -1967,25 +2002,24 @@ void MainWindow::addAccessoryTaskGraph(QCPGraph **graphPtr,
 
 void MainWindow::addStillRunningTaskGraph(Task *task)
 {
-	addAccessoryTaskGraph(&task->runningGraph, tr("is runnable"),
+	addAccessoryTaskGraph(&task->runningGraph, RUNNING_NAME,
 			      task->runningTimev, task->scaledRunningData,
-			      QCPScatterStyle::ssCircle, 5, Qt::blue);
+			      RUNNING_SHAPE, RUNNING_SIZE, RUNNING_COLOR);
 }
 
 void MainWindow::addPreemptedTaskGraph(Task *task)
 {
-	addAccessoryTaskGraph(&task->preemptedGraph, tr("was preempted"),
+	addAccessoryTaskGraph(&task->preemptedGraph, PREEMPTED_NAME,
 			      task->preemptedTimev, task->scaledPreemptedData,
-			      QCPScatterStyle::ssCircle, 5, Qt::red);
+			      PREEMPTED_SHAPE, PREEMPTED_SIZE, PREEMPTED_COLOR);
 }
 
 void MainWindow::addUninterruptibleTaskGraph(Task *task)
 {
-	addAccessoryTaskGraph(&task->uninterruptibleGraph,
-			      tr("uninterruptible"), task->uninterruptibleTimev,
+	addAccessoryTaskGraph(&task->uninterruptibleGraph, UNINT_NAME,
+			      task->uninterruptibleTimev,
 			      task->scaledUninterruptibleData,
-			      QCPScatterStyle::ssCircle, 5,
-			      QColor(205, 0, 205));
+			      UNINT_SHAPE, UNINT_SIZE, UNINT_COLOR);
 }
 
 void MainWindow::removeTaskGraph(int pid)
