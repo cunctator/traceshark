@@ -183,16 +183,16 @@ const QString MainWindow::RUNNING_NAME = tr("is runnable");
 const QString MainWindow::PREEMPTED_NAME = tr("was preempted");
 const QString MainWindow::UNINT_NAME = tr("uninterruptible");
 
-const double MainWindow::RUNNING_SIZE = 5;
-const double MainWindow::PREEMPTED_SIZE = 5;
-const double MainWindow::UNINT_SIZE = 5;
+const double MainWindow::RUNNING_SIZE = 8;
+const double MainWindow::PREEMPTED_SIZE = 8;
+const double MainWindow::UNINT_SIZE = 8;
 
 const QCPScatterStyle::ScatterShape MainWindow::RUNNING_SHAPE =
-	QCPScatterStyle::ssCircle;
+	QCPScatterStyle::ssTriangle;
 const QCPScatterStyle::ScatterShape MainWindow::PREEMPTED_SHAPE =
-	QCPScatterStyle::ssCircle;
+	QCPScatterStyle::ssTriangle;
 const QCPScatterStyle::ScatterShape MainWindow::UNINT_SHAPE =
-	QCPScatterStyle::ssCircle;
+	QCPScatterStyle::ssPlus;
 
 const QColor MainWindow::RUNNING_COLOR = Qt::blue;
 const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
