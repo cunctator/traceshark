@@ -809,65 +809,51 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	errorBars->setDataPlottable(graph);
 }
 
-void MainWindow::addPreemptedGraph(CPUTask &task)
+void MainWindow::addGenericAccessoryGraph(const QString &name,
+					  const QVector<double> &timev,
+					  const QVector<double> &scaledData,
+					  QCPScatterStyle::ScatterShape sshape,
+					  double size,
+					  const QColor &color)
 {
 	/* Add still running graph on top of the other two...*/
-	if (task.preemptedTimev.size() == 0)
+	if (timev.size() == 0)
 		return;
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
-	QString name = QString(tr("was preempted"));
 	graph->setName(name);
-	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+	QCPScatterStyle style = QCPScatterStyle(sshape, size);
 	QPen pen = QPen();
 
-	pen.setColor(Qt::red);
+	pen.setColor(color);
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	graph->setData(task.preemptedTimev, task.scaledPreemptedData);
+	graph->setData(timev, scaledData);
+}
+
+void MainWindow::addPreemptedGraph(CPUTask &task)
+{
+	addGenericAccessoryGraph(tr("was preempted"), task.preemptedTimev,
+				 task.scaledPreemptedData,
+				 QCPScatterStyle::ssCircle, 5, Qt::red);
 }
 
 void MainWindow::addStillRunningGraph(CPUTask &task)
 {
-	/* Add still running graph on top of the other two...*/
-	if (task.runningTimev.size() == 0)
-		return;
-	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
-					      tracePlot->yAxis);
-	QString name = QString(tr("is runnable"));
-	graph->setName(name);
-	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
-	QPen pen = QPen();
-
-	pen.setColor(Qt::blue);
-	style.setPen(pen);
-	graph->setScatterStyle(style);
-	graph->setLineStyle(QCPGraph::lsNone);
-	graph->setAdaptiveSampling(true);
-	graph->setData(task.runningTimev, task.scaledRunningData);
+	addGenericAccessoryGraph(tr("is runnable"), task.runningTimev,
+				 task.scaledRunningData,
+				 QCPScatterStyle::ssCircle, 5, Qt::blue);
 }
 
 void MainWindow::addUninterruptibleGraph(CPUTask &task)
 {
-	/* Add still running graph on top of the other two...*/
-	if (task.uninterruptibleTimev.size() == 0)
-		return;
-	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
-					      tracePlot->yAxis);
-	QString name = QString(tr("uninterruptible"));
-	graph->setName(name);
-	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
-	QPen pen = QPen();
-
-	pen.setColor(QColor(205, 0, 205));
-	style.setPen(pen);
-	graph->setScatterStyle(style);
-	graph->setLineStyle(QCPGraph::lsNone);
-	graph->setAdaptiveSampling(true);
-	graph->setData(task.uninterruptibleTimev,
-		       task.scaledUninterruptibleData);
+	addGenericAccessoryGraph(tr("uninterruptible"),
+				 task.uninterruptibleTimev,
+				 task.scaledUninterruptibleData,
+				 QCPScatterStyle::ssCircle, 5,
+				 QColor(205, 0, 205));
 }
 
 /*

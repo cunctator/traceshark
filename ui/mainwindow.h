@@ -186,6 +186,12 @@ private:
 	void addPreemptedGraph(CPUTask &task);
 	void addStillRunningGraph(CPUTask &task);
 	void addUninterruptibleGraph(CPUTask &task);
+	void addGenericAccessoryGraph(const QString &name,
+				      const QVector<double> &timev,
+				      const QVector<double> &scaledData,
+				      QCPScatterStyle::ScatterShape sshape,
+				      double size,
+				      const QColor &color);
 
 	void setTraceActionsEnabled(bool e);
 	void setCloseActionsEnabled(bool e);
