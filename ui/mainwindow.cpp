@@ -1924,64 +1924,10 @@ void MainWindow::addTaskGraph(int pid)
 	errorBars->setDataPlottable(graph);
 	task->wakeUpGraph = graph;
 
-	/* Add the still running graph on top of the other two... */
-	QString name = QString(tr("is runnable"));
-	QCPScatterStyle rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
-	if (task->runningTimev.size() == 0) {
-		task->runningGraph = nullptr;
-		goto skip_running;
-	}
-	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
-	graph->setName(name);
+	addStillRunningTaskGraph(task);
+	addPreemptedTaskGraph(task);
+	addUninterruptibleTaskGraph(task);
 
-	pen.setColor(Qt::blue);
-	rstyle.setPen(pen);
-	graph->setScatterStyle(rstyle);
-	graph->setLineStyle(QCPGraph::lsNone);
-	graph->setAdaptiveSampling(true);
-	graph->setData(task->runningTimev, task->scaledRunningData);
-	task->runningGraph = graph;
-
-skip_running:
-	/* ...and then the preempted graph */
-	name = QString(tr("was preempted"));
-	rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
-	if (task->preemptedTimev.size() == 0) {
-		task->preemptedGraph = nullptr;
-		goto skip_preempted;
-	}
-	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
-	graph->setName(name);
-
-	pen.setColor(Qt::red);
-	rstyle.setPen(pen);
-	graph->setScatterStyle(rstyle);
-	graph->setLineStyle(QCPGraph::lsNone);
-	graph->setAdaptiveSampling(true);
-	graph->setData(task->preemptedTimev, task->scaledPreemptedData);
-	task->preemptedGraph = graph;
-
-skip_preempted:
-	/* ...and then the uninterruptible graph */
-	name = QString(tr("uninterruptible"));
-	rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
-	if (task->uninterruptibleTimev.size() == 0) {
-		task->uninterruptibleGraph = nullptr;
-		goto skip_unint;
-	}
-	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
-	graph->setName(name);
-
-	pen.setColor(QColor(205, 0, 205));
-	rstyle.setPen(pen);
-	graph->setScatterStyle(rstyle);
-	graph->setLineStyle(QCPGraph::lsNone);
-	graph->setAdaptiveSampling(true);
-	graph->setData(task->uninterruptibleTimev,
-		       task->scaledUninterruptibleData);
-	task->uninterruptibleGraph = graph;
-
-skip_unint:
 	/*
 	 * We only modify the lower part of the range to show the newly
 	 * added unified task graph.
@@ -1990,6 +1936,56 @@ skip_unint:
 	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
 
 	tracePlot->replot();
+}
+
+void MainWindow::addAccessoryTaskGraph(QCPGraph **graphPtr,
+				       const QString &name,
+				       const QVector<double> &timev,
+				       const QVector<double> &scaledData,
+				       QCPScatterStyle::ScatterShape sshape,
+				       double size,
+				       const QColor &color)
+{
+	/* Add the still running graph on top of the other two... */
+	QCPGraph *graph;
+	QPen pen;
+	QCPScatterStyle style = QCPScatterStyle(sshape, size);
+	if (timev.size() <= 0) {
+		*graphPtr = nullptr;
+		return;
+	}
+	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
+	graph->setName(name);
+	pen.setColor(color);
+	style.setPen(pen);
+	graph->setScatterStyle(style);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setData(timev, scaledData);
+	*graphPtr = graph;
+}
+
+void MainWindow::addStillRunningTaskGraph(Task *task)
+{
+	addAccessoryTaskGraph(&task->runningGraph, tr("is runnable"),
+			      task->runningTimev, task->scaledRunningData,
+			      QCPScatterStyle::ssCircle, 5, Qt::blue);
+}
+
+void MainWindow::addPreemptedTaskGraph(Task *task)
+{
+	addAccessoryTaskGraph(&task->preemptedGraph, tr("was preempted"),
+			      task->preemptedTimev, task->scaledPreemptedData,
+			      QCPScatterStyle::ssCircle, 5, Qt::red);
+}
+
+void MainWindow::addUninterruptibleTaskGraph(Task *task)
+{
+	addAccessoryTaskGraph(&task->uninterruptibleGraph,
+			      tr("uninterruptible"), task->uninterruptibleTimev,
+			      task->scaledUninterruptibleData,
+			      QCPScatterStyle::ssCircle, 5,
+			      QColor(205, 0, 205));
 }
 
 void MainWindow::removeTaskGraph(int pid)

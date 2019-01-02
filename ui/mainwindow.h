@@ -192,6 +192,14 @@ private:
 				      QCPScatterStyle::ScatterShape sshape,
 				      double size,
 				      const QColor &color);
+	void addAccessoryTaskGraph(QCPGraph **graphPtr, const QString &name,
+				   const QVector<double> &timev,
+				   const QVector<double> &scaledData,
+				   QCPScatterStyle::ScatterShape sshape,
+				   double size, const QColor &color);
+	void addStillRunningTaskGraph(Task *task);
+	void addPreemptedTaskGraph(Task *task);
+	void addUninterruptibleTaskGraph(Task *task);
 
 	void setTraceActionsEnabled(bool e);
 	void setCloseActionsEnabled(bool e);
