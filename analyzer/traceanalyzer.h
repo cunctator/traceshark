@@ -972,6 +972,11 @@ bool TraceAnalyzer::__processPidFilter(const TraceEvent &event,
 				return true;
 			pid = sched_wakeup_pid(ttype, event);
 			break;
+		case SCHED_WAKING:
+			if (!sched_waking_args_ok(ttype, event))
+				return true;
+			pid = sched_waking_pid(ttype, event);
+			break;
 		case SCHED_PROCESS_FORK:
 			if (!sched_process_fork_args_ok(ttype, event))
 				return true;
