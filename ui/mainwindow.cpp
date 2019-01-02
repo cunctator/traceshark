@@ -811,7 +811,7 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 void MainWindow::addPreemptedGraph(CPUTask &task)
 {
 	/* Add still running graph on top of the other two...*/
-	if (task.runningTimev.size() == 0)
+	if (task.preemptedTimev.size() == 0)
 		return;
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
