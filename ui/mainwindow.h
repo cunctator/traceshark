@@ -185,6 +185,7 @@ private:
 	void addWakeupGraph(CPUTask &task);
 	void addPreemptedGraph(CPUTask &task);
 	void addStillRunningGraph(CPUTask &task);
+	void addUninterruptibleGraph(CPUTask &task);
 
 	void setTraceActionsEnabled(bool e);
 	void setCloseActionsEnabled(bool e);

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018, 2019
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -260,30 +261,37 @@ bool AbstractTask::doStatsTimeLimited()
 
 bool AbstractTask::doScaleRunning()
 {
-	int s = runningTimev.size();
-	double scaledHeight = FLOOR_HEIGHT * scale + offset;
-
-	scaledRunningData.resize(s);
-	scaledRunningData.fill(scaledHeight, s);
-	return false; /* No error */
+	return fillDataVector(runningTimev, scaledRunningData, nullptr,
+			      FLOOR_HEIGHT);
 }
 
 bool AbstractTask::doScalePreempted()
 {
-	int s = preemptedTimev.size();
-	scaledPreemptedData.resize(s);
-	double scaledHeight = FLOOR_HEIGHT * scale + offset;
-	scaledPreemptedData.fill(scaledHeight, s);
-	return false; /* No error */
+	return fillDataVector(preemptedTimev, scaledPreemptedData, nullptr,
+			      FLOOR_HEIGHT);
+}
+
+bool AbstractTask::doScaleUnint()
+{
+	return fillDataVector(uninterruptibleTimev, scaledUninterruptibleData,
+			      nullptr,  FLOOR_HEIGHT);
 }
 
 bool AbstractTask::doScaleWakeup()
 {
-	int s = wakeDelay.size();
-	/* Create the dummy vector needed for horizontal display */
-	double scaledHeight = WAKEUP_HEIGHT * scale + offset;
-	wakeZero.fill(0, s);
-	wakeHeight.fill(scaledHeight, s);
+	return fillDataVector(wakeDelay, wakeHeight, &wakeZero, WAKEUP_HEIGHT);
+}
+
+bool  AbstractTask::fillDataVector(QVector<double> &timev,
+				   QVector<double> &data,
+				   QVector<double> *zerov,
+				   double height)
+{
+	int s = timev.size();
+	double scaledHeight = height * scale + offset;
+	data.fill(scaledHeight, s);
+	if (zerov != nullptr)
+		zerov->fill(0, s);
 	return false; /* No error */
 }
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -567,6 +567,7 @@ void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 	const char *name;
 	bool runnable;
 	bool preempted;
+	bool uint;
 
 	if (!sched_switch_parse(ttype, event, handle))
 		return;
@@ -656,6 +657,9 @@ void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		task->lastWakeUP = oldtime;
 	} else {
 		task->lastSleepEntry = oldtime;
+		uint = task_state_is_flag_set(state, TASK_FLAG_UNINTERRUPTIBLE);
+		if (uint)
+			task->uninterruptibleTimev.append(oldtimeDbl);
 	}
 
 	/* ... then handle the per CPU task */
@@ -679,6 +683,9 @@ void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 		} else {
 			cpuTask->runningTimev.append(oldtimeDbl);
 		}
+	} else {
+		if (uint)
+			cpuTask->uninterruptibleTimev.append(oldtimeDbl);
 	}
 
 skip:

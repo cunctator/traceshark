@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -91,8 +91,10 @@ public:
 	QVector<double> wakeZero;
 	QVector<double> preemptedTimev;
 	QVector<double> runningTimev;
+	QVector<double> uninterruptibleTimev;
 	QVector<double> scaledPreemptedData;
 	QVector<double> scaledRunningData;
+	QVector<double> scaledUninterruptibleData;
 
 	vtl::Time accTime;             /* Total time consumption        */
 	unsigned  accPct;              /* Percentage of the above       */
@@ -112,6 +114,7 @@ public:
 	bool doScaleWakeup();
 	bool doScaleRunning();
 	bool doScalePreempted();
+	bool doScaleUnint();
 
 	static void setCursorTime(enum TShark::CursorIdx cursor,
 				  const vtl::Time &time);
@@ -126,6 +129,8 @@ private:
 	__always_inline int binarySearch(const vtl::Time &time);
 	int findLower(const vtl::Time &time);
 	int findHigher(const vtl::Time &time);
+	bool fillDataVector(QVector<double> &timev, QVector<double> &data,
+			    QVector<double> *zerov, double height);
 protected:
 	static vtl::Time lowerTimeLimit;
 	static vtl::Time higherTimeLimit;

@@ -660,6 +660,7 @@ skipIdleFreqGraphs:
 				addWakeupGraph(task);
 				addPreemptedGraph(task);
 				addStillRunningGraph(task);
+				addUninterruptibleGraph(task);
 			}
 		}
 	}
@@ -846,6 +847,27 @@ void MainWindow::addStillRunningGraph(CPUTask &task)
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
 	graph->setData(task.runningTimev, task.scaledRunningData);
+}
+
+void MainWindow::addUninterruptibleGraph(CPUTask &task)
+{
+	/* Add still running graph on top of the other two...*/
+	if (task.uninterruptibleTimev.size() == 0)
+		return;
+	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
+					      tracePlot->yAxis);
+	QString name = QString(tr("uninterruptible"));
+	graph->setName(name);
+	QCPScatterStyle style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+	QPen pen = QPen();
+
+	pen.setColor(QColor(205, 0, 205));
+	style.setPen(pen);
+	graph->setScatterStyle(style);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setData(task.uninterruptibleTimev,
+		       task.scaledUninterruptibleData);
 }
 
 /*
@@ -1833,6 +1855,7 @@ void MainWindow::consumeSettings()
 			task->wakeUpGraph = nullptr;
 			task->runningGraph = nullptr;
 			task->preemptedGraph = nullptr;
+			task->uninterruptibleGraph = nullptr;
 		}
 	}
 
@@ -1891,6 +1914,7 @@ void MainWindow::addTaskGraph(int pid)
 	task->doScaleWakeup();
 	task->doScaleRunning();
 	task->doScalePreempted();
+	task->doScaleUnint();
 
 	taskGraph->setData(task->schedTimev, task->scaledSchedData);
 	task->graph = taskGraph;
@@ -1919,7 +1943,7 @@ void MainWindow::addTaskGraph(int pid)
 	QCPScatterStyle rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	if (task->runningTimev.size() == 0) {
 		task->runningGraph = nullptr;
-		goto out;
+		goto skip_running;
 	}
 	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
 	graph->setName(name);
@@ -1932,12 +1956,13 @@ void MainWindow::addTaskGraph(int pid)
 	graph->setData(task->runningTimev, task->scaledRunningData);
 	task->runningGraph = graph;
 
+skip_running:
 	/* ...and then the preempted graph */
 	name = QString(tr("was preempted"));
 	rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
 	if (task->preemptedTimev.size() == 0) {
 		task->preemptedGraph = nullptr;
-		goto out;
+		goto skip_preempted;
 	}
 	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
 	graph->setName(name);
@@ -1950,7 +1975,27 @@ void MainWindow::addTaskGraph(int pid)
 	graph->setData(task->preemptedTimev, task->scaledPreemptedData);
 	task->preemptedGraph = graph;
 
-out:
+skip_preempted:
+	/* ...and then the uninterruptible graph */
+	name = QString(tr("uninterruptible"));
+	rstyle = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+	if (task->uninterruptibleTimev.size() == 0) {
+		task->uninterruptibleGraph = nullptr;
+		goto skip_unint;
+	}
+	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
+	graph->setName(name);
+
+	pen.setColor(QColor(205, 0, 205));
+	rstyle.setPen(pen);
+	graph->setScatterStyle(rstyle);
+	graph->setLineStyle(QCPGraph::lsNone);
+	graph->setAdaptiveSampling(true);
+	graph->setData(task->uninterruptibleTimev,
+		       task->scaledUninterruptibleData);
+	task->uninterruptibleGraph = graph;
+
+skip_unint:
 	/*
 	 * We only modify the lower part of the range to show the newly
 	 * added unified task graph.
@@ -1991,6 +2036,11 @@ void MainWindow::removeTaskGraph(int pid)
 	if (task->preemptedGraph != nullptr) {
 		tracePlot->removeGraph(task->preemptedGraph);
 		task->preemptedGraph = nullptr;
+	}
+
+	if (task->uninterruptibleGraph != nullptr) {
+		tracePlot->removeGraph(task->uninterruptibleGraph);
+		task->uninterruptibleGraph = nullptr;
 	}
 
 	taskRangeAllocator->putTaskRange(pid);
