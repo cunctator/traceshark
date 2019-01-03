@@ -22,6 +22,11 @@ Above is a screenshot of traceshark. The four uppermost graphs are for displayin
 
 Below these four graphs are the per CPU scheduling graphs, the different colors of these graphs are for different tasks. The small vertical bars that are shown just above the per CPU graphs indicates the waiting time between wakeup and being scheduled, the highest height is equal to 20 ms, i.e. a full lenght means that the waiting time was at least 20 ms, possibly more.
 
+ Furthermore, in the scheduling graphs, there are the following subtle markers:
+* ![still running example](https://raw.githubusercontent.com/cunctator/traceshark/158dc1d884e2cc63b19978be20bf0b55437296ee/doc/running60x54.png) The blue triangle indicates that the task was still running when it was scheduled out.
+* ![preempted example](https://raw.githubusercontent.com/cunctator/traceshark/158dc1d884e2cc63b19978be20bf0b55437296ee/doc/preempted60x54.png) The red triangle indicates that the task was preempted when it was scheduled out.
+* ![uinterruptible example](https://raw.githubusercontent.com/cunctator/traceshark/158dc1d884e2cc63b19978be20bf0b55437296ee/doc/preempted60x54.png) The magenta colored plus sign indicates that the task went into uninterruptible sleep when it was scheduled out. Note that in practice, only the lower line of the plus sign is visible.
+
 Below the scheduling graphs are the migration graphs. Task migrations between CPUs are shown with arrows. Fork/exit is shown with an arrow from/to `fork/exit`.
 
 Below the migration arrows are the unified task graphs, where tasks are shown without caring about which CPU it is running on. Here the time between wakeup and being scheduled in shown by horizontal bars.
