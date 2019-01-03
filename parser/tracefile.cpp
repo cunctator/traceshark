@@ -76,7 +76,7 @@ __always_inline static int clib_close(int fd)
 
 TraceFile::TraceFile(char *name, int &ts_errno, unsigned int bsize)
 	: fd_is_open(false), bufferSwitch(false), nRead(0), lastBuf(0),
-	  lastPos(0), endOfLine(false), mappedFile(nullptr)
+	  lastPos(0), endOfLine(false), mappedFile(nullptr), fileSize(0)
 {
 	unsigned int i;
 
@@ -84,8 +84,8 @@ TraceFile::TraceFile(char *name, int &ts_errno, unsigned int bsize)
 	if (fd >= 0) {
 		fd_is_open = true;
 		fileInfo.saveStat(fd, &ts_errno);
-	}
-	else {
+		fileSize = fileInfo.getFileSize();
+	} else {
 		if (errno != 0)
 			ts_errno = errno;
 		else
@@ -146,15 +146,9 @@ bool TraceFile::isIntact(int *ts_errno)
 	return intact;
 }
 
-int64_t TraceFile::getFileSize()
-{
-	return fileInfo.getFileSize();
-}
-
 bool TraceFile::allocMmap()
 {
-	mappedFileSize = fileInfo.getFileSize();
-	mappedFile = (char*) mmap(nullptr, mappedFileSize, PROT_READ,
+	mappedFile = (char*) mmap(nullptr, fileSize, PROT_READ,
 				  MAP_PRIVATE, fd, 0);
 	if (mappedFile == MAP_FAILED) {
 		/*
@@ -174,20 +168,20 @@ void TraceFile::freeMmap()
 {
 	if (mappedFile == nullptr)
 		return;
-	if (munmap(mappedFile, mappedFileSize) != 0)
+	if (munmap(mappedFile, fileSize) != 0)
 		munmap_err();
 }
 
 void TraceFile::readChunk(const Chunk *chunk, char *buf, int size,
 			  int *ts_errno)
 {
-	size_t s;
+	int64_t s;
 	if (mappedFile == nullptr) {
 		readChunk_(chunk, buf, size, ts_errno);
 		return;
 	}
 	s = TSMIN(size, chunk->len);
-	if (chunk->offset + s > mappedFileSize) {
+	if (chunk->offset + s > fileSize) {
 		*ts_errno = - TS_ERROR_EOF;
 		return;
 	}
@@ -203,7 +197,7 @@ QByteArray TraceFile::getChunkArray(const Chunk *chunk, int *ts_errno)
 		return getChunkArray_(chunk, ts_errno);
 	}
 
-	if (chunk->offset + chunk->len > (long) mappedFileSize) {
+	if (chunk->offset + chunk->len > fileSize) {
 		*ts_errno = - TS_ERROR_EOF;
 		return rval;
 	}

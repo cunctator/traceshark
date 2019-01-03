@@ -89,7 +89,7 @@ public:
 	bool isIntact(int *ts_errno);
 	void readChunk(const Chunk *chunk, char *buf, int size,
 				       int *ts_errno);
-	int64_t getFileSize();
+	__always_inline int64_t getFileSize();
 	bool allocMmap();
 	void freeMmap();
 private:
@@ -111,7 +111,7 @@ private:
 	unsigned lastPos;
 	bool endOfLine;
 	char *mappedFile;
-	size_t mappedFileSize;
+	int64_t fileSize;
 	static const unsigned int NR_BUFFERS = 4;
 	LoadBuffer *loadBuffers[NR_BUFFERS];
 	LoadThread *loadThread;
@@ -323,6 +323,11 @@ __always_inline void TraceFile::readChunk_(const Chunk *chunk, char *buf,
 		count -= r;
 	}
 	*ts_errno = 0;
+}
+
+int64_t TraceFile::getFileSize()
+{
+	return fileSize;
 }
 
 #endif
