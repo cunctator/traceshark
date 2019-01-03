@@ -1254,7 +1254,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 		if (!ok) {
 			rval = false;
 			*ts_errno = - TS_ERROR_NOCPUEV;
-			goto error_munmap;
+			goto error_close;
 		}
 	}
 
@@ -1336,7 +1336,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 					ts_errno);
 				if (*ts_errno != 0) {
 					rval = false;
-					goto error_munmap;
+					goto error_close;
 				}
 				if (cs > 0) {
 					written += cs;
@@ -1356,7 +1356,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 				if (write_rval < 0 && errno != EINTR) {
 					rval = false;
 					*ts_errno = errno;
-					goto error_munmap;
+					goto error_close;
 				}
 			} while(written_io < written);
 		}
@@ -1368,7 +1368,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 		rval = false;
 		if (*ts_errno == 0)
 			*ts_errno = - TS_ERROR_FILECHANGED;
-		goto error_munmap;
+		goto error_close;
 	}
 
 skip_perf:
@@ -1378,6 +1378,7 @@ skip_perf:
 /* Insert ftrace code here */
 
 skip_ftrace:
+error_close:
 	if (clib_close(fd) != 0) {
 		if (errno != EINTR) {
 			rval = false;
