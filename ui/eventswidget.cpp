@@ -61,7 +61,7 @@
 
 EventsWidget::EventsWidget(QWidget *parent):
 	QDockWidget(tr("Events"), parent), events(nullptr),
-	eventsPtrs(nullptr), saveScrollTime(false)
+	eventsPtrs(nullptr), saveScrollTime(false), selectedEvent(nullptr)
 {
 	tableView = new TableView(this);
 	eventsModel = new EventsModel(tableView);
@@ -81,7 +81,8 @@ EventsWidget::EventsWidget(QWidget *parent):
 }
 
 EventsWidget::EventsWidget(vtl::TList<TraceEvent> *e, QWidget *parent):
-	QDockWidget(parent)
+	QDockWidget(parent), eventsPtrs(nullptr), saveScrollTime(false),
+	selectedEvent(nullptr)
 {
 	tableView = new TableView(this);
 	eventsModel = new EventsModel(e, tableView);
