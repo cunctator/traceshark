@@ -67,7 +67,6 @@ private:
 	LoadBuffer **loadBuffers;
 	unsigned int nBuffers;
 	int fd;
-	char *mappedFile;
 };
 
 #endif /* LOADTHREAD */
