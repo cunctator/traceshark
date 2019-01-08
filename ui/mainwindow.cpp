@@ -1418,8 +1418,8 @@ void MainWindow::createActions()
 	tsconnect(taskFilterAction, triggered(), this,
 		  taskFilterTriggered());
 
-	taskFilterLimitedAction = new QAction(tr("Filter on selected task"),
-					      this);
+	taskFilterLimitedAction =
+		new QAction(tr("Filter on selected task (time limited)"), this);
 	taskFilterLimitedAction->setIcon(QIcon(RESSRC_PNG_FILTERCURRENT_LIMIT));
 	taskFilterLimitedAction->setToolTip(tr(TASK_FILTER_TIMELIMIT_TOOLTIP));
 	tsconnect(taskFilterLimitedAction, triggered(), this,
