@@ -185,7 +185,7 @@ const QString MainWindow::UNINT_NAME = tr("uninterruptible");
 
 const double MainWindow::RUNNING_SIZE = 8;
 const double MainWindow::PREEMPTED_SIZE = 8;
-const double MainWindow::UNINT_SIZE = 8;
+const double MainWindow::UNINT_SIZE = 12;
 
 const QCPScatterStyle::ScatterShape MainWindow::RUNNING_SHAPE =
 	QCPScatterStyle::ssTriangle;
