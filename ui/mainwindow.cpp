@@ -398,7 +398,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::openTrace()
 {
-	QString name = QFileDialog::getOpenFileName(this);
+	QString name;
+	QString caption = tr("Open a trace file");
+	QFileDialog::Options options = QFileDialog::DontUseNativeDialog |
+		QFileDialog::DontUseSheet;
+
+	name = QFileDialog::getOpenFileName(this, caption, QString(),
+					    tr("ASCII (*.asc *.txt)"), nullptr,
+					    options);
 	if (!name.isEmpty()) {
 		openFile(name);
 	}
@@ -980,7 +987,6 @@ void MainWindow::closeTrace()
 
 void MainWindow::saveScreenshot()
 {
-	QFileDialog dialog(this);
 	QStringList fileNameList;
 	QString fileName;
 	QString pngSuffix = QString(".png");
@@ -989,6 +995,8 @@ void MainWindow::saveScreenshot()
 	QString pdfSuffix = QString(".pdf");
 	QString pdfCreator = QString("traceshark ");
 	QString pdfTitle;
+	QString diagcapt;
+	QFileDialog::Options options;
 
 	pdfCreator += QString(TRACESHARK_VERSION_STRING);
 
@@ -1009,19 +1017,13 @@ void MainWindow::saveScreenshot()
 
 	pdfTitle += pdfCreator;
 
-	dialog.setFileMode(QFileDialog::AnyFile);
-	dialog.setNameFilter(tr("Images (*.png *.bmp *.jpg *.pdf)"));
-	dialog.setViewMode(QFileDialog::Detail);
-	dialog.setAcceptMode(QFileDialog::AcceptSave);
-	dialog.setDefaultSuffix(QString("png"));
-
-	if (dialog.exec())
-		fileNameList = dialog.selectedFiles();
-
-	if (fileNameList.size() != 1)
+	diagcapt = tr("Save screenshot to image");
+	options = QFileDialog::DontUseNativeDialog | QFileDialog::DontUseSheet;
+	fileName = QFileDialog::getSaveFileName(this, diagcapt, QString(),
+						tr("Images (*.png *.bmp *.jpg *.pdf)"),
+						nullptr, options);
+	if (fileName.isEmpty())
 		return;
-
-	fileName = fileNameList.at(0);
 
 	if (fileName.endsWith(pngSuffix, Qt::CaseInsensitive)) {
 		tracePlot->savePng(fileName);
@@ -1032,6 +1034,8 @@ void MainWindow::saveScreenshot()
 	} else if (fileName.endsWith(pdfSuffix, Qt::CaseInsensitive)) {
 		tracePlot->savePdf(fileName, 0, 0,  QCP::epAllowCosmetic,
 				   pdfCreator, pdfTitle);
+	} else {
+		tracePlot->savePng(fileName + pngSuffix);
 	}
 }
 
@@ -1787,10 +1791,11 @@ void MainWindow::resetFilters()
 
 void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 {
-	QFileDialog dialog(this);
 	QStringList fileNameList;
 	QString fileName;
 	int ts_errno;
+	QString caption;
+	QFileDialog::Options options;
 
 	if (analyzer->events->size() <= 0) {
 		vtl::warnx("The trace is empty. There is nothing to export");
@@ -1802,24 +1807,24 @@ void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 		return;
 	}
 
-	dialog.setFileMode(QFileDialog::AnyFile);
-	dialog.setNameFilter(tr("ASCII Text (*.asc *.txt)"));
-	dialog.setViewMode(QFileDialog::Detail);
-	dialog.setAcceptMode(QFileDialog::AcceptSave);
-	dialog.setDefaultSuffix(QString("asc"));
-
-	if (!dialog.exec())
-		return;
-
-	fileNameList = dialog.selectedFiles();
-
-	if (fileNameList.size() != 1) {
-		vtl::warnx("You can only select one filename, not %d",
-			   fileNameList.size());
-		return;
+	switch (export_type) {
+	case TraceAnalyzer::EXPORT_TYPE_CPU_CYCLES:
+		caption = tr("Export CPU cycles events");
+		break;
+	case TraceAnalyzer::EXPORT_TYPE_ALL:
+		caption = tr("Export all filtered events");
+		break;
+	default:
+		caption = tr("Unknown export");
+		break;
 	}
 
-	fileName = fileNameList.at(0);
+	options = QFileDialog::DontUseNativeDialog | QFileDialog::DontUseSheet;
+	fileName = QFileDialog::getSaveFileName(this, caption, QString(),
+						tr("ASCII Text (*.asc *.txt)"),
+						nullptr, options);
+	if (fileName.isEmpty())
+		return;
 
 	if (!analyzer->exportTraceFile(fileName.toLocal8Bit().data(),
 				       &ts_errno, export_type)) {
