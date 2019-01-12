@@ -361,7 +361,6 @@ static __always_inline const char *substr_after_char(const char *str,
 		}
 		str++;
 	}
-	*sublen = 0;
 	return NullStr;
 }
 
