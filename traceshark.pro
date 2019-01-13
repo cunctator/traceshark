@@ -218,14 +218,6 @@ SOURCES      +=  vtl/bitvector.cpp
 SOURCES      +=  vtl/error.cpp
 
 ###############################################################################
-# Qt Modules
-#
-
-QT           += core
-QT           += widgets
-QT           += printsupport
-
-###############################################################################
 # Directories
 #
 
@@ -420,6 +412,9 @@ MOC_DIR=obj
 # These are meant to be edit by the user in order to configure the build
 #
 
+# Uncomment this to disable the usage of opengl rendering
+# USE_OPENGL = yes
+
 # Uncomment this for debug build:
 # USE_DEBUG_FLAG = -g
 
@@ -493,9 +488,23 @@ QMAKE_LINK = $${USE_ALTERNATIVE_COMPILER}
 
 OUR_POSIX_DEFINES = _FILE_OFFSET_BITS=64 _POSIX_C_SOURCE=200809L
 
+# Compute the defines to be set with -D flag at the compiler command line
 DEFINES += $${OUR_POSIX_DEFINES}
-# Uncomment the line below to enable OpenGl through the new method. Seems flaky.
-# DEFINES += QCUSTOMPLOT_USE_OPENGL
+!isEmpty (USE_OPENGL) {
+DEFINES += QCUSTOMPLOT_USE_OPENGL
+}
+
+###############################################################################
+# Qt Modules
+#
+
+QT           += core
+QT           += widgets
+QT           += printsupport
+!isEmpty (USE_OPENGL): equals(QT_MAJOR_VERSION, 4) {
+QT           += opengl
+}
+
 
 ###############################################################################
 # Resources
