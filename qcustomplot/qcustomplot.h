@@ -91,6 +91,7 @@
 #  include <QtWidgets/QWidget>
 #  include <QtPrintSupport/QtPrintSupport>
 #endif
+#include "qcplist.h"
 #include "qcppointer.h"
 
 class QCPPainter;
@@ -624,8 +625,8 @@ protected:
 /* end of 'src/paintbuffer.h' */
 
 
-/* including file 'src/layer.h', size 6887                                   */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* including file 'src/layer.h', size 6909                                   */
+/* commit eeb16a9f03800ecc78f4d16fb3618ec0a0923985 2019-01-27 15:44:50 +0100 */
 
 class QCP_LIB_DECL QCPLayer : public QObject
 {
@@ -634,7 +635,7 @@ class QCP_LIB_DECL QCPLayer : public QObject
   Q_PROPERTY(QCustomPlot* parentPlot READ parentPlot)
   Q_PROPERTY(QString name READ name)
   Q_PROPERTY(int index READ index)
-  Q_PROPERTY(QList<QCPLayerable*> children READ children)
+  Q_PROPERTY(QCPList<QCPLayerable*> children READ children)
   Q_PROPERTY(bool visible READ visible WRITE setVisible)
   Q_PROPERTY(LayerMode mode READ mode WRITE setMode)
   /// \endcond
@@ -659,7 +660,7 @@ public:
   QCustomPlot *parentPlot() const { return mParentPlot; }
   QString name() const { return mName; }
   int index() const { return mIndex; }
-  QList<QCPLayerable*> children() const { return mChildren; }
+  QCPList<QCPLayerable*> &children() { return mChildren; }
   bool visible() const { return mVisible; }
   LayerMode mode() const { return mMode; }
   
@@ -675,7 +676,7 @@ protected:
   QCustomPlot *mParentPlot;
   QString mName;
   int mIndex;
-  QList<QCPLayerable*> mChildren;
+  QCPList<QCPLayerable*> mChildren;
   bool mVisible;
   LayerMode mMode;
   

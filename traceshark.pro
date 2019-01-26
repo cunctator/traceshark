@@ -56,6 +56,9 @@
 #
 
 HEADERS       = qcustomplot/qcustomplot.h
+HEADERS      += qcustomplot/qcppointer.h
+HEADERS      += qcustomplot/qcppointer_impl.h
+HEADERS      += qcustomplot/qcplist.h
 
 HEADERS      +=  ui/abstracttaskmodel.h
 HEADERS      +=  ui/cursor.h
