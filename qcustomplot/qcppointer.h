@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * QCustomPlot, an easy to use, modern plotting widget for Qt
  * This code is part of the improved version for traceshark
