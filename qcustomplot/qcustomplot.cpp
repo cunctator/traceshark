@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
@@ -12548,8 +12547,8 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
 /* end of 'src/item.cpp' */
 
 
-/* including file 'src/core.cpp', size 126758                                */
-/* commit eeb16a9f03800ecc78f4d16fb3618ec0a0923985 2019-01-27 15:44:50 +0100 */
+/* including file 'src/core.cpp', size 126714                                */
+/* commit 15778b60ae768b1f4b38b4291be3595f1e9e52c7 2019-01-31 19:49:54 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCustomPlot
@@ -14123,8 +14122,7 @@ bool QCustomPlot::removeLayer(QCPLayer *layer)
   QCPList<QCPLayerable*> children = layer->children();
   if (isFirstLayer) // prepend in reverse order (so order relative to each other stays the same)
   {
-    QCPList<QCPLayerable*>::iterator iter = children.end();
-    for (iter--; iter != children.end(); iter--) {
+    for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
       QCPLayerable *c = *iter;
       c->moveToLayer(targetLayer, true);
     }
@@ -15608,8 +15606,7 @@ QList<QCPLayerable*> QCustomPlot::layerableListAt(const QPointF &pos, bool onlyS
   for (int layerIndex=mLayers.size()-1; layerIndex>=0; --layerIndex)
   {
     const QCPList<QCPLayerable*> &layerables = mLayers.at(layerIndex)->children();
-    auto iter = layerables.cend();
-    for (iter--; iter != layerables.cend(); iter--)
+    for (auto iter = layerables.crbegin(); iter != layerables.crend(); iter++)
     {
       QCPLayerable *layerable = *iter;
       if (!layerable->realVisibility())

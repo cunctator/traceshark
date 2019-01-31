@@ -103,6 +103,30 @@ public:
 	protected:
 		const QCPListElement<T> *ptr;
 	};
+	class reverse_iterator {
+		friend class QCPList<T>;
+	public:
+		reverse_iterator operator++(int);
+		reverse_iterator operator--(int);
+		T &operator*();
+		T operator->();
+		bool operator==(reverse_iterator i);
+		bool operator!=(reverse_iterator i);
+	protected:
+		QCPListElement<T> *ptr;
+	};
+	class const_reverse_iterator {
+		friend class QCPList<T>;
+	public:
+		const_reverse_iterator operator++(int);
+		const_reverse_iterator operator--(int);
+		const T &operator*();
+		const T operator->();
+		bool operator==(const_reverse_iterator i);
+		bool operator!=(const_reverse_iterator i);
+	protected:
+		const QCPListElement<T> *ptr;
+	};
 	void append(const T &value);
 	void prepend(const T &value);
 	bool removeOne(const T &value);
@@ -116,6 +140,10 @@ public:
 	iterator end();
 	const_iterator cbegin() const;
 	const_iterator cend() const;
+	reverse_iterator rbegin();
+	reverse_iterator rend();
+	const_reverse_iterator crbegin() const;
+	const_reverse_iterator crend() const;
 private:
 	void deleteAll();
 	void removeElement(QCPListElement<T> *e);
@@ -369,6 +397,126 @@ const T &QCPList<T>::const_iterator::operator*()
 
 template<class T>
 const T QCPList<T>::const_iterator::operator->()
+{
+	return ptr->value;
+}
+
+template<class T>
+typename QCPList<T>::reverse_iterator QCPList<T>::rbegin()
+{
+	typename QCPList<T>::reverse_iterator r;
+	r.ptr = head.prev;
+	return r;
+}
+
+template<class T>
+typename QCPList<T>::reverse_iterator QCPList<T>::rend()
+{
+	typename QCPList<T>::reverse_iterator r;
+	r.ptr = &head;
+	return r;
+}
+
+template<class T>
+typename QCPList<T>::reverse_iterator
+QCPList<T>::reverse_iterator::operator++(int)
+{
+	typename QCPList<T>::reverse_iterator r;
+	ptr = ptr->prev;
+	r.ptr = ptr;
+	return r;
+}
+
+template<class T>
+typename QCPList<T>::reverse_iterator
+QCPList<T>::reverse_iterator::operator--(int)
+{
+	typename QCPList<T>::reverse_iterator r;
+	ptr = ptr->next;
+	r.ptr = ptr;
+	return r;
+}
+
+template<class T>
+bool QCPList<T>::reverse_iterator::operator==(reverse_iterator i)
+{
+	return ptr == i.ptr;
+}
+
+template<class T>
+bool QCPList<T>::reverse_iterator::operator!=(reverse_iterator i)
+{
+	return ptr != i.ptr;
+}
+
+template<class T>
+T &QCPList<T>::reverse_iterator::operator*()
+{
+	return ptr->value;
+}
+
+template<class T>
+T QCPList<T>::reverse_iterator::operator->()
+{
+	return ptr->value;
+}
+
+template<class T>
+typename QCPList<T>::const_reverse_iterator QCPList<T>::crbegin() const
+{
+	typename QCPList<T>::const_reverse_iterator r;
+	r.ptr = head.prev;
+	return r;
+}
+
+template<class T>
+typename QCPList<T>::const_reverse_iterator QCPList<T>::crend() const
+{
+	typename QCPList<T>::const_reverse_iterator r;
+	r.ptr = &head;
+	return r;
+}
+
+template<class T>
+typename QCPList<T>::const_reverse_iterator
+QCPList<T>::const_reverse_iterator::operator++(int)
+{
+	typename QCPList<T>::const_reverse_iterator r;
+	ptr = ptr->prev;
+	r.ptr = ptr;
+	return r;
+}
+
+template<class T>
+typename QCPList<T>::const_reverse_iterator
+QCPList<T>::const_reverse_iterator::operator--(int)
+{
+	typename QCPList<T>::const_reverse_iterator r;
+	ptr = ptr->next;
+	r.ptr = ptr;
+	return r;
+}
+
+template<class T>
+bool QCPList<T>::const_reverse_iterator::operator==(const_reverse_iterator i)
+{
+	return ptr == i.ptr;
+}
+
+template<class T>
+bool QCPList<T>::const_reverse_iterator::operator!=(const_reverse_iterator i)
+{
+	return ptr != i.ptr;
+}
+
+template<class T>
+const T &QCPList<T>::const_reverse_iterator::operator*()
+{
+	return ptr->value;
+}
+
+template<class T>
+const T QCPList<T>::const_reverse_iterator::operator->()
 {
 	return ptr->value;
 }
