@@ -414,9 +414,10 @@ MOC_DIR=obj
 # These are meant to be edit by the user in order to configure the build
 #
 
-# Uncomment this to enable the usage of opengl rendering. I believe that it
-# currently is little benefit in using it. There are reasons why it is disabled
-# by default
+# Uncomment this to enable the usage of opengl rendering. If you select this
+# the line width of the scheduling graphs will be increased to 2 pixels. Only
+# enable this if you want 2 pixel wide scheduling graphs and your computer is
+# opengl capable.
 # USE_OPENGL = yes
 
 # Uncomment this for debug build:
