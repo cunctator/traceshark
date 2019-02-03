@@ -165,6 +165,12 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
+#ifdef QCUSTOMPLOT_USE_OPENGL
+#define DEFAULT_LINE_WIDTH (2)
+#else
+#define DEFAULT_LINE_WIDTH (1)
+#endif /* QCUSTOMPLOT_USE_OPENGL */
+
 const double MainWindow::bugWorkAroundOffset = 100;
 const double MainWindow::schedSectionOffset = 100;
 const double MainWindow::schedSpacing = 250;
@@ -199,7 +205,7 @@ const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
 const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 
 MainWindow::MainWindow():
-	tracePlot(nullptr), filterActive(false)
+	tracePlot(nullptr), filterActive(false), lineWidth(DEFAULT_LINE_WIDTH)
 {
 	analyzer = new TraceAnalyzer;
 
@@ -339,7 +345,11 @@ void MainWindow::createTracePlot()
 
 	tracePlot = new TracePlot(plotWidget);
 #ifdef QCUSTOMPLOT_USE_OPENGL
-	tracePlot->setOpenGl(true, 16);
+	tracePlot->setOpenGl(true, 4);
+	if (tracePlot->openGl()) {
+		printf("OpenGL rendering enabled\n");
+	}
+	tracePlot->setAntialiasedElements(QCP::aeNone);
 #endif /* QCUSTOMPLOT_USE_OPENGL */
 
 	tracePlot->yAxis->setTicker(ticker);
@@ -782,6 +792,7 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask)
 	QPen pen = QPen();
 
 	pen.setColor(color);
+	pen.setWidth(line_width);
 	graph->setPen(pen);
 	graph->setTask(task);
 	if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
@@ -808,6 +819,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 						   tracePlot->yAxis);
 	errorBars->setAntialiased(false);
 	pen.setColor(color);
+	pen.setWidth(line_width);
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -837,6 +849,7 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	errorBars->setAntialiased(false);
 
 	pen.setColor(color);
+	pen.setWidth(line_width);
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -1931,6 +1944,7 @@ void MainWindow::addTaskGraph(int pid)
 	QPen pen = QPen();
 
 	pen.setColor(color);
+	pen.setWidth(line_width);
 	taskGraph->setPen(pen);
 	taskGraph->setTask(task);
 

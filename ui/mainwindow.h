@@ -326,6 +326,7 @@ private:
 	Setting settings[Setting::NR_SETTINGS];
 	bool filterActive;
 	double cursorPos[TShark::NR_CURSORS];
+	int line_width;
 };
 
 #endif /* MAINWINDOW_H */
