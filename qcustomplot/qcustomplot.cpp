@@ -7140,8 +7140,8 @@ QVector<double> QCPAxisTickerLog::createTickVector(double tickStep, const QCPRan
 /* end of 'src/axis/axistickerlog.cpp' */
 
 
-/* including file 'src/axis/axis.cpp', size 99515                            */
-/* commit ce344b3f96a62e5f652585e55f1ae7c7883cd45b 2018-06-25 01:03:39 +0200 */
+/* including file 'src/axis/axis.cpp', size 99525                            */
+/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8699,11 +8699,12 @@ QList<QCPAbstractPlottable*> QCPAxis::plottables() const
 {
   QList<QCPAbstractPlottable*> result;
   if (!mParentPlot) return result;
-  
-  for (int i=0; i<mParentPlot->mPlottables.size(); ++i)
+
+  for (auto iter = mParentPlot->mPlottables.cbegin(); iter != mParentPlot->mPlottables.cend(); iter++)
   {
-    if (mParentPlot->mPlottables.at(i)->keyAxis() == this ||mParentPlot->mPlottables.at(i)->valueAxis() == this)
-      result.append(mParentPlot->mPlottables.at(i));
+    QCPAbstractPlottable *plottable = *iter;
+    if (plottable->keyAxis() == this || plottable->valueAxis() == this)
+      result.append(plottable);
   }
   return result;
 }
@@ -8717,11 +8718,12 @@ QList<QCPGraph*> QCPAxis::graphs() const
 {
   QList<QCPGraph*> result;
   if (!mParentPlot) return result;
-  
-  for (int i=0; i<mParentPlot->mGraphs.size(); ++i)
+
+  for (auto iter = mParentPlot->mGraphs.cbegin(); iter != mParentPlot->mGraphs.cend(); iter++)
   {
-    if (mParentPlot->mGraphs.at(i)->keyAxis() == this || mParentPlot->mGraphs.at(i)->valueAxis() == this)
-      result.append(mParentPlot->mGraphs.at(i));
+    QCPGraph* graph = *iter;
+    if (graph->keyAxis() == this || graph->valueAxis() == this)
+      result.append(graph);
   }
   return result;
 }
@@ -8736,15 +8738,15 @@ QList<QCPAbstractItem*> QCPAxis::items() const
 {
   QList<QCPAbstractItem*> result;
   if (!mParentPlot) return result;
-  
-  for (int itemId=0; itemId<mParentPlot->mItems.size(); ++itemId)
+
+  for (auto iter = mParentPlot->mItems.begin(); iter != mParentPlot->mItems.end(); iter++)
   {
-    QList<QCPItemPosition*> positions = mParentPlot->mItems.at(itemId)->positions();
+    QList<QCPItemPosition*> positions = (*iter)->positions();
     for (int posId=0; posId<positions.size(); ++posId)
     {
       if (positions.at(posId)->keyAxis() == this || positions.at(posId)->valueAxis() == this)
       {
-        result.append(mParentPlot->mItems.at(itemId));
+        result.append(*iter);
         break;
       }
     }
@@ -12548,8 +12550,8 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
 /* end of 'src/item.cpp' */
 
 
-/* including file 'src/core.cpp', size 126714                                */
-/* commit 15778b60ae768b1f4b38b4291be3595f1e9e52c7 2019-01-31 19:49:54 +0100 */
+/* including file 'src/core.cpp', size 125371                                */
+/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCustomPlot
@@ -13494,26 +13496,6 @@ void QCustomPlot::setBackgroundScaledMode(Qt::AspectRatioMode mode)
   mBackgroundScaledMode = mode;
 }
 
-/*!
-  Returns the plottable with \a index. If the index is invalid, returns 0.
-  
-  There is an overloaded version of this function with no parameter which returns the last added
-  plottable, see QCustomPlot::plottable()
-  
-  \see plottableCount
-*/
-QCPAbstractPlottable *QCustomPlot::plottable(int index)
-{
-  if (index >= 0 && index < mPlottables.size())
-  {
-    return mPlottables.at(index);
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
-    return 0;
-  }
-}
-
 /*! \overload
   
   Returns the last plottable that was added to the plot. If there are no plottables in the plot,
@@ -13557,21 +13539,6 @@ bool QCustomPlot::removePlottable(QCPAbstractPlottable *plottable)
   return true;
 }
 
-/*! \overload
-  
-  Removes and deletes the plottable by its \a index.
-*/
-bool QCustomPlot::removePlottable(int index)
-{
-  if (index >= 0 && index < mPlottables.size())
-    return removePlottable(mPlottables[index]);
-  else
-  {
-    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
-    return false;
-  }
-}
-
 /*!
   Removes all plottables from the plot and deletes them. Corresponding legend items are also
   removed from the default legend (QCustomPlot::legend).
@@ -13583,8 +13550,17 @@ bool QCustomPlot::removePlottable(int index)
 int QCustomPlot::clearPlottables()
 {
   int c = mPlottables.size();
-  for (int i=c-1; i >= 0; --i)
-    removePlottable(mPlottables[i]);
+  auto iter = mPlottables.rbegin();
+  while (iter != mPlottables.rend())
+  {
+    QCPAbstractPlottable* plottable = *iter;
+    /*
+     * NB: We must advance the iterator before removing the graph, otherwise the iterator will become
+     * invalid, because removePlottable() will remove it from mPlottables
+     */
+    iter++;
+    removePlottable(plottable);
+  }
   return c;
 }
 
@@ -13608,8 +13584,9 @@ int QCustomPlot::plottableCount() const
 QList<QCPAbstractPlottable*> QCustomPlot::selectedPlottables() const
 {
   QList<QCPAbstractPlottable*> result;
-  foreach (QCPAbstractPlottable *plottable, mPlottables)
+  for (auto iter = mPlottables.cbegin(); iter != mPlottables.cend(); iter++)
   {
+    QCPAbstractPlottable *plottable = *iter;
     if (plottable->selected())
       result.append(plottable);
   }
@@ -13632,9 +13609,10 @@ QCPAbstractPlottable *QCustomPlot::plottableAt(const QPointF &pos, bool onlySele
 {
   QCPAbstractPlottable *resultPlottable = 0;
   double resultDistance = mSelectionTolerance; // only regard clicks with distances smaller than mSelectionTolerance as selections, so initialize with that value
-  
-  foreach (QCPAbstractPlottable *plottable, mPlottables)
+
+  for (auto iter = mPlottables.cbegin(); iter != mPlottables.cend(); iter++)
   {
+    QCPAbstractPlottable *plottable = *iter;
     if (onlySelectable && !plottable->selectable()) // we could have also passed onlySelectable to the selectTest function, but checking here is faster, because we have access to QCPabstractPlottable::selectable
       continue;
     if ((plottable->keyAxis()->axisRect()->rect() & plottable->valueAxis()->axisRect()->rect()).contains(pos.toPoint())) // only consider clicks inside the rect that is spanned by the plottable's key/value axes
@@ -13657,26 +13635,6 @@ QCPAbstractPlottable *QCustomPlot::plottableAt(const QPointF &pos, bool onlySele
 bool QCustomPlot::hasPlottable(QCPAbstractPlottable *plottable) const
 {
   return mPlottables.contains(plottable);
-}
-
-/*!
-  Returns the graph with \a index. If the index is invalid, returns 0.
-  
-  There is an overloaded version of this function with no parameter which returns the last created
-  graph, see QCustomPlot::graph()
-  
-  \see graphCount, addGraph
-*/
-QCPGraph *QCustomPlot::graph(int index) const
-{
-  if (index >= 0 && index < mGraphs.size())
-  {
-    return mGraphs.at(index);
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
-    return 0;
-  }
 }
 
 /*! \overload
@@ -13742,18 +13700,6 @@ bool QCustomPlot::removeGraph(QCPGraph *graph)
   return removePlottable(graph);
 }
 
-/*! \overload
-  
-  Removes and deletes the graph by its \a index.
-*/
-bool QCustomPlot::removeGraph(int index)
-{
-  if (index >= 0 && index < mGraphs.size())
-    return removeGraph(mGraphs[index]);
-  else
-    return false;
-}
-
 /*!
   Removes all graphs from the plot and deletes them. Corresponding legend items are also removed
   from the default legend (QCustomPlot::legend).
@@ -13765,8 +13711,17 @@ bool QCustomPlot::removeGraph(int index)
 int QCustomPlot::clearGraphs()
 {
   int c = mGraphs.size();
-  for (int i=c-1; i >= 0; --i)
-    removeGraph(mGraphs[i]);
+  auto iter = mGraphs.rbegin();
+  while (iter != mGraphs.rend())
+  {
+    QCPGraph *graph = *iter;
+    /*
+     * NB: We must advance the iterator before removing the graph, otherwise the iterator will become
+     * invalid, because removeGraph() will remove it from mGraphs
+     */
+    iter++;
+    removeGraph(graph);
+  }
   return c;
 }
 
@@ -13791,32 +13746,13 @@ int QCustomPlot::graphCount() const
 QList<QCPGraph*> QCustomPlot::selectedGraphs() const
 {
   QList<QCPGraph*> result;
-  foreach (QCPGraph *graph, mGraphs)
+  for (auto iter = mGraphs.cbegin(); iter != mGraphs.cend(); iter++)
   {
+    QCPGraph *graph = *iter;
     if (graph->selected())
       result.append(graph);
   }
   return result;
-}
-
-/*!
-  Returns the item with \a index. If the index is invalid, returns 0.
-  
-  There is an overloaded version of this function with no parameter which returns the last added
-  item, see QCustomPlot::item()
-  
-  \see itemCount
-*/
-QCPAbstractItem *QCustomPlot::item(int index) const
-{
-  if (index >= 0 && index < mItems.size())
-  {
-    return mItems.at(index);
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
-    return 0;
-  }
 }
 
 /*! \overload
@@ -13856,21 +13792,6 @@ bool QCustomPlot::removeItem(QCPAbstractItem *item)
   }
 }
 
-/*! \overload
-  
-  Removes and deletes the item by its \a index.
-*/
-bool QCustomPlot::removeItem(int index)
-{
-  if (index >= 0 && index < mItems.size())
-    return removeItem(mItems[index]);
-  else
-  {
-    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
-    return false;
-  }
-}
-
 /*!
   Removes all items from the plot and deletes them.
   
@@ -13881,8 +13802,9 @@ bool QCustomPlot::removeItem(int index)
 int QCustomPlot::clearItems()
 {
   int c = mItems.size();
-  for (int i=c-1; i >= 0; --i)
-    removeItem(mItems[i]);
+  for (auto iter = mItems.rbegin(); iter != mItems.rend(); iter++)
+	  delete *iter;
+  mItems.clear();
   return c;
 }
 
@@ -13904,8 +13826,9 @@ int QCustomPlot::itemCount() const
 QList<QCPAbstractItem*> QCustomPlot::selectedItems() const
 {
   QList<QCPAbstractItem*> result;
-  foreach (QCPAbstractItem *item, mItems)
+  for (auto iter = mItems.cbegin(); iter != mItems.cend(); iter++)
   {
+    QCPAbstractItem *item = *iter;
     if (item->selected())
       result.append(item);
   }
@@ -13929,9 +13852,10 @@ QCPAbstractItem *QCustomPlot::itemAt(const QPointF &pos, bool onlySelectable) co
 {
   QCPAbstractItem *resultItem = 0;
   double resultDistance = mSelectionTolerance; // only regard clicks with distances smaller than mSelectionTolerance as selections, so initialize with that value
-  
-  foreach (QCPAbstractItem *item, mItems)
+
+  for (auto iter = mItems.cbegin(); iter != mItems.cend(); iter++)
   {
+    QCPAbstractItem *item = *iter;
     if (onlySelectable && !item->selectable()) // we could have also passed onlySelectable to the selectTest function, but checking here is faster, because we have access to QCPAbstractItem::selectable
       continue;
     if (!item->clipToAxisRect() || item->clipRect().contains(pos.toPoint())) // only consider clicks inside axis cliprect of the item if actually clipped to it
@@ -16694,8 +16618,8 @@ QPointF QCPSelectionDecoratorBracket::getPixelCoordinates(const QCPPlottableInte
 /* end of 'src/selectiondecorator-bracket.cpp' */
 
 
-/* including file 'src/layoutelements/layoutelement-axisrect.cpp', size 47592 */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200  */
+/* including file 'src/layoutelements/layoutelement-axisrect.cpp', size 47559 */
+/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100  */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17190,10 +17114,11 @@ QList<QCPAbstractPlottable*> QCPAxisRect::plottables() const
 {
   // Note: don't append all QCPAxis::plottables() into a list, because we might get duplicate entries
   QList<QCPAbstractPlottable*> result;
-  for (int i=0; i<mParentPlot->mPlottables.size(); ++i)
+  for (auto iter = mParentPlot->mPlottables.cbegin(); iter != mParentPlot->mPlottables.cend(); iter++)
   {
-    if (mParentPlot->mPlottables.at(i)->keyAxis()->axisRect() == this || mParentPlot->mPlottables.at(i)->valueAxis()->axisRect() == this)
-      result.append(mParentPlot->mPlottables.at(i));
+    QCPAbstractPlottable* plottable = *iter;
+    if (plottable->keyAxis()->axisRect() == this || plottable->valueAxis()->axisRect() == this)
+      result.append(plottable);
   }
   return result;
 }
@@ -17210,10 +17135,11 @@ QList<QCPGraph*> QCPAxisRect::graphs() const
 {
   // Note: don't append all QCPAxis::graphs() into a list, because we might get duplicate entries
   QList<QCPGraph*> result;
-  for (int i=0; i<mParentPlot->mGraphs.size(); ++i)
+  for (auto iter = mParentPlot->mGraphs.cbegin(); iter != mParentPlot->mGraphs.cend(); iter++)
   {
-    if (mParentPlot->mGraphs.at(i)->keyAxis()->axisRect() == this || mParentPlot->mGraphs.at(i)->valueAxis()->axisRect() == this)
-      result.append(mParentPlot->mGraphs.at(i));
+    QCPGraph* graph = *iter;
+    if (graph->keyAxis()->axisRect() == this || graph->valueAxis()->axisRect() == this)
+      result.append(graph);
   }
   return result;
 }
@@ -17233,21 +17159,21 @@ QList<QCPAbstractItem *> QCPAxisRect::items() const
   // Note: don't just append all QCPAxis::items() into a list, because we might get duplicate entries
   //       and miss those items that have this axis rect as clipAxisRect.
   QList<QCPAbstractItem*> result;
-  for (int itemId=0; itemId<mParentPlot->mItems.size(); ++itemId)
+  for (auto iter = mParentPlot->mItems.begin(); iter != mParentPlot->mItems.end(); iter++)
   {
-    if (mParentPlot->mItems.at(itemId)->clipAxisRect() == this)
+    if ((*iter)->clipAxisRect() == this)
     {
-      result.append(mParentPlot->mItems.at(itemId));
+      result.append(*iter);
       continue;
     }
-    QList<QCPItemPosition*> positions = mParentPlot->mItems.at(itemId)->positions();
+    QList<QCPItemPosition*> positions = (*iter)->positions();
     for (int posId=0; posId<positions.size(); ++posId)
     {
       if (positions.at(posId)->axisRect() == this ||
           positions.at(posId)->keyAxis()->axisRect() == this ||
           positions.at(posId)->valueAxis()->axisRect() == this)
       {
-        result.append(mParentPlot->mItems.at(itemId));
+        result.append(*iter);
         break;
       }
     }
@@ -19289,8 +19215,8 @@ QColor QCPTextElement::mainTextColor() const
 /* end of 'src/layoutelements/layoutelement-textelement.cpp' */
 
 
-/* including file 'src/layoutelements/layoutelement-colorscale.cpp', size 26246 */
-/* commit ce344b3f96a62e5f652585e55f1ae7c7883cd45b 2018-06-25 01:03:39 +0200    */
+/* including file 'src/layoutelements/layoutelement-colorscale.cpp', size 26324 */
+/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100    */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19628,9 +19554,10 @@ void QCPColorScale::setRangeZoom(bool enabled)
 QList<QCPColorMap*> QCPColorScale::colorMaps() const
 {
   QList<QCPColorMap*> result;
-  for (int i=0; i<mParentPlot->plottableCount(); ++i)
+  for (auto iter = mParentPlot->mPlottables.cbegin(); iter != mParentPlot->mPlottables.cend(); iter++)
   {
-    if (QCPColorMap *cm = qobject_cast<QCPColorMap*>(mParentPlot->plottable(i)))
+    QCPAbstractPlottable* plottable = *iter;
+    if (QCPColorMap *cm = qobject_cast<QCPColorMap*>(plottable))
       if (cm->colorScale() == this)
         result.append(cm);
   }

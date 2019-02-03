@@ -3587,8 +3587,8 @@ private:
 /* end of 'src/item.h' */
 
 
-/* including file 'src/core.h', size 14914                                   */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* including file 'src/core.h', size 14750                                   */
+/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100 */
 
 class QCP_LIB_DECL QCustomPlot : public QWidget
 {
@@ -3676,10 +3676,8 @@ public:
   
   // non-property methods:
   // plottable interface:
-  QCPAbstractPlottable *plottable(int index);
   QCPAbstractPlottable *plottable();
   bool removePlottable(QCPAbstractPlottable *plottable);
-  bool removePlottable(int index);
   int clearPlottables();
   int plottableCount() const;
   QList<QCPAbstractPlottable*> selectedPlottables() const;
@@ -3687,20 +3685,16 @@ public:
   bool hasPlottable(QCPAbstractPlottable *plottable) const;
  
   // specialized interface for QCPGraph:
-  QCPGraph *graph(int index) const;
   QCPGraph *graph() const;
   QCPGraph *addGraph(QCPAxis *keyAxis=0, QCPAxis *valueAxis=0);
   bool removeGraph(QCPGraph *graph);
-  bool removeGraph(int index);
   int clearGraphs();
   int graphCount() const;
   QList<QCPGraph*> selectedGraphs() const;
 
   // item interface:
-  QCPAbstractItem *item(int index) const;
   QCPAbstractItem *item() const;
   bool removeItem(QCPAbstractItem *item);
-  bool removeItem(int index);
   int clearItems();
   int itemCount() const;
   QList<QCPAbstractItem*> selectedItems() const;
@@ -3768,9 +3762,9 @@ protected:
   double mBufferDevicePixelRatio;
   QCPLayoutGrid *mPlotLayout;
   bool mAutoAddPlottableToLegend;
-  QList<QCPAbstractPlottable*> mPlottables;
-  QList<QCPGraph*> mGraphs; // extra list of plottables also in mPlottables that are of type QCPGraph
-  QList<QCPAbstractItem*> mItems;
+  QCPList<QCPAbstractPlottable*> mPlottables;
+  QCPList<QCPGraph*> mGraphs; // extra list of plottables also in mPlottables that are of type QCPGraph
+  QCPList<QCPAbstractItem*> mItems;
   QList<QCPLayer*> mLayers;
   QCP::AntialiasedElements mAntialiasedElements, mNotAntialiasedElements;
   QCP::Interactions mInteractions;
@@ -3848,6 +3842,7 @@ protected:
   friend class QCPAbstractPlottable;
   friend class QCPGraph;
   friend class QCPAbstractItem;
+  friend class QCPColorScale;
 };
 Q_DECLARE_METATYPE(QCustomPlot::LayerInsertMode)
 Q_DECLARE_METATYPE(QCustomPlot::RefreshPriority)
