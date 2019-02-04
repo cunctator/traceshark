@@ -58,6 +58,7 @@
 #include <QDialog>
 
 QT_BEGIN_NAMESPACE
+class QComboBox;
 class QTextEdit;
 template <typename T, typename U> class QMap;
 QT_END_NAMESPACE
@@ -74,6 +75,7 @@ signals:
 	void settingsChanged();
 private:
 	QMap<Setting::SettingIndex, TCheckBox*> *checkBoxMap;
+	QComboBox *comboBox;
 	int savedHeight;
 private slots:
 	void okClicked();

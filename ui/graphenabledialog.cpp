@@ -56,6 +56,7 @@
 #include "ui/tcheckbox.h"
 #include "vtl/error.h"
 
+#include <QComboBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -109,6 +110,30 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent):
 		}
 	}
 
+	QHBoxLayout *comboLayout =  new QHBoxLayout();
+	layout->addLayout(comboLayout, idx, 0, Qt::AlignLeft);
+	comboBox = new QComboBox();
+	comboBox->addItem(tr("1"));
+	comboBox->addItem(tr("2"));
+	comboBox->addItem(tr("3"));
+	comboBox->addItem(tr("4"));
+	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
+	QLabel *comboLabel = new QLabel(tr("Line width of sched graphs:"));
+	comboLayout->addWidget(comboLabel);
+	comboLayout->addWidget(comboBox);
+
+#ifndef QCUSTOMPLOT_USE_OPENGL
+	/*
+	 * We only let the user increase the line width of the scheduling
+	 * graphs if we have opengl enabled.
+	 */
+	comboBox->setEnabled(false);
+	QLabel *disabledLabel = new QLabel(tr("(Enable OpenGL to change line width)"));
+	comboLayout->addWidget(disabledLabel);
+#endif
+
+	comboLayout->addStretch();
+
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	mainLayout->addLayout(buttonLayout);
 	cancelButton = new QPushButton(tr("Cancel"));
@@ -129,6 +154,7 @@ GraphEnableDialog::~GraphEnableDialog()
 void GraphEnableDialog::okClicked()
 {
 	bool changed = false;
+	int new_width;
 	QMap<Setting::SettingIndex, TCheckBox*>::iterator iter;
 
 	hide();
@@ -143,6 +169,12 @@ void GraphEnableDialog::okClicked()
 			changed = true;
 			Setting::setEnabled(idxn, checked);
 		}
+	}
+
+	new_width = comboBox->currentIndex() + 1;
+	if (new_width != Setting::getLineWidth()) {
+		changed = true;
+		Setting::setLineWidth(new_width);
 	}
 
 	if (changed)
@@ -160,6 +192,7 @@ void GraphEnableDialog::cancelClicked()
 		bool enabled = Setting::isEnabled(idxn);
 		tbox->setChecked(enabled);
 	}
+	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
 }
 
 void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)

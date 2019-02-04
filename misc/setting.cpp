@@ -139,6 +139,8 @@ Setting Setting::settings[NR_SETTINGS];
 
 bool Setting::backup[NR_SETTINGS];
 
+int Setting::line_width = 0;
+
 void Setting::backupState()
 {
 	int idx;
@@ -193,4 +195,14 @@ void Setting::addGraphEnableDialog(GraphEnableDialog *dialog)
 		tsconnect(&settings[idx], clicked(enum SettingIndex),
 			  dialog, settingClicked(enum SettingIndex));
 	}
+}
+
+void Setting::setLineWidth(int width)
+{
+	line_width = width;
+}
+
+int Setting::getLineWidth()
+{
+	return line_width;
 }

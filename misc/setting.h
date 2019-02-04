@@ -100,6 +100,8 @@ public:
 	static void addGraphEnableDialog(GraphEnableDialog *dialog);
 	static void backupState();
 	static void restoreState();
+	static void setLineWidth(int width);
+	static int getLineWidth();
 private:
 	bool enabled;
 	QString name;
@@ -109,6 +111,7 @@ private:
 	unsigned int nrDependents;
 	static Setting settings[];
 	static bool backup[];
+	static int line_width;
 	QCheckBox *checkBox;
 signals:
 	void clicked(enum SettingIndex idx);

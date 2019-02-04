@@ -205,7 +205,7 @@ const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
 const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 
 MainWindow::MainWindow():
-	tracePlot(nullptr), filterActive(false), line_width(DEFAULT_LINE_WIDTH)
+	tracePlot(nullptr), filterActive(false)
 {
 	analyzer = new TraceAnalyzer;
 
@@ -781,6 +781,8 @@ void MainWindow::setupSettings()
 	Setting::setName(Setting::SHOW_MIGRATION_GRAPHS,
 			 tr("Show migration graphs"));
 	Setting::setEnabled(Setting::SHOW_MIGRATION_GRAPHS, true);
+
+	Setting::setLineWidth(DEFAULT_LINE_WIDTH);
 }
 
 void MainWindow::addSchedGraph(CPUTask &cpuTask)
@@ -792,7 +794,7 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask)
 	QPen pen = QPen();
 
 	pen.setColor(color);
-	pen.setWidth(line_width);
+	pen.setWidth(Setting::getLineWidth());
 	graph->setPen(pen);
 	graph->setTask(task);
 	if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
@@ -819,7 +821,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 						   tracePlot->yAxis);
 	errorBars->setAntialiased(false);
 	pen.setColor(color);
-	pen.setWidth(line_width);
+	pen.setWidth(Setting::getLineWidth());
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -849,7 +851,7 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	errorBars->setAntialiased(false);
 
 	pen.setColor(color);
-	pen.setWidth(line_width);
+	pen.setWidth(Setting::getLineWidth());
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -1944,7 +1946,7 @@ void MainWindow::addTaskGraph(int pid)
 	QPen pen = QPen();
 
 	pen.setColor(color);
-	pen.setWidth(line_width);
+	pen.setWidth(Setting::getLineWidth());
 	taskGraph->setPen(pen);
 	taskGraph->setTask(task);
 
