@@ -76,7 +76,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   8. If all went well, your file `filtered.svg` should now contain an image, that can be displayed by a web browser such as Chromium or Firefox. For an example, check the file doc/filtered.svg in this repository, it can be zoomed, unlike the png representation below:
   [![filtered.png](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/filtered.png)](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/filtered.png)
   You can read more about flame graphs [here](http://www.brendangregg.com/flamegraphs.html).
-* ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) Pressing this button will open a dialog that allows the user to select which types of graphs will be displayed. Here it is possible to disable certain graphs, for example CPU idle graphs that frequently may be of little interest. It is also possible to enable horizontal wakeup graphs for the per CPU task graphs that are disabled by default, becase they will frequently overlap each other.
+* ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) Pressing this button will open a dialog that allows the user to select which types of graphs will be displayed. Here it is possible to disable certain graphs, for example CPU idle graphs that frequently may be of little interest. It is also possible to enable horizontal wakeup graphs for the per CPU task graphs that are disabled by default, becase they will frequently overlap each other. If OpenGL is enabled at compile time, by editing traceshark.pro, then it is possible to select the desired line width of the scheduling graphs.
 * ![Show global statistics](https://github.com/cunctator/traceshark/raw/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/getstats30x30.png) Pressing this button will show dialog with global statistics on the left side of the plot. The statistics show how many % of the CPU time each task has consumed as well as the time consumed. The percentages are percentage of a core. This means that the maximum for a normal task is 100% and for the idle task, swapper with pid 0, the maximum is `N * 100`, where N is the number of CPUs. The tasks are sorted so that those tasks that consume more CPU time are shown earlier. The dialog has buttons for adding selected tasks to the legend, to add them as task graphs, to filter the events view on them, or to reset the filtering. There is even a button to close the dialog.
 * ![Show statistics limited by cursors](https://github.com/cunctator/traceshark/raw/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/getstatstimelimit30x30.png) Pressing this button will show dialog with the same statistics as the previous button but the scope will not be the whole trace but the time between cursors and the statistics will be shown on the right side of the plot. If the cursors are moved while the dialog is shown, then the statistics will be updated accordingly.
 
@@ -128,10 +128,13 @@ qmake-qt5 (or just qmake)
 make -j5
 ```
 
-It is not necessary but you can customize your build by editing traceshark.pro.
+It is not necessary but you can customize your build by editing traceshark.pro. One of the most important options is that you can enable OpenGL support. If and only if OpenGL support is enabled, then it is possible for the user to select the line width of the scheduling graphs. OpenGL is enabled by uncommenting the following line in traceshark.pro:
 
-For example, you can uncomment the following if you want the try to detect and
-optmize for your build machine:
+```
+# USE_OPENGL = yes
+```
+
+You can uncomment the following if you want the try to detect and optmize for your build machine:
 
 ```
 # MARCH_FLAG = -march=native
