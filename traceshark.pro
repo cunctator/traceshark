@@ -420,11 +420,14 @@ MOC_DIR=obj
 # opengl capable.
 # USE_OPENGL = yes
 
-# Uncomment this for debug build:
+# Uncomment this for debug symbols
 # USE_DEBUG_FLAG = -g
 
-# Uncomment this for debug build without optimization:
+# Uncomment this for debug symbols and without optimization:
 # USE_DEBUG_FLAG = -g -O0
+
+# Uncomment this for debug build. This affects Qt.
+# QT_DEBUG_BUILD = yes
 
 # Uncomment if you want to use hardening flags
 # Not really needed, unless browsing data controlled by a non-trusted source
@@ -458,8 +461,10 @@ gitversion.commands = ./scripts/gitversion --input ${QMAKE_FILE_NAME} --output $
 gitversion.input = GIT_VERSION_HEADERS
 QMAKE_EXTRA_COMPILERS += gitversion
 
-!isEmpty(USE_DEBUG_FLAG) {
-CONFIG += DEBUG
+!isEmpty(QT_DEBUG_BUILD) {
+CONFIG += debug
+} else {
+CONFIG += release
 }
 
 HARDENING_CXXFLAGS += -fPIE -pie
