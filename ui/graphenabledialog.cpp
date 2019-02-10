@@ -128,7 +128,7 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent):
 	 * graphs if we have opengl enabled.
 	 */
 	comboBox->setEnabled(false);
-	QLabel *disabledLabel = new QLabel(tr("(Enable OpenGL to change line width)"));
+	QLabel *disabledLabel = new QLabel(tr("(OpenGL is disabled)"));
 	comboLayout->addWidget(disabledLabel);
 #endif
 

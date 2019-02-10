@@ -71,6 +71,8 @@
 #include <QtWidgets>
 #endif
 
+#define MAX_NR_MIGRATIONS (200000)
+
 typedef enum {
 	TRACE_TYPE_FTRACE = 0,
 	TRACE_TYPE_PERF,

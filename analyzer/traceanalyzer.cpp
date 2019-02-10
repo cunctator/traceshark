@@ -819,7 +819,8 @@ void TraceAnalyzer::doScale()
 {
 	QList<AbstractWorkItem*> workList;
 	unsigned int cpu;
-	int i, s;
+	int i;
+	int s = 0;
 	bool useWorkList =
 		Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS) ||
 		Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS) ||
@@ -844,7 +845,9 @@ void TraceAnalyzer::doScale()
 	}
 
 	/* Migration scaling is done from the mainthread */
-	if (Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS))
+	if ((Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS) &&
+	     migrations.size() < MAX_NR_MIGRATIONS) ||
+	    Setting::isEnabled(Setting::SHOW_MIGRATION_UNLIMITED))
 		scaleMigration();
 
 	if (useWorkList) {

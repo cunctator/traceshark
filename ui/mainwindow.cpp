@@ -756,6 +756,10 @@ void MainWindow::setupSettings()
 	schedDep.index = Setting::SHOW_SCHED_GRAPHS;
 	schedDep.desiredValue = true;
 
+	SettingDependency unlimitedDep;
+	unlimitedDep.index = Setting::SHOW_MIGRATION_GRAPHS;
+	unlimitedDep.desiredValue = true;
+
 	Setting::setName(Setting::HORIZONTAL_WAKEUP,
 			 tr("Show horizontal wakeup"));
 	Setting::setEnabled(Setting::HORIZONTAL_WAKEUP, false);
@@ -778,9 +782,16 @@ void MainWindow::setupSettings()
 			 tr("Show CPU idle graphs"));
 	Setting::setEnabled(Setting::SHOW_CPUIDLE_GRAPHS, true);
 
+	QString maxstr = QString::number(MAX_NR_MIGRATIONS / 1000);
+	maxstr = maxstr + QString("k");
 	Setting::setName(Setting::SHOW_MIGRATION_GRAPHS,
-			 tr("Show migration graphs"));
+			 tr("Show migrations if < ") + maxstr);
 	Setting::setEnabled(Setting::SHOW_MIGRATION_GRAPHS, true);
+
+	Setting::setName(Setting::SHOW_MIGRATION_UNLIMITED,
+			 tr("Unlimited migrations"));
+	Setting::setEnabled(Setting::SHOW_MIGRATION_UNLIMITED, false);
+	Setting::addDependency(Setting::SHOW_MIGRATION_UNLIMITED, unlimitedDep);
 
 	Setting::setLineWidth(DEFAULT_LINE_WIDTH);
 }

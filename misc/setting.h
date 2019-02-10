@@ -81,6 +81,7 @@ public:
 		SHOW_CPUFREQ_GRAPHS,
 		SHOW_CPUIDLE_GRAPHS,
 		SHOW_MIGRATION_GRAPHS,
+		SHOW_MIGRATION_UNLIMITED,
 		NR_SETTINGS
 	};
 	static void setName(enum SettingIndex idx, const QString &n);
