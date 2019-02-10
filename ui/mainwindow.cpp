@@ -96,6 +96,9 @@
 #define CURSOR_ZOOM_TOOLTIP	        \
 "Zoom to the time interval defined by the cursors"
 
+#define DEFAULT_ZOOM_TOOLTIP	        \
+"Zoom to the default zoom level"
+
 #define TOOLTIP_EXIT			\
 "Exit traceshark"
 
@@ -939,6 +942,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	exportEventsAction->setEnabled(e);
 	exportCPUAction->setEnabled(e);
 	cursorZoomAction->setEnabled(e);
+	defaultZoomAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
 	timeFilterAction->setEnabled(e);
@@ -1083,6 +1087,18 @@ void MainWindow::cursorZoom()
 		    cursorPos[TShark::BLUE_CURSOR]);
 
 	tracePlot->xAxis->setRange(QCPRange(min, max));
+	tracePlot->replot();
+}
+
+void MainWindow::defaultZoom()
+{
+	double start, end;
+
+	start = analyzer->getStartTime().toDouble();
+	end = analyzer->getEndTime().toDouble();
+
+	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+	tracePlot->xAxis->setRange(QCPRange(start, end));
 	tracePlot->replot();
 }
 
@@ -1382,11 +1398,16 @@ void MainWindow::createActions()
 	tsconnect(exportCPUAction, triggered(), this,
 		  exportCPUTriggered());
 
-	cursorZoomAction = new QAction(tr("Cursor Zoom"), this);
+	cursorZoomAction = new QAction(tr("Cursor zoom"), this);
 	cursorZoomAction->setIcon(QIcon(RESSRC_PNG_CURSOR_ZOOM));
 	cursorZoomAction->setToolTip(tr(CURSOR_ZOOM_TOOLTIP));
-	tsconnect(cursorZoomAction, triggered(), this,
-		  cursorZoom());
+	tsconnect(cursorZoomAction, triggered(), this, cursorZoom());
+
+	defaultZoomAction = new QAction(tr("Default zoom"), this);
+	defaultZoomAction->setIcon(QIcon(RESSRC_PNG_DEFAULT_ZOOM));
+	defaultZoomAction->setToolTip(tr(DEFAULT_ZOOM_TOOLTIP));
+	tsconnect(defaultZoomAction, triggered(), this,
+		  defaultZoom());
 
 	showStatsAction = new QAction(tr("Show stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_PNG_GETSTATS));
@@ -1503,6 +1524,7 @@ void MainWindow::createToolBars()
 	viewToolBar = new QToolBar(tr("&View"));
 	addToolBar(Qt::LeftToolBarArea, viewToolBar);
 	viewToolBar->addAction(cursorZoomAction);
+	viewToolBar->addAction(defaultZoomAction);
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(showEventsAction);
 	viewToolBar->addAction(timeFilterAction);
@@ -1546,6 +1568,7 @@ void MainWindow::createMenus()
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(cursorZoomAction);
+	viewMenu->addAction(defaultZoomAction);
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(showEventsAction);
 	viewMenu->addAction(timeFilterAction);

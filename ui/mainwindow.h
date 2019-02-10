@@ -131,6 +131,7 @@ private slots:
 	void addTaskToLegend(int pid);
 	void removeTaskGraph(int pid);
 	void cursorZoom();
+	void defaultZoom();
 	void showTaskSelector();
 	void showEventFilter();
 	void showGraphEnable();
@@ -254,6 +255,7 @@ private:
 	QAction *saveAction;
 	QAction *exitAction;
 	QAction *cursorZoomAction;
+	QAction *defaultZoomAction;
 	QAction *showTasksAction;
 	QAction *showEventsAction;
 	QAction *timeFilterAction;
