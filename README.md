@@ -226,6 +226,8 @@ The option `-m 128M` is needed to increase the memory used by perf for buffering
 
 The stack trace of an event will be displayed by traceshark if you double click on the event's info field in the events view.
 
+Typing the above commands every time may be error prone and tedious, for this reason, there is the [perf-record.sh](https://raw.githubusercontent.com/cunctator/traceshark/de71cc2f7982f3fe11f20da8c44c0ecaae16453f/scripts/perf-record.sh) script in the [scripts](https://github.com/cunctator/traceshark/tree/de71cc2f7982f3fe11f20da8c44c0ecaae16453f/scripts) directory.
+
 In order to get an ASCII representation that can be parsed by traceshark:
 ```
 perf script -f > file_to_open_with_traceshark.asc
