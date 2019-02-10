@@ -58,6 +58,7 @@
 #define RESSRC_PNG_ADD_TO_LEGEND ":/traceshark/images/addtolegend30x30.png"
 #define RESSRC_PNG_CLEAR_LEGEND  ":/traceshark/images/clearlegend30x30.png"
 #define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
+#define RESSRC_PNG_CURSOR_ZOOM   ":/traceshark/images/cursorzoom30x30.png"
 #define RESSRC_PNG_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
 #define RESSRC_PNG_EXPORTCPUEVENTS  \
 	                         ":/traceshark/images/exportcpuevents30x30.png"
