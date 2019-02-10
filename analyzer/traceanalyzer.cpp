@@ -181,7 +181,6 @@ void TraceAnalyzer::close(int *ts_errno)
 	taskMap.clear();
 	disableAllFilters();
 	migrations.clear();
-	migrationArrows.clear();
 	colorMap.clear();
 	parser->close(ts_errno);
 	taskNamePool->clear();
@@ -801,7 +800,6 @@ void TraceAnalyzer::addCpuSchedWork(unsigned int cpu,
  */
 void TraceAnalyzer::scaleMigration()
 {
-	MigrationArrow *a;
 	QList<Migration>::iterator iter;
 	double unit = migrationScale / getNrCPUs();
 	for (iter = migrations.begin(); iter != migrations.end(); iter++) {
@@ -809,9 +807,12 @@ void TraceAnalyzer::scaleMigration()
 		double s = migrationOffset + (m.oldcpu + 1) * unit;
 		double e = migrationOffset + (m.newcpu + 1) * unit;
 		QColor color = getTaskColor(m.pid);
-		a = new MigrationArrow(s, e, m.time.toDouble(), color,
-				       customPlot);
-		migrationArrows.append(a);
+		/*
+		 * The constructor will save a pointer to the MigrationArrow
+		 * object in the customPlot object.
+		 */
+		new MigrationArrow(s, e, m.time.toDouble(), color,
+				   customPlot);
 	}
 }
 

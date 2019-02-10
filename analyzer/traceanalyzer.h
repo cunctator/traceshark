@@ -171,7 +171,6 @@ public:
 	CpuFreq *cpuFreq;
 	CpuIdle *cpuIdle;
 	QList<Migration> migrations;
-	QList<MigrationArrow*> migrationArrows;
 private:
 	TraceParser *parser;
 	void prepareDataStructures();
