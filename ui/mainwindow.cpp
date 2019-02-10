@@ -93,6 +93,9 @@
 #define TOOLTIP_SAVESCREEN		\
 "Take a screenshot of the current graph and save it to a file"
 
+#define CURSOR_ZOOM_TOOLTIP	        \
+"Zoom to the time interval defined by the cursors"
+
 #define TOOLTIP_EXIT			\
 "Exit traceshark"
 
@@ -935,6 +938,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	saveAction->setEnabled(e);
 	exportEventsAction->setEnabled(e);
 	exportCPUAction->setEnabled(e);
+	cursorZoomAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
 	timeFilterAction->setEnabled(e);
@@ -1063,6 +1067,23 @@ void MainWindow::saveScreenshot()
 	} else {
 		tracePlot->savePng(fileName + pngSuffix);
 	}
+}
+
+void MainWindow::cursorZoom()
+{
+	double min, max;
+
+	/* Give up if both cursors are exactly on the same location */
+	if (cursorPos[TShark::RED_CURSOR] == cursorPos[TShark::BLUE_CURSOR])
+		return;
+
+	min = TSMIN(cursorPos[TShark::RED_CURSOR],
+		    cursorPos[TShark::BLUE_CURSOR]);
+	max = TSMAX(cursorPos[TShark::RED_CURSOR],
+		    cursorPos[TShark::BLUE_CURSOR]);
+
+	tracePlot->xAxis->setRange(QCPRange(min, max));
+	tracePlot->replot();
 }
 
 void MainWindow::about()
@@ -1361,6 +1382,12 @@ void MainWindow::createActions()
 	tsconnect(exportCPUAction, triggered(), this,
 		  exportCPUTriggered());
 
+	cursorZoomAction = new QAction(tr("Cursor Zoom"), this);
+	cursorZoomAction->setIcon(QIcon(RESSRC_PNG_CURSOR_ZOOM));
+	cursorZoomAction->setToolTip(tr(CURSOR_ZOOM_TOOLTIP));
+	tsconnect(cursorZoomAction, triggered(), this,
+		  cursorZoom());
+
 	showStatsAction = new QAction(tr("Show stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_PNG_GETSTATS));
 	showStatsAction->setToolTip(TOOLTIP_GETSTATS);
@@ -1475,6 +1502,7 @@ void MainWindow::createToolBars()
 
 	viewToolBar = new QToolBar(tr("&View"));
 	addToolBar(Qt::LeftToolBarArea, viewToolBar);
+	viewToolBar->addAction(cursorZoomAction);
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(showEventsAction);
 	viewToolBar->addAction(timeFilterAction);
@@ -1517,6 +1545,7 @@ void MainWindow::createMenus()
 	fileMenu->addAction(exitAction);
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
+	viewMenu->addAction(cursorZoomAction);
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(showEventsAction);
 	viewMenu->addAction(timeFilterAction);
