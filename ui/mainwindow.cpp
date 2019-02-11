@@ -208,7 +208,7 @@ const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
 const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 
 MainWindow::MainWindow():
-	tracePlot(nullptr), graphEnableAction(nullptr), filterActive(false)
+	tracePlot(nullptr), graphEnableDialog(nullptr), filterActive(false)
 {
 	setupSettings();
 	analyzer = new TraceAnalyzer;
