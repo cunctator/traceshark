@@ -81,9 +81,10 @@ public:
 	void scrollTo(const vtl::Time &time);
 	void scrollTo(int n);
 	void scrollToSaved();
-	void show();
 	vtl::Time getSavedScroll();
 	const TraceEvent *getSelectedEvent();
+public slots:
+	void show();
 signals:
 	void timeSelected(vtl::Time time);
 	void infoDoubleClicked(const TraceEvent &event);
