@@ -67,7 +67,6 @@ class EventInfoDialog : public QDialog {
 
 public:
 	EventInfoDialog(QWidget *parent = 0);
-public slots:
 	void show(const TraceEvent &event, TraceFile &file);
 private:
 	QPlainTextEdit *textEdit;

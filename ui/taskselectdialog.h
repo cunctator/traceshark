@@ -86,7 +86,6 @@ public:
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
-public slots:
 	void show();
 signals:
 	void addTaskGraph(int pid);
