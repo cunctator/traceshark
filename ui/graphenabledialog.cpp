@@ -63,8 +63,9 @@
 #include <QMap>
 #include <QVBoxLayout>
 
-GraphEnableDialog::GraphEnableDialog(QWidget *parent):
-	QDialog(parent, Qt::WindowCloseButtonHint), savedHeight(900)
+GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
+	QDialog(parent, Qt::WindowCloseButtonHint), savedHeight(900),
+	openglStatus(opengl)
 {
 	QVBoxLayout *mainLayout = new QVBoxLayout(this);
 	QGridLayout *layout = new QGridLayout();
@@ -110,28 +111,37 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent):
 		}
 	}
 
+	openglBox = new TCheckBox(0, Setting::isOpenGLEnabled());
+	tsconnect(openglBox, boxClicked(TCheckBox *, bool),
+		  this, handleOpenGLClicked(TCheckBox *, bool));
+	openglBox->setChecked(opengl);
+	openglBox->setEnabled(has_opengl());
+	openglBox->setText(tr("Enable OpenGL"));
+	layout->addWidget(openglBox, idx, 0, Qt::AlignLeft);
+
 	QHBoxLayout *comboLayout =  new QHBoxLayout();
-	layout->addLayout(comboLayout, idx, 0, Qt::AlignLeft);
+	layout->addLayout(comboLayout, idx, 1, Qt::AlignLeft);
 	comboBox = new QComboBox();
 	comboBox->addItem(tr("1"));
 	comboBox->addItem(tr("2"));
 	comboBox->addItem(tr("3"));
 	comboBox->addItem(tr("4"));
+	if (openglStatus) {
+		comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
+	} else {
+		comboBox->setCurrentIndex(0);
+	}
 	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
 	QLabel *comboLabel = new QLabel(tr("Line width of sched graphs:"));
 	comboLayout->addWidget(comboLabel);
 	comboLayout->addWidget(comboBox);
 
-#ifndef QCUSTOMPLOT_USE_OPENGL
 	/*
 	 * We only let the user increase the line width of the scheduling
-	 * graphs if we have opengl enabled.
+	 * graphs if we have opengl enabled. It's too slow to draw anything
+	 * but one pixel wide lines wihout it.
 	 */
-	comboBox->setEnabled(false);
-	QLabel *disabledLabel = new QLabel(tr("(OpenGL is disabled)"));
-	comboLayout->addWidget(disabledLabel);
-#endif
-
+	comboBox->setEnabled(opengl &&  Setting::isOpenGLEnabled());
 	comboLayout->addStretch();
 
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
@@ -177,6 +187,11 @@ void GraphEnableDialog::okClicked()
 		Setting::setLineWidth(new_width);
 	}
 
+	if (openglBox->isChecked() != Setting::isOpenGLEnabled()) {
+		changed = true;
+		Setting::setOpenGLEnabled(openglBox->isChecked());
+	}
+
 	if (changed)
 		emit settingsChanged();
 }
@@ -193,6 +208,7 @@ void GraphEnableDialog::cancelClicked()
 		tbox->setChecked(enabled);
 	}
 	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
+	openglBox->setChecked(Setting::isOpenGLEnabled());
 }
 
 void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)
@@ -214,4 +230,30 @@ void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)
 		dBox = iter.value();
 		dBox->setDisabled(checked != dep.desiredValue);
 	}
+}
+
+void GraphEnableDialog::handleOpenGLClicked(TCheckBox */*checkBox*/,
+					    bool checked)
+{
+	if (openglStatus && checked) {
+		comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
+		comboBox->setEnabled(true);
+	} else {
+		comboBox->setCurrentIndex(0);
+		comboBox->setEnabled(false);
+	}
+}
+
+void GraphEnableDialog::setOpenGLStatus(bool enabled)
+{
+	openglStatus = enabled;
+}
+
+void GraphEnableDialog::show()
+{
+	if (openglStatus && openglBox->isChecked())
+		comboBox->setEnabled(true);
+	else
+		comboBox->setEnabled(false);
+	QDialog::show();
 }

@@ -103,6 +103,8 @@ public:
 	static void restoreState();
 	static void setLineWidth(int width);
 	static int getLineWidth();
+	static void setOpenGLEnabled(bool e);
+	static bool isOpenGLEnabled();
 private:
 	bool enabled;
 	QString name;
@@ -113,6 +115,7 @@ private:
 	static Setting settings[];
 	static bool backup[];
 	static int line_width;
+	static bool opengl;
 	QCheckBox *checkBox;
 signals:
 	void clicked(enum SettingIndex idx);

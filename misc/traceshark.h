@@ -63,6 +63,12 @@
 #include "misc/tstring.h"
 #include "vtl/compiler.h"
 
+#ifdef QCUSTOMPLOT_USE_OPENGL
+#define has_opengl() (true)
+#else
+#define has_opengl() (false)
+#endif /* QCUSTOMPLOT_USE_OPENGL */
+
 #define EVENT_MAX_NR_ARGS (128)
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

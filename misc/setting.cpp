@@ -141,6 +141,8 @@ bool Setting::backup[NR_SETTINGS];
 
 int Setting::line_width = 0;
 
+bool Setting::opengl = false;
+
 void Setting::backupState()
 {
 	int idx;
@@ -205,4 +207,14 @@ void Setting::setLineWidth(int width)
 int Setting::getLineWidth()
 {
 	return line_width;
+}
+
+bool Setting::isOpenGLEnabled()
+{
+	return opengl;
+}
+
+void Setting::setOpenGLEnabled(bool e)
+{
+	opengl = e;
 }

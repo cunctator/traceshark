@@ -171,11 +171,8 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
-#ifdef QCUSTOMPLOT_USE_OPENGL
-#define DEFAULT_LINE_WIDTH (2)
-#else
+#define DEFAULT_LINE_WIDTH_OPENGL (2)
 #define DEFAULT_LINE_WIDTH (1)
-#endif /* QCUSTOMPLOT_USE_OPENGL */
 
 const double MainWindow::bugWorkAroundOffset = 100;
 const double MainWindow::schedSectionOffset = 100;
@@ -211,8 +208,9 @@ const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
 const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 
 MainWindow::MainWindow():
-	tracePlot(nullptr), filterActive(false)
+	tracePlot(nullptr), graphEnableAction(nullptr), filterActive(false)
 {
+	setupSettings();
 	analyzer = new TraceAnalyzer;
 
 	infoWidget = new InfoWidget(this);
@@ -253,8 +251,6 @@ MainWindow::MainWindow():
 	cursors[TShark::RED_CURSOR] = nullptr;
 	cursors[TShark::BLUE_CURSOR] = nullptr;
 
-	setupSettings();
-
 	errorDialog = new ErrorDialog();
 	licenseDialog = new LicenseDialog();
 	eventInfoDialog = new EventInfoDialog();
@@ -272,7 +268,7 @@ MainWindow::MainWindow():
 	statsLimitedDialog->setAllowedAreas(Qt::RightDockWidgetArea);
 
 	eventSelectDialog = new EventSelectDialog();
-	graphEnableDialog = new GraphEnableDialog();
+	graphEnableDialog = new GraphEnableDialog(nullptr, isOpenGLEnabled());
 
 	vtl::set_error_handler(errorDialog);
 
@@ -350,13 +346,11 @@ void MainWindow::createTracePlot()
 	QSharedPointer<QCPAxisTicker> ticker((QCPAxisTicker*) (yaxisTicker));
 
 	tracePlot = new TracePlot(plotWidget);
-#ifdef QCUSTOMPLOT_USE_OPENGL
-	tracePlot->setOpenGl(true, 4);
-	if (tracePlot->openGl()) {
-		printf("OpenGL rendering enabled\n");
+	setupOpenGL();
+	Setting::setOpenGLEnabled(isOpenGLEnabled());
+	if (!isOpenGLEnabled()) {
+		Setting::setLineWidth(DEFAULT_LINE_WIDTH);
 	}
-	tracePlot->setAntialiasedElements(QCP::aeNone);
-#endif /* QCUSTOMPLOT_USE_OPENGL */
 
 	tracePlot->yAxis->setTicker(ticker);
 	taskRangeAllocator = new TaskRangeAllocator(schedHeight
@@ -446,6 +440,8 @@ void MainWindow::openFile(const QString &name)
 		quint64 scursor, tshow;
 
 		clearPlot();
+		setupOpenGL();
+
 		start = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 		processTrace();
@@ -799,7 +795,12 @@ void MainWindow::setupSettings()
 	Setting::setEnabled(Setting::SHOW_MIGRATION_UNLIMITED, false);
 	Setting::addDependency(Setting::SHOW_MIGRATION_UNLIMITED, unlimitedDep);
 
-	Setting::setLineWidth(DEFAULT_LINE_WIDTH);
+	Setting::setOpenGLEnabled(has_opengl());
+	if (has_opengl()) {
+		Setting::setLineWidth(DEFAULT_LINE_WIDTH_OPENGL);
+	} else {
+		Setting::setLineWidth(DEFAULT_LINE_WIDTH);
+	}
 }
 
 void MainWindow::addSchedGraph(CPUTask &cpuTask)
@@ -1925,10 +1926,13 @@ void MainWindow::consumeSettings()
 {
 	unsigned int cpu;
 
-	if (!analyzer->isOpen())
+	if (!analyzer->isOpen()) {
+		setupOpenGL();
 		return;
+	}
 
 	clearPlot();
+	setupOpenGL();
 	taskToolBar->clear();
 
 	for (cpu = 0; cpu <= analyzer->getMaxCPU(); cpu++) {
@@ -2434,6 +2438,39 @@ out:
 		setTaskActionsEnabled(false);
 	}
 	tracePlot->replot();
+}
+
+bool MainWindow::isOpenGLEnabled()
+{
+	if (has_opengl())
+		return tracePlot->openGl();
+	else
+		return false;
+}
+
+void MainWindow::setupOpenGL()
+{
+	if (has_opengl() && Setting::isOpenGLEnabled()) {
+		if (!isOpenGLEnabled()) {
+			tracePlot->setOpenGl(true, 4);
+			if (tracePlot->openGl()) {
+				printf("OpenGL rendering enabled\n");
+			}
+		}
+	} else {
+		if (has_opengl() && isOpenGLEnabled()) {
+			tracePlot->setOpenGl(false, 4);
+			if (!tracePlot->openGl()) {
+				printf("OpenGL rendering disabled\n");
+			}
+		}
+	}
+	if (graphEnableDialog != nullptr) {
+		graphEnableDialog->setOpenGLStatus(isOpenGLEnabled());
+	}
+	Setting::setOpenGLEnabled(isOpenGLEnabled());
+	if (!isOpenGLEnabled())
+		Setting::setLineWidth(DEFAULT_LINE_WIDTH);
 }
 
 /* Adds the currently selected task to the legend */

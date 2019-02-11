@@ -217,6 +217,8 @@ private:
 
 	bool selectQCPGraph(QCPGraph *graph);
 	void selectTaskByPid(int pid, const unsigned int *preferred_cpu);
+	bool isOpenGLEnabled();
+	void setupOpenGL();
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;

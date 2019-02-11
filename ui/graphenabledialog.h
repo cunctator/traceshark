@@ -69,18 +69,24 @@ class GraphEnableDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	GraphEnableDialog(QWidget *parent = 0);
+	GraphEnableDialog(QWidget *parent = 0, bool opengl = false);
 	~GraphEnableDialog();
+	void setOpenGLStatus(bool enabled);
 signals:
 	void settingsChanged();
 private:
 	QMap<Setting::SettingIndex, TCheckBox*> *checkBoxMap;
 	QComboBox *comboBox;
 	int savedHeight;
+	bool openglStatus;
+	TCheckBox *openglBox;
+public slots:
+	void show();
 private slots:
 	void okClicked();
 	void cancelClicked();
 	void handleBoxClicked(TCheckBox *, bool);
+	void handleOpenGLClicked(TCheckBox *, bool);
 };
 
 #endif /* GRAPHENABLEDIALOG_H */
