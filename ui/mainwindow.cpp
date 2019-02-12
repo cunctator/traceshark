@@ -541,7 +541,7 @@ void MainWindow::computeLayout()
 	ticks.resize(0);
 	tickLabels.resize(0);
 
-	if (Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS)) {
+	if (analyzer->enableMigrations()) {
 		offset += migrateSectionOffset;
 
 		analyzer->setMigrationOffset(offset);

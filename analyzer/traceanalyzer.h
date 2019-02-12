@@ -144,6 +144,7 @@ public:
 	void setCpuFreqScale(unsigned int cpu, double scale);
 	void setMigrationOffset(double offset);
 	void setMigrationScale(double scale);
+	bool enableMigrations();
 	void doScale();
 	void doStats();
 	void doLimitedStats();

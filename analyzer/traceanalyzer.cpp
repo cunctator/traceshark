@@ -816,6 +816,13 @@ void TraceAnalyzer::scaleMigration()
 	}
 }
 
+bool TraceAnalyzer::enableMigrations()
+{
+	return (Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS) &&
+		(Setting::isEnabled(Setting::SHOW_MIGRATION_UNLIMITED) ||
+		 migrations.size() < MAX_NR_MIGRATIONS));
+}
+
 void TraceAnalyzer::doScale()
 {
 	QList<AbstractWorkItem*> workList;
@@ -846,9 +853,7 @@ void TraceAnalyzer::doScale()
 	}
 
 	/* Migration scaling is done from the mainthread */
-	if ((Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS) &&
-	     migrations.size() < MAX_NR_MIGRATIONS) ||
-	    Setting::isEnabled(Setting::SHOW_MIGRATION_UNLIMITED))
+	if (enableMigrations())
 		scaleMigration();
 
 	if (useWorkList) {
