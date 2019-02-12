@@ -72,7 +72,6 @@ public:
 	GraphEnableDialog(QWidget *parent = 0, bool opengl = false);
 	~GraphEnableDialog();
 	void setOpenGLStatus(bool enabled);
-	void show();
 signals:
 	void settingsChanged();
 private:
@@ -81,6 +80,8 @@ private:
 	int savedHeight;
 	bool openglStatus;
 	TCheckBox *openglBox;
+public slots:
+	void show();
 private slots:
 	void okClicked();
 	void cancelClicked();
