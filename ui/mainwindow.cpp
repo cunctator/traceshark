@@ -300,6 +300,9 @@ MainWindow::~MainWindow()
 	delete eventSelectDialog;
 	delete graphEnableDialog;
 
+	vtl::set_error_handler(errorDialog);
+	delete errorDialog;
+
 	for (i = 0; i < STATUS_NR; i++)
 		delete statusStrings[i];
 }
