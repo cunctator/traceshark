@@ -229,20 +229,8 @@ MainWindow::MainWindow():
 
 	/* createTracePlot needs to have plotWidget created */
 	createTracePlot();
+	plotConnections();
 
-	tsconnect(tracePlot, mouseWheel(QWheelEvent*), this, mouseWheel());
-	tsconnect(tracePlot->xAxis, rangeChanged(QCPRange), tracePlot->xAxis2,
-		  setRange(QCPRange));
-	tsconnect(tracePlot, mousePress(QMouseEvent*), this, mousePress());
-	tsconnect(tracePlot,selectionChangedByUser() , this,
-		  selectionChanged());
-	tsconnect(tracePlot, plottableClick(QCPAbstractPlottable *, int,
-					    QMouseEvent *), this,
-		  plottableClicked(QCPAbstractPlottable *, int, QMouseEvent *));
-	tsconnect(tracePlot, legendDoubleClick(QCPLegend*,
-					       QCPAbstractLegendItem*,
-					       QMouseEvent*), this,
-		  legendDoubleClick(QCPLegend*, QCPAbstractLegendItem*));
 	eventsWidget = new EventsWidget(this);
 	eventsWidget->setAllowedAreas(Qt::TopDockWidgetArea |
 				      Qt::BottomDockWidgetArea);
@@ -250,91 +238,12 @@ MainWindow::MainWindow():
 
 	cursors[TShark::RED_CURSOR] = nullptr;
 	cursors[TShark::BLUE_CURSOR] = nullptr;
-
-	errorDialog = new ErrorDialog();
-	licenseDialog = new LicenseDialog();
-	eventInfoDialog = new EventInfoDialog();
-	taskSelectDialog =
-		new TaskSelectDialog(nullptr, tr("Task Selector"),
-				     TaskSelectDialog::TaskSelectRegular);
-	statsDialog = new TaskSelectDialog(nullptr, tr("Global Statistics"),
-					   TaskSelectDialog::TaskSelectStats);
-	statsLimitedDialog =
-		new TaskSelectDialog(nullptr, tr("Cursor Statistics"),
-				     TaskSelectDialog::TaskSelectStatsLimited);
-
-	taskSelectDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
-	statsDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
-	statsLimitedDialog->setAllowedAreas(Qt::RightDockWidgetArea);
-
-	eventSelectDialog = new EventSelectDialog();
-	graphEnableDialog = new GraphEnableDialog(nullptr, isOpenGLEnabled());
-
-	vtl::set_error_handler(errorDialog);
-
-	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
-		  this, plotDoubleClicked(QMouseEvent*));
-	tsconnect(infoWidget, valueChanged(vtl::Time, int),
-		  this, infoValueChanged(vtl::Time, int));
-
-	/* Events widget */
-	tsconnect(eventsWidget, timeSelected(vtl::Time), this,
-		  moveActiveCursor(vtl::Time));
-	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
-		  this, showEventInfo(const TraceEvent &));
-	tsconnect(eventsWidget, eventSelected(const TraceEvent *),
-		  this, handleEventSelected(const TraceEvent *));
-
-	/* task select dialog */
-	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
-	tsconnect(taskSelectDialog, addTaskToLegend(int), this,
-		  addTaskToLegend(int));
-	tsconnect(taskSelectDialog, createFilter(QMap<int, int> &, bool, bool),
-		  this, createPidFilter(QMap<int, int> &, bool, bool));
-	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
-	tsconnect(taskSelectDialog, QDockWidgetNeedsRemoval(QDockWidget*),
-		  this, removeQDockWidget(QDockWidget*));
-	tsconnect(taskSelectDialog, taskDoubleClicked(int),
-		  this, taskTriggered(int));
-
-	/* statistics Dialog */
-	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
-	tsconnect(statsDialog, addTaskToLegend(int), this,
-		  addTaskToLegend(int));
-	tsconnect(statsDialog, createFilter(QMap<int, int> &, bool, bool),
-		  this, createPidFilter(QMap<int, int> &, bool, bool));
-	tsconnect(statsDialog, resetFilter(), this, resetPidFilter());
-	tsconnect(statsDialog, QDockWidgetNeedsRemoval(QDockWidget*),
-		  this, removeQDockWidget(QDockWidget*));
-	tsconnect(statsDialog, taskDoubleClicked(int),
-		  this, taskTriggered(int));
-
-	/* Time limited statistics Dialog */
-	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
-		  addTaskGraph(int));
-	tsconnect(statsLimitedDialog, addTaskToLegend(int), this,
-		  addTaskToLegend(int));
-	tsconnect(statsLimitedDialog,
-		  createFilter(QMap<int, int> &, bool, bool),
-		  this, createPidFilter(QMap<int, int> &, bool, bool));
-	tsconnect(statsLimitedDialog, resetFilter(), this, resetPidFilter());
-	tsconnect(statsLimitedDialog, QDockWidgetNeedsRemoval(QDockWidget*),
-		  this, removeQDockWidget(QDockWidget*));
-	tsconnect(statsLimitedDialog, taskDoubleClicked(int),
-		  this, taskTriggered(int));
-
-	/* event select dialog */
-	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
-						  bool),
-		  this, createEventFilter(QMap<event_t, event_t> &, bool));
-	tsconnect(eventSelectDialog, resetFilter(), this, resetEventFilter());
-
-	/* graph enable dialog */
-	tsconnect(graphEnableDialog, settingsChanged(),
-		  this, consumeSettings());
-
 	cursorPos[TShark::RED_CURSOR] = 0;
 	cursorPos[TShark::BLUE_CURSOR] = 0;
+
+	createDialogs();
+	widgetConnections();
+	dialogConnections();
 }
 
 void MainWindow::createTracePlot()
@@ -1609,6 +1518,114 @@ void MainWindow::createStatusBar()
 	statusStrings[STATUS_ERROR] = new QString(tr("An error has occured"));
 
 	setStatus(STATUS_NOFILE);
+}
+
+void MainWindow::createDialogs()
+{
+	errorDialog = new ErrorDialog();
+	licenseDialog = new LicenseDialog();
+	eventInfoDialog = new EventInfoDialog();
+	taskSelectDialog =
+		new TaskSelectDialog(nullptr, tr("Task Selector"),
+				     TaskSelectDialog::TaskSelectRegular);
+	statsDialog = new TaskSelectDialog(nullptr, tr("Global Statistics"),
+					   TaskSelectDialog::TaskSelectStats);
+	statsLimitedDialog =
+		new TaskSelectDialog(nullptr, tr("Cursor Statistics"),
+				     TaskSelectDialog::TaskSelectStatsLimited);
+
+	taskSelectDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
+	statsDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
+	statsLimitedDialog->setAllowedAreas(Qt::RightDockWidgetArea);
+
+	eventSelectDialog = new EventSelectDialog();
+	graphEnableDialog = new GraphEnableDialog(nullptr, isOpenGLEnabled());
+
+	vtl::set_error_handler(errorDialog);
+}
+
+void MainWindow::plotConnections()
+{
+	tsconnect(tracePlot, mouseWheel(QWheelEvent*), this, mouseWheel());
+	tsconnect(tracePlot->xAxis, rangeChanged(QCPRange), tracePlot->xAxis2,
+		  setRange(QCPRange));
+	tsconnect(tracePlot, mousePress(QMouseEvent*), this, mousePress());
+	tsconnect(tracePlot,selectionChangedByUser() , this,
+		  selectionChanged());
+	tsconnect(tracePlot, plottableClick(QCPAbstractPlottable *, int,
+					    QMouseEvent *), this,
+		  plottableClicked(QCPAbstractPlottable *, int, QMouseEvent *));
+	tsconnect(tracePlot, legendDoubleClick(QCPLegend*,
+					       QCPAbstractLegendItem*,
+					       QMouseEvent*), this,
+		  legendDoubleClick(QCPLegend*, QCPAbstractLegendItem*));
+	tsconnect(tracePlot, mouseDoubleClick(QMouseEvent*),
+		  this, plotDoubleClicked(QMouseEvent*));
+}
+
+void MainWindow::widgetConnections()
+{
+	tsconnect(infoWidget, valueChanged(vtl::Time, int),
+		  this, infoValueChanged(vtl::Time, int));
+
+	/* Events widget */
+	tsconnect(eventsWidget, timeSelected(vtl::Time), this,
+		  moveActiveCursor(vtl::Time));
+	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
+		  this, showEventInfo(const TraceEvent &));
+	tsconnect(eventsWidget, eventSelected(const TraceEvent *),
+		  this, handleEventSelected(const TraceEvent *));
+}
+
+void MainWindow::dialogConnections()
+{
+	/* task select dialog */
+	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
+	tsconnect(taskSelectDialog, addTaskToLegend(int), this,
+		  addTaskToLegend(int));
+	tsconnect(taskSelectDialog, createFilter(QMap<int, int> &, bool, bool),
+		  this, createPidFilter(QMap<int, int> &, bool, bool));
+	tsconnect(taskSelectDialog, resetFilter(), this, resetPidFilter());
+	tsconnect(taskSelectDialog, QDockWidgetNeedsRemoval(QDockWidget*),
+		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(taskSelectDialog, taskDoubleClicked(int),
+		  this, taskTriggered(int));
+
+	/* statistics Dialog */
+	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
+	tsconnect(statsDialog, addTaskToLegend(int), this,
+		  addTaskToLegend(int));
+	tsconnect(statsDialog, createFilter(QMap<int, int> &, bool, bool),
+		  this, createPidFilter(QMap<int, int> &, bool, bool));
+	tsconnect(statsDialog, resetFilter(), this, resetPidFilter());
+	tsconnect(statsDialog, QDockWidgetNeedsRemoval(QDockWidget*),
+		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(statsDialog, taskDoubleClicked(int),
+		  this, taskTriggered(int));
+
+	/* Time limited statistics Dialog */
+	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
+		  addTaskGraph(int));
+	tsconnect(statsLimitedDialog, addTaskToLegend(int), this,
+		  addTaskToLegend(int));
+	tsconnect(statsLimitedDialog,
+		  createFilter(QMap<int, int> &, bool, bool),
+		  this, createPidFilter(QMap<int, int> &, bool, bool));
+	tsconnect(statsLimitedDialog, resetFilter(), this, resetPidFilter());
+	tsconnect(statsLimitedDialog, QDockWidgetNeedsRemoval(QDockWidget*),
+		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(statsLimitedDialog, taskDoubleClicked(int),
+		  this, taskTriggered(int));
+
+	/* event select dialog */
+	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
+						  bool),
+		  this, createEventFilter(QMap<event_t, event_t> &, bool));
+	tsconnect(eventSelectDialog, resetFilter(), this, resetEventFilter());
+
+	/* graph enable dialog */
+	tsconnect(graphEnableDialog, settingsChanged(),
+		  this, consumeSettings());
 }
 
 void MainWindow::setStatus(status_t status, const QString *fileName)

@@ -235,6 +235,10 @@ private:
 	void createMenus();
 	void createTracePlot();
 	void createStatusBar();
+	void createDialogs();
+	void plotConnections();
+	void widgetConnections();
+	void dialogConnections();
 
 	void setStatus(status_t status, const QString *fileName = nullptr);
 	int loadTraceFile(const QString &);
