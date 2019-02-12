@@ -228,7 +228,11 @@ void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)
 			vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
 				  __LINE__);
 		dBox = iter.value();
-		dBox->setDisabled(checked != dep.desiredValue);
+		bool dep_ok = checked == dep.desiredValue;
+		Setting::SettingIndex idx;
+		idx = (Setting::SettingIndex) dBox->getId();
+		dBox->setDisabled(!dep_ok);
+		dBox->setChecked(dep_ok && Setting::isEnabled(idx));
 	}
 }
 
