@@ -239,13 +239,10 @@ void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)
 void GraphEnableDialog::handleOpenGLClicked(TCheckBox */*checkBox*/,
 					    bool checked)
 {
-	if (openglStatus && checked) {
-		comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
-		comboBox->setEnabled(true);
-	} else {
-		comboBox->setCurrentIndex(0);
-		comboBox->setEnabled(false);
-	}
+	bool opengl = openglStatus && checked;
+	int width = opengl ? Setting::getLineWidth() : 1;
+	comboBox->setCurrentIndex(width - 1);
+	comboBox->setEnabled(opengl);
 }
 
 void GraphEnableDialog::setOpenGLStatus(bool enabled)
