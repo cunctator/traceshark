@@ -2633,5 +2633,5 @@ bool MainWindow::isLowResScreen()
 
 	geometry = QApplication::desktop()->availableGeometry();
 	/* This is a heuristic */
-	return geometry.width() < 1600 && geometry.height() < 1200;
+	return geometry.width() < 1700 && geometry.height() < 1220;
 }
