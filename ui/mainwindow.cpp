@@ -707,12 +707,16 @@ void MainWindow::setupSettings()
 	Setting::setEnabled(Setting::SHOW_MIGRATION_UNLIMITED, false);
 	Setting::addDependency(Setting::SHOW_MIGRATION_UNLIMITED, unlimitedDep);
 
-	Setting::setOpenGLEnabled(has_opengl());
-	if (has_opengl()) {
-		Setting::setLineWidth(DEFAULT_LINE_WIDTH_OPENGL);
-	} else {
-		Setting::setLineWidth(DEFAULT_LINE_WIDTH);
-	}
+	/*
+	 * OpenGL is only really useful when we use a line width greater than 1.
+	 * We only want a line width greater than 1 when we are on a high
+	 * resolution screen. Thus, we only enable opengl when the resolution
+	 * is high.
+	 */
+	bool opengl = has_opengl() && !isLowResScreen();
+	int width = opengl ? DEFAULT_LINE_WIDTH_OPENGL : DEFAULT_LINE_WIDTH;
+	Setting::setOpenGLEnabled(opengl);
+	Setting::setLineWidth(width);
 }
 
 void MainWindow::addSchedGraph(CPUTask &cpuTask)
@@ -2621,4 +2625,13 @@ bool MainWindow::isWideScreen()
 
 	geometry = QApplication::desktop()->availableGeometry();
 	return geometry.width() > 1800;
+}
+
+bool MainWindow::isLowResScreen()
+{
+	QRect geometry;
+
+	geometry = QApplication::desktop()->availableGeometry();
+	/* This is a heuristic */
+	return geometry.width() < 1600 && geometry.height() < 1200;
 }

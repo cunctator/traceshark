@@ -243,6 +243,7 @@ private:
 	void setStatus(status_t status, const QString *fileName = nullptr);
 	int loadTraceFile(const QString &);
 	bool isWideScreen();
+	bool isLowResScreen();
 
 	QMenu *fileMenu;
 	QMenu *viewMenu;
