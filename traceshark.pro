@@ -414,11 +414,11 @@ MOC_DIR=obj
 # These are meant to be edit by the user in order to configure the build
 #
 
-# Uncomment this to enable the usage of opengl rendering. If you select this
-# the line width of the scheduling graphs will be increased to 2 pixels. Only
-# enable this if you want 2 pixel wide scheduling graphs and your computer is
-# opengl capable.
-# USE_OPENGL = yes
+# Uncomment this to disable the usage of OpenGL rendering. If you disalble this,
+# the line width of the scheduling graphs will always be 1 pixel. You should
+# disable this if your computer is not OpenGL capable, or if you are happy to
+# always have the scheduling graphs drawn with a width of 1.
+# DISABLE_OPENGL = yes
 
 # Uncomment this for debug symbols
 # USE_DEBUG_FLAG = -g
@@ -500,7 +500,7 @@ OUR_POSIX_DEFINES = _FILE_OFFSET_BITS=64 _POSIX_C_SOURCE=200809L
 
 # Compute the defines to be set with -D flag at the compiler command line
 DEFINES += $${OUR_POSIX_DEFINES}
-!isEmpty (USE_OPENGL) {
+isEmpty (DISABLE_OPENGL) {
 DEFINES += QCUSTOMPLOT_USE_OPENGL
 }
 
@@ -511,7 +511,7 @@ DEFINES += QCUSTOMPLOT_USE_OPENGL
 QT           += core
 QT           += widgets
 QT           += printsupport
-!isEmpty (USE_OPENGL): equals(QT_MAJOR_VERSION, 4) {
+isEmpty (DISABLE_OPENGL): equals(QT_MAJOR_VERSION, 4) {
 QT           += opengl
 }
 
