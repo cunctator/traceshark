@@ -171,9 +171,6 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
-#define DEFAULT_LINE_WIDTH_OPENGL (2)
-#define DEFAULT_LINE_WIDTH (1)
-
 const double MainWindow::bugWorkAroundOffset = 100;
 const double MainWindow::schedSectionOffset = 100;
 const double MainWindow::schedSpacing = 250;

@@ -63,6 +63,9 @@
 #include "misc/tstring.h"
 #include "vtl/compiler.h"
 
+#define DEFAULT_LINE_WIDTH_OPENGL (2)
+#define DEFAULT_LINE_WIDTH (1)
+
 #ifdef QCUSTOMPLOT_USE_OPENGL
 #define has_opengl() (true)
 #else

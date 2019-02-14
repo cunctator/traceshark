@@ -240,7 +240,7 @@ void GraphEnableDialog::handleOpenGLClicked(TCheckBox */*checkBox*/,
 					    bool checked)
 {
 	bool opengl = openglStatus && checked;
-	int width = opengl ? Setting::getLineWidth() : 1;
+	int width = opengl ? Setting::getLineWidth() : DEFAULT_LINE_WIDTH;
 	comboBox->setCurrentIndex(width - 1);
 	comboBox->setEnabled(opengl);
 }
