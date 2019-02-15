@@ -461,7 +461,7 @@ gitversion.commands = ./scripts/gitversion --input ${QMAKE_FILE_NAME} --output $
 gitversion.input = GIT_VERSION_HEADERS
 QMAKE_EXTRA_COMPILERS += gitversion
 
-!isEmpty(QT_DEBUG_BUILD) {
+equals(QT_DEBUG_BUILD, yes) {
 CONFIG += debug
 } else {
 CONFIG += release
@@ -476,7 +476,7 @@ HARDENING_LFLAGS += -Wl,-z,relro,-z,now
 
 OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${USE_DEBUG_FLAG} $${USE_EXTRA_OPTS}
 
-!isEmpty (USE_HARDENING_CXXFLAGS) {
+equals(USE_HARDENING_CXXFLAGS, yes) {
 OUR_FLAGS += $${HARDENING_CXXFLAGS}
 }
 
@@ -487,7 +487,7 @@ QMAKE_CXXFLAGS_RELEASE += $${OUR_NORMAL_CXXFLAGS} $${OUR_FLAGS}
 QMAKE_CFLAGS_RELEASE += -$${OUR_NORMAL_CFLAGS} $${OUR_FLAGS}
 QMAKE_LFLAGS_RELEASE += -fwhole-program -O2 -std=c++11 $${OUR_FLAGS}
 
-!isEmpty (USE_HARDENING_CXXFLAGS) {
+equals (USE_HARDENING_CXXFLAGS, yes) {
 QMAKE_LFLAGS_RELEASE += $${HARDENING_LFLAGS}
 }
 
@@ -500,7 +500,7 @@ OUR_POSIX_DEFINES = _FILE_OFFSET_BITS=64 _POSIX_C_SOURCE=200809L
 
 # Compute the defines to be set with -D flag at the compiler command line
 DEFINES += $${OUR_POSIX_DEFINES}
-isEmpty (DISABLE_OPENGL) {
+!equals(DISABLE_OPENGL, yes) {
 DEFINES += QCUSTOMPLOT_USE_OPENGL
 }
 
@@ -511,7 +511,7 @@ DEFINES += QCUSTOMPLOT_USE_OPENGL
 QT           += core
 QT           += widgets
 QT           += printsupport
-isEmpty (DISABLE_OPENGL): equals(QT_MAJOR_VERSION, 4) {
+!equals(DISABLE_OPENGL, yes): equals(QT_MAJOR_VERSION, 4) {
 QT           += opengl
 }
 
