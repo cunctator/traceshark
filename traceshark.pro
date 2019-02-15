@@ -234,7 +234,7 @@
 
 ###############################################################################
 # Build configuration options used to compute generic compiler flags
-# These are meant to be edit by the user in order to configure the build
+# These may be edited by the user in order to configure the build
 #
 
 # Uncomment this to disable the usage of OpenGL rendering. If you disalble this,
