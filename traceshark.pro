@@ -51,183 +51,6 @@
 #
 
 ###############################################################################
-# Header files
-#
-
-HEADERS       = qcustomplot/qcustomplot.h
-HEADERS      += qcustomplot/qcppointer.h
-HEADERS      += qcustomplot/qcppointer_impl.h
-HEADERS      += qcustomplot/qcplist.h
-
-HEADERS      +=  ui/abstracttaskmodel.h
-HEADERS      +=  ui/cursor.h
-HEADERS      +=  ui/cursorinfo.h
-HEADERS      +=  ui/errordialog.h
-HEADERS      +=  ui/eventinfodialog.h
-HEADERS      +=  ui/eventselectdialog.h
-HEADERS      +=  ui/eventselectmodel.h
-HEADERS      +=  ui/eventselectview.h
-HEADERS      +=  ui/eventsmodel.h
-HEADERS      +=  ui/eventswidget.h
-HEADERS      +=  ui/graphenabledialog.h
-HEADERS      +=  ui/infowidget.h
-HEADERS      +=  ui/licensedialog.h
-HEADERS      +=  ui/mainwindow.h
-HEADERS      +=  ui/migrationarrow.h
-HEADERS      +=  ui/migrationline.h
-HEADERS      +=  ui/statslimitedmodel.h
-HEADERS      +=  ui/statsmodel.h
-HEADERS      +=  ui/tableview.h
-HEADERS      +=  ui/taskgraph.h
-HEADERS      +=  ui/taskmodel.h
-HEADERS      +=  ui/taskrangeallocator.h
-HEADERS      +=  ui/taskselectdialog.h
-HEADERS      +=  ui/tasktoolbar.h
-HEADERS      +=  ui/taskview.h
-HEADERS      +=  ui/tcheckbox.h
-HEADERS      +=  ui/traceplot.h
-HEADERS      +=  ui/tracesharkstyle.h
-HEADERS      +=  ui/yaxisticker.h
-
-HEADERS      +=  analyzer/abstracttask.h
-HEADERS      +=  analyzer/cpufreq.h
-HEADERS      +=  analyzer/cpu.h
-HEADERS      +=  analyzer/cpuidle.h
-HEADERS      +=  analyzer/cputask.h
-HEADERS      +=  analyzer/filterstate.h
-HEADERS      +=  analyzer/migration.h
-HEADERS      +=  analyzer/task.h
-HEADERS      +=  analyzer/tcolor.h
-HEADERS      +=  analyzer/traceanalyzer.h
-
-HEADERS      +=  parser/fileinfo.h
-HEADERS      +=  parser/genericparams.h
-HEADERS      +=  parser/paramhelpers.h
-HEADERS      +=  parser/traceevent.h
-HEADERS      +=  parser/tracefile.h
-HEADERS      +=  parser/tracelinedata.h
-HEADERS      +=  parser/traceline.h
-HEADERS      +=  parser/traceparser.h
-
-HEADERS      +=  parser/ftrace/ftraceparams.h
-HEADERS      +=  parser/ftrace/ftracegrammar.h
-
-HEADERS      +=  parser/perf/perfparams.h
-HEADERS      +=  parser/perf/perfgrammar.h
-
-HEADERS      +=  threads/indexwatcher.h
-HEADERS      +=  threads/loadbuffer.h
-HEADERS      +=  threads/loadthread.h
-HEADERS      +=  threads/threadbuffer.h
-HEADERS      +=  threads/tthread.h
-HEADERS      +=  threads/workitem.h
-HEADERS      +=  threads/workqueue.h
-HEADERS      +=  threads/workthread.h
-
-HEADERS      +=  mm/mempool.h
-HEADERS      +=  mm/stringpool.h
-HEADERS      +=  mm/stringtree.h
-
-HEADERS      +=  misc/chunk.h
-HEADERS      +=  misc/errors.h
-HEADERS      +=  misc/resources.h
-HEADERS      +=  misc/setting.h
-HEADERS      +=  misc/string.h
-HEADERS      +=  misc/traceshark.h
-HEADERS      +=  misc/tstring.h
-
-HEADERS      +=  vtl/avltree.h
-HEADERS      +=  vtl/bitvector.h
-HEADERS      +=  vtl/bsdexits.h
-HEADERS      +=  vtl/compiler.h
-HEADERS      +=  vtl/error.h
-HEADERS      +=  vtl/heapsort.h
-HEADERS      +=  vtl/tlist.h
-HEADERS      +=  vtl/time.h
-
-###############################################################################
-# Source files
-#
-
-SOURCES       = qcustomplot/qcustomplot.cpp
-
-SOURCES      +=  ui/abstracttaskmodel.cpp
-SOURCES      +=  ui/cursor.cpp
-SOURCES      +=  ui/cursorinfo.cpp
-SOURCES      +=  ui/errordialog.cpp
-SOURCES      +=  ui/eventinfodialog.cpp
-SOURCES      +=  ui/eventselectdialog.cpp
-SOURCES      +=  ui/eventselectmodel.cpp
-SOURCES      +=  ui/eventselectview.cpp
-SOURCES      +=  ui/eventsmodel.cpp
-SOURCES      +=  ui/eventswidget.cpp
-SOURCES      +=  ui/graphenabledialog.cpp
-SOURCES      +=  ui/infowidget.cpp
-SOURCES      +=  ui/licensedialog.cpp
-SOURCES      +=  ui/mainwindow.cpp
-SOURCES      +=  ui/migrationarrow.cpp
-SOURCES      +=  ui/migrationline.cpp
-SOURCES      +=  ui/statslimitedmodel.cpp
-SOURCES      +=  ui/statsmodel.cpp
-SOURCES      +=  ui/tableview.cpp
-SOURCES      +=  ui/taskgraph.cpp
-SOURCES      +=  ui/taskmodel.cpp
-SOURCES      +=  ui/taskrangeallocator.cpp
-SOURCES      +=  ui/taskselectdialog.cpp
-SOURCES      +=  ui/tasktoolbar.cpp
-SOURCES      +=  ui/taskview.cpp
-SOURCES      +=  ui/tcheckbox.cpp
-SOURCES      +=  ui/traceplot.cpp
-SOURCES      +=  ui/tracesharkstyle.cpp
-SOURCES      +=  ui/yaxisticker.cpp
-
-
-SOURCES      +=  analyzer/abstracttask.cpp
-SOURCES      +=  analyzer/cpufreq.cpp
-SOURCES      +=  analyzer/cpuidle.cpp
-SOURCES      +=  analyzer/cputask.cpp
-SOURCES      +=  analyzer/filterstate.cpp
-SOURCES      +=  analyzer/task.cpp
-SOURCES      +=  analyzer/tcolor.cpp
-SOURCES      +=  analyzer/traceanalyzer.cpp
-
-SOURCES      +=  parser/fileinfo.cpp
-SOURCES      +=  parser/traceevent.cpp
-SOURCES      +=  parser/tracefile.cpp
-SOURCES      +=  parser/traceparser.cpp
-
-SOURCES      +=  parser/ftrace/ftraceparams.cpp
-SOURCES      +=  parser/ftrace/ftracegrammar.cpp
-
-SOURCES      +=  parser/perf/perfparams.cpp
-SOURCES      +=  parser/perf/perfgrammar.cpp
-
-SOURCES      +=  threads/indexwatcher.cpp
-SOURCES      +=  threads/loadbuffer.cpp
-SOURCES      +=  threads/loadthread.cpp
-SOURCES      +=  threads/tthread.cpp
-SOURCES      +=  threads/workqueue.cpp
-
-SOURCES      +=  mm/mempool.cpp
-SOURCES      +=  mm/stringpool.cpp
-SOURCES      +=  mm/stringtree.cpp
-
-SOURCES      +=  misc/errors.cpp
-SOURCES      +=  misc/main.cpp
-SOURCES      +=  misc/setting.cpp
-
-SOURCES      +=  vtl/bitvector.cpp
-SOURCES      +=  vtl/error.cpp
-
-###############################################################################
-# Directories
-#
-
-#DESTDIR=bin #Target file directory
-OBJECTS_DIR=obj
-MOC_DIR=obj
-
-###############################################################################
 # Architecture Flags
 #
 
@@ -446,12 +269,194 @@ MOC_DIR=obj
 # USE_EXTRA_OPTS += -funsafe-math-optimizations
 # USE_EXTRA_OPTS += -O3
 
+############################# ATTENTION !!!!! ##################################
+############################# ATTENTION !!!!! ##################################
+############################# ATTENTION !!!!! ##################################
+# Do not edit anything below this, unless you are developing traceshark, it's
+# not meant to be changed by regular users.
+################################################################################
+
+################################################################################
+# Header files
+#
+
+HEADERS       = qcustomplot/qcustomplot.h
+HEADERS      += qcustomplot/qcppointer.h
+HEADERS      += qcustomplot/qcppointer_impl.h
+HEADERS      += qcustomplot/qcplist.h
+
+HEADERS      +=  ui/abstracttaskmodel.h
+HEADERS      +=  ui/cursor.h
+HEADERS      +=  ui/cursorinfo.h
+HEADERS      +=  ui/errordialog.h
+HEADERS      +=  ui/eventinfodialog.h
+HEADERS      +=  ui/eventselectdialog.h
+HEADERS      +=  ui/eventselectmodel.h
+HEADERS      +=  ui/eventselectview.h
+HEADERS      +=  ui/eventsmodel.h
+HEADERS      +=  ui/eventswidget.h
+HEADERS      +=  ui/graphenabledialog.h
+HEADERS      +=  ui/infowidget.h
+HEADERS      +=  ui/licensedialog.h
+HEADERS      +=  ui/mainwindow.h
+HEADERS      +=  ui/migrationarrow.h
+HEADERS      +=  ui/migrationline.h
+HEADERS      +=  ui/statslimitedmodel.h
+HEADERS      +=  ui/statsmodel.h
+HEADERS      +=  ui/tableview.h
+HEADERS      +=  ui/taskgraph.h
+HEADERS      +=  ui/taskmodel.h
+HEADERS      +=  ui/taskrangeallocator.h
+HEADERS      +=  ui/taskselectdialog.h
+HEADERS      +=  ui/tasktoolbar.h
+HEADERS      +=  ui/taskview.h
+HEADERS      +=  ui/tcheckbox.h
+HEADERS      +=  ui/traceplot.h
+HEADERS      +=  ui/tracesharkstyle.h
+HEADERS      +=  ui/yaxisticker.h
+
+HEADERS      +=  analyzer/abstracttask.h
+HEADERS      +=  analyzer/cpufreq.h
+HEADERS      +=  analyzer/cpu.h
+HEADERS      +=  analyzer/cpuidle.h
+HEADERS      +=  analyzer/cputask.h
+HEADERS      +=  analyzer/filterstate.h
+HEADERS      +=  analyzer/migration.h
+HEADERS      +=  analyzer/task.h
+HEADERS      +=  analyzer/tcolor.h
+HEADERS      +=  analyzer/traceanalyzer.h
+
+HEADERS      +=  parser/fileinfo.h
+HEADERS      +=  parser/genericparams.h
+HEADERS      +=  parser/paramhelpers.h
+HEADERS      +=  parser/traceevent.h
+HEADERS      +=  parser/tracefile.h
+HEADERS      +=  parser/tracelinedata.h
+HEADERS      +=  parser/traceline.h
+HEADERS      +=  parser/traceparser.h
+
+HEADERS      +=  parser/ftrace/ftraceparams.h
+HEADERS      +=  parser/ftrace/ftracegrammar.h
+
+HEADERS      +=  parser/perf/perfparams.h
+HEADERS      +=  parser/perf/perfgrammar.h
+
+HEADERS      +=  threads/indexwatcher.h
+HEADERS      +=  threads/loadbuffer.h
+HEADERS      +=  threads/loadthread.h
+HEADERS      +=  threads/threadbuffer.h
+HEADERS      +=  threads/tthread.h
+HEADERS      +=  threads/workitem.h
+HEADERS      +=  threads/workqueue.h
+HEADERS      +=  threads/workthread.h
+
+HEADERS      +=  mm/mempool.h
+HEADERS      +=  mm/stringpool.h
+HEADERS      +=  mm/stringtree.h
+
+HEADERS      +=  misc/chunk.h
+HEADERS      +=  misc/errors.h
+HEADERS      +=  misc/resources.h
+HEADERS      +=  misc/setting.h
+HEADERS      +=  misc/string.h
+HEADERS      +=  misc/traceshark.h
+HEADERS      +=  misc/tstring.h
+
+HEADERS      +=  vtl/avltree.h
+HEADERS      +=  vtl/bitvector.h
+HEADERS      +=  vtl/bsdexits.h
+HEADERS      +=  vtl/compiler.h
+HEADERS      +=  vtl/error.h
+HEADERS      +=  vtl/heapsort.h
+HEADERS      +=  vtl/tlist.h
+HEADERS      +=  vtl/time.h
+
+###############################################################################
+# Source files
+#
+
+SOURCES       = qcustomplot/qcustomplot.cpp
+
+SOURCES      +=  ui/abstracttaskmodel.cpp
+SOURCES      +=  ui/cursor.cpp
+SOURCES      +=  ui/cursorinfo.cpp
+SOURCES      +=  ui/errordialog.cpp
+SOURCES      +=  ui/eventinfodialog.cpp
+SOURCES      +=  ui/eventselectdialog.cpp
+SOURCES      +=  ui/eventselectmodel.cpp
+SOURCES      +=  ui/eventselectview.cpp
+SOURCES      +=  ui/eventsmodel.cpp
+SOURCES      +=  ui/eventswidget.cpp
+SOURCES      +=  ui/graphenabledialog.cpp
+SOURCES      +=  ui/infowidget.cpp
+SOURCES      +=  ui/licensedialog.cpp
+SOURCES      +=  ui/mainwindow.cpp
+SOURCES      +=  ui/migrationarrow.cpp
+SOURCES      +=  ui/migrationline.cpp
+SOURCES      +=  ui/statslimitedmodel.cpp
+SOURCES      +=  ui/statsmodel.cpp
+SOURCES      +=  ui/tableview.cpp
+SOURCES      +=  ui/taskgraph.cpp
+SOURCES      +=  ui/taskmodel.cpp
+SOURCES      +=  ui/taskrangeallocator.cpp
+SOURCES      +=  ui/taskselectdialog.cpp
+SOURCES      +=  ui/tasktoolbar.cpp
+SOURCES      +=  ui/taskview.cpp
+SOURCES      +=  ui/tcheckbox.cpp
+SOURCES      +=  ui/traceplot.cpp
+SOURCES      +=  ui/tracesharkstyle.cpp
+SOURCES      +=  ui/yaxisticker.cpp
+
+
+SOURCES      +=  analyzer/abstracttask.cpp
+SOURCES      +=  analyzer/cpufreq.cpp
+SOURCES      +=  analyzer/cpuidle.cpp
+SOURCES      +=  analyzer/cputask.cpp
+SOURCES      +=  analyzer/filterstate.cpp
+SOURCES      +=  analyzer/task.cpp
+SOURCES      +=  analyzer/tcolor.cpp
+SOURCES      +=  analyzer/traceanalyzer.cpp
+
+SOURCES      +=  parser/fileinfo.cpp
+SOURCES      +=  parser/traceevent.cpp
+SOURCES      +=  parser/tracefile.cpp
+SOURCES      +=  parser/traceparser.cpp
+
+SOURCES      +=  parser/ftrace/ftraceparams.cpp
+SOURCES      +=  parser/ftrace/ftracegrammar.cpp
+
+SOURCES      +=  parser/perf/perfparams.cpp
+SOURCES      +=  parser/perf/perfgrammar.cpp
+
+SOURCES      +=  threads/indexwatcher.cpp
+SOURCES      +=  threads/loadbuffer.cpp
+SOURCES      +=  threads/loadthread.cpp
+SOURCES      +=  threads/tthread.cpp
+SOURCES      +=  threads/workqueue.cpp
+
+SOURCES      +=  mm/mempool.cpp
+SOURCES      +=  mm/stringpool.cpp
+SOURCES      +=  mm/stringtree.cpp
+
+SOURCES      +=  misc/errors.cpp
+SOURCES      +=  misc/main.cpp
+SOURCES      +=  misc/setting.cpp
+
+SOURCES      +=  vtl/bitvector.cpp
+SOURCES      +=  vtl/error.cpp
+
+###############################################################################
+# Directories
+#
+
+#DESTDIR=bin #Target file directory
+OBJECTS_DIR=obj
+MOC_DIR=obj
+
 
 #############################################################################
 # Compute generic compiler flags
-# Do not edit anything below this line, unless you are developing traceshark
-# with respect to the compiler usage. This section is not mean to be changed by
-# regular users.
+#
 
 GIT_VERSION_HEADERS = misc/gitversion-template.h
 gitversion.output =  obj/gitversion.h
