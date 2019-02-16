@@ -18,14 +18,14 @@ The `sched_waking`events are not really visualized but there is a button to find
 
 ![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/39a26bc92d67b96a0a411d7d22f1ff6acd206398/doc/ts-screenshot2.png)
 
-Above is a screenshot of traceshark. The four uppermost graphs are for displaying CPU idle and frequency states. They are four because the measurment was made on a system with four virtual CPUs. The green graphs with red circles ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/idle-graph.png) show the CPU idle states while the thicker blue graphs ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/freq-graph.png) show the CPU frequency changes.
+Above is a screenshot of traceshark. The four uppermost graphs are for displaying CPU idle and frequency states. They are four because the measurement was made on a system with four virtual CPUs. The green graphs with red circles ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/idle-graph.png) show the CPU idle states while the thicker blue graphs ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/freq-graph.png) show the CPU frequency changes.
 
-Below these four graphs are the per CPU scheduling graphs, the different colors of these graphs are for different tasks. The small vertical bars that are shown just above the per CPU graphs indicates the waiting time between wakeup and being scheduled, the highest height is equal to 20 ms, i.e. a full lenght means that the waiting time was at least 20 ms, possibly more.
+Below these four graphs are the per CPU scheduling graphs, the different colors of these graphs are for different tasks. The small vertical bars that are shown just above the per CPU graphs indicates the waiting time between wakeup and being scheduled, the highest height is equal to 20 ms, i.e. a full length means that the waiting time was at least 20 ms, possibly more.
 
  Furthermore, in the scheduling graphs, there are the following subtle markers:
 * ![still running example](https://raw.githubusercontent.com/cunctator/traceshark/b552614ebc40656a6cbaef77e21ee95eb4eb32cd/doc/running60x54.png) The blue triangle indicates that the task was still running when it was scheduled out.
 * ![preempted example](https://raw.githubusercontent.com/cunctator/traceshark/b552614ebc40656a6cbaef77e21ee95eb4eb32cd/doc/preempted60x54.png) The red triangle indicates that the task was preempted when it was scheduled out.
-* ![uinterruptible example](https://raw.githubusercontent.com/cunctator/traceshark/b552614ebc40656a6cbaef77e21ee95eb4eb32cd/doc/unint60x54.png) The magenta colored plus sign indicates that the task went into uninterruptible sleep when it was scheduled out. Note that in practice, only the lower line of the plus sign is visible.
+* ![uninterruptible example](https://raw.githubusercontent.com/cunctator/traceshark/b552614ebc40656a6cbaef77e21ee95eb4eb32cd/doc/unint60x54.png) The magenta colored plus sign indicates that the task went into uninterruptible sleep when it was scheduled out. Note that in practice, only the lower line of the plus sign is visible.
 
 Below the scheduling graphs are the migration graphs. Task migrations between CPUs are shown with arrows. Fork/exit is shown with an arrow from/to `fork/exit`.
 
@@ -39,9 +39,9 @@ The task select dialog can be shown by clicking `View -> Show task list`, or by 
 
 ### 1.1.1 How to zoom and scroll vertically
 
-The graphs are by default zoomed and scrolled horizontally, i.e. timewise. You can scroll by grabbing the graph with your mouse pointer and zoom with the mouse wheel.
+The graphs are by default zoomed and scrolled horizontally, i.e. time wise. You can scroll by grabbing the graph with your mouse pointer and zoom with the mouse wheel.
 
-If you instead want to zoom or scroll vertically, you need to select the vertical axis by left clicking on it with your mouse pointer. N.B, you should click directly on the line representing the axis, not on the labels, such as "cpu0", "cpu1", etc. As long as the vertical axis is selected, all scrolling and zooming will be vertical. If you want to switch back to horizontal, then you just need to deselect the axis by clicking on it again. Vertical zooming and scrolling may be particularly useful if you are looking at a trace of a sytem with a large number of CPUs or if you are short of vertical screen space.
+If you instead want to zoom or scroll vertically, you need to select the vertical axis by left clicking on it with your mouse pointer. N.B, you should click directly on the line representing the axis, not on the labels, such as "cpu0", "cpu1", etc. As long as the vertical axis is selected, all scrolling and zooming will be vertical. If you want to switch back to horizontal, then you just need to deselect the axis by clicking on it again. Vertical zooming and scrolling may be particularly useful if you are looking at a trace of a system with a large number of CPUs or if you are short of vertical screen space.
 
 ### 1.1.2 Functionality of the buttons
 
@@ -79,7 +79,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
 * ![Export filtered CPU events](https://raw.githubusercontent.com/cunctator/traceshark/c7168ab2ffffd65f3b87ae6b65c2f9c6a7daed6b/images/exportcpuevents30x30.png) This functions exactly as the previously mentioned ![Export filtered events](https://raw.githubusercontent.com/cunctator/traceshark/c7168ab2ffffd65f3b87ae6b65c2f9c6a7daed6b/images/exportevents30x30.png) button, except that it only exports cycles events. The benefit is that the user doesn't need to separately filter on cycles events. The downside is that if the events of interest have a slightly different name, nothing will be exported. This could be the case with certain kernel versions, particularly heavily patched vendor kernels.
 * ![Cursor zoom](https://raw.githubusercontent.com/cunctator/traceshark/c7168ab2ffffd65f3b87ae6b65c2f9c6a7daed6b/images/cursorzoom30x30.png) Pressing this button will zoom the plot to the time interval that is defined by the cursors. This feature may be especially useful when a very large file has been opened and the response to mouse zooming is sluggish.
 * ![Default zoom](https://raw.githubusercontent.com/cunctator/traceshark/c7168ab2ffffd65f3b87ae6b65c2f9c6a7daed6b/images/defaultzoom30x30.png) Pressing this button will zoom the plot to the default time interval, that is from the beginning to the end of the trace. The height will also be adjusted so that everything is shown vertically too.
-* ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) Pressing this button will open a dialog that allows the user to select which types of graphs will be displayed. Here it is possible to disable certain graphs, for example CPU idle graphs that frequently may be of little interest. It is also possible to enable horizontal wakeup graphs for the per CPU task graphs that are disabled by default, becase they will frequently overlap each other. If OpenGL is enabled at compile time, by editing traceshark.pro, then it is also possible to select the desired line width of the scheduling graphs. Otherwise, the line width will always be set to 1.
+* ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) Pressing this button will open a dialog that allows the user to select which types of graphs will be displayed. Here it is possible to disable certain graphs, for example CPU idle graphs that frequently may be of little interest. It is also possible to enable horizontal wakeup graphs for the per CPU task graphs that are disabled by default, because they will frequently overlap each other. If OpenGL is enabled at compile time, by editing traceshark.pro, then it is also possible to select the desired line width of the scheduling graphs. Otherwise, the line width will always be set to 1.
 * ![Show global statistics](https://github.com/cunctator/traceshark/raw/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/getstats30x30.png) Pressing this button will show dialog with global statistics on the left side of the plot. The statistics show how many % of the CPU time each task has consumed as well as the time consumed. The percentages are percentage of a core. This means that the maximum for a normal task is 100% and for the idle task, swapper with pid 0, the maximum is `N * 100`, where N is the number of CPUs. The tasks are sorted so that those tasks that consume more CPU time are shown earlier. The dialog has buttons for adding selected tasks to the legend, to add them as task graphs, to filter the events view on them, or to reset the filtering. There is even a button to close the dialog.
 * ![Show statistics limited by cursors](https://github.com/cunctator/traceshark/raw/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/getstatstimelimit30x30.png) Pressing this button will show dialog with the same statistics as the previous button but the scope will not be the whole trace but the time between cursors and the statistics will be shown on the right side of the plot. If the cursors are moved while the dialog is shown, then the statistics will be updated accordingly.
 
@@ -94,7 +94,7 @@ The top widget has some buttons as well:
   2. Double click to move the cursor to just after the scheduling of interest
   3. Make sure that the task is selected.
   4. Click on the ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/wakeup30x30.png) button.
-  5. Locate the wakup event in the events view. It should be selected.
+  5. Locate the wakeup event in the events view. It should be selected.
   6. Double click on the `Info` field to display the backtrace.
   7. If the backtrace leads to an interrupt (including software interrupts), then the wakeup source has been found.
   8. If the `sched_wakeup` event is executed as pid 0, that is no new task has been autoselected, and/or, the backtrace leads to something like this:
@@ -111,7 +111,7 @@ The top widget has some buttons as well:
   9. If none of the above is true, then go back to IV.
 * ![Find Waking](https://github.com/cunctator/traceshark/raw/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/waking30x30.png) This is used to find the `sched_waking` event that is associated with and precedes a particular `sched_wakeup` event. A `sched_wakeup` event must be selected in the events view for this button to be enabled.
 * ![Find Waking Direct](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/wakingdirect30x30.png) This is used to find the `sched_waking` event directly, without first finding the `sched_wakeup` event. It operates in the same way as the ![Find Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/wakeup30x30.png) button, based on the currently selected task and the position of the currently active cursor. If you use this button, you should remember that tasks might sometimes wake up without a `sched_waking` event. One example is when new tasks are woken up by the `sched_wakeup_new` event; in that case there is no corresponding `sched_waking` event.
-* ![Find next sched_switch sleep event](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/findsleep30x30.png) This is used to find the next sched_switch event that puts the currently selected task to sleep. It is sometimes desirable to see what kind of code makes a task go to sleep; this is particlarly useful together with the feature that the backtrace can be displayed by double clicking on the event's info field in the events view.
+* ![Find next sched_switch sleep event](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/findsleep30x30.png) This is used to find the next sched_switch event that puts the currently selected task to sleep. It is sometimes desirable to see what kind of code makes a task go to sleep; this is particularly useful together with the feature that the backtrace can be displayed by double clicking on the event's info field in the events view.
 * ![Add unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/addtask30x30.png) Adds a unified scheduling graph for the currently selected task.
 * ![Remove unified task graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/removetask30x30.png) Removes the currently selected unified graph.
 * ![Filter on the current task](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/filtercurrent30x30.png) This will filter the events view so that only events involving the currently selected task will be displayed.
@@ -131,13 +131,13 @@ qmake-qt5 (or just qmake)
 make -j5
 ```
 
-It is not necessary but you can customize your build by editing traceshark.pro. One of the most important options is that you can disable OpenGL support. If and only if OpenGL support is enabled, then it is possible for the user to select the line width of the scheduling graphs, otherwise the line width will always be set to 1. OpenGL is enabled at compile time by default. If it has been enabled at compile time, then it will be enabled by default when running the application but only if the screen is deemed to be a high resoltuion screen.  The user can enable or disable OpenGL at runtime by opening the dialog with the ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) button. If you run into rendering problems, including problems with very slow rendering, then disabling OpenGL might be worth trying. OpenGL can be disabled at compile time by uncommenting the following line in traceshark.pro:
+It is not necessary but you can customize your build by editing traceshark.pro. One of the most important options is that you can disable OpenGL support. If and only if OpenGL support is enabled, then it is possible for the user to select the line width of the scheduling graphs, otherwise the line width will always be set to 1. OpenGL is enabled at compile time by default. If it has been enabled at compile time, then it will be enabled by default when running the application but only if the screen is deemed to be a high resolution screen.  The user can enable or disable OpenGL at runtime by opening the dialog with the ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) button. If you run into rendering problems, including problems with very slow rendering, then disabling OpenGL might be worth trying. OpenGL can be disabled at compile time by uncommenting the following line in traceshark.pro:
 
 ```
 # DISABLE_OPENGL = yes
 ```
 
-You can uncomment the following if you want the try to detect and optmize for your build machine:
+You can uncomment the following if you want the try to detect and optimize for your build machine:
 
 ```
 # MARCH_FLAG = -march=native
@@ -247,7 +247,7 @@ that for example scheduling is not correctly shown.
 
 One approach if the perf provided by your distro doesn't work with traceshark,
 is to check the kernel version with "uname -r", then go to kernel.org and
-donwload the corresponding mainline kernel and compile perf from the tools/perf
+download the corresponding mainline kernel and compile perf from the tools/perf
 directory in that kernel source tree. If it still doesn't work and you have a
 very old kernel, it might work to use perf from a newer kernel, although you
 would probably be better off if you upgraded both the kernel and perf but
