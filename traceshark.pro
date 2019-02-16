@@ -360,6 +360,7 @@ HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
 HEADERS      +=  misc/string.h
 HEADERS      +=  misc/traceshark.h
+HEADERS      +=  misc/translate.h
 HEADERS      +=  misc/tstring.h
 
 HEADERS      +=  vtl/avltree.h
@@ -441,6 +442,7 @@ SOURCES      +=  mm/stringtree.cpp
 SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
 SOURCES      +=  misc/setting.cpp
+SOURCES      +=  misc/translate.cpp
 
 SOURCES      +=  vtl/bitvector.cpp
 SOURCES      +=  vtl/error.cpp

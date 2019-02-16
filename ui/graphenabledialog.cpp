@@ -74,6 +74,7 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 	Setting::SettingIndex idxn;
 	QPushButton *okButton;
 	QPushButton *cancelButton;
+	QPushButton *saveButton;
 
 	checkBoxMap = new QMap<Setting::SettingIndex, TCheckBox*>;
 	for (idx = 0; idx < Setting::NR_SETTINGS; idx++) {
@@ -148,12 +149,15 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 	mainLayout->addLayout(buttonLayout);
 	cancelButton = new QPushButton(tr("Cancel"));
 	okButton = new QPushButton(tr("OK"));
+	saveButton = new QPushButton(tr("Save settings"));
 	buttonLayout->addStretch();
 	buttonLayout->addWidget(cancelButton);
 	buttonLayout->addWidget(okButton);
+	buttonLayout->addWidget(saveButton);
 	buttonLayout->addStretch();
 	tsconnect(cancelButton, clicked(), this, cancelClicked());
 	tsconnect(okButton, clicked(), this, okClicked());
+	tsconnect(saveButton, clicked(), this, saveClicked());
 }
 
 GraphEnableDialog::~GraphEnableDialog()
@@ -209,6 +213,25 @@ void GraphEnableDialog::cancelClicked()
 	}
 	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
 	openglBox->setChecked(Setting::isOpenGLEnabled());
+}
+
+void GraphEnableDialog::saveClicked()
+{
+	int ts_errno;
+
+	okClicked();
+	ts_errno = Setting::saveSettings();
+	if (ts_errno != 0)
+		vtl::warn(ts_errno, "Failed to load settings from %s",
+			  TS_SETTING_FILENAME);
+	else {
+		QMessageBox msgBox;
+		QString msg = tr("The settings has been saved to ");
+		msg += QString(TS_SETTING_FILENAME);
+		msgBox.setText(msg);
+		msgBox.exec();
+		//vtl::warnx("Saved settings to %s", TS_SETTING_FILENAME);
+	}
 }
 
 void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)

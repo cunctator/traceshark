@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,44 +50,60 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRAPHENABLEDIALOG_H
-#define GRAPHENABLEDIALOG_H
+#include "translate.h"
 
-#include "misc/setting.h"
-#include "vtl/error.h"
-#include <QDialog>
-
-QT_BEGIN_NAMESPACE
-class QComboBox;
-class QTextEdit;
-template <typename T, typename U> class QMap;
-QT_END_NAMESPACE
-
-class TCheckBox;
-
-class GraphEnableDialog : public QDialog {
-	Q_OBJECT
-
-public:
-	GraphEnableDialog(QWidget *parent = 0, bool opengl = false);
-	~GraphEnableDialog();
-	void setOpenGLStatus(bool enabled);
-signals:
-	void settingsChanged();
-private:
-	QMap<Setting::SettingIndex, TCheckBox*> *checkBoxMap;
-	QComboBox *comboBox;
-	int savedHeight;
-	bool openglStatus;
-	TCheckBox *openglBox;
-public slots:
-	void show();
-private slots:
-	void okClicked();
-	void cancelClicked();
-	void saveClicked();
-	void handleBoxClicked(TCheckBox *, bool);
-	void handleOpenGLClicked(TCheckBox *, bool);
-};
-
-#endif /* GRAPHENABLEDIALOG_H */
+tserror_t translate_FileError(QFileDevice::FileError err)
+{
+	tserror_t ecode;
+	switch(err) {
+	case QFileDevice::NoError:
+		ecode = TS_ERROR_NOERROR;
+		break;
+	case QFileDevice::ReadError:
+		ecode = TS_ERROR_FILE_READ;
+		break;
+	case QFileDevice::WriteError:
+		ecode = TS_ERROR_FILE_WRITE;
+		break;
+	case QFileDevice::FatalError:
+		ecode = TS_ERROR_FATALERROR;
+		break;
+	case QFileDevice::ResourceError:
+		ecode = TS_ERROR_FILE_RESOURCE;
+		break;
+	case QFileDevice::OpenError:
+		ecode = TS_ERROR_OPEN;
+		break;
+	case QFileDevice::AbortError:
+		ecode = TS_ERROR_ABORT;
+		break;
+	case QFileDevice::TimeOutError:
+		ecode = TS_ERROR_TIMEOUT;
+		break;
+	case QFileDevice::UnspecifiedError:
+		ecode = TS_ERROR_UNSPEC;
+		break;
+	case QFileDevice::RemoveError:
+		ecode = TS_ERROR_FILE_REMOVE;
+		break;
+	case QFileDevice::RenameError:
+		ecode = TS_ERROR_FILE_RENAME;
+		break;
+	case QFileDevice::PositionError:
+		ecode = TS_ERROR_FILE_POS;
+		break;
+	case QFileDevice::ResizeError:
+		ecode = TS_ERROR_FILE_RESIZE;
+		break;
+	case QFileDevice::PermissionsError:
+		ecode = TS_ERROR_FILE_PERM;
+		break;
+	case QFileDevice::CopyError:
+		ecode = TS_ERROR_FILE_COPY;
+		break;
+	default:
+		ecode = TS_ERROR_UNSPEC;
+		break;
+	}
+	return ecode;
+}

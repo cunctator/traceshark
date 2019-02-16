@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,44 +50,12 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRAPHENABLEDIALOG_H
-#define GRAPHENABLEDIALOG_H
+#ifndef _TS_TRANSLATE_H
+#define _TS_TRANSLATE_H
 
-#include "misc/setting.h"
-#include "vtl/error.h"
-#include <QDialog>
+#include "errors.h"
+#include <QFile>
 
-QT_BEGIN_NAMESPACE
-class QComboBox;
-class QTextEdit;
-template <typename T, typename U> class QMap;
-QT_END_NAMESPACE
+tserror_t translate_FileError(QFileDevice::FileError err);
 
-class TCheckBox;
-
-class GraphEnableDialog : public QDialog {
-	Q_OBJECT
-
-public:
-	GraphEnableDialog(QWidget *parent = 0, bool opengl = false);
-	~GraphEnableDialog();
-	void setOpenGLStatus(bool enabled);
-signals:
-	void settingsChanged();
-private:
-	QMap<Setting::SettingIndex, TCheckBox*> *checkBoxMap;
-	QComboBox *comboBox;
-	int savedHeight;
-	bool openglStatus;
-	TCheckBox *openglBox;
-public slots:
-	void show();
-private slots:
-	void okClicked();
-	void cancelClicked();
-	void saveClicked();
-	void handleBoxClicked(TCheckBox *, bool);
-	void handleOpenGLClicked(TCheckBox *, bool);
-};
-
-#endif /* GRAPHENABLEDIALOG_H */
+#endif /* _TS_TRANSLATE_H */

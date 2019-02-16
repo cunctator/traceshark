@@ -63,6 +63,7 @@
 #include "misc/tstring.h"
 #include "vtl/compiler.h"
 
+#define MAX_LINE_WIDTH_OPENGL (4)
 #define DEFAULT_LINE_WIDTH_OPENGL (2)
 #define DEFAULT_LINE_WIDTH (1)
 

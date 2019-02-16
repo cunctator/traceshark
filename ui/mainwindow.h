@@ -178,6 +178,7 @@ private:
 	void rescaleTrace();
 	void clearPlot();
 	void showTrace();
+	void loadSettings();
 	void setupCursors();
 	void setupSettings();
 	void updateResetFiltersEnabled();

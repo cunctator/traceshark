@@ -53,14 +53,14 @@
 #ifndef SETTING_H
 #define SETTING_H
 
-#include <QObject>
 #include <QString>
+#include <QMap>
 
 QT_BEGIN_NAMESPACE
-class QCheckBox;
+class QTextStream;
 QT_END_NAMESPACE
 
-class GraphEnableDialog;
+#define TS_SETTING_FILENAME ".traceshark"
 
 class SettingDependency
 {
@@ -73,7 +73,7 @@ class Setting
 {
 public:
 	Setting();
-	enum SettingIndex {
+	enum SettingIndex : int {
 		SHOW_SCHED_GRAPHS = 0,
 		HORIZONTAL_WAKEUP,
 		VERTICAL_WAKEUP,
@@ -81,9 +81,14 @@ public:
 		SHOW_CPUIDLE_GRAPHS,
 		SHOW_MIGRATION_GRAPHS,
 		SHOW_MIGRATION_UNLIMITED,
-		NR_SETTINGS
+		NR_SETTINGS,
+		/* These are not regular settings but must have unique values */
+		OPENGL_ENABLED,
+		LINE_WIDTH,
+		END_SETTINGS,
 	};
 	static void setName(enum SettingIndex idx, const QString &n);
+	static void setKey(enum SettingIndex idx, const QString &key);
 	static void setEnabled(enum SettingIndex idx, bool e);
 	static void clearDependencies(enum SettingIndex idx);
 	static void addDependency(enum SettingIndex idx,
@@ -97,10 +102,26 @@ public:
 	static const SettingDependency &getDependent(enum SettingIndex idx,
 						     unsigned int nr);
 	static void setLineWidth(int width);
+	static void setLineWidthKey(const QString &key);
 	static int getLineWidth();
 	static void setOpenGLEnabled(bool e);
+	static void setOpenGLEnabledKey(const QString &key);
 	static bool isOpenGLEnabled();
+	static int loadSettings();
+	static int saveSettings();
 private:
+	static int readKeyValuePair(QTextStream &stream, QString &key,
+				    QString &value);
+	static QString getFileName();
+	static bool boolFromValue(bool *ok, const QString &value);
+	static bool isIrregularIndex(enum SettingIndex idx);
+	static bool isRegularIndex(enum SettingIndex idx);
+	static void handleIrregularIndex(enum SettingIndex idx,
+					 const QString &value);
+	static void handleRegularIndex(enum SettingIndex idx,
+				       const QString &value);
+	static int handleOlderVersion(int oldver, int newver);
+	static const QString &boolToQString(bool b);
 	bool enabled;
 	QString name;
 	SettingDependency dependency[4];
@@ -110,7 +131,8 @@ private:
 	static Setting settings[];
 	static int line_width;
 	static bool opengl;
-	QCheckBox *checkBox;
+	static QMap<QString, enum SettingIndex> fileKeyMap;
+	static const int this_version;
 };
 
 #endif /* SETTING_H */

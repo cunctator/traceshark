@@ -208,6 +208,8 @@ MainWindow::MainWindow():
 	tracePlot(nullptr), graphEnableDialog(nullptr), filterActive(false)
 {
 	setupSettings();
+	loadSettings();
+
 	analyzer = new TraceAnalyzer;
 
 	infoWidget = new InfoWidget(this);
@@ -629,6 +631,16 @@ skipIdleFreqGraphs:
 	tracePlot->replot();
 }
 
+void MainWindow::loadSettings()
+{
+	int ts_errno;
+
+	ts_errno = Setting::loadSettings();
+	if (ts_errno != 0)
+		vtl::warn(ts_errno, "Failed to load settings from %s",
+			  TS_SETTING_FILENAME);
+}
+
 void MainWindow::setupCursors()
 {
 	double start, end, red, blue;
@@ -673,34 +685,48 @@ void MainWindow::setupSettings()
 
 	Setting::setName(Setting::HORIZONTAL_WAKEUP,
 			 tr("Show horizontal wakeup"));
+	Setting::setKey(Setting::HORIZONTAL_WAKEUP,
+			QString("HORIZONTAL_WAKEUP"));
 	Setting::setEnabled(Setting::HORIZONTAL_WAKEUP, false);
 	Setting::addDependency(Setting::HORIZONTAL_WAKEUP, schedDep);
 
 	Setting::setName(Setting::VERTICAL_WAKEUP,
 			 tr("Show vertical wakeup"));
+	Setting::setKey(Setting::VERTICAL_WAKEUP,
+			QString("VERTICAL_WAKEUP"));
 	Setting::setEnabled(Setting::VERTICAL_WAKEUP, true);
 	Setting::addDependency(Setting::VERTICAL_WAKEUP, schedDep);
 
 	Setting::setName(Setting::SHOW_SCHED_GRAPHS,
 			 tr("Show scheduling graphs"));
+	Setting::setKey(Setting::SHOW_SCHED_GRAPHS,
+			QString("SHOW_SCHED_GRAPHS"));
 	Setting::setEnabled(Setting::SHOW_SCHED_GRAPHS, true);
 
 	Setting::setName(Setting::SHOW_CPUFREQ_GRAPHS,
 			 tr("Show CPU frequency graphs"));
+	Setting::setKey(Setting::SHOW_CPUFREQ_GRAPHS,
+			QString("SHOW_CPUFREQ_GRAPHS"));
 	Setting::setEnabled(Setting::SHOW_CPUFREQ_GRAPHS, true);
 
 	Setting::setName(Setting::SHOW_CPUIDLE_GRAPHS,
 			 tr("Show CPU idle graphs"));
+	Setting::setKey(Setting::SHOW_CPUIDLE_GRAPHS,
+			QString("SHOW_CPUIDLE_GRAPHS"));
 	Setting::setEnabled(Setting::SHOW_CPUIDLE_GRAPHS, true);
 
 	QString maxstr = QString::number(MAX_NR_MIGRATIONS / 1000);
 	maxstr = maxstr + QString("k");
 	Setting::setName(Setting::SHOW_MIGRATION_GRAPHS,
 			 tr("Show migrations if < ") + maxstr);
+	Setting::setKey(Setting::SHOW_MIGRATION_GRAPHS,
+			QString("SHOW_MIGRATION_GRAPHS"));
 	Setting::setEnabled(Setting::SHOW_MIGRATION_GRAPHS, true);
 
 	Setting::setName(Setting::SHOW_MIGRATION_UNLIMITED,
 			 tr("Unlimited migrations"));
+	Setting::setKey(Setting::SHOW_MIGRATION_UNLIMITED,
+			QString("SHOW_MIGRATION_UNLIMITED"));
 	Setting::setEnabled(Setting::SHOW_MIGRATION_UNLIMITED, false);
 	Setting::addDependency(Setting::SHOW_MIGRATION_UNLIMITED, unlimitedDep);
 
@@ -713,7 +739,9 @@ void MainWindow::setupSettings()
 	bool opengl = has_opengl() && !isLowResScreen();
 	int width = opengl ? DEFAULT_LINE_WIDTH_OPENGL : DEFAULT_LINE_WIDTH;
 	Setting::setOpenGLEnabled(opengl);
+	Setting::setOpenGLEnabledKey(QString("OPENGL_ENABLED"));
 	Setting::setLineWidth(width);
+	Setting::setLineWidthKey(QString("SCHED_GRAPH_LINE_WIDTH"));
 }
 
 void MainWindow::addSchedGraph(CPUTask &cpuTask)

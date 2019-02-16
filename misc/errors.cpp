@@ -51,9 +51,12 @@
  */
 
 #include "misc/errors.h"
+#include <QFile>
 
-/* Do not change the order of these without updating the enum in
- * errors.h */
+/*
+ * Do not change the order of these without updating the enum in
+ * errors.h
+ */
 
 static const char noerror[] = "No error has occurred.";
 static const char interne[] = "A serious internal error has occurred.";
@@ -62,6 +65,26 @@ static const char errpars[] = "A parsing error has occurred.";
 static const char errcpue[] = "Could not find cycles or cpu-cycles events.";
 static const char errchan[] = "The tracefile has changed on disk.";
 static const char errueof[] = "Unexpected end of file.";
+static const char errffer[] = "Incorrect file format.";
+static const char errnewf[] = \
+	"The file format is from a newer unsupported version.";
+
+/* The errors below are to accomodate the Qt QFileDevice::FileError codes */
+static const char errfred[] = "An error occurred when reading from the file.";
+static const char errfwri[] = "An error occurred when writing to the file.";
+static const char errffat[] = "A fatal error occurred.";
+static const char errfres[] = \
+	"Out of resources (e.g., too many open files, out of memory, etc.)";
+static const char errfope[] = "The file could not be opened.";
+static const char errfabt[] = "The operation was aborted.";
+static const char errftim[] = "A timeout occurred.";
+static const char errfuns[] = "An unspecified error occurred.";
+static const char errfrem[] = "The file could not be removed.";
+static const char errfren[] = "The file could not be renamed.";
+static const char errfpos[] = "The position in the file could not be changed.";
+static const char errfrez[] = "The file could not be resized.";
+static const char errfacc[] = "The file could not be accessed.";
+static const char errfcop[] = "The file could not be copied.";
 
 static const char *errorstrings[TS_NR_ERRORS] = {
 	noerror,
@@ -70,7 +93,23 @@ static const char *errorstrings[TS_NR_ERRORS] = {
 	errpars,
 	errcpue,
 	errchan,
-	errueof
+	errueof,
+	errffer,
+	errnewf,
+	errfred,
+	errfwri,
+	errffat,
+	errfres,
+	errfope,
+	errfabt,
+	errftim,
+	errfuns,
+	errfrem,
+	errfren,
+	errfpos,
+	errfrez,
+	errfacc,
+	errfcop
 };
 
 const char *ts_strerror(int ts_errno)
