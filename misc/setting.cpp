@@ -57,7 +57,7 @@
 
 #include <QCheckBox>
 
-Setting::Setting(): enabled(true), nrDep(0), nrDependents(0), checkBox(nullptr)
+Setting::Setting(): enabled(true), nrDep(0), nrDependents(0)
 {
 	bzero(dependency, sizeof(dependency));
 	bzero(dependent, sizeof(dependent));
@@ -137,67 +137,9 @@ const SettingDependency &Setting::getDependent(enum SettingIndex idx,
 
 Setting Setting::settings[NR_SETTINGS];
 
-bool Setting::backup[NR_SETTINGS];
-
 int Setting::line_width = 0;
 
 bool Setting::opengl = false;
-
-void Setting::backupState()
-{
-	int idx;
-	for (idx = 0; idx < NR_SETTINGS; idx++) {
-		backup[idx] = settings[idx].enabled;
-	}
-}
-
-void Setting::restoreState()
-{
-	int idx;
-	for (idx = 0; idx < NR_SETTINGS; idx++) {
-		settings[idx].enabled = backup[idx];
-	}
-}
-
-void Setting::addCheckBox(enum SettingIndex idx, QCheckBox *checkBox)
-{
-	settings[idx].checkBox = checkBox;
-	tsconnect(checkBox, clicked(), &settings[idx], clicked());
-}
-
-void Setting::clicked()
-{
-	unsigned int i;
-	int idx = (int) (this - &settings[0]);
-	bool en;
-
-	if (idx < 0 || idx >= NR_SETTINGS)
-		vtl::errx(BSD_EX_SOFTWARE, "Something went wrong in %s:%d",
-			  __FILE__,__LINE__);
-
-	Setting &s = settings[idx];
-	en = s.checkBox->isChecked();
-	enabled = en;
-
-	for (i = 0; i < s.nrDependents; i++) {
-		SettingDependency &dep = s.dependent[i];
-		bool cb_enabled = dep.desiredValue == enabled;
-		settings[dep.index].checkBox->setEnabled(cb_enabled);
-	}
-
-	emit clicked((SettingIndex) idx);
-}
-
-
-void Setting::addGraphEnableDialog(GraphEnableDialog *dialog)
-{
-	int idx;
-
-	for (idx = 0; idx < NR_SETTINGS; idx++) {
-		tsconnect(&settings[idx], clicked(enum SettingIndex),
-			  dialog, settingClicked(enum SettingIndex));
-	}
-}
 
 void Setting::setLineWidth(int width)
 {

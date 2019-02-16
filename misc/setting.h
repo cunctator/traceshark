@@ -69,9 +69,8 @@ public:
 	bool desiredValue;
 };
 
-class Setting : QObject
+class Setting
 {
-	Q_OBJECT
 public:
 	Setting();
 	enum SettingIndex {
@@ -97,10 +96,6 @@ public:
 						      unsigned int nr);
 	static const SettingDependency &getDependent(enum SettingIndex idx,
 						     unsigned int nr);
-	static void addCheckBox(enum SettingIndex idx, QCheckBox *checkBox);
-	static void addGraphEnableDialog(GraphEnableDialog *dialog);
-	static void backupState();
-	static void restoreState();
 	static void setLineWidth(int width);
 	static int getLineWidth();
 	static void setOpenGLEnabled(bool e);
@@ -113,14 +108,9 @@ private:
 	unsigned int nrDep;
 	unsigned int nrDependents;
 	static Setting settings[];
-	static bool backup[];
 	static int line_width;
 	static bool opengl;
 	QCheckBox *checkBox;
-signals:
-	void clicked(enum SettingIndex idx);
-private slots:
-	void clicked();
 };
 
 #endif /* SETTING_H */
