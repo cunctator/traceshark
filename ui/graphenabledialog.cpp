@@ -222,7 +222,7 @@ void GraphEnableDialog::saveClicked()
 	okClicked();
 	ts_errno = Setting::saveSettings();
 	if (ts_errno != 0)
-		vtl::warn(ts_errno, "Failed to load settings from %s",
+		vtl::warn(ts_errno, "Failed to save settings to %s",
 			  TS_SETTING_FILENAME);
 	else {
 		QMessageBox msgBox;
@@ -230,7 +230,6 @@ void GraphEnableDialog::saveClicked()
 		msg += QString(TS_SETTING_FILENAME);
 		msgBox.setText(msg);
 		msgBox.exec();
-		//vtl::warnx("Saved settings to %s", TS_SETTING_FILENAME);
 	}
 }
 
