@@ -187,17 +187,17 @@ int Setting::saveSettings()
 {
 	QString name = getFileName();
 	QFile file(name);
-	QMap<QString, enum Setting::SettingIndex>::const_iterator iter;
+	QMap<QString, enum Setting::SettingIndex>::iterator iter;
 
 	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-		QFileDevice::FileError error = file.error();
+		qfile_error_class::FileError error = file.error();
 		return -translate_FileError(error);
 	}
 	QTextStream stream(&file);
         stream << QString(TRACESHARK_VERSION_KEY) << " ";
 	stream << QString::number(this_version) << "\n";
 
-	for (iter = fileKeyMap.cbegin(); iter != fileKeyMap.cend(); iter++) {
+	for (iter = fileKeyMap.begin(); iter != fileKeyMap.end(); iter++) {
 		SettingIndex idx = iter.value();
 		const QString &key = iter.key();
 		if (idx >= 0 && idx < NR_SETTINGS) {
@@ -213,8 +213,8 @@ int Setting::saveSettings()
 		}
 	}
 	stream.flush();
-	QFileDevice::FileError err = file.error();
-	if (err != QFileDevice::NoError)
+	qfile_error_t err = file.error();
+	if (err != qfile_error_class::NoError)
 		return -translate_FileError(err);
 	return 0;
 }
@@ -232,7 +232,7 @@ int Setting::loadSettings()
 	if (!file.exists())
 		return 0;
 	if (!file.open(QIODevice::ReadOnly)) {
-		QFileDevice::FileError error = file.error();
+		qfile_error_t error = file.error();
 		return -translate_FileError(error);
 	}
 	QTextStream stream(&file);
@@ -255,10 +255,10 @@ int Setting::loadSettings()
 		if (rval != 0)
 			return rval;
 		enum SettingIndex idx;
-		QMap<QString, enum SettingIndex>::const_iterator iter;
+		QMap<QString, enum SettingIndex>::iterator iter;
 		iter = fileKeyMap.find(key);
-		if (iter == fileKeyMap.cend())
-		    continue;
+		if (iter == fileKeyMap.end())
+			continue;
 		idx = iter.value();
 		if (isIrregularIndex(idx)) {
 			handleIrregularIndex(idx, value);

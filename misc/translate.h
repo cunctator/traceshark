@@ -56,6 +56,14 @@
 #include "errors.h"
 #include <QFile>
 
-tserror_t translate_FileError(QFileDevice::FileError err);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+typedef QFile::FileError qfile_error_t;
+#define qfile_error_class QFile
+#else
+typedef QFileDevice::FileError qfile_error_t;
+#define qfile_error_class QFileDevice
+#endif
+
+tserror_t translate_FileError(qfile_error_t err);
 
 #endif /* _TS_TRANSLATE_H */

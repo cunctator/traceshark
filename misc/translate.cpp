@@ -52,53 +52,53 @@
 
 #include "translate.h"
 
-tserror_t translate_FileError(QFileDevice::FileError err)
+tserror_t translate_FileError(qfile_error_t err)
 {
 	tserror_t ecode;
 	switch(err) {
-	case QFileDevice::NoError:
+	case qfile_error_class::NoError:
 		ecode = TS_ERROR_NOERROR;
 		break;
-	case QFileDevice::ReadError:
+	case qfile_error_class::ReadError:
 		ecode = TS_ERROR_FILE_READ;
 		break;
-	case QFileDevice::WriteError:
+	case qfile_error_class::WriteError:
 		ecode = TS_ERROR_FILE_WRITE;
 		break;
-	case QFileDevice::FatalError:
+	case qfile_error_class::FatalError:
 		ecode = TS_ERROR_FATALERROR;
 		break;
-	case QFileDevice::ResourceError:
+	case qfile_error_class::ResourceError:
 		ecode = TS_ERROR_FILE_RESOURCE;
 		break;
-	case QFileDevice::OpenError:
+	case qfile_error_class::OpenError:
 		ecode = TS_ERROR_OPEN;
 		break;
-	case QFileDevice::AbortError:
+	case qfile_error_class::AbortError:
 		ecode = TS_ERROR_ABORT;
 		break;
-	case QFileDevice::TimeOutError:
+	case qfile_error_class::TimeOutError:
 		ecode = TS_ERROR_TIMEOUT;
 		break;
-	case QFileDevice::UnspecifiedError:
+	case qfile_error_class::UnspecifiedError:
 		ecode = TS_ERROR_UNSPEC;
 		break;
-	case QFileDevice::RemoveError:
+	case qfile_error_class::RemoveError:
 		ecode = TS_ERROR_FILE_REMOVE;
 		break;
-	case QFileDevice::RenameError:
+	case qfile_error_class::RenameError:
 		ecode = TS_ERROR_FILE_RENAME;
 		break;
-	case QFileDevice::PositionError:
+	case qfile_error_class::PositionError:
 		ecode = TS_ERROR_FILE_POS;
 		break;
-	case QFileDevice::ResizeError:
+	case qfile_error_class::ResizeError:
 		ecode = TS_ERROR_FILE_RESIZE;
 		break;
-	case QFileDevice::PermissionsError:
+	case qfile_error_class::PermissionsError:
 		ecode = TS_ERROR_FILE_PERM;
 		break;
-	case QFileDevice::CopyError:
+	case qfile_error_class::CopyError:
 		ecode = TS_ERROR_FILE_COPY;
 		break;
 	default:
