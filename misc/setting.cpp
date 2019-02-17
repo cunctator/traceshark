@@ -187,7 +187,7 @@ int Setting::saveSettings()
 {
 	QString name = getFileName();
 	QFile file(name);
-	QMap<QString, enum Setting::SettingIndex>::iterator iter;
+	QMap<QString, enum Setting::SettingIndex>::const_iterator iter;
 
 	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
 		qfile_error_class::FileError error = file.error();
@@ -255,7 +255,7 @@ int Setting::loadSettings()
 		if (rval != 0)
 			return rval;
 		enum SettingIndex idx;
-		QMap<QString, enum SettingIndex>::iterator iter;
+		QMap<QString, enum SettingIndex>::const_iterator iter;
 		iter = fileKeyMap.find(key);
 		if (iter == fileKeyMap.end())
 			continue;
