@@ -226,8 +226,8 @@ void GraphEnableDialog::saveClicked()
 			  TS_SETTING_FILENAME);
 	else {
 		QMessageBox msgBox;
-		QString msg = tr("The settings has been saved to ");
-		msg += QString(TS_SETTING_FILENAME);
+		QString msg = tr("The settings have been saved to:\n");
+		msg += Setting::getFileName();
 		msgBox.setText(msg);
 		msgBox.exec();
 	}

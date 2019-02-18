@@ -106,6 +106,7 @@ public:
 	static bool isOpenGLEnabled();
 	static int loadSettings();
 	static int saveSettings();
+	static const QString &getFileName();
 private:
 	static void setName(enum SettingIndex idx, const QString &n);
 	static void setKey(enum SettingIndex idx, const QString &key);
@@ -115,7 +116,6 @@ private:
 	static void setLineWidthKey(const QString &key);
 	static int readKeyValuePair(QTextStream &stream, QString &key,
 				    QString &value);
-	static QString getFileName();
 	static bool boolFromValue(bool *ok, const QString &value);
 	static bool isIrregularIndex(enum SettingIndex idx);
 	static bool isRegularIndex(enum SettingIndex idx);

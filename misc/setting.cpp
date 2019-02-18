@@ -256,12 +256,17 @@ void Setting::setKey(enum SettingIndex idx, const QString &key)
 	fileKeyMap[key] = idx;
 }
 
-QString Setting::getFileName()
+const QString &Setting::getFileName()
 {
-	char *homedir = getenv("HOME");
-	QString name = QString(homedir);
-	name += QString("/");
-	name += QString(TS_SETTING_FILENAME);
+	static bool need_init = true;
+	static QString name;
+	if (need_init) {
+		char *homedir = getenv("HOME");
+		name = QString(homedir);
+		name += QString("/");
+		name += QString(TS_SETTING_FILENAME);
+		need_init = false;
+	}
 	return name;
 }
 
@@ -272,8 +277,10 @@ int Setting::saveSettings()
 	QMap<QString, enum Setting::SettingIndex>::const_iterator iter;
 
 	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-		qfile_error_class::FileError error = file.error();
-		return -translate_FileError(error);
+		qfile_error_t error = file.error();
+		if (error != qfile_error_class::NoError)
+			return -translate_FileError(error);
+		return -TS_ERROR_UNSPEC;
 	}
 	QTextStream stream(&file);
         stream << QString(TRACESHARK_VERSION_KEY) << " ";
@@ -315,7 +322,9 @@ int Setting::loadSettings()
 		return 0;
 	if (!file.open(QIODevice::ReadOnly)) {
 		qfile_error_t error = file.error();
-		return -translate_FileError(error);
+		if (error != qfile_error_class::NoError)
+			return -translate_FileError(error);
+		return -TS_ERROR_UNSPEC;
 	}
 	QTextStream stream(&file);
 	if (!stream.atEnd()) {
