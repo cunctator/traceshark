@@ -52,6 +52,8 @@
 
 #include <stdlib.h>
 
+#include <QObject>
+
 #include "misc/errors.h"
 #include "misc/traceshark.h"
 #include "ui/graphenabledialog.h"
@@ -65,6 +67,86 @@ Setting::Setting(): enabled(true), nrDep(0), nrDependents(0)
 {
 	bzero(dependency, sizeof(dependency));
 	bzero(dependent, sizeof(dependent));
+}
+
+void Setting::setupSettings()
+{
+	QObject q;
+	SettingDependency schedDep;
+	schedDep.index = Setting::SHOW_SCHED_GRAPHS;
+	schedDep.desiredValue = true;
+
+	SettingDependency unlimitedDep;
+	unlimitedDep.index = Setting::SHOW_MIGRATION_GRAPHS;
+	unlimitedDep.desiredValue = true;
+
+	setName(Setting::HORIZONTAL_WAKEUP, q.tr("Show horizontal wakeup"));
+	setKey(Setting::HORIZONTAL_WAKEUP, QString("HORIZONTAL_WAKEUP"));
+	setEnabled(Setting::HORIZONTAL_WAKEUP, false);
+	addDependency(Setting::HORIZONTAL_WAKEUP, schedDep);
+
+	setName(Setting::VERTICAL_WAKEUP, q.tr("Show vertical wakeup"));
+	setKey(Setting::VERTICAL_WAKEUP, QString("VERTICAL_WAKEUP"));
+	setEnabled(Setting::VERTICAL_WAKEUP, true);
+	addDependency(Setting::VERTICAL_WAKEUP, schedDep);
+
+	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
+	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
+	setEnabled(Setting::SHOW_SCHED_GRAPHS, true);
+
+	setName(Setting::SHOW_CPUFREQ_GRAPHS,
+		q.tr("Show CPU frequency graphs"));
+	setKey(Setting::SHOW_CPUFREQ_GRAPHS, QString("SHOW_CPUFREQ_GRAPHS"));
+	setEnabled(Setting::SHOW_CPUFREQ_GRAPHS, true);
+
+	setName(Setting::SHOW_CPUIDLE_GRAPHS, q.tr("Show CPU idle graphs"));
+	setKey(Setting::SHOW_CPUIDLE_GRAPHS, QString("SHOW_CPUIDLE_GRAPHS"));
+	setEnabled(Setting::SHOW_CPUIDLE_GRAPHS, true);
+
+	QString maxstr = QString::number(MAX_NR_MIGRATIONS / 1000);
+	maxstr = maxstr + QString("k");
+	setName(Setting::SHOW_MIGRATION_GRAPHS, q.tr("Show migrations if < ")
+		+ maxstr);
+	setKey(Setting::SHOW_MIGRATION_GRAPHS,
+	       QString("SHOW_MIGRATION_GRAPHS"));
+	setEnabled(Setting::SHOW_MIGRATION_GRAPHS, true);
+
+	setName(Setting::SHOW_MIGRATION_UNLIMITED,
+		q.tr("Unlimited migrations"));
+	setKey(Setting::SHOW_MIGRATION_UNLIMITED,
+	       QString("SHOW_MIGRATION_UNLIMITED"));
+	setEnabled(Setting::SHOW_MIGRATION_UNLIMITED, false);
+	addDependency(Setting::SHOW_MIGRATION_UNLIMITED, unlimitedDep);
+
+	/*
+	 * OpenGL is only really useful when we use a line width greater than 1.
+	 * We only want a line width greater than 1 when we are on a high
+	 * resolution screen. Thus, we only enable opengl when the resolution
+	 * is high.
+	 */
+	bool opengl = has_opengl() && !isLowResScreen();
+	int width = opengl ? DEFAULT_LINE_WIDTH_OPENGL : DEFAULT_LINE_WIDTH;
+	setOpenGLEnabled(opengl);
+	setOpenGLEnabledKey(QString("OPENGL_ENABLED"));
+	setLineWidth(width);
+	setLineWidthKey(QString("SCHED_GRAPH_LINE_WIDTH"));
+}
+
+bool Setting::isWideScreen()
+{
+	QRect geometry;
+
+	geometry = QApplication::desktop()->availableGeometry();
+	return geometry.width() > 1800;
+}
+
+bool Setting::isLowResScreen()
+{
+	QRect geometry;
+
+	geometry = QApplication::desktop()->availableGeometry();
+	/* This is a heuristic */
+	return geometry.width() < 1700 && geometry.height() < 1220;
 }
 
 void Setting::setName(enum SettingIndex idx, const QString &n)

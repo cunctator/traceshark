@@ -87,12 +87,11 @@ public:
 		LINE_WIDTH,
 		END_SETTINGS,
 	};
-	static void setName(enum SettingIndex idx, const QString &n);
-	static void setKey(enum SettingIndex idx, const QString &key);
+	static void setupSettings();
+	static bool isWideScreen();
+	static bool isLowResScreen();
 	static void setEnabled(enum SettingIndex idx, bool e);
 	static void clearDependencies(enum SettingIndex idx);
-	static void addDependency(enum SettingIndex idx,
-				  const SettingDependency &d);
 	static unsigned int getNrDependencies(enum SettingIndex idx);
 	static unsigned int getNrDependents(enum SettingIndex idx);
 	static const QString &getName(enum SettingIndex idx);
@@ -102,14 +101,18 @@ public:
 	static const SettingDependency &getDependent(enum SettingIndex idx,
 						     unsigned int nr);
 	static void setLineWidth(int width);
-	static void setLineWidthKey(const QString &key);
 	static int getLineWidth();
 	static void setOpenGLEnabled(bool e);
-	static void setOpenGLEnabledKey(const QString &key);
 	static bool isOpenGLEnabled();
 	static int loadSettings();
 	static int saveSettings();
 private:
+	static void setName(enum SettingIndex idx, const QString &n);
+	static void setKey(enum SettingIndex idx, const QString &key);
+	static void addDependency(enum SettingIndex idx,
+				  const SettingDependency &d);
+	static void setOpenGLEnabledKey(const QString &key);
+	static void setLineWidthKey(const QString &key);
 	static int readKeyValuePair(QTextStream &stream, QString &key,
 				    QString &value);
 	static QString getFileName();

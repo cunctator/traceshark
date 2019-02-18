@@ -180,7 +180,6 @@ private:
 	void showTrace();
 	void loadSettings();
 	void setupCursors();
-	void setupSettings();
 	void updateResetFiltersEnabled();
 
 	void addSchedGraph(CPUTask &task);
@@ -243,8 +242,6 @@ private:
 
 	void setStatus(status_t status, const QString *fileName = nullptr);
 	int loadTraceFile(const QString &);
-	bool isWideScreen();
-	bool isLowResScreen();
 
 	QMenu *fileMenu;
 	QMenu *viewMenu;

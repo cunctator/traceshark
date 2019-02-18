@@ -207,7 +207,7 @@ const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 MainWindow::MainWindow():
 	tracePlot(nullptr), graphEnableDialog(nullptr), filterActive(false)
 {
-	setupSettings();
+	Setting::setupSettings();
 	loadSettings();
 
 	analyzer = new TraceAnalyzer;
@@ -671,77 +671,6 @@ void MainWindow::setupCursors()
 	checkStatsTimeLimited();
 
 	scrollTo(redtime);
-}
-
-void MainWindow::setupSettings()
-{
-	SettingDependency schedDep;
-	schedDep.index = Setting::SHOW_SCHED_GRAPHS;
-	schedDep.desiredValue = true;
-
-	SettingDependency unlimitedDep;
-	unlimitedDep.index = Setting::SHOW_MIGRATION_GRAPHS;
-	unlimitedDep.desiredValue = true;
-
-	Setting::setName(Setting::HORIZONTAL_WAKEUP,
-			 tr("Show horizontal wakeup"));
-	Setting::setKey(Setting::HORIZONTAL_WAKEUP,
-			QString("HORIZONTAL_WAKEUP"));
-	Setting::setEnabled(Setting::HORIZONTAL_WAKEUP, false);
-	Setting::addDependency(Setting::HORIZONTAL_WAKEUP, schedDep);
-
-	Setting::setName(Setting::VERTICAL_WAKEUP,
-			 tr("Show vertical wakeup"));
-	Setting::setKey(Setting::VERTICAL_WAKEUP,
-			QString("VERTICAL_WAKEUP"));
-	Setting::setEnabled(Setting::VERTICAL_WAKEUP, true);
-	Setting::addDependency(Setting::VERTICAL_WAKEUP, schedDep);
-
-	Setting::setName(Setting::SHOW_SCHED_GRAPHS,
-			 tr("Show scheduling graphs"));
-	Setting::setKey(Setting::SHOW_SCHED_GRAPHS,
-			QString("SHOW_SCHED_GRAPHS"));
-	Setting::setEnabled(Setting::SHOW_SCHED_GRAPHS, true);
-
-	Setting::setName(Setting::SHOW_CPUFREQ_GRAPHS,
-			 tr("Show CPU frequency graphs"));
-	Setting::setKey(Setting::SHOW_CPUFREQ_GRAPHS,
-			QString("SHOW_CPUFREQ_GRAPHS"));
-	Setting::setEnabled(Setting::SHOW_CPUFREQ_GRAPHS, true);
-
-	Setting::setName(Setting::SHOW_CPUIDLE_GRAPHS,
-			 tr("Show CPU idle graphs"));
-	Setting::setKey(Setting::SHOW_CPUIDLE_GRAPHS,
-			QString("SHOW_CPUIDLE_GRAPHS"));
-	Setting::setEnabled(Setting::SHOW_CPUIDLE_GRAPHS, true);
-
-	QString maxstr = QString::number(MAX_NR_MIGRATIONS / 1000);
-	maxstr = maxstr + QString("k");
-	Setting::setName(Setting::SHOW_MIGRATION_GRAPHS,
-			 tr("Show migrations if < ") + maxstr);
-	Setting::setKey(Setting::SHOW_MIGRATION_GRAPHS,
-			QString("SHOW_MIGRATION_GRAPHS"));
-	Setting::setEnabled(Setting::SHOW_MIGRATION_GRAPHS, true);
-
-	Setting::setName(Setting::SHOW_MIGRATION_UNLIMITED,
-			 tr("Unlimited migrations"));
-	Setting::setKey(Setting::SHOW_MIGRATION_UNLIMITED,
-			QString("SHOW_MIGRATION_UNLIMITED"));
-	Setting::setEnabled(Setting::SHOW_MIGRATION_UNLIMITED, false);
-	Setting::addDependency(Setting::SHOW_MIGRATION_UNLIMITED, unlimitedDep);
-
-	/*
-	 * OpenGL is only really useful when we use a line width greater than 1.
-	 * We only want a line width greater than 1 when we are on a high
-	 * resolution screen. Thus, we only enable opengl when the resolution
-	 * is high.
-	 */
-	bool opengl = has_opengl() && !isLowResScreen();
-	int width = opengl ? DEFAULT_LINE_WIDTH_OPENGL : DEFAULT_LINE_WIDTH;
-	Setting::setOpenGLEnabled(opengl);
-	Setting::setOpenGLEnabledKey(QString("OPENGL_ENABLED"));
-	Setting::setLineWidth(width);
-	Setting::setLineWidthKey(QString("SCHED_GRAPH_LINE_WIDTH"));
 }
 
 void MainWindow::addSchedGraph(CPUTask &cpuTask)
@@ -1453,7 +1382,7 @@ void MainWindow::createActions()
 
 void MainWindow::createToolBars()
 {
-	bool widescreen = isWideScreen();
+	bool widescreen = Setting::isWideScreen();
 
 	fileToolBar = new QToolBar(tr("&File"));
 	addToolBar(Qt::LeftToolBarArea, fileToolBar);
@@ -2642,21 +2571,4 @@ void MainWindow::taskFilterLimitedTriggered()
 {
 	timeFilter();
 	taskFilter();
-}
-
-bool MainWindow::isWideScreen()
-{
-	QRect geometry;
-
-	geometry = QApplication::desktop()->availableGeometry();
-	return geometry.width() > 1800;
-}
-
-bool MainWindow::isLowResScreen()
-{
-	QRect geometry;
-
-	geometry = QApplication::desktop()->availableGeometry();
-	/* This is a heuristic */
-	return geometry.width() < 1700 && geometry.height() < 1220;
 }
