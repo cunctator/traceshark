@@ -74,6 +74,7 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 	Setting::SettingIndex idxn;
 	QPushButton *okButton;
 	QPushButton *cancelButton;
+	QPushButton *applyButton;
 	QPushButton *saveButton;
 
 	checkBoxMap = new QMap<Setting::SettingIndex, TCheckBox*>;
@@ -149,14 +150,17 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 	mainLayout->addLayout(buttonLayout);
 	cancelButton = new QPushButton(tr("Cancel"));
 	okButton = new QPushButton(tr("OK"));
-	saveButton = new QPushButton(tr("Save settings"));
+	applyButton = new QPushButton(tr("Apply"));
+	saveButton = new QPushButton(tr("Apply && Save settings"));
 	buttonLayout->addStretch();
 	buttonLayout->addWidget(cancelButton);
 	buttonLayout->addWidget(okButton);
+	buttonLayout->addWidget(applyButton);
 	buttonLayout->addWidget(saveButton);
 	buttonLayout->addStretch();
 	tsconnect(cancelButton, clicked(), this, cancelClicked());
 	tsconnect(okButton, clicked(), this, okClicked());
+	tsconnect(applyButton, clicked(), this, applyClicked());
 	tsconnect(saveButton, clicked(), this, saveClicked());
 }
 
@@ -167,11 +171,30 @@ GraphEnableDialog::~GraphEnableDialog()
 
 void GraphEnableDialog::okClicked()
 {
+	hide();
+	applyClicked();
+}
+
+void GraphEnableDialog::cancelClicked()
+{
+	hide();
+	QMap<Setting::SettingIndex, TCheckBox*>::iterator iter;
+	for(iter = checkBoxMap->begin(); iter != checkBoxMap->end(); iter++) {
+		TCheckBox *tbox = iter.value();
+		Setting::SettingIndex idxn = (Setting::SettingIndex)
+			tbox->getId();
+		bool enabled = Setting::isEnabled(idxn);
+		tbox->setChecked(enabled);
+	}
+	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
+	openglBox->setChecked(Setting::isOpenGLEnabled());
+}
+
+void GraphEnableDialog::applyClicked()
+{
 	bool changed = false;
 	int new_width;
 	QMap<Setting::SettingIndex, TCheckBox*>::iterator iter;
-
-	hide();
 
 	for(iter = checkBoxMap->begin(); iter != checkBoxMap->end(); iter++) {
 		TCheckBox *tbox = iter.value();
@@ -198,21 +221,7 @@ void GraphEnableDialog::okClicked()
 
 	if (changed)
 		emit settingsChanged();
-}
-
-void GraphEnableDialog::cancelClicked()
-{
-	hide();
-	QMap<Setting::SettingIndex, TCheckBox*>::iterator iter;
-	for(iter = checkBoxMap->begin(); iter != checkBoxMap->end(); iter++) {
-		TCheckBox *tbox = iter.value();
-		Setting::SettingIndex idxn = (Setting::SettingIndex)
-			tbox->getId();
-		bool enabled = Setting::isEnabled(idxn);
-		tbox->setChecked(enabled);
-	}
-	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
-	openglBox->setChecked(Setting::isOpenGLEnabled());
+	recheckOpenGL();
 }
 
 void GraphEnableDialog::saveClicked()
@@ -274,9 +283,14 @@ void GraphEnableDialog::setOpenGLStatus(bool enabled)
 
 void GraphEnableDialog::show()
 {
+	recheckOpenGL();
+	QDialog::show();
+}
+
+void GraphEnableDialog::recheckOpenGL()
+{
 	if (openglStatus && openglBox->isChecked())
 		comboBox->setEnabled(true);
 	else
 		comboBox->setEnabled(false);
-	QDialog::show();
 }

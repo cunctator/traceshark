@@ -85,9 +85,11 @@ public slots:
 private slots:
 	void okClicked();
 	void cancelClicked();
+	void applyClicked();
 	void saveClicked();
 	void handleBoxClicked(TCheckBox *, bool);
 	void handleOpenGLClicked(TCheckBox *, bool);
+	void recheckOpenGL();
 };
 
 #endif /* GRAPHENABLEDIALOG_H */
