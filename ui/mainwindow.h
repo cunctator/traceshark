@@ -127,6 +127,7 @@ private slots:
 			      QMouseEvent *event);
 	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
 			       *abstractItem);
+	void legendEmptyChanged(bool empty);
 	void addTaskGraph(int pid);
 	void addTaskToLegend(int pid);
 	void removeTaskGraph(int pid);
@@ -204,6 +205,7 @@ private:
 	void addUninterruptibleTaskGraph(Task *task);
 
 	void setTraceActionsEnabled(bool e);
+	void setLegendActionsEnabled(bool e);
 	void setCloseActionsEnabled(bool e);
 	void setTaskActionsEnabled(bool e);
 	void setWakeupActionsEnabled(bool e);

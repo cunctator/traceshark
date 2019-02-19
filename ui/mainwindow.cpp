@@ -819,6 +819,10 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	timeFilterAction->setEnabled(e);
 	showStatsAction->setEnabled(e);
 	showStatsTimeLimitedAction->setEnabled(e);
+}
+
+void MainWindow::setLegendActionsEnabled(bool e)
+{
 	clearLegendAction->setEnabled(e);
 }
 
@@ -882,6 +886,7 @@ void MainWindow::closeTrace()
 	}
 	taskToolBar->clear();
 	setTraceActionsEnabled(false);
+	setLegendActionsEnabled(false);
 	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
@@ -1326,7 +1331,7 @@ void MainWindow::createActions()
 	addToLegendAction = new QAction(tr("Add task to the legend"), this);
 	addToLegendAction->setIcon(QIcon(RESSRC_PNG_ADD_TO_LEGEND));
 	addToLegendAction->setToolTip(tr(ADD_LEGEND_TOOLTIP));
-	tsconnect(addToLegendAction, triggered(), this,addToLegendTriggered());
+	tsconnect(addToLegendAction, triggered(), this, addToLegendTriggered());
 
 	clearLegendAction = new QAction(tr("Clear the legend"), this);
 	clearLegendAction->setIcon(QIcon(RESSRC_PNG_CLEAR_LEGEND));
@@ -1375,6 +1380,7 @@ void MainWindow::createActions()
 		  taskFilterLimitedTriggered());
 
 	setTraceActionsEnabled(false);
+	setLegendActionsEnabled(false);
 	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
@@ -1536,6 +1542,10 @@ void MainWindow::widgetConnections()
 		  this, showEventInfo(const TraceEvent &));
 	tsconnect(eventsWidget, eventSelected(const TraceEvent *),
 		  this, handleEventSelected(const TraceEvent *));
+
+	/* TaskToolBar widget */
+	tsconnect(taskToolBar, LegendEmptyChanged(bool), this,
+		  legendEmptyChanged(bool));
 }
 
 void MainWindow::dialogConnections()
@@ -1664,6 +1674,11 @@ void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
 		return;
 
 	handleLegendGraphDoubleClick(legendGraph);
+}
+
+void MainWindow::legendEmptyChanged(bool empty)
+{
+	setLegendActionsEnabled(!empty);
 }
 
 void MainWindow::handleLegendGraphDoubleClick(QCPGraph *graph)

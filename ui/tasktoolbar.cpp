@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -126,8 +126,14 @@ void TaskToolBar::removeTaskGraph()
 
 void TaskToolBar::clear()
 {
+	bool before, after;
+
 	removeTaskGraph();
+	before = legendPidMap.isEmpty();
 	legendPidMap.clear();
+	after = legendPidMap.isEmpty();
+	if (before != after)
+		emit LegendEmptyChanged(after);
 }
 
 void TaskToolBar::addCurrentTaskToLegend()
@@ -144,6 +150,7 @@ void TaskToolBar::addTaskGraphToLegend(TaskGraph *graph)
 	QObject *obj;
 	QCustomPlot *plot;
 	Task *task;
+	bool before, after;
 
 	task = graph->getTask();
 	if (task == nullptr)
@@ -160,17 +167,23 @@ void TaskToolBar::addTaskGraphToLegend(TaskGraph *graph)
 	if (legendPidMap.contains(task->pid))
 		return;
 
+	before = legendPidMap.isEmpty();
 	legendPidMap[task->pid] = graph;
+	after = legendPidMap.isEmpty();
+
 	graph->addToLegend();
 	obj = graph->getQCPGraph()->parent();
 	plot = qobject_cast<QCustomPlot *>(obj);
 	if (plot != nullptr)
 		plot->replot();
+	if (before != after)
+		emit LegendEmptyChanged(after);
 }
 
 
 void TaskToolBar::clearLegend()
 {
+	bool before, after;
 	QCustomPlot *plot = nullptr;
 	QObject *obj;
 	DEFINE_PIDMAP_ITERATOR(iter) = legendPidMap.begin();
@@ -185,7 +198,11 @@ void TaskToolBar::clearLegend()
 	}
 	if (plot != nullptr)
 		plot->replot();
+	before = legendPidMap.isEmpty();
 	legendPidMap.clear();
+	after = legendPidMap.isEmpty();
+	if (before != after)
+		emit LegendEmptyChanged(after);
 }
 
 bool TaskToolBar::checkGraphSelection()
@@ -200,12 +217,17 @@ bool TaskToolBar::checkGraphSelection()
 
 void TaskToolBar::pidRemoved(int pid)
 {
+	bool before, after;
+
+	before = legendPidMap.isEmpty();
 	if (legendPidMap.contains(pid))
 		legendPidMap.remove(pid);
 	else
 		vtl::warnx("Unexpected state in %s:%d", __FILE__, __LINE__);
+	after = legendPidMap.isEmpty();
+	if (before != after)
+		emit LegendEmptyChanged(after);
 }
-
 
 int TaskToolBar::getPid()
 {
