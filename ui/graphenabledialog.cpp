@@ -151,7 +151,7 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 	cancelButton = new QPushButton(tr("Cancel"));
 	okButton = new QPushButton(tr("OK"));
 	applyButton = new QPushButton(tr("Apply"));
-	saveButton = new QPushButton(tr("Apply && Save settings"));
+	saveButton = new QPushButton(tr("Apply && Save"));
 	buttonLayout->addStretch();
 	buttonLayout->addWidget(cancelButton);
 	buttonLayout->addWidget(okButton);
