@@ -185,3 +185,53 @@ double TaskRangeAllocator::getBottom()
 		 */
 		return bottom;
 }
+
+bool TaskRangeAllocator::isEmpty()
+{
+	return rangeList == nullptr;
+}
+
+TaskRangeAllocator::iterator TaskRangeAllocator::begin()
+{
+	TaskRangeAllocator::iterator r;
+	r.ptr = rangeList;
+	return r;
+}
+
+TaskRangeAllocator::iterator TaskRangeAllocator::end()
+{
+	TaskRangeAllocator::iterator r;
+	r.ptr = nullptr;
+	return r;
+}
+
+TaskRangeAllocator::iterator TaskRangeAllocator::iterator::operator++(int)
+{
+	TaskRangeAllocator::iterator r;
+	ptr = ptr->next;
+	r.ptr = ptr;
+	return r;
+}
+
+TaskRangeAllocator::iterator TaskRangeAllocator::iterator::operator--(int)
+{
+	TaskRangeAllocator::iterator r;
+	ptr = ptr->prev;
+	r.ptr = ptr;
+	return r;
+}
+
+bool TaskRangeAllocator::iterator::operator==(iterator i)
+{
+	return ptr == i.ptr;
+}
+
+bool TaskRangeAllocator::iterator::operator!=(iterator i)
+{
+	return ptr != i.ptr;
+}
+
+const TaskRange &TaskRangeAllocator::iterator::value()
+{
+	return  *ptr;
+}

@@ -57,6 +57,7 @@
 #define RESSRC_PNG_ADD_TASK      ":/traceshark/images/addtask30x30.png"
 #define RESSRC_PNG_ADD_TO_LEGEND ":/traceshark/images/addtolegend30x30.png"
 #define RESSRC_PNG_CLEAR_LEGEND  ":/traceshark/images/clearlegend30x30.png"
+#define RESSRC_PNG_CLEAR_TASK    ":/traceshark/images/cleartasksgraphs30x30.png"
 #define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
 #define RESSRC_PNG_CURSOR_ZOOM   ":/traceshark/images/cursorzoom30x30.png"
 #define RESSRC_PNG_DEFAULT_ZOOM  ":/traceshark/images/defaultzoom30x30.png"

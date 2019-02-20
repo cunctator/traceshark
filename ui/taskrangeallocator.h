@@ -66,12 +66,26 @@ class TaskRangeAllocator {
 public:
 	TaskRangeAllocator(double decValue);
 	~TaskRangeAllocator();
+	class iterator {
+		friend class TaskRangeAllocator;
+	public:
+		iterator operator++(int);
+		iterator operator--(int);
+		bool operator==(iterator i);
+		bool operator!=(iterator i);
+		const TaskRange &value();
+	protected:
+		TaskRange *ptr;
+	};
+	iterator begin();
+	iterator end();
 	void setStart(double topValue);
 	TaskRange *getTaskRange(int pid, bool &isNew);
 	void putTaskRange(int pid);
 	void putTaskRange(TaskRange *range);
 	void clearAll();
 	double getBottom();
+	bool isEmpty();
 private:
 	TaskRange *rangeList;
 	double top;

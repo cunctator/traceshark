@@ -162,6 +162,7 @@ private slots:
 	void findWakingTriggered();
 	void findWakingDirectTriggered();
 	void removeTaskGraphTriggered();
+	void clearTaskGraphsTriggered();
 	void taskFilterTriggered();
 	void taskFilterLimitedTriggered();
 
@@ -209,6 +210,7 @@ private:
 	void setCloseActionsEnabled(bool e);
 	void setTaskActionsEnabled(bool e);
 	void setWakeupActionsEnabled(bool e);
+	void setTaskGraphRemovalActionsEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
@@ -285,6 +287,7 @@ private:
 	QAction *findWakingAction;
 	QAction *findWakingDirectAction;
 	QAction *removeTaskGraphAction;
+	QAction *clearTaskGraphsAction;
 	QAction *taskFilterAction;
 	QAction *taskFilterLimitedAction;
 
