@@ -53,6 +53,8 @@
 #ifndef TASKRANGEALLOCATOR
 #define TASKRANGEALLOCATOR
 
+#include <QMap>
+
 class TaskRange {
 public:
 	double upper;
@@ -86,12 +88,14 @@ public:
 	void clearAll();
 	double getBottom();
 	bool isEmpty();
+	bool contains(int pid);
 private:
 	TaskRange *rangeList;
 	double top;
 	double bottom;
 	double dec;
 	const double taskSectionOffset = 250;
+	QMap<int, TaskRange *> pidMap;
 };
 
 #endif /* TASKRANGEALLOCATOR */

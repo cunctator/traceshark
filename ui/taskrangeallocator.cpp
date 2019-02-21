@@ -72,6 +72,7 @@ void TaskRangeAllocator::clearAll()
 	}
 	bottom = top;
 	rangeList = nullptr;
+	pidMap.clear();
 }
 
 void TaskRangeAllocator::setStart(double topValue)
@@ -87,18 +88,13 @@ TaskRange *TaskRangeAllocator::getTaskRange(int pid, bool &isNew)
 	TaskRange **tr;
 	TaskRange *prev;
 	double upper;
+	QMap<int, TaskRange*>::iterator iter;
 
 	isNew = false;
 
-	r = rangeList;
-	while (r != nullptr) {
-		if (r->pid == pid)
-			break;
-		r = r->next;
-	}
-
-	if (r != nullptr)
-		return r;
+	iter = pidMap.find(pid);
+	if (iter != pidMap.end())
+		return iter.value();
 
 	r = new TaskRange;
 	isNew = true;
@@ -106,6 +102,7 @@ TaskRange *TaskRangeAllocator::getTaskRange(int pid, bool &isNew)
 		return r;
 
 	r->pid = pid;
+	pidMap[pid] = r;
 
 	upper = top;
 	tr = &rangeList;
@@ -153,21 +150,16 @@ void TaskRangeAllocator::putTaskRange(TaskRange *range)
 		}
 		bottom = newbottom;
 	}
+	pidMap.remove(range->pid);
 	delete range;
 }
 
 void TaskRangeAllocator::putTaskRange(int pid)
 {
-	TaskRange *r = rangeList;
-
-	while (r != nullptr) {
-		if (r->pid == pid)
-			break;
-		r = r->next;
-	}
-
-	if (r != nullptr)
-		putTaskRange(r);
+	QMap<int, TaskRange*>::iterator iter;
+	iter = pidMap.find(pid);
+	if (iter != pidMap.end())
+		putTaskRange(iter.value());
 }
 
 double TaskRangeAllocator::getBottom()
@@ -189,6 +181,11 @@ double TaskRangeAllocator::getBottom()
 bool TaskRangeAllocator::isEmpty()
 {
 	return rangeList == nullptr;
+}
+
+bool TaskRangeAllocator::contains(int pid)
+{
+	return pidMap.contains(pid);
 }
 
 TaskRangeAllocator::iterator TaskRangeAllocator::begin()

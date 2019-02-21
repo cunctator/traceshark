@@ -123,8 +123,6 @@ private slots:
 	void taskTriggered(int pid);
 	void handleEventSelected(const TraceEvent *event);
 	void selectionChanged();
-	void plottableClicked(QCPAbstractPlottable *plottable, int dataIndex,
-			      QMouseEvent *event);
 	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
 			       *abstractItem);
 	void legendEmptyChanged(bool empty);
@@ -210,7 +208,9 @@ private:
 	void setCloseActionsEnabled(bool e);
 	void setTaskActionsEnabled(bool e);
 	void setWakeupActionsEnabled(bool e);
-	void setTaskGraphRemovalActionsEnabled(bool e);
+	void setAddTaskGraphActionEnabled(bool e);
+	void setTaskGraphRemovalActionEnabled(bool e);
+	void setTaskGraphClearActionEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
@@ -223,6 +223,7 @@ private:
 	void selectTaskByPid(int pid, const unsigned int *preferred_cpu);
 	bool isOpenGLEnabled();
 	void setupOpenGL();
+	void updateTaskGraphActions();
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;

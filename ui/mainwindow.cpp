@@ -846,7 +846,6 @@ void MainWindow::setTaskActionsEnabled(bool e)
 	findWakingDirectAction->setEnabled(e);
 	findSleepAction->setEnabled(e);
 	addToLegendAction->setEnabled(e);
-	addTaskGraphAction->setEnabled(e);
 	taskFilterAction->setEnabled(e);
 	taskFilterLimitedAction->setEnabled(e);
 }
@@ -856,9 +855,18 @@ void MainWindow::setWakeupActionsEnabled(bool e)
 	findWakingAction->setEnabled(e);
 }
 
-void MainWindow::setTaskGraphRemovalActionsEnabled(bool e)
+void MainWindow::setAddTaskGraphActionEnabled(bool e)
+{
+	addTaskGraphAction->setEnabled(e);
+}
+
+void MainWindow::setTaskGraphRemovalActionEnabled(bool e)
 {
 	removeTaskGraphAction->setEnabled(e);
+}
+
+void MainWindow::setTaskGraphClearActionEnabled(bool e)
+{
 	clearTaskGraphsAction->setEnabled(e);
 }
 
@@ -898,7 +906,9 @@ void MainWindow::closeTrace()
 	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
-	setTaskGraphRemovalActionsEnabled(false);
+	setAddTaskGraphActionEnabled(false);
+	setTaskGraphRemovalActionEnabled(false);
+	setTaskGraphClearActionEnabled(false);
 	setStatus(STATUS_NOFILE);
 	if (ts_errno != 0)
 		vtl::warn(ts_errno, "Failed to close() trace file");
@@ -1399,7 +1409,9 @@ void MainWindow::createActions()
 	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
 	setWakeupActionsEnabled(false);
-	setTaskGraphRemovalActionsEnabled(false);
+	setAddTaskGraphActionEnabled(false);
+	setTaskGraphRemovalActionEnabled(false);
+	setTaskGraphClearActionEnabled(false);
 }
 
 void MainWindow::createToolBars()
@@ -1535,11 +1547,8 @@ void MainWindow::plotConnections()
 	tsconnect(tracePlot->xAxis, rangeChanged(QCPRange), tracePlot->xAxis2,
 		  setRange(QCPRange));
 	tsconnect(tracePlot, mousePress(QMouseEvent*), this, mousePress());
-	tsconnect(tracePlot,selectionChangedByUser() , this,
+	tsconnect(tracePlot, selectionChangedByUser() , this,
 		  selectionChanged());
-	tsconnect(tracePlot, plottableClick(QCPAbstractPlottable *, int,
-					    QMouseEvent *), this,
-		  plottableClicked(QCPAbstractPlottable *, int, QMouseEvent *));
 	tsconnect(tracePlot, legendDoubleClick(QCPLegend*,
 					       QCPAbstractLegendItem*,
 					       QMouseEvent*), this,
@@ -1645,35 +1654,36 @@ int MainWindow::loadTraceFile(const QString &fileName)
 	return rval;
 }
 
-void MainWindow::plottableClicked(QCPAbstractPlottable *plottable,
-				  int /* dataIndex */,
-				  QMouseEvent * /* event */)
-{
-	QCPGraph *qcpGraph;
-	TaskGraph *graph;
-
-	tracePlot->replot();
-	qcpGraph = qobject_cast<QCPGraph *>(plottable);
-	if (qcpGraph == nullptr)
-		return;
-
-	graph = TaskGraph::fromQCPGraph(qcpGraph);
-	if (graph == nullptr)
-		return;
-
-	if (qcpGraph->selected()) {
-		setTaskActionsEnabled(true);
-		taskToolBar->setTaskGraph(graph);
-	} else {
-		setTaskActionsEnabled(false);
-		taskToolBar->removeTaskGraph();
-	}
-}
-
 void MainWindow::selectionChanged()
 {
-	if (taskToolBar->checkGraphSelection())
+	int pid;
+	TaskGraph *graph = nullptr;
+	QCPGraph *qcpGraph = nullptr;
+	QCPAbstractPlottable *plottable;
+	QList<QCPAbstractPlottable*> plist = tracePlot->selectedPlottables();
+	QList<QCPAbstractPlottable*>::const_iterator iter;
+
+	for (iter = plist.begin(); iter != plist.end(); iter++) {
+		plottable = *iter;
+		qcpGraph = qobject_cast<QCPGraph *>(plottable);
+		if (qcpGraph == nullptr)
+			continue;
+		graph = TaskGraph::fromQCPGraph(qcpGraph);
+		if (graph == nullptr)
+			continue;
+	}
+
+	if (qcpGraph == nullptr || !qcpGraph->selected() || graph == nullptr) {
 		setTaskActionsEnabled(false);
+		taskToolBar->removeTaskGraph();
+		setTaskGraphRemovalActionEnabled(false);
+		setAddTaskGraphActionEnabled(false);
+		return;
+	}
+
+	setTaskActionsEnabled(true);
+	taskToolBar->setTaskGraph(graph);
+	updateTaskGraphActions();
 }
 
 void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
@@ -2070,7 +2080,7 @@ void MainWindow::addTaskGraph(int pid)
 	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
 
 	tracePlot->replot();
-	setTaskGraphRemovalActionsEnabled(true);
+	updateTaskGraphActions();
 }
 
 void MainWindow::addAccessoryTaskGraph(QCPGraph **graphPtr,
@@ -2128,7 +2138,7 @@ void MainWindow::removeTaskGraph(int pid)
 	QCPGraph *qcpGraph;
 
 	if (task == nullptr) {
-		setTaskGraphRemovalActionsEnabled(
+		setTaskGraphClearActionEnabled(
 			!taskRangeAllocator->isEmpty());
 		return;
 	}
@@ -2169,7 +2179,7 @@ void MainWindow::removeTaskGraph(int pid)
 	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
 
 	tracePlot->replot();
-	setTaskGraphRemovalActionsEnabled(!taskRangeAllocator->isEmpty());
+	updateTaskGraphActions();
 }
 
 void MainWindow::clearTaskGraphsTriggered()
@@ -2227,7 +2237,21 @@ void MainWindow::clearTaskGraphsTriggered()
 	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
 
 	tracePlot->replot();
-	setTaskGraphRemovalActionsEnabled(!taskRangeAllocator->isEmpty());
+	updateTaskGraphActions();
+}
+
+void MainWindow::updateTaskGraphActions()
+{
+	setTaskGraphClearActionEnabled(!taskRangeAllocator->isEmpty());
+	int spid = taskToolBar->getPid();
+	if (spid != 0) {
+		bool TaskGraph_selected = taskRangeAllocator->contains(spid);
+		setTaskGraphRemovalActionEnabled(TaskGraph_selected);
+		setAddTaskGraphActionEnabled(!TaskGraph_selected);
+	} else {
+		setTaskGraphRemovalActionEnabled(false);
+		setAddTaskGraphActionEnabled(false);
+	}
 }
 
 void MainWindow::showTaskSelector()
