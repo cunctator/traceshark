@@ -1656,7 +1656,6 @@ int MainWindow::loadTraceFile(const QString &fileName)
 
 void MainWindow::selectionChanged()
 {
-	int pid;
 	TaskGraph *graph = nullptr;
 	QCPGraph *qcpGraph = nullptr;
 	QCPAbstractPlottable *plottable;
