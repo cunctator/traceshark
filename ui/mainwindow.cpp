@@ -2534,6 +2534,7 @@ out:
 		taskToolBar->removeTaskGraph();
 		setTaskActionsEnabled(false);
 	}
+	updateTaskGraphActions();
 	tracePlot->replot();
 }
 
