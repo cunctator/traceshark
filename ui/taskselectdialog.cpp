@@ -200,6 +200,7 @@ void TaskSelectDialog::addUnifiedClicked()
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
 	int pid;
 	bool ok;
+	bool need = false;
 	int i, s;
 
 	s = indexList.size();
@@ -207,9 +208,13 @@ void TaskSelectDialog::addUnifiedClicked()
 		const QModelIndex &index = indexList.at(i);
 
 		pid = taskModel->rowToPid(index.row(), ok);
-		if (ok && pid != 0)
+		if (ok && pid != 0) {
 			emit addTaskGraph(pid);
+			need = true;
+		}
 	}
+	if (need)
+		emit needReplot();
 }
 
 void TaskSelectDialog::addLegendClicked()
@@ -218,15 +223,20 @@ void TaskSelectDialog::addLegendClicked()
 	int pid;
 	bool ok;
 	int i, s;
+	bool need = false;
 
 	s = indexList.size();
 	for (i = 0; i < s; i++) {
 		const QModelIndex &index = indexList.at(i);
 
 		pid = taskModel->rowToPid(index.row(), ok);
-		if (ok && pid != 0)
+		if (ok && pid != 0) {
+			need = true;
 			emit addTaskToLegend(pid);
+		}
 	}
+	if (need)
+		emit needReplot();
 }
 
 void TaskSelectDialog::addFilterClicked()

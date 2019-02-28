@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018, 2019
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -58,7 +59,7 @@
 #include "vtl/time.h"
 
 Cursor::Cursor(QCustomPlot *parent, TShark::CursorIdx idx):
-	QCPItemLine(parent), position(0), cursorIdx(idx)
+	QCPItemLine(parent), position(0), time(false, 0, 0, 6), cursorIdx(idx)
 {
 	QColor color;
 
@@ -84,7 +85,7 @@ Cursor::Cursor(QCustomPlot *parent, TShark::CursorIdx idx):
 
 void Cursor::setPosition(double pos)
 {
-	vtl::Time time = vtl::Time::fromDouble(pos);
+	time = vtl::Time::fromDouble(pos);
 	/*
 	 * Fixme: Make some functions so that the precision can be propagated
 	 * from the TraceAnalyzer class, via MainWindow.
@@ -94,8 +95,9 @@ void Cursor::setPosition(double pos)
 	_setPosition(pos);
 }
 
-void Cursor::setPosition(const vtl::Time &time)
+void Cursor::setPosition(const vtl::Time &t)
 {
+	time = t;
 	advertiseTime(time);
 	_setPosition(time.toDouble());
 }
@@ -111,6 +113,11 @@ void Cursor::_setPosition(double pos)
 double Cursor::getPosition()
 {
 	return position;
+}
+
+const vtl::Time &Cursor::getTime()
+{
+	return time;
 }
 
 void Cursor::advertiseTime(const vtl::Time &time)

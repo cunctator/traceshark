@@ -127,6 +127,7 @@ private slots:
 			       *abstractItem);
 	void legendEmptyChanged(bool empty);
 	void addTaskGraph(int pid);
+	void doReplot();
 	void addTaskToLegend(int pid);
 	void removeTaskGraph(int pid);
 	void cursorZoom();
@@ -180,6 +181,11 @@ private:
 	void showTrace();
 	void loadSettings();
 	void setupCursors();
+	void setupCursors(const double &red, const double &blue);
+	void setupCursors(const vtl::Time &redtime, const vtl::Time &bluetime);
+	void _setupCursors(vtl::Time redtime, const double &red,
+			   vtl::Time bluetime, const double &blue);
+
 	void updateResetFiltersEnabled();
 
 	void addSchedGraph(CPUTask &task);

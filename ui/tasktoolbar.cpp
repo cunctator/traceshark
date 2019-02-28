@@ -147,8 +147,6 @@ void TaskToolBar::addCurrentTaskToLegend()
 
 void TaskToolBar::addTaskGraphToLegend(TaskGraph *graph)
 {
-	QObject *obj;
-	QCustomPlot *plot;
 	Task *task;
 	bool before, after;
 
@@ -172,10 +170,6 @@ void TaskToolBar::addTaskGraphToLegend(TaskGraph *graph)
 	after = legendPidMap.isEmpty();
 
 	graph->addToLegend();
-	obj = graph->getQCPGraph()->parent();
-	plot = qobject_cast<QCustomPlot *>(obj);
-	if (plot != nullptr)
-		plot->replot();
 	if (before != after)
 		emit LegendEmptyChanged(after);
 }

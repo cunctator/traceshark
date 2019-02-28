@@ -54,6 +54,7 @@
 
 #include <QApplication>
 #include <QDateTime>
+#include <QList>
 #include <QToolBar>
 
 #include "ui/cursor.h"
@@ -651,6 +652,34 @@ void MainWindow::setupCursors()
 	start = analyzer->getStartTime().toDouble();
 	end = analyzer->getEndTime().toDouble();
 
+	red = (start + end) / 2;
+	blue = (start + end) / 2 + (end - start) / 10;
+
+	setupCursors(red, blue);
+}
+
+void MainWindow::setupCursors(const double &red, const double &blue)
+{
+	vtl::Time redtime = vtl::Time::fromDouble(red);
+	redtime.setPrecision(analyzer->getTimePrecision());
+	vtl::Time bluetime = vtl::Time::fromDouble(blue);
+	bluetime.setPrecision(analyzer->getTimePrecision());
+
+	_setupCursors(redtime, red, bluetime, blue);
+}
+
+void MainWindow::setupCursors(const vtl::Time &redtime,
+			      const vtl::Time &bluetime)
+{
+	double red = redtime.toDouble();
+	double blue = bluetime.toDouble();
+
+	_setupCursors(redtime, red, bluetime, blue);
+}
+
+void MainWindow::_setupCursors(vtl::Time redtime, const double &red,
+			       vtl::Time bluetime, const double &blue)
+{
 	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot,
 						 TShark::RED_CURSOR);
 	cursors[TShark::BLUE_CURSOR] = new Cursor(tracePlot,
@@ -659,15 +688,10 @@ void MainWindow::setupCursors()
 	cursors[TShark::RED_CURSOR]->setLayer(cursorLayer);
 	cursors[TShark::BLUE_CURSOR]->setLayer(cursorLayer);
 
-	red = (start + end) / 2;
-	vtl::Time redtime = vtl::Time::fromDouble(red);
-	redtime.setPrecision(analyzer->getTimePrecision());
 	cursors[TShark::RED_CURSOR]->setPosition(redtime);
 	cursorPos[TShark::RED_CURSOR] = red;
 	infoWidget->setTime(redtime, TShark::RED_CURSOR);
-	blue = (start + end) / 2 + (end - start) / 10;
-	vtl::Time bluetime = vtl::Time::fromDouble(blue);
-	bluetime.setPrecision(analyzer->getTimePrecision());
+
 	cursors[TShark::BLUE_CURSOR]->setPosition(bluetime);
 	cursorPos[TShark::BLUE_CURSOR] = blue;
 	infoWidget->setTime(bluetime, TShark::BLUE_CURSOR);
@@ -1579,6 +1603,7 @@ void MainWindow::dialogConnections()
 {
 	/* task select dialog */
 	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
+	tsconnect(taskSelectDialog, needReplot(), this, doReplot());
 	tsconnect(taskSelectDialog, addTaskToLegend(int), this,
 		  addTaskToLegend(int));
 	tsconnect(taskSelectDialog, createFilter(QMap<int, int> &, bool, bool),
@@ -1591,6 +1616,7 @@ void MainWindow::dialogConnections()
 
 	/* statistics Dialog */
 	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
+	tsconnect(statsDialog, needReplot(), this, doReplot());
 	tsconnect(statsDialog, addTaskToLegend(int), this,
 		  addTaskToLegend(int));
 	tsconnect(statsDialog, createFilter(QMap<int, int> &, bool, bool),
@@ -1604,6 +1630,7 @@ void MainWindow::dialogConnections()
 	/* Time limited statistics Dialog */
 	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
 		  addTaskGraph(int));
+	tsconnect(statsLimitedDialog, needReplot(), this, doReplot());
 	tsconnect(statsLimitedDialog, addTaskToLegend(int), this,
 		  addTaskToLegend(int));
 	tsconnect(statsLimitedDialog,
@@ -1945,11 +1972,32 @@ void MainWindow::exportEventsTriggered()
 void MainWindow::consumeSettings()
 {
 	unsigned int cpu;
+	QList<int> taskGraphs;
+	vtl::Time redtime, bluetime;
 
 	if (!analyzer->isOpen()) {
 		setupOpenGL();
 		return;
 	}
+
+	/* Save the PIDs of the tasks that have a task graph */
+	TaskRangeAllocator::iterator i;
+	for (i = taskRangeAllocator->begin(); i !=  taskRangeAllocator->end();
+	     i++) {
+		taskGraphs.append(i.value().pid);
+	}
+
+	/* Save the cursor time */
+	Cursor *redCursor = cursors[TShark::RED_CURSOR];
+	Cursor *blueCursor = cursors[TShark::BLUE_CURSOR];
+
+	if (redCursor != nullptr)
+		redtime = redCursor->getTime();
+	if (blueCursor != nullptr)
+		bluetime = blueCursor->getTime();
+
+	/* Save the zoom */
+	QCPRange savedRangeX = tracePlot->xAxis->range();
 
 	clearPlot();
 	setupOpenGL();
@@ -1988,10 +2036,17 @@ void MainWindow::consumeSettings()
 	}
 
 	computeLayout();
-	setupCursors();
+	setupCursors(redtime, bluetime);
 	rescaleTrace();
 	showTrace();
 	tracePlot->show();
+
+	tracePlot->xAxis->setRange(savedRangeX);
+	/* Restore the task graphs from the list */
+	QList<int>::const_iterator j;
+	for (j = taskGraphs.begin(); j != taskGraphs.end(); j++)
+		addTaskGraph(*j);
+	tracePlot->replot();
 }
 
 void MainWindow::addTaskGraph(int pid)
@@ -2078,8 +2133,12 @@ void MainWindow::addTaskGraph(int pid)
 	QCPRange range = tracePlot->yAxis->range();
 	tracePlot->yAxis->setRange(QCPRange(bottom, range.upper));
 
-	tracePlot->replot();
 	updateTaskGraphActions();
+}
+
+void MainWindow::doReplot()
+{
+	tracePlot->replot();
 }
 
 void MainWindow::addAccessoryTaskGraph(QCPGraph **graphPtr,
@@ -2446,6 +2505,7 @@ bool MainWindow::selectQCPGraph(QCPGraph *graph)
 void MainWindow::addTaskGraphTriggered()
 {
 	addTaskGraph(taskToolBar->getPid());
+	doReplot();
 }
 
 void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu)
@@ -2575,6 +2635,7 @@ void MainWindow::setupOpenGL()
 void MainWindow::addToLegendTriggered()
 {
 	taskToolBar->addCurrentTaskToLegend();
+	doReplot();
 }
 
 /* Clears the legend of all tasks */

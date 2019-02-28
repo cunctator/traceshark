@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,10 +57,7 @@
 
 #include "misc/traceshark.h"
 #include "qcustomplot/qcustomplot.h"
-
-namespace vtl {
-	class Time;
-}
+#include "vtl/time.h"
 
 class Cursor : public QCPItemLine
 {
@@ -68,13 +65,15 @@ class Cursor : public QCPItemLine
 public:
 	Cursor(QCustomPlot *parent, TShark::CursorIdx idx);
 	double getPosition();
+	const vtl::Time &getTime();
 	void setPosition(double pos);
-	void setPosition(const vtl::Time &time);
+	void setPosition(const vtl::Time &t);
 	void setColor(const QColor &color);
 private:
 	void _setPosition(double pos);
 	void advertiseTime(const vtl::Time &time);
 	double position;
+	vtl::Time time;
 	TShark::CursorIdx cursorIdx;
 };
 
