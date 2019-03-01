@@ -1973,6 +1973,7 @@ void MainWindow::consumeSettings()
 {
 	unsigned int cpu;
 	QList<int> taskGraphs;
+	QList<int> legendPids;
 	vtl::Time redtime, bluetime;
 
 	if (!analyzer->isOpen()) {
@@ -1986,6 +1987,9 @@ void MainWindow::consumeSettings()
 	     i++) {
 		taskGraphs.append(i.value().pid);
 	}
+
+	/* Save the Pids of the tasks that have a legend */
+	legendPids = taskToolBar->legendPidList();
 
 	/* Save the cursor time */
 	Cursor *redCursor = cursors[TShark::RED_CURSOR];
@@ -2046,6 +2050,11 @@ void MainWindow::consumeSettings()
 	QList<int>::const_iterator j;
 	for (j = taskGraphs.begin(); j != taskGraphs.end(); j++)
 		addTaskGraph(*j);
+
+	/* Restore the legends from the list */
+	for (j = legendPids.begin(); j != legendPids.end(); j++)
+		addTaskToLegend(*j);
+
 	tracePlot->replot();
 }
 

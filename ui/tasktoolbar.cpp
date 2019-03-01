@@ -64,13 +64,17 @@
 #include "analyzer/task.h"
 #include "ui/taskgraph.h"
 #include "ui/tasktoolbar.h"
+#include "misc/maplist.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "qcustomplot/qcustomplot.h"
 #include "vtl/error.h"
 
 #define DEFINE_PIDMAP_ITERATOR(name) \
-	QMap<int, TaskGraph*>::iterator name
+	MapList<int, TaskGraph*>::iterator name
+
+#define DEFINE_CONST_PIDMAP_ITERATOR(name) \
+	MapList<int, TaskGraph*>::const_iterator name
 
 TaskToolBar::TaskToolBar(const QString &title, QWidget *parent):
 	QToolBar(title, parent), taskGraph(nullptr)
@@ -166,7 +170,7 @@ void TaskToolBar::addTaskGraphToLegend(TaskGraph *graph)
 		return;
 
 	before = legendPidMap.isEmpty();
-	legendPidMap[task->pid] = graph;
+	legendPidMap.append(task->pid, graph);
 	after = legendPidMap.isEmpty();
 
 	graph->addToLegend();
@@ -182,7 +186,7 @@ void TaskToolBar::clearLegend()
 	QObject *obj;
 	DEFINE_PIDMAP_ITERATOR(iter) = legendPidMap.begin();
 	while(iter != legendPidMap.end()) {
-		TaskGraph *&graph = iter.value();
+		TaskGraph *graph = iter.value();
 		graph->removeFromLegend();
 		if (plot == nullptr) {
 			obj = graph->getQCPGraph()->parent();
@@ -243,4 +247,14 @@ void TaskToolBar::addStretch()
 	QHBoxLayout *layout  = new QHBoxLayout(widget);
 	layout->addStretch();
 	addWidget(widget);
+}
+
+QList<int> TaskToolBar::legendPidList() const
+{
+	DEFINE_CONST_PIDMAP_ITERATOR(iter);
+	QList<int> rlist;
+
+	for (iter = legendPidMap.cbegin(); iter != legendPidMap.cend(); iter++)
+		rlist.append(iter.key());
+	return rlist;
 }

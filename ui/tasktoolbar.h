@@ -53,8 +53,10 @@
 #ifndef TASKINFO_H
 #define TASKINFO_H
 
+#include <QList>
 #include <QToolBar>
-#include <QMap>
+
+#include "misc/maplist.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -82,13 +84,14 @@ public:
 	void clearLegend();
 	void addCurrentTaskToLegend();
 	void addStretch();
+	QList<int> legendPidList() const;
 signals:
 	void LegendEmptyChanged(bool empty);
 private:
 	QLineEdit *pidLine;
 	QLineEdit *nameLine;
 	TaskGraph *taskGraph;
-	QMap <int, TaskGraph*> legendPidMap;
+	MapList <int, TaskGraph*> legendPidMap;
 };
 
 #endif /* TASKINFO_H */
