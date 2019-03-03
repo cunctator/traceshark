@@ -84,12 +84,12 @@ public:
 	public:
 		iterator operator++(int);
 		iterator operator--(int);
-		U &operator*();
-		U *operator->();
-		const T &key();
-		U &value();
-		bool operator==(iterator i);
-		bool operator!=(iterator i);
+		U &operator*() const;
+		U *operator->() const;
+		const T &key() const;
+		U &value() const;
+		bool operator==(iterator i) const;
+		bool operator!=(iterator i) const;
 	protected:
 		MapListElement<T, U> *ptr;
 	};
@@ -98,12 +98,12 @@ public:
 	public:
 		const_iterator operator++(int);
 		const_iterator operator--(int);
-		const U &operator*();
-		const U *operator->();
-		const T &key();
-		const U &value();
-		bool operator==(const_iterator i);
-		bool operator!=(const_iterator i);
+		const U &operator*() const;
+		const U *operator->() const;
+		const T &key() const;
+		const U &value() const;
+		bool operator==(const_iterator i) const;
+		bool operator!=(const_iterator i) const;
 	protected:
 		const MapListElement<T, U> *ptr;
 	};
@@ -112,12 +112,12 @@ public:
 	public:
 		reverse_iterator operator++(int);
 		reverse_iterator operator--(int);
-		U &operator*();
-		U *operator->();
-		const T &key();
-		U &value();
-		bool operator==(reverse_iterator i);
-		bool operator!=(reverse_iterator i);
+		U &operator*() const;
+		U *operator->() const;
+		const T &key() const;
+		U &value() const;
+		bool operator==(reverse_iterator i) const;
+		bool operator!=(reverse_iterator i) const;
 	protected:
 		MapListElement<T, U> *ptr;
 	};
@@ -126,12 +126,12 @@ public:
 	public:
 		const_reverse_iterator operator++(int);
 		const_reverse_iterator operator--(int);
-		const U &operator*();
-		const U *operator->();
-		const T &key();
-		const U &value();
-		bool operator==(const_reverse_iterator i);
-		bool operator!=(const_reverse_iterator i);
+		const U &operator*() const;
+		const U *operator->() const;
+		const T &key() const;
+		const U &value() const;
+		bool operator==(const_reverse_iterator i) const;
+		bool operator!=(const_reverse_iterator i) const;
 	protected:
 		const MapListElement<T, U> *ptr;
 	};
@@ -339,37 +339,37 @@ typename MapList<T, U>::iterator MapList<T, U>::iterator::operator--(int)
 }
 
 template<class T, class U>
-bool MapList<T, U>::iterator::operator==(iterator i)
+bool MapList<T, U>::iterator::operator==(iterator i) const
 {
 	return ptr == i.ptr;
 }
 
 template<class T, class U>
-bool MapList<T, U>::iterator::operator!=(iterator i)
+bool MapList<T, U>::iterator::operator!=(iterator i) const
 {
 	return ptr != i.ptr;
 }
 
 template<class T, class U>
-U &MapList<T, U>::iterator::operator*()
+U &MapList<T, U>::iterator::operator*() const
 {
 	return ptr->value;
 }
 
 template<class T, class U>
-U *MapList<T, U>::iterator::operator->()
+U *MapList<T, U>::iterator::operator->() const
 {
 	return &ptr->value;
 }
 
 template<class T, class U>
-const T &MapList<T, U>::iterator::key()
+const T &MapList<T, U>::iterator::key() const
 {
 	return ptr->key;
 }
 
 template<class T, class U>
-U &MapList<T, U>::iterator::value()
+U &MapList<T, U>::iterator::value() const
 {
 	return ptr->value;
 }
@@ -410,37 +410,37 @@ typename MapList<T, U>::const_iterator MapList<T, U>::const_iterator::operator--
 }
 
 template<class T, class U>
-bool MapList<T, U>::const_iterator::operator==(const_iterator i)
+bool MapList<T, U>::const_iterator::operator==(const_iterator i) const
 {
 	return ptr == i.ptr;
 }
 
 template<class T, class U>
-bool MapList<T, U>::const_iterator::operator!=(const_iterator i)
+bool MapList<T, U>::const_iterator::operator!=(const_iterator i) const
 {
 	return ptr != i.ptr;
 }
 
 template<class T, class U>
-const U &MapList<T, U>::const_iterator::operator*()
+const U &MapList<T, U>::const_iterator::operator*() const
 {
 	return ptr->value;
 }
 
 template<class T, class U>
-const U *MapList<T, U>::const_iterator::operator->()
+const U *MapList<T, U>::const_iterator::operator->() const
 {
 	return &ptr->value;
 }
 
 template<class T, class U>
-const T &MapList<T, U>::const_iterator::key()
+const T &MapList<T, U>::const_iterator::key() const
 {
 	return ptr->key;
 }
 
 template<class T, class U>
-const U &MapList<T, U>::const_iterator::value()
+const U &MapList<T, U>::const_iterator::value() const
 {
 	return ptr->value;
 }
@@ -482,37 +482,37 @@ MapList<T, U>::reverse_iterator::operator--(int)
 }
 
 template<class T, class U>
-bool MapList<T, U>::reverse_iterator::operator==(reverse_iterator i)
+bool MapList<T, U>::reverse_iterator::operator==(reverse_iterator i) const
 {
 	return ptr == i.ptr;
 }
 
 template<class T, class U>
-bool MapList<T, U>::reverse_iterator::operator!=(reverse_iterator i)
+bool MapList<T, U>::reverse_iterator::operator!=(reverse_iterator i) const
 {
 	return ptr != i.ptr;
 }
 
 template<class T, class U>
-U &MapList<T, U>::reverse_iterator::operator*()
+U &MapList<T, U>::reverse_iterator::operator*() const
 {
 	return ptr->value;
 }
 
 template<class T, class U>
-U *MapList<T, U>::reverse_iterator::operator->()
+U *MapList<T, U>::reverse_iterator::operator->() const
 {
 	return &ptr->value;
 }
 
 template<class T, class U>
-const T &MapList<T, U>::reverse_iterator::key()
+const T &MapList<T, U>::reverse_iterator::key() const
 {
 	return ptr->key;
 }
 
 template<class T, class U>
-U &MapList<T, U>::reverse_iterator::value()
+U &MapList<T, U>::reverse_iterator::value() const
 {
 	return ptr->value;
 }
@@ -555,36 +555,38 @@ MapList<T, U>::const_reverse_iterator::operator--(int)
 
 template<class T, class U>
 bool MapList<T, U>::const_reverse_iterator::operator==(const_reverse_iterator i)
+	const
 {
 	return ptr == i.ptr;
 }
 
 template<class T, class U>
 bool MapList<T, U>::const_reverse_iterator::operator!=(const_reverse_iterator i)
+	const
 {
 	return ptr != i.ptr;
 }
 
 template<class T, class U>
-const U &MapList<T, U>::const_reverse_iterator::operator*()
+const U &MapList<T, U>::const_reverse_iterator::operator*() const
 {
 	return ptr->value;
 }
 
 template<class T, class U>
-const U *MapList<T, U>::const_reverse_iterator::operator->()
+const U *MapList<T, U>::const_reverse_iterator::operator->() const
 {
 	return &ptr->value;
 }
 
 template<class T, class U>
-const T &MapList<T, U>::const_reverse_iterator::key()
+const T &MapList<T, U>::const_reverse_iterator::key() const
 {
 	return ptr->key;
 }
 
 template<class T, class U>
-const U &MapList<T, U>::const_reverse_iterator::value()
+const U &MapList<T, U>::const_reverse_iterator::value() const
 {
 	return ptr->value;
 }
