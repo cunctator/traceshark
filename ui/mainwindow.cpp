@@ -1117,7 +1117,10 @@ void MainWindow::aboutQCustomPlot()
 
 void MainWindow::license()
 {
-	licenseDialog->show();
+	if (licenseDialog->isVisible())
+		licenseDialog->hide();
+	else
+		licenseDialog->show();
 }
 
 void MainWindow::mouseWheel()
@@ -2323,6 +2326,10 @@ void MainWindow::updateTaskGraphActions()
 
 void MainWindow::showTaskSelector()
 {
+	if (taskSelectDialog->isVisible()) {
+		taskSelectDialog->hide();
+		return;
+	}
 	taskSelectDialog->show();
 	if (dockWidgetArea(taskSelectDialog) == Qt::NoDockWidgetArea)
 		addDockWidget(Qt::LeftDockWidgetArea, taskSelectDialog);
@@ -2333,16 +2340,26 @@ void MainWindow::showTaskSelector()
 
 void MainWindow::showEventFilter()
 {
-	eventSelectDialog->show();
+	if (eventSelectDialog->isVisible())
+		eventSelectDialog->hide();
+	else
+		eventSelectDialog->show();
 }
 
 void MainWindow::showGraphEnable()
 {
-	graphEnableDialog->show();
+	if (graphEnableDialog->isVisible())
+		graphEnableDialog->hide();
+	else
+		graphEnableDialog->show();
 }
 
 void MainWindow::showStats()
 {
+	if (statsDialog->isVisible()) {
+		statsDialog->hide();
+		return;
+	}
 	statsDialog->show();
 	if (dockWidgetArea(statsDialog) == Qt::NoDockWidgetArea)
 		addDockWidget(Qt::LeftDockWidgetArea, statsDialog);
@@ -2353,6 +2370,10 @@ void MainWindow::showStats()
 
 void MainWindow::showStatsTimeLimited()
 {
+	if (statsLimitedDialog->isVisible()) {
+		statsLimitedDialog->hide();
+		return;
+	}
 	statsLimitedDialog->beginResetModel();
 	analyzer->doLimitedStats();
 	statsLimitedDialog->setTaskMap(&analyzer->taskMap,
