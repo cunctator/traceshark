@@ -53,6 +53,7 @@
 #ifndef TASKRANGEALLOCATOR
 #define TASKRANGEALLOCATOR
 
+#include <QList>
 #include <QMap>
 
 class TaskRange {
@@ -89,6 +90,7 @@ public:
 	double getBottom();
 	bool isEmpty();
 	bool contains(int pid);
+	QList<int> getPidList() const;
 private:
 	TaskRange *rangeList;
 	double top;

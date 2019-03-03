@@ -232,3 +232,14 @@ const TaskRange &TaskRangeAllocator::iterator::value()
 {
 	return  *ptr;
 }
+
+QList<int> TaskRangeAllocator::getPidList() const
+{
+	QList<int> rlist;
+	TaskRange *r = rangeList;
+	while (r != nullptr) {
+		rlist.append(r->pid);
+		r = r->next;
+	}
+	return rlist;
+}

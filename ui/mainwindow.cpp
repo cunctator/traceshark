@@ -1985,11 +1985,7 @@ void MainWindow::consumeSettings()
 	}
 
 	/* Save the PIDs of the tasks that have a task graph */
-	TaskRangeAllocator::iterator i;
-	for (i = taskRangeAllocator->begin(); i !=  taskRangeAllocator->end();
-	     i++) {
-		taskGraphs.append(i.value().pid);
-	}
+	taskGraphs = taskRangeAllocator->getPidList();
 
 	/* Save the Pids of the tasks that have a legend */
 	legendPids = taskToolBar->legendPidList();
