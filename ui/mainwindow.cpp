@@ -869,9 +869,13 @@ void MainWindow::setTaskActionsEnabled(bool e)
 	findWakeupAction->setEnabled(e);
 	findWakingDirectAction->setEnabled(e);
 	findSleepAction->setEnabled(e);
-	addToLegendAction->setEnabled(e);
 	taskFilterAction->setEnabled(e);
 	taskFilterLimitedAction->setEnabled(e);
+}
+
+void MainWindow::setAddToLegendActionEnabled(bool e)
+{
+	addToLegendAction->setEnabled(e);
 }
 
 void MainWindow::setWakeupActionsEnabled(bool e)
@@ -933,6 +937,7 @@ void MainWindow::closeTrace()
 	setAddTaskGraphActionEnabled(false);
 	setTaskGraphRemovalActionEnabled(false);
 	setTaskGraphClearActionEnabled(false);
+	setAddToLegendActionEnabled(false);
 	setStatus(STATUS_NOFILE);
 	if (ts_errno != 0)
 		vtl::warn(ts_errno, "Failed to close() trace file");
@@ -1439,6 +1444,7 @@ void MainWindow::createActions()
 	setAddTaskGraphActionEnabled(false);
 	setTaskGraphRemovalActionEnabled(false);
 	setTaskGraphClearActionEnabled(false);
+	setAddToLegendActionEnabled(false);
 }
 
 void MainWindow::createToolBars()
@@ -1607,6 +1613,7 @@ void MainWindow::dialogConnections()
 	/* task select dialog */
 	tsconnect(taskSelectDialog, addTaskGraph(int), this, addTaskGraph(int));
 	tsconnect(taskSelectDialog, needReplot(), this, doReplot());
+	tsconnect(taskSelectDialog, needLegendCheck(), this, doLegendCheck());
 	tsconnect(taskSelectDialog, addTaskToLegend(int), this,
 		  addTaskToLegend(int));
 	tsconnect(taskSelectDialog, createFilter(QMap<int, int> &, bool, bool),
@@ -1620,6 +1627,7 @@ void MainWindow::dialogConnections()
 	/* statistics Dialog */
 	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
 	tsconnect(statsDialog, needReplot(), this, doReplot());
+	tsconnect(statsDialog, needLegendCheck(), this, doLegendCheck());
 	tsconnect(statsDialog, addTaskToLegend(int), this,
 		  addTaskToLegend(int));
 	tsconnect(statsDialog, createFilter(QMap<int, int> &, bool, bool),
@@ -1636,6 +1644,7 @@ void MainWindow::dialogConnections()
 	tsconnect(statsLimitedDialog, needReplot(), this, doReplot());
 	tsconnect(statsLimitedDialog, addTaskToLegend(int), this,
 		  addTaskToLegend(int));
+	tsconnect(statsLimitedDialog, needLegendCheck(), this, doLegendCheck());
 	tsconnect(statsLimitedDialog,
 		  createFilter(QMap<int, int> &, bool, bool),
 		  this, createPidFilter(QMap<int, int> &, bool, bool));
@@ -1707,12 +1716,14 @@ void MainWindow::selectionChanged()
 		taskToolBar->removeTaskGraph();
 		setTaskGraphRemovalActionEnabled(false);
 		setAddTaskGraphActionEnabled(false);
+		setAddToLegendActionEnabled(false);
 		return;
 	}
 
 	setTaskActionsEnabled(true);
 	taskToolBar->setTaskGraph(graph);
 	updateTaskGraphActions();
+	updateAddToLegendAction();
 }
 
 void MainWindow::legendDoubleClick(QCPLegend * /* legend */,
@@ -1747,8 +1758,6 @@ void MainWindow::handleLegendGraphDoubleClick(QCPGraph *graph)
 		return;
 	tgraph->removeFromLegend();
 	task = tgraph->getTask();
-	if (task == nullptr)
-		return;
 	/*
 	 * Inform the TaskToolBar class that the pid has been removed. This is
 	 * needed because TaskToolBar keeps track of this for the purpose of
@@ -1756,7 +1765,9 @@ void MainWindow::handleLegendGraphDoubleClick(QCPGraph *graph)
 	 * graphs, there might be "identical" legend graphs when the same pid
 	 * has migrated between CPUs
 	 */
-	taskToolBar->pidRemoved(task->pid);
+	if (task != nullptr)
+		taskToolBar->pidRemoved(task->pid);
+	updateAddToLegendAction();
 }
 
 void MainWindow::addTaskToLegend(int pid)
@@ -2055,6 +2066,9 @@ void MainWindow::consumeSettings()
 		addTaskToLegend(*j);
 
 	tracePlot->replot();
+	setTaskActionsEnabled(false);
+	updateAddToLegendAction();
+	updateTaskGraphActions();
 }
 
 void MainWindow::addTaskGraph(int pid)
@@ -2147,6 +2161,11 @@ void MainWindow::addTaskGraph(int pid)
 void MainWindow::doReplot()
 {
 	tracePlot->replot();
+}
+
+void MainWindow::doLegendCheck()
+{
+	updateAddToLegendAction();
 }
 
 void MainWindow::addAccessoryTaskGraph(QCPGraph **graphPtr,
@@ -2318,6 +2337,17 @@ void MainWindow::updateTaskGraphActions()
 		setTaskGraphRemovalActionEnabled(false);
 		setAddTaskGraphActionEnabled(false);
 	}
+}
+
+void MainWindow::updateAddToLegendAction()
+{
+	int pid = taskToolBar->getPid();
+	if (pid == 0) {
+		/* No task is selected */
+		setAddToLegendActionEnabled(false);
+		return;
+	}
+	setAddToLegendActionEnabled(!taskToolBar->legendContains(pid));
 }
 
 void MainWindow::showTaskSelector()
@@ -2621,6 +2651,7 @@ out:
 		setTaskActionsEnabled(false);
 	}
 	updateTaskGraphActions();
+	updateAddToLegendAction();
 	tracePlot->replot();
 }
 
@@ -2662,12 +2693,14 @@ void MainWindow::addToLegendTriggered()
 {
 	taskToolBar->addCurrentTaskToLegend();
 	doReplot();
+	updateAddToLegendAction();
 }
 
 /* Clears the legend of all tasks */
 void MainWindow::clearLegendTriggered()
 {
 	taskToolBar->clearLegend();
+	updateAddToLegendAction();
 }
 
 /* Finds the preceding wakeup of the currently selected task */

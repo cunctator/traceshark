@@ -85,6 +85,7 @@ public:
 	void addCurrentTaskToLegend();
 	void addStretch();
 	QList<int> legendPidList() const;
+	bool legendContains(int pid) const;
 signals:
 	void LegendEmptyChanged(bool empty);
 private:

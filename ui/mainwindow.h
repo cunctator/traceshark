@@ -128,6 +128,7 @@ private slots:
 	void legendEmptyChanged(bool empty);
 	void addTaskGraph(int pid);
 	void doReplot();
+	void doLegendCheck();
 	void addTaskToLegend(int pid);
 	void removeTaskGraph(int pid);
 	void cursorZoom();
@@ -217,6 +218,7 @@ private:
 	void setAddTaskGraphActionEnabled(bool e);
 	void setTaskGraphRemovalActionEnabled(bool e);
 	void setTaskGraphClearActionEnabled(bool e);
+	void setAddToLegendActionEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
@@ -230,6 +232,7 @@ private:
 	bool isOpenGLEnabled();
 	void setupOpenGL();
 	void updateTaskGraphActions();
+	void updateAddToLegendAction();
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;

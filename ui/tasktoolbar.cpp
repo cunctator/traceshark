@@ -258,3 +258,8 @@ QList<int> TaskToolBar::legendPidList() const
 		rlist.append(iter.key());
 	return rlist;
 }
+
+bool TaskToolBar::legendContains(int pid) const
+{
+	return legendPidMap.contains(pid);
+}

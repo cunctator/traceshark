@@ -235,8 +235,10 @@ void TaskSelectDialog::addLegendClicked()
 			emit addTaskToLegend(pid);
 		}
 	}
-	if (need)
+	if (need) {
 		emit needReplot();
+		emit needLegendCheck();
+	}
 }
 
 void TaskSelectDialog::addFilterClicked()

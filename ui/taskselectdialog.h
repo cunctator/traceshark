@@ -91,6 +91,7 @@ public slots:
 signals:
 	void addTaskGraph(int pid);
 	void needReplot(void);
+	void needLegendCheck(void);
 	void addTaskToLegend(int pid);
 	void resetFilter(void);
 	void createFilter(QMap<int, int> &map, bool orlogic, bool inclusive);
