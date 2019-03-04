@@ -189,7 +189,7 @@ private:
 
 	void updateResetFiltersEnabled();
 
-	void addSchedGraph(CPUTask &task);
+	void addSchedGraph(CPUTask &task, unsigned int cpu);
 	void addHorizontalWakeupGraph(CPUTask &task);
 	void addWakeupGraph(CPUTask &task);
 	void addPreemptedGraph(CPUTask &task);
@@ -228,11 +228,13 @@ private:
 	void checkStatsTimeLimited();
 
 	bool selectQCPGraph(QCPGraph *graph);
-	void selectTaskByPid(int pid, const unsigned int *preferred_cpu);
+	void selectTaskByPid(int pid, const unsigned int *preferred_cpu,
+			     bool prefer_cpugraph);
 	bool isOpenGLEnabled();
 	void setupOpenGL();
 	void updateTaskGraphActions();
 	void updateAddToLegendAction();
+	TaskGraph *selectedGraph();
 
 	TracePlot *tracePlot;
 	YAxisTicker *yaxisTicker;

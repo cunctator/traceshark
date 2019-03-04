@@ -56,8 +56,9 @@
 
 QMap<QCPGraph *, TaskGraph *> TaskGraph::graphDir;
 
-TaskGraph::TaskGraph(QCustomPlot *parent):
-	plot(parent), task(nullptr), taskGraph(nullptr)
+TaskGraph::TaskGraph(QCustomPlot *parent, unsigned int cpu_, bool unified_):
+	plot(parent), task(nullptr), taskGraph(nullptr), cpu(cpu_),
+	unified(unified_)
 {
 	graph = parent->addGraph(parent->xAxis, parent->yAxis);
 	graphDir[graph] = this;
@@ -146,4 +147,21 @@ void TaskGraph::clearMap()
 QCPGraph *TaskGraph::getQCPGraph()
 {
 	return graph;
+}
+
+unsigned int TaskGraph::getCPU()
+{
+	return cpu;
+}
+
+int TaskGraph::getPid()
+{
+	if (task != nullptr)
+		return task->pid;
+	return 0;
+}
+
+bool TaskGraph::isUnified()
+{
+	return unified;
 }

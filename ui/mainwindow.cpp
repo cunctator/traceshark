@@ -621,7 +621,7 @@ skipIdleFreqGraphs:
 			CPUTask &task = iter.value();
 			iter++;
 
-			addSchedGraph(task);
+			addSchedGraph(task, cpu);
 			if(Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS)) {
 				addHorizontalWakeupGraph(task);
 				addWakeupGraph(task);
@@ -700,10 +700,10 @@ void MainWindow::_setupCursors(vtl::Time redtime, const double &red,
 	scrollTo(redtime);
 }
 
-void MainWindow::addSchedGraph(CPUTask &cpuTask)
+void MainWindow::addSchedGraph(CPUTask &cpuTask, unsigned int cpu)
 {
 	/* Add scheduling graph */
-	TaskGraph *graph = new TaskGraph(tracePlot);
+	TaskGraph *graph = new TaskGraph(tracePlot, cpu, false);
 	QColor color = analyzer->getTaskColor(cpuTask.pid);
 	Task *task = analyzer->findTask(cpuTask.pid);
 	QPen pen = QPen();
@@ -1241,7 +1241,7 @@ void MainWindow::showEventInfo(const TraceEvent &event)
 
 void MainWindow::taskTriggered(int pid)
 {
-	selectTaskByPid(pid, nullptr);
+	selectTaskByPid(pid, nullptr, false);
 }
 
 void MainWindow::handleEventSelected(const TraceEvent *event)
@@ -1695,23 +1695,8 @@ int MainWindow::loadTraceFile(const QString &fileName)
 
 void MainWindow::selectionChanged()
 {
-	TaskGraph *graph = nullptr;
-	QCPGraph *qcpGraph = nullptr;
-	QCPAbstractPlottable *plottable;
-	QList<QCPAbstractPlottable*> plist = tracePlot->selectedPlottables();
-	QList<QCPAbstractPlottable*>::const_iterator iter;
-
-	for (iter = plist.begin(); iter != plist.end(); iter++) {
-		plottable = *iter;
-		qcpGraph = qobject_cast<QCPGraph *>(plottable);
-		if (qcpGraph == nullptr)
-			continue;
-		graph = TaskGraph::fromQCPGraph(qcpGraph);
-		if (graph == nullptr)
-			continue;
-	}
-
-	if (qcpGraph == nullptr || !qcpGraph->selected() || graph == nullptr) {
+	TaskGraph *graph = selectedGraph();
+	if (graph == nullptr) {
 		setTaskActionsEnabled(false);
 		taskToolBar->removeTaskGraph();
 		setTaskGraphRemovalActionEnabled(false);
@@ -1989,6 +1974,11 @@ void MainWindow::consumeSettings()
 	QList<int> taskGraphs;
 	QList<int> legendPids;
 	vtl::Time redtime, bluetime;
+	bool selected = false;
+	bool unified = false;
+	int selected_pid = 0;
+	unsigned int selected_cpu = 0;
+	TaskGraph *selected_graph;
 
 	if (!analyzer->isOpen()) {
 		setupOpenGL();
@@ -2012,6 +2002,15 @@ void MainWindow::consumeSettings()
 
 	/* Save the zoom */
 	QCPRange savedRangeX = tracePlot->xAxis->range();
+
+	/* Save wether a task was selected */
+	selected_graph = selectedGraph();
+	if (selected_graph != nullptr) {
+		selected = true;
+		selected_cpu = selected_graph->getCPU();
+		selected_pid = selected_graph->getPid();
+		unified = selected_graph->isUnified();
+	}
 
 	clearPlot();
 	setupOpenGL();
@@ -2065,10 +2064,19 @@ void MainWindow::consumeSettings()
 	for (j = legendPids.begin(); j != legendPids.end(); j++)
 		addTaskToLegend(*j);
 
-	tracePlot->replot();
-	setTaskActionsEnabled(false);
-	updateAddToLegendAction();
-	updateTaskGraphActions();
+	if (selected) {
+		/* Restore the graph selection */
+		if (unified)
+			selectTaskByPid(selected_pid, nullptr, false);
+		else
+			selectTaskByPid(selected_pid, &selected_cpu, true);
+	} else {
+		/* No task was selected */
+		tracePlot->replot();
+		setTaskActionsEnabled(false);
+		updateAddToLegendAction();
+		updateTaskGraphActions();
+	}
 }
 
 void MainWindow::addTaskGraph(int pid)
@@ -2105,7 +2113,7 @@ void MainWindow::addTaskGraph(int pid)
 
 	bottom = taskRangeAllocator->getBottom();
 
-	taskGraph = new TaskGraph(tracePlot);
+	taskGraph = new TaskGraph(tracePlot, 0, true);
 	taskGraph->setTaskGraphForLegend(cpuTask->graph);
 	QPen pen = QPen();
 
@@ -2350,6 +2358,29 @@ void MainWindow::updateAddToLegendAction()
 	setAddToLegendActionEnabled(!taskToolBar->legendContains(pid));
 }
 
+TaskGraph *MainWindow::selectedGraph()
+{
+	TaskGraph *graph = nullptr;
+	QCPGraph *qcpGraph = nullptr;
+	QCPAbstractPlottable *plottable;
+	QList<QCPAbstractPlottable*> plist = tracePlot->selectedPlottables();
+	QList<QCPAbstractPlottable*>::const_iterator iter;
+
+	for (iter = plist.begin(); iter != plist.end(); iter++) {
+		plottable = *iter;
+		qcpGraph = qobject_cast<QCPGraph *>(plottable);
+		if (qcpGraph == nullptr)
+			continue;
+		graph = TaskGraph::fromQCPGraph(qcpGraph);
+		if (graph == nullptr)
+			continue;
+	}
+
+	if (qcpGraph == nullptr || !qcpGraph->selected())
+		return nullptr;
+	return graph;
+}
+
 void MainWindow::showTaskSelector()
 {
 	if (taskSelectDialog->isVisible()) {
@@ -2488,7 +2519,7 @@ void MainWindow::showWakeupOrWaking(int pid, event_t wakevent)
 	unsigned int wcpu = wakeupevent->cpu;
 	int wpid = wakeupevent->pid;
 
-	selectTaskByPid(wpid, &wcpu);
+	selectTaskByPid(wpid, &wcpu, false);
 }
 
 void MainWindow::showWaking(const TraceEvent *wakeupevent)
@@ -2532,7 +2563,7 @@ void MainWindow::showWaking(const TraceEvent *wakeupevent)
 	unsigned int wcpu = wakingevent->cpu;
 	int wpid = wakingevent->pid;
 
-	selectTaskByPid(wpid, &wcpu);
+	selectTaskByPid(wpid, &wcpu, false);
 }
 
 void MainWindow::checkStatsTimeLimited()
@@ -2564,7 +2595,8 @@ void MainWindow::addTaskGraphTriggered()
 	doReplot();
 }
 
-void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu)
+void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu,
+				 bool prefer_cpugraph)
 {
 	Task *task;
 	QCPGraph *qcpGraph;
@@ -2583,6 +2615,9 @@ void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu)
 	 */
 	if (pid == 0)
 		goto out;
+
+	if (prefer_cpugraph)
+		goto do_cpugraph;
 
 	task = analyzer->findTask(pid);
 
