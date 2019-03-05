@@ -174,21 +174,35 @@ private:
 		STATUS_NR
 	} status_t;
 
+	/* Helper functions for the constructor */
+	void createActions();
+	void createToolBars();
+	void createMenus();
+	void createTracePlot();
+	void createStatusBar();
+	void createDialogs();
+	void plotConnections();
+	void widgetConnections();
+	void dialogConnections();
+	void loadSettings();
+
+	/* Functions for opening and processing a trace*/
 	void processTrace();
 	void computeLayout();
 	void computeStats();
 	void rescaleTrace();
 	void clearPlot();
 	void showTrace();
-	void loadSettings();
+	int loadTraceFile(const QString &);
+	void setStatus(status_t status, const QString *fileName = nullptr);
+
+	/* The rest of the functions */
 	void setupCursors();
 	void setupCursors(const double &red, const double &blue);
 	void setupCursors(const vtl::Time &redtime, const vtl::Time &bluetime);
 	void _setupCursors(vtl::Time redtime, const double &red,
 			   vtl::Time bluetime, const double &blue);
-
 	void updateResetFiltersEnabled();
-
 	void addSchedGraph(CPUTask &task, unsigned int cpu);
 	void addHorizontalWakeupGraph(CPUTask &task);
 	void addWakeupGraph(CPUTask &task);
@@ -209,7 +223,6 @@ private:
 	void addStillRunningTaskGraph(Task *task);
 	void addPreemptedTaskGraph(Task *task);
 	void addUninterruptibleTaskGraph(Task *task);
-
 	void setTraceActionsEnabled(bool e);
 	void setLegendActionsEnabled(bool e);
 	void setCloseActionsEnabled(bool e);
@@ -222,11 +235,8 @@ private:
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
-
 	void handleWakeUpChanged(bool selected);
-
 	void checkStatsTimeLimited();
-
 	bool selectQCPGraph(QCPGraph *graph);
 	void selectTaskByPid(int pid, const unsigned int *preferred_cpu,
 			     bool prefer_cpugraph);
@@ -245,19 +255,6 @@ private:
 	EventsWidget *eventsWidget;
 	InfoWidget *infoWidget;
 	QString traceFile;
-
-	void createActions();
-	void createToolBars();
-	void createMenus();
-	void createTracePlot();
-	void createStatusBar();
-	void createDialogs();
-	void plotConnections();
-	void widgetConnections();
-	void dialogConnections();
-
-	void setStatus(status_t status, const QString *fileName = nullptr);
-	int loadTraceFile(const QString &);
 
 	QMenu *fileMenu;
 	QMenu *viewMenu;
