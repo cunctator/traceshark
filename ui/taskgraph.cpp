@@ -56,9 +56,10 @@
 
 QMap<QCPGraph *, TaskGraph *> TaskGraph::graphDir;
 
-TaskGraph::TaskGraph(QCustomPlot *parent, unsigned int cpu_, bool unified_):
+TaskGraph::TaskGraph(QCustomPlot *parent, unsigned int cpu_,
+		     enum GraphType g):
 	plot(parent), task(nullptr), taskGraph(nullptr), cpu(cpu_),
-	unified(unified_)
+	graph_type(g)
 {
 	graph = parent->addGraph(parent->xAxis, parent->yAxis);
 	graphDir[graph] = this;
@@ -161,7 +162,7 @@ int TaskGraph::getPid()
 	return 0;
 }
 
-bool TaskGraph::isUnified()
+enum TaskGraph::GraphType TaskGraph::getGraphType()
 {
-	return unified;
+	return graph_type;
 }

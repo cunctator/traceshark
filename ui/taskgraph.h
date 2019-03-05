@@ -65,8 +65,11 @@ class QCPGraph;
 class TaskGraph
 {
 public:
-	TaskGraph(QCustomPlot *parent, unsigned int cpu_,
-		  bool unified_);
+	enum GraphType {
+		GRAPH_CPUGRAPH,
+		GRAPH_UNIFIED
+	};
+	TaskGraph(QCustomPlot *parent, unsigned int cpu_, enum GraphType g);
 	virtual ~TaskGraph();
 	void destroy();
 	void setTask(Task *newTask);
@@ -84,7 +87,7 @@ public:
 	QCPGraph *getQCPGraph();
 	unsigned int getCPU();
 	int getPid();
-	bool isUnified();
+	enum TaskGraph::GraphType getGraphType();
 private:
 	QCustomPlot *plot;
 	Task *task;
@@ -92,7 +95,7 @@ private:
 	QCPGraph *graph;
 	QCPGraph *legendGraph;
 	unsigned int cpu;
-	bool unified;
+	enum GraphType graph_type;
 	static QMap<QCPGraph *, TaskGraph *> graphDir;
 };
 

@@ -703,7 +703,8 @@ void MainWindow::_setupCursors(vtl::Time redtime, const double &red,
 void MainWindow::addSchedGraph(CPUTask &cpuTask, unsigned int cpu)
 {
 	/* Add scheduling graph */
-	TaskGraph *graph = new TaskGraph(tracePlot, cpu, false);
+	TaskGraph *graph = new TaskGraph(tracePlot, cpu,
+					 TaskGraph::GRAPH_CPUGRAPH);
 	QColor color = analyzer->getTaskColor(cpuTask.pid);
 	Task *task = analyzer->findTask(cpuTask.pid);
 	QPen pen = QPen();
@@ -1979,6 +1980,7 @@ void MainWindow::consumeSettings()
 	int selected_pid = 0;
 	unsigned int selected_cpu = 0;
 	TaskGraph *selected_graph;
+	enum TaskGraph::GraphType graph_type;
 
 	if (!analyzer->isOpen()) {
 		setupOpenGL();
@@ -2009,7 +2011,8 @@ void MainWindow::consumeSettings()
 		selected = true;
 		selected_cpu = selected_graph->getCPU();
 		selected_pid = selected_graph->getPid();
-		unified = selected_graph->isUnified();
+		graph_type = selected_graph->getGraphType();
+		unified = graph_type == TaskGraph::GRAPH_UNIFIED;
 	}
 
 	clearPlot();
@@ -2113,7 +2116,7 @@ void MainWindow::addTaskGraph(int pid)
 
 	bottom = taskRangeAllocator->getBottom();
 
-	taskGraph = new TaskGraph(tracePlot, 0, true);
+	taskGraph = new TaskGraph(tracePlot, 0, TaskGraph::GRAPH_UNIFIED);
 	taskGraph->setTaskGraphForLegend(cpuTask->graph);
 	QPen pen = QPen();
 
