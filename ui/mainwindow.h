@@ -174,6 +174,11 @@ private:
 		STATUS_NR
 	} status_t;
 
+	typedef enum {
+		PR_CPUGRAPH_ONLY,
+		PR_TRY_TASKGRAPH
+	} preference_t;
+
 	/* Helper functions for the constructor */
 	void createActions();
 	void createToolBars();
@@ -239,7 +244,7 @@ private:
 	void checkStatsTimeLimited();
 	bool selectQCPGraph(QCPGraph *graph);
 	void selectTaskByPid(int pid, const unsigned int *preferred_cpu,
-			     bool prefer_cpugraph);
+			     preference_t preference);
 	bool isOpenGLEnabled();
 	void setupOpenGL();
 	void updateTaskGraphActions();

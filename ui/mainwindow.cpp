@@ -1242,7 +1242,7 @@ void MainWindow::showEventInfo(const TraceEvent &event)
 
 void MainWindow::taskTriggered(int pid)
 {
-	selectTaskByPid(pid, nullptr, false);
+	selectTaskByPid(pid, nullptr, PR_TRY_TASKGRAPH);
 }
 
 void MainWindow::handleEventSelected(const TraceEvent *event)
@@ -2070,9 +2070,11 @@ void MainWindow::consumeSettings()
 	if (selected) {
 		/* Restore the graph selection */
 		if (unified)
-			selectTaskByPid(selected_pid, nullptr, false);
+			selectTaskByPid(selected_pid, nullptr,
+					PR_TRY_TASKGRAPH);
 		else
-			selectTaskByPid(selected_pid, &selected_cpu, true);
+			selectTaskByPid(selected_pid, &selected_cpu,
+					PR_CPUGRAPH_ONLY);
 	} else {
 		/* No task was selected */
 		tracePlot->replot();
@@ -2522,7 +2524,7 @@ void MainWindow::showWakeupOrWaking(int pid, event_t wakevent)
 	unsigned int wcpu = wakeupevent->cpu;
 	int wpid = wakeupevent->pid;
 
-	selectTaskByPid(wpid, &wcpu, false);
+	selectTaskByPid(wpid, &wcpu, PR_TRY_TASKGRAPH);
 }
 
 void MainWindow::showWaking(const TraceEvent *wakeupevent)
@@ -2566,7 +2568,7 @@ void MainWindow::showWaking(const TraceEvent *wakeupevent)
 	unsigned int wcpu = wakingevent->cpu;
 	int wpid = wakingevent->pid;
 
-	selectTaskByPid(wpid, &wcpu, false);
+	selectTaskByPid(wpid, &wcpu, PR_TRY_TASKGRAPH);
 }
 
 void MainWindow::checkStatsTimeLimited()
@@ -2599,7 +2601,7 @@ void MainWindow::addTaskGraphTriggered()
 }
 
 void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu,
-				 bool prefer_cpugraph)
+				 preference_t preference)
 {
 	Task *task;
 	QCPGraph *qcpGraph;
@@ -2619,7 +2621,7 @@ void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu,
 	if (pid == 0)
 		goto out;
 
-	if (prefer_cpugraph)
+	if (preference == PR_CPUGRAPH_ONLY)
 		goto do_cpugraph;
 
 	task = analyzer->findTask(pid);
