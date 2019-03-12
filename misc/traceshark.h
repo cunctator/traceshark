@@ -55,7 +55,7 @@
 
 #include "gitversion.h"
 
-#define TRACESHARK_VERSION_STRING "0.9.7-beta" TRACESHARK_GIT_VERSION
+#define TRACESHARK_VERSION_STRING "0.9.8-beta" TRACESHARK_GIT_VERSION
 
 #include <QtCore>
 #include <cstdint>
