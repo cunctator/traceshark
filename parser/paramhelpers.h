@@ -63,8 +63,14 @@ public:
 	int index;
 };
 
+typedef enum ftrace_sched_format {
+	FTRACE_SCHED_OLD,
+	FTRACE_SCHED_NEW,
+} ftraceschedformat_t;
+
 class ftrace_sched_switch_handle {
 public:
+	ftraceschedformat_t format;
 	int index;
 };
 
@@ -81,6 +87,13 @@ public:
 
 #define ABSURD_UNSIGNED ((unsigned int)INT_MAX)
 #define ABSURD_INT (INT_MAX)
+
+#define SWITCH_PPID_PFIX "prev_pid="
+#define SWITCH_PPRI_PFIX "prev_prio="
+#define SWITCH_PSTA_PFIX "prev_state="
+#define SWITCH_NCOM_PFIX "next_comm="
+#define SWITCH_NPID_PFIX "next_pid="
+#define SWITCH_NPRI_PFIX "next_prio="
 
 #define is_this_event(EVENTNAME, EVENT) (EVENT.type == EVENTNAME)
 

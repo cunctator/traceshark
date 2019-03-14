@@ -95,19 +95,45 @@ static __always_inline bool
 ftrace_sched_switch_parse(const TraceEvent &event, sched_switch_handle& handle)
 {
 	int i;
+	ftraceschedformat_t format = FTRACE_SCHED_OLD;
 
 	if (event.argc < 6)
 		return false;
 
 	/* Find the index of the '==>' */
-	for (i = 3; i < event.argc; i++) {
-		if (isArrowStr(event.argv[i]))
+	for (i = 3; i < event.argc - 2; i++) {
+		if (!isArrowStr(event.argv[i]))
+			continue;
+		const char *c1 = event.argv[i - 3]->ptr;
+		const char *c2 = event.argv[i - 2]->ptr;
+		const char *c3 = event.argv[i - 1]->ptr;
+		const char *c4 = event.argv[i + 1]->ptr;
+		/* Check if it is the new format */
+		if (!prefixcmp(c1, SWITCH_PPID_PFIX) &&
+		    !prefixcmp(c2, SWITCH_PPRI_PFIX) &&
+		    !prefixcmp(c3, SWITCH_PSTA_PFIX) &&
+		    !prefixcmp(c4, SWITCH_NCOM_PFIX)) {
+			format = FTRACE_SCHED_NEW;
 			break;
+		} else {
+			/*
+			 * Check if if is the old style format. We do this by
+			 * checking that the priority fields have their
+			 * [] braces
+			 */
+			const TString *t1 = event.argv[i - 2];
+			const TString *t2 = event.argv[event.argc - 1];
+			if (is_param_inside_braces(t1) &&
+			    is_param_inside_braces(t2)) {
+				break;
+			}
+		}
 	}
 	if (!(i < event.argc))
 		return false;
 
 	handle.ftrace.index = i;
+	handle.ftrace.format = format;
 	return true;
 }
 
@@ -117,11 +143,11 @@ __ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					    const sched_switch_handle &handle)
 {
 	int i;
-	int startidx, endidx;
+	int beginidx;
+	int endidx;
 	int len = 0;
 	char *c;
-	char *d;
-	char *end;
+	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
 	const TString *retstr;
@@ -129,48 +155,43 @@ __ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 	c = &sbuf[0];
 	ts.ptr = c;
 
-	endidx = event.argc - 2;
-	startidx = handle.ftrace.index + 1;
-
+	i = handle.perf.index;
 	/*
-	 * This loop will merge any strings before the final string, in case
-	 * such strings exists due to the task name containing spaces, and
-	 * then the taskname would be split into several strings
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character.
 	 */
-	for (i = startidx; i < endidx; i++) {
-		len += event.argv[i]->len;
-		if (len > TASKNAME_MAXLEN)
-			return NullStr;
-		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
-		c += event.argv[i]->len;
-		*c = ' ';
-		len++;
-		c++;
-	}
 
-	/*
-	 * Localize the separing ':' in the final string. The final
-	 * string is the only sting in case of no spaces in the task name.
-	 * we are searching backwards because we are interested in the last ':',
-	 * since the task name can contain ':' characters
-	 */
-	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
-	     end > event.argv[endidx]->ptr; end--) {
-		if (*end == ':')
-			break;
-	}
-
-	/* Copy the final portion up to the ':' we found previously */
-	for (d = event.argv[endidx]->ptr; d < end; d++) {
-		len++;
-		if (len > TASKNAME_MAXLEN)
+	if (handle.ftrace.format == FTRACE_SCHED_NEW) {
+		const TString * first = event.argv[i + 1];
+		beginidx = i + 2;
+		endidx = event.argc - 3;
+		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+					  ok);
+		if (!ok)
 			return NullStr;
-		*c = *d;
-		c++;
+
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
+			return NullStr;
+	} else {
+		/* handle.ftrace.format == FTRACE_SCHED_OLD */
+		const TString * last = event.argv[event.argc - 2];
+		beginidx = i + 1;
+		endidx = event.argc - 3;
+
+		merge_args_into_cstring(event, beginidx, endidx,
+					c, len, TASKNAME_MAXLEN,
+					ok);
+		if (!ok)
+			return NullStr;
+
+		__copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
+					   ok);
+		if (!ok)
+			return NullStr;
 	}
-	/* Terminate the string */
-	*c = '\0';
-	len++;
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
@@ -185,17 +206,20 @@ ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					  StringPool *pool,
 					  const sched_switch_handle &handle);
 
+
 static __always_inline const char *
 __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					    StringPool *pool,
 					    const sched_switch_handle &handle)
 {
 	int i;
+	int beginidx;
 	int endidx;
 	int len = 0;
 	char *c;
-	char *d;
-	char *end;
+	const TString *first;
+	const TString *last;
+	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
 	const TString *retstr;
@@ -203,48 +227,46 @@ __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 	c = &sbuf[0];
 	ts.ptr = c;
 
-	endidx = handle.ftrace.index - 3;
-
+	i = handle.perf.index;
 	/*
-	 * This loop will merge any strings before the final string, in case
-	 * such strings exists due to the task name containing spaces, and
-	 * then the taskname would be split into several strings
+	 * This will copy the first part of the name, that is the portion
+	 * of first that is suceeded by the '=' character
 	 */
-	for (i = 0; i < endidx; i++) {
-		len += event.argv[i]->len;
-		if (len > TASKNAME_MAXLEN)
+
+	if (handle.ftrace.format == FTRACE_SCHED_NEW) {
+		first = event.argv[0];
+		beginidx = 1;
+		endidx = i - 4;
+		__copy_tstring_after_char(first, '=', c, len,
+					  TASKNAME_MAXLEN, ok);
+		if (!ok)
 			return NullStr;
-		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
-		c += event.argv[i]->len;
-		*c = ' ';
-		len++;
-		c++;
-	}
 
-	/*
-	 * Localize the separing ':' in the final string. The final
-	 * string is the only sting in case of no spaces in the task name.
-	 * we are searching backwards because we are interested in the last ':',
-	 * since the task name can contain ':' characters
-	 */
-	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
-	     end > event.argv[endidx]->ptr; end--) {
-		if (*end == ':')
-			break;
-	}
-
-	/* Copy the final portion up to the ':' we found previously */
-	for (d = event.argv[endidx]->ptr; d < end; d++) {
-		len++;
-		if (len > TASKNAME_MAXLEN)
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
 			return NullStr;
-		*c = *d;
-		c++;
-	}
-	/* Terminate the string */
-	*c = '\0';
-	len++;
 
+	} else {
+		/* handle.ftrace.format == FTRACE_SCHED_NEW */
+		last = event.argv[i - 3];
+		beginidx = 0;
+		endidx = i - 4;
+
+		merge_args_into_cstring(event, beginidx, endidx,
+					c, len, TASKNAME_MAXLEN,
+					ok);
+		if (!ok)
+			return NullStr;
+
+		__copy_tstring_before_char(last, ':',
+					   c, len, TASKNAME_MAXLEN,
+					   ok);
+
+		if (!ok)
+			return NullStr;
+	}
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
@@ -253,6 +275,7 @@ __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 	return retstr->ptr;
 }
 
+
 const char *
 ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					  StringPool *pool,
@@ -260,9 +283,12 @@ ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 
 static __always_inline int
 ftrace_sched_switch_handle_newpid(const TraceEvent &event,
-				  const sched_switch_handle &/*handle*/)
+				  const sched_switch_handle &handle)
 {
-	return int_after_char(event, event.argc - 2, ':');
+	if (handle.ftrace.format == FTRACE_SCHED_OLD)
+		return int_after_char(event, event.argc - 2, ':');
+	else
+		return int_after_char(event, event.argc - 2, '=');
 }
 
 static __always_inline int
@@ -270,15 +296,34 @@ ftrace_sched_switch_handle_oldpid(const TraceEvent &event,
 				  const sched_switch_handle &handle)
 {
 	int i = handle.ftrace.index;
-	return int_after_char(event, i - 3, ':');
+	if (handle.ftrace.format == FTRACE_SCHED_OLD)
+		return int_after_char(event, i - 3, ':');
+	else
+		return int_after_char(event, i - 3, '=');
 }
 
 static __always_inline taskstate_t
 ftrace_sched_switch_handle_state(const TraceEvent &event,
 				 const sched_switch_handle &handle)
 {
+	int j;
+	TString stateStr;
+
 	int i = handle.ftrace.index;
-	return __sched_state_from_tstring(event.argv[i - 1]);
+	const TString *stateArgStr = event.argv[i - 1];
+
+	if (handle.ftrace.format == FTRACE_SCHED_NEW) {
+		for (j = stateArgStr->len - 2; j > 0; j--) {
+			if (stateArgStr->ptr[j] == '=') {
+				stateStr.len = stateArgStr->len - 1 - j;
+				stateStr.ptr = stateArgStr->ptr + j + 1;
+				return  __sched_state_from_tstring(&stateStr);
+			}
+		}
+	} else if (stateArgStr->len == 1 || stateArgStr->len == 2)
+		return __sched_state_from_tstring(stateArgStr);
+
+	return TASK_STATE_PARSER_ERROR;
 }
 
 static __always_inline taskstate_t
@@ -286,14 +331,20 @@ ftrace_sched_switch_handle_oldprio(const TraceEvent &event,
 				   const sched_switch_handle &handle)
 {
 	int i = handle.ftrace.index;
-	return param_inside_braces(event, i - 2);
+	if (handle.ftrace.format == FTRACE_SCHED_NEW)
+		return uint_after_char(event, i - 2, '=');
+	else
+		return param_inside_braces(event, i - 2);
 }
 
 static __always_inline taskstate_t
 ftrace_sched_switch_handle_newprio(const TraceEvent &event,
-				   const sched_switch_handle &/*handle*/)
+				   const sched_switch_handle &handle)
 {
-	return param_inside_braces(event, event.argc - 1);
+	if (handle.ftrace.format == FTRACE_SCHED_NEW)
+		return uint_after_char(event, event.argc - 1, '=');
+	else
+		return param_inside_braces(event, event.argc - 1);
 }
 
 #define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)

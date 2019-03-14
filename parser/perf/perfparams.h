@@ -89,14 +89,6 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 							'='))
 #define perf_sched_migrate_pid(EVENT) (int_after_char(EVENT, EVENT.argc - 4, \
 						      '='))
-
-#define SWITCH_PPID_PFIX "prev_pid="
-#define SWITCH_PPRI_PFIX "prev_prio="
-#define SWITCH_PSTA_PFIX "prev_state="
-#define SWITCH_NCOM_PFIX "next_comm="
-#define SWITCH_NPID_PFIX "next_pid="
-#define SWITCH_NPRI_PFIX "next_prio="
-
 /*
  * This function finds the index of the '==>' in the switch event arguments
  * that has this format:
