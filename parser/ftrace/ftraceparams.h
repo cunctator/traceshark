@@ -348,32 +348,66 @@ ftrace_sched_switch_handle_newprio(const TraceEvent &event,
 }
 
 #define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
-#define ftrace_sched_wakeup_cpu(EVENT) (uint_after_char(EVENT, \
-							EVENT.argc - 1, ':'))
+
+static __always_inline
+unsigned int ftrace_sched_wakeup_cpu(const TraceEvent &event)
+{
+	unsigned int cpu = uint_after_char(event, event.argc - 1, ':');
+
+	if (cpu == ABSURD_UNSIGNED)
+		cpu = uint_after_char(event, event.argc - 1, '=');
+	return cpu;
+}
+
+#define WAKEUP_SUCC_PFIX "success="
 
 static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
-	 /* Empty string should not be produced by parser */
-	char *last = ss->ptr + ss->len - 1;
-	return *last == '1';
+	const char *c = ss->ptr;
+	if (!prefixcmp(c, WAKEUP_SUCC_PFIX)) {
+		char *last = ss->ptr + ss->len - 1;
+		return *last == '1';
+	}
+	return true;
 }
 
-#define ftrace_sched_wakeup_prio(EVENT) (param_inside_braces(EVENT, \
-							     EVENT.argc - 3))
-#define ftrace_sched_wakeup_pid(EVENT) (int_after_char(EVENT, \
-						       EVENT.argc - 4,	\
-						       ':'))
-/* Todo, code could be shrared with the other two *_strup() functions */
+static __always_inline
+unsigned int ftrace_sched_wakeup_prio(const TraceEvent &event)
+{
+	int idx = event.argc - 3;
+	if (is_param_inside_braces(event.argv[idx])) {
+		return param_inside_braces(event, idx);
+	} else {
+		/* Perhaps we should check here that we have the prio= prefix */
+		idx = event.argc - 2;
+		return uint_after_char(event, idx, '=');
+	}
+}
+
+#define WAKEUP_PID_PFIX "pid="
+
+static __always_inline int ftrace_sched_wakeup_pid(const TraceEvent &event)
+{
+	int idx = event.argc - 3;
+	const char *c = event.argv[idx]->ptr;
+	if (!prefixcmp(c, WAKEUP_PID_PFIX))
+		return int_after_char(event, idx, '=');
+	/* We assume the old format here */
+	idx = event.argc - 4;
+	return int_after_char(event, idx, ':');
+}
+
 static __always_inline const char
 *__ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
-	int i;
-	char *c;
+	int beginidx;
 	int endidx;
-	char *d;
-	char *end;
 	int len = 0;
+	char *c;
+	const TString *first;
+	const TString *last;
+	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
 	const TString *retstr;
@@ -381,51 +415,45 @@ static __always_inline const char
 	c = &sbuf[0];
 	ts.ptr = c;
 
-	if (event.argc < 4)
-		return NullStr;
+	/* We use the "pid=" prefix as a marker for the new format */
+	const char *d = event.argv[event.argc - 3]->ptr;
+	bool is_newformat = !prefixcmp(d, WAKEUP_PID_PFIX);
 
-	endidx = event.argc - 4;
-
-	/* This loop will merge any strings before the final string, in case
-	 * such strings exists due to the task name containing spaces, and
-	 * then the taskname would be split into several strings
-	 */
-	for(i = 0; i < event.argc - 4; i++) {
-		len += event.argv[i]->len;
-		if (len > TASKNAME_MAXLEN)
+	if (is_newformat) {
+		/* newformat */
+		first = event.argv[0];
+		beginidx = 1;
+		endidx = event.argc - 4;
+		__copy_tstring_after_char(first, '=', c, len,
+					  TASKNAME_MAXLEN, ok);
+		if (!ok)
 			return NullStr;
-		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
-		c += event.argv[i]->len;
-		*c = ' ';
-		len++;
-		c++;
-	}
 
-	/*
-	 * Localize the separating ':' in the final string. The final
-	 * string is the only sting in case of no spaces in the task name.
-	 * we are searching backwards because we are interested in the last ':',
-	 * since the task name can contain ':' characters
-	 */
-	for (end = event.argv[endidx]->ptr + event.argv[endidx]->len - 1;
-	     end > event.argv[endidx]->ptr; end--) {
-		if (*end == ':')
-			break;
-	}
-
-	/* Copy the final portion up to the ':' we found previously */
-	for (d = event.argv[endidx]->ptr; d < end; d++) {
-		len++;
-		if (len > TASKNAME_MAXLEN)
+		merge_args_into_cstring_nullterminate(event, beginidx, endidx,
+						      c, len, TASKNAME_MAXLEN,
+						      ok);
+		if (!ok)
 			return NullStr;
-		*c = *d;
-		c++;
+
+	} else {
+		/* oldformat */
+		last = event.argv[event.argc - 4];
+		beginidx = 0;
+		endidx = event.argc - 5;
+
+		merge_args_into_cstring(event, beginidx, endidx,
+					c, len, TASKNAME_MAXLEN,
+					ok);
+		if (!ok)
+			return NullStr;
+
+		__copy_tstring_before_char(last, ':',
+					   c, len, TASKNAME_MAXLEN,
+					   ok);
+
+		if (!ok)
+			return NullStr;
 	}
-
-	/* Terminate the string */
-	*c = '\0';
-	len++;
-
 	ts.len = len;
 	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
 	if (retstr == nullptr)
