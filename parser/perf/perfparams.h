@@ -183,7 +183,7 @@ perf_sched_switch_handle_state(const TraceEvent &event,
 				return  __sched_state_from_tstring(&stateStr);
 			}
 		}
-	} else if (event.argv[i - 1]->len == 1) {
+	} else if (event.argv[i - 1]->len == 1 || event.argv[i - 1]->len == 2) {
 		return __sched_state_from_tstring(stateArgStr);
 	}
 
@@ -256,7 +256,6 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 	int endidx;
 	int len = 0;
 	char *c;
-	const TString *first;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
@@ -266,13 +265,10 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 	ts.ptr = c;
 
 	i = handle.perf.index;
-	/*
-	 * This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character.
-	 */
-	first = event.argv[i + 1];
+
 
 	if (!handle.perf.is_distro_style) {
+		const TString *first = event.argv[i + 1];
 		beginidx = i + 2;
 		endidx = event.argc - 3;
 		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
@@ -286,6 +282,7 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 	} else {
+		const TString *last = event.argv[event.argc - 2];
 		beginidx = i + 1;
 		endidx = event.argc - 3;
 
@@ -295,7 +292,7 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
+		__copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
 					   ok);
 		if (!ok)
 			return NullStr;
@@ -324,7 +321,6 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 	int endidx;
 	int len = 0;
 	char *c;
-	const TString *first;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
 	TString ts;
@@ -334,13 +330,9 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 	ts.ptr = c;
 
 	i = handle.perf.index;
-	/*
-	 * This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character
-	 */
-	first = event.argv[0];
 
 	if (!handle.perf.is_distro_style) {
+		const TString *first = event.argv[0];
 		beginidx = 1;
 		endidx = i - 4;
 		__copy_tstring_after_char(first, '=', c, len,
@@ -355,6 +347,7 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 			return NullStr;
 
 	} else {
+		const TString *last = event.argv[i - 3];
 		beginidx = 0;
 		endidx = i - 4;
 
@@ -364,7 +357,7 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		__copy_tstring_before_char(first, ':',
+		__copy_tstring_before_char(last, ':',
 					   c, len, TASKNAME_MAXLEN,
 					   ok);
 
@@ -500,10 +493,6 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 		beginidx = 1;
 		endidx = i - 1;
 
-		/*
-		 * This will copy the first part of the name, that is the
-		 * portion of first that is suceeded by the '=' character
-		 */
 		first = event.argv[0];
 		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 					  ok);
@@ -577,10 +566,6 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 		return NullStr;
 	beginidx = i + 1;
 
-	/*
-	 * This will copy the first part of the name, that is the portion
-	 * of first that is suceeded by the '=' character
-	 */
 	first = event.argv[i];
 	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
