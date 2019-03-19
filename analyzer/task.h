@@ -53,6 +53,8 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <cstring>
+
 #include <QString>
 
 #include "analyzer/abstracttask.h"
