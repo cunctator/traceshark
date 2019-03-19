@@ -526,18 +526,16 @@ found:
 	i++;
 
 	for (;i <= endidx; i++) {
+		*c = ' ';
+		len++;
+		c++;
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
 			return NullStr;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
-		if (i == endidx)
-			goto finalize;
-		*c = ' ';
-		len++;
-		c++;
 	}
-finalize:
+
 	/* Terminate the string */
 	*c  = '\0';
 	len++;
