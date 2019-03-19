@@ -254,10 +254,10 @@ merge_args_into_cstring(const TraceEvent &event,
 			ok = false;
 			return;
 		}
-		*c = ' ';
-		c++;
 		strncpy(c, event.argv[i]->ptr, event.argv[i]->len);
 		c += event.argv[i]->len;
+		*c = ' ';
+		c++;
 	}
 }
 
