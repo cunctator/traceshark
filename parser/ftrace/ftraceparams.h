@@ -523,6 +523,8 @@ found:
 	if (d == NullStr || sublen > TASKNAME_MAXLEN)
 		return NullStr;
 	strncpy(c, d, sublen);
+	c += sublen;
+	len += sublen;
 	i++;
 
 	for (;i <= endidx; i++) {
