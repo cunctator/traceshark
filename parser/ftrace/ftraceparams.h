@@ -138,7 +138,7 @@ ftrace_sched_switch_parse(const TraceEvent &event, sched_switch_handle& handle)
 }
 
 static __always_inline const char *
-__ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
+_ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					    StringPool *pool,
 					    const sched_switch_handle &handle)
 {
@@ -165,7 +165,7 @@ __ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		const TString * first = event.argv[i + 1];
 		beginidx = i + 2;
 		endidx = event.argc - 3;
-		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+		_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 					  ok);
 		if (!ok)
 			return NullStr;
@@ -187,7 +187,7 @@ __ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		__copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
+		_copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
 					   ok);
 		if (!ok)
 			return NullStr;
@@ -208,7 +208,7 @@ ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 
 
 static __always_inline const char *
-__ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
+_ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					    StringPool *pool,
 					    const sched_switch_handle &handle)
 {
@@ -237,7 +237,7 @@ __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		first = event.argv[0];
 		beginidx = 1;
 		endidx = i - 4;
-		__copy_tstring_after_char(first, '=', c, len,
+		_copy_tstring_after_char(first, '=', c, len,
 					  TASKNAME_MAXLEN, ok);
 		if (!ok)
 			return NullStr;
@@ -260,7 +260,7 @@ __ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		__copy_tstring_before_char(last, ':',
+		_copy_tstring_before_char(last, ':',
 					   c, len, TASKNAME_MAXLEN,
 					   ok);
 
@@ -317,11 +317,11 @@ ftrace_sched_switch_handle_state(const TraceEvent &event,
 			if (stateArgStr->ptr[j] == '=') {
 				stateStr.len = stateArgStr->len - 1 - j;
 				stateStr.ptr = stateArgStr->ptr + j + 1;
-				return  __sched_state_from_tstring(&stateStr);
+				return  _sched_state_from_tstring(&stateStr);
 			}
 		}
 	} else if (stateArgStr->len == 1 || stateArgStr->len == 2)
-		return __sched_state_from_tstring(stateArgStr);
+		return _sched_state_from_tstring(stateArgStr);
 
 	return TASK_STATE_PARSER_ERROR;
 }
@@ -399,7 +399,7 @@ static __always_inline int ftrace_sched_wakeup_pid(const TraceEvent &event)
 }
 
 static __always_inline const char
-*__ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
+*_ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
 	int beginidx;
 	int endidx;
@@ -424,7 +424,7 @@ static __always_inline const char
 		first = event.argv[0];
 		beginidx = 1;
 		endidx = event.argc - 4;
-		__copy_tstring_after_char(first, '=', c, len,
+		_copy_tstring_after_char(first, '=', c, len,
 					  TASKNAME_MAXLEN, ok);
 		if (!ok)
 			return NullStr;
@@ -447,7 +447,7 @@ static __always_inline const char
 		if (!ok)
 			return NullStr;
 
-		__copy_tstring_before_char(last, ':',
+		_copy_tstring_before_char(last, ':',
 					   c, len, TASKNAME_MAXLEN,
 					   ok);
 
@@ -491,7 +491,7 @@ ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 }
 
 static __always_inline const char *
-__ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
+_ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 					     StringPool *pool)
 {
 	int i;
@@ -586,7 +586,7 @@ const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 	 !prefixcmp(EVENT.argv[EVENT.argc - 1]->ptr, FTRACE_WAKING_CPU_PFIX))
 
 static __always_inline const char *
-__ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
+_ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
 {
 	int beginidx;
 	int endidx;
@@ -609,7 +609,7 @@ __ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
 	 * portion of first that is suceeded by the '=' character
 	 */
 	first = event.argv[0];
-	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+	_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 				  ok);
 	if (!ok)
 		return NullStr;

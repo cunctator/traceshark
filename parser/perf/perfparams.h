@@ -109,7 +109,7 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
  * In a nutshell, this protects us against weirdos but not against lunatics :)
  */
 static __always_inline int
-___perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
+_perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 {
 	int i;
 	for (i = 3; i < event.argc - 2; i++) {
@@ -157,7 +157,7 @@ static __always_inline bool perf_sched_switch_parse(const TraceEvent &event,
 {
 	int i;
 
-	i = ___perf_sched_switch_find_arrow(event, handle.perf.is_distro_style);
+	i = _perf_sched_switch_find_arrow(event, handle.perf.is_distro_style);
 	if( i <= 0)
 		return false;
 	handle.perf.index = i;
@@ -180,11 +180,11 @@ perf_sched_switch_handle_state(const TraceEvent &event,
 			if (stateArgStr->ptr[j] == '=') {
 				stateStr.len = stateArgStr->len - 1 - j;
 				stateStr.ptr = stateArgStr->ptr + j + 1;
-				return  __sched_state_from_tstring(&stateStr);
+				return  _sched_state_from_tstring(&stateStr);
 			}
 		}
 	} else if (event.argv[i - 1]->len == 1 || event.argv[i - 1]->len == 2) {
-		return __sched_state_from_tstring(stateArgStr);
+		return _sched_state_from_tstring(stateArgStr);
 	}
 
 	return TASK_STATE_PARSER_ERROR;
@@ -247,7 +247,7 @@ perf_sched_switch_handle_newprio(const TraceEvent &event,
 }
 
 static __always_inline const char *
-__perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
+_perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					  StringPool *pool,
 					  const sched_switch_handle &handle)
 {
@@ -271,7 +271,7 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		const TString *first = event.argv[i + 1];
 		beginidx = i + 2;
 		endidx = event.argc - 3;
-		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+		_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 					  ok);
 		if (!ok)
 			return NullStr;
@@ -292,7 +292,7 @@ __perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		__copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
+		_copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
 					   ok);
 		if (!ok)
 			return NullStr;
@@ -312,7 +312,7 @@ perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					const sched_switch_handle &handle);
 
 static __always_inline const char *
-__perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
+_perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					  StringPool *pool,
 					  const sched_switch_handle &handle)
 {
@@ -335,7 +335,7 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		const TString *first = event.argv[0];
 		beginidx = 1;
 		endidx = i - 4;
-		__copy_tstring_after_char(first, '=', c, len,
+		_copy_tstring_after_char(first, '=', c, len,
 					  TASKNAME_MAXLEN, ok);
 		if (!ok)
 			return NullStr;
@@ -357,7 +357,7 @@ __perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		__copy_tstring_before_char(last, ':',
+		_copy_tstring_before_char(last, ':',
 					   c, len, TASKNAME_MAXLEN,
 					   ok);
 
@@ -451,7 +451,7 @@ static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 }
 
 static __always_inline const char *
-__perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
+_perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 {
 	int i;
 	int beginidx;
@@ -484,7 +484,7 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 			return NullStr;
 
 		first = event.argv[0];
-		__copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
+		_copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
 					   ok);
 		if (!ok)
 			return NullStr;
@@ -494,7 +494,7 @@ __perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 		endidx = i - 1;
 
 		first = event.argv[0];
-		__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
+		_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
 					  ok);
 		if (!ok)
 			return NullStr;
@@ -540,7 +540,7 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 }
 
 static __always_inline const char *
-__perf_sched_process_fork_childname_strdup(const TraceEvent &event,
+_perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 					   StringPool *pool)
 {
 	int i;
@@ -567,7 +567,7 @@ __perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	beginidx = i + 1;
 
 	first = event.argv[i];
-	__copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
+	_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
 		return NullStr;
 

@@ -110,7 +110,7 @@ public:
  * This function copies everything after the delim char into the cstring
  * pointed to by c and adds the length to len
  */
-static __always_inline void __copy_tstring_after_char(const TString *str,
+static __always_inline void _copy_tstring_after_char(const TString *str,
 						      char delim,
 						      char *&dest,
 						      int &len,
@@ -153,7 +153,7 @@ err:
  * This function copies everything after the delim char into the cstring
  * pointed to by c and adds the length to len
  */
-static __always_inline void __copy_tstring_before_char(const TString *str,
+static __always_inline void _copy_tstring_before_char(const TString *str,
 						       char delim,
 						       char *&dest,
 						       int &len,
@@ -378,7 +378,7 @@ static __always_inline const char *substr_after_char(const char *str,
 }
 
 static __always_inline taskstate_t
-__sched_state_from_tstring(const TString *str)
+_sched_state_from_tstring(const TString *str)
 {
 	int i;
 	char c;
