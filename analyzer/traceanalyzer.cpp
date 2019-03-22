@@ -102,7 +102,7 @@ TraceAnalyzer::TraceAnalyzer()
 	  customPlot(nullptr), pidFilterInclusive(false),
 	  OR_pidFilterInclusive(false)
 {
-	taskNamePool = new StringPool(16384, 256);
+	taskNamePool = new StringPool<>(16384, 256);
 	parser = new TraceParser();
 	filterState.disableAll();
 	OR_filterState.disableAll();

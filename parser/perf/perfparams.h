@@ -248,7 +248,7 @@ perf_sched_switch_handle_newprio(const TraceEvent &event,
 
 static __always_inline const char *
 _perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
-					  StringPool *pool,
+					  StringPool<> *pool,
 					  const sched_switch_handle &handle)
 {
 	int i;
@@ -293,13 +293,13 @@ _perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 			return NullStr;
 
 		_copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
-					   ok);
+					  ok);
 		if (!ok)
 			return NullStr;
 	}
 
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -308,12 +308,12 @@ _perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 
 const char *
 perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
-					StringPool *pool,
+					StringPool<> *pool,
 					const sched_switch_handle &handle);
 
 static __always_inline const char *
 _perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
-					  StringPool *pool,
+					  StringPool<> *pool,
 					  const sched_switch_handle &handle)
 {
 	int i;
@@ -365,7 +365,7 @@ _perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 			return NullStr;
 	}
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -374,7 +374,7 @@ _perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 
 const char *
 perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
-					StringPool *pool,
+					StringPool<> *pool,
 					const sched_switch_handle &handle);
 
 /*
@@ -451,7 +451,7 @@ static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 }
 
 static __always_inline const char *
-_perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
+_perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
 	int i;
 	int beginidx;
@@ -507,7 +507,7 @@ _perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 	}
 
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -515,7 +515,7 @@ _perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
 }
 
 const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
-					  StringPool *pool);
+					  StringPool<> *pool);
 
 #define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define perf_sched_process_fork_childpid(EVENT) \
@@ -541,7 +541,7 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 
 static __always_inline const char *
 _perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-					   StringPool *pool)
+					   StringPool<> *pool)
 {
 	int i;
 	int beginidx;
@@ -577,7 +577,7 @@ _perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 		return NullStr;
 
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -585,7 +585,7 @@ _perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 }
 
 const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-						     StringPool *pool);
+						     StringPool<> *pool);
 
 #define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define perf_sched_process_exit_pid(EVENT) \

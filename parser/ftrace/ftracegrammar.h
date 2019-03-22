@@ -87,8 +87,8 @@ private:
 	__always_inline bool TimeMatch(const TString *str, TraceEvent &event);
 	__always_inline bool EventMatch(const TString *str, TraceEvent &event);
 	__always_inline bool ArgMatch(const TString *str, TraceEvent &event);
-	StringPool *argPool;
-	StringPool *namePool;
+	StringPool<> *argPool;
+	StringPool<> *namePool;
 	int unknownTypeCounter;
 	typedef enum {
 		STATE_NAMEPID = 0,
@@ -198,7 +198,6 @@ __always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 	const int maxlen = sizeof(nbuf) / sizeof(char) - 1;
 	int i;
 	int fini;
-	uint32_t hash;
 
 	namestr.ptr = nbuf;
 	namestr.len = 0;
@@ -242,12 +241,10 @@ __always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 			}
 			if (!namestr.merge(&finistr, maxlen))
 				return false;
-			hash = TShark::StrHash32(&namestr);
-			newname = namePool->allocString(&namestr, hash, 0);
+			newname = namePool->allocString(&namestr, 0);
 		} else {
 			/* This is the common case, no spaces in the name. */
-			hash = TShark::StrHash32(&finistr);
-			newname = namePool->allocString(&finistr, hash, 0);
+			newname = namePool->allocString(&finistr, 0);
 		}
 
 		if (newname == nullptr)
@@ -299,7 +296,7 @@ __always_inline bool FtraceGrammar::ArgMatch(const TString *str,
 {
 	const TString *newstr;
 	if (event.argc < EVENT_MAX_NR_ARGS) {
-		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
+		newstr = argPool->allocString(str, 16);
 		if (newstr == nullptr)
 			return false;
 		event.argv[event.argc] = newstr;

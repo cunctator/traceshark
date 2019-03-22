@@ -139,7 +139,7 @@ ftrace_sched_switch_parse(const TraceEvent &event, sched_switch_handle& handle)
 
 static __always_inline const char *
 _ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
-					    StringPool *pool,
+					    StringPool<> *pool,
 					    const sched_switch_handle &handle)
 {
 	int i;
@@ -194,7 +194,7 @@ _ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 	}
 
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -203,13 +203,13 @@ _ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 
 const char *
 ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
-					  StringPool *pool,
+					  StringPool<> *pool,
 					  const sched_switch_handle &handle);
 
 
 static __always_inline const char *
 _ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
-					    StringPool *pool,
+					    StringPool<> *pool,
 					    const sched_switch_handle &handle)
 {
 	int i;
@@ -268,7 +268,7 @@ _ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 			return NullStr;
 	}
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -278,7 +278,7 @@ _ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 
 const char *
 ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
-					  StringPool *pool,
+					  StringPool<> *pool,
 					  const sched_switch_handle &handle);
 
 static __always_inline int
@@ -399,7 +399,7 @@ static __always_inline int ftrace_sched_wakeup_pid(const TraceEvent &event)
 }
 
 static __always_inline const char
-*_ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool *pool)
+*_ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
 	int beginidx;
 	int endidx;
@@ -455,7 +455,7 @@ static __always_inline const char
 			return NullStr;
 	}
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -463,7 +463,7 @@ static __always_inline const char
 }
 
 const char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
-					    StringPool *pool);
+					    StringPool<> *pool);
 
 #define ftrace_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 #define ftrace_sched_process_fork_childpid(EVENT) \
@@ -492,7 +492,7 @@ ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 
 static __always_inline const char *
 _ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
-					     StringPool *pool)
+					     StringPool<> *pool)
 {
 	int i;
 	const int endidx = event.argc - 2;
@@ -543,7 +543,7 @@ found:
 	len++;
 
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 
@@ -551,7 +551,7 @@ found:
 }
 
 const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
-						       StringPool *pool);
+						       StringPool<> *pool);
 
 #define ftrace_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
 #define ftrace_sched_process_exit_pid(EVENT) \
@@ -586,7 +586,7 @@ const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 	 !prefixcmp(EVENT.argv[EVENT.argc - 1]->ptr, FTRACE_WAKING_CPU_PFIX))
 
 static __always_inline const char *
-_ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
+_ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
 	int beginidx;
 	int endidx;
@@ -621,14 +621,14 @@ _ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
 		return NullStr;
 
 	ts.len = len;
-	retstr = pool->allocString(&ts, TShark::StrHash32(&ts), 0);
+	retstr = pool->allocString(&ts, 0);
 	if (retstr == nullptr)
 		return NullStr;
 	return retstr->ptr;
 }
 
 const char *
-ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool);
+ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool<> *pool);
 
 #define ftrace_sched_waking_pid(EVENT) \
 	(int_after_char(EVENT, EVENT.argc - 3, '='))

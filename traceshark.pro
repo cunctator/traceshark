@@ -436,7 +436,6 @@ SOURCES      +=  threads/tthread.cpp
 SOURCES      +=  threads/workqueue.cpp
 
 SOURCES      +=  mm/mempool.cpp
-SOURCES      +=  mm/stringpool.cpp
 SOURCES      +=  mm/stringtree.cpp
 
 SOURCES      +=  misc/errors.cpp

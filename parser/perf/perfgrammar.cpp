@@ -56,8 +56,8 @@
 PerfGrammar::PerfGrammar() :
 	unknownTypeCounter(EVENT_UNKNOWN)
 {
-	argPool = new StringPool(2048, 1024 * 1024);
-	namePool =  new StringPool(1024, 65536);
+	argPool = new StringPool<>(2048, 1024 * 1024);
+	namePool =  new StringPool<>(1024, 65536);
 	eventTree = new StringTree(8, 256, 4096);
 	setupEventTree();
 }

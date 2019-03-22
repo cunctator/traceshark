@@ -53,18 +53,18 @@
 #include "parser/ftrace/ftraceparams.h"
 
 const char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
-					    StringPool *pool) {
+					    StringPool<> *pool) {
 	return _ftrace_sched_wakeup_name_strdup(event, pool);
 }
 
 const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
-						       StringPool *pool) {
+						       StringPool<> *pool) {
 	return _ftrace_sched_process_fork_childname_strdup(event, pool);
 }
 
 const char *
 ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
-					  StringPool *pool,
+					  StringPool<> *pool,
 					  const sched_switch_handle &handle)
 {
 	return _ftrace_sched_switch_handle_newname_strdup(event, pool, handle);
@@ -72,7 +72,7 @@ ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 
 const char *
 ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
-					  StringPool *pool,
+					  StringPool<> *pool,
 					  const sched_switch_handle &handle)
 {
 	return _ftrace_sched_switch_handle_oldname_strdup(event, pool, handle);
@@ -80,7 +80,7 @@ ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 
 
 const char *
-ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool *pool)
+ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
 	return _ftrace_sched_waking_name_strdup(event, pool);
 }

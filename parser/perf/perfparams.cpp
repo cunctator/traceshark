@@ -53,20 +53,20 @@
 #include "parser/perf/perfparams.h"
 
 const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
-					  StringPool *pool)
+					  StringPool<> *pool)
 {
 	return _perf_sched_wakeup_name_strdup(event, pool);
 }
 
 const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-						     StringPool *pool)
+						     StringPool<> *pool)
 {
 	return _perf_sched_process_fork_childname_strdup(event, pool);
 }
 
 const char
 *perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
-					 StringPool *pool,
+					 StringPool<> *pool,
 					 const sched_switch_handle &handle)
 {
 	return _perf_sched_switch_handle_oldname_strdup(event, pool, handle);
@@ -74,7 +74,7 @@ const char
 
 const char *
 perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
-					StringPool *pool,
+					StringPool<> *pool,
 					const sched_switch_handle &handle)
 {
 	return _perf_sched_switch_handle_newname_strdup(event, pool, handle);

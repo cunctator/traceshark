@@ -278,7 +278,7 @@ private:
 	int minIdleState;
 	unsigned int timePrecision;
 	CPU *CPUs;
-	StringPool *taskNamePool;
+	StringPool<> *taskNamePool;
 	QCustomPlot *customPlot;
 	FilterState filterState;
 	FilterState OR_filterState;

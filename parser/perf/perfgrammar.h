@@ -86,8 +86,8 @@ private:
 	__always_inline bool TimeMatch(TString *str, TraceEvent &event);
 	__always_inline bool EventMatch(TString *str, TraceEvent &event);
 	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
-	StringPool *argPool;
-	StringPool *namePool;
+	StringPool<> *argPool;
+	StringPool<> *namePool;
 
 	/*
 	 * This is a counter that will count up every time a new event name
@@ -229,7 +229,6 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str, TraceEvent &event)
 	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
 	int i;
 	int pid;
-	uint32_t hash;
 	bool ok;
 
 	namestr.ptr = cstr;
@@ -259,12 +258,9 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str, TraceEvent &event)
 					return false;
 			}
 
-			hash = TShark::StrHash32(&namestr);
-			newname = namePool->allocString(&namestr, hash, 0);
+			newname = namePool->allocString(&namestr, 0);
 		} else {
-			hash = TShark::StrHash32(event.argv[0]);
-			newname = namePool->allocString(event.argv[0], hash,
-							0);
+			newname = namePool->allocString(event.argv[0], 0);
 		}
 		if (newname == nullptr)
 			return false;
@@ -323,7 +319,7 @@ __always_inline bool PerfGrammar::ArgMatch(TString *str, TraceEvent &event)
 {
 	const TString *newstr;
 	if (event.argc < EVENT_MAX_NR_ARGS) {
-		newstr = argPool->allocString(str, TShark::StrHash32(str), 16);
+		newstr = argPool->allocString(str, 16);
 		if (newstr == nullptr)
 			return false;
 		event.argv[event.argc] = newstr;

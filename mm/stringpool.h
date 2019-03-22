@@ -61,6 +61,9 @@
 #include "vtl/avltree.h"
 #include "vtl/tlist.h"
 
+#define STRINGPOOL_MAX(A, B) ((A) >= (B) ? A:B)
+#define STRINGPOOL_MIN(A, B) ((A) < (B) ? A:B)
+
 class __DummySP {};
 
 class PoolBundleSP {
@@ -68,6 +71,9 @@ public:
 	MemPool *charPool;
 	MemPool *nodePool;
 };
+
+template<typename HashFunc>
+class StringPool;
 
 #define __STRINGPOOL_ITERATOR(name) \
 vtl::AVLTree<TString, __DummySP, vtl::AVLBALANCE_USEPOINTERS, \
@@ -117,8 +123,9 @@ vtl::AVLBALANCE_USEPOINTERS, AVLAllocatorSP<TString, __DummySP>, \
 #define SP_CACHE_SIZE (TYPICAL_CACHE_LINE_SIZE - TSTRING_PTR_SIZE - \
 		       AVLTREE_SIZE)
 
+template<typename HashFunc>
 class StringPoolEntry {
-	friend class StringPool;
+	friend class StringPool<HashFunc>;
 public:
 StringPoolEntry(void *data): cachePtr(nullptr), avlTree(data) {
 		bzero(cache, SP_CACHE_SIZE);
@@ -131,13 +138,21 @@ protected:
 		avlTree;
 };
 
+class DefaultHashFunc {
+public:
+	__always_inline unsigned int operator()(const TString *str) const
+	{
+		return TShark::StrHash32(str);
+	}
+};
+
+template<typename HashFunc = DefaultHashFunc>
 class StringPool
 {
 public:
 	StringPool(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256);
 	~StringPool();
 	__always_inline const TString *allocString(const TString *str,
-						   uint32_t hval,
 						   uint32_t cutoff);
 	void clear();
 	void reset();
@@ -146,20 +161,23 @@ private:
 	MemPool *coldCharPool;
 	MemPool *strPool;
 	PoolBundleSP avlPools;
-	StringPoolEntry **hashTable;
+	StringPoolEntry<HashFunc> **hashTable;
 	unsigned int *countAllocs;
 	unsigned int *countReuse;
 	unsigned int hSize;
 	void clearTable();
-	vtl::TList<StringPoolEntry*> deleteList;
+	vtl::TList<StringPoolEntry<HashFunc>*> deleteList;
+	HashFunc hFunc;
 };
 
-__always_inline const TString *StringPool::allocString(const TString *str,
-						       uint32_t hval,
-						       uint32_t cutoff)
+template<typename HashFunc>
+__always_inline
+const TString *StringPool<HashFunc>::allocString(const TString *str,
+						 uint32_t cutoff)
 {
-	StringPoolEntry *entry;
+	StringPoolEntry<HashFunc> *entry;
 	bool isNew;
+	uint32_t hval = hFunc(str);
 
 	hval = hval % hSize;
 
@@ -193,7 +211,7 @@ __always_inline const TString *StringPool::allocString(const TString *str,
 		}
 		return &refStr;
 	} else {
-		entry = new StringPoolEntry(&avlPools);
+		entry = new StringPoolEntry<HashFunc>(&avlPools);
 		hashTable[hval] = entry;
 		deleteList.append(entry);
 		__STRINGPOOL_ITERATOR(iter) iter =
@@ -205,7 +223,9 @@ __always_inline const TString *StringPool::allocString(const TString *str,
 	}
 }
 
-__always_inline const TString *StringPool::allocUniqueString(const TString *str)
+template<typename HashFunc>
+__always_inline
+const TString *StringPool<HashFunc>::allocUniqueString(const TString *str)
 {
 	TString *newstr;
 
@@ -220,7 +240,79 @@ __always_inline const TString *StringPool::allocUniqueString(const TString *str)
 	return newstr;
 }
 
+template<typename HashFunc>
+StringPool<HashFunc>::StringPool(unsigned int nr_pages, unsigned int hSizeP)
+{
+	unsigned int entryPages, strPages;
 
+	if (hSizeP == 0)
+		hSize = 1;
+	else
+		hSize = hSizeP;
 
+	entryPages = 2 * hSize *
+		sizeof(vtl::AVLNode<TString, __DummySP>) / 4096;
+	entryPages = STRINGPOOL_MAX(1, entryPages);
+	strPages = 2* hSize * sizeof(TString) / 4096;
+	strPages = STRINGPOOL_MAX(16, strPages);
+
+	coldCharPool = new MemPool(nr_pages, 1);
+	strPool = new MemPool(nr_pages, sizeof(TString));
+
+	avlPools.charPool = new MemPool(nr_pages, sizeof(char));
+	avlPools.nodePool = new MemPool(entryPages, sizeof(vtl::AVLNode<TString,
+							   __DummySP>));
+	hashTable = new StringPoolEntry<HashFunc>*[hSize];
+	countAllocs = new unsigned int[hSize];
+	countReuse = new unsigned int[hSize];
+	clearTable();
+}
+
+template<typename HashFunc>
+StringPool<HashFunc>::~StringPool()
+{
+	unsigned int i, s;
+	delete coldCharPool;
+	delete strPool;
+	delete avlPools.charPool;
+	delete avlPools.nodePool;
+	delete[] hashTable;
+	delete[] countAllocs;
+	delete[] countReuse;
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
+}
+
+template<typename HashFunc>
+void StringPool<HashFunc>::clearTable()
+{
+	bzero(hashTable, hSize * sizeof(StringPoolEntry<HashFunc>*));
+	bzero(countAllocs, hSize * sizeof(unsigned int));
+	bzero(countReuse, hSize * sizeof(unsigned int));
+}
+
+template<typename HashFunc>
+void StringPool<HashFunc>::clear()
+{
+	unsigned int s, i;
+	clearTable();
+	coldCharPool->reset();
+	strPool->reset();
+	avlPools.nodePool->reset();
+	avlPools.charPool->reset();
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
+	deleteList.clear();
+}
+
+template<typename HashFunc>
+void StringPool<HashFunc>::reset()
+{
+	clear();
+}
 
 #endif /* STRINGPOOL_H */
