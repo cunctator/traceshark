@@ -138,15 +138,15 @@ protected:
 		avlTree;
 };
 
-class DefaultHashFunc {
+class StringPoolDefaultHashFunc {
 public:
-	__always_inline unsigned int operator()(const TString *str) const
+	__always_inline uint32_t operator()(const TString *str) const
 	{
 		return TShark::StrHash32(str);
 	}
 };
 
-template<typename HashFunc = DefaultHashFunc>
+template<typename HashFunc = StringPoolDefaultHashFunc>
 class StringPool
 {
 public:
