@@ -82,14 +82,14 @@ char *eventstrings[NR_EVENTS] = {
 	irqhdlrext
 };
 
-StringTree *TraceEvent::stringTree = nullptr;
+StringTree<> *TraceEvent::stringTree = nullptr;
 
-void TraceEvent::setStringTree(StringTree *sTree)
+void TraceEvent::setStringTree(StringTree<> *sTree)
 {
 	stringTree = sTree;
 }
 
-const StringTree *TraceEvent::getStringTree()
+const StringTree<> *TraceEvent::getStringTree()
 {
 	return stringTree;
 }

@@ -53,8 +53,10 @@
 #ifndef TRACEEVENT_H
 #define TRACEEVENT_H
 
+#include "mm/stringtree.h"
 #include "parser/traceline.h"
 #include "misc/tstring.h"
+#include "misc/types.h"
 #include "vtl/time.h"
 
 #include <cstdint>
@@ -115,8 +117,6 @@
 
 #define TASK_CHAR_SEPARATOR		'|'
 
-typedef uint32_t taskstate_t;
-
 /*
  * This works because TASK_FLAG_MASK will mask out the preemption flag
  */
@@ -131,25 +131,8 @@ static __always_inline bool task_state_is_flag_set(taskstate_t state,
 	return ((state & flag) != 0);
 }
 
-typedef enum {
-	EVENT_ERROR = -1,
-	CPU_FREQUENCY,
-	CPU_IDLE,
-	SCHED_MIGRATE_TASK,
-	SCHED_SWITCH,
-	SCHED_WAKEUP,
-	SCHED_WAKEUP_NEW,
-	SCHED_WAKING,
-	SCHED_PROCESS_FORK,
-	SCHED_PROCESS_EXIT,
-	IRQ_HANDLER_ENTRY,
-	IRQ_HANDLER_EXIT,
-	NR_EVENTS,
-} event_t;
-
 #define EVENT_UNKNOWN (NR_EVENTS)
 
-class StringTree;
 class Chunk;
 
 class TraceEvent {
@@ -174,14 +157,14 @@ public:
 
 	const TString *getEventName() const;
 	static const TString *getEventName(event_t event);
-	static void setStringTree(StringTree *sTree);
-	static const StringTree *getStringTree();
+	static void setStringTree(StringTree<> *sTree);
+	static const StringTree<> *getStringTree();
 	static int getNrEvents();
 private:
 	/* This is supposed to be set to the stringtree that was involved in
 	 * the parsing of the events, so that it can used to translate from
 	 * event_t to event name */
-	static StringTree *stringTree;
+	static StringTree<> *stringTree;
 };
 
 extern char *eventstrings[];

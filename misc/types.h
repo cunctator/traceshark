@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,73 +50,25 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-#include "mm/stringtree.h"
+#ifndef _MISC_TYPES_H
+#define _MISC_TYPES_H
 
-#define MAX(A, B) ((A) >= (B) ? A:B)
-#define MIN(A, B) ((A) < (B) ? A:B)
+typedef uint32_t taskstate_t;
 
+typedef enum {
+	EVENT_ERROR = -1,
+	CPU_FREQUENCY,
+	CPU_IDLE,
+	SCHED_MIGRATE_TASK,
+	SCHED_SWITCH,
+	SCHED_WAKEUP,
+	SCHED_WAKEUP_NEW,
+	SCHED_WAKING,
+	SCHED_PROCESS_FORK,
+	SCHED_PROCESS_EXIT,
+	IRQ_HANDLER_ENTRY,
+	IRQ_HANDLER_EXIT,
+	NR_EVENTS,
+} event_t;
 
-StringTree::StringTree(unsigned int nr_pages, unsigned int hSizeP,
-		       unsigned int table_size):
-	maxEvent((event_t)-1)
-{
-	unsigned int entryPages;
-
-	if (hSizeP == 0)
-		hSize = 1;
-	else
-		hSize = hSizeP;
-
-	entryPages = 2 * hSize *
-		sizeof(vtl::AVLNode<TString, event_t>) / 4096;
-	entryPages = MAX(1, entryPages);
-
-	avlPools.charPool = new MemPool(nr_pages, sizeof(char));
-	avlPools.nodePool = new MemPool(entryPages, sizeof(vtl::AVLNode<TString,
-							   event_t>));
-	hashTable = new StringTreeEntry*[hSize];
-
-	stringTable = new TString*[table_size];
-	tableSize = table_size;
-
-	clearTable();
-}
-
-StringTree::~StringTree()
-{
-	unsigned int i, s;
-	delete avlPools.charPool;
-	delete avlPools.nodePool;
-	delete[] hashTable;
-	delete[] stringTable;
-	s = deleteList.size();
-	for (i = 0; i < s; i++) {
-		delete deleteList[i];
-	}
-}
-
-void StringTree::clearTable()
-{
-	bzero(hashTable, hSize * sizeof(StringTreeEntry*));
-	bzero(stringTable, tableSize * sizeof(TString*));
-	maxEvent = (event_t) -1;
-}
-
-void StringTree::clear()
-{
-	unsigned int s, i;
-	clearTable();
-	avlPools.nodePool->reset();
-	avlPools.charPool->reset();
-	s = deleteList.size();
-	for (i = 0; i < s; i++) {
-		delete deleteList[i];
-	}
-	deleteList.clear();
-}
-
-void StringTree::reset()
-{
-	clear();
-}
+#endif

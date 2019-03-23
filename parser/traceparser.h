@@ -92,8 +92,8 @@ public:
 	void threadParser();
 	void threadReader();
 	__always_inline vtl::TList<TraceEvent> *getEventsTList() const;
-	const StringTree *getPerfEventTree();
-	const StringTree *getFtraceEventTree();
+	const StringTree<> *getPerfEventTree();
+	const StringTree<> *getFtraceEventTree();
 protected:
 	__always_inline void waitForNextBatch(bool &eof, int &index);
 	void waitForTraceType();

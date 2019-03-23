@@ -61,6 +61,8 @@ namespace vtl {
 }
 class Task;
 class TaskHandle;
+
+template<typename HashFunc>
 class StringTree;
 
 QT_BEGIN_NAMESPACE
@@ -73,7 +75,7 @@ class EventSelectModel : public QAbstractTableModel
 public:
 	EventSelectModel(QObject *parent = 0);
 	~EventSelectModel();
-	void setStringTree(const StringTree *stree);
+	void setStringTree(const StringTree<> *stree);
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
@@ -88,7 +90,7 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 private:
 	vtl::TList<event_t> *eventList;
-	const StringTree *stringTree;
+	const StringTree<> *stringTree;
 	QString *errorStr;
 };
 

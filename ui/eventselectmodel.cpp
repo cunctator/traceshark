@@ -74,7 +74,7 @@ EventSelectModel::~EventSelectModel()
 	delete errorStr;
 }
 
-void EventSelectModel::setStringTree(const StringTree *stree)
+void EventSelectModel::setStringTree(const StringTree<> *stree)
 {
 	event_t event;
 	int i, maxevent;

@@ -76,7 +76,7 @@ public:
 	void clear();
 	__always_inline bool parseLine(const TraceLine &line,
 				       TraceEvent &event);
-	StringTree *eventTree;
+	StringTree<> *eventTree;
 private:
 	void setupEventTree();
 	__always_inline bool NamePidMatch(const TString *str,
@@ -275,7 +275,7 @@ __always_inline bool FtraceGrammar::EventMatch(const TString *str,
 	} else
 		return false;
 
-	type = eventTree->searchAllocString(&estr, TShark::StrHash32(&estr),
+	type = eventTree->searchAllocString(&estr,
 					    (event_t) unknownTypeCounter);
 	if (type == EVENT_ERROR)
 		return false;

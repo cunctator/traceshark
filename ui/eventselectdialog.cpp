@@ -108,7 +108,7 @@ EventSelectDialog::~EventSelectDialog()
 	delete filterMap;
 }
 
-void EventSelectDialog::setStringTree(const StringTree *stree)
+void EventSelectDialog::setStringTree(const StringTree<> *stree)
 {
 	eventModel->setStringTree(stree);
 }

@@ -1170,7 +1170,7 @@ event_t TraceAnalyzer::determineCPUEvent(bool &ok)
 {
 	int i, j;
 	int maxevent;
-	const StringTree *stree = TraceEvent::getStringTree();
+	const StringTree<> *stree = TraceEvent::getStringTree();
 	const TString *ename;
 	event_t rval = (event_t) 0;
 	event_t event;

@@ -74,7 +74,7 @@ public:
 	~PerfGrammar();
 	void clear();
 	__always_inline bool parseLine(TraceLine &line, TraceEvent &event);
-	StringTree *eventTree;
+	StringTree<> *eventTree;
 private:
 	void setupEventTree();
 	__always_inline bool StoreMatch(TString *str, TraceEvent &event);
@@ -299,7 +299,6 @@ __always_inline bool PerfGrammar::EventMatch(TString *str, TraceEvent &event)
 	}
 
 	type = eventTree->searchAllocString(&tmpstr,
-					    TShark::StrHash32(&tmpstr),
 					    (event_t) unknownTypeCounter);
 	if (type == EVENT_ERROR)
 		return false;

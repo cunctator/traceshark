@@ -58,15 +58,21 @@
 #include "mm/mempool.h"
 #include "misc/traceshark.h"
 #include "misc/tstring.h"
-#include "parser/traceevent.h"
+#include "misc/types.h"
 #include "vtl/avltree.h"
 #include "vtl/tlist.h"
+
+#define STRINGTREE_MAX(A, B) ((A) >= (B) ? A:B)
+#define STRINGTREE_MIN(A, B) ((A) < (B) ? A:B)
 
 class PoolBundleST {
 public:
 	MemPool *charPool;
 	MemPool *nodePool;
 };
+
+template<typename HashFunc>
+class StringTree;
 
 #define __STRINGTREE_ITERATOR(name) \
 	vtl::AVLTree<TString, event_t, vtl::AVLBALANCE_USEPOINTERS, \
@@ -116,8 +122,9 @@ vtl::AVLBALANCE_USEPOINTERS, AVLAllocatorST<TString, event_t>, \
 #define ST_CACHE_SIZE (ST_TYPICAL_CACHE_LINE_SIZE - ST_TSTRING_PTR_SIZE - \
 		       ST_AVLTREE_SIZE)
 
+template<typename HashFunc>
 class StringTreeEntry {
-	friend class StringTree;
+	friend class StringTree<HashFunc>;
 public:
 StringTreeEntry(void *data): avlTree(data) { }
 protected:
@@ -126,6 +133,15 @@ protected:
 		avlTree;
 };
 
+class StringTreeDefaultHashFunc {
+public:
+	__always_inline uint32_t operator()(const TString *str) const
+	{
+		return TShark::StrHash32(str);
+	}
+};
+
+template<typename HashFunc = StringTreeDefaultHashFunc>
 class StringTree
 {
 public:
@@ -134,36 +150,41 @@ public:
 	~StringTree();
 	__always_inline const TString *stringLookup(event_t value) const;
 	__always_inline event_t searchAllocString(const TString *str,
-						  uint32_t hval,
 						  event_t newval);
 	__always_inline event_t getMaxEvent() const;
 	void clear();
 	void reset();
 private:
 	PoolBundleST avlPools;
-	StringTreeEntry **hashTable;
+	StringTreeEntry<HashFunc> **hashTable;
 	unsigned int hSize;
 	unsigned int tableSize;
 	event_t maxEvent;
 	TString **stringTable;
 	void clearTable();
-	vtl::TList<StringTreeEntry*> deleteList;
+	vtl::TList<StringTreeEntry<HashFunc>*> deleteList;
+	HashFunc hashFunc;
 };
 
-__always_inline const TString *StringTree::stringLookup(event_t value) const
+template<typename HashFunc>
+__always_inline
+const TString *StringTree<HashFunc>::stringLookup(event_t value) const
 {
 	if (value < 0 || value > maxEvent)
 		return nullptr;
 	return stringTable[value];
 }
 
-__always_inline event_t StringTree::searchAllocString(const TString *str,
-						      uint32_t hval,
-						      event_t newval)
+template<typename HashFunc>
+__always_inline
+event_t StringTree<HashFunc>::searchAllocString(const TString *str,
+						event_t newval)
 {
-	StringTreeEntry *entry;
+	StringTreeEntry<HashFunc> *entry;
 	bool isNew;
+	uint32_t hval;
 
+	hval = hashFunc(str);
 	hval = hval % hSize;
 
 	if (hashTable[hval] != nullptr) {
@@ -180,7 +201,7 @@ __always_inline event_t StringTree::searchAllocString(const TString *str,
 			return iter.value();
 		}
 	} else {
-		entry = new StringTreeEntry(&avlPools);
+		entry = new StringTreeEntry<HashFunc>(&avlPools);
 		hashTable[hval] = entry;
 		deleteList.append(entry);
 		__STRINGTREE_ITERATOR(iter) iter =
@@ -193,9 +214,79 @@ __always_inline event_t StringTree::searchAllocString(const TString *str,
 	}
 }
 
-__always_inline event_t StringTree::getMaxEvent() const
+template<typename HashFunc>
+__always_inline event_t StringTree<HashFunc>::getMaxEvent() const
 {
 	return maxEvent;
+}
+
+template<typename HashFunc>
+StringTree<HashFunc>::StringTree(unsigned int nr_pages, unsigned int hSizeP,
+				 unsigned int table_size):
+maxEvent((event_t)-1)
+{
+	unsigned int entryPages;
+
+	if (hSizeP == 0)
+		hSize = 1;
+	else
+		hSize = hSizeP;
+
+	entryPages = 2 * hSize *
+		sizeof(vtl::AVLNode<TString, event_t>) / 4096;
+	entryPages = STRINGTREE_MAX(1, entryPages);
+
+	avlPools.charPool = new MemPool(nr_pages, sizeof(char));
+	avlPools.nodePool = new MemPool(entryPages, sizeof(vtl::AVLNode<TString,
+							   event_t>));
+	hashTable = new StringTreeEntry<HashFunc>*[hSize];
+
+	stringTable = new TString*[table_size];
+	tableSize = table_size;
+
+	clearTable();
+}
+
+template<typename HashFunc>
+StringTree<HashFunc>::~StringTree()
+{
+	unsigned int i, s;
+	delete avlPools.charPool;
+	delete avlPools.nodePool;
+	delete[] hashTable;
+	delete[] stringTable;
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
+}
+
+template<typename HashFunc>
+void StringTree<HashFunc>::clearTable()
+{
+	bzero(hashTable, hSize * sizeof(StringTreeEntry<HashFunc>*));
+	bzero(stringTable, tableSize * sizeof(TString*));
+	maxEvent = (event_t) -1;
+}
+
+template<typename HashFunc>
+void StringTree<HashFunc>::clear()
+{
+	unsigned int s, i;
+	clearTable();
+	avlPools.nodePool->reset();
+	avlPools.charPool->reset();
+	s = deleteList.size();
+	for (i = 0; i < s; i++) {
+		delete deleteList[i];
+	}
+	deleteList.clear();
+}
+
+template<typename HashFunc>
+void StringTree<HashFunc>::reset()
+{
+	clear();
 }
 
 #endif /* STRINGTREE_H */

@@ -73,7 +73,7 @@ class EventSelectDialog : public QDialog {
 public:
 	EventSelectDialog(QWidget *parent = 0);
 	~EventSelectDialog();
-	void setStringTree(const StringTree *stree);
+	void setStringTree(const StringTree<> *stree);
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();

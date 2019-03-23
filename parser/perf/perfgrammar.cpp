@@ -58,7 +58,7 @@ PerfGrammar::PerfGrammar() :
 {
 	argPool = new StringPool<>(2048, 1024 * 1024);
 	namePool =  new StringPool<>(1024, 65536);
-	eventTree = new StringTree(8, 256, 4096);
+	eventTree = new StringTree<>(8, 256, 4096);
 	setupEventTree();
 }
 
@@ -86,7 +86,6 @@ void PerfGrammar::setupEventTree()
 	for (t = 0; t < NR_EVENTS; t++) {
 		str.ptr = eventstrings[t];
 		str.len = strlen(eventstrings[t]);
-		eventTree->searchAllocString(&str, TShark::StrHash32(&str),
-					     (event_t) t);
+		eventTree->searchAllocString(&str, (event_t) t);
 	}
 }

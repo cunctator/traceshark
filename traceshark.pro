@@ -362,6 +362,7 @@ HEADERS      +=  misc/string.h
 HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/translate.h
 HEADERS      +=  misc/tstring.h
+HEADERS      +=  misc/types.h
 
 HEADERS      +=  vtl/avltree.h
 HEADERS      +=  vtl/bitvector.h
@@ -436,7 +437,6 @@ SOURCES      +=  threads/tthread.cpp
 SOURCES      +=  threads/workqueue.cpp
 
 SOURCES      +=  mm/mempool.cpp
-SOURCES      +=  mm/stringtree.cpp
 
 SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
