@@ -58,7 +58,7 @@
 
 namespace vtl {
 
-typedef enum { AVLBALANCE_USEPOINTERS,  AVLBALANCE_USESWAP } avlbalance_t;
+typedef enum : int { AVLBALANCE_USEPOINTERS,  AVLBALANCE_USESWAP } avlbalance_t;
 
 #define __AVLTREEMAX(A, B) ((A) >= (B) ? A:B)
 

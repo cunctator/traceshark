@@ -63,7 +63,7 @@ public:
 	int index;
 };
 
-typedef enum ftrace_sched_format {
+typedef enum ftrace_sched_format : int {
 	FTRACE_SCHED_OLD,
 	FTRACE_SCHED_NEW,
 } ftraceschedformat_t;

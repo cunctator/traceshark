@@ -64,7 +64,7 @@ class QCPGraph;
 class TaskGraph;
 class Task;
 
-typedef enum {
+typedef enum : int {
 	STATUS_ALIVE,
 	STATUS_EXITCALLED,
 	STATUS_FINAL

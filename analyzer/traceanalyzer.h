@@ -102,7 +102,7 @@ class QCustomPlot;
 class TraceAnalyzer
 {
 public:
-	typedef enum {
+	typedef enum : int {
 		EXPORT_TYPE_ALL = 0,
 		EXPORT_TYPE_CPU_CYCLES
 	} exporttype_t;

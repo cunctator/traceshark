@@ -96,7 +96,7 @@ private:
 	 */
 	int unknownTypeCounter;
 
-	typedef enum {
+	typedef enum : int {
 		STATE_NAME = 0,
 		STATE_PID,
 		STATE_CPU,

@@ -167,14 +167,14 @@ private slots:
 	void taskFilterLimitedTriggered();
 
 private:
-	typedef enum {
+	typedef enum : int {
 		STATUS_NOFILE = 0,
 		STATUS_FILE,
 		STATUS_ERROR,
 		STATUS_NR
 	} status_t;
 
-	typedef enum {
+	typedef enum : int {
 		PR_CPUGRAPH_ONLY,
 		PR_TRY_TASKGRAPH
 	} preference_t;

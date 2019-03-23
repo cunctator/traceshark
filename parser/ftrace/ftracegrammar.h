@@ -90,7 +90,7 @@ private:
 	StringPool<> *argPool;
 	StringPool<> *namePool;
 	int unknownTypeCounter;
-	typedef enum {
+	typedef enum : int {
 		STATE_NAMEPID = 0,
 		STATE_CPU,
 		STATE_TIME,

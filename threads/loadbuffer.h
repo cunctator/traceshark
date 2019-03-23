@@ -98,7 +98,7 @@ private:
 	__always_inline void completeTokenization();
 	__always_inline void waitForConsumptionComplete();
 	__always_inline void completeConsumption();
-	typedef enum {
+	typedef enum : int {
 		LOADSTATE_EMPTY = 0,
 		LOADSTATE_LOADED,
 		LOADSTATE_TOKENIZED

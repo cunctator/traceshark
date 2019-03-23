@@ -83,7 +83,7 @@
 
 #define MAX_NR_MIGRATIONS (200000)
 
-typedef enum {
+typedef enum : int {
 	TRACE_TYPE_FTRACE = 0,
 	TRACE_TYPE_PERF,
 	TRACE_TYPE_UNKNOWN,

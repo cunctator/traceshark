@@ -55,7 +55,7 @@
 
 typedef uint32_t taskstate_t;
 
-typedef enum {
+typedef enum : int {
 	EVENT_ERROR = -1,
 	CPU_FREQUENCY,
 	CPU_IDLE,
