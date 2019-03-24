@@ -63,7 +63,26 @@
 
 #define TRACESHARK_VERSION_KEY "TRACESHARK_FILE_VERSION"
 
-Setting::Setting(): enabled(true), nrDep(0), nrDependents(0)
+Setting::Value::Value() :
+	type_(TYPE_INT)
+{
+	value.int_value = 0;
+}
+
+Setting::Value::Value(bool b) :
+	type_(TYPE_BOOL)
+{
+	value.bool_value = b;
+}
+
+Setting::Value::Value(int i) :
+	type_(TYPE_INT)
+{
+	value.int_value = i;
+}
+
+
+Setting::Setting(): flags(FLAG_NO_FLAG), nrDep(0), nrDependents(0)
 {
 	bzero(dependency, sizeof(dependency));
 	bzero(dependent, sizeof(dependent));
@@ -72,36 +91,35 @@ Setting::Setting(): enabled(true), nrDep(0), nrDependents(0)
 void Setting::setupSettings()
 {
 	QObject q;
-	SettingDependency schedDep;
-	schedDep.index = Setting::SHOW_SCHED_GRAPHS;
-	schedDep.desiredValue = true;
 
-	SettingDependency unlimitedDep;
-	unlimitedDep.index = Setting::SHOW_MIGRATION_GRAPHS;
-	unlimitedDep.desiredValue = true;
+	Dependency schedDep(Setting::SHOW_SCHED_GRAPHS, true);
+	Dependency unlimitedDep(Setting::SHOW_MIGRATION_GRAPHS, true);
+	Dependency openglDep(Setting::OPENGL_ENABLED, true);
+
+	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
+	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
+	initBoolValue(Setting::SHOW_SCHED_GRAPHS, true);
 
 	setName(Setting::HORIZONTAL_WAKEUP, q.tr("Show horizontal wakeup"));
 	setKey(Setting::HORIZONTAL_WAKEUP, QString("HORIZONTAL_WAKEUP"));
-	setEnabled(Setting::HORIZONTAL_WAKEUP, false);
+	initBoolValue(Setting::HORIZONTAL_WAKEUP, false);
+	initDisabledBoolValue(Setting::HORIZONTAL_WAKEUP, false);
 	addDependency(Setting::HORIZONTAL_WAKEUP, schedDep);
 
 	setName(Setting::VERTICAL_WAKEUP, q.tr("Show vertical wakeup"));
 	setKey(Setting::VERTICAL_WAKEUP, QString("VERTICAL_WAKEUP"));
-	setEnabled(Setting::VERTICAL_WAKEUP, true);
+	initBoolValue(Setting::VERTICAL_WAKEUP, true);
+	initDisabledBoolValue(Setting::VERTICAL_WAKEUP, false);
 	addDependency(Setting::VERTICAL_WAKEUP, schedDep);
-
-	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
-	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
-	setEnabled(Setting::SHOW_SCHED_GRAPHS, true);
 
 	setName(Setting::SHOW_CPUFREQ_GRAPHS,
 		q.tr("Show CPU frequency graphs"));
 	setKey(Setting::SHOW_CPUFREQ_GRAPHS, QString("SHOW_CPUFREQ_GRAPHS"));
-	setEnabled(Setting::SHOW_CPUFREQ_GRAPHS, true);
+	initBoolValue(Setting::SHOW_CPUFREQ_GRAPHS, true);
 
 	setName(Setting::SHOW_CPUIDLE_GRAPHS, q.tr("Show CPU idle graphs"));
 	setKey(Setting::SHOW_CPUIDLE_GRAPHS, QString("SHOW_CPUIDLE_GRAPHS"));
-	setEnabled(Setting::SHOW_CPUIDLE_GRAPHS, true);
+	initBoolValue(Setting::SHOW_CPUIDLE_GRAPHS, true);
 
 	QString maxstr = QString::number(MAX_NR_MIGRATIONS / 1000);
 	maxstr = maxstr + QString("k");
@@ -109,27 +127,31 @@ void Setting::setupSettings()
 		+ maxstr);
 	setKey(Setting::SHOW_MIGRATION_GRAPHS,
 	       QString("SHOW_MIGRATION_GRAPHS"));
-	setEnabled(Setting::SHOW_MIGRATION_GRAPHS, true);
+	initBoolValue(Setting::SHOW_MIGRATION_GRAPHS, true);
 
 	setName(Setting::SHOW_MIGRATION_UNLIMITED,
 		q.tr("Unlimited migrations"));
 	setKey(Setting::SHOW_MIGRATION_UNLIMITED,
 	       QString("SHOW_MIGRATION_UNLIMITED"));
-	setEnabled(Setting::SHOW_MIGRATION_UNLIMITED, false);
+	initBoolValue(Setting::SHOW_MIGRATION_UNLIMITED, false);
+	initDisabledBoolValue(Setting::SHOW_MIGRATION_UNLIMITED, false);
 	addDependency(Setting::SHOW_MIGRATION_UNLIMITED, unlimitedDep);
 
-	/*
-	 * OpenGL is only really useful when we use a line width greater than 1.
-	 * We only want a line width greater than 1 when we are on a high
-	 * resolution screen. Thus, we only enable opengl when the resolution
-	 * is high.
-	 */
 	bool opengl = has_opengl() && !isLowResScreen();
 	int width = opengl ? DEFAULT_LINE_WIDTH_OPENGL : DEFAULT_LINE_WIDTH;
-	setOpenGLEnabled(opengl);
-	setOpenGLEnabledKey(QString("OPENGL_ENABLED"));
-	setLineWidth(width);
-	setLineWidthKey(QString("SCHED_GRAPH_LINE_WIDTH"));
+
+	setName(Setting::OPENGL_ENABLED, q.tr("Enable OpenGL"));
+	setKey(Setting::OPENGL_ENABLED, QString("OPENGL_ENABLED"));
+	initBoolValue(Setting::OPENGL_ENABLED, opengl);
+	setFlag(Setting::OPENGL_ENABLED, FLAG_MUST_BE_CONSUMED);
+
+	setName(Setting::LINE_WIDTH, q.tr("Line width of sched graphs:"));
+	setKey(Setting::LINE_WIDTH, QString("SCHED_GRAPH_LINE_WIDTH"));
+	initIntValue(Setting::LINE_WIDTH, width);
+	initMaxIntValue(Setting::LINE_WIDTH, MAX_LINE_WIDTH_OPENGL);
+	initMinIntValue(Setting::LINE_WIDTH, MIN_LINE_WIDTH_OPENGL);
+	initDisabledIntValue(Setting::LINE_WIDTH, DEFAULT_LINE_WIDTH);
+	addDependency(Setting::LINE_WIDTH, openglDep);
 }
 
 bool Setting::isWideScreen()
@@ -149,109 +171,162 @@ bool Setting::isLowResScreen()
 	return geometry.width() < 1700 && geometry.height() < 1220;
 }
 
-void Setting::setName(enum SettingIndex idx, const QString &n)
+void Setting::setName(enum Index idx, const QString &n)
 {
 	settings[idx].name = n;
 }
 
-void Setting::setEnabled(enum SettingIndex idx, bool e)
+void Setting::setBoolValue(enum Index idx, bool v)
 {
-	settings[idx].enabled = e;
+	assert_bool(settings[idx].value);
+	settings[idx].value.value.bool_value = v;
 }
 
-void Setting::clearDependencies(enum SettingIndex idx)
+void Setting::initBoolValue(enum Index idx, bool v)
 {
-	settings[idx].nrDep = 0;
+	settings[idx].value.type_ = Value::TYPE_BOOL;
+	settings[idx].value.value.bool_value = v;
 }
 
-void Setting::addDependency(enum SettingIndex idx,
-			    const SettingDependency &d)
+void Setting::setIntValue(enum Index idx, int v)
 {
-	SettingDependency dy;
+	assert_int(settings[idx].value);
+	settings[idx].value.value.int_value = v;
+}
+
+void Setting::initIntValue(enum Index idx, int v)
+{
+	settings[idx].value.type_ = Value::TYPE_INT;
+	settings[idx].value.value.int_value = v;
+}
+
+void Setting::initMaxIntValue(enum Index idx, int v)
+{
+	settings[idx].max_value.type_ = Value::TYPE_INT;
+	settings[idx].max_value.value.int_value = v;
+}
+
+void Setting::initMinIntValue(enum Index idx, int v)
+{
+	settings[idx].min_value.type_ = Value::TYPE_INT;
+	settings[idx].min_value.value.int_value = v;
+}
+
+void Setting::initDisabledBoolValue(enum Index idx, bool v)
+{
+	settings[idx].disabled_value.type_ = Value::TYPE_BOOL;
+	settings[idx].disabled_value.value.bool_value = v;
+}
+
+void Setting::initDisabledIntValue(enum Index idx, int v)
+{
+	settings[idx].disabled_value.type_ = Value::TYPE_INT;
+	settings[idx].disabled_value.value.int_value = v;
+}
+
+const Setting::value_t &Setting::getValue(enum Index idx)
+{
+	return settings[idx].value;
+}
+
+const Setting::value_t &Setting::getDisabledValue(enum Index idx)
+{
+	return settings[idx].disabled_value;
+}
+
+const Setting::value_t &Setting::getMaxValue(enum Index idx)
+{
+	return settings[idx].max_value;
+}
+
+const Setting::value_t &Setting::getMinValue(enum Index idx)
+{
+	return settings[idx].min_value;
+}
+
+void Setting::setFlag(enum Index idx, enum Flag f)
+{
+	unsigned int flags = settings[idx].flags;
+	flags |= (unsigned int) f;
+	settings[idx].flags = (enum Flag) flags;
+}
+
+void Setting::clearFlag(enum Index idx, enum Flag f)
+{
+	unsigned int flags = settings[idx].flags;
+        flags &= ~ (unsigned int) f;
+	settings[idx].flags = (enum Flag) flags;
+}
+
+bool Setting::isFlagSet(enum Index idx , enum Flag f)
+{
+	return (settings[idx].flags & f) != 0;
+}
+
+void Setting::addDependency(enum Index idx,
+			    const Dependency &d)
+{
+	Dependency dy;
 	unsigned int *nrDependents;
 	unsigned int *nrDep;
 
 	nrDep = &settings[idx].nrDep;
 
 	if (*nrDep >=
-	    sizeof(settings[idx].dependency) / sizeof(SettingDependency))
+	    sizeof(settings[idx].dependency) / sizeof(Dependency))
 		return;
 	settings[idx].dependency[*nrDep] = d;
 	(*nrDep)++;
 
-	dy.index = idx;
-	dy.desiredValue = d.desiredValue;
-	nrDependents = &settings[d.index].nrDependents;
+	assert_same(d.desired_value.type_, settings[d.index_].value.type_);
+
+	dy.index_ = idx;
+	dy.desired_value = d.desired_value;
+	dy.type_ = d.type_;
+	dy.low_value = d.low_value;
+	dy.high_value = d.high_value;
+	nrDependents = &settings[d.index_].nrDependents;
 	if (*nrDependents >=
-	    sizeof(settings[d.index].dependent) / sizeof(SettingDependency))
+	    sizeof(settings[d.index_].dependent) / sizeof(Dependency))
 		return;
-	settings[d.index].dependent[*nrDependents] = dy;
+	settings[d.index_].dependent[*nrDependents] = dy;
 	(*nrDependents)++;
 }
 
-unsigned int Setting::getNrDependencies(enum SettingIndex idx)
+unsigned int Setting::getNrDependencies(enum Index idx)
 {
 	return settings[idx].nrDep;
 }
 
-unsigned int Setting::getNrDependents(enum SettingIndex idx)
+unsigned int Setting::getNrDependents(enum Index idx)
 {
 	return settings[idx].nrDependents;
 }
 
-const QString &Setting::getName(enum SettingIndex idx)
+const QString &Setting::getName(enum Index idx)
 {
 	return settings[idx].name;
 }
 
-bool Setting::isEnabled(enum SettingIndex idx)
-{
-	return settings[idx].enabled;
-}
-
-const SettingDependency &Setting::getDependency(enum SettingIndex idx,
-						unsigned int nr)
+const Setting::Dependency &Setting::getDependency(enum Index idx,
+						  unsigned int nr)
 {
 	return settings[idx].dependency[nr];
 }
 
-const SettingDependency &Setting::getDependent(enum SettingIndex idx,
-					       unsigned int nr)
+const Setting::Dependency &Setting::getDependent(enum Index idx,
+						 unsigned int nr)
 {
 	return settings[idx].dependent[nr];
 }
 
 Setting Setting::settings[NR_SETTINGS];
 
-int Setting::line_width = 0;
-
-bool Setting::opengl = false;
-
-QMap<QString, enum Setting::SettingIndex> Setting::fileKeyMap;
+QMap<QString, enum Setting::Index> Setting::fileKeyMap;
 
 const int Setting::this_version = 1;
 
-void Setting::setLineWidth(int width)
-{
-	line_width = width;
-}
-
-int Setting::getLineWidth()
-{
-	return line_width;
-}
-
-bool Setting::isOpenGLEnabled()
-{
-	return opengl;
-}
-
-void Setting::setOpenGLEnabled(bool e)
-{
-	opengl = e;
-}
-
-void Setting::setKey(enum SettingIndex idx, const QString &key)
+void Setting::setKey(enum Index idx, const QString &key)
 {
 	fileKeyMap[key] = idx;
 }
@@ -274,7 +349,7 @@ int Setting::saveSettings()
 {
 	QString name = getFileName();
 	QFile file(name);
-	QMap<QString, enum Setting::SettingIndex>::const_iterator iter;
+	QMap<QString, enum Setting::Index>::const_iterator iter;
 
 	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
 		qfile_error_t error = file.error();
@@ -287,19 +362,23 @@ int Setting::saveSettings()
 	stream << QString::number(this_version) << "\n";
 
 	for (iter = fileKeyMap.begin(); iter != fileKeyMap.end(); iter++) {
-		SettingIndex idx = iter.value();
+		Index idx = iter.value();
 		const QString &key = iter.key();
-		if (idx >= 0 && idx < NR_SETTINGS) {
-			const Setting &s = settings[idx];
-			stream << key << " ";
-			stream << boolToQString(s.enabled) << "\n";
-		} else if (idx == OPENGL_ENABLED) {
-			stream << key << " ";
-			stream << boolToQString(opengl) << "\n";
-		} else if (idx == LINE_WIDTH) {
-			stream << key << " ";
-			stream << QString::number(line_width) << "\n";
-		}
+		const Setting &s = settings[idx];
+		stream << key << " ";
+		switch (s.value.type()) {
+		case Value::TYPE_BOOL:
+			stream << boolToQString(s.value.value.bool_value)
+			       << "\n";
+			break;
+		case Value::TYPE_INT:
+			stream << QString::number(s.value.value.int_value)
+			       << "\n";
+			break;
+		default:
+			stream << QString("ERROR_YOU_SHOULD_NEVER_SEE_THIS\n");
+			break;
+		};
 	}
 	stream.flush();
 	qfile_error_t err = file.error();
@@ -317,6 +396,8 @@ int Setting::loadSettings()
 	QString name = getFileName();
 	QFile file(name);
 	int rval = 0;
+	int ival;
+	bool bval;
 
 	if (!file.exists())
 		return 0;
@@ -345,18 +426,29 @@ int Setting::loadSettings()
 		rval = readKeyValuePair(stream, key, value);
 		if (rval != 0)
 			return rval;
-		enum SettingIndex idx;
-		QMap<QString, enum SettingIndex>::const_iterator iter;
+		enum Index idx;
+		QMap<QString, enum Index>::const_iterator iter;
 		iter = fileKeyMap.find(key);
 		if (iter == fileKeyMap.end())
 			continue;
 		idx = iter.value();
-		if (isIrregularIndex(idx)) {
-			handleIrregularIndex(idx, value);
-		} else if (isRegularIndex(idx)) {
-			handleRegularIndex(idx, value);
-		} else
-			return -TS_ERROR_INTERNAL;
+		Setting &setting = settings[idx];
+		switch (setting.value.type()) {
+		case Value::TYPE_BOOL:
+			bval = boolFromValue(&ok, value);
+			if (ok)
+				setting.value.value.bool_value = bval;
+			break;
+		case Value::TYPE_INT:
+			ival = value.toInt(&ok);
+			if (ok &&
+			    ival >= setting.min_value.value.int_value &&
+			    ival <= setting.max_value.value.int_value)
+				setting.value.value.int_value = ival;
+			break;
+		default:
+			break;
+		}
 	}
 	if (version < this_version)
 		rval = handleOlderVersion(version, this_version);
@@ -379,26 +471,6 @@ int Setting::readKeyValuePair(QTextStream &stream, QString &key, QString &value)
 	return 0;
 }
 
-void Setting::setOpenGLEnabledKey(const QString &key)
-{
-	setKey(OPENGL_ENABLED, key);
-}
-
-void Setting::setLineWidthKey(const QString &key)
-{
-	setKey(LINE_WIDTH, key);
-}
-
-bool Setting::isIrregularIndex(enum SettingIndex idx)
-{
-	return idx > NR_SETTINGS && idx < END_SETTINGS;
-}
-
-bool Setting::isRegularIndex(enum SettingIndex idx)
-{
-	return idx >= 0 && idx < NR_SETTINGS;
-}
-
 bool Setting::boolFromValue(bool *ok, const QString &value)
 {
 	if (value == QString("true") || value == QString("TRUE")) {
@@ -411,36 +483,6 @@ bool Setting::boolFromValue(bool *ok, const QString &value)
 	}
 	*ok = false;
 	return false;
-}
-
-void Setting::handleRegularIndex(enum SettingIndex idx,
-				 const QString &value)
-{
-	bool ok;
-	bool enabled = boolFromValue(&ok, value);
-	if (ok)
-		settings[idx].enabled = enabled;
-}
-
-void Setting::handleIrregularIndex(enum SettingIndex idx,
-				   const QString &value)
-{
-	bool enabled, ok;
-	int width;
-	switch(idx) {
-	case OPENGL_ENABLED:
-		enabled = boolFromValue(&ok, value);
-		if (ok)
-			opengl = enabled;
-		break;
-	case LINE_WIDTH:
-		width = value.toInt(&ok);
-		if (ok && width >= 1 && width <= MAX_LINE_WIDTH_OPENGL)
-			line_width = width;
-		break;
-	default:
-		break;
-	}
 }
 
 int Setting::handleOlderVersion(int /*oldver*/, int /*newver*/)
@@ -460,4 +502,80 @@ const QString &Setting::boolToQString(bool b)
 		return true_str;
 	else
 		return false_str;
+}
+
+Setting::Dependency::Dependency()
+{}
+
+Setting::Dependency::Dependency(Setting::settingindex_t i, bool desired_val) :
+	type_(DESIRED_VALUE), index_(i)
+{
+	desired_value.type_ = Value::TYPE_BOOL;
+	desired_value.value.bool_value = desired_val;
+}
+
+Setting::Dependency::Dependency(Setting::settingindex_t i, int desired_val) :
+	type_(DESIRED_VALUE), index_(i)
+{
+	desired_value.type_ = Value::TYPE_INT;
+	desired_value.value.int_value = desired_val;
+}
+
+Setting::Dependency::Dependency(Setting::settingindex_t i, int low, int high) :
+	type_(DESIRED_INTERVAL), index_(i)
+{
+	low_value.type_ = Value::TYPE_INT;
+	low_value.value.int_value = low;
+	high_value.type_ = Value::TYPE_INT;
+	high_value.value.int_value = high;
+}
+
+bool Setting::Dependency::getDesiredBool() const
+{
+	assert_bool(desired_value);
+	assert_desired();
+	return desired_value.value.bool_value;
+}
+
+int Setting::Dependency::getDesiredInt() const
+{
+	assert_int(desired_value);
+	assert_desired();
+	return desired_value.value.int_value;
+}
+
+bool Setting::Dependency::check(const value_t &val) const
+{
+	if (type_ == DESIRED_VALUE) {
+		return (val == desired_value);
+	} else { /* type == DESIRED_INTERVAL */
+		return (val <= high_value &&
+			val >= low_value);
+	}
+}
+
+const char *Setting::getValueTypeStr(Value::type_t type)
+{
+	static const char *boolstr = "bool";
+	static const char *intstr = "int";
+	static const char *unknownstr = "unknown";
+
+	if (type == Value::TYPE_BOOL)
+		return boolstr;
+	if (type == Value::TYPE_INT)
+		return intstr;
+	return unknownstr;
+}
+
+void Setting::error_type(Value::type_t expected, Value::type_t was)
+{
+	const char *expstr = getValueTypeStr(expected);
+	const char *wasstr = getValueTypeStr(was);
+
+	vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d. Expected type %s but the type was %s\n", __FILE__, __LINE__, expstr, wasstr);
+}
+
+void Setting::Dependency::error_dep_type() const
+{
+	vtl::errx(BSD_EX_SOFTWARE,  "Error at %s:%d. Wrong dependency type\n");
 }

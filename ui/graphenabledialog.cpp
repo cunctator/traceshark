@@ -54,6 +54,7 @@
 #include "misc/traceshark.h"
 #include "ui/graphenabledialog.h"
 #include "ui/tcheckbox.h"
+#include "ui/tspinbox.h"
 #include "vtl/error.h"
 
 #include <QComboBox>
@@ -71,80 +72,114 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 	QGridLayout *layout = new QGridLayout();
 	mainLayout->addLayout(layout);
 	int idx;
-	Setting::SettingIndex idxn;
+	Setting::Index idxn;
 	QPushButton *okButton;
 	QPushButton *cancelButton;
 	QPushButton *applyButton;
 	QPushButton *saveButton;
 
-	checkBoxMap = new QMap<Setting::SettingIndex, TCheckBox*>;
+	checkBoxMap = new QMap<Setting::Index, TCheckBox*>;
+	spinBoxMap = new QMap<Setting::Index, TSpinBox*>;
+
 	for (idx = 0; idx < Setting::NR_SETTINGS; idx++) {
-		idxn = (Setting::SettingIndex) idx;
-		if (checkBoxMap->contains(idxn))
+		idxn = (Setting::Index) idx;
+		if (checkBoxMap->contains(idxn) || spinBoxMap->contains(idxn))
 			continue;
 		const QString &name = Setting::getName(idxn);
-		bool enabled = Setting::isEnabled(idxn);
-		TCheckBox *checkBox = new TCheckBox(idx, enabled);
-		tsconnect(checkBox, boxClicked(TCheckBox *, bool),
-			  this, handleBoxClicked(TCheckBox *, bool));
-		checkBox->setText(name);
-		layout->addWidget(checkBox, idx, 0, Qt::AlignLeft);
-		(*checkBoxMap)[idxn] = checkBox;
+		TCheckBox *checkBox;
+		TSpinBox *spinBox;
+		bool enabled;
+		int vint;
+		int vmaxint, vminint;
+
+		if (Setting::isFlagSet(idxn, Setting::FLAG_MUST_BE_CONSUMED))
+			consumeList.append(idxn);
+
+		const Setting::value_t &value = Setting::getValue(idxn);
+		Setting::value_t vmax;
+		Setting::value_t vmin;
+
+		switch (value.type()) {
+		case Setting::Value::TYPE_BOOL:
+			enabled = value.boolv();
+			checkBox = new TCheckBox(idx, enabled);
+			tsconnect(checkBox, boxClicked(TCheckBox *, bool),
+				  this, handleBoxClicked(TCheckBox *, bool));
+			checkBox->setText(name);
+			(*checkBoxMap)[idxn] = checkBox;
+			layout->addWidget(checkBox, idx, 0, Qt::AlignLeft);
+			break;
+		case Setting::Value::TYPE_INT:
+			vmax = Setting::getMaxValue(idxn);
+			vmin = Setting::getMinValue(idxn);
+			vint = value.intv();
+			vmaxint = vmax.intv();
+			vminint = vmin.intv();
+			spinBox = new TSpinBox(idx, vminint, vmaxint);
+			spinBox->setValue(vint);
+			spinBox->setText(name);
+			tsconnect(spinBox, boxChanged(TSpinBox *, int),
+				  this, handleSpinChanged(TSpinBox *, int));
+			(*spinBoxMap)[idxn] = spinBox;
+			layout->addWidget(spinBox, idx, 0, Qt::AlignLeft);
+			break;
+		default:
+			vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+		}
+
 
 		unsigned int nrdep = Setting::getNrDependents(idxn);
 		unsigned int d;
 		for (d = 0; d < nrdep; d++) {
-			Setting::SettingIndex d_idx = (Setting::SettingIndex)
-				Setting::getDependent(idxn, d).index;
-			if (checkBoxMap->contains(d_idx))
-				vtl::errx(BSD_EX_SOFTWARE,
-				"Seems like the order of the enum "
-				"Setting::SettingIndex is wrong in "
-				"ui/setting.h is wrong!\n");
+			const Setting::Dependency &dy =
+				Setting::getDependent(idxn, d);
+			Setting::Index d_idx = (Setting::Index) dy.index();
+			bool dep_ok = dy.check(value);
 
+			if (checkBoxMap->contains(d_idx) ||
+			    spinBoxMap->contains(d_idx))
+				vtl::errx(BSD_EX_SOFTWARE,
+					  "Seems like the order of the enum "
+					  "Setting::Index is wrong in "
+					  "ui/setting.h!\n");
 			const QString &dname = Setting::getName(d_idx);
-			enabled = Setting::isEnabled(d_idx);
-			checkBox = new TCheckBox(d_idx, enabled);
-			checkBox->setChecked(enabled);
-			checkBox->setText(dname);
-			layout->addWidget(checkBox, idx, 1 + d,
-					  Qt::AlignJustify);
-			(*checkBoxMap)[d_idx] = checkBox;
+			const Setting::value_t &defval =
+				Setting::getDisabledValue(d_idx);
+			const Setting::value_t &dvalue =
+				Setting::getValue(d_idx);
+			switch (dvalue.type()) {
+			case Setting::Value::TYPE_BOOL:
+				enabled = dep_ok ?
+					dvalue.boolv() : defval.boolv();
+				checkBox = new TCheckBox(d_idx, enabled);
+				checkBox->setChecked(enabled);
+				checkBox->setEnabled(dep_ok);
+				checkBox->setText(dname);
+				(*checkBoxMap)[d_idx] = checkBox;
+				layout->addWidget(checkBox, idx, 1 + d,
+						  Qt::AlignJustify);
+				break;
+			case Setting::Value::TYPE_INT:
+				vmax = Setting::getMaxValue(d_idx);
+				vmin = Setting::getMinValue(d_idx);
+				vint = dep_ok ? dvalue.intv() : defval.intv();
+				vmaxint = vmax.intv();
+				vminint = vmin.intv();
+				spinBox = new TSpinBox(d_idx, vminint, vmaxint);
+				spinBox->setValue(vint);
+				spinBox->setEnabled(dep_ok);
+				spinBox->setText(dname);
+				(*spinBoxMap)[d_idx] = spinBox;
+				layout->addWidget(spinBox, idx, 1 + d,
+						  Qt::AlignJustify);
+				break;
+			default:
+				vtl::errx(BSD_EX_SOFTWARE, "%s:%d",
+					  __FILE__, __LINE__);
+				break;
+			}
 		}
 	}
-
-	openglBox = new TCheckBox(0, Setting::isOpenGLEnabled());
-	tsconnect(openglBox, boxClicked(TCheckBox *, bool),
-		  this, handleOpenGLClicked(TCheckBox *, bool));
-	openglBox->setChecked(opengl);
-	openglBox->setEnabled(has_opengl());
-	openglBox->setText(tr("Enable OpenGL"));
-	layout->addWidget(openglBox, idx, 0, Qt::AlignLeft);
-
-	QHBoxLayout *comboLayout =  new QHBoxLayout();
-	layout->addLayout(comboLayout, idx, 1, Qt::AlignLeft);
-	comboBox = new QComboBox();
-	comboBox->addItem(tr("1"));
-	comboBox->addItem(tr("2"));
-	comboBox->addItem(tr("3"));
-	comboBox->addItem(tr("4"));
-	if (openglStatus) {
-		comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
-	} else {
-		comboBox->setCurrentIndex(0);
-	}
-	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
-	QLabel *comboLabel = new QLabel(tr("Line width of sched graphs:"));
-	comboLayout->addWidget(comboLabel);
-	comboLayout->addWidget(comboBox);
-
-	/*
-	 * We only let the user increase the line width of the scheduling
-	 * graphs if we have opengl enabled. It's too slow to draw anything
-	 * but one pixel wide lines wihout it.
-	 */
-	comboBox->setEnabled(opengl &&  Setting::isOpenGLEnabled());
-	comboLayout->addStretch();
 
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	mainLayout->addLayout(buttonLayout);
@@ -167,6 +202,7 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 GraphEnableDialog::~GraphEnableDialog()
 {
 	delete checkBoxMap;
+	delete spinBoxMap;
 }
 
 void GraphEnableDialog::okClicked()
@@ -178,50 +214,60 @@ void GraphEnableDialog::okClicked()
 void GraphEnableDialog::cancelClicked()
 {
 	hide();
-	QMap<Setting::SettingIndex, TCheckBox*>::iterator iter;
+	QMap<Setting::Index, TCheckBox*>::iterator iter;
 	for(iter = checkBoxMap->begin(); iter != checkBoxMap->end(); iter++) {
 		TCheckBox *tbox = iter.value();
-		Setting::SettingIndex idxn = (Setting::SettingIndex)
+		Setting::Index idxn = (Setting::Index)
 			tbox->getId();
-		bool enabled = Setting::isEnabled(idxn);
-		tbox->setChecked(enabled);
+		Setting::value_t value = Setting::getValue(idxn);
+		tbox->setChecked(value.boolv());
 	}
-	comboBox->setCurrentIndex(Setting::getLineWidth() - 1);
-	openglBox->setChecked(Setting::isOpenGLEnabled());
+
+	QMap<Setting::Index, TSpinBox*>::iterator siter;
+	for(siter = spinBoxMap->begin(); siter != spinBoxMap->end(); siter++) {
+		TSpinBox *sbox = siter.value();
+		Setting::Index idxn = (Setting::Index)
+			sbox->getId();
+		Setting::value_t value = Setting::getValue(idxn);
+		sbox->setValue(value.intv());
+	}
 }
 
 void GraphEnableDialog::applyClicked()
 {
 	bool changed = false;
-	int new_width;
-	QMap<Setting::SettingIndex, TCheckBox*>::iterator iter;
+	QMap<Setting::Index, TCheckBox*>::iterator iter;
 
 	for(iter = checkBoxMap->begin(); iter != checkBoxMap->end(); iter++) {
 		TCheckBox *tbox = iter.value();
-		Setting::SettingIndex idxn = (Setting::SettingIndex)
+		Setting::Index idxn = (Setting::Index)
 			tbox->getId();
-		bool checked = tbox->isChecked();
-		bool enabled = Setting::isEnabled(idxn);
-		if (checked != enabled) {
+		bool uivalue;
+		uivalue = tbox->isChecked();
+		Setting::value_t setvalue = Setting::getValue(idxn);
+		if (uivalue != setvalue.boolv()) {
 			changed = true;
-			Setting::setEnabled(idxn, checked);
+			Setting::setBoolValue(idxn, uivalue);
 		}
 	}
 
-	new_width = comboBox->currentIndex() + 1;
-	if (new_width != Setting::getLineWidth()) {
-		changed = true;
-		Setting::setLineWidth(new_width);
-	}
-
-	if (openglBox->isChecked() != Setting::isOpenGLEnabled()) {
-		changed = true;
-		Setting::setOpenGLEnabled(openglBox->isChecked());
+	QMap<Setting::Index, TSpinBox*>::iterator siter;
+	for(siter = spinBoxMap->begin(); siter != spinBoxMap->end(); siter++)
+	{
+		TSpinBox *sbox = siter.value();
+		Setting::Index idxn = (Setting::Index)
+			sbox->getId();
+		int uivalue;
+		uivalue = sbox->value();
+		Setting::value_t setvalue = Setting::getValue(idxn);
+		if (uivalue != setvalue.intv()) {
+			changed = true;
+			Setting::setIntValue(idxn, uivalue);
+		}
 	}
 
 	if (changed)
 		emit settingsChanged();
-	recheckOpenGL();
 }
 
 void GraphEnableDialog::saveClicked()
@@ -244,53 +290,151 @@ void GraphEnableDialog::saveClicked()
 
 void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)
 {
-	Setting::SettingIndex id = (Setting::SettingIndex) checkBox->getId();
+	Setting::Index id = (Setting::Index) checkBox->getId();
 	unsigned int d;
-	QMap<Setting::SettingIndex, TCheckBox*>::iterator iter;
+	QMap<Setting::Index, TCheckBox*>::iterator iter;
+	QMap<Setting::Index, TSpinBox*>::iterator siter;
 	TCheckBox *dBox;
+	TSpinBox *sBox;
+	bool bval;
+	int ival;
+	bool consume = Setting::isFlagSet(id, Setting::FLAG_MUST_BE_CONSUMED);
+
+	Setting::value_t newval(checked);
+	Setting::value_t savedval = Setting::getValue(id);
 
 	unsigned int nrdep = Setting::getNrDependents(id);
 	for (d = 0; d < nrdep; d++) {
-		SettingDependency dep = Setting::getDependent(id, d);
-		Setting::SettingIndex dep_idx = (Setting::SettingIndex)
-			dep.index;
+		Setting::Dependency dep = Setting::getDependent(id, d);
+		Setting::Index dep_idx = (Setting::Index)
+			dep.index();
+		bool dep_ok = dep.check(newval);
+		if (consume)
+			dep_ok = dep_ok && (dep.check(savedval));
 		iter = checkBoxMap->find(dep_idx);
-		if (iter == checkBoxMap->end())
+		if (iter != checkBoxMap->end()) {
+			dBox = iter.value();
+			dBox->setDisabled(!dep_ok);
+			if (!dep_ok)
+				bval = Setting::getDisabledValue(dep_idx)
+					.boolv();
+			else
+				bval = Setting::getValue(dep_idx).boolv();
+			dBox->setChecked(bval);
+			continue;
+		}
+		siter = spinBoxMap->find(dep_idx);
+		if (siter != spinBoxMap->end()) {
+			sBox = siter.value();
+			sBox->setDisabled(!dep_ok);
+			if (!dep_ok)
+				ival = Setting::getDisabledValue(dep_idx)
+					.intv();
+			else
+				ival = Setting::getValue(dep_idx).intv();
+			sBox->setValue(ival);
+		} else {
 			vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
 				  __LINE__);
-		dBox = iter.value();
-		bool dep_ok = checked == dep.desiredValue;
-		Setting::SettingIndex idx;
-		idx = (Setting::SettingIndex) dBox->getId();
-		dBox->setDisabled(!dep_ok);
-		dBox->setChecked(dep_ok && Setting::isEnabled(idx));
+		}
 	}
 }
 
-void GraphEnableDialog::handleOpenGLClicked(TCheckBox */*checkBox*/,
-					    bool checked)
+void GraphEnableDialog::handleSpinChanged(TSpinBox */*spinBox*/, int /*value*/)
 {
-	bool opengl = openglStatus && checked;
-	int width = opengl ? Setting::getLineWidth() : DEFAULT_LINE_WIDTH;
-	comboBox->setCurrentIndex(width - 1);
-	comboBox->setEnabled(opengl);
-}
-
-void GraphEnableDialog::setOpenGLStatus(bool enabled)
-{
-	openglStatus = enabled;
+	/*
+	 * We currently do not have any dependencies that would depend on a
+	 * spinbox having a value. I don't bother write code that there is
+	 * no test case for.
+	 */
 }
 
 void GraphEnableDialog::show()
 {
-	recheckOpenGL();
 	QDialog::show();
 }
 
-void GraphEnableDialog::recheckOpenGL()
+void GraphEnableDialog::checkConsumption()
 {
-	if (openglStatus && openglBox->isChecked())
-		comboBox->setEnabled(true);
-	else
-		comboBox->setEnabled(false);
+	Setting::Index idx;
+	QList<Setting::Index>::const_iterator iter;
+	for (iter = consumeList.begin(); iter != consumeList.end(); iter++) {
+		idx = *iter;
+		QMap<Setting::Index, TCheckBox*>::iterator iter;
+		QMap<Setting::Index, TSpinBox*>::iterator siter;
+
+		iter = checkBoxMap->find(idx);
+		if (iter != checkBoxMap->end()) {
+			checkCBoxConsumption(idx, *iter);
+			continue;
+		}
+		siter = spinBoxMap->find(idx);
+		if (siter != spinBoxMap->end()) {
+			checkSBoxConsumption(idx, *siter);
+		} else {
+			vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
+				  __LINE__);
+		}
+	}
+}
+
+void GraphEnableDialog::checkCBoxConsumption(Setting::Index idx,
+					     TCheckBox *box)
+{
+	QMap<Setting::Index, TCheckBox*>::iterator iter;
+	QMap<Setting::Index, TSpinBox*>::iterator siter;
+	Setting::value_t value = Setting::getValue(idx);
+	bool bval = Setting::getValue(idx).boolv();
+	if (bval != box->isChecked())
+		box->setChecked(bval);
+	TCheckBox *cBox;
+	TSpinBox *sBox;
+	int ival;
+
+	unsigned int nrdep = Setting::getNrDependents(idx);
+	unsigned int d;
+
+	for (d = 0; d < nrdep; d++) {
+		Setting::Dependency dep = Setting::getDependent(idx, d);
+		Setting::Index dep_idx = (Setting::Index) dep.index();
+		bool dep_ok = dep.check(value);
+		iter = checkBoxMap->find(dep_idx);
+		if (iter != checkBoxMap->end()) {
+			cBox = iter.value();
+			cBox->setEnabled(dep_ok);
+			if (dep_ok) {
+				bval =  Setting::getValue(dep_idx).boolv();
+			} else {
+				bval = Setting::getDisabledValue(dep_idx)
+					.boolv();
+				Setting::setBoolValue(dep_idx, bval);
+			}
+			cBox->setChecked(bval);
+			continue;
+		}
+		siter = spinBoxMap->find(dep_idx);
+		if (siter != spinBoxMap->end()) {
+			sBox = siter.value();
+			sBox->setEnabled(dep_ok);
+			if (dep_ok) {
+				ival =  Setting::getValue(dep_idx).intv();
+			} else {
+				ival = Setting::getDisabledValue(dep_idx)
+					.intv();
+				Setting::setIntValue(dep_idx, bval);
+			}
+			sBox->setValue(ival);
+			continue;
+		}
+	}
+}
+
+void GraphEnableDialog::checkSBoxConsumption(Setting::Index /*idx*/,
+					      TSpinBox */*box*/)
+{
+	/*
+	 * We currently do not have any spinboxes that would have the
+	 * Setting::FLAG_MUST_BE_CONSUMED flag set. I don't bother write code
+	 * that there is no test case for.
+	 */
 }

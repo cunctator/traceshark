@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
+ // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,49 +50,44 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRAPHENABLEDIALOG_H
-#define GRAPHENABLEDIALOG_H
+#ifndef _TS_UI_TSPINBOX_H
+#define _TS_UI_TSPINBOX_H
 
-#include "misc/setting.h"
-#include "vtl/error.h"
-#include <QDialog>
+#include <QWidget>
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
-class QTextEdit;
-template <typename T, typename U> class QMap;
+class QSpinBox;
+class QLabel;
 QT_END_NAMESPACE
 
-class TCheckBox;
-class TSpinBox;
-
-class GraphEnableDialog : public QDialog {
+class TSpinBox : public QWidget {
 	Q_OBJECT
-
 public:
-	GraphEnableDialog(QWidget *parent = 0, bool opengl = false);
-	~GraphEnableDialog();
-	void checkConsumption();
+	TSpinBox(int id = 0, int vmin = 0, int vmax = 1,
+		 QWidget *parent = 0);
+	virtual ~TSpinBox();
+	int getId() const;
+	void setText(const QString &str);
+	void setValue(int value);
+	int value() const;
 signals:
-	void settingsChanged();
+	void boxChanged(TSpinBox *, int value);
 private:
-	QMap<Setting::Index, TCheckBox*> *checkBoxMap;
-	QMap<Setting::Index, TSpinBox*> *spinBoxMap;
-	QList<Setting::Index> consumeList;
-	QComboBox *comboBox;
-	int savedHeight;
-	bool openglStatus;
-	void checkCBoxConsumption(Setting::Index idx, TCheckBox *box);
-	void checkSBoxConsumption(Setting::Index idx, TSpinBox *box);
-public slots:
-	void show();
+	int id;
+	int value_min;
+	int value_max;
+	typedef enum Type : int {
+		TYPE_SPINBOX = 0,
+		TYPE_COMBOBOX,
+	} type_t;
+	type_t type;
+	QComboBox *cbox;
+	QSpinBox *sbox;
+	QLabel *label;
 private slots:
-	void okClicked();
-	void cancelClicked();
-	void applyClicked();
-	void saveClicked();
-	void handleBoxClicked(TCheckBox *box, bool enabled);
-	void handleSpinChanged(TSpinBox *box, int value);
+	void sBoxChanged(int value);
+	void cBoxChanged(int value);
 };
 
-#endif /* GRAPHENABLEDIALOG_H */
+#endif /* _TS_UI_TSPINBOX_H */

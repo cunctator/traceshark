@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,49 +50,94 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRAPHENABLEDIALOG_H
-#define GRAPHENABLEDIALOG_H
+#include <QComboBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QSpinBox>
 
-#include "misc/setting.h"
+#include "misc/traceshark.h"
 #include "vtl/error.h"
-#include <QDialog>
+#include "tspinbox.h"
 
-QT_BEGIN_NAMESPACE
-class QComboBox;
-class QTextEdit;
-template <typename T, typename U> class QMap;
-QT_END_NAMESPACE
+#define MAX_SIZE_COMBOBOX (10)
+#define TSPIN_MAX(A, B) (A >= B ? A : B)
+#define TSPIN_MIN(A, B) (A <= B ? A : B)
 
-class TCheckBox;
-class TSpinBox;
+TSpinBox::TSpinBox(int id_arg, int vmin, int vmax, QWidget *parent):
+	QWidget(parent), id(id_arg), value_min(vmin), value_max(vmax)
+{
+	QHBoxLayout *layout = new QHBoxLayout();
+	setLayout(layout);
 
-class GraphEnableDialog : public QDialog {
-	Q_OBJECT
+	label = new QLabel();
+	layout->addWidget(label);
 
-public:
-	GraphEnableDialog(QWidget *parent = 0, bool opengl = false);
-	~GraphEnableDialog();
-	void checkConsumption();
-signals:
-	void settingsChanged();
-private:
-	QMap<Setting::Index, TCheckBox*> *checkBoxMap;
-	QMap<Setting::Index, TSpinBox*> *spinBoxMap;
-	QList<Setting::Index> consumeList;
-	QComboBox *comboBox;
-	int savedHeight;
-	bool openglStatus;
-	void checkCBoxConsumption(Setting::Index idx, TCheckBox *box);
-	void checkSBoxConsumption(Setting::Index idx, TSpinBox *box);
-public slots:
-	void show();
-private slots:
-	void okClicked();
-	void cancelClicked();
-	void applyClicked();
-	void saveClicked();
-	void handleBoxClicked(TCheckBox *box, bool enabled);
-	void handleSpinChanged(TSpinBox *box, int value);
-};
+	if (vmin >= vmax) {
+		vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,	\
+			  __LINE__);
+	}
 
-#endif /* GRAPHENABLEDIALOG_H */
+	bool is_spinbox = (vmax - vmin) > MAX_SIZE_COMBOBOX;
+	type = is_spinbox ? TYPE_SPINBOX : TYPE_COMBOBOX;
+
+	if (type == TYPE_SPINBOX) {
+		sbox = new QSpinBox();
+		sbox->setMinimum(vmin);
+		sbox->setMaximum(vmax);
+		layout->addWidget(sbox);
+		tsconnect(sbox, valueChanged(int), this, sBoxChanged(int));
+	} else { /* type == TYPE_COMBOBOX */
+		cbox = new QComboBox();
+		for (int i = vmin; i <= vmax; i++) {
+			cbox->addItem(QString::number(i));
+		}
+		layout->addWidget(cbox);
+		tsconnect(cbox, currentIndexChanged(int), this,
+			  cBoxChanged(int));
+	}
+}
+
+TSpinBox::~TSpinBox()
+{}
+
+void TSpinBox::sBoxChanged(int value)
+{
+	emit boxChanged(this, value);
+}
+
+void TSpinBox::cBoxChanged(int index)
+{
+	int value = index + value_min;
+	emit boxChanged(this, value);
+}
+
+int TSpinBox::getId() const
+{
+	return id;
+}
+
+void TSpinBox::setText(const QString &str)
+{
+	label->setText(str);
+}
+
+
+void TSpinBox::setValue(int value)
+{
+	value = TSPIN_MIN(value, value_max);
+	value = TSPIN_MAX(value, value_min);
+	if (type == TYPE_SPINBOX) {
+		sbox->setValue(value);
+	} else { /* type == TYPE_COMBOBOX */
+		cbox->setCurrentIndex(value - value_min);
+	}
+}
+
+int TSpinBox::value() const
+{
+	if (type == TYPE_SPINBOX) {
+		return sbox->value();
+	} else { /* type == TYPE_COMBOBOX */
+		return cbox->currentIndex() + value_min;
+	}
+}

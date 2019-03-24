@@ -53,6 +53,8 @@
 #ifndef SETTING_H
 #define SETTING_H
 
+#include "vtl/error.h"
+
 #include <QString>
 #include <QMap>
 
@@ -62,18 +64,10 @@ QT_END_NAMESPACE
 
 #define TS_SETTING_FILENAME ".traceshark"
 
-class SettingDependency
-{
-public:
-	int index;
-	bool desiredValue;
-};
-
 class Setting
 {
 public:
-	Setting();
-	enum SettingIndex : int {
+	typedef enum Index : int {
 		SHOW_SCHED_GRAPHS = 0,
 		HORIZONTAL_WAKEUP,
 		VERTICAL_WAKEUP,
@@ -81,61 +75,319 @@ public:
 		SHOW_CPUIDLE_GRAPHS,
 		SHOW_MIGRATION_GRAPHS,
 		SHOW_MIGRATION_UNLIMITED,
-		NR_SETTINGS,
-		/* These are not regular settings but must have unique values */
 		OPENGL_ENABLED,
 		LINE_WIDTH,
-		END_SETTINGS,
+		NR_SETTINGS,
+	} settingindex_t;
+        class Value;
+	typedef Value value_t;
+	class Dependency;
+	class Value {
+		friend class Dependency;
+		friend class Setting;
+	public:
+		typedef enum Type {
+			TYPE_BOOL,
+			TYPE_INT,
+		} type_t;
+		Value();
+		Value(bool b);
+		Value(int i);
+		__always_inline bool operator<(const value_t &other) const;
+		__always_inline bool operator>(const value_t &other) const;
+		__always_inline bool operator<=(const value_t &other) const;
+		__always_inline bool operator>=(const value_t &other) const;
+		__always_inline bool operator==(const value_t &other) const;
+		__always_inline bool operator!=(const value_t &other) const;
+		__always_inline bool boolv() const;
+		__always_inline int intv() const;
+		__always_inline type_t type() const;
+	protected:
+		type_t type_;
+		union {
+			bool bool_value;
+			int int_value;
+		} value;
 	};
+	typedef enum Flag : unsigned int {
+		FLAG_NO_FLAG          = 0,
+		FLAG_MUST_BE_CONSUMED = 1
+	} flag_t;
+	class Dependency
+	{
+		friend class Setting;
+	public:
+		typedef enum Type : int {
+			DESIRED_VALUE = 0,
+			DESIRED_INTERVAL,
+		} type_t;
+		Dependency();
+		Dependency(settingindex_t i, bool desired_val);
+		Dependency(settingindex_t i, int desired_val);
+		Dependency(settingindex_t i, int low, int high);
+		bool getDesiredBool() const;
+		int getDesiredInt() const;
+		__always_inline enum Type type() const;
+		__always_inline int index() const;
+		__always_inline const value_t &desired() const;
+		__always_inline const value_t &low() const;
+		__always_inline const value_t &high() const;
+		const value_t &getLowerBound() const;
+		const value_t &getHigherBound() const;
+		bool check(const value_t &val) const;
+		__always_inline void assert_desired() const;
+		__always_inline void assert_interval() const;
+	protected:
+		type_t type_;
+		int index_;
+		value_t desired_value;
+		value_t low_value;
+		value_t high_value;
+	private:
+		void error_dep_type() const;
+	};
+	Setting();
 	static void setupSettings();
 	static bool isWideScreen();
 	static bool isLowResScreen();
-	static void setEnabled(enum SettingIndex idx, bool e);
-	static void clearDependencies(enum SettingIndex idx);
-	static unsigned int getNrDependencies(enum SettingIndex idx);
-	static unsigned int getNrDependents(enum SettingIndex idx);
-	static const QString &getName(enum SettingIndex idx);
-	static bool isEnabled(enum SettingIndex idx);
-	static const SettingDependency &getDependency(enum SettingIndex idx,
-						      unsigned int nr);
-	static const SettingDependency &getDependent(enum SettingIndex idx,
-						     unsigned int nr);
-	static void setLineWidth(int width);
-	static int getLineWidth();
-	static void setOpenGLEnabled(bool e);
-	static bool isOpenGLEnabled();
+	static void setBoolValue(enum Index idx, bool v);
+	static bool getBoolValue(enum Index idx);
+	static void setIntValue(enum Index idx, int v);
+	static const value_t &getValue(enum Index idx);
+	static const value_t &getDisabledValue(enum Index idx);
+	static const value_t &getMinValue(enum Index idx);
+	static const value_t &getMaxValue(enum Index idx);
+	static bool isFlagSet(enum Index idx , enum Flag f);
+	static unsigned int getNrDependencies(enum Index idx);
+	static unsigned int getNrDependents(enum Index idx);
+	static const QString &getName(enum Index idx);
+	static const Dependency &getDependency(enum Index idx, unsigned int nr);
+	static const Dependency &getDependent(enum Index idx, unsigned int nr);
 	static int loadSettings();
 	static int saveSettings();
 	static const QString &getFileName();
+	static const char *getValueTypeStr(Value::type_t type);
+	__always_inline static void assert_bool(const value_t &val);
+	__always_inline static void assert_int(const value_t &val);
+	__always_inline static void assert_same(Value::type_t a,
+						Value::type_t b);
 private:
-	static void setName(enum SettingIndex idx, const QString &n);
-	static void setKey(enum SettingIndex idx, const QString &key);
-	static void addDependency(enum SettingIndex idx,
-				  const SettingDependency &d);
-	static void setOpenGLEnabledKey(const QString &key);
-	static void setLineWidthKey(const QString &key);
+	static void setFlag(enum Index idx, enum Flag f);
+	static void clearFlag(enum Index idx, enum Flag f);
+	static void initBoolValue(enum Index idx, bool v);
+	static void initIntValue(enum Index idx, int v);
+	static void initDisabledBoolValue(enum Index idx, bool v);
+	static void initDisabledIntValue(enum Index idx, int v);
+	static void initMaxIntValue(enum Index idx, int v);
+	static void initMinIntValue(enum Index idx, int v);
+	static void error_type(Value::type_t expected, Value::type_t was);
+	static void setName(enum Index idx, const QString &n);
+	static void setKey(enum Index idx, const QString &key);
+	static void addDependency(enum Index idx, const Dependency &d);
 	static int readKeyValuePair(QTextStream &stream, QString &key,
 				    QString &value);
 	static bool boolFromValue(bool *ok, const QString &value);
-	static bool isIrregularIndex(enum SettingIndex idx);
-	static bool isRegularIndex(enum SettingIndex idx);
-	static void handleIrregularIndex(enum SettingIndex idx,
-					 const QString &value);
-	static void handleRegularIndex(enum SettingIndex idx,
-				       const QString &value);
 	static int handleOlderVersion(int oldver, int newver);
 	static const QString &boolToQString(bool b);
-	bool enabled;
+	value_t value;
+	value_t min_value;
+	value_t max_value;
+	value_t disabled_value;
+	flag_t flags;
 	QString name;
-	SettingDependency dependency[4];
-	SettingDependency dependent[4];
+	Dependency dependency[4];
+	Dependency dependent[4];
 	unsigned int nrDep;
 	unsigned int nrDependents;
 	static Setting settings[];
-	static int line_width;
-	static bool opengl;
-	static QMap<QString, enum SettingIndex> fileKeyMap;
+	static QMap<QString, enum Index> fileKeyMap;
 	static const int this_version;
 };
+
+__always_inline
+bool Setting::Value::operator<(const Setting::value_t &other) const
+{
+	assert_same(type_, other.type_);
+	switch (type_) {
+	case TYPE_BOOL:
+		vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+		break;
+	case TYPE_INT:
+		return value.int_value < other.value.int_value;
+		break;
+	default:
+		break;
+	}
+	vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+	return true;
+}
+
+__always_inline
+bool Setting::Value::operator>(const Setting::value_t &other) const
+{
+	assert_same(type_, other.type_);
+	switch (type_) {
+	case TYPE_BOOL:
+		vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+		break;
+	case TYPE_INT:
+		return value.int_value > other.value.int_value;
+		break;
+	default:
+		break;
+	}
+	vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+	return true;
+}
+
+__always_inline
+bool Setting::Value::operator<=(const Setting::value_t &other) const
+{
+	assert_same(type_, other.type_);
+	switch (type_) {
+	case TYPE_BOOL:
+		vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+		break;
+	case TYPE_INT:
+		return value.int_value <= other.value.int_value;
+		break;
+	default:
+		break;
+	}
+	vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+	return true;
+}
+
+__always_inline
+bool Setting::Value::operator>=(const Setting::value_t &other) const
+{
+	assert_same(type_, other.type_);
+	switch (type_) {
+	case TYPE_BOOL:
+		vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+		break;
+	case TYPE_INT:
+		return value.int_value >= other.value.int_value;
+		break;
+	default:
+		break;
+	}
+	vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+	return true;
+}
+
+__always_inline
+bool Setting::Value::operator!=(const Setting::value_t &other) const
+{
+	assert_same(type_, other.type_);
+	switch (type_) {
+	case TYPE_BOOL:
+		return value.bool_value != other.value.bool_value;
+		break;
+	case TYPE_INT:
+		return value.int_value != other.value.int_value;
+		break;
+	default:
+		break;
+	}
+	vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+	return true;
+}
+
+__always_inline
+bool Setting::Value::operator==(const Setting::value_t &other) const
+{
+	assert_same(type_, other.type_);
+	switch (type_) {
+	case TYPE_BOOL:
+		return value.bool_value == other.value.bool_value;
+		break;
+	case TYPE_INT:
+		return value.int_value == other.value.int_value;
+		break;
+	default:
+		break;
+	}
+	vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
+	return true;
+}
+
+__always_inline
+bool Setting::Value::boolv() const
+{
+	assert_same(type_, TYPE_BOOL);
+	return value.bool_value;
+}
+
+__always_inline
+int Setting::Value::intv() const
+{
+	assert_same(type_, TYPE_INT);
+	return value.int_value;
+}
+
+__always_inline
+Setting::Value::type_t Setting::Value::type() const
+{
+	return type_;
+}
+
+__always_inline void Setting::assert_bool(const Setting::value_t &val)
+{
+	if (val.type_ != Setting::Value::TYPE_BOOL)
+		error_type(Setting::Value::TYPE_BOOL, val.type_);
+}
+
+ __always_inline void Setting::assert_int(const value_t &val)
+{
+	if (val.type_ != Setting::Value::TYPE_INT)
+		error_type(Setting::Value::TYPE_INT, val.type_);
+}
+
+__always_inline void Setting::assert_same(Value::type_t a, Value::type_t b)
+{
+	if (a != b)
+		error_type(a, b);
+}
+
+__always_inline void Setting::Dependency::assert_desired() const
+{
+	if (type_ != Setting::Dependency::DESIRED_VALUE)
+		error_dep_type();
+}
+
+__always_inline void Setting::Dependency::assert_interval() const
+{
+	if (type_ != Setting::Dependency::DESIRED_INTERVAL)
+		error_dep_type();
+}
+
+__always_inline enum Setting::Dependency::Type Setting::Dependency::type() const
+{
+	return type_;
+}
+
+__always_inline int Setting::Dependency::index() const
+{
+	return index_;
+}
+
+__always_inline const Setting::value_t &Setting::Dependency::desired() const
+{
+	assert_desired();
+	return desired_value;
+}
+
+__always_inline const Setting::value_t &Setting::Dependency::low() const
+{
+	assert_interval();
+	return low_value;
+}
+
+__always_inline const Setting::value_t &Setting::Dependency::high() const
+{
+	assert_interval();
+	return high_value;
+}
 
 #endif /* SETTING_H */

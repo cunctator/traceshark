@@ -818,8 +818,8 @@ void TraceAnalyzer::scaleMigration()
 
 bool TraceAnalyzer::enableMigrations()
 {
-	return (Setting::isEnabled(Setting::SHOW_MIGRATION_GRAPHS) &&
-		(Setting::isEnabled(Setting::SHOW_MIGRATION_UNLIMITED) ||
+	return (Setting::getValue(Setting::SHOW_MIGRATION_GRAPHS).boolv() &&
+		(Setting::getValue(Setting::SHOW_MIGRATION_UNLIMITED).boolv() ||
 		 migrations.size() < MAX_NR_MIGRATIONS));
 }
 
@@ -830,20 +830,23 @@ void TraceAnalyzer::doScale()
 	int i;
 	int s = 0;
 	bool useWorkList =
-		Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS) ||
-		Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS) ||
-		Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS);
+		Setting::getValue(Setting::SHOW_CPUFREQ_GRAPHS).boolv() ||
+		Setting::getValue(Setting::SHOW_CPUIDLE_GRAPHS).boolv() ||
+		Setting::getValue(Setting::SHOW_SCHED_GRAPHS).boolv();
 
 	if (useWorkList) {
 		for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
 			/* CpuFreq items */
-			if (Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS))
+			if (Setting::getValue(Setting::SHOW_CPUFREQ_GRAPHS)
+			    .boolv())
 				addCpuFreqWork(cpu, workList);
 			/* CpuIdle items */
-			if (Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS))
+			if (Setting::getValue(Setting::SHOW_CPUIDLE_GRAPHS)
+			    .boolv())
 				addCpuIdleWork(cpu, workList);
 			/* Task items */
-			if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
+			if (Setting::getValue(Setting::SHOW_SCHED_GRAPHS)
+			    .boolv())
 				addCpuSchedWork(cpu, workList);
 		}
 		s = workList.size();

@@ -259,10 +259,6 @@ void MainWindow::createTracePlot()
 
 	tracePlot = new TracePlot(plotWidget);
 	setupOpenGL();
-	Setting::setOpenGLEnabled(isOpenGLEnabled());
-	if (!isOpenGLEnabled()) {
-		Setting::setLineWidth(DEFAULT_LINE_WIDTH);
-	}
 
 	tracePlot->yAxis->setTicker(ticker);
 	taskRangeAllocator = new TaskRangeAllocator(schedHeight
@@ -483,7 +479,7 @@ void MainWindow::computeLayout()
 		offset += p;
 	}
 
-	if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS)) {
+	if (Setting::getValue(Setting::SHOW_SCHED_GRAPHS).boolv()) {
 		offset += schedSectionOffset;
 
 		/* Set the offset and scale of the scheduling graphs */
@@ -497,8 +493,8 @@ void MainWindow::computeLayout()
 		}
 	}
 
-	if (Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS) ||
-	    Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS)) {
+	if (Setting::getValue(Setting::SHOW_CPUFREQ_GRAPHS).boolv() ||
+	    Setting::getValue(Setting::SHOW_CPUIDLE_GRAPHS).boolv()) {
 		offset += cpuSectionOffset;
 
 		for (cpu = 0; cpu < nrCPUs; cpu++) {
@@ -564,8 +560,8 @@ void MainWindow::showTrace()
 	tracePlot->yAxis->setTicks(true);
 
 
-	if (!Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS) &&
-	    !Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS))
+	if (!Setting::getValue(Setting::SHOW_CPUFREQ_GRAPHS).boolv() &&
+	    !Setting::getValue(Setting::SHOW_CPUIDLE_GRAPHS).boolv())
 		goto skipIdleFreqGraphs;
 
 	/* Show CPU frequency and idle graphs */
@@ -577,7 +573,7 @@ void MainWindow::showTrace()
 		QString name;
 		QCPScatterStyle style;
 
-		if (Setting::isEnabled(Setting::SHOW_CPUIDLE_GRAPHS)) {
+		if (Setting::getValue(Setting::SHOW_CPUIDLE_GRAPHS).boolv()) {
 			graph = tracePlot->addGraph(tracePlot->xAxis,
 						    tracePlot->yAxis);
 			graph->setSelectable(QCP::stNone);
@@ -595,7 +591,7 @@ void MainWindow::showTrace()
 				       analyzer->cpuIdle[cpu].scaledData);
 		}
 
-		if (Setting::isEnabled(Setting::SHOW_CPUFREQ_GRAPHS)) {
+		if (Setting::getValue(Setting::SHOW_CPUFREQ_GRAPHS).boolv()) {
 			graph = tracePlot->addGraph(tracePlot->xAxis,
 						    tracePlot->yAxis);
 			graph->setSelectable(QCP::stNone);
@@ -622,7 +618,9 @@ skipIdleFreqGraphs:
 			iter++;
 
 			addSchedGraph(task, cpu);
-			if(Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS)) {
+			if (Setting::getValue(Setting::SHOW_SCHED_GRAPHS)
+			    .boolv())
+			{
 				addHorizontalWakeupGraph(task);
 				addWakeupGraph(task);
 				addPreemptedGraph(task);
@@ -710,10 +708,10 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask, unsigned int cpu)
 	QPen pen = QPen();
 
 	pen.setColor(color);
-	pen.setWidth(Setting::getLineWidth());
+	pen.setWidth(Setting::getValue(Setting::LINE_WIDTH).intv());
 	graph->setPen(pen);
 	graph->setTask(task);
-	if (Setting::isEnabled(Setting::SHOW_SCHED_GRAPHS))
+	if (Setting::getValue(Setting::SHOW_SCHED_GRAPHS).boolv())
 		graph->setData(cpuTask.schedTimev, cpuTask.scaledSchedData);
 	/*
 	 * Save a pointer to the graph object in the task. The destructor of
@@ -724,7 +722,7 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask, unsigned int cpu)
 
 void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 {
-	if (!Setting::isEnabled(Setting::HORIZONTAL_WAKEUP))
+	if (!Setting::getValue(Setting::HORIZONTAL_WAKEUP).boolv())
 		return;
 
 	/* Add wakeup graph on top of scheduling */
@@ -737,7 +735,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 						   tracePlot->yAxis);
 	errorBars->setAntialiased(false);
 	pen.setColor(color);
-	pen.setWidth(Setting::getLineWidth());
+	pen.setWidth(Setting::getValue(Setting::LINE_WIDTH).intv());
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -753,7 +751,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 
 void MainWindow::addWakeupGraph(CPUTask &task)
 {
-	if (!Setting::isEnabled(Setting::VERTICAL_WAKEUP))
+	if (!Setting::getValue(Setting::VERTICAL_WAKEUP).boolv())
 		return;
 
 	/* Add wakeup graph on top of scheduling */
@@ -767,7 +765,7 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	errorBars->setAntialiased(false);
 
 	pen.setColor(color);
-	pen.setWidth(Setting::getLineWidth());
+	pen.setWidth(Setting::getValue(Setting::LINE_WIDTH).intv());
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -1984,6 +1982,7 @@ void MainWindow::consumeSettings()
 
 	if (!analyzer->isOpen()) {
 		setupOpenGL();
+		graphEnableDialog->checkConsumption();
 		return;
 	}
 
@@ -2082,6 +2081,7 @@ void MainWindow::consumeSettings()
 		updateAddToLegendAction();
 		updateTaskGraphActions();
 	}
+	graphEnableDialog->checkConsumption();
 }
 
 void MainWindow::addTaskGraph(int pid)
@@ -2123,7 +2123,7 @@ void MainWindow::addTaskGraph(int pid)
 	QPen pen = QPen();
 
 	pen.setColor(color);
-	pen.setWidth(Setting::getLineWidth());
+	pen.setWidth(Setting::getValue(Setting::LINE_WIDTH).intv());
 	taskGraph->setPen(pen);
 	taskGraph->setTask(task);
 
@@ -2705,7 +2705,8 @@ bool MainWindow::isOpenGLEnabled()
 
 void MainWindow::setupOpenGL()
 {
-	if (has_opengl() && Setting::isOpenGLEnabled()) {
+	if (has_opengl() &&
+	    Setting::getValue(Setting::OPENGL_ENABLED).boolv()) {
 		if (!isOpenGLEnabled()) {
 			tracePlot->setOpenGl(true, 4);
 			if (tracePlot->openGl()) {
@@ -2713,19 +2714,14 @@ void MainWindow::setupOpenGL()
 			}
 		}
 	} else {
-		if (has_opengl() && isOpenGLEnabled()) {
+		if (isOpenGLEnabled()) {
 			tracePlot->setOpenGl(false, 4);
 			if (!tracePlot->openGl()) {
 				printf("OpenGL rendering disabled\n");
 			}
 		}
 	}
-	if (graphEnableDialog != nullptr) {
-		graphEnableDialog->setOpenGLStatus(isOpenGLEnabled());
-	}
-	Setting::setOpenGLEnabled(isOpenGLEnabled());
-	if (!isOpenGLEnabled())
-		Setting::setLineWidth(DEFAULT_LINE_WIDTH);
+	Setting::setBoolValue(Setting::OPENGL_ENABLED, isOpenGLEnabled());
 }
 
 /* Adds the currently selected task to the legend */

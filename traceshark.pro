@@ -313,6 +313,7 @@ HEADERS      +=  ui/taskview.h
 HEADERS      +=  ui/tcheckbox.h
 HEADERS      +=  ui/traceplot.h
 HEADERS      +=  ui/tracesharkstyle.h
+HEADERS      +=  ui/tspinbox.h
 HEADERS      +=  ui/yaxisticker.h
 
 HEADERS      +=  analyzer/abstracttask.h
@@ -407,6 +408,7 @@ SOURCES      +=  ui/taskview.cpp
 SOURCES      +=  ui/tcheckbox.cpp
 SOURCES      +=  ui/traceplot.cpp
 SOURCES      +=  ui/tracesharkstyle.cpp
+SOURCES      +=  ui/tspinbox.cpp
 SOURCES      +=  ui/yaxisticker.cpp
 
 
