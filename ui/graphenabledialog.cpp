@@ -96,8 +96,6 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 			consumeList.append(idxn);
 
 		const Setting::value_t &value = Setting::getValue(idxn);
-		Setting::value_t vmax;
-		Setting::value_t vmin;
 
 		switch (value.type()) {
 		case Setting::Value::TYPE_BOOL:
@@ -110,11 +108,9 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 			layout->addWidget(checkBox, idx, 0, Qt::AlignLeft);
 			break;
 		case Setting::Value::TYPE_INT:
-			vmax = Setting::getMaxValue(idxn);
-			vmin = Setting::getMinValue(idxn);
+			vmaxint = Setting::getMaxValue(idxn).intv();
+			vminint = Setting::getMinValue(idxn).intv();
 			vint = value.intv();
-			vmaxint = vmax.intv();
-			vminint = vmin.intv();
 			spinBox = new TSpinBox(idx, vminint, vmaxint);
 			spinBox->setValue(vint);
 			spinBox->setText(name);
@@ -160,11 +156,9 @@ GraphEnableDialog::GraphEnableDialog(QWidget *parent, bool opengl):
 						  Qt::AlignJustify);
 				break;
 			case Setting::Value::TYPE_INT:
-				vmax = Setting::getMaxValue(d_idx);
-				vmin = Setting::getMinValue(d_idx);
+				vmaxint = Setting::getMaxValue(d_idx).intv();
+				vminint = Setting::getMinValue(d_idx).intv();
 				vint = dep_ok ? dvalue.intv() : defval.intv();
-				vmaxint = vmax.intv();
-				vminint = vmin.intv();
 				spinBox = new TSpinBox(d_idx, vminint, vmaxint);
 				spinBox->setValue(vint);
 				spinBox->setEnabled(dep_ok);
@@ -219,7 +213,7 @@ void GraphEnableDialog::cancelClicked()
 		TCheckBox *tbox = iter.value();
 		Setting::Index idxn = (Setting::Index)
 			tbox->getId();
-		Setting::value_t value = Setting::getValue(idxn);
+		const Setting::value_t &value = Setting::getValue(idxn);
 		tbox->setChecked(value.boolv());
 	}
 
@@ -228,7 +222,7 @@ void GraphEnableDialog::cancelClicked()
 		TSpinBox *sbox = siter.value();
 		Setting::Index idxn = (Setting::Index)
 			sbox->getId();
-		Setting::value_t value = Setting::getValue(idxn);
+		const Setting::value_t &value = Setting::getValue(idxn);
 		sbox->setValue(value.intv());
 	}
 }
@@ -244,7 +238,7 @@ void GraphEnableDialog::applyClicked()
 			tbox->getId();
 		bool uivalue;
 		uivalue = tbox->isChecked();
-		Setting::value_t setvalue = Setting::getValue(idxn);
+		const Setting::value_t &setvalue = Setting::getValue(idxn);
 		if (uivalue != setvalue.boolv()) {
 			changed = true;
 			Setting::setBoolValue(idxn, uivalue);
@@ -259,7 +253,7 @@ void GraphEnableDialog::applyClicked()
 			sbox->getId();
 		int uivalue;
 		uivalue = sbox->value();
-		Setting::value_t setvalue = Setting::getValue(idxn);
+		const Setting::value_t &setvalue = Setting::getValue(idxn);
 		if (uivalue != setvalue.intv()) {
 			changed = true;
 			Setting::setIntValue(idxn, uivalue);
@@ -301,7 +295,7 @@ void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)
 	bool consume = Setting::isFlagSet(id, Setting::FLAG_MUST_BE_CONSUMED);
 
 	Setting::value_t newval(checked);
-	Setting::value_t savedval = Setting::getValue(id);
+	const Setting::value_t &savedval = Setting::getValue(id);
 
 	unsigned int nrdep = Setting::getNrDependents(id);
 	for (d = 0; d < nrdep; d++) {
@@ -383,7 +377,7 @@ void GraphEnableDialog::checkCBoxConsumption(Setting::Index idx,
 {
 	QMap<Setting::Index, TCheckBox*>::iterator iter;
 	QMap<Setting::Index, TSpinBox*>::iterator siter;
-	Setting::value_t value = Setting::getValue(idx);
+	const Setting::value_t &value = Setting::getValue(idx);
 	bool bval = Setting::getValue(idx).boolv();
 	if (bval != box->isChecked())
 		box->setChecked(bval);
