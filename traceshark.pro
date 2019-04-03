@@ -359,6 +359,7 @@ HEADERS      +=  misc/chunk.h
 HEADERS      +=  misc/errors.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
+HEADERS      +=  misc/settingstore.h
 HEADERS      +=  misc/string.h
 HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/translate.h
@@ -443,6 +444,8 @@ SOURCES      +=  mm/mempool.cpp
 SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
 SOURCES      +=  misc/setting.cpp
+SOURCES      +=  misc/settingstore.cpp
+
 SOURCES      +=  misc/translate.cpp
 
 SOURCES      +=  vtl/bitvector.cpp

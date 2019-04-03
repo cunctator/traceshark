@@ -98,6 +98,7 @@
 
 class TraceFile;
 class QCustomPlot;
+class SettingStore;
 
 class TraceAnalyzer
 {
@@ -106,7 +107,7 @@ public:
 		EXPORT_TYPE_ALL = 0,
 		EXPORT_TYPE_CPU_CYCLES
 	} exporttype_t;
-	TraceAnalyzer();
+	TraceAnalyzer(const SettingStore *sstore);
 	~TraceAnalyzer();
 	int open(const QString &fileName);
 	bool isOpen() const;
@@ -296,6 +297,7 @@ private:
 	static const int spaceStrLen;
 	static const char *const cpuevents[];
 	static const int CPUEVENTS_NR;
+	const SettingStore *setstor;
 };
 
 __always_inline

@@ -88,6 +88,7 @@ class QCPLayer;
 class QCPLegend;
 class QCustomPlot;
 class QCPAbstractLegendItem;
+class SettingStore;
 class TaskToolBar;
 class TracePlot;
 class TraceEvent;
@@ -351,7 +352,7 @@ private:
 	QVector<double> ticks;
 	QVector<QString> tickLabels;
 	Cursor *cursors[TShark::NR_CURSORS];
-	Setting settings[Setting::NR_SETTINGS];
+	SettingStore *settingStore;
 	bool filterActive;
 	double cursorPos[TShark::NR_CURSORS];
 };

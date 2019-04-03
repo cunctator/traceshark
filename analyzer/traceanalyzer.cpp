@@ -76,6 +76,7 @@ extern "C" {
 #include "parser/traceparser.h"
 #include "misc/errors.h"
 #include "misc/setting.h"
+#include "misc/settingstore.h"
 #include "misc/traceshark.h"
 #include "threads/workthread.h"
 #include "threads/workitem.h"
@@ -92,7 +93,7 @@ __always_inline static int clib_close(int fd)
 	return close(fd);
 }
 
-TraceAnalyzer::TraceAnalyzer()
+TraceAnalyzer::TraceAnalyzer(const SettingStore *sstore)
 	: events(nullptr), cpuTaskMaps(nullptr), cpuFreq(nullptr),
 	  cpuIdle(nullptr), black(0, 0, 0), white(255, 255, 255),
 	  migrationOffset(0), migrationScale(0), maxCPU(0), nrCPUs(0),
@@ -100,7 +101,7 @@ TraceAnalyzer::TraceAnalyzer()
 	  startTimeDbl(0), endTimeIdx(0), maxFreq(0), minFreq(0),
 	  maxIdleState(0), minIdleState(0), timePrecision(0), CPUs(nullptr),
 	  customPlot(nullptr), pidFilterInclusive(false),
-	  OR_pidFilterInclusive(false)
+	  OR_pidFilterInclusive(false), setstor(sstore)
 {
 	taskNamePool = new StringPool<>(16384, 256);
 	parser = new TraceParser();
@@ -818,8 +819,8 @@ void TraceAnalyzer::scaleMigration()
 
 bool TraceAnalyzer::enableMigrations()
 {
-	return (Setting::getValue(Setting::SHOW_MIGRATION_GRAPHS).boolv() &&
-		(Setting::getValue(Setting::SHOW_MIGRATION_UNLIMITED).boolv() ||
+	return (setstor->getValue(Setting::SHOW_MIGRATION_GRAPHS).boolv() &&
+		(setstor->getValue(Setting::SHOW_MIGRATION_UNLIMITED).boolv() ||
 		 migrations.size() < MAX_NR_MIGRATIONS));
 }
 
@@ -830,22 +831,22 @@ void TraceAnalyzer::doScale()
 	int i;
 	int s = 0;
 	bool useWorkList =
-		Setting::getValue(Setting::SHOW_CPUFREQ_GRAPHS).boolv() ||
-		Setting::getValue(Setting::SHOW_CPUIDLE_GRAPHS).boolv() ||
-		Setting::getValue(Setting::SHOW_SCHED_GRAPHS).boolv();
+		setstor->getValue(Setting::SHOW_CPUFREQ_GRAPHS).boolv() ||
+		setstor->getValue(Setting::SHOW_CPUIDLE_GRAPHS).boolv() ||
+		setstor->getValue(Setting::SHOW_SCHED_GRAPHS).boolv();
 
 	if (useWorkList) {
 		for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
 			/* CpuFreq items */
-			if (Setting::getValue(Setting::SHOW_CPUFREQ_GRAPHS)
+			if (setstor->getValue(Setting::SHOW_CPUFREQ_GRAPHS)
 			    .boolv())
 				addCpuFreqWork(cpu, workList);
 			/* CpuIdle items */
-			if (Setting::getValue(Setting::SHOW_CPUIDLE_GRAPHS)
+			if (setstor->getValue(Setting::SHOW_CPUIDLE_GRAPHS)
 			    .boolv())
 				addCpuIdleWork(cpu, workList);
 			/* Task items */
-			if (Setting::getValue(Setting::SHOW_SCHED_GRAPHS)
+			if (setstor->getValue(Setting::SHOW_SCHED_GRAPHS)
 			    .boolv())
 				addCpuSchedWork(cpu, workList);
 		}

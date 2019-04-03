@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,49 +50,57 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRAPHENABLEDIALOG_H
-#define GRAPHENABLEDIALOG_H
+#ifndef _TS_SETTINGSTORE_H
+#define _TS_SETTINGSTORE_H
 
-#include "misc/setting.h"
-#include "vtl/error.h"
-#include <QDialog>
+#include <QString>
+#include "setting.h"
 
-QT_BEGIN_NAMESPACE
-class QComboBox;
-class QTextEdit;
-template <typename T, typename U> class QMap;
-QT_END_NAMESPACE
+#define TS_SETTING_FILENAME ".traceshark"
 
-class TCheckBox;
-class TSpinBox;
-
-class GraphEnableDialog : public QDialog {
-	Q_OBJECT
-
+class SettingStore
+{
 public:
-	GraphEnableDialog(SettingStore *sstore, QWidget *parent = 0);
-	~GraphEnableDialog();
-	void checkConsumption();
-signals:
-	void settingsChanged();
+	SettingStore();
+	void setBoolValue(enum Setting::Index idx, bool v);
+	void setIntValue(enum Setting::Index idx, int v);
+	const Setting::Value &getValue(enum Setting::Index idx) const;
+	const Setting::Value &getDisabledValue(enum Setting::Index idx) const;
+	const Setting::Value &getMinValue(enum Setting::Index idx) const;
+	const Setting::Value &getMaxValue(enum Setting::Index idx) const;
+	bool isFlagSet(enum Setting::Index idx , enum Setting::Flag f) const;
+	unsigned int getNrDependencies(enum Setting::Index idx) const;
+	unsigned int getNrDependents(enum Setting::Index idx) const;
+	const QString &getName(enum Setting::Index idx) const;
+	const Setting::Dependency &getDependency(enum Setting::Index idx,
+						 unsigned int nr) const;
+	const Setting::Dependency &getDependent(enum Setting::Index idx,
+						unsigned int nr) const;
+	int loadSettings();
+	int saveSettings() const;
+	void setFlag(enum Setting::Index idx, enum Setting::Flag f);
+	void clearFlag(enum Setting::Index idx, enum Setting::Flag f);
+	void initBoolValue(enum Setting::Index idx, bool v);
+	void initIntValue(enum Setting::Index idx, int v);
+	void initDisabledBoolValue(enum Setting::Index idx, bool v);
+	void initDisabledIntValue(enum Setting::Index idx, int v);
+	void initMaxIntValue(enum Setting::Index idx, int v);
+	void initMinIntValue(enum Setting::Index idx, int v);
+	void setName(enum Setting::Index idx, const QString &n);
+	void setKey(enum Setting::Index idx, const QString &key);
+	void addDependency(enum Setting::Index idx,
+			   const Setting::Dependency &d);
+	int readKeyValuePair(QTextStream &stream,
+			     QString &key,
+			     QString &value);
+	static const QString &getFileName();
 private:
-	QMap<Setting::Index, TCheckBox*> *checkBoxMap;
-	QMap<Setting::Index, TSpinBox*> *spinBoxMap;
-	QList<Setting::Index> consumeList;
-	QComboBox *comboBox;
-	int savedHeight;
-	SettingStore *settingStore;
-	void checkCBoxConsumption(Setting::Index idx, TCheckBox *box);
-	void checkSBoxConsumption(Setting::Index idx, TSpinBox *box);
-public slots:
-	void show();
-private slots:
-	void okClicked();
-	void cancelClicked();
-	void applyClicked();
-	void saveClicked();
-	void handleBoxClicked(TCheckBox *box, bool enabled);
-	void handleSpinChanged(TSpinBox *box, int value);
+	int handleOlderVersion(int oldver, int newver);
+	static const QString &boolToQString(bool b);
+	static bool boolFromValue(bool *ok, const QString &value);
+	Setting settings[Setting::NR_SETTINGS];
+	QMap<QString, enum Setting::Index> fileKeyMap;
+	static const int this_version;
 };
 
-#endif /* GRAPHENABLEDIALOG_H */
+#endif /* _TS_SETTINGSTORE_H */
