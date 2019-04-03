@@ -235,8 +235,7 @@ void SettingStore::addDependency(enum Setting::Index idx,
 
 	nrDep = &settings[idx].nrDep;
 
-	if (*nrDep >=
-	    sizeof(settings[idx].dependency) / sizeof(Setting::Dependency))
+	if (*nrDep >= arraylen(settings[idx].dependency))
 		return;
 	settings[idx].dependency[*nrDep] = d;
 	(*nrDep)++;
@@ -250,8 +249,7 @@ void SettingStore::addDependency(enum Setting::Index idx,
 	dy.low_value = d.low_value;
 	dy.high_value = d.high_value;
 	nrDependents = &settings[d.index_].nrDependents;
-	if (*nrDependents >=
-	    sizeof(settings[d.index_].dependent) / sizeof(Setting::Dependency))
+	if (*nrDependents >= arraylen(settings[d.index_].dependent))
 		return;
 	settings[d.index_].dependent[*nrDependents] = dy;
 	(*nrDependents)++;

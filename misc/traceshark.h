@@ -92,6 +92,8 @@ typedef enum : int {
 	TRACE_TYPE_MAX
 } tracetype_t;
 
+#define arraylen(ARRAY) (sizeof(ARRAY) / sizeof(ARRAY[0]))
+
 #define tsconnect(src, ssig, dest, dslot) \
 	connect(src, SIGNAL(ssig), dest, SLOT(dslot))
 
