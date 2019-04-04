@@ -78,6 +78,8 @@ public:
 						unsigned int nr) const;
 	int loadSettings();
 	int saveSettings() const;
+	static const QString &getFileName();
+private:
 	void setFlag(enum Setting::Index idx, enum Setting::Flag f);
 	void clearFlag(enum Setting::Index idx, enum Setting::Flag f);
 	void initBoolValue(enum Setting::Index idx, bool v);
@@ -93,8 +95,6 @@ public:
 	int readKeyValuePair(QTextStream &stream,
 			     QString &key,
 			     QString &value);
-	static const QString &getFileName();
-private:
 	int handleOlderVersion(int oldver, int newver);
 	static const QString &boolToQString(bool b);
 	static bool boolFromValue(bool *ok, const QString &value);
