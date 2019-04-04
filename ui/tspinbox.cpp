@@ -95,6 +95,9 @@ TSpinBox::TSpinBox(int id_arg, int vmin, int vmax, QWidget *parent):
 		tsconnect(cbox, currentIndexChanged(int), this,
 			  cBoxChanged(int));
 	}
+
+	ulabel = new QLabel();
+	layout->addWidget(ulabel);
 }
 
 TSpinBox::~TSpinBox()
@@ -116,11 +119,15 @@ int TSpinBox::getId() const
 	return id;
 }
 
-void TSpinBox::setText(const QString &str)
+void TSpinBox::setName(const QString &str)
 {
 	label->setText(str);
 }
 
+void TSpinBox::setUnit(const QString &str)
+{
+	ulabel->setText(str);
+}
 
 void TSpinBox::setValue(int value)
 {

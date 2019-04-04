@@ -88,6 +88,7 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore,
 		if (checkBoxMap->contains(idxn) || spinBoxMap->contains(idxn))
 			continue;
 		const QString &name = settingStore->getName(idxn);
+		const QString &unit = settingStore->getUnit(idxn);
 		TCheckBox *checkBox;
 		TSpinBox *spinBox;
 		bool enabled;
@@ -116,7 +117,8 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore,
 			vint = value.intv();
 			spinBox = new TSpinBox(idx, vminint, vmaxint);
 			spinBox->setValue(vint);
-			spinBox->setText(name);
+			spinBox->setName(name);
+			spinBox->setUnit(unit);
 			tsconnect(spinBox, boxChanged(TSpinBox *, int),
 				  this, handleSpinChanged(TSpinBox *, int));
 			(*spinBoxMap)[idxn] = spinBox;
@@ -142,6 +144,7 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore,
 					  "Setting::Index is wrong in "
 					  "ui/setting.h!\n");
 			const QString &dname = settingStore->getName(d_idx);
+			const QString &dunit = settingStore->getUnit(d_idx);
 			const Setting::Value &defval =
 				settingStore->getDisabledValue(d_idx);
 			const Setting::Value &dvalue =
@@ -159,13 +162,16 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore,
 						  Qt::AlignJustify);
 				break;
 			case Setting::Value::TYPE_INT:
-				vmaxint = settingStore->getMaxValue(d_idx).intv();
-				vminint = settingStore->getMinValue(d_idx).intv();
+				vmaxint = settingStore->getMaxValue(d_idx)
+					.intv();
+				vminint = settingStore->getMinValue(d_idx)
+					.intv();
 				vint = dep_ok ? dvalue.intv() : defval.intv();
 				spinBox = new TSpinBox(d_idx, vminint, vmaxint);
 				spinBox->setValue(vint);
 				spinBox->setEnabled(dep_ok);
-				spinBox->setText(dname);
+				spinBox->setName(dname);
+				spinBox->setUnit(dunit);
 				(*spinBoxMap)[d_idx] = spinBox;
 				layout->addWidget(spinBox, idx, 1 + d,
 						  Qt::AlignJustify);

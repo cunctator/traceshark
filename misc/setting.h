@@ -168,6 +168,7 @@ protected:
 	Value disabled_value;
 	flag_t flags;
 	QString name;
+	QString unit;
 	Dependency dependency[4];
 	Dependency dependent[4];
 	unsigned int nrDep;

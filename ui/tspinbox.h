@@ -68,7 +68,8 @@ public:
 		 QWidget *parent = 0);
 	virtual ~TSpinBox();
 	int getId() const;
-	void setText(const QString &str);
+	void setName(const QString &str);
+	void setUnit(const QString &str);
 	void setValue(int value);
 	int value() const;
 signals:
@@ -85,6 +86,7 @@ private:
 	QComboBox *cbox;
 	QSpinBox *sbox;
 	QLabel *label;
+	QLabel *ulabel;
 private slots:
 	void sBoxChanged(int value);
 	void cBoxChanged(int value);

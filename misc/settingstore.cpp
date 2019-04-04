@@ -124,6 +124,7 @@ SettingStore::SettingStore()
 	setFlag(Setting::OPENGL_ENABLED, Setting::FLAG_MUST_BE_CONSUMED);
 
 	setName(Setting::LINE_WIDTH, q.tr("Line width of sched graphs:"));
+	setUnit(Setting::LINE_WIDTH, q.tr("pixels"));
 	setKey(Setting::LINE_WIDTH, QString("SCHED_GRAPH_LINE_WIDTH"));
 	initIntValue(Setting::LINE_WIDTH, width);
 	initMaxIntValue(Setting::LINE_WIDTH, MAX_LINE_WIDTH_OPENGL);
@@ -135,6 +136,11 @@ SettingStore::SettingStore()
 void SettingStore::setName(enum Setting::Index idx, const QString &n)
 {
 	settings[idx].name = n;
+}
+
+void SettingStore::setUnit(enum Setting::Index idx, const QString &u)
+{
+	settings[idx].unit = u;
 }
 
 void SettingStore::setBoolValue(enum Setting::Index idx, bool v)
@@ -268,6 +274,11 @@ unsigned int SettingStore::getNrDependents(enum Setting::Index idx) const
 const QString &SettingStore::getName(enum Setting::Index idx) const
 {
 	return settings[idx].name;
+}
+
+const QString &SettingStore::getUnit(enum Setting::Index idx) const
+{
+	return settings[idx].unit;
 }
 
 const Setting::Dependency &SettingStore::getDependency(enum Setting::Index idx,

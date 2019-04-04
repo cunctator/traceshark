@@ -72,6 +72,7 @@ public:
 	unsigned int getNrDependencies(enum Setting::Index idx) const;
 	unsigned int getNrDependents(enum Setting::Index idx) const;
 	const QString &getName(enum Setting::Index idx) const;
+	const QString &getUnit(enum Setting::Index idx) const;
 	const Setting::Dependency &getDependency(enum Setting::Index idx,
 						 unsigned int nr) const;
 	const Setting::Dependency &getDependent(enum Setting::Index idx,
@@ -89,6 +90,7 @@ private:
 	void initMaxIntValue(enum Setting::Index idx, int v);
 	void initMinIntValue(enum Setting::Index idx, int v);
 	void setName(enum Setting::Index idx, const QString &n);
+	void setUnit(enum Setting::Index idx, const QString &u);
 	void setKey(enum Setting::Index idx, const QString &key);
 	void addDependency(enum Setting::Index idx,
 			   const Setting::Dependency &d);
