@@ -67,6 +67,7 @@ class SettingStore;
 class Setting
 {
 	friend class SettingStore;
+	friend class ValueBox;
 public:
 	typedef enum Index : int {
 		SHOW_SCHED_GRAPHS = 0,
@@ -86,6 +87,7 @@ public:
 		friend class Dependency;
 		friend class Setting;
 		friend class SettingStore;
+		friend class ValueBox;
 	public:
 		typedef enum Type {
 			TYPE_BOOL,
@@ -154,14 +156,14 @@ public:
 	static bool isLowResScreen();
 
 	static const char *getValueTypeStr(Value::type_t type);
-	__always_inline static void assert_bool(const Value &val);
-	__always_inline static void assert_int(const Value &val);
-	__always_inline static void assert_same(Value::type_t a,
-						Value::type_t b);
 private:
 	static void error_type(Value::type_t expected, Value::type_t was);
 
 protected:
+	__always_inline static void assert_bool(const Value &val);
+	__always_inline static void assert_int(const Value &val);
+	__always_inline static void assert_same(Value::type_t a,
+						Value::type_t b);
 	Value value;
 	Value min_value;
 	Value max_value;

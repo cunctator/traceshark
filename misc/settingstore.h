@@ -64,6 +64,7 @@ public:
 	SettingStore();
 	void setBoolValue(enum Setting::Index idx, bool v);
 	void setIntValue(enum Setting::Index idx, int v);
+	void setValue(enum Setting::Index idx, const Setting::Value &v);
 	const Setting::Value &getValue(enum Setting::Index idx) const;
 	const Setting::Value &getDisabledValue(enum Setting::Index idx) const;
 	const Setting::Value &getMinValue(enum Setting::Index idx) const;

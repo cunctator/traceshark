@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
+ // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,23 +50,69 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TCHECKBOX_H
-#define TCHECKBOX_H
+#ifndef _TS_UI_VALUEBOX_H
+#define _TS_UI_VALUEBOX_H
 
-#include <QCheckBox>
+#include <QWidget>
 
-class TCheckBox : public QCheckBox {
+QT_BEGIN_NAMESPACE
+class QCheckBox;
+class QComboBox;
+class QLayout;
+class QSpinBox;
+class QLabel;
+QT_END_NAMESPACE
+
+#include "misc/setting.h"
+
+class SettingStore;
+
+class ValueBox : public QWidget {
 	Q_OBJECT
 public:
-	TCheckBox(int id = 0, bool checked = true, QWidget *parent = 0);
-	virtual ~TCheckBox();
-	int getId();
+	ValueBox(Setting::Index id_arg = Setting::SHOW_SCHED_GRAPHS,
+		 SettingStore *sstore = nullptr,
+		 QWidget *parent = 0);
+	virtual ~ValueBox();
+	__always_inline int getId() const;
+	void reloadValue();
+	void storeValue();
+	void setDefaultValue();
+	Setting::Value value() const;
+	void setValue(const Setting::Value &v);
+	void setEnabled(bool en);
+	void setDisabled(bool dis);
 signals:
-	void boxClicked(TCheckBox *, bool checked);
+	void boxChanged(ValueBox *, Setting::Value value);
 private:
-	int id;
+
+	typedef enum Type : int {
+		TYPE_ERROR = 0,
+		TYPE_CHECKBOX,
+		TYPE_COMBOBOX,
+		TYPE_SPINBOX,
+	} type_t;
+
+	void createIntBox(QLayout *layout, const Setting::Value &value);
+	void createBoolBox(QLayout *layout, const Setting::Value &value);
+	SettingStore *settingStore;
+	Setting::Index id;
+	int value_min;
+	int value_max;
+	type_t type;
+	QCheckBox *checkBox;
+	QComboBox *comboBox;
+	QSpinBox *spinBox;
+	Setting::Value enabledValue;
 private slots:
-	void clicked();
+	void checkBoxChanged(int s);
+	void comboBoxChanged(int value);
+	void spinBoxChanged(int value);
 };
 
-#endif /* TCHECKBOX_H */
+__always_inline int ValueBox::getId() const
+{
+	return id;
+}
+
+#endif /* _TS_UI_TSPINBOX_H */

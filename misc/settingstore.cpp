@@ -161,6 +161,12 @@ void SettingStore::setIntValue(enum Setting::Index idx, int v)
 	settings[idx].value.value.int_value = v;
 }
 
+void SettingStore::setValue(enum Setting::Index idx, const Setting::Value &v)
+{
+	Setting::assert_same(settings[idx].value.type_, v.type_);
+	settings[idx].value = v;
+}
+
 void SettingStore::initIntValue(enum Setting::Index idx, int v)
 {
 	settings[idx].value.type_ = Setting::Value::TYPE_INT;

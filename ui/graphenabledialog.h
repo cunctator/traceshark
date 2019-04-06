@@ -63,8 +63,7 @@ class QTextEdit;
 template <typename T, typename U> class QMap;
 QT_END_NAMESPACE
 
-class TCheckBox;
-class TSpinBox;
+class ValueBox;
 
 class GraphEnableDialog : public QDialog {
 	Q_OBJECT
@@ -76,14 +75,11 @@ public:
 signals:
 	void settingsChanged();
 private:
-	QMap<Setting::Index, TCheckBox*> *checkBoxMap;
-	QMap<Setting::Index, TSpinBox*> *spinBoxMap;
+	QMap<Setting::Index, ValueBox*> *valueBoxMap;
 	QList<Setting::Index> consumeList;
-	QComboBox *comboBox;
 	int savedHeight;
 	SettingStore *settingStore;
-	void checkCBoxConsumption(Setting::Index idx, TCheckBox *box);
-	void checkSBoxConsumption(Setting::Index idx, TSpinBox *box);
+	void valueBoxConsumption(Setting::Index idx, ValueBox *box);
 public slots:
 	void show();
 private slots:
@@ -91,8 +87,7 @@ private slots:
 	void cancelClicked();
 	void applyClicked();
 	void saveClicked();
-	void handleBoxClicked(TCheckBox *box, bool enabled);
-	void handleSpinChanged(TSpinBox *box, int value);
+	void handleBoxChanged(ValueBox *valueBox, Setting::Value value);
 };
 
 #endif /* GRAPHENABLEDIALOG_H */

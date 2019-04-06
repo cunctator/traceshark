@@ -54,11 +54,9 @@
 #include "misc/settingstore.h"
 #include "misc/traceshark.h"
 #include "ui/graphenabledialog.h"
-#include "ui/tcheckbox.h"
-#include "ui/tspinbox.h"
+#include "ui/valuebox.h"
 #include "vtl/error.h"
 
-#include <QComboBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -80,54 +78,24 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore,
 	QPushButton *applyButton;
 	QPushButton *saveButton;
 
-	checkBoxMap = new QMap<Setting::Index, TCheckBox*>;
-	spinBoxMap = new QMap<Setting::Index, TSpinBox*>;
+	valueBoxMap = new QMap<Setting::Index, ValueBox*>;
 
 	for (idx = 0; idx < Setting::NR_SETTINGS; idx++) {
 		idxn = (Setting::Index) idx;
-		if (checkBoxMap->contains(idxn) || spinBoxMap->contains(idxn))
+		if (valueBoxMap->contains(idxn))
 			continue;
-		const QString &name = settingStore->getName(idxn);
-		const QString &unit = settingStore->getUnit(idxn);
-		TCheckBox *checkBox;
-		TSpinBox *spinBox;
-		bool enabled;
-		int vint;
-		int vmaxint, vminint;
+		ValueBox *valueBox;
 
 		if (settingStore->isFlagSet(idxn,
 					    Setting::FLAG_MUST_BE_CONSUMED))
 			consumeList.append(idxn);
 
-		const Setting::Value &value = settingStore->getValue(idxn);
-
-		switch (value.type()) {
-		case Setting::Value::TYPE_BOOL:
-			enabled = value.boolv();
-			checkBox = new TCheckBox(idx, enabled);
-			tsconnect(checkBox, boxClicked(TCheckBox *, bool),
-				  this, handleBoxClicked(TCheckBox *, bool));
-			checkBox->setText(name);
-			(*checkBoxMap)[idxn] = checkBox;
-			layout->addWidget(checkBox, idx, 0, Qt::AlignLeft);
-			break;
-		case Setting::Value::TYPE_INT:
-			vmaxint = settingStore->getMaxValue(idxn).intv();
-			vminint = settingStore->getMinValue(idxn).intv();
-			vint = value.intv();
-			spinBox = new TSpinBox(idx, vminint, vmaxint);
-			spinBox->setValue(vint);
-			spinBox->setName(name);
-			spinBox->setUnit(unit);
-			tsconnect(spinBox, boxChanged(TSpinBox *, int),
-				  this, handleSpinChanged(TSpinBox *, int));
-			(*spinBoxMap)[idxn] = spinBox;
-			layout->addWidget(spinBox, idx, 0, Qt::AlignLeft);
-			break;
-		default:
-			vtl::errx(BSD_EX_SOFTWARE, "%s:%d", __FILE__, __LINE__);
-		}
-
+		valueBox = new ValueBox(idxn, settingStore);
+		const Setting::Value &value = valueBox->value();
+		tsconnect(valueBox, boxChanged(ValueBox *, Setting::Value),
+			  this, handleBoxChanged(ValueBox *, Setting::Value));
+		(*valueBoxMap)[idxn] = valueBox;
+		layout->addWidget(valueBox, idx, 0, Qt::AlignLeft);
 
 		unsigned int nrdep = settingStore->getNrDependents(idxn);
 		unsigned int d;
@@ -136,51 +104,26 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore,
 				settingStore->getDependent(idxn, d);
 			Setting::Index d_idx = (Setting::Index) dy.index();
 			bool dep_ok = dy.check(value);
+			const Setting::Value &defval =
+				settingStore->getDisabledValue(d_idx);
 
-			if (checkBoxMap->contains(d_idx) ||
-			    spinBoxMap->contains(d_idx))
+			if (valueBoxMap->contains(d_idx))
 				vtl::errx(BSD_EX_SOFTWARE,
 					  "Seems like the order of the enum "
 					  "Setting::Index is wrong in "
 					  "ui/setting.h!\n");
-			const QString &dname = settingStore->getName(d_idx);
-			const QString &dunit = settingStore->getUnit(d_idx);
-			const Setting::Value &defval =
-				settingStore->getDisabledValue(d_idx);
-			const Setting::Value &dvalue =
-				settingStore->getValue(d_idx);
-			switch (dvalue.type()) {
-			case Setting::Value::TYPE_BOOL:
-				enabled = dep_ok ?
-					dvalue.boolv() : defval.boolv();
-				checkBox = new TCheckBox(d_idx, enabled);
-				checkBox->setChecked(enabled);
-				checkBox->setEnabled(dep_ok);
-				checkBox->setText(dname);
-				(*checkBoxMap)[d_idx] = checkBox;
-				layout->addWidget(checkBox, idx, 1 + d,
-						  Qt::AlignJustify);
-				break;
-			case Setting::Value::TYPE_INT:
-				vmaxint = settingStore->getMaxValue(d_idx)
-					.intv();
-				vminint = settingStore->getMinValue(d_idx)
-					.intv();
-				vint = dep_ok ? dvalue.intv() : defval.intv();
-				spinBox = new TSpinBox(d_idx, vminint, vmaxint);
-				spinBox->setValue(vint);
-				spinBox->setEnabled(dep_ok);
-				spinBox->setName(dname);
-				spinBox->setUnit(dunit);
-				(*spinBoxMap)[d_idx] = spinBox;
-				layout->addWidget(spinBox, idx, 1 + d,
-						  Qt::AlignJustify);
-				break;
-			default:
-				vtl::errx(BSD_EX_SOFTWARE, "%s:%d",
-					  __FILE__, __LINE__);
-				break;
-			}
+
+			valueBox = new ValueBox(d_idx, settingStore);
+			if (!dep_ok)
+				valueBox->setValue(defval);
+			valueBox->setEnabled(dep_ok);
+			tsconnect(valueBox, boxChanged(ValueBox *,
+						       Setting::Value),
+				  this, handleBoxChanged(ValueBox *,
+							 Setting::Value));
+			(*valueBoxMap)[d_idx] = valueBox;
+			layout->addWidget(valueBox, idx, 1 + d,
+					  Qt::AlignJustify);
 		}
 	}
 
@@ -204,8 +147,7 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore,
 
 GraphEnableDialog::~GraphEnableDialog()
 {
-	delete checkBoxMap;
-	delete spinBoxMap;
+	delete valueBoxMap;
 }
 
 void GraphEnableDialog::okClicked()
@@ -217,55 +159,26 @@ void GraphEnableDialog::okClicked()
 void GraphEnableDialog::cancelClicked()
 {
 	hide();
-	QMap<Setting::Index, TCheckBox*>::iterator iter;
-	for(iter = checkBoxMap->begin(); iter != checkBoxMap->end(); iter++) {
-		TCheckBox *tbox = iter.value();
-		Setting::Index idxn = (Setting::Index)
-			tbox->getId();
-		const Setting::Value &value = settingStore->getValue(idxn);
-		tbox->setChecked(value.boolv());
-	}
-
-	QMap<Setting::Index, TSpinBox*>::iterator siter;
-	for(siter = spinBoxMap->begin(); siter != spinBoxMap->end(); siter++) {
-		TSpinBox *sbox = siter.value();
-		Setting::Index idxn = (Setting::Index)
-			sbox->getId();
-		const Setting::Value &value = settingStore->getValue(idxn);
-		sbox->setValue(value.intv());
+	QMap<Setting::Index, ValueBox*>::iterator iter;
+	for(iter = valueBoxMap->begin(); iter != valueBoxMap->end(); iter++) {
+		ValueBox *vbox = iter.value();
+		vbox->reloadValue();
 	}
 }
 
 void GraphEnableDialog::applyClicked()
 {
 	bool changed = false;
-	QMap<Setting::Index, TCheckBox*>::iterator iter;
+	QMap<Setting::Index, ValueBox*>::iterator iter;
 
-	for(iter = checkBoxMap->begin(); iter != checkBoxMap->end(); iter++) {
-		TCheckBox *tbox = iter.value();
-		Setting::Index idxn = (Setting::Index)
-			tbox->getId();
-		bool uivalue;
-		uivalue = tbox->isChecked();
+	for(iter = valueBoxMap->begin(); iter != valueBoxMap->end(); iter++) {
+		ValueBox *vbox = iter.value();
+		Setting::Index idxn = (Setting::Index) vbox->getId();
+		const Setting::Value &uivalue = vbox->value();
 		const Setting::Value &setvalue = settingStore->getValue(idxn);
-		if (uivalue != setvalue.boolv()) {
+		if (uivalue != setvalue) {
 			changed = true;
-			settingStore->setBoolValue(idxn, uivalue);
-		}
-	}
-
-	QMap<Setting::Index, TSpinBox*>::iterator siter;
-	for(siter = spinBoxMap->begin(); siter != spinBoxMap->end(); siter++)
-	{
-		TSpinBox *sbox = siter.value();
-		Setting::Index idxn = (Setting::Index)
-			sbox->getId();
-		int uivalue;
-		uivalue = sbox->value();
-		const Setting::Value &setvalue = settingStore->getValue(idxn);
-		if (uivalue != setvalue.intv()) {
-			changed = true;
-			settingStore->setIntValue(idxn, uivalue);
+			vbox->storeValue();
 		}
 	}
 
@@ -291,65 +204,34 @@ void GraphEnableDialog::saveClicked()
 	}
 }
 
-void GraphEnableDialog::handleBoxClicked(TCheckBox *checkBox, bool checked)
+void GraphEnableDialog::handleBoxChanged(ValueBox *valueBox,
+					 Setting::Value value)
 {
-	Setting::Index id = (Setting::Index) checkBox->getId();
+	Setting::Index id = (Setting::Index) valueBox->getId();
 	unsigned int d;
-	QMap<Setting::Index, TCheckBox*>::iterator iter;
-	QMap<Setting::Index, TSpinBox*>::iterator siter;
-	TCheckBox *dBox;
-	TSpinBox *sBox;
-	bool bval;
-	int ival;
-	bool consume = settingStore->isFlagSet(id, Setting::FLAG_MUST_BE_CONSUMED);
+	QMap<Setting::Index, ValueBox*>::iterator iter;
+	ValueBox *vbox;
+	Setting::Value val;
+	const Setting::flag_t consumeflag = Setting::FLAG_MUST_BE_CONSUMED;
+	bool consume = settingStore->isFlagSet(id, consumeflag);
 
-	Setting::Value newval(checked);
 	const Setting::Value &savedval = settingStore->getValue(id);
-
-	unsigned int nrdep = settingStore->getNrDependents(id);
+	const unsigned int nrdep = settingStore->getNrDependents(id);
 	for (d = 0; d < nrdep; d++) {
 		Setting::Dependency dep = settingStore->getDependent(id, d);
-		Setting::Index dep_idx = (Setting::Index)
-			dep.index();
-		bool dep_ok = dep.check(newval);
+		Setting::Index dep_idx = (Setting::Index) dep.index();
+		bool dep_ok = dep.check(value);
 		if (consume)
 			dep_ok = dep_ok && (dep.check(savedval));
-		iter = checkBoxMap->find(dep_idx);
-		if (iter != checkBoxMap->end()) {
-			dBox = iter.value();
-			dBox->setDisabled(!dep_ok);
-			if (!dep_ok)
-				bval = settingStore->getDisabledValue(dep_idx)
-					.boolv();
-			else
-				bval = settingStore->getValue(dep_idx).boolv();
-			dBox->setChecked(bval);
-			continue;
-		}
-		siter = spinBoxMap->find(dep_idx);
-		if (siter != spinBoxMap->end()) {
-			sBox = siter.value();
-			sBox->setDisabled(!dep_ok);
-			if (!dep_ok)
-				ival = settingStore->getDisabledValue(dep_idx)
-					.intv();
-			else
-				ival = settingStore->getValue(dep_idx).intv();
-			sBox->setValue(ival);
+		iter = valueBoxMap->find(dep_idx);
+		if (iter != valueBoxMap->end()) {
+			vbox = iter.value();
+			vbox->setEnabled(dep_ok);
 		} else {
 			vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
 				  __LINE__);
 		}
 	}
-}
-
-void GraphEnableDialog::handleSpinChanged(TSpinBox */*spinBox*/, int /*value*/)
-{
-	/*
-	 * We currently do not have any dependencies that would depend on a
-	 * spinbox having a value. I don't bother write code that there is
-	 * no test case for.
-	 */
 }
 
 void GraphEnableDialog::show()
@@ -363,36 +245,27 @@ void GraphEnableDialog::checkConsumption()
 	QList<Setting::Index>::const_iterator iter;
 	for (iter = consumeList.begin(); iter != consumeList.end(); iter++) {
 		idx = *iter;
-		QMap<Setting::Index, TCheckBox*>::iterator iter;
-		QMap<Setting::Index, TSpinBox*>::iterator siter;
+		QMap<Setting::Index, ValueBox*>::iterator viter;
 
-		iter = checkBoxMap->find(idx);
-		if (iter != checkBoxMap->end()) {
-			checkCBoxConsumption(idx, *iter);
+		viter = valueBoxMap->find(idx);
+		if (viter != valueBoxMap->end()) {
+			valueBoxConsumption(idx, *viter);
 			continue;
 		}
-		siter = spinBoxMap->find(idx);
-		if (siter != spinBoxMap->end()) {
-			checkSBoxConsumption(idx, *siter);
-		} else {
-			vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
-				  __LINE__);
-		}
+		vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
+			  __LINE__);
 	}
 }
 
-void GraphEnableDialog::checkCBoxConsumption(Setting::Index idx,
-					     TCheckBox *box)
+void GraphEnableDialog::valueBoxConsumption(Setting::Index idx,
+					    ValueBox *box)
 {
-	QMap<Setting::Index, TCheckBox*>::iterator iter;
-	QMap<Setting::Index, TSpinBox*>::iterator siter;
+	QMap<Setting::Index, ValueBox*>::iterator iter;
+	ValueBox *vbox;
+	Setting::Value dval;
 	const Setting::Value &value = settingStore->getValue(idx);
-	bool bval = settingStore->getValue(idx).boolv();
-	if (bval != box->isChecked())
-		box->setChecked(bval);
-	TCheckBox *cBox;
-	TSpinBox *sBox;
-	int ival;
+	if (value != box->value())
+		box->setValue(value);
 
 	unsigned int nrdep = settingStore->getNrDependents(idx);
 	unsigned int d;
@@ -401,43 +274,17 @@ void GraphEnableDialog::checkCBoxConsumption(Setting::Index idx,
 		Setting::Dependency dep = settingStore->getDependent(idx, d);
 		Setting::Index dep_idx = (Setting::Index) dep.index();
 		bool dep_ok = dep.check(value);
-		iter = checkBoxMap->find(dep_idx);
-		if (iter != checkBoxMap->end()) {
-			cBox = iter.value();
-			cBox->setEnabled(dep_ok);
+		iter = valueBoxMap->find(dep_idx);
+		if (iter != valueBoxMap->end()) {
+			vbox = iter.value();
+			vbox->setEnabled(dep_ok);
 			if (dep_ok) {
-				bval =  settingStore->getValue(dep_idx).boolv();
+				dval = settingStore->getValue(dep_idx);
 			} else {
-				bval = settingStore->getDisabledValue(dep_idx)
-					.boolv();
-				settingStore->setBoolValue(dep_idx, bval);
+				dval = settingStore->getDisabledValue(dep_idx);
+				settingStore->setValue(dep_idx, dval);
 			}
-			cBox->setChecked(bval);
-			continue;
-		}
-		siter = spinBoxMap->find(dep_idx);
-		if (siter != spinBoxMap->end()) {
-			sBox = siter.value();
-			sBox->setEnabled(dep_ok);
-			if (dep_ok) {
-				ival =  settingStore->getValue(dep_idx).intv();
-			} else {
-				ival = settingStore->getDisabledValue(dep_idx)
-					.intv();
-				settingStore->setIntValue(dep_idx, bval);
-			}
-			sBox->setValue(ival);
-			continue;
+			vbox->setValue(dval);
 		}
 	}
-}
-
-void GraphEnableDialog::checkSBoxConsumption(Setting::Index /*idx*/,
-					      TSpinBox */*box*/)
-{
-	/*
-	 * We currently do not have any spinboxes that would have the
-	 * Setting::FLAG_MUST_BE_CONSUMED flag set. I don't bother write code
-	 * that there is no test case for.
-	 */
 }
