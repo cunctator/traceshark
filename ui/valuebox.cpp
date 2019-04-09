@@ -83,7 +83,7 @@ ValueBox::ValueBox(Setting::Index id_arg, SettingStore *sstore,
 		layout->addWidget(label);
 		value_min = settingStore->getMinValue(id).value.int_value;
 		value_max = settingStore->getMaxValue(id).value.bool_value;
-		createIntBox(layout, value);
+		createIntBox(layout);
 		QLabel *ulabel = new QLabel();
 		ulabel->setText(unit);
 		layout->addWidget(ulabel);
@@ -95,30 +95,29 @@ ValueBox::ValueBox(Setting::Index id_arg, SettingStore *sstore,
 		 */
 		QStackedLayout *layout = new QStackedLayout();
 		setLayout(layout);
-		createBoolBox(layout, value);
+		createBoolBox(layout);
 		checkBox->setText(name);
 	} else
 		vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
 			  __LINE__);
 
+	setValue(value);
 	QWidget::setEnabled(supported);
 }
 
-void ValueBox::createIntBox(QLayout *layout, const Setting::Value &value)
+void ValueBox::createIntBox(QLayout *layout)
 {
 	if (value_min >= value_max) {
 		vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,	\
 			  __LINE__);
 	}
 
-	int ival = value.value.int_value;
 	bool is_spinbox = (value_max - value_min) > MAX_SIZE_COMBOBOX;
 	type = is_spinbox ? TYPE_SPINBOX : TYPE_COMBOBOX;
 	if (type == TYPE_SPINBOX) {
 		spinBox = new QSpinBox();
 		spinBox->setMinimum(value_min);
 		spinBox->setMaximum(value_max);
-		spinBox->setValue(ival);
 		layout->addWidget(spinBox);
 		tsconnect(spinBox, valueChanged(int), this,
 			  spinBoxChanged(int));
@@ -127,18 +126,16 @@ void ValueBox::createIntBox(QLayout *layout, const Setting::Value &value)
 		for (int i = value_min; i <= value_max; i++) {
 			comboBox->addItem(QString::number(i));
 		}
-		comboBox->setCurrentIndex(ival - value_min);
 		layout->addWidget(comboBox);
 		tsconnect(comboBox, currentIndexChanged(int), this,
 			  comboBoxChanged(int));
 	}
 }
 
-void ValueBox::createBoolBox(QLayout *layout, const Setting::Value &value)
+void ValueBox::createBoolBox(QLayout *layout)
 {
 	type = TYPE_CHECKBOX;
 	checkBox = new QCheckBox();
-	checkBox->setChecked(value.value.bool_value);
 	layout->addWidget(checkBox);
 	tsconnect(checkBox, stateChanged(int), this, checkBoxChanged(int));
 }

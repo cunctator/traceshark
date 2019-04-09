@@ -91,8 +91,8 @@ private:
 		TYPE_SPINBOX,
 	} type_t;
 
-	void createIntBox(QLayout *layout, const Setting::Value &value);
-	void createBoolBox(QLayout *layout, const Setting::Value &value);
+	void createIntBox(QLayout *layout);
+	void createBoolBox(QLayout *layout);
 	SettingStore *settingStore;
 	Setting::Index id;
 	int value_min;
