@@ -162,7 +162,9 @@ void GraphEnableDialog::cancelClicked()
 	QMap<Setting::Index, ValueBox*>::iterator iter;
 	for(iter = valueBoxMap->begin(); iter != valueBoxMap->end(); iter++) {
 		ValueBox *vbox = iter.value();
-		vbox->reloadValue();
+		Setting::Index idxn = (Setting::Index) vbox->getId();
+		const Setting::Value &value = settingStore->getValue(idxn);
+		vbox->setValue(value);
 	}
 }
 
@@ -174,11 +176,11 @@ void GraphEnableDialog::applyClicked()
 	for(iter = valueBoxMap->begin(); iter != valueBoxMap->end(); iter++) {
 		ValueBox *vbox = iter.value();
 		Setting::Index idxn = (Setting::Index) vbox->getId();
-		const Setting::Value &uivalue = vbox->value();
+		Setting::Value uivalue = vbox->value();
 		const Setting::Value &setvalue = settingStore->getValue(idxn);
 		if (uivalue != setvalue) {
 			changed = true;
-			vbox->storeValue();
+			settingStore->setValue(idxn, uivalue);
 		}
 	}
 

@@ -75,8 +75,6 @@ public:
 		 QWidget *parent = 0);
 	virtual ~ValueBox();
 	__always_inline int getId() const;
-	void reloadValue();
-	void storeValue();
 	void setDefaultValue();
 	Setting::Value value() const;
 	void setValue(const Setting::Value &v);

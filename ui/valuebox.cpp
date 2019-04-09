@@ -170,12 +170,6 @@ void ValueBox::checkBoxChanged(int /*s*/)
 	emit boxChanged(this, value);
 }
 
-void ValueBox::reloadValue()
-{
-	const Setting::Value &val = settingStore->getValue(id);
-	setValue(val);
-}
-
 void ValueBox::setValue(const Setting::Value &v)
 {
 	switch (type) {
@@ -193,26 +187,6 @@ void ValueBox::setValue(const Setting::Value &v)
 		break;
 	default:
 		vtl::errx(BSD_EX_SOFTWARE,"Unexpected internal state %s:%d",
-			  __FILE__, __LINE__);
-		break;
-	}
-}
-
-void ValueBox::storeValue()
-{
-	switch (type) {
-	case TYPE_CHECKBOX:
-		settingStore->setBoolValue(id, checkBox->isChecked());
-		break;
-	case TYPE_COMBOBOX:
-		settingStore->setIntValue(id,
-					  comboBox->currentIndex() + value_min);
-		break;
-	case TYPE_SPINBOX:
-		settingStore->setIntValue(id, spinBox->value());
-		break;
-	default:
-		vtl::errx(BSD_EX_SOFTWARE, "Unexpected internal state %s:%d",
 			  __FILE__, __LINE__);
 		break;
 	}
