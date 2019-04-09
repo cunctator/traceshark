@@ -76,7 +76,8 @@ Setting::Value::Value(int i) :
 	value.int_value = i;
 }
 
-Setting::Setting(): flags(FLAG_NO_FLAG), nrDep(0), nrDependents(0)
+Setting::Setting(): supported(true), flags(FLAG_NO_FLAG), nrDep(0),
+		    nrDependents(0)
 {
 	bzero(dependency, sizeof(dependency));
 	bzero(dependent, sizeof(dependent));

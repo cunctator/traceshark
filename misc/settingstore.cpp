@@ -122,6 +122,9 @@ SettingStore::SettingStore()
 	setKey(Setting::OPENGL_ENABLED, QString("OPENGL_ENABLED"));
 	initBoolValue(Setting::OPENGL_ENABLED, opengl);
 	setFlag(Setting::OPENGL_ENABLED, Setting::FLAG_MUST_BE_CONSUMED);
+	initDisabledBoolValue(Setting::OPENGL_ENABLED, false);
+	if (!has_opengl())
+		permanentlyDisable(Setting::OPENGL_ENABLED);
 
 	setName(Setting::LINE_WIDTH, q.tr("Line width of sched graphs:"));
 	setUnit(Setting::LINE_WIDTH, q.tr("pixels"));
@@ -131,6 +134,8 @@ SettingStore::SettingStore()
 	initMinIntValue(Setting::LINE_WIDTH, MIN_LINE_WIDTH_OPENGL);
 	initDisabledIntValue(Setting::LINE_WIDTH, DEFAULT_LINE_WIDTH);
 	addDependency(Setting::LINE_WIDTH, openglDep);
+	if (!has_opengl())
+		permanentlyDisable(Setting::LINE_WIDTH);
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)
@@ -146,31 +151,36 @@ void SettingStore::setUnit(enum Setting::Index idx, const QString &u)
 void SettingStore::setBoolValue(enum Setting::Index idx, bool v)
 {
 	Setting::assert_bool(settings[idx].value);
-	settings[idx].value.value.bool_value = v;
+	if (settings[idx].supported)
+		settings[idx].value.value.bool_value = v;
 }
 
 void SettingStore::initBoolValue(enum Setting::Index idx, bool v)
 {
 	settings[idx].value.type_ = Setting::Value::TYPE_BOOL;
-	settings[idx].value.value.bool_value = v;
+	if (settings[idx].supported)
+		settings[idx].value.value.bool_value = v;
 }
 
 void SettingStore::setIntValue(enum Setting::Index idx, int v)
 {
 	Setting::assert_int(settings[idx].value);
-	settings[idx].value.value.int_value = v;
+	if (settings[idx].supported)
+		settings[idx].value.value.int_value = v;
 }
 
 void SettingStore::setValue(enum Setting::Index idx, const Setting::Value &v)
 {
 	Setting::assert_same(settings[idx].value.type_, v.type_);
-	settings[idx].value = v;
+	if (settings[idx].supported)
+		settings[idx].value = v;
 }
 
 void SettingStore::initIntValue(enum Setting::Index idx, int v)
 {
 	settings[idx].value.type_ = Setting::Value::TYPE_INT;
-	settings[idx].value.value.int_value = v;
+	if (settings[idx].supported)
+		settings[idx].value.value.int_value = v;
 }
 
 void SettingStore::initMaxIntValue(enum Setting::Index idx, int v)
@@ -185,16 +195,30 @@ void SettingStore::initMinIntValue(enum Setting::Index idx, int v)
 	settings[idx].min_value.value.int_value = v;
 }
 
+void SettingStore::permanentlyDisable(enum Setting::Index idx)
+{
+	settings[idx].supported = false;
+	settings[idx].value = settings[idx].disabled_value;
+}
+
 void SettingStore::initDisabledBoolValue(enum Setting::Index idx, bool v)
 {
 	settings[idx].disabled_value.type_ = Setting::Value::TYPE_BOOL;
 	settings[idx].disabled_value.value.bool_value = v;
+	if (!settings[idx].supported) {
+		settings[idx].value.type_ = Setting::Value::TYPE_BOOL;
+		settings[idx].value.value.bool_value = v;
+	}
 }
 
 void SettingStore::initDisabledIntValue(enum Setting::Index idx, int v)
 {
 	settings[idx].disabled_value.type_ = Setting::Value::TYPE_INT;
 	settings[idx].disabled_value.value.int_value = v;
+	if (!settings[idx].supported) {
+		settings[idx].value.type_ = Setting::Value::TYPE_INT;
+		settings[idx].value.value.int_value = v;
+	}
 }
 
 const Setting::Value &SettingStore::getValue(enum Setting::Index idx) const
@@ -409,12 +433,12 @@ int SettingStore::loadSettings()
 		switch (setting.value.type()) {
 		case Setting::Value::TYPE_BOOL:
 			bval = boolFromValue(&ok, value);
-			if (ok)
+			if (ok && setting.supported)
 				setting.value.value.bool_value = bval;
 			break;
 		case Setting::Value::TYPE_INT:
 			ival = value.toInt(&ok);
-			if (ok &&
+			if (ok && setting.supported &&
 			    ival >= setting.min_value.value.int_value &&
 			    ival <= setting.max_value.value.int_value)
 				setting.value.value.int_value = ival;

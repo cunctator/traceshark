@@ -70,6 +70,7 @@ public:
 	const Setting::Value &getMinValue(enum Setting::Index idx) const;
 	const Setting::Value &getMaxValue(enum Setting::Index idx) const;
 	bool isFlagSet(enum Setting::Index idx , enum Setting::Flag f) const;
+	__always_inline bool isSupported(enum Setting::Index idx) const;
 	unsigned int getNrDependencies(enum Setting::Index idx) const;
 	unsigned int getNrDependents(enum Setting::Index idx) const;
 	const QString &getName(enum Setting::Index idx) const;
@@ -90,6 +91,7 @@ private:
 	void initDisabledIntValue(enum Setting::Index idx, int v);
 	void initMaxIntValue(enum Setting::Index idx, int v);
 	void initMinIntValue(enum Setting::Index idx, int v);
+	void permanentlyDisable(enum Setting::Index idx);
 	void setName(enum Setting::Index idx, const QString &n);
 	void setUnit(enum Setting::Index idx, const QString &u);
 	void setKey(enum Setting::Index idx, const QString &key);
@@ -105,5 +107,10 @@ private:
 	QMap<QString, enum Setting::Index> fileKeyMap;
 	static const int this_version;
 };
+
+__always_inline bool SettingStore::isSupported(enum Setting::Index idx) const
+{
+	return settings[idx].supported;
+}
 
 #endif /* _TS_SETTINGSTORE_H */

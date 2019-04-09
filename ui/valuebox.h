@@ -104,6 +104,7 @@ private:
 	QComboBox *comboBox;
 	QSpinBox *spinBox;
 	Setting::Value enabledValue;
+	bool supported;
 private slots:
 	void checkBoxChanged(int s);
 	void comboBoxChanged(int value);

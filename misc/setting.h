@@ -158,12 +158,12 @@ public:
 	static const char *getValueTypeStr(Value::type_t type);
 private:
 	static void error_type(Value::type_t expected, Value::type_t was);
-
 protected:
 	__always_inline static void assert_bool(const Value &val);
 	__always_inline static void assert_int(const Value &val);
 	__always_inline static void assert_same(Value::type_t a,
 						Value::type_t b);
+	bool supported;
 	Value value;
 	Value min_value;
 	Value max_value;

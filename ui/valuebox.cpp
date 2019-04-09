@@ -70,8 +70,9 @@ ValueBox::ValueBox(Setting::Index id_arg, SettingStore *sstore,
 	QWidget(parent), settingStore(sstore), id(id_arg), type(TYPE_ERROR)
 {
 	const QString &name = settingStore->getName(id);
-	const Setting::Value &value = sstore->getValue(id);
+	const Setting::Value &value = settingStore->getValue(id);
 	Setting::Value::type_t vtype = value.type();
+	supported = settingStore->isSupported(id);
 
 	if (vtype == Setting::Value::TYPE_INT) {
 		QHBoxLayout *layout = new QHBoxLayout();
@@ -99,6 +100,8 @@ ValueBox::ValueBox(Setting::Index id_arg, SettingStore *sstore,
 	} else
 		vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
 			  __LINE__);
+
+	QWidget::setEnabled(supported);
 }
 
 void ValueBox::createIntBox(QLayout *layout, const Setting::Value &value)
@@ -241,7 +244,7 @@ Setting::Value ValueBox::value() const
 
 void ValueBox::setEnabled(bool en)
 {
-	if (en == QWidget::isEnabled())
+	if (en == QWidget::isEnabled() || !supported)
 		return;
 
 	if (en) {
