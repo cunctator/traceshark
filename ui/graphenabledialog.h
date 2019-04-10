@@ -80,6 +80,9 @@ private:
 	int savedHeight;
 	SettingStore *settingStore;
 	void valueBoxConsumption(Setting::Index idx, ValueBox *box);
+	void handleDependencies(Setting::Index idx,
+				const Setting::Value &value,
+				bool need_consume, bool store);
 public slots:
 	void show();
 private slots:

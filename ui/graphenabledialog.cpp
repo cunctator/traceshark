@@ -209,26 +209,47 @@ void GraphEnableDialog::saveClicked()
 void GraphEnableDialog::handleBoxChanged(ValueBox *valueBox,
 					 Setting::Value value)
 {
-	Setting::Index id = (Setting::Index) valueBox->getId();
-	unsigned int d;
-	QMap<Setting::Index, ValueBox*>::iterator iter;
-	ValueBox *vbox;
-	Setting::Value val;
-	const Setting::flag_t consumeflag = Setting::FLAG_MUST_BE_CONSUMED;
-	bool consume = settingStore->isFlagSet(id, consumeflag);
+	Setting::Index idx = (Setting::Index) valueBox->getId();
 
-	const Setting::Value &savedval = settingStore->getValue(id);
-	const unsigned int nrdep = settingStore->getNrDependents(id);
+	const Setting::flag_t consumeflag = Setting::FLAG_MUST_BE_CONSUMED;
+	bool need_consume = settingStore->isFlagSet(idx, consumeflag);
+
+	handleDependencies(idx, value, need_consume, false);
+}
+
+void GraphEnableDialog::handleDependencies(Setting::Index idx,
+					   const Setting::Value &value,
+					   bool need_consume,
+					   bool store)
+{
+	ValueBox *vbox;
+	Setting::Value dval;
+	unsigned int d;
+	const Setting::Value &savedval = settingStore->getValue(idx);
+	const unsigned int nrdep = settingStore->getNrDependents(idx);
+	QMap<Setting::Index, ValueBox*>::iterator iter;
+
 	for (d = 0; d < nrdep; d++) {
-		Setting::Dependency dep = settingStore->getDependent(id, d);
+		Setting::Dependency dep = settingStore->getDependent(idx, d);
 		Setting::Index dep_idx = (Setting::Index) dep.index();
 		bool dep_ok = dep.check(value);
-		if (consume)
+		if (need_consume)
 			dep_ok = dep_ok && (dep.check(savedval));
 		iter = valueBoxMap->find(dep_idx);
 		if (iter != valueBoxMap->end()) {
 			vbox = iter.value();
+			bool is_enabled = vbox->isEnabled();
+			if (is_enabled && dep_ok)
+				continue;
 			vbox->setEnabled(dep_ok);
+			if (dep_ok) {
+				dval = settingStore->getValue(dep_idx);
+			} else {
+				dval = settingStore->getDisabledValue(dep_idx);
+				if (store)
+					settingStore->setValue(dep_idx, dval);
+			}
+			vbox->setValue(dval);
 		} else {
 			vtl::errx(BSD_EX_SOFTWARE, "Error at %s:%d", __FILE__,
 				  __LINE__);
@@ -263,30 +284,10 @@ void GraphEnableDialog::valueBoxConsumption(Setting::Index idx,
 					    ValueBox *box)
 {
 	QMap<Setting::Index, ValueBox*>::iterator iter;
-	ValueBox *vbox;
 	Setting::Value dval;
 	const Setting::Value &value = settingStore->getValue(idx);
 	if (value != box->value())
 		box->setValue(value);
 
-	unsigned int nrdep = settingStore->getNrDependents(idx);
-	unsigned int d;
-
-	for (d = 0; d < nrdep; d++) {
-		Setting::Dependency dep = settingStore->getDependent(idx, d);
-		Setting::Index dep_idx = (Setting::Index) dep.index();
-		bool dep_ok = dep.check(value);
-		iter = valueBoxMap->find(dep_idx);
-		if (iter != valueBoxMap->end()) {
-			vbox = iter.value();
-			vbox->setEnabled(dep_ok);
-			if (dep_ok) {
-				dval = settingStore->getValue(dep_idx);
-			} else {
-				dval = settingStore->getDisabledValue(dep_idx);
-				settingStore->setValue(dep_idx, dval);
-			}
-			vbox->setValue(dval);
-		}
-	}
+	handleDependencies(idx, value, false, true);
 }
