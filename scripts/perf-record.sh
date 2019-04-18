@@ -216,7 +216,7 @@ esac
 
 perf_cmd="$perf_cmd -m $perfmem""K"
 
-if [ $use_rt = "yes" ];then
+if [ "$use_rt" = "yes" ];then
     perf_cmd="$perf_cmd -r $rt_priority"
 fi
 
@@ -224,6 +224,8 @@ if [ -e $SAMPLE_RATE_PROCFILE ];then
     echo "Setting "$SAMPLE_RATE_PROCFILE" to "$sample_freq_opt
     echo $sample_freq_opt > $SAMPLE_RATE_PROCFILE
 fi
+
+perf_cmd="$perf_cmd -a"
 
 if [ "$timeout_opt" != "" ];then
     $perf_cmd&
