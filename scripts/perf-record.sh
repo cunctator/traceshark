@@ -58,22 +58,24 @@ default_events="power:cpu_frequency power:cpu_idle sched:sched_kthread_stop sche
 
 usage()
 {
-    echo "Usage:\n"$cmd" [<options>]"
-    echo "\t-h|--help\t\tDisplay this help information"
-    echo "\t-s|--sleep <N>\t\tSleep N seconds before terminating trace"
-    echo "\t-m|--memory <N>\t\tUse a buffer of N megatbytes]"
-    echo "\t-n|--no-callgraph\tDo not record callgraphs"
-    echo "\t-f|--frame-ponter\tUse frampointer callgraphs"
-    echo "\t-x|--max-freq <N>\tSet the max sample rate to N"
-    echo "\t-e|--event E\t\tAdd event E to the events to be traced"
-    echo "\t-r|--realtime\t\tRun with SCHED_FIFO, priority 99"
-    echo "\t-p|--rt-priority <P>\tRun with SCHED_FIFO, priority N"
-    echo "\t-t|--stack-size <S>\tUse S bytes as stack size for callgraphs"
+    echo "Usage:"
+    echo $cmd" [<options>]"
+    echo "    -h|--help             Display this help information"
+    echo "    -s|--sleep <N>        Sleep N seconds before terminating trace"
+    echo "    -m|--memory <N>       Use a buffer of N megatbytes]"
+    echo "    -n|--no-callgraph     Do not record callgraphs"
+    echo "    -f|--frame-ponter     Use frampointer callgraphs"
+    echo "    -x|--max-freq <N>     Set the max sample rate to N"
+    echo "    -e|--event E          Add event E to the events to be traced"
+    echo "    -r|--realtime         Run with SCHED_FIFO, priority 99"
+    echo "    -p|--rt-priority <P>  Run with SCHED_FIFO, priority N"
+    echo "    -t|--stack-size <S>   Use S bytes as stack size for callgraphs"
 }
 
 recording_msg()
 {
-    echo "Recording with:\n"$perf_cmd
+    echo "Recording with:"
+    echo $perf_cmd
 }
 
 timeout_stop_msg()
