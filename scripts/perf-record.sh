@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 #
 #  perf-record.sh - a convenience script to launch perf record
-#  Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2018-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 #  This file is dual licensed: you can use it either under the terms of
 #  the GPL, or the BSD license, at your option.
