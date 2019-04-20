@@ -249,6 +249,36 @@ perf_sched_switch_handle_oldpid(const TraceEvent &event,
 }
 
 static __always_inline int
+_perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
+					   const sched_switch_handle &handle)
+{
+	int idx = handle.perf.index;
+	int i;
+
+	/* Normat case */
+	if (!prefixcmp(event.argv[event.argc - 2]->ptr, SWITCH_NPID_PFIX)) {
+		return int_after_char(event, event.argc - 2, '=');
+	}
+	for (i = idx + 1; i < event.argc; i++) {
+		if (prefixcmp(event.argv[i]->ptr, SWITCH_NPID_PFIX) != 0)
+			continue;
+		/*
+		 * We require that either the previous or next string start
+		 * with "next_". This is to guard against people with task
+		 * names that contain "next_pid="
+		 */
+		if ((i > (idx + 1) && prefixcmp(event.argv[i - 1]->ptr,
+						SWITCH_NEXT_PFIX)) ||
+		    (i < (event.argc - 1) && prefixcmp(event.argv[i + 1]->ptr,
+						       SWITCH_NEXT_PFIX)))
+			break;
+	}
+	if (i == idx)
+		return ABSURD_INT;
+	return int_after_char(event, i, '=');
+}
+
+static __always_inline int
 perf_sched_switch_handle_newpid(const TraceEvent &event,
 				const sched_switch_handle &handle)
 {
@@ -257,7 +287,9 @@ perf_sched_switch_handle_newpid(const TraceEvent &event,
 	if (handle.perf.is_distro_style) {
 		newpid = int_after_char(event, event.argc - 2, ':');
 	} else {
-		newpid = int_after_char(event, event.argc - 2, '=');
+		//newpid = int_after_char(event, event.argc - 2, '=');
+		newpid = _perf_sched_switch_handle_newpid_newformat(event,
+								    handle);
 	}
 	return newpid;
 }
