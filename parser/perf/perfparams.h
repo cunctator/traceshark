@@ -306,6 +306,10 @@ perf_sched_switch_handle_oldprio(const TraceEvent &event,
 	if (handle.perf.is_distro_style) {
 		return param_inside_braces(event, i - 2);
 	} else {
+		/*
+		 * Since this function is not used, we just assume that the
+		 * argument is in the usual place.
+		 */
 		return uint_after_char(event, i - 2, '=');
 	}
 }
@@ -317,6 +321,10 @@ perf_sched_switch_handle_newprio(const TraceEvent &event,
 	if (handle.perf.is_distro_style) {
 		return param_inside_braces(event, event.argc - 1);
 	} else {
+		/*
+		 * Since this function is not used, we just assume that the
+		 * argument is in the usual place.
+		 */
 		return uint_after_char(event, event.argc - 1, '=');
 	}
 }
