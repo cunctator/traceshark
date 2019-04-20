@@ -56,6 +56,7 @@
 #include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
+#include "parser/perf/helpers.h"
 #include "misc/errors.h"
 #include "misc/string.h"
 #include "misc/traceshark.h"
@@ -89,69 +90,6 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 							'='))
 #define perf_sched_migrate_pid(EVENT) (int_after_char(EVENT, EVENT.argc - 4, \
 						      '='))
-/*
- * This function finds the index of the '==>' in the switch event arguments
- * that has this format:
- *
- * prev_pid=... prev_prio=... prev_state=... ==> next_comm=...
- * 
- * This is quite paranoid but I don't see a choice. Basically, it would be
- * sufficient to check for the '==>' but then if some weird person would be
- * running a task that has a name like 'x x x ==>' then the parsing could get
- * fooled, checking that the tokens before and after the '==>' have the correct
- * prefixes protects us against such idiotic cases. I believe that the maximum
- * taskname length in the kernel (16 characters?)  will protect us from from 
- * somebody creating the truly lunatic taskname that would be able to fool 
- * this parsing, i.e. a taskname such as :
- * 
- * "prev_pid= prev_prio= prev_state= ==> next_comm="
- *
- * In a nutshell, this protects us against weirdos but not against lunatics :)
- */
-static __always_inline int
-_perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
-{
-	int i;
-	for (i = 2; i < event.argc - 2; i++) {
-		const TString *arrow = event.argv[i];
-		if (!isArrowStr(arrow))
-			continue;
-		const char *c1 = event.argv[i - 2]->ptr;
-		const char *c2 = event.argv[i - 1]->ptr;
-		const char *c3 = event.argv[i + 1]->ptr;
-		/* Check if it is regular mainline format */
-		if (!prefixcmp(c1, SWITCH_PREV_PFIX) &&
-		    !prefixcmp(c2, SWITCH_PREV_PFIX) &&
-		    !prefixcmp(c3, SWITCH_NEXT_PFIX)) {
-			is_distro_style = false;
-			break;
-		} else {
-			/*
-			 * Check if it is distro format. We do this by
-			 * checking that the priority fields have their
-			 * [] braces
-			 */
-			const TString *t1 = event.argv[i - 2];
-			const TString *t2 = event.argv[event.argc - 1];
-			if (is_param_inside_braces(t1) &&
-			    is_param_inside_braces(t2)) {
-				is_distro_style = true;
-				break;
-			}
-		}
-		/*
-		 * If we reach this point, there are two possibilities:
-		 * - Some weirdo has a ' ==> ' inside a task name
-		 * - Unknown format
-		 *
-		 * However, we do not give up as a subsequent iteration may
-		 * find the correct '==>'
-		 */
-	}
-	if (!(i < event.argc - 2))
-		return 0;
-	return i;
-}
 
 static __always_inline bool perf_sched_switch_parse(const TraceEvent &event,
 						    sched_switch_handle& handle)
@@ -202,37 +140,6 @@ distro_style:
 }
 
 static __always_inline int
-_perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
-					   const sched_switch_handle &handle)
-{
-	int idx = handle.perf.index;
-	int i;
-
-	/* Normat case */
-	if (idx >= 3 &&
-	    !prefixcmp(event.argv[idx - 3]->ptr, SWITCH_PPID_PFIX)) {
-		return int_after_char(event, idx - 3, '=');
-	}
-	for (i = 0; i < idx; i++) {
-		if (prefixcmp(event.argv[i]->ptr, SWITCH_PPID_PFIX) != 0)
-			continue;
-		/*
-		 * We require that either the previous or next string start
-		 * with "prev_". This is to guard against people with task
-		 * names that contain "prev_pid="
-		 */
-		if ((i > 0 && prefixcmp(event.argv[i - 1]->ptr,
-					SWITCH_PREV_PFIX)) ||
-		    (i < (idx - 2) && prefixcmp(event.argv[i + 1]->ptr,
-						SWITCH_PREV_PFIX)))
-			break;
-	}
-	if (i == idx)
-		return ABSURD_INT;
-	return int_after_char(event, i, '=');
-}
-
-static __always_inline int
 perf_sched_switch_handle_oldpid(const TraceEvent &event,
 				const sched_switch_handle &handle)
 {
@@ -246,36 +153,6 @@ perf_sched_switch_handle_oldpid(const TraceEvent &event,
 								    handle);
 	}
 	return oldpid;
-}
-
-static __always_inline int
-_perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
-					   const sched_switch_handle &handle)
-{
-	int idx = handle.perf.index;
-	int i;
-
-	/* Normat case */
-	if (!prefixcmp(event.argv[event.argc - 2]->ptr, SWITCH_NPID_PFIX)) {
-		return int_after_char(event, event.argc - 2, '=');
-	}
-	for (i = idx + 1; i < event.argc; i++) {
-		if (prefixcmp(event.argv[i]->ptr, SWITCH_NPID_PFIX) != 0)
-			continue;
-		/*
-		 * We require that either the previous or next string start
-		 * with "next_". This is to guard against people with task
-		 * names that contain "next_pid="
-		 */
-		if ((i > (idx + 1) && prefixcmp(event.argv[i - 1]->ptr,
-						SWITCH_NEXT_PFIX)) ||
-		    (i < (event.argc - 1) && prefixcmp(event.argv[i + 1]->ptr,
-						       SWITCH_NEXT_PFIX)))
-			break;
-	}
-	if (i == idx)
-		return ABSURD_INT;
-	return int_after_char(event, i, '=');
 }
 
 static __always_inline int

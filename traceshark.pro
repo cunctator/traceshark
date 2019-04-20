@@ -338,6 +338,7 @@ HEADERS      +=  parser/traceparser.h
 HEADERS      +=  parser/ftrace/ftraceparams.h
 HEADERS      +=  parser/ftrace/ftracegrammar.h
 
+HEADERS      +=  parser/perf/helpers.h
 HEADERS      +=  parser/perf/perfparams.h
 HEADERS      +=  parser/perf/perfgrammar.h
 
