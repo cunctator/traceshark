@@ -112,19 +112,17 @@ static __always_inline int
 _perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 {
 	int i;
-	for (i = 3; i < event.argc - 2; i++) {
+	for (i = 2; i < event.argc - 2; i++) {
 		const TString *arrow = event.argv[i];
 		if (!isArrowStr(arrow))
 			continue;
-		const char *c1 = event.argv[i - 3]->ptr;
-		const char *c2 = event.argv[i - 2]->ptr;
-		const char *c3 = event.argv[i - 1]->ptr;
-		const char *c4 = event.argv[i + 1]->ptr;
+		const char *c1 = event.argv[i - 2]->ptr;
+		const char *c2 = event.argv[i - 1]->ptr;
+		const char *c3 = event.argv[i + 1]->ptr;
 		/* Check if it is regular mainline format */
-		if (!prefixcmp(c1, SWITCH_PPID_PFIX) &&
-		    !prefixcmp(c2, SWITCH_PPRI_PFIX) &&
-		    !prefixcmp(c3, SWITCH_PSTA_PFIX) &&
-		    !prefixcmp(c4, SWITCH_NCOM_PFIX)) {
+		if (!prefixcmp(c1, SWITCH_PREV_PFIX) &&
+		    !prefixcmp(c2, SWITCH_PREV_PFIX) &&
+		    !prefixcmp(c3, SWITCH_NEXT_PFIX)) {
 			is_distro_style = false;
 			break;
 		} else {
@@ -145,6 +143,9 @@ _perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 		 * If we reach this point, there are two possibilities:
 		 * - Some weirdo has a ' ==> ' inside a task name
 		 * - Unknown format
+		 *
+		 * However, we do not give up as a subsequent iteration may
+		 * find the correct '==>'
 		 */
 	}
 	if (!(i < event.argc - 2))
@@ -168,25 +169,35 @@ static __always_inline taskstate_t
 perf_sched_switch_handle_state(const TraceEvent &event,
 			       const sched_switch_handle &handle)
 {
-	int i = handle.perf.index;
-	int j;
-	TString stateStr;
+	int i, j;
+	TString st;
 
 	i = handle.perf.index;
-	const TString *stateArgStr = event.argv[i - 1];
 
-	if (event.argv[i - 1]->len > 2) {
-		for (j = stateArgStr->len - 2; j > 0; j--) {
-			if (stateArgStr->ptr[j] == '=') {
-				stateStr.len = stateArgStr->len - 1 - j;
-				stateStr.ptr = stateArgStr->ptr + j + 1;
-				return  _sched_state_from_tstring(&stateStr);
+	if (handle.perf.is_distro_style)
+		goto distro_style;
+
+	/* This is the regular format */
+	for (i = handle.perf.index - 1; i >= 0; i--) {
+		const TString *t = event.argv[i];
+		if (!prefixcmp(t->ptr, SWITCH_PSTA_PFIX)) {
+			for (j = t->len - 2; j > 0; j--) {
+				if (t->ptr[j] == '=') {
+					st.len = t->len - 1 - j;
+					st.ptr = t->ptr + j + 1;
+					return  _sched_state_from_tstring(&st);
+				}
 			}
 		}
-	} else if (event.argv[i - 1]->len == 1 || event.argv[i - 1]->len == 2) {
+	}
+	return TASK_STATE_PARSER_ERROR;
+
+distro_style:
+	/* This is the distro format */
+	const TString *stateArgStr = event.argv[i - 1];
+	if (stateArgStr->len == 1 || stateArgStr->len == 2) {
 		return _sched_state_from_tstring(stateArgStr);
 	}
-
 	return TASK_STATE_PARSER_ERROR;
 }
 

@@ -88,6 +88,9 @@ public:
 #define ABSURD_UNSIGNED ((unsigned int)INT_MAX)
 #define ABSURD_INT (INT_MAX)
 
+#define SWITCH_PREV_PFIX "prev_"
+#define SWITCH_NEXT_PFIX "next_"
+
 #define SWITCH_PPID_PFIX "prev_pid="
 #define SWITCH_PPRI_PFIX "prev_prio="
 #define SWITCH_PSTA_PFIX "prev_state="
