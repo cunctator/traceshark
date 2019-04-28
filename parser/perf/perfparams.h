@@ -110,13 +110,13 @@ perf_sched_switch_handle_state(const TraceEvent &event,
 	int i, j;
 	TString st;
 
-	i = handle.perf.index;
+	i = handle.perf.index - 1;
 
 	if (handle.perf.is_distro_style)
 		goto distro_style;
 
 	/* This is the regular format */
-	for (i = handle.perf.index - 1; i >= 0; i--) {
+	for (; i >= 0; i--) {
 		const TString *t = event.argv[i];
 		if (!prefixcmp(t->ptr, SWITCH_PSTA_PFIX)) {
 			for (j = t->len - 2; j > 0; j--) {
@@ -132,7 +132,7 @@ perf_sched_switch_handle_state(const TraceEvent &event,
 
 distro_style:
 	/* This is the distro format */
-	const TString *stateArgStr = event.argv[i - 1];
+	const TString *stateArgStr = event.argv[i];
 	if (stateArgStr->len == 1 || stateArgStr->len == 2) {
 		return _sched_state_from_tstring(stateArgStr);
 	}
