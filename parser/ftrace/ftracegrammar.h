@@ -195,7 +195,7 @@ __always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 	const TString *newname;
 	char nbuf[256];
 	char fbuf[256];
-	const int maxlen = sizeof(nbuf) / sizeof(char) - 1;
+	const int maxlen = arraylen(nbuf) - 1;
 	int i;
 	int fini;
 
@@ -261,7 +261,7 @@ __always_inline bool FtraceGrammar::EventMatch(const TString *str,
 	TString estr;
 	estr.len = 0;
 	estr.ptr = buf;
-	const int maxlen = sizeof(buf) / sizeof(char) - 1;
+	const int maxlen = arraylen(buf) - 1;
 	estr.set(str, maxlen);
 	char *lastChr = estr.ptr + estr.len - 1;
 	event_t type;

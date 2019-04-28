@@ -1161,7 +1161,7 @@ bool TraceAnalyzer::filterActive(FilterState::filter_t filter) const
 
 const char TraceAnalyzer::spaceStr[] = \
 	"                                     ";
-const int TraceAnalyzer::spaceStrLen = sizeof(spaceStr) / sizeof(char);
+const int TraceAnalyzer::spaceStrLen = strlitlen(spaceStr);
 
 const char *const TraceAnalyzer::cpuevents[] =
 {
@@ -1311,8 +1311,8 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 			ename = eptr->getEventName()->ptr;
 			nrspaces = TSMAX(1, spaceStrLen - strlen(ename));
 			nrspaces = TSMIN(nrspaces, space);
-			strncpy(wb, spaceStr, nrspaces);
 			if (nrspaces > 0) {
+				strncpy(wb, spaceStr, nrspaces);
 				written += nrspaces;
 				space   -= nrspaces;
 				wb      += nrspaces;

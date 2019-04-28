@@ -226,7 +226,7 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str, TraceEvent &event)
 	TString namestr;
 	const TString *newname;
 	char cstr[256];
-	const unsigned int maxlen = sizeof(cstr) / sizeof(char) - 1;
+	const unsigned int maxlen = arraylen(cstr) - 1;
 	int i;
 	int pid;
 	bool ok;
