@@ -133,11 +133,23 @@ _perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
 	int i;
 
 	/* Normat case */
-	if (idx >= 3 &&
-	    !prefixcmp(event.argv[idx - 3]->ptr, SWITCH_PPID_PFIX)) {
-		return int_after_char(event, idx - 3, '=');
+	if (idx >= 3) {
+		/*
+		 * In the normal case of the of a known format, the
+		 * "prev_pid=" prefix should be found at position idx - 3
+		 * but we will anyway scan also idx - 2 and idx - 1. The idx
+		 * event should point to the "==>" string.
+		 */
+		for (i = idx - 3; i < idx; i++) {
+			if (!prefixcmp(event.argv[i]->ptr, SWITCH_PPID_PFIX))
+				return int_after_char(event, i, '=');
+		}
 	}
-	for (i = 0; i < idx; i++) {
+	/*
+	 * Probably/hopefully we will never get here. If we do, then we have
+	 * some unknown sched_switch argument format.
+	 */
+	for (i = 0; i < idx - 3; i++) {
 		if (prefixcmp(event.argv[i]->ptr, SWITCH_PPID_PFIX) != 0)
 			continue;
 		/*
