@@ -161,11 +161,9 @@ _perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
 					SWITCH_PREV_PFIX)) ||
 		    (i < (idx - 2) && prefixcmp(event.argv[i + 1]->ptr,
 						SWITCH_PREV_PFIX)))
-			break;
+			return int_after_char(event, i, '=');
 	}
-	if (i >= idx - 3)
-		return ABSURD_INT;
-	return int_after_char(event, i, '=');
+	return ABSURD_INT;
 }
 
 static __always_inline int
@@ -199,11 +197,9 @@ _perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
 						SWITCH_NEXT_PFIX)) ||
 		    (i < (event.argc - 1) && prefixcmp(event.argv[i + 1]->ptr,
 						       SWITCH_NEXT_PFIX)))
-			break;
+			return int_after_char(event, i, '=');
 	}
-	if (i >= event.argc - 2)
-		return ABSURD_INT;
-	return int_after_char(event, i, '=');
+	return ABSURD_INT;
 }
 
 #endif /* _PERFPARAMHELPERS_H */
