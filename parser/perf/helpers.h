@@ -172,14 +172,22 @@ static __always_inline int
 _perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
 					   const sched_switch_handle &handle)
 {
-	int idx = handle.perf.index;
 	int i;
 
 	/* Normat case */
-	if (!prefixcmp(event.argv[event.argc - 2]->ptr, SWITCH_NPID_PFIX)) {
-		return int_after_char(event, event.argc - 2, '=');
+	if (event.argc > 2) {
+		/*
+		 * In the normal case of the of a known format, the
+		 * "next_pid=" prefix should be found at position event.argc - 2
+		 * but we will anyway scan also event.argc - 1.
+		 */
+		for (i = event.argc - 2; i < event.argc; i++) {
+			if (!prefixcmp(event.argv[i]->ptr, SWITCH_NPID_PFIX))
+				return int_after_char(event, i, '=');
+		}
 	}
-	for (i = idx + 1; i < event.argc; i++) {
+	int idx = handle.perf.index;
+	for (i = idx + 1; i < event.argc - 2; i++) {
 		if (prefixcmp(event.argv[i]->ptr, SWITCH_NPID_PFIX) != 0)
 			continue;
 		/*
@@ -193,7 +201,7 @@ _perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
 						       SWITCH_NEXT_PFIX)))
 			break;
 	}
-	if (i == idx)
+	if (i >= event.argc - 2)
 		return ABSURD_INT;
 	return int_after_char(event, i, '=');
 }
