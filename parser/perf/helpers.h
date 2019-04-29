@@ -163,7 +163,7 @@ _perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
 						SWITCH_PREV_PFIX)))
 			break;
 	}
-	if (i == idx)
+	if (i >= idx - 3)
 		return ABSURD_INT;
 	return int_after_char(event, i, '=');
 }
