@@ -62,7 +62,7 @@ average=$(cat $file|LC_NUMERIC="C" awk '/processTrace/ { sum+=$3;n++ } END {prin
 
 minimum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {min=-1} $1~/processTrace/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
 
-maximum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {max=-1} $1~/processTrace/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
+maximum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {max=-1} $1~/processTrace/ && (max == -1 || $3 > max) {  max=$3 } END {print max}')
 
 
 st_average=$(cat $file|LC_NUMERIC="C" awk '/showTrace/ { sum+=$3;n++ } END {print sum/n}')
@@ -75,7 +75,7 @@ tps_average=$(cat $file|LC_NUMERIC="C" awk '/tracePlot->show/ { sum+=$3;n++ } EN
 
 tps_minimum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {min=-1} $1~/tracePlot->show/ && (min == -1 || $3 < min) {  min=$3 } END {print min}')
 
-tps_maximum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {max=-1} $1~/tracePlot->show/ && (min == -1 || $3 > max) {  max=$3 } END {print max}')
+tps_maximum=$(cat $file|LC_NUMERIC="C" awk 'BEGIN {max=-1} $1~/tracePlot->show/ && (max == -1 || $3 > max) {  max=$3 } END {print max}')
 
 echo "\nprocessTrace():"
 echo "minimum = "$minimum
