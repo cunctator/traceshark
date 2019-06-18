@@ -64,8 +64,32 @@
 #include <cstdint>
 
 #define perf_cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
-#define perf_cpufreq_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
-#define perf_cpufreq_freq(EVENT) (uint_after_char(EVENT, 0, '='))
+
+static __always_inline unsigned int perf_cpufreq_cpu(const TraceEvent &event)
+{
+	int i;
+
+	if (unlikely(prefixcmp(event.argv[1]->ptr, FREQ_CPUID_PFIX) != 0)) {
+		for (i = 0; i < event.argc; i++) {
+			if (prefixcmp(event.argv[i]->ptr, FREQ_CPUID_PFIX) == 0)
+				return uint_after_char(event, i, '=');
+		}
+	}
+	return uint_after_char(event, 1, '=');
+}
+
+static __always_inline unsigned int perf_cpufreq_freq(const TraceEvent &event)
+{
+	int i;
+
+	if (unlikely(prefixcmp(event.argv[0]->ptr, FREQ_STATE_PFIX) != 0)) {
+		for (i = 0; i < event.argc; i++) {
+			if (prefixcmp(event.argv[i]->ptr, FREQ_STATE_PFIX) == 0)
+				return uint_after_char(event, i, '=');
+		}
+	}
+	return uint_after_char(event, 0, '=');
+}
 
 #define perf_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_cpuidle_cpu(EVENT) (uint_after_char(EVENT, 1, '='))

@@ -88,6 +88,9 @@ public:
 #define ABSURD_UNSIGNED ((unsigned int)INT_MAX)
 #define ABSURD_INT (INT_MAX)
 
+#define FREQ_STATE_PFIX "state="
+#define FREQ_CPUID_PFIX "cpu_id="
+
 #define SWITCH_PREV_PFIX "prev_"
 #define SWITCH_NEXT_PFIX "next_"
 
