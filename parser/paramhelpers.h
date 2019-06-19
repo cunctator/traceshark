@@ -92,6 +92,9 @@ public:
 #define FREQ_STATE_PFIX "state="
 #define FREQ_CPUID_PFIX "cpu_id="
 
+#define IDLE_STATE_PFIX "state="
+#define IDLE_CPUID_PFIX "cpu_id="
+
 #define SWITCH_PREV_PFIX "prev_"
 #define SWITCH_NEXT_PFIX "next_"
 

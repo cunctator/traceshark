@@ -68,12 +68,12 @@
 #define perf_cpufreq_freq(EVENT)    (uint_after_pfix(EVENT, 0, FREQ_STATE_PFIX))
 
 #define perf_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
-#define perf_cpuidle_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
+#define perf_cpuidle_cpu(EVENT)     (uint_after_pfix(EVENT, 1, IDLE_CPUID_PFIX))
 static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 {
 	int32_t state;
 	uint32_t ustate;
-	ustate = uint_after_char(event, 0, '=');
+	ustate = uint_after_pfix(event, 0, IDLE_STATE_PFIX);
 
 	/* the string is a signed printed as unsigned :) */
 	state = *((int*) &ustate);
