@@ -81,15 +81,21 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 	return state;
 }
 
-#define perf_sched_migrate_args_ok(EVENT) (EVENT.argc >= 5)
-#define perf_sched_migrate_destCPU(EVENT) (uint_after_char(EVENT, EVENT.argc \
-							   - 1, '='))
-#define perf_sched_migrate_origCPU(EVENT) (uint_after_char(EVENT, EVENT.argc \
-							   - 2, '='))
-#define perf_sched_migrate_prio(EVENT) (uint_after_char(EVENT, EVENT.argc - 3,\
-							'='))
-#define perf_sched_migrate_pid(EVENT) (int_after_char(EVENT, EVENT.argc - 4, \
-						      '='))
+/* Normally we would require >= 5 but we don't need the first comm= arg */
+#define perf_sched_migrate_args_ok(EVENT) (EVENT.argc >= 4)
+#define perf_sched_migrate_destCPU(EVENT) (uint_after_pfix(EVENT,	\
+							   EVENT.argc - 1, \
+						           MIGRATE_DEST_PFIX))
+#define perf_sched_migrate_origCPU(EVENT) (uint_after_pfix(EVENT,	\
+							   EVENT.argc - 2, \
+						           MIGRATE_ORIG_PFIX))
+#define perf_sched_migrate_prio(EVENT) (uint_after_pfix(EVENT,		\
+							EVENT.argc - 3, \
+							MIGRATE_PRIO_PFIX))
+#define perf_sched_migrate_pid(EVENT) (int_after_pfix(EVENT,		\
+						      EVENT.argc - 4,	\
+						      MIGRATE_PID_PFIX))
+
 
 static __always_inline bool perf_sched_switch_parse(const TraceEvent &event,
 						    sched_switch_handle& handle)

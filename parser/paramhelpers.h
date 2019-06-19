@@ -95,6 +95,12 @@ public:
 #define IDLE_STATE_PFIX "state="
 #define IDLE_CPUID_PFIX "cpu_id="
 
+#define MIGRATE_COMM_PFIX "comm="
+#define MIGRATE_PID_PFIX  "pid="
+#define MIGRATE_PRIO_PFIX "prio="
+#define MIGRATE_ORIG_PFIX "orig_cpu="
+#define MIGRATE_DEST_PFIX "dest_cpu="
+
 #define SWITCH_PREV_PFIX "prev_"
 #define SWITCH_NEXT_PFIX "next_"
 
@@ -476,6 +482,26 @@ unsigned int uint_after_pfix(const TraceEvent &event,
 		}
 	}
 	return uint_after_char(event, idx_guess, '=');
+}
+
+static __always_inline int int_after_pfix(const TraceEvent &event,
+					  int idx_guess,
+					  const char* pfix)
+{
+	int i = idx_guess;
+
+	if (unlikely(prefixcmp(event.argv[idx_guess]->ptr, pfix) != 0)) {
+		/*
+		 * If the expected argument doesn't contain the wanted prefix
+		 * we will search for it. If we don't find it, we just use
+		 * idx_guess anyway.
+		 */
+		for (i = 0; i < event.argc; i++) {
+			if (prefixcmp(event.argv[i]->ptr, pfix) == 0)
+				return int_after_char(event, i, '=');
+		}
+	}
+	return int_after_char(event, idx_guess, '=');
 }
 
 #endif /* PARAMHELPERS_H */
