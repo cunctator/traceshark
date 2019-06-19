@@ -557,20 +557,6 @@ const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 #define ftrace_sched_process_exit_pid(EVENT) \
 	(int_after_char(EVENT, EVENT.argc - 2, '='))
 
-#define ftrace_irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
-#define ftrace_irq_handler_entry_irq(EVENT) \
-	(uint_after_char(EVENT, 0, '='))
-#define ftrace_irq_handler_entry_name(EVENT, LEN_INTPTR) \
-	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_INTPTR))
-
-#define ftrace_irq_handler_exit_args_ok(EVENT)	(EVENT.argc >= 2)
-#define ftrace_irq_handler_exit_irq(EVENT) \
-	(uint_after_char(EVENT, 0, '='))
-#define ftrace_irq_handler_exit_handled(EVENT) \
-	(strncmp(EVENT.argv[1]->ptr, "ret=handled", EVENT.argv[1]->len) == 0)
-#define ftrace_irq_handler_exit_ret(EVENT, LEN_INTPTR) \
-	(substr_after_char(EVENT.argv[1]->ptr, EVENT.argv[1].len, LEN_INTPTR))
-
 #define FTRACE_WAKING_COMM_PFIX "comm="
 #define FTRACE_WAKING_PID_PFIX  "pid="
 #define FTRACE_WAKING_PRIO_PFIX "prio="

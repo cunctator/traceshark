@@ -154,12 +154,6 @@ DECLARE_GENERIC_TRACEFN_POOL(sched_process_fork_childname_strdup, const char *)
 DECLARE_GENERIC_TRACEFN(sched_process_exit_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(sched_process_exit_pid, int)
 
-DECLARE_GENERIC_TRACEFN(irq_handler_entry_args_ok, bool)
-DECLARE_GENERIC_TRACEFN(irq_handler_entry_irq, unsigned int)
-
-DECLARE_GENERIC_TRACEFN(irq_handler_exit_args_ok, bool)
-DECLARE_GENERIC_TRACEFN(irq_handler_exit_irq, unsigned int)
-
 DECLARE_GENERIC_TRACEFN(sched_waking_args_ok, bool)
 DECLARE_GENERIC_TRACEFN(sched_waking_cpu, unsigned int)
 DECLARE_GENERIC_TRACEFN(sched_waking_prio, unsigned int)
