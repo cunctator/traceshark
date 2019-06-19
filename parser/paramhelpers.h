@@ -111,6 +111,11 @@ public:
 #define SWITCH_NPID_PFIX "next_pid="
 #define SWITCH_NPRI_PFIX "next_prio="
 
+#define WAKE_SUCC_PFIX "success="
+#define WAKE_PID_PFIX  "pid="
+#define WAKE_PRIO_PFIX "prio="
+#define WAKE_TCPU_PFIX "target_cpu="
+
 #define EXIT_COMM_PFIX "comm="
 #define EXIT_PID_PFIX  "pid="
 #define EXIT_PRIO_PFIX "prio="

@@ -355,11 +355,6 @@ perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
  * prio=120 target_cpu=000
  */
 
-#define WAKE_SUCC_PFIX "success="
-#define WAKE_PID_PFIX  "pid="
-#define WAKE_PRIO_PFIX "prio="
-#define WAKE_TCPU_PFIX "target_cpu="
-
 #define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 
 /* The last argument is target_cpu, regardless of old or new */
