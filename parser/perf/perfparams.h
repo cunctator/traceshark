@@ -553,9 +553,10 @@ _perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 const char *perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 						     StringPool<> *pool);
 
-#define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 3)
+/* Normally should be >= 3 but we don't care if the prio argument is missing */
+#define perf_sched_process_exit_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_sched_process_exit_pid(EVENT) \
-	(int_after_char(EVENT, EVENT.argc - 2, '='));
+	(int_after_pfix(EVENT, EVENT.argc - 2, EXIT_PID_PFIX))
 
 #define perf_irq_handler_entry_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_irq_handler_entry_irq(EVENT) \

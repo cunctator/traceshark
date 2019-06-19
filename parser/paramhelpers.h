@@ -111,6 +111,10 @@ public:
 #define SWITCH_NPID_PFIX "next_pid="
 #define SWITCH_NPRI_PFIX "next_prio="
 
+#define EXIT_COMM_PFIX "comm="
+#define EXIT_PID_PFIX  "pid="
+#define EXIT_PRIO_PFIX "prio="
+
 #define is_this_event(EVENTNAME, EVENT) (EVENT.type == EVENTNAME)
 
 #define isArrowStr(str) (str->len == 3 && str->ptr[0] == '=' && \
