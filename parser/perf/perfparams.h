@@ -358,35 +358,36 @@ perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 #define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 
 /* The last argument is target_cpu, regardless of old or new */
-#define perf_sched_wakeup_cpu(EVENT) (uint_after_char(EVENT, EVENT.argc - 1, \
-						      '='))
+#define perf_sched_wakeup_cpu(EVENT) (uint_after_pfix(EVENT, EVENT.argc - 1, \
+						      WAKE_TCPU_PFIX))
 
 static __always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
+	int i;
 
+	if (prefixcmp(ss->ptr, WAKE_SUCC_PFIX) == 0)
+		return int_after_char(event, event.argc - 2, '=');
+
+	for (i = 0; i < event.argc; i++) {
+		if (prefixcmp(event.argv[i]->ptr, WAKE_SUCC_PFIX) == 0)
+			return int_after_char(event, i, '=');
+	}
 	/* Assume that wakeup is successful if no success field is found */
-	if (prefixcmp(ss->ptr, WAKE_SUCC_PFIX) != 0)
-		return true;
-
-	/* Empty string should not be produced by parser */
-	char *last = ss->ptr + ss->len - 1;
-	return *last == '1';
+	return true;
 }
 
 static __always_inline unsigned int
 perf_sched_wakeup_prio(const TraceEvent &event)
 {
 	unsigned int newidx = event.argc - 2;
-	unsigned int oldidx;
 	/* Check if we are on the new format */
 	if (!prefixcmp(event.argv[newidx]->ptr, WAKE_PRIO_PFIX)) {
 		return uint_after_char(event, newidx, '=');
 	}
 
 	/* Assume that this is the old format */
-	oldidx = event.argc - 3;
-	return uint_after_char(event, oldidx, '=');
+	return uint_after_pfix(event, event.argc - 3, WAKE_PRIO_PFIX);
 }
 
 static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
