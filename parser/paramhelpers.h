@@ -477,7 +477,7 @@ unsigned int uint_after_pfix(const TraceEvent &event,
 			     int idx_guess,
 			     const char* pfix)
 {
-	int i = idx_guess;
+	int i;
 
 	if (unlikely(prefixcmp(event.argv[idx_guess]->ptr, pfix) != 0)) {
 		/*
@@ -497,7 +497,7 @@ static __always_inline int int_after_pfix(const TraceEvent &event,
 					  int idx_guess,
 					  const char* pfix)
 {
-	int i = idx_guess;
+	int i;
 
 	if (unlikely(prefixcmp(event.argv[idx_guess]->ptr, pfix) != 0)) {
 		/*
