@@ -214,8 +214,8 @@ perf_sched_switch_handle_newprio(const TraceEvent &event,
 
 static __always_inline const char *
 _perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
-					  StringPool<> *pool,
-					  const sched_switch_handle &handle)
+					 StringPool<> *pool,
+					 const sched_switch_handle &handle)
 {
 	int i;
 	int beginidx;
@@ -279,8 +279,8 @@ perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 
 static __always_inline const char *
 _perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
-					  StringPool<> *pool,
-					  const sched_switch_handle &handle)
+					 StringPool<> *pool,
+					 const sched_switch_handle &handle)
 {
 	int i;
 	int beginidx;
@@ -503,7 +503,7 @@ perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 
 static __always_inline const char *
 _perf_sched_process_fork_childname_strdup(const TraceEvent &event,
-					   StringPool<> *pool)
+					  StringPool<> *pool)
 {
 	int i;
 	int beginidx;
