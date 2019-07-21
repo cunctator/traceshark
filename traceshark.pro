@@ -228,6 +228,10 @@
 # MARCH_FLAG = -mcpu=cortex-a53
 # MTUNE_FLAG = -mtune=cortex-a53
 
+# RPI 4
+MARCH_FLAG = -mcpu=cortex-a72
+MTUNE_FLAG = -mtune=cortex-a72
+
 # Asus Tinkerboard
 # MARCH_FLAG = -mcpu=cortex-a17
 # MTUNE_FLAG = -mtune=cortex-a17
