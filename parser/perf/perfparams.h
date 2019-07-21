@@ -480,25 +480,45 @@ const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
 					  StringPool<> *pool);
 
 #define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
-#define perf_sched_process_fork_childpid(EVENT) \
-	(int_after_char(EVENT, EVENT.argc - 1, '='))
 
-static __always_inline int
-perf_sched_process_fork_parent_pid(const TraceEvent &event) {
+static __always_inline
+int perf_sched_process_fork_childpid(const TraceEvent &event) {
 	int i;
-	int endidx;
+	int endidx = event.argc - 1;
+	int guessidx = endidx;
 
-	endidx = event.argc - 2;
+	if (likely(prefixcmp(event.argv[guessidx]->ptr, "child_pid=") == 0))
+		return int_after_char(event, guessidx, '=');
 
-	for (i = endidx; i > 0; i--) {
-		if (prefixcmp(event.argv[i]->ptr, "child_comm=") == 0 &&
-		    prefixcmp(event.argv[i - 1]->ptr, "pid=") == 0)
+	for (i = endidx - 1; i > 0; i--) {
+		if (prefixcmp(event.argv[i]->ptr, "child_pid=") == 0)
 			break;
 	}
-	if (i < 2)
+	if (i < 0)
 		return ABSURD_INT;
 
-	return int_after_char(event, i - 1, '=');
+	return int_after_char(event, i, '=');
+}
+
+static __always_inline
+int perf_sched_process_fork_parent_pid(const TraceEvent &event) {
+	int i;
+	int endidx = event.argc - 1;
+	int guessidx = 1;
+
+	if (prefixcmp(event.argv[guessidx]->ptr, "pid=") == 0 &&
+	    prefixcmp(event.argv[guessidx + 1]->ptr, "child_comm=") == 0)
+		return int_after_char(event, guessidx, '=');
+
+	for (i = guessidx; i < endidx - 1; i++) {
+		if (prefixcmp(event.argv[i]->ptr, "pid=") == 0 &&
+		    prefixcmp(event.argv[i + 1]->ptr, "child_comm=") == 0)
+			break;
+	}
+	if (i >= endidx)
+		return ABSURD_INT;
+
+	return int_after_char(event, i, '=');
 }
 
 static __always_inline const char *
