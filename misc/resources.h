@@ -59,6 +59,7 @@
 #define RESSRC_PNG_CLEAR_LEGEND  ":/traceshark/images/clearlegend30x30.png"
 #define RESSRC_PNG_CLEAR_TASK    ":/traceshark/images/cleartasksgraphs30x30.png"
 #define RESSRC_PNG_CLOSE         ":/traceshark/images/close30x30.png"
+#define RESSRC_PNG_CPUFILTER     ":/traceshark/images/cpufilter30x30.png"
 #define RESSRC_PNG_CURSOR_ZOOM   ":/traceshark/images/cursorzoom30x30.png"
 #define RESSRC_PNG_DEFAULT_ZOOM  ":/traceshark/images/defaultzoom30x30.png"
 #define RESSRC_PNG_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
