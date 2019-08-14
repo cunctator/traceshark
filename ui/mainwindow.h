@@ -95,6 +95,7 @@ class TraceEvent;
 class TaskRangeAllocator;
 class TaskSelectDialog;
 class EventSelectDialog;
+class CPUSelectDialog;
 class YAxisTicker;
 
 class MainWindow : public QMainWindow
@@ -135,14 +136,17 @@ private slots:
 	void cursorZoom();
 	void defaultZoom();
 	void showTaskSelector();
+	void filterOnCPUs();
 	void showEventFilter();
 	void showGraphEnable();
 	void showWakeupOrWaking(int pid, event_t wakevent);
 	void showWaking(const TraceEvent *event);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
+	void createCPUFilter(QMap<unsigned, unsigned> &map, bool orlogic);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void resetPidFilter();
+	void resetCPUFilter();
 	void resetEventFilter();
 	void resetFilters();
 	void timeFilter();
@@ -281,6 +285,7 @@ private:
 	QAction *cursorZoomAction;
 	QAction *defaultZoomAction;
 	QAction *showTasksAction;
+	QAction *filterCPUsAction;
 	QAction *showEventsAction;
 	QAction *timeFilterAction;
 	QAction *graphEnableAction;
@@ -315,6 +320,7 @@ private:
 	TaskSelectDialog *statsDialog;
 	TaskSelectDialog *statsLimitedDialog;
 	EventSelectDialog *eventSelectDialog;
+	CPUSelectDialog *cpuSelectDialog;
 	GraphEnableDialog *graphEnableDialog;
 
 	static const double bugWorkAroundOffset;

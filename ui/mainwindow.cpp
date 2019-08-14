@@ -72,6 +72,7 @@
 #include "ui/taskselectdialog.h"
 #include "ui/tasktoolbar.h"
 #include "ui/eventselectdialog.h"
+#include "ui/cpuselectdialog.h"
 #include "parser/traceevent.h"
 #include "ui/traceplot.h"
 #include "ui/yaxisticker.h"
@@ -107,6 +108,9 @@
 
 #define TOOLTIP_SHOWTASKS		\
 "Show a list of all tasks and it's possible to select one"
+
+#define TOOLTIP_CPUFILTER		\
+"Select a subset of CPUs to filter on"
 
 #define TOOLTIP_SHOWEVENTS		\
 "Show a list of event types and it's possible to select which to filter on"
@@ -299,6 +303,7 @@ MainWindow::~MainWindow()
 	delete statsDialog;
 	delete statsLimitedDialog;
 	delete eventSelectDialog;
+	delete cpuSelectDialog;
 	delete graphEnableDialog;
 
 	vtl::set_error_handler(nullptr);
@@ -313,6 +318,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	/* Here is a great place to save settings, if we ever want to do it */
 	taskSelectDialog->hide();
 	eventSelectDialog->hide();
+	cpuSelectDialog->hide();
 	statsDialog->hide();
 	statsLimitedDialog->hide();
 	event->accept();
@@ -375,6 +381,10 @@ void MainWindow::openFile(const QString &name)
 		eventSelectDialog->beginResetModel();
 		eventSelectDialog->setStringTree(TraceEvent::getStringTree());
 		eventSelectDialog->endResetModel();
+
+		cpuSelectDialog->beginResetModel();
+		cpuSelectDialog->setNrCPUs(analyzer->getNrCPUs());
+		cpuSelectDialog->endResetModel();
 
 		eventsw = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -845,6 +855,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	cursorZoomAction->setEnabled(e);
 	defaultZoomAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
+	filterCPUsAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
 	timeFilterAction->setEnabled(e);
 	showStatsAction->setEnabled(e);
@@ -926,6 +937,10 @@ void MainWindow::closeTrace()
 	eventSelectDialog->beginResetModel();
 	eventSelectDialog->setStringTree(nullptr);
 	eventSelectDialog->endResetModel();
+
+	cpuSelectDialog->beginResetModel();
+	cpuSelectDialog->setNrCPUs(0);
+	cpuSelectDialog->endResetModel();
 
 	clearPlot();
 	if(analyzer->isOpen()) {
@@ -1291,6 +1306,11 @@ void MainWindow::createActions()
 	showTasksAction->setToolTip(tr(TOOLTIP_SHOWTASKS));
 	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
 
+	filterCPUsAction = new QAction(tr("Filter on CPUs..."), this);
+	filterCPUsAction->setIcon(QIcon(RESSRC_PNG_CPUFILTER));
+	filterCPUsAction->setToolTip(tr(TOOLTIP_CPUFILTER));
+	tsconnect(filterCPUsAction, triggered(), this, filterOnCPUs());
+
 	showEventsAction = new QAction(tr("Filter on event type..."), this);
 	showEventsAction->setIcon(QIcon(RESSRC_PNG_EVENTFILTER));
 	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
@@ -1467,6 +1487,7 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(cursorZoomAction);
 	viewToolBar->addAction(defaultZoomAction);
 	viewToolBar->addAction(showTasksAction);
+	viewToolBar->addAction(filterCPUsAction);
 	viewToolBar->addAction(showEventsAction);
 	viewToolBar->addAction(timeFilterAction);
 	viewToolBar->addAction(resetFiltersAction);
@@ -1512,6 +1533,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(cursorZoomAction);
 	viewMenu->addAction(defaultZoomAction);
 	viewMenu->addAction(showTasksAction);
+	viewMenu->addAction(filterCPUsAction);
 	viewMenu->addAction(showEventsAction);
 	viewMenu->addAction(timeFilterAction);
 	viewMenu->addAction(resetFiltersAction);
@@ -1572,6 +1594,7 @@ void MainWindow::createDialogs()
 	statsLimitedDialog->setAllowedAreas(Qt::RightDockWidgetArea);
 
 	eventSelectDialog = new EventSelectDialog();
+	cpuSelectDialog = new CPUSelectDialog();
 	graphEnableDialog = new GraphEnableDialog(settingStore, nullptr);
 
 	vtl::set_error_handler(errorDialog);
@@ -1656,6 +1679,12 @@ void MainWindow::dialogConnections()
 		  this, removeQDockWidget(QDockWidget*));
 	tsconnect(statsLimitedDialog, taskDoubleClicked(int),
 		  this, taskTriggered(int));
+
+	/* the CPU filter dialog */
+	tsconnect(cpuSelectDialog, createFilter(QMap<unsigned, unsigned> &,
+						bool),
+		  this, createCPUFilter(QMap<unsigned, unsigned> &, bool));
+	tsconnect(cpuSelectDialog, resetFilter(), this, resetCPUFilter());
 
 	/* event select dialog */
 	tsconnect(eventSelectDialog, createFilter(QMap<event_t, event_t> &,
@@ -1849,6 +1878,18 @@ void MainWindow::createPidFilter(QMap<int, int> &map,
 	updateResetFiltersEnabled();
 }
 
+void MainWindow::createCPUFilter(QMap<unsigned, unsigned> &map, bool orlogic)
+{
+	vtl::Time saved = eventsWidget->getSavedScroll();
+
+	eventsWidget->beginResetModel();
+	analyzer->createCPUFilter(map, orlogic);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+	updateResetFiltersEnabled();
+}
+
 void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
 {
 	vtl::Time saved = eventsWidget->getSavedScroll();
@@ -1872,6 +1913,22 @@ void MainWindow::resetPidFilter()
 	saved = eventsWidget->getSavedScroll();
 	eventsWidget->beginResetModel();
 	analyzer->disableFilter(FilterState::FILTER_PID);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+	updateResetFiltersEnabled();
+}
+
+void MainWindow::resetCPUFilter()
+{
+	vtl::Time saved;
+
+	if (!analyzer->filterActive(FilterState::FILTER_CPU))
+		return;
+
+	saved = eventsWidget->getSavedScroll();
+	eventsWidget->beginResetModel();
+	analyzer->disableFilter(FilterState::FILTER_CPU);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
@@ -2402,6 +2459,14 @@ void MainWindow::showTaskSelector()
 
 	if (dockWidgetArea(statsDialog) == Qt::LeftDockWidgetArea)
 		tabifyDockWidget(statsDialog, taskSelectDialog);
+}
+
+void MainWindow::filterOnCPUs()
+{
+	if (cpuSelectDialog->isVisible())
+		cpuSelectDialog->hide();
+	else
+		cpuSelectDialog->show();
 }
 
 void MainWindow::showEventFilter()

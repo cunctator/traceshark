@@ -933,6 +933,12 @@ void TraceAnalyzer::processAllFilters()
 		const TraceEvent &event = events->at(i);
 		eptr = &event;
 		/* OR filters */
+		if (OR_filterState.isEnabled(FilterState::FILTER_CPU)) {
+			if (OR_filterCPUMap.contains(event.cpu)) {
+				filteredEvents.append(eptr);
+				continue;
+			}
+		}
 		if (OR_filterState.isEnabled(FilterState::FILTER_PID) &&
 		    !__processPidFilter(event, OR_filterPidMap,
 					OR_pidFilterInclusive)) {
@@ -955,6 +961,10 @@ void TraceAnalyzer::processAllFilters()
 			}
 		}
 		/* AND filters */
+		if (filterState.isEnabled(FilterState::FILTER_CPU) &&
+		    !filterCPUMap.contains(event.cpu)) {
+			continue;
+		}
 		if (filterState.isEnabled(FilterState::FILTER_PID) &&
 		    __processPidFilter(event, filterPidMap,
 				       pidFilterInclusive)) {
@@ -1004,6 +1014,27 @@ void TraceAnalyzer::createPidFilter(QMap<int, int> &map,
 		filterPidMap = map;
 		filterState.enable(FilterState::FILTER_PID);
 	}
+	if (filterState.isEnabled())
+		processAllFilters();
+}
+
+void TraceAnalyzer::createCPUFilter(QMap<unsigned, unsigned> &map,
+				    bool orlogic)
+{
+	if (map.isEmpty() || map.size() == (int) nrCPUs) {
+		if (filterState.isEnabled(FilterState::FILTER_CPU))
+			disableFilter(FilterState::FILTER_CPU);
+		return;
+	}
+
+	if (orlogic) {
+		OR_filterCPUMap = map;
+		OR_filterState.enable(FilterState::FILTER_CPU);
+	} else {
+		filterCPUMap = map;
+		filterState.enable(FilterState::FILTER_CPU);
+	}
+	/* No need to process filters if we only have OR-filters */
 	if (filterState.isEnabled())
 		processAllFilters();
 }
@@ -1074,6 +1105,8 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 		/* We need to do nothing */
 		break;
 	case FilterState::FILTER_CPU:
+		filterCPUMap.clear();
+		OR_filterCPUMap.clear();
 		break;
 	case FilterState::FILTER_ARG:
 		break;

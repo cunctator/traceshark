@@ -153,6 +153,7 @@ public:
 	__always_inline Task *findTask(int pid);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
+	void createCPUFilter(QMap<unsigned, unsigned> &map, bool orlogic);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void createTimeFilter(const vtl::Time &low,
 			      const vtl::Time &high, bool orlogic);
@@ -285,6 +286,8 @@ private:
 	FilterState OR_filterState;
 	QMap<int, int> filterPidMap;
 	QMap<int, int> OR_filterPidMap;
+	QMap<unsigned, unsigned> filterCPUMap;
+	QMap<unsigned, unsigned> OR_filterCPUMap;
 	QMap<event_t, event_t> filterEventMap;
 	QMap<event_t, event_t> OR_filterEventMap;
 	bool pidFilterInclusive;

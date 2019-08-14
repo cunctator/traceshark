@@ -290,6 +290,9 @@ HEADERS      += qcustomplot/qcppointer_impl.h
 HEADERS      += qcustomplot/qcplist.h
 
 HEADERS      +=  ui/abstracttaskmodel.h
+HEADERS      +=  ui/cpuselectdialog.h
+HEADERS      +=  ui/cpuselectmodel.h
+HEADERS      +=  ui/cpuselectview.h
 HEADERS      +=  ui/cursor.h
 HEADERS      +=  ui/cursorinfo.h
 HEADERS      +=  ui/errordialog.h
@@ -386,6 +389,9 @@ HEADERS      +=  vtl/time.h
 SOURCES       = qcustomplot/qcustomplot.cpp
 
 SOURCES      +=  ui/abstracttaskmodel.cpp
+SOURCES      +=  ui/cpuselectdialog.cpp
+SOURCES      +=  ui/cpuselectmodel.cpp
+SOURCES      +=  ui/cpuselectview.cpp
 SOURCES      +=  ui/cursor.cpp
 SOURCES      +=  ui/cursorinfo.cpp
 SOURCES      +=  ui/errordialog.cpp
