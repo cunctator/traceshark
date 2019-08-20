@@ -1088,6 +1088,7 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 		break;
 	case FilterState::FILTER_EVENT:
 		filterEventMap.clear();
+		OR_filterEventMap.clear();
 		break;
 	case FilterState::FILTER_TIME:
 		/* We need to do nothing */
@@ -1097,6 +1098,7 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 		OR_filterCPUMap.clear();
 		break;
 	case FilterState::FILTER_ARG:
+		/* Argument filtering is not yet implemented */
 		break;
 	default:
 		break;
