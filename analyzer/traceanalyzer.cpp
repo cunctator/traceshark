@@ -946,9 +946,7 @@ void TraceAnalyzer::processAllFilters()
 			continue;
 		}
 		if (OR_filterState.isEnabled(FilterState::FILTER_EVENT)) {
-			DEFINE_FILTER_EVENTMAP_ITERATOR(iter);
-			iter = OR_filterEventMap.find(event.type);
-			if (iter != OR_filterEventMap.end()) {
+			if (OR_filterEventMap.contains(event.type) ) {
 				filteredEvents.append(eptr);
 				continue;
 			}
@@ -970,23 +968,13 @@ void TraceAnalyzer::processAllFilters()
 				       pidFilterInclusive)) {
 			continue;
 		}
-		if (filterState.isEnabled(FilterState::FILTER_EVENT)) {
-			DEFINE_FILTER_EVENTMAP_ITERATOR(iter);
-			iter = filterEventMap.find(event.type);
-			if (iter == filterEventMap.end())
-				continue;
+		if (filterState.isEnabled(FilterState::FILTER_EVENT) &&
+		    !filterEventMap.contains(event.type)) {
+			continue;
 		}
-		if (filterState.isEnabled(FilterState::FILTER_TIME)) {
-			if (event.time < filterTimeLow ||
-			    event.time > filterTimeHigh)
-				continue;
-		}
-		if (filterState.isEnabled(FilterState::FILTER_CPU)) {
-			/* Add CPU nr filtering here */
-		}
-		if (filterState.isEnabled(FilterState::FILTER_ARG)) {
-			/* Add argument filtering here */
-		}
+		if (filterState.isEnabled(FilterState::FILTER_TIME) &&
+		    (event.time < filterTimeLow || event.time > filterTimeHigh))
+			continue;
 		filteredEvents.append(eptr);
 	}
 }
