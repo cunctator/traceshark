@@ -66,7 +66,7 @@ template <typename, typename> class QMap;
 QT_END_NAMESPACE
 
 class EventSelectModel;
-class EventSelectView;
+class TableView;
 
 class EventSelectDialog : public QDialog {
 	Q_OBJECT
@@ -86,7 +86,7 @@ private slots:
 	void closeClicked();
 	void addFilterClicked();
 private:
-	EventSelectView *eventView;
+	TableView *eventView;
 	EventSelectModel *eventModel;
 	QComboBox *logicBox;
 	QMap<event_t, event_t> *filterMap;

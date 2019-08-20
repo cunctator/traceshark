@@ -63,7 +63,7 @@ template <typename, typename> class QMap;
 QT_END_NAMESPACE
 
 class CPUSelectModel;
-class CPUSelectView;
+class TableView;
 
 class CPUSelectDialog : public QDialog {
 	Q_OBJECT
@@ -83,7 +83,7 @@ private slots:
 	void closeClicked();
 	void addFilterClicked();
 private:
-	CPUSelectView *cpuView;
+	TableView *cpuView;
 	CPUSelectModel *cpuModel;
 	QComboBox *logicBox;
 	QMap<unsigned int, unsigned int> *filterMap;

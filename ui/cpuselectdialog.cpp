@@ -58,7 +58,7 @@
 
 #include "ui/cpuselectdialog.h"
 #include "ui/cpuselectmodel.h"
-#include "ui/cpuselectview.h"
+#include "ui/tableview.h"
 #include "misc/traceshark.h"
 
 #define CBOX_INDEX_AND 0
@@ -70,7 +70,7 @@ CPUSelectDialog::CPUSelectDialog(QWidget *parent)
 	QVBoxLayout *mainLayout =  new QVBoxLayout(this);
 	QHBoxLayout *filterLayout = new QHBoxLayout();
 
-	cpuView = new CPUSelectView(this);
+	cpuView = new TableView(this, TableView::TABLE_ROWSELECT);
 	cpuModel = new CPUSelectModel(cpuView);
 	cpuView->setModel(cpuModel);
 

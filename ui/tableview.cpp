@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -52,9 +52,14 @@
 
 #include "tableview.h"
 
-TableView::TableView(QWidget *parent):
+TableView::TableView(QWidget *parent, viewtype_t type):
 	QTableView(parent)
-{}
+{
+	if (type == TABLE_ROWSELECT) {
+		setSelectionBehavior(QAbstractItemView::SelectRows);
+		setSelectionMode(QAbstractItemView::ExtendedSelection);
+	}
+}
 
 
 void TableView::selectionChanged(const QItemSelection &selected,
@@ -67,7 +72,7 @@ void TableView::selectionChanged(const QItemSelection &selected,
 TableView::~TableView()
 {}
 
-QModelIndexList TableView::modelIndexList()
+QModelIndexList TableView::selectedIndexes() const
 {
-	return selectedIndexes();
+	return QTableView::selectedIndexes();
 }

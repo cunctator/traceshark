@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -59,9 +59,13 @@ class TableView : public QTableView
 {
 	Q_OBJECT
 public:
-	TableView(QWidget *parent = nullptr);
+	typedef enum : int {
+		TABLE_NORMAL = 0,
+		TABLE_ROWSELECT
+	} viewtype_t;
+	TableView(QWidget *parent = nullptr, viewtype_t type = TABLE_NORMAL);
 	~TableView();
-	QModelIndexList modelIndexList();
+	QModelIndexList selectedIndexes() const;
 signals:
 	void sigSelectionChanged(const QItemSelection &selected,
 				 const QItemSelection &deselected);

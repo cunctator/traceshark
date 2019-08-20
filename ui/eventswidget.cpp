@@ -280,7 +280,7 @@ void EventsWidget::handleSelectionChanged(const QItemSelection &/*selected*/,
 const TraceEvent *EventsWidget::getSelectedEvent()
 {
 	int s, i, row;
-	const QModelIndexList list = tableView->modelIndexList();
+	const QModelIndexList list = tableView->selectedIndexes();
 	const TraceEvent *event = nullptr;
 
 	s = list.size();

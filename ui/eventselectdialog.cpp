@@ -58,7 +58,7 @@
 
 #include "ui/eventselectdialog.h"
 #include "ui/eventselectmodel.h"
-#include "ui/eventselectview.h"
+#include "ui/tableview.h"
 #include "misc/traceshark.h"
 
 #define CBOX_INDEX_AND 0
@@ -70,7 +70,7 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 	QVBoxLayout *mainLayout =  new QVBoxLayout(this);
 	QHBoxLayout *filterLayout = new QHBoxLayout();
 
-	eventView = new EventSelectView(this);
+	eventView = new TableView(this, TableView::TABLE_ROWSELECT);
 	eventModel = new EventSelectModel(eventView);
 	eventView->setModel(eventModel);
 

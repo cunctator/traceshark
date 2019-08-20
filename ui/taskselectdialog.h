@@ -67,7 +67,7 @@ template <typename, typename> class QMap;
 QT_END_NAMESPACE
 
 class TaskModel;
-class TaskView;
+class TableView;
 class AbstractTaskModel;
 
 class TaskSelectDialog : public QDockWidget {
@@ -104,7 +104,7 @@ private slots:
 	void addFilterClicked();
 	void handleDoubleClick(const QModelIndex &index);
 private:
-	TaskView *taskView;
+	TableView *taskView;
 	AbstractTaskModel *taskModel;
 	QComboBox *logicBox;
 	QCheckBox *includeBox;

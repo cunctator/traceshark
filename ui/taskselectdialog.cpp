@@ -54,7 +54,6 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QMap>
-#include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QWidget>
@@ -66,7 +65,7 @@
 #include "ui/taskmodel.h"
 #include "ui/statsmodel.h"
 #include "ui/statslimitedmodel.h"
-#include "ui/taskview.h"
+#include "ui/tableview.h"
 #include "misc/traceshark.h"
 
 #define CBOX_INDEX_AND 0
@@ -83,7 +82,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	QHBoxLayout *filterLayout = new QHBoxLayout();
 	QHBoxLayout *settingLayout = new QHBoxLayout();
 
-	taskView = new TaskView(this);
+	taskView = new TableView(this, TableView::TABLE_ROWSELECT);
 	switch (type) {
 	case TaskSelectStats:
 		taskModel = new StatsModel(taskView);
