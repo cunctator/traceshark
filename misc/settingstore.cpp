@@ -138,7 +138,7 @@ SettingStore::SettingStore()
 		permanentlyDisable(Setting::LINE_WIDTH);
 
 	setName(Setting::MAX_VRT_WAKEUP_LATENCY,
-		q.tr("Latency of full vertical latency bar"));
+		q.tr("Latency of a full vertical latency bar"));
 	setUnit(Setting::MAX_VRT_WAKEUP_LATENCY, q.tr("ms"));
 	setKey(Setting::MAX_VRT_WAKEUP_LATENCY,
 	       QString("MAX_VRT_WAKEUP_LATENCY"));
