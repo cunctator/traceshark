@@ -100,7 +100,8 @@ SettingStore::SettingStore()
 	initIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, DEFAULT_MAX_VRT_LATENCY);
 	initMaxIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MAX_MAX_VRT_LATENCY);
 	initMinIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MIN_MAX_VRT_LATENCY);
-	initDisabledIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, 0);
+	initDisabledIntValue(Setting::MAX_VRT_WAKEUP_LATENCY,
+			     DEFAULT_MAX_VRT_LATENCY);
 	addDependency(Setting::MAX_VRT_WAKEUP_LATENCY, vertwakeDep);
 
 	setName(Setting::SHOW_CPUFREQ_GRAPHS,
