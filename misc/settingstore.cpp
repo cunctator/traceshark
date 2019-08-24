@@ -73,6 +73,7 @@ SettingStore::SettingStore()
 	Setting::Dependency schedDep(Setting::SHOW_SCHED_GRAPHS, true);
 	Setting::Dependency unlimitedDep(Setting::SHOW_MIGRATION_GRAPHS, true);
 	Setting::Dependency openglDep(Setting::OPENGL_ENABLED, true);
+	Setting::Dependency vertwakeDep(Setting::VERTICAL_WAKEUP, true);
 
 	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
 	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
@@ -146,6 +147,7 @@ SettingStore::SettingStore()
 	initMaxIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MAX_MAX_VRT_LATENCY);
 	initMinIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MIN_MAX_VRT_LATENCY);
 	initDisabledIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, 0);
+	addDependency(Setting::MAX_VRT_WAKEUP_LATENCY, vertwakeDep);
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)
