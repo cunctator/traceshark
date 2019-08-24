@@ -79,13 +79,14 @@ SettingStore::SettingStore()
 	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
 	initBoolValue(Setting::SHOW_SCHED_GRAPHS, true);
 
-	setName(Setting::HORIZONTAL_WAKEUP, q.tr("Show horizontal wakeup"));
+	setName(Setting::HORIZONTAL_WAKEUP,
+		q.tr("Show horizontal wakeup latency"));
 	setKey(Setting::HORIZONTAL_WAKEUP, QString("HORIZONTAL_WAKEUP"));
 	initBoolValue(Setting::HORIZONTAL_WAKEUP, false);
 	initDisabledBoolValue(Setting::HORIZONTAL_WAKEUP, false);
 	addDependency(Setting::HORIZONTAL_WAKEUP, schedDep);
 
-	setName(Setting::VERTICAL_WAKEUP, q.tr("Show vertical wakeup"));
+	setName(Setting::VERTICAL_WAKEUP, q.tr("Show vertical wakeup latency"));
 	setKey(Setting::VERTICAL_WAKEUP, QString("VERTICAL_WAKEUP"));
 	initBoolValue(Setting::VERTICAL_WAKEUP, true);
 	initDisabledBoolValue(Setting::VERTICAL_WAKEUP, false);
