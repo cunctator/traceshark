@@ -79,6 +79,7 @@ public:
 		SHOW_MIGRATION_UNLIMITED,
 		OPENGL_ENABLED,
 		LINE_WIDTH,
+		MAX_VRT_WAKEUP_LATENCY,
 		NR_SETTINGS,
 	} index_t;
         class Value;

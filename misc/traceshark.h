@@ -68,6 +68,9 @@
 #define DEFAULT_LINE_WIDTH_OPENGL (2)
 #define MAX_LINE_WIDTH_OPENGL (4)
 #define DEFAULT_LINE_WIDTH (1)
+#define DEFAULT_MAX_VRT_LATENCY (20)
+#define MIN_MAX_VRT_LATENCY (1)
+#define MAX_MAX_VRT_LATENCY (1000)
 
 #ifdef QCUSTOMPLOT_USE_OPENGL
 #define has_opengl() (true)

@@ -136,6 +136,16 @@ SettingStore::SettingStore()
 	addDependency(Setting::LINE_WIDTH, openglDep);
 	if (!has_opengl())
 		permanentlyDisable(Setting::LINE_WIDTH);
+
+	setName(Setting::MAX_VRT_WAKEUP_LATENCY,
+		q.tr("Latency of full vertical latency bar"));
+	setUnit(Setting::MAX_VRT_WAKEUP_LATENCY, q.tr("ms"));
+	setKey(Setting::MAX_VRT_WAKEUP_LATENCY,
+	       QString("MAX_VRT_WAKEUP_LATENCY"));
+	initIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, DEFAULT_MAX_VRT_LATENCY);
+	initMaxIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MAX_MAX_VRT_LATENCY);
+	initMinIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MIN_MAX_VRT_LATENCY);
+	initDisabledIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, 0);
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)
