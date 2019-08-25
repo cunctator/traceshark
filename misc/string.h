@@ -55,9 +55,7 @@
 
 #include <cstring>
 
-#define strlitlen(STR) (sizeof(STR) / sizeof(char) - 1)
-
 #define prefixcmp(STR, PREFIX) \
-	strncmp(STR, PREFIX, strlitlen(PREFIX))
+	strncmp(STR, PREFIX, strlen(PREFIX))
 
 #endif /* _MISC_STRING_H */

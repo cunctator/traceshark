@@ -52,6 +52,7 @@
 
 #include <climits>
 #include <cstdlib>
+#include <cstring>
 
 extern "C" {
 #include <sys/types.h>
@@ -1184,7 +1185,7 @@ bool TraceAnalyzer::filterActive(FilterState::filter_t filter) const
 
 const char TraceAnalyzer::spaceStr[] = \
 	"                                     ";
-const int TraceAnalyzer::spaceStrLen = strlitlen(spaceStr);
+const int TraceAnalyzer::spaceStrLen = strlen(spaceStr);
 
 const char *const TraceAnalyzer::cpuevents[] =
 {
