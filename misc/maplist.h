@@ -63,6 +63,7 @@ template<class T, class U>
 class MapListElement {
 public:
 	MapListElement();
+	MapListElement(const T &k, const U &v);
 	MapListElement<T, U> *next;
 	MapListElement<T, U> *prev;
 	T key;
@@ -71,7 +72,12 @@ public:
 
 template<class T, class U>
 MapListElement<T, U>::MapListElement():
-next(nullptr), prev(nullptr)
+	next(nullptr), prev(nullptr), key(T()), value(U())
+{}
+
+template<class T, class U>
+MapListElement<T, U>::MapListElement(const T &k, const U &v):
+	next(nullptr), prev(nullptr), key(k), value(v)
 {}
 
 template<class T, class U>
@@ -223,9 +229,7 @@ void MapList<T, U>::prepend(const T &key, const U &value)
 template<class T, class U>
 MapListElement<T, U> *MapList<T, U>::newElement(const T &key, const U &value)
 {
-	MapListElement<T, U> *elem = new MapListElement<T, U>;
-	elem->key = key;
-	elem->value = value;
+	MapListElement<T, U> *elem = new MapListElement<T, U>(key, value);
 	elementMap.insert(key, elem);
 	mysize++;
 	return elem;
