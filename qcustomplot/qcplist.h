@@ -63,6 +63,7 @@ template<class T>
 class QCPListElement {
 public:
 	QCPListElement();
+	QCPListElement(const T &v);
 	QCPListElement<T> *next;
 	QCPListElement<T> *prev;
 	T value;
@@ -71,7 +72,12 @@ public:
 
 template<class T>
 QCPListElement<T>::QCPListElement():
-next(nullptr), prev(nullptr)
+next(nullptr), prev(nullptr), value(T()), pos(0)
+{}
+
+template<class T>
+QCPListElement<T>::QCPListElement(const T &v):
+next(nullptr), prev(nullptr), value(v), pos(0)
 {}
 
 template<class T>
@@ -217,8 +223,7 @@ void QCPList<T>::prepend(const T &value)
 template<class T>
 QCPListElement<T> *QCPList<T>::newElement(const T &value)
 {
-	QCPListElement<T> *elem = new QCPListElement<T>;
-	elem->value = value;
+	QCPListElement<T> *elem = new QCPListElement<T>(value);
 	elementMap.insert(value, elem);
 	mysize++;
 	return elem;
