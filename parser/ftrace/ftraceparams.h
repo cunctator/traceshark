@@ -520,16 +520,20 @@ found:
 
 	const char *d = substr_after_char(event.argv[i]->ptr,
 					  event.argv[i]->len, '=', &sublen);
-	if (d == NullStr || sublen > TASKNAME_MAXLEN)
+	if (d == NullStr)
+		return NullStr;
+	len += sublen;
+	if (len > TASKNAME_MAXLEN)
 		return NullStr;
 	strncpy(c, d, sublen);
 	c += sublen;
-	len += sublen;
 	i++;
 
 	for (;i <= endidx; i++) {
-		*c = ' ';
 		len++;
+		if (len > TASKNAME_MAXLEN)
+			return NullStr;
+		*c = ' ';
 		c++;
 		len += event.argv[i]->len;
 		if (len > TASKNAME_MAXLEN)
