@@ -102,7 +102,8 @@ bool Setting::isLowResScreen()
 }
 
 
-Setting::Dependency::Dependency()
+Setting::Dependency::Dependency():
+	type_(DESIRED_VALUE), index_(SHOW_SCHED_GRAPHS)
 {}
 
 Setting::Dependency::Dependency(Setting::index_t i, bool desired_val) :
