@@ -1192,7 +1192,7 @@ const char *const TraceAnalyzer::cpuevents[] =
 	"cpu-cycles", "cycles",
 };
 
-const int TraceAnalyzer::CPUEVENTS_NR = sizeof(cpuevents) / sizeof(char*);
+const int TraceAnalyzer::CPUEVENTS_NR = arraylen(cpuevents);
 
 event_t TraceAnalyzer::determineCPUEvent(bool &ok)
 {
