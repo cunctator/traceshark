@@ -82,7 +82,7 @@ ValueBox::ValueBox(Setting::Index id_arg, SettingStore *sstore,
 		label->setText(name);
 		layout->addWidget(label);
 		value_min = settingStore->getMinValue(id).value.int_value;
-		value_max = settingStore->getMaxValue(id).value.bool_value;
+		value_max = settingStore->getMaxValue(id).value.int_value;
 		createIntBox(layout);
 		QLabel *ulabel = new QLabel();
 		ulabel->setText(unit);
