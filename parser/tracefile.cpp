@@ -170,6 +170,7 @@ void TraceFile::freeMmap()
 		return;
 	if (munmap(mappedFile, fileSize) != 0)
 		munmap_err();
+	mappedFile = nullptr;
 }
 
 void TraceFile::readChunk(const Chunk *chunk, char *buf, int size,
