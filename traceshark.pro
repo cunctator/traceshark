@@ -241,7 +241,7 @@
 # These may be edited by the user in order to configure the build
 #
 
-# Uncomment this to disable the usage of OpenGL rendering. If you disalble this,
+# Uncomment this to disable the usage of OpenGL rendering. If you disable this,
 # the line width of the scheduling graphs will always be 1 pixel. You should
 # disable this if your computer is not OpenGL capable, or if you are happy to
 # always have the scheduling graphs drawn with a width of 1.
