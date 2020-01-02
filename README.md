@@ -256,8 +256,8 @@ would probably be better off if you upgraded both the kernel and perf but
 upgrading the kernel isn't always possible.
 
 I am not exactly sure how recent perf/kernel is necessary but basically I
-believe that late 3.X and all 4.X kernels to date should work as long as the
-perf program has not been patched.
+believe that late 3.X and all 4.X and 5.x kernels to date should work as long
+as the perf program has not been patched.
 
 If you use the '-g' flag, you might also want to compile your own perf because
 in some distros perf is compiled without support for backtraces and it starts
