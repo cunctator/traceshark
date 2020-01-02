@@ -291,14 +291,9 @@ Auto-detecting system features:
 I believe that for backtraces to work, it's desirable that as many as possible
 of those dwarf, bfd, elf, and unwind related options are enabled. They tend to
 get automatically enabled if you have the necessary development packages
-installed on your machine. Here is a list of development packages that you can
-try to install on Debian Stretch:
+installed on your machine.
 
+On Ubunut Bionic and Debian Buster/Bullseye the following might work:
 ```
-sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang-dev libslang2 'libunwind*' libunwind8 python-dev
-```
-
-On Ubunut Bionic the following might work:
-```
-sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang2-dev libslang2 'libunwind*' libunwind8 python-dev
+sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang2-dev libslang2 'libunwind*' libunwind8 python-dev libzstd-dev libcap-dev
 ```
