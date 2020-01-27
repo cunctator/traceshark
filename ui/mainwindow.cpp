@@ -83,7 +83,7 @@
 #include "misc/traceshark.h"
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
-#include "qcustomplot/qcustomplot.h"
+#include "ui/qcustomplot.h"
 #include "vtl/compiler.h"
 #include "vtl/error.h"
 

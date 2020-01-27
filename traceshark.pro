@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 #
 #  Traceshark - a visualizer for visualizing ftrace and perf traces
-#  Copyright (C) 2014-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2014-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 # This file is dual licensed: you can use it either under the terms of
 # the GPL, or the BSD license, at your option.
@@ -247,6 +247,16 @@
 # always have the scheduling graphs drawn with a width of 1.
 # DISABLE_OPENGL = yes
 
+# Uncomment this to use the libqcustomplot of your system. At the time of
+# writing, this is a bad idea. Only do this if you know exactly what you are
+# doing. traceshark has its own QCustomPlot, which contains important
+# performance fixes that are unlikely to be in the system libqcustomplot.
+# On the other hand, if you do not care about performance and have at least one
+# other application that uses libqcustomplot and you want to save about 1.3 MB
+# of disk space, then this is for you. If libqcustomplot was compiled without
+# OpenGL support, then you probably want to disable OpenGL above as well.
+# USE_SYSTEM_QCUSTOMPLOT = yes
+
 # Uncomment this for debug symbols
 # USE_DEBUG_FLAG = -g
 
@@ -284,10 +294,12 @@
 # Header files
 #
 
+!equals(USE_SYSTEM_QCUSTOMPLOT, yes) {
 HEADERS       = qcustomplot/qcustomplot.h
 HEADERS      += qcustomplot/qcppointer.h
 HEADERS      += qcustomplot/qcppointer_impl.h
 HEADERS      += qcustomplot/qcplist.h
+}
 
 HEADERS      +=  ui/abstracttaskmodel.h
 HEADERS      +=  ui/cpuselectdialog.h
@@ -306,6 +318,7 @@ HEADERS      +=  ui/licensedialog.h
 HEADERS      +=  ui/mainwindow.h
 HEADERS      +=  ui/migrationarrow.h
 HEADERS      +=  ui/migrationline.h
+HEADERS      +=  ui/qcustomplot.h
 HEADERS      +=  ui/statslimitedmodel.h
 HEADERS      +=  ui/statsmodel.h
 HEADERS      +=  ui/tableview.h
@@ -383,7 +396,9 @@ HEADERS      +=  vtl/time.h
 # Source files
 #
 
+!equals(USE_SYSTEM_QCUSTOMPLOT, yes) {
 SOURCES       = qcustomplot/qcustomplot.cpp
+}
 
 SOURCES      +=  ui/abstracttaskmodel.cpp
 SOURCES      +=  ui/cpuselectdialog.cpp
@@ -492,6 +507,11 @@ OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${USE_DEBUG_FLAG} $${USE_EXTRA_OPTS}
 
 equals(USE_HARDENING_CXXFLAGS, yes) {
 OUR_FLAGS += $${HARDENING_CXXFLAGS}
+}
+
+equals(USE_SYSTEM_QCUSTOMPLOT, yes) {
+OUR_FLAGS += -DCONFIG_SYSTEM_QCUSTOMPLOT
+LIBS += -lqcustomplot
 }
 
 OUR_NORMAL_CXXFLAGS = -pedantic -Wall -std=c++11

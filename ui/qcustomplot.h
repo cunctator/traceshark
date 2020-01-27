@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,29 +50,17 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef YAXISTICKER_H
-#define YAXISTICKER_H
+#ifndef UI_QCUSTOMPLOT_H
+#define UI_QCUSTOMPLOT_H
 
-#include <QVector>
-#include <QString>
-#include "ui/qcustomplot.h"
+#ifdef CONFIG_SYSTEM_QCUSTOMPLOT
 
-class YAxisTicker : public QCPAxisTicker {
-public:
-	YAxisTicker();
-	void setTickVector(QVector<double> &ticks);
-	void setTickVectorLabels(QVector<QString> &labels);
-protected:
-	QVector<double> createTickVector(double tickStep,
-					 const QCPRange &range);
-	QVector<QString> createLabelVector(const QVector<double> &ticks,
-					   const QLocale &locale,
-					   QChar formatChar,
-					   int precision);
-	int getSubTickCount(double tickStep);
-private:
-	QVector<double> storedTicks;
-	QVector<QString> storedTickLabels;
-};
+#include <qcustomplot.h>
 
-#endif /* YAXISTICKER_H */
+#else /* CONFIG_SYSTEM_QCUSTOMPLOT */
+
+#include "qcustomplot/qcustomplot.h"
+
+#endif
+
+#endif
