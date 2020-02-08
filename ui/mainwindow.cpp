@@ -293,7 +293,8 @@ MainWindow::~MainWindow()
 {
 	int i;
 
-	closeTrace();
+	if (analyzer->isOpen())
+		closeTrace();
 	delete analyzer;
 	delete tracePlot;
 	delete taskRangeAllocator;
