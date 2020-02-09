@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
@@ -952,7 +951,7 @@ void QCPPaintBufferGlFbo::reallocateBuffer()
 
 
 /* including file 'src/layer.cpp', size 37363                                */
-/* commit eeb16a9f03800ecc78f4d16fb3618ec0a0923985 2019-01-27 15:44:50 +0100 */
+/* commit 2074fa7e9f1970a500e3cb7e8569bccc1690f473 2020-02-05 21:42:32 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLayer
@@ -7141,7 +7140,7 @@ QVector<double> QCPAxisTickerLog::createTickVector(double tickStep, const QCPRan
 
 
 /* including file 'src/axis/axis.cpp', size 99525                            */
-/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100 */
+/* commit aa655b8d6792e4aa7f039d360f1925c02b852bff 2020-02-06 20:52:04 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -10307,7 +10306,7 @@ void QCPScatterStyle::drawShape(QCPPainter *painter, double x, double y) const
 //amalgamation: add datacontainer.cpp
 
 /* including file 'src/plottable.cpp', size 38847                            */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionDecorator
@@ -11280,7 +11279,7 @@ void QCPAbstractPlottable::deselectEvent(bool *selectionStateChanged)
 
 
 /* including file 'src/item.cpp', size 49275                                 */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemAnchor
@@ -12550,8 +12549,8 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
 /* end of 'src/item.cpp' */
 
 
-/* including file 'src/core.cpp', size 125371                                */
-/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100 */
+/* including file 'src/core.cpp', size 127621                                */
+/* commit aa655b8d6792e4aa7f039d360f1925c02b852bff 2020-02-06 20:52:04 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCustomPlot
@@ -13496,6 +13495,26 @@ void QCustomPlot::setBackgroundScaledMode(Qt::AspectRatioMode mode)
   mBackgroundScaledMode = mode;
 }
 
+/*!
+  Returns the plottable with \a index. If the index is invalid, returns 0.
+  
+  There is an overloaded version of this function with no parameter which returns the last added
+  plottable, see QCustomPlot::plottable()
+  
+  \see plottableCount
+*/
+QCPAbstractPlottable *QCustomPlot::plottable(int index)
+{
+  if (index >= 0 && index < mPlottables.size())
+  {
+    return mPlottables.at(index);
+  } else
+  {
+    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
+    return 0;
+  }
+}
+
 /*! \overload
   
   Returns the last plottable that was added to the plot. If there are no plottables in the plot,
@@ -13537,6 +13556,21 @@ bool QCustomPlot::removePlottable(QCPAbstractPlottable *plottable)
   delete plottable;
   mPlottables.removeOne(plottable);
   return true;
+}
+
+/*! \overload
+  
+  Removes and deletes the plottable by its \a index.
+*/
+bool QCustomPlot::removePlottable(int index)
+{
+  if (index >= 0 && index < mPlottables.size())
+    return removePlottable(mPlottables[index]);
+  else
+  {
+    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
+    return false;
+  }
 }
 
 /*!
@@ -13637,6 +13671,27 @@ bool QCustomPlot::hasPlottable(QCPAbstractPlottable *plottable) const
   return mPlottables.contains(plottable);
 }
 
+/*!
+  Returns the graph with \a index. If the index is invalid, returns 0.
+  
+  There is an overloaded version of this function with no parameter which returns the last created
+  graph, see QCustomPlot::graph()
+  
+  \see graphCount, addGraph
+*/
+QCPGraph *QCustomPlot::graph(int index) const
+{
+  if (index >= 0 && index < mGraphs.size())
+  {
+    return mGraphs.at(index);
+  } else
+  {
+    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
+    return 0;
+  }
+}
+
+
 /*! \overload
   
   Returns the last graph, that was created with \ref addGraph. If there are no graphs in the plot,
@@ -13700,6 +13755,18 @@ bool QCustomPlot::removeGraph(QCPGraph *graph)
   return removePlottable(graph);
 }
 
+/*! \overload
+  
+  Removes and deletes the graph by its \a index.
+*/
+bool QCustomPlot::removeGraph(int index)
+{
+  if (index >= 0 && index < mGraphs.size())
+    return removeGraph(mGraphs[index]);
+  else
+    return false;
+}
+
 /*!
   Removes all graphs from the plot and deletes them. Corresponding legend items are also removed
   from the default legend (QCustomPlot::legend).
@@ -13755,6 +13822,26 @@ QList<QCPGraph*> QCustomPlot::selectedGraphs() const
   return result;
 }
 
+/*!
+  Returns the item with \a index. If the index is invalid, returns 0.
+  
+  There is an overloaded version of this function with no parameter which returns the last added
+  item, see QCustomPlot::item()
+  
+  \see itemCount
+*/
+QCPAbstractItem *QCustomPlot::item(int index) const
+{
+  if (index >= 0 && index < mItems.size())
+  {
+    return mItems.at(index);
+  } else
+  {
+    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
+    return 0;
+  }
+}
+
 /*! \overload
   
   Returns the last item that was added to this plot. If there are no items in the plot,
@@ -13792,6 +13879,21 @@ bool QCustomPlot::removeItem(QCPAbstractItem *item)
   }
 }
 
+/*! \overload
+  
+  Removes and deletes the item by its \a index.
+*/
+bool QCustomPlot::removeItem(int index)
+{
+  if (index >= 0 && index < mItems.size())
+    return removeItem(mItems[index]);
+  else
+  {
+    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
+    return false;
+  }
+}
+
 /*!
   Removes all items from the plot and deletes them.
   
@@ -13803,7 +13905,7 @@ int QCustomPlot::clearItems()
 {
   int c = mItems.size();
   for (auto iter = mItems.rbegin(); iter != mItems.rend(); iter++)
-	  delete *iter;
+    delete *iter;
   mItems.clear();
   return c;
 }
@@ -16619,7 +16721,7 @@ QPointF QCPSelectionDecoratorBracket::getPixelCoordinates(const QCPPlottableInte
 
 
 /* including file 'src/layoutelements/layoutelement-axisrect.cpp', size 47559 */
-/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100  */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100  */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19216,7 +19318,7 @@ QColor QCPTextElement::mainTextColor() const
 
 
 /* including file 'src/layoutelements/layoutelement-colorscale.cpp', size 26324 */
-/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100    */
+/* commit aa655b8d6792e4aa7f039d360f1925c02b852bff 2020-02-06 20:52:04 +0100    */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
@@ -116,7 +115,7 @@ class QCPColorScale;
 class QCPBars;
 
 /* including file 'src/global.h', size 16354                                 */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 #define QCUSTOMPLOT_VERSION_STR "2.0.1"
 #define QCUSTOMPLOT_VERSION 0x020001
@@ -626,7 +625,7 @@ protected:
 
 
 /* including file 'src/layer.h', size 6909                                   */
-/* commit eeb16a9f03800ecc78f4d16fb3618ec0a0923985 2019-01-27 15:44:50 +0100 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPLayer : public QObject
 {
@@ -3246,7 +3245,7 @@ void QCPDataContainer<DataType>::performAutoSqueeze()
 
 
 /* including file 'src/plottable.h', size 8435                               */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPSelectionDecorator
 {
@@ -3403,7 +3402,7 @@ private:
 
 
 /* including file 'src/item.h', size 9390                                    */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPItemAnchor
 {
@@ -3587,8 +3586,8 @@ private:
 /* end of 'src/item.h' */
 
 
-/* including file 'src/core.h', size 14750                                   */
-/* commit 9ca0c8d6624cfb6afd9edc8663bb2bdd11a816ed 2019-02-03 21:50:33 +0100 */
+/* including file 'src/core.h', size 15624                                   */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCustomPlot : public QWidget
 {
@@ -3676,8 +3675,10 @@ public:
   
   // non-property methods:
   // plottable interface:
+  QCPAbstractPlottable *plottable(int index) __attribute__ ((deprecated("This function now has bad performance if there are many plottables in the plot!")));
   QCPAbstractPlottable *plottable();
   bool removePlottable(QCPAbstractPlottable *plottable);
+  bool removePlottable(int index) __attribute__ ((deprecated("This function now has bad performance if there are many plottables in the plot!")));
   int clearPlottables();
   int plottableCount() const;
   QList<QCPAbstractPlottable*> selectedPlottables() const;
@@ -3685,16 +3686,20 @@ public:
   bool hasPlottable(QCPAbstractPlottable *plottable) const;
  
   // specialized interface for QCPGraph:
+  QCPGraph *graph(int index) const __attribute__ ((deprecated("This function now has bad performance if there are many graphs in the plot!")));
   QCPGraph *graph() const;
   QCPGraph *addGraph(QCPAxis *keyAxis=0, QCPAxis *valueAxis=0);
   bool removeGraph(QCPGraph *graph);
+  bool removeGraph(int index) __attribute__ ((deprecated("This function now has bad performance if there are many items in the plot!")));
   int clearGraphs();
   int graphCount() const;
   QList<QCPGraph*> selectedGraphs() const;
 
   // item interface:
+  QCPAbstractItem *item(int index) const __attribute__ ((deprecated("This function now has bad performance if there are many items in the plot!")));
   QCPAbstractItem *item() const;
   bool removeItem(QCPAbstractItem *item);
+  bool removeItem(int index) __attribute__ ((deprecated("This function now has bad performance if there are many items in the plot!")));
   int clearItems();
   int itemCount() const;
   QList<QCPAbstractItem*> selectedItems() const;
@@ -4586,7 +4591,7 @@ Q_DECLARE_METATYPE(QCPSelectionDecoratorBracket::BracketStyle)
 
 
 /* including file 'src/layoutelements/layoutelement-axisrect.h', size 7511   */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPAxisRect : public QCPLayoutElement
 {
@@ -5017,7 +5022,7 @@ private:
 
 
 /* including file 'src/layoutelements/layoutelement-colorscale.h', size 5927 */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 
 class QCPColorScaleAxisRectPrivate : public QCPAxisRect
@@ -5125,7 +5130,7 @@ private:
 
 
 /* including file 'src/plottables/plottable-graph.h', size 9296              */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPGraphData
 {
@@ -5379,7 +5384,7 @@ Q_DECLARE_METATYPE(QCPCurve::LineStyle)
 
 
 /* including file 'src/plottables/plottable-bars.h', size 8935               */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPBarsGroup : public QObject
 {
@@ -5684,7 +5689,7 @@ protected:
 
 
 /* including file 'src/plottables/plottable-colormap.h', size 7072           */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPColorMapData
 {
@@ -5959,7 +5964,7 @@ Q_DECLARE_METATYPE(QCPFinancial::ChartStyle)
 
 
 /* including file 'src/plottables/plottable-errorbar.h', size 7729           */
-/* commit dfcd90fc0223eaa9ff20c536cb3a7bf4a0eb80f7 2017-07-30 14:44:21 +0200 */
+/* commit de2ea9c99087e7fe956fd30e8a62dff53c6da840 2020-02-06 23:02:51 +0100 */
 
 class QCP_LIB_DECL QCPErrorBarsData
 {

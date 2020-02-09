@@ -67,6 +67,12 @@ public:
 	QCPListElement<T> *next;
 	QCPListElement<T> *prev;
 	T value;
+	/*
+	 * pos is used to keep track of the order of elements in case the same
+	 * value has been inserted more than once, since QCPList<T>::removeOne()
+	 * is required to remove the first occurrence of the value, in order to
+	 * keep compatibility with QList<T>
+	 */
 	long long pos;
 };
 
@@ -134,6 +140,7 @@ public:
 		const QCPListElement<T> *ptr;
 	};
 	void append(const T &value);
+	const T &at(int index) const;
 	void prepend(const T &value);
 	bool removeOne(const T &value);
 	void removeOne(iterator i);
@@ -152,7 +159,10 @@ public:
 	reverse_iterator rend();
 	const_reverse_iterator crbegin() const;
 	const_reverse_iterator crend() const;
+	T &operator[](int index);
+	const T &operator[](int index) const;
 private:
+	__always_inline T &_at(int index) const;
 	void deleteAll();
 	void removeElement(QCPListElement<T> *e);
 	int mysize;
@@ -207,6 +217,24 @@ void QCPList<T>::append(const T&value)
 	elem->next = &head;
 	head.prev = elem;
 	elem->prev->next = elem;
+}
+
+template<class T>
+T &QCPList<T>::_at(int i) const
+{
+	int j;
+	QCPListElement<T> *elem = head.next;
+
+	for (j = 0; j < i; j++)
+		elem = elem->next;
+
+	return elem->value;
+}
+
+template<class T>
+const T &QCPList<T>::at(int i) const
+{
+	return _at(i);
 }
 
 template<class T>
@@ -540,6 +568,18 @@ template<class T>
 const T *QCPList<T>::const_reverse_iterator::operator->()
 {
 	return &ptr->value;
+}
+
+template<class T>
+T &QCPList<T>::operator[](int i)
+{
+	return _at(i);
+}
+
+template<class T>
+const T &QCPList<T>::operator[](int i) const
+{
+	return _at(i);
 }
 
 #endif /* QCPLIST_H  */
