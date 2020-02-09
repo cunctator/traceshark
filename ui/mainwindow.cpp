@@ -921,7 +921,10 @@ void MainWindow::setTaskGraphClearActionEnabled(bool e)
 
 void MainWindow::closeTrace()
 {
+	quint64 startt, mresett, clearptt, acloset, disablet;
 	int ts_errno = 0;
+
+	startt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 	resetFilters();
 
 	eventsWidget->beginResetModel();
@@ -949,10 +952,18 @@ void MainWindow::closeTrace()
 	cpuSelectDialog->setNrCPUs(0);
 	cpuSelectDialog->endResetModel();
 
+	mresett = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 	clearPlot();
+
+	clearptt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 	if(analyzer->isOpen()) {
 		analyzer->close(&ts_errno);
 	}
+
+	acloset = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 	taskToolBar->clear();
 	setTraceActionsEnabled(false);
 	setLegendActionsEnabled(false);
@@ -964,8 +975,25 @@ void MainWindow::closeTrace()
 	setTaskGraphClearActionEnabled(false);
 	setAddToLegendActionEnabled(false);
 	setStatus(STATUS_NOFILE);
+
 	if (ts_errno != 0)
 		vtl::warn(ts_errno, "Failed to close() trace file");
+
+	disablet = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	if (( (disablet - startt) > 1000 )) {
+		printf( "\n\n\n"
+			"This is a diagnostic message generated because "
+			"closing the trace took more than\n"
+			"one second:\n"
+			"MainWindow::closeTrace() took %.6lf s\n"
+			"MainWindow::clearPlot() took %.6lf s\n"
+			"analyzer->close() took %.6lf s\n",
+			(double) (disablet - startt) / 1000,
+			(double) (clearptt - mresett) / 1000,
+			(double) (acloset - clearptt) / 1000);
+		fflush(stdout);
+	}
 }
 
 void MainWindow::saveScreenshot()
