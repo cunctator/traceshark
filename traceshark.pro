@@ -257,6 +257,12 @@
 # OpenGL support, then you probably want to disable OpenGL above as well.
 # USE_SYSTEM_QCUSTOMPLOT = yes
 
+# If you have uncommented the previous, you can uncomment this to customize
+# the flag for linking with libqcustomplot. It defaults to -lqcustomplot.
+# Make sure that you compile traceshark with the same Qt version as your
+# libqcustomplot. Currently it is better to use Qt 5.
+# USE_CUSTOM_QCUSTOMPLOT_FLAG = -lqcustomplot-qt5
+
 # Uncomment this for debug symbols
 # USE_DEBUG_FLAG = -g
 
@@ -510,6 +516,13 @@ OUR_FLAGS += $${HARDENING_CXXFLAGS}
 }
 
 equals(USE_SYSTEM_QCUSTOMPLOT, yes) {
+
+isEmpty(USE_CUSTOM_QCUSTOMPLOT_FLAG) {
+QCUSTOM_FLAG = -lqcustomplot
+} else {
+QCUSTOM_FLAG = $${USE_CUSTOM_QCUSTOMPLOT_FLAG}
+}
+
 OUR_FLAGS += -DCONFIG_SYSTEM_QCUSTOMPLOT
 LIBS += -lqcustomplot
 }
