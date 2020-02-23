@@ -1,0 +1,141 @@
+
+.\" Copyright (c) 2020, Viktor Rosendahl
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+
+.TH TRACESHARK 1 "23 February 2020" "v0.9.9-beta"
+.SH NAME
+traceshark - A viewer for traces from trace-cmd and perf
+.SH SYNOPSIS
+.B traceshark [
+.I OPTION
+.B ]... [
+.I filename
+.B ]
+.SH DESCRIPTION
+.B traceshark
+is a graphical viewer for the Ftrace and Perf events that can be captured by the Linux kernel. It visualizes the following events:
+
+.PP
+.I cpu_frequency
+.PP
+.I cpu_idle
+.PP
+.I sched_migrate_task
+.PP
+.I sched_process_exit
+.PP
+.I sched_process_fork
+.PP
+.I sched_switch
+.PP
+.I sched_wakeup
+.PP
+.I sched_wakeup_new
+.PP
+.I sched_waking
+.PP
+
+The
+.I sched_waking
+events are not really visualized but there is a button to find the
+.I sched_waking
+event that has instigated a particular
+.I sched_wakeup
+event.
+
+.SH OPTIONS
+
+.B traceshark
+supports the options that are supported by all Qt applications. For details,
+check the Qt documentation, especially the documentations of the QApplication
+class.
+
+.SH EXAMPLES
+
+Below is an example of how you can use perf to capture a trace that can be viewed with
+.B traceshark:
+
+.nf
+.B $ sudo mount -t tmpfs tmpfs /mnt/tmp
+.B $ cd /mnt/tmp
+.B $ sudo perf record -e power:cpu_frequency -e power:cpu_idle -e sched:sched_kthread_stop -e sched:sched_kthread_stop_ret -e sched:sched_migrate_task -e sched:sched_move_numa -e sched:sched_pi_setprio -e sched:sched_process_exec -e sched:sched_process_exit -e sched:sched_process_fork -e sched:sched_process_free -e sched:sched_process_wait -e sched:sched_stick_numa -e sched:sched_swap_numa -e sched:sched_switch -e sched:sched_wait_task -e sched:sched_wake_idle_without_ipi -e sched:sched_wakeup -e sched:sched_wakeup_new -e sched:sched_waking -e cpu-cycles -e cpu-cycles --call-graph=dwarf,20480 -m 512M -r 99 -a
+.I <Control-C>
+.B $ sudo perf script -f > tracefile.asc
+.B $ traceshark tracefile.asc&
+.fi
+
+It is also possible to use trace-cmd to capture a trace:
+
+.nf
+.B $ sudo mount -t tmpfs tmpfs /mnt/tmp
+.B $ cd /mnt/tmp
+.B $ sudo trace-cmd record -e cpu_frequency -e cpu_idle -e sched_kthread_stop -e sched_kthread_stop_ret -e sched_migrate_task -e sched_move_numa -e sched_pi_setprio -e sched_process_exec -e sched_process_exit -e sched_process_fork -e sched_process_free -e sched_process_wait -e sched_stick_numa -e sched_swap_numa -e sched_switch -e sched_wait_task -e sched_wake_idle_without_ipi -e sched_wakeup -e sched_wakeup_new -e sched_waking -b 32768 -r 99
+.I <Control-C>
+.B $ trace-cmd report trace.dat > tracefile.asc
+.B $ traceshark tracefile.asc&
+.fi
+
+.SH SEE ALSO
+
+.IP "" 0
+More detailed information about how to use \fBtraceshark\fR:
+.RS 0
+.B https://github\&.com/cunctator/traceshark\fR\&
+.RE
+
+.IP "" 0
+Documentation of the QApplication class and the command line options:
+.RS 0
+.B https://doc\&.qt\&.io/qt-5/qapplication.html\fR\&
+.RE
+
+.IP "" 0
+Sample traces can be found here:
+.RS 0
+.B https://github\&.com/cunctator/traceshark-resources\fR\&
+.RE
+
+.SH BUGS
+
+.B traceshark
+uses the QCustomPlot library to display one graph for each task in the trace. For this reason the UI might become slow when displaying a large trace with many thousands of tasks, because QCustomPLot has not been designed to display such a large number of graphs. This situation can be improved by compiling
+.B traceshark
+from source code and make sure that you use its own internal QCustomPlot, which contains some hacks to improve the performance with a large number of graphs.
+
+
+
+.SH AUTHOR
+
+.B traceshark
+was created by Viktor Rosendahl <viktor.rosendahl@iki.fi>.
+
+.SH COPYRIGHT
+
+.PP
+Copyright (c) 2020 Viktor Rosendahl
+
+.IP "" 0
+The license of this man page is GPLv2+:
+.RS 0
+.B http://www\&.gnu\&.org/licenses/old-licenses/gpl-2\&.0\&.html
+.RE
