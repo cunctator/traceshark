@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=0.9.9-beta
+Type=Application
+Name=traceshark
+GenericName=traceshark
+Comment=
+Exec=/usr/bin/traceshark
+Icon=/usr/share/icons/traceshark/shark.png
+Categories=System;
+Terminal=false
