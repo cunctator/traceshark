@@ -50,7 +50,7 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "qcustomplot/qcustomplot.h"
+#include "ui/qcustomplot.h"
 #include "ui/taskgraph.h"
 #include "analyzer/task.h"
 
