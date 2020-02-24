@@ -1609,7 +1609,7 @@ void MainWindow::createStatusBar()
 
 	statusStrings[STATUS_NOFILE] = new QString(tr("No file loaded"));
 	statusStrings[STATUS_FILE] = new QString(tr("Loaded file "));
-	statusStrings[STATUS_ERROR] = new QString(tr("An error has occured"));
+	statusStrings[STATUS_ERROR] = new QString(tr("An error has occurred"));
 
 	setStatus(STATUS_NOFILE);
 }
