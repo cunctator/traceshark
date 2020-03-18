@@ -100,6 +100,19 @@ const TString *TraceEvent::getEventName() const
 	return stringTree->stringLookup(TraceEvent::type);
 }
 
+void TraceEvent::clear()
+{
+	taskName = nullptr;
+	pid = 0;
+	cpu = 0;
+	time = VTL_TIME_ZERO;
+	intArg = 0;
+	type = EVENT_ERROR;
+	argv = nullptr;
+	argc = 0;
+	postEventInfo = nullptr;
+}
+
 const TString *TraceEvent::getEventName(event_t event)
 {
 	return stringTree->stringLookup(event);

@@ -60,11 +60,21 @@ class TraceEvent;
 
 class TraceLineData {
 public:
+	__always_inline void clear();
 	vtl::Time prevTime;
 	bool prevLineIsEvent;
 	TraceEvent *prevEvent;
 	int64_t infoBegin;
 	unsigned long nrEvents;
 };
+
+__always_inline void TraceLineData::clear()
+{
+	prevTime = VTL_TIME_MIN;
+	prevLineIsEvent = true;
+	prevEvent = nullptr;
+	infoBegin = 0;
+	nrEvents = 0;
+}
 
 #endif /* TRACELINEDATA_H */

@@ -156,6 +156,7 @@ public:
 	Chunk *postEventInfo;
 
 	const TString *getEventName() const;
+	void clear();
 	static const TString *getEventName(event_t event);
 	static void setStringTree(StringTree<> *sTree);
 	static const StringTree<> *getStringTree();

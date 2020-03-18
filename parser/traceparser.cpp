@@ -68,7 +68,6 @@
 #include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
 
-#define CLEAR_VARIABLE(VAR) memset(&VAR, 0, sizeof(VAR))
 #define TRACE_TYPE_CONFIDENCE_FACTOR (100)
 
 TraceParser::TraceParser()
@@ -91,10 +90,13 @@ TraceParser::TraceParser()
 	ftraceEvents = new vtl::TList<TraceEvent>();
 	perfEvents = new vtl::TList<TraceEvent>();
 
-	CLEAR_VARIABLE(fakeEvent);
-	CLEAR_VARIABLE(fakePostEventInfo);
-	CLEAR_VARIABLE(ftraceLineData);
-	CLEAR_VARIABLE(perfLineData);
+	fakeEvent.clear();
+
+	fakePostEventInfo.offset = 0;
+	fakePostEventInfo.len = 0;
+
+	ftraceLineData.clear();
+	perfLineData.clear();
 }
 
 TraceParser::~TraceParser()
@@ -306,17 +308,11 @@ void TraceParser::prepareParse()
 	fakePostEventInfo.len = 0;
 	fakeEvent.postEventInfo = &fakePostEventInfo;
 
-	perfLineData.infoBegin = 0;
+	perfLineData.clear();
 	perfLineData.prevEvent = &fakeEvent;
-	perfLineData.nrEvents = 0;
-	perfLineData.prevLineIsEvent = true;
-	perfLineData.prevTime = VTL_TIME_MIN;
 
-	ftraceLineData.infoBegin = 0;
+	ftraceLineData.clear();
 	ftraceLineData.prevEvent = &fakeEvent;
-	ftraceLineData.nrEvents = 0;
-	ftraceLineData.prevLineIsEvent = true;
-	ftraceLineData.prevTime = VTL_TIME_MIN;
 
 	ftraceEvents->clear();
 	perfEvents->clear();
