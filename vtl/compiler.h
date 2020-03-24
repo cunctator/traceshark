@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -87,6 +87,9 @@
 #define prefetch(addr) \
 	__builtin_prefetch(addr)
 
+#define attr_warn_unused_result \
+	__attribute__ ((warn_unused_result))
+
 #else /* __GNUC__ not defined */
 
 #define likely(x)   (x)
@@ -94,6 +97,8 @@
 #define prefetch_read(addr, locality)
 #define prefetch_write(addr, locality)
 #define prefetch(addr)
+
+#define attr_warn_unused_result
 
 #endif /* __GNUC__ */
 

@@ -55,6 +55,7 @@
 #define TSTRING_H
 
 #include <cstring>
+#include "vtl/compiler.h"
 
 class TString {
 public:
@@ -65,7 +66,8 @@ public:
 	static __always_inline int strcmp(const TString *a, const TString *b,
 					  short skip,
 					  short *neq);
-	__always_inline bool merge(const TString *s, int maxlen);
+	__always_inline bool merge(const TString *s, int maxlen)
+		attr_warn_unused_result;
 	__always_inline bool set(const TString *s, int maxlen);
 private:
 	__always_inline int TSTRING_MIN(int a, int b);
