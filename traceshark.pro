@@ -241,6 +241,10 @@
 # These may be edited by the user in order to configure the build
 #
 
+# Uncomment the line below to customize the installation root directory. The
+# default is /usr
+# CUSTOM_INSTALL_PREFIX = /usr/local
+
 # Uncomment this to disable the usage of OpenGL rendering. If you disable this,
 # the line width of the scheduling graphs will always be 1 pixel. You should
 # disable this if your computer is not OpenGL capable, or if you are happy to
@@ -568,3 +572,23 @@ QT           += opengl
 #
 
 RESOURCES     = traceshark.qrc
+
+
+###############################################################################
+# Installation
+#
+
+isEmpty (CUSTOM_INSTALL_PREFIX) {
+INSTALL_PREFIX = /usr
+} else {
+INSTALL_PREFIX = $${CUSTOM_INSTALL_PREFIX}
+}
+
+documentation.path = $${INSTALL_PREFIX}/share/man/man1
+documentation.files = doc/traceshark.1
+
+target.path = $${INSTALL_PREFIX}/bin
+target.files = traceshark
+
+INSTALLS += documentation
+INSTALLS += target
