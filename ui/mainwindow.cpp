@@ -2817,15 +2817,15 @@ void MainWindow::setupOpenGL()
 	    settingStore->getValue(Setting::OPENGL_ENABLED).boolv()) {
 		if (!isOpenGLEnabled()) {
 			tracePlot->setOpenGl(true, 4);
-			if (tracePlot->openGl()) {
-				printf("OpenGL rendering enabled\n");
+			if (!tracePlot->openGl()) {
+				qcp_warn_failed_opengl_enable();
 			}
 		}
 	} else {
 		if (isOpenGLEnabled()) {
 			tracePlot->setOpenGl(false, 4);
-			if (!tracePlot->openGl()) {
-				printf("OpenGL rendering disabled\n");
+			if (tracePlot->openGl()) {
+				qcp_warn_failed_opengl_disable();
 			}
 		}
 	}

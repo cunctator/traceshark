@@ -63,6 +63,25 @@
 #include "parser/traceevent.h"
 #include "threads/workitem.h"
 
+#ifdef CONFIG_SYSTEM_QCUSTOMPLOT
+	/*
+	 * Most distrob probably build QCustomPlot without OpenGL suppport so we
+	 * provide the user with a reasonable guess.
+	 */
+#define qcp_warn_failed_opengl_enable()				\
+	vtl::warnx("QCustomPlot failed to enable OpenGL. Perhaps the QCustomPlot library on your system was compiled without QCUSTOMPLOT_USE_OPENGL.")
+#else
+	/*
+	 * In this case we are using the system QCustomPlot so we have no idea
+	 * what the problem is.
+	 */
+#define qcp_warn_failed_opengl_enable() \
+	vtl::warnx("QCustomPlot failed to enable OpenGL.")
+#endif
+
+#define qcp_warn_failed_opengl_disable() \
+	vtl::warnx("QCustomPlot failed to disable OpenGL.")
+
 QT_BEGIN_NAMESPACE
 class QAction;
 class QLabel;
