@@ -65,22 +65,24 @@
 
 #ifdef CONFIG_SYSTEM_QCUSTOMPLOT
 	/*
-	 * Most distrob probably build QCustomPlot without OpenGL suppport so we
+	 * Most distros probably build QCustomPlot without OpenGL suppport so we
 	 * provide the user with a reasonable guess.
 	 */
-#define qcp_warn_failed_opengl_enable()				\
-	vtl::warnx("QCustomPlot failed to enable OpenGL. Perhaps the QCustomPlot library on your system was compiled without QCUSTOMPLOT_USE_OPENGL.")
+#define qcp_warn_failed_opengl_enable()					\
+	vtl::warnx(							\
+"QCustomPlot failed to enable OpenGL. Perhaps the QCustomPlot library\n"\
+"on your system was compiled without QCUSTOMPLOT_USE_OPENGL.\n")
 #else
 	/*
-	 * In this case we are using the system QCustomPlot so we have no idea
+	 * In this case we are using the internal QCustomPlot so we have no idea
 	 * what the problem is.
 	 */
 #define qcp_warn_failed_opengl_enable() \
-	vtl::warnx("QCustomPlot failed to enable OpenGL.")
+	vtl::warnx("QCustomPlot failed to enable OpenGL.\n")
 #endif
 
 #define qcp_warn_failed_opengl_disable() \
-	vtl::warnx("QCustomPlot failed to disable OpenGL.")
+	vtl::warnx("QCustomPlot failed to disable OpenGL.\n")
 
 QT_BEGIN_NAMESPACE
 class QAction;
