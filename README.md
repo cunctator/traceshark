@@ -125,15 +125,38 @@ At the bottom of the screen is the events view. The events view will be automati
 
 # 2. Building traceshark
 
-The program can be built by doing something like this, assuming that you have
-Qt5 development packages installed:
+## 2.1 How to set up your build environment
+
+In order to build traceshark, you will need three things:
+* A C++ compiler
+* make
+* The development packages for Qt
+
+On Ubuntu and Debian (tested on Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Debian 9, and Debian 10), you can install these like this:
 
 ```
-qmake-qt5 (or just qmake)
+sudo apt-get install qt5-default g++ make
+```
+
+On Fedora (tested with Fedora 32), you can do the following:
+
+```
+sudo dnf install qt5-qtbase-devel g++ make
+```
+
+## 2.2 How to compile and install
+
+The program can be compiled and installed by doing something like this:
+
+```
+qmake-qt5 (on some distros you should use just qmake instead of qmake-qt5)
 make -j5
+sudo make install
 ```
 
-It is not necessary but you can customize your build by editing traceshark.pro. One of the most important options is that you can disable OpenGL support. If and only if OpenGL support is enabled, then it is possible for the user to select the line width of the scheduling graphs, otherwise the line width will always be set to 1. OpenGL is enabled at compile time by default. If it has been enabled at compile time, then it will be enabled by default when running the application but only if the screen is deemed to be a high resolution screen.  The user can enable or disable OpenGL at runtime by opening the dialog with the ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) button. If you run into rendering problems, including problems with very slow rendering, then disabling OpenGL might be worth trying. OpenGL can be disabled at compile time by uncommenting the following line in traceshark.pro:
+## 2.3 How to configure your build
+
+It is not necessary but you can tweak your build by editing traceshark.pro. One of the most important options is that you can disable OpenGL support. If and only if OpenGL support is enabled, then it is possible for the user to select the line width of the scheduling graphs, otherwise the line width will always be set to 1. OpenGL is enabled at compile time by default. If it has been enabled at compile time, then it will be enabled by default when running the application but only if the screen is deemed to be a high resolution screen.  The user can enable or disable OpenGL at runtime by opening the dialog with the ![Select which types of graphs should be enabled](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/graphenabledialog30x30.png) button. If you run into rendering problems, including problems with very slow rendering, then disabling OpenGL might be worth trying. OpenGL can be disabled at compile time by uncommenting the following line in traceshark.pro:
 
 ```
 # DISABLE_OPENGL = yes
