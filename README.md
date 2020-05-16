@@ -144,6 +144,19 @@ On Fedora (tested with Fedora 32), you can do the following:
 sudo dnf install qt5-qtbase-devel g++ make
 ```
 
+It is not recommended but if you plan to configure your build to use the QCustomPlot library on your distro instead of the patched built-in version, then you will need to install the relevant development package. On Ubuntu 20.04 and Debian 10:
+
+```
+sudo apt-get install libqcustomplot-dev
+```
+
+The QCustomPlot library on Debian 9 and Ubuntu 18.04 is too old for traceshark.
+
+On Fedora 32:
+```
+sudo dnf install qcustomplot-qt5-devel
+```
+
 ## 2.2 How to compile and install
 
 The program can be compiled and installed by doing something like this:
@@ -192,6 +205,12 @@ If you want to build a debug build, uncomment one of the following two lines:
 
 # Uncomment this for debug build without optimization:
 # USE_DEBUG_FLAG = -g -O0
+```
+
+This is not recommended because it will very likely result in worse performance but if you absolutely want to use the QCustomPlot library on your system, then you need to uncomment the following line:
+
+```
+# USE_SYSTEM_QCUSTOMPLOT = yes
 ```
 
 Please note that the software will compile for Qt 4 but that it has not been as
