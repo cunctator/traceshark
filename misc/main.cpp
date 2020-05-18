@@ -96,6 +96,11 @@ static void parseArguments(QString *fileName, int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+  // must be called before QApplication is created
+#if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
+  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
 	QApplication app(argc, argv);
 	MainWindow mainWindow;
 	QPixmap pm(QLatin1String(RESSRC_PNG_SHARK));
