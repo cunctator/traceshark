@@ -96,9 +96,9 @@ static void parseArguments(QString *fileName, int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-  // must be called before QApplication is created
+	/* must be called before QApplication is created */
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
-  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 
 	QApplication app(argc, argv);
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 	vtl::set_strerror(ts_strerror);
 
 	parseArguments(&fileName, argc, argv);
-/* Set graphicssystem to opengl if we have old enough Qt */
+	/* Set graphicssystem to opengl if we have old enough Qt */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 	QApplication::setGraphicsSystem("opengl");
 #pragma message(QT4_WARNING)
