@@ -32,6 +32,37 @@
   <file>images/wakingdirect30x30.png</file>
   <file>images/qcp-logo.png</file>
   <file>images/qtlogo-64.png</file>
+
+  <!-- These are SVG icons. They are SVG representation of the previous PNGs -->
+  <!-- There are no SVG representations of the qcp and qt logos -->
+  <file>images/addtask.svg</file>
+  <file>images/addtolegend.svg</file>
+  <file>images/clearlegend.svg</file>
+  <file>images/cleartasksgraphs.svg</file>
+  <file>images/close.svg</file>
+  <file>images/cpufilter.svg</file>
+  <file>images/cursorzoom.svg</file>
+  <file>images/defaultzoom.svg</file>
+  <file>images/eventfilter.svg</file>
+  <file>images/exportcpuevents.svg</file>
+  <file>images/exportevents.svg</file>
+  <file>images/filtercurrent.svg</file>
+  <file>images/filtercurrentlimited.svg</file>
+  <file>images/findsleep.svg</file>
+  <file>images/getstats.svg</file>
+  <file>images/getstatstimelimit.svg</file>
+  <file>images/graphenabledialog.svg</file>
+  <file>images/moveblue.svg</file>
+  <file>images/movered.svg</file>
+  <file>images/open.svg</file>
+  <file>images/removetask.svg</file>
+  <file>images/resetfilters.svg</file>
+  <file>images/screenshot.svg</file>
+  <file>images/taskselector.svg</file>
+  <file>images/timefilter.svg</file>
+  <file>images/wakeup.svg</file>
+  <file>images/waking.svg</file>
+  <file>images/wakingdirect.svg</file>
   <file>LICENSE</file>
 </qresource>
 </RCC>

@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.7a -->
+<!-- CreationDate: 2020-05-21 14:12:24 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="407pt" height="589pt"
+	viewBox="3076 -1060 6447 9347">
+<g fill="none">
+<!-- Arc -->
+<path d="M 9000,4500 A 1273 1273 0 0 0 7200 2700" fill="#00ff00"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Arc -->
+<path d="M 5400,2700 A 1273 1273 0 0 0 3600 4500" fill="#00ff00"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Circle -->
+<circle cx="6300" cy="5400" r="2737" fill="#00ff00"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Circle -->
+<circle cx="6300" cy="5400" r="2349" fill="#ffffff"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Circle -->
+<circle cx="6277" cy="5422" r="351" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 6300,5400 6975,3825"
+	stroke="#b00000" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 6300,3150 6300,3600"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 4050,5400 4500,5400"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 8550,5400 8100,5400"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 6300,7650 6300,7200"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 5400,6300 6300,5400"
+	stroke="#0000ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 6300,1800 4725,0 5400,0 5400,-900 7200,-900 7200,0 7875,0 6300,1800" fill="#00ff00"
+	stroke="#000000" stroke-width="210px"/>
+</g>
+</svg>

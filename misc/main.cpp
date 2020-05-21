@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014, 2015, 2016, 2018
+ * Copyright (C) 2014, 2015, 2016, 2018, 2020
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 
 	QApplication app(argc, argv);
 	MainWindow mainWindow;
-	QPixmap pm(QLatin1String(RESSRC_PNG_SHARK));
+	QPixmap pm(QLatin1String(RESSRC_GPH_SHARK));
 	QIcon icon;
 	QString appname = QLatin1String("Traceshark");
 	QRect geometry;

@@ -50,26 +50,44 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RESOURCES_H
-#define RESOURCES_H
+#ifndef SVGRESOURCES_H
+#define SVGRESOURCES_H
 
-#include <QtCore>
+/* All pixmap resources for icons should be defined here  */
+#define RESSRC_GPH_ADD_TASK      ":/traceshark/images/addtask.svg"
+#define RESSRC_GPH_ADD_TO_LEGEND ":/traceshark/images/addtolegend.svg"
+#define RESSRC_GPH_CLEAR_LEGEND  ":/traceshark/images/clearlegend.svg"
+#define RESSRC_GPH_CLEAR_TASK    ":/traceshark/images/cleartasksgraphs.svg"
+#define RESSRC_GPH_CLOSE         ":/traceshark/images/close.svg"
+#define RESSRC_GPH_CPUFILTER     ":/traceshark/images/cpufilter.svg"
+#define RESSRC_GPH_CURSOR_ZOOM   ":/traceshark/images/cursorzoom.svg"
+#define RESSRC_GPH_DEFAULT_ZOOM  ":/traceshark/images/defaultzoom.svg"
+#define RESSRC_GPH_EVENTFILTER   ":/traceshark/images/eventfilter.svg"
+#define RESSRC_GPH_EXPORTCPUEVENTS  \
+	                         ":/traceshark/images/exportcpuevents.svg"
+#define RESSRC_GPH_EXPORTEVENTS  ":/traceshark/images/exportevents.svg"
+#define RESSRC_GPH_FILTERCURRENT ":/traceshark/images/filtercurrent.svg"
+#define RESSRC_GPH_FILTERCURRENT_LIMIT \
+	                         ":/traceshark/images/filtercurrentlimited.svg"
+#define RESSRC_GPH_GETSTATS      ":/traceshark/images/getstats.svg"
+#define RESSRC_GPH_GETSTATS_TIMELIMIT \
+	                         ":/traceshark/images/getstatstimelimit.svg"
+#define RESSRC_GPH_GRAPHENABLE   ":/traceshark/images/graphenabledialog.svg"
+#define RESSRC_GPH_MOVE_BLUE     ":/traceshark/images/moveblue.svg"
+#define RESSRC_GPH_MOVE_RED      ":/traceshark/images/movered.svg"
+#define RESSRC_GPH_OPEN          ":/traceshark/images/open.svg"
+#define RESSRC_GPH_REMOVE_TASK   ":/traceshark/images/removetask.svg"
+#define RESSRC_GPH_RESETFILTERS  ":/traceshark/images/resetfilters.svg"
+#define RESSRC_GPH_SCREENSHOT    ":/traceshark/images/screenshot.svg"
+#define RESSRC_GPH_SHARK         ":/traceshark/images/shark.png"
+#define RESSRC_GPH_TASKSELECT    ":/traceshark/images/taskselector.svg"
+#define RESSRC_GPH_TIMEFILTER    ":/traceshark/images/timefilter.svg"
+#define RESSRC_GPH_FIND_SLEEP    ":/traceshark/images/findsleep.svg"
+#define RESSRC_GPH_FIND_WAKEUP   ":/traceshark/images/wakeup.svg"
+#define RESSRC_GPH_FIND_WAKING   ":/traceshark/images/waking.svg"
+#define RESSRC_GPH_FIND_WAKING_DIRECT \
+				 ":/traceshark/images/wakingdirect.svg"
+#define RESSRC_GPH_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
+#define RESSRC_GPH_QT_LOGO       ":/traceshark/images/qtlogo-64.png"
 
-#if QT_VERSION < QT_VERSION_CHECK(5,6,0)
-
-/* Old Qt, we need to use pixmaps for icons*/
-#include "pngresources.h"
-
-#else /*  QT_VERSION >= QT_VERSION_CHECK(5,6,0) */
-
-/*
- * We are on QT > 5.6.0, so we can use svg for icons. This is probably good for
- * HiDPI use cases.
- */
-#include "svgresources.h"
-
-#endif
-
-#define RESSRC_TEXT_LICENSE      ":/traceshark/LICENSE"
-
-#endif /* RESOURCES_H */
+#endif /* SVGRESOURCES_H */

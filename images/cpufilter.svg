@@ -1,0 +1,68 @@
+<?xml version="1.0" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.7a -->
+<!-- CreationDate: 2020-05-21 13:33:12 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="564pt" height="564pt"
+	viewBox="25 25 8950 8950">
+<g fill="none">
+<!-- Line -->
+<rect x="2700" y="2700" width="3600" height="3600" rx="300" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="3375" y="4725" width="900" height="900" rx="210" fill="#00ffff"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="1800" y="1800" width="5400" height="5400" rx="900"
+	stroke="#000000" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 450,2925 1350,2925"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 450,4500 1350,4500"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 450,6075 1350,6075"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 7650,6075 8550,6075"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 7650,4500 8550,4500"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 7650,2925 8550,2925"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 4500,8550 4500,7650"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 6075,8550 6075,7650"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 2925,8550 2925,7650"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 2925,1350 2925,450"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 4500,1350 4500,450"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 6075,1350 6075,450"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<rect x="4725" y="3375" width="900" height="900" rx="210" fill="#00ffff"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="3375" y="3375" width="900" height="900" rx="210" fill="#00ffff"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="4725" y="4725" width="900" height="900" rx="210" fill="#00ffff"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="3150" y="3150" width="1350" height="1350" rx="210"
+	stroke="#ff0000" stroke-width="285px"/>
+</g>
+</svg>

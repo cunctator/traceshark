@@ -1,0 +1,38 @@
+<?xml version="1.0" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.7a -->
+<!-- CreationDate: 2020-05-21 13:33:56 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="733pt" height="648pt"
+	viewBox="-188 -188 11626 10276">
+<g fill="none">
+<!-- Circle -->
+<circle cx="5359" cy="3254" r="2647"
+	stroke="#000000" stroke-width="885px"/>
+<!-- Circle -->
+<circle cx="8173" cy="8962" r="428" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 10800,450 10800,2250"
+	stroke="#ff0000" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 10800,4050 10800,5850"
+	stroke="#ff0000" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 10800,7650 10800,9450"
+	stroke="#ff0000" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 450,450 450,2250"
+	stroke="#0000ff" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 450,7650 450,9450"
+	stroke="#0000ff" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 450,4050 450,5850"
+	stroke="#0000ff" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 6415,5638 8170,8968"
+	stroke="#000000" stroke-width="885px"/>
+</g>
+</svg>

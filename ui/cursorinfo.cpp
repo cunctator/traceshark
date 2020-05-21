@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2016, 2018, 2020
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -81,11 +82,11 @@ CursorInfo::CursorInfo(int nr, QWidget *parent):
 	switch (nr) {
 	case TShark::RED_CURSOR:
 		text = QString(tr(RED_CURSOR_TOOLTIP));
-		qresource = QLatin1String(RESSRC_PNG_MOVE_RED);
+		qresource = QLatin1String(RESSRC_GPH_MOVE_RED);
 		break;
 	case TShark::BLUE_CURSOR:
 		text = QString(tr(BLUE_CURSOR_TOOLTIP));
-		qresource = QLatin1String(RESSRC_PNG_MOVE_BLUE);
+		qresource = QLatin1String(RESSRC_GPH_MOVE_BLUE);
 		break;
 	default:
 		text = QString(tr("error in cursorinfo.cpp"));

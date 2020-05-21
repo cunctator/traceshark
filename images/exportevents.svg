@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.7a -->
+<!-- CreationDate: 2020-05-21 13:36:29 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="1006pt" height="694pt"
+	viewBox="793 -107 15964 11014">
+<g fill="none">
+<!-- Line -->
+<rect x="900" y="0" width="10800" height="10800"
+	stroke="#000000" stroke-width="135px"/>
+<!-- Line -->
+<polyline points=" 1800,3600 10800,3600"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 1800,5400 10800,5400"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 1800,7200 10800,7200"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 1800,9000 10800,9000"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 1800,1800 10800,1800"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 12150,4050 13950,4050 13950,2700 16650,5400 13950,8100 13950,6750 12150,6750
+ 12150,4050" fill="#0000ff"
+	stroke="#000000" stroke-width="135px"/>
+</g>
+</svg>
