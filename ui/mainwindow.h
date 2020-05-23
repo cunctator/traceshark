@@ -376,6 +376,8 @@ private:
 
 	double bottom;
 	double top;
+	double startTime;
+	double endTime;
 	QVector<double> ticks;
 	QVector<QString> tickLabels;
 	Cursor *cursors[TShark::NR_CURSORS];

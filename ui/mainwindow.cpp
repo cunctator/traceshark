@@ -444,6 +444,8 @@ void MainWindow::openFile(const QString &name)
 void MainWindow::processTrace()
 {
 	analyzer->processTrace();
+	startTime = analyzer->getStartTime().toDouble();
+	endTime = analyzer->getEndTime().toDouble();
 }
 
 void MainWindow::computeLayout()
@@ -453,11 +455,7 @@ void MainWindow::computeLayout()
 	unsigned int offset;
 	QString label;
 	double inc, o, p;
-	double start, end;
 	QColor color;
-
-	start = analyzer->getStartTime().toDouble();
-	end = analyzer->getEndTime().toDouble();
 
 	bottom = bugWorkAroundOffset;
 	offset = bottom;
@@ -476,7 +474,7 @@ void MainWindow::computeLayout()
 		color = QColor(135, 206, 250); /* Light sky blue */
 		label = QString("fork/exit");
 		ticks.append(offset);
-		new MigrationLine(start, end, offset, color, tracePlot);
+		new MigrationLine(startTime, endTime, offset, color, tracePlot);
 		tickLabels.append(label);
 		o = offset;
 		p = inc / nrCPUs ;
@@ -485,7 +483,8 @@ void MainWindow::computeLayout()
 			label = QString("cpu") + QString::number(cpu);
 			ticks.append(o);
 			tickLabels.append(label);
-			new MigrationLine(start, end, o, color, tracePlot);
+			new MigrationLine(startTime, endTime, o, color,
+					  tracePlot);
 		}
 
 		offset += inc;
@@ -557,21 +556,17 @@ void MainWindow::clearPlot()
 void MainWindow::showTrace()
 {
 	unsigned int cpu;
-	double start, end;
 	int precision = 7;
 	double extra = 0;
 	QColor color;
 
-	start = analyzer->getStartTime().toDouble();
-	end = analyzer->getEndTime().toDouble();
-
-	if (end >= 10)
-		extra = floor (log(end) / log(10));
+	if (endTime >= 10)
+		extra = floor (log(endTime) / log(10));
 
 	precision += (int) extra;
 
 	tracePlot->yAxis->setRange(QCPRange(bottom, top));
-	tracePlot->xAxis->setRange(QCPRange(start, end));
+	tracePlot->xAxis->setRange(QCPRange(startTime, endTime));
 	tracePlot->xAxis->setNumberPrecision(precision);
 	tracePlot->yAxis->setTicks(false);
 	yaxisTicker->setTickVector(ticks);
@@ -666,13 +661,10 @@ void MainWindow::loadSettings()
 
 void MainWindow::setupCursors()
 {
-	double start, end, red, blue;
+	double red, blue;
 
-	start = analyzer->getStartTime().toDouble();
-	end = analyzer->getEndTime().toDouble();
-
-	red = (start + end) / 2;
-	blue = (start + end) / 2 + (end - start) / 10;
+	red = (startTime + endTime) / 2;
+	blue = (startTime + endTime) / 2 + (endTime - startTime) / 10;
 
 	setupCursors(red, blue);
 }
@@ -1069,13 +1061,8 @@ void MainWindow::cursorZoom()
 
 void MainWindow::defaultZoom()
 {
-	double start, end;
-
-	start = analyzer->getStartTime().toDouble();
-	end = analyzer->getEndTime().toDouble();
-
 	tracePlot->yAxis->setRange(QCPRange(bottom, top));
-	tracePlot->xAxis->setRange(QCPRange(start, end));
+	tracePlot->xAxis->setRange(QCPRange(startTime, endTime));
 	tracePlot->replot();
 }
 
