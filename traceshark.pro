@@ -549,6 +549,10 @@ QMAKE_LINK = $${USE_ALTERNATIVE_COMPILER}
 
 OUR_POSIX_DEFINES = _FILE_OFFSET_BITS=64 _POSIX_C_SOURCE=200809L
 
+mac {
+OUR_POSIX_DEFINES += _DARWIN_C_SOURCE
+}
+
 # Compute the defines to be set with -D flag at the compiler command line
 DEFINES += $${OUR_POSIX_DEFINES}
 !equals(DISABLE_OPENGL, yes) {
