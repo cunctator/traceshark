@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -59,6 +59,7 @@
 #include "misc/traceshark.h"
 #include "misc/tstring.h"
 #include "vtl/avltree.h"
+#include "vtl/compiler.h"
 #include "vtl/tlist.h"
 
 #define STRINGPOOL_MAX(A, B) ((A) >= (B) ? A:B)
@@ -82,7 +83,7 @@ AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>::iterator
 template <class T>
 class AVLCompareSP {
 public:
-	__always_inline static int compare(const T &a, const T &b) {
+	vtl_always_inline static int compare(const T &a, const T &b) {
 		return strcmp(a.ptr, b.ptr);
 	}
 };
@@ -94,7 +95,7 @@ public:
 		PoolBundleSP *pb = (PoolBundleSP*) data;
 		pools = *pb;
 	}
-	__always_inline vtl::AVLNode<T, U> *alloc(const T &key) {
+	vtl_always_inline vtl::AVLNode<T, U> *alloc(const T &key) {
 		vtl::AVLNode<T, U> *node = (vtl::AVLNode<T, U> *)
 			pools.nodePool->allocObj();
 		node->key.len = key.len;
@@ -102,7 +103,7 @@ public:
 		strcpy(node->key.ptr, key.ptr);
 		return node;
 	}
-	__always_inline int clear() {
+	vtl_always_inline int clear() {
 		/*
 		 * Do nothing because the pools are owned by StringPool. This
 		 * is only called from StringPool, via AVLTree, when the object
@@ -140,7 +141,7 @@ protected:
 
 class StringPoolDefaultHashFunc {
 public:
-	__always_inline uint32_t operator()(const TString *str) const
+	vtl_always_inline uint32_t operator()(const TString *str) const
 	{
 		return TShark::StrHash32(str);
 	}
@@ -152,12 +153,12 @@ class StringPool
 public:
 	StringPool(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256);
 	~StringPool();
-	__always_inline const TString *allocString(const TString *str,
+	vtl_always_inline const TString *allocString(const TString *str,
 						   uint32_t cutoff);
 	void clear();
 	void reset();
 private:
-	__always_inline const TString *allocUniqueString(const TString *str);
+	vtl_always_inline const TString *allocUniqueString(const TString *str);
 	MemPool *coldCharPool;
 	MemPool *strPool;
 	PoolBundleSP avlPools;
@@ -171,7 +172,7 @@ private:
 };
 
 template<typename HashFunc>
-__always_inline
+vtl_always_inline
 const TString *StringPool<HashFunc>::allocString(const TString *str,
 						 uint32_t cutoff)
 {
@@ -224,7 +225,7 @@ const TString *StringPool<HashFunc>::allocString(const TString *str,
 }
 
 template<typename HashFunc>
-__always_inline
+vtl_always_inline
 const TString *StringPool<HashFunc>::allocUniqueString(const TString *str)
 {
 	TString *newstr;

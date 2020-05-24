@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,6 +55,7 @@
 
 #include "misc/string.h"
 #include "parser/paramhelpers.h"
+#include "vtl/compiler.h"
 
 /*
  * The functions in this file are not meant to be used directly. The are only
@@ -80,7 +81,7 @@
  *
  * In a nutshell, this protects us against weirdos but not against lunatics :)
  */
-static __always_inline int
+static vtl_always_inline int
 _perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 {
 	int i;
@@ -125,7 +126,7 @@ _perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 	return i;
 }
 
-static __always_inline int
+static vtl_always_inline int
 _perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
 					   const sched_switch_handle &handle)
 {
@@ -166,7 +167,7 @@ _perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
 	return ABSURD_INT;
 }
 
-static __always_inline int
+static vtl_always_inline int
 _perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
 					   const sched_switch_handle &handle)
 {

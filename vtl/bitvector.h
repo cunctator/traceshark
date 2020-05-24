@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,17 +55,18 @@
 
 #include <cstdint>
 #include <QVector>
+#include "vtl/compiler.h"
 
 namespace vtl {
 class BitVector
 {
 public:
 	BitVector();
-	__always_inline bool readbool(unsigned int index) const;
-	__always_inline void appendbool(bool value);
-	__always_inline unsigned int read(unsigned int index) const;
-	__always_inline void append(unsigned int value);
-	__always_inline unsigned int size() const;
+	vtl_always_inline bool readbool(unsigned int index) const;
+	vtl_always_inline void appendbool(bool value);
+	vtl_always_inline unsigned int read(unsigned int index) const;
+	vtl_always_inline void append(unsigned int value);
+	vtl_always_inline unsigned int size() const;
 	void clear();
 	void softclear();
 private:
@@ -78,12 +79,12 @@ private:
 	QVector<word_t> array;
 };
 
-__always_inline bool BitVector::readbool(unsigned int index) const
+vtl_always_inline bool BitVector::readbool(unsigned int index) const
 {
 	return BitVector::read(index) == 0x1;
 }
 
-__always_inline void BitVector::appendbool(bool value)
+vtl_always_inline void BitVector::appendbool(bool value)
 {
 	unsigned int bitnr = nrElements % BITVECTOR_BITS_PER_WORD;
 	word_t mask;
@@ -107,7 +108,7 @@ __always_inline void BitVector::appendbool(bool value)
 	nrElements++;
 }
 
-__always_inline unsigned int BitVector::read(unsigned int index) const
+vtl_always_inline unsigned int BitVector::read(unsigned int index) const
 {
 	unsigned int windex = index / BITVECTOR_BITS_PER_WORD;
         unsigned int r;
@@ -118,7 +119,7 @@ __always_inline unsigned int BitVector::read(unsigned int index) const
 	return r;
 }
 
-__always_inline void BitVector::append(unsigned int value)
+vtl_always_inline void BitVector::append(unsigned int value)
 {
 	unsigned int bitnr = nrElements % BITVECTOR_BITS_PER_WORD;
 	word_t mask_and, mask_or;
@@ -139,7 +140,7 @@ __always_inline void BitVector::append(unsigned int value)
 	nrElements++;
 }
 
-__always_inline unsigned int BitVector::size() const
+vtl_always_inline unsigned int BitVector::size() const
 {
 	return nrElements;
 }

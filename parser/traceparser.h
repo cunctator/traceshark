@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -70,6 +70,7 @@
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
 #include "misc/tstring.h"
+#include "vtl/compiler.h"
 
 #define NR_TBUFFERS (4)
 #define TBUFSIZE (256)
@@ -91,11 +92,11 @@ public:
 	void close(int *ts_errno);
 	void threadParser();
 	void threadReader();
-	__always_inline vtl::TList<TraceEvent> *getEventsTList() const;
+	vtl_always_inline vtl::TList<TraceEvent> *getEventsTList() const;
 	const StringTree<> *getPerfEventTree();
 	const StringTree<> *getFtraceEventTree();
 protected:
-	__always_inline void waitForNextBatch(bool &eof, int &index);
+	vtl_always_inline void waitForNextBatch(bool &eof, int &index);
 	void waitForTraceType();
 	tracetype_t traceType;
 	TraceFile *traceFile;
@@ -104,13 +105,14 @@ private:
 	void guessTraceType();
 	void sendTraceType();
 	void prepareParse();
-	__always_inline bool __parseBuffer(tracetype_t ttppe,
+	vtl_always_inline bool __parseBuffer(tracetype_t ttppe,
 					   unsigned int index);
-	__always_inline bool parseFtraceBuffer(unsigned int index);
-	__always_inline bool parsePerfBuffer(unsigned int index);
-	__always_inline bool parseLineFtrace(TraceLine &line,
+	vtl_always_inline bool parseFtraceBuffer(unsigned int index);
+	vtl_always_inline bool parsePerfBuffer(unsigned int index);
+	vtl_always_inline bool parseLineFtrace(TraceLine &line,
 					     TraceEvent &event);
-	__always_inline bool parseLinePerf(TraceLine &line, TraceEvent &event);
+	vtl_always_inline
+	bool parseLinePerf(TraceLine &line, TraceEvent &event);
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
 	bool parseLineBugFixup(TraceEvent* event, const vtl::Time &prevTime);
@@ -134,25 +136,25 @@ private:
 	IndexWatcher *traceTypeWatcher;
 };
 
-__always_inline void TraceParser::waitForNextBatch(bool &eof, int &index)
+vtl_always_inline void TraceParser::waitForNextBatch(bool &eof, int &index)
 {
 	eventsWatcher->waitForNextBatch(eof, index);
 }
 
 /* This parses a buffer */
-__always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
+vtl_always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 {
 	return __parseBuffer(TRACE_TYPE_FTRACE, index);
 }
 
 /* This parses a buffer */
-__always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
+vtl_always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 {
 	return __parseBuffer(TRACE_TYPE_PERF, index);
 }
 
 /* This parses a buffer */
-__always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
+vtl_always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 						unsigned int index)
 {
 	unsigned int i, s;
@@ -190,7 +192,7 @@ __always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
 	return eof;
 }
 
-__always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
+vtl_always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
 						  TraceEvent &event)
 {
 	if (ftraceGrammar->parseLine(line, event)) {
@@ -216,7 +218,7 @@ __always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
 	return false;
 }
 
-__always_inline bool TraceParser::parseLinePerf(TraceLine &line,
+vtl_always_inline bool TraceParser::parseLinePerf(TraceLine &line,
 						TraceEvent &event)
 {
 	if (perfGrammar->parseLine(line, event)) {
@@ -254,7 +256,7 @@ __always_inline bool TraceParser::parseLinePerf(TraceLine &line,
 	}
 }
 
-__always_inline vtl::TList<TraceEvent> *TraceParser::getEventsTList() const
+vtl_always_inline vtl::TList<TraceEvent> *TraceParser::getEventsTList() const
 {
 	return events;
 }

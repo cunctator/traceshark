@@ -1,7 +1,7 @@
  // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -64,6 +64,7 @@ class QLabel;
 QT_END_NAMESPACE
 
 #include "misc/setting.h"
+#include "vtl/compiler.h"
 
 class SettingStore;
 
@@ -74,7 +75,7 @@ public:
 		 SettingStore *sstore = nullptr,
 		 QWidget *parent = 0);
 	virtual ~ValueBox();
-	__always_inline int getId() const;
+	vtl_always_inline int getId() const;
 	void setDefaultValue();
 	Setting::Value value() const;
 	void setValue(const Setting::Value &v);
@@ -109,7 +110,7 @@ private slots:
 	void spinBoxChanged(int value);
 };
 
-__always_inline int ValueBox::getId() const
+vtl_always_inline int ValueBox::getId() const
 {
 	return id;
 }

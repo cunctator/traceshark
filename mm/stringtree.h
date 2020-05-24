@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2017, 2019, 2020
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -60,6 +61,7 @@
 #include "misc/tstring.h"
 #include "misc/types.h"
 #include "vtl/avltree.h"
+#include "vtl/compiler.h"
 #include "vtl/tlist.h"
 
 #define STRINGTREE_MAX(A, B) ((A) >= (B) ? A:B)
@@ -81,7 +83,7 @@ AVLAllocatorST<TString, event_t>, AVLCompareST<TString>>::iterator
 template <class T>
 class AVLCompareST {
 public:
-	__always_inline static int compare(const T &a, const T &b) {
+	vtl_always_inline static int compare(const T &a, const T &b) {
 		return strcmp(a.ptr, b.ptr);
 	}
 };
@@ -93,7 +95,7 @@ public:
 		PoolBundleST *pb = (PoolBundleST*) data;
 		pools = *pb;
 	}
-	__always_inline vtl::AVLNode<T, U> *alloc(const T &key) {
+	vtl_always_inline vtl::AVLNode<T, U> *alloc(const T &key) {
 		vtl::AVLNode<T, U> *node = (vtl::AVLNode<T, U> *)
 			pools.nodePool->allocObj();
 		node->key.len = key.len;
@@ -101,7 +103,7 @@ public:
 		strncpy(node->key.ptr, key.ptr, key.len + 1);
 		return node;
 	}
-	__always_inline int clear() {
+	vtl_always_inline int clear() {
 		/*
 		 * Do nothing because the pools are owned by StringTree. This
 		 * is only called from StringTree, via AVLTree, when the object
@@ -135,7 +137,7 @@ protected:
 
 class StringTreeDefaultHashFunc {
 public:
-	__always_inline uint32_t operator()(const TString *str) const
+	vtl_always_inline uint32_t operator()(const TString *str) const
 	{
 		return TShark::StrHash32(str);
 	}
@@ -148,10 +150,10 @@ public:
 	StringTree(unsigned int nr_pages = 256 * 10, unsigned int hSizeP = 256,
 		   unsigned int table_size = 4096);
 	~StringTree();
-	__always_inline const TString *stringLookup(event_t value) const;
-	__always_inline event_t searchAllocString(const TString *str,
+	vtl_always_inline const TString *stringLookup(event_t value) const;
+	vtl_always_inline event_t searchAllocString(const TString *str,
 						  event_t newval);
-	__always_inline event_t getMaxEvent() const;
+	vtl_always_inline event_t getMaxEvent() const;
 	void clear();
 	void reset();
 private:
@@ -167,7 +169,7 @@ private:
 };
 
 template<typename HashFunc>
-__always_inline
+vtl_always_inline
 const TString *StringTree<HashFunc>::stringLookup(event_t value) const
 {
 	if (value < 0 || value > maxEvent)
@@ -176,7 +178,7 @@ const TString *StringTree<HashFunc>::stringLookup(event_t value) const
 }
 
 template<typename HashFunc>
-__always_inline
+vtl_always_inline
 event_t StringTree<HashFunc>::searchAllocString(const TString *str,
 						event_t newval)
 {
@@ -215,7 +217,7 @@ event_t StringTree<HashFunc>::searchAllocString(const TString *str,
 }
 
 template<typename HashFunc>
-__always_inline event_t StringTree<HashFunc>::getMaxEvent() const
+vtl_always_inline event_t StringTree<HashFunc>::getMaxEvent() const
 {
 	return maxEvent;
 }

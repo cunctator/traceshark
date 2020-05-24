@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,6 +57,7 @@
 #include "parser/traceline.h"
 #include "misc/tstring.h"
 #include "misc/types.h"
+#include "vtl/compiler.h"
 #include "vtl/time.h"
 
 #include <cstdint>
@@ -120,13 +121,13 @@
 /*
  * This works because TASK_FLAG_MASK will mask out the preemption flag
  */
-static __always_inline bool task_state_is_runnable(taskstate_t state)
+static vtl_always_inline bool task_state_is_runnable(taskstate_t state)
 {
 	return ((state & TASK_FLAG_MASK) == TASK_STATE_RUNNABLE);
 }
 
-static __always_inline bool task_state_is_flag_set(taskstate_t state,
-						   taskstate_t flag)
+static vtl_always_inline bool task_state_is_flag_set(taskstate_t state,
+						     taskstate_t flag)
 {
 	return ((state & flag) != 0);
 }

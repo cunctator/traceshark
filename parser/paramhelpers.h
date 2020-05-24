@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,6 +57,7 @@
 #include "misc/errors.h"
 #include "misc/string.h"
 #include "parser/traceevent.h"
+#include "vtl/compiler.h"
 
 class perf_sched_switch_handle {
 public:
@@ -135,12 +136,12 @@ public:
  * This function copies everything after the delim char into the cstring
  * pointed to by c and adds the length to len
  */
-static __always_inline void _copy_tstring_after_char(const TString *str,
-						      char delim,
-						      char *&dest,
-						      int &len,
-						      int maxlen,
-						      bool &ok)
+static vtl_always_inline void _copy_tstring_after_char(const TString *str,
+						       char delim,
+						       char *&dest,
+						       int &len,
+						       int maxlen,
+						       bool &ok)
 {
 	int i;
 	int flen;
@@ -178,12 +179,12 @@ err:
  * This function copies everything after the delim char into the cstring
  * pointed to by c and adds the length to len
  */
-static __always_inline void _copy_tstring_before_char(const TString *str,
-						       char delim,
-						       char *&dest,
-						       int &len,
-						       int maxlen,
-						       bool &ok)
+static vtl_always_inline void _copy_tstring_before_char(const TString *str,
+							char delim,
+							char *&dest,
+							int &len,
+							int maxlen,
+							bool &ok)
 {
 	int i;
 	int flen;
@@ -223,7 +224,7 @@ err:
  * a cstring. Such cases exists because tasknames that contains spaces have
  * been split into several arguments due to parsing with space as delimiter
  */
-static __always_inline void
+static vtl_always_inline void
 merge_args_into_cstring_nullterminate(const TraceEvent &event,
 				      int beginidx,
 				      int endidx,
@@ -260,7 +261,7 @@ merge_args_into_cstring_nullterminate(const TraceEvent &event,
  * a cstring. Such cases exists because tasknames that contains spaces have
  * been split into several arguments due to parsing with space as delimiter
  */
-static __always_inline void
+static vtl_always_inline void
 merge_args_into_cstring(const TraceEvent &event,
 			int beginidx,
 			int endidx,
@@ -286,8 +287,8 @@ merge_args_into_cstring(const TraceEvent &event,
 	}
 }
 
-static __always_inline unsigned int uint_after_char(const TraceEvent &event,
-						    int n_param, char ch)
+static vtl_always_inline unsigned int uint_after_char(const TraceEvent &event,
+						      int n_param, char ch)
 {
 	char *last;
 	char *first;
@@ -316,8 +317,8 @@ static __always_inline unsigned int uint_after_char(const TraceEvent &event,
 	return param;
 }
 
-static __always_inline int int_after_char(const TraceEvent &event,
-					  int n_param, char ch)
+static vtl_always_inline int int_after_char(const TraceEvent &event,
+					    int n_param, char ch)
 {
 	char *last;
 	char *first;
@@ -351,15 +352,16 @@ static __always_inline int int_after_char(const TraceEvent &event,
 	return (neg ? -param:param);
 }
 
-static __always_inline bool is_param_inside_braces(const TString *str)
+static vtl_always_inline bool is_param_inside_braces(const TString *str)
 {
 	int s = str->len;
 	bool r =  s > 2 && str->ptr[0] == '[' && str->ptr[s - 1] == ']';
 	return r;
 }
 
-static __always_inline unsigned int param_inside_braces(const TraceEvent &event,
-							int n_param)
+static vtl_always_inline
+unsigned int param_inside_braces(const TraceEvent &event,
+				 int n_param)
 {
 	int len = event.argv[n_param]->len;
 	char *first = event.argv[n_param]->ptr;
@@ -381,10 +383,10 @@ static __always_inline unsigned int param_inside_braces(const TraceEvent &event,
 	return ABSURD_UNSIGNED;
 }
 
-static __always_inline const char *substr_after_char(const char *str,
-						     int len,
-						     char c,
-						     int *sublen)
+static vtl_always_inline const char *substr_after_char(const char *str,
+						       int len,
+						       char c,
+						       int *sublen)
 {
 	int i;
 
@@ -402,7 +404,7 @@ static __always_inline const char *substr_after_char(const char *str,
 	return NullStr;
 }
 
-static __always_inline taskstate_t
+static vtl_always_inline taskstate_t
 _sched_state_from_tstring(const TString *str)
 {
 	int i;
@@ -472,7 +474,7 @@ _sched_state_from_tstring(const TString *str)
 	return state;
 }
 
-static __always_inline
+static vtl_always_inline
 unsigned int uint_after_pfix(const TraceEvent &event,
 			     int idx_guess,
 			     const char* pfix)
@@ -493,9 +495,9 @@ unsigned int uint_after_pfix(const TraceEvent &event,
 	return uint_after_char(event, idx_guess, '=');
 }
 
-static __always_inline int int_after_pfix(const TraceEvent &event,
-					  int idx_guess,
-					  const char* pfix)
+static vtl_always_inline int int_after_pfix(const TraceEvent &event,
+					    int idx_guess,
+					    const char* pfix)
 {
 	int i;
 

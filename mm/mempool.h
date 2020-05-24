@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -68,16 +68,16 @@ public:
 	MemPool(unsigned int nr_pages = 256 * 10,
 		unsigned int objsize = 64);
 	~MemPool();
-	__always_inline void* allocObj();
-	__always_inline void* allocN(unsigned int n);
-	__always_inline void* preallocN(unsigned int n);
-	__always_inline bool commitN(unsigned int n);
-	__always_inline void* allocBytes(unsigned int bytes);
-	__always_inline void* allocChars(unsigned int chars);
-	__always_inline void* preallocBytes(unsigned int maxbytes);
-	__always_inline void* preallocChars(unsigned int maxchars);
-	__always_inline bool commitBytes(unsigned int nrbytes);
-	__always_inline bool commitChars(unsigned int nrbytes);
+	vtl_always_inline void* allocObj();
+	vtl_always_inline void* allocN(unsigned int n);
+	vtl_always_inline void* preallocN(unsigned int n);
+	vtl_always_inline bool commitN(unsigned int n);
+	vtl_always_inline void* allocBytes(unsigned int bytes);
+	vtl_always_inline void* allocChars(unsigned int chars);
+	vtl_always_inline void* preallocBytes(unsigned int maxbytes);
+	vtl_always_inline void* preallocChars(unsigned int maxchars);
+	vtl_always_inline bool commitBytes(unsigned int nrbytes);
+	vtl_always_inline bool commitChars(unsigned int nrbytes);
 	void reset();
 private:
 	quint8 *memory;
@@ -86,31 +86,31 @@ private:
 	unsigned long long used;
 	unsigned int objSize;
 	QList <void*> exhaustList;
-	__always_inline void newMap();
+	vtl_always_inline void newMap();
 	void addMemory();
 };
 
-__always_inline void* MemPool::allocObj()
+vtl_always_inline void* MemPool::allocObj()
 {
 	return allocBytes(objSize);
 }
 
-__always_inline void* MemPool::allocN(unsigned int n)
+vtl_always_inline void* MemPool::allocN(unsigned int n)
 {
 	return allocBytes(objSize * n);
 }
 
-__always_inline void* MemPool::preallocN(unsigned int n)
+vtl_always_inline void* MemPool::preallocN(unsigned int n)
 {
 	return preallocBytes(objSize * n);
 }
 
-__always_inline bool MemPool::commitN(unsigned int n)
+vtl_always_inline bool MemPool::commitN(unsigned int n)
 {
 	return commitBytes(objSize * n);
 }
 
-__always_inline void* MemPool::allocBytes(unsigned int bytes)
+vtl_always_inline void* MemPool::allocBytes(unsigned int bytes)
 {
 	quint8* ptr;
 	int retries = 0;
@@ -131,12 +131,12 @@ __always_inline void* MemPool::allocBytes(unsigned int bytes)
 	return nullptr;
 }
 
-__always_inline void* MemPool::allocChars(unsigned int chars)
+vtl_always_inline void* MemPool::allocChars(unsigned int chars)
 {
 	return allocBytes(sizeof(char) * chars);
 }
 
-__always_inline void* MemPool::preallocBytes(unsigned int bytes)
+vtl_always_inline void* MemPool::preallocBytes(unsigned int bytes)
 {
 	unsigned long long maxused = used + bytes;
 	int retries = 0;
@@ -153,7 +153,7 @@ __always_inline void* MemPool::preallocBytes(unsigned int bytes)
 	return nullptr;
 }
 
-__always_inline bool MemPool::commitBytes(unsigned int bytes)
+vtl_always_inline bool MemPool::commitBytes(unsigned int bytes)
 {
 	used += bytes;
 	if (used >= poolSize) {
@@ -164,17 +164,17 @@ __always_inline bool MemPool::commitBytes(unsigned int bytes)
 	return true;
 }
 
-__always_inline void* MemPool::preallocChars(unsigned int maxchars)
+vtl_always_inline void* MemPool::preallocChars(unsigned int maxchars)
 {
 	return preallocBytes(sizeof(char) * maxchars);
 }
 
-__always_inline bool MemPool::commitChars(unsigned int chars)
+vtl_always_inline bool MemPool::commitChars(unsigned int chars)
 {
 	return commitBytes(sizeof(char) * chars);
 }
 
-__always_inline void MemPool::newMap()
+vtl_always_inline void MemPool::newMap()
 {
 	quint8 *ptr;
 	ptr = (quint8*) mmap(nullptr, (size_t) poolSize, PROT_READ|PROT_WRITE,

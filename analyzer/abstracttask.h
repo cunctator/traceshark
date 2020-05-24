@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,8 +54,9 @@
 #define ABSTRACTTASK_H
 
 #include <QVector>
-#include "vtl/bitvector.h"
 
+#include "vtl/bitvector.h"
+#include "vtl/compiler.h"
 #include "vtl/time.h"
 #include "misc/traceshark.h"
 
@@ -126,7 +127,7 @@ public:
 private:
 	int _binarySearch(const vtl::Time &time, int lowerIdx,
 					  int higherIdx);
-	__always_inline int binarySearch(const vtl::Time &time);
+	vtl_always_inline int binarySearch(const vtl::Time &time);
 	int findLower(const vtl::Time &time);
 	int findHigher(const vtl::Time &time);
 	bool fillDataVector(QVector<double> &timev, QVector<double> &data,

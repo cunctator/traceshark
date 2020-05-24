@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2017, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,37 +50,39 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HEAPSORT_H
-#define __HEAPSORT_H
+#ifndef VTL_HEAPSORT_H
+#define VTL_HEAPSORT_H
+
+#include "vtl/compiler.h"
 
 namespace vtl {
 
-__always_inline long __heap_iParent(long i)
+vtl_always_inline long heap_iParent__(long i)
 {
 	return (i - 1) / 2;
 }
 
-__always_inline long __heap_iLeftChild(long i)
+vtl_always_inline long heap_iLeftChild__(long i)
 {
 	return 2 * i + 1;
 }
 
-__always_inline long __heap_iRightChild(long i)
+vtl_always_inline long heap_iRightChild__(long i)
 {
 	return 2 * i + 2;
 }
 
 template<template <typename> class C, typename T, typename TCompFunc>
-	__always_inline void __heap_siftdown(C<T> &container,
-					     long start,
-					     long end,
-					     TCompFunc compFunc)
+vtl_always_inline void heap_siftdown__(C<T> &container,
+				       long start,
+				       long end,
+				       TCompFunc compFunc)
 {
 	long root, child, rchild, swap;
 
 	root = start;
-	while (__heap_iLeftChild(root) <= end) {
-		child = __heap_iLeftChild(root);
+	while (heap_iLeftChild__(root) <= end) {
+		child = heap_iLeftChild__(root);
 		swap = root;
 		if (compFunc(container[swap], container[child]) < 0)
 			swap = child;
@@ -98,16 +100,16 @@ template<template <typename> class C, typename T, typename TCompFunc>
 }
 
 template<template <typename> class C, typename T, typename TCompFunc>
-	__always_inline void __heap_heapify(C<T> &container,
-					    TCompFunc compFunc)
+vtl_always_inline void heap_heapify__(C<T> &container,
+				      TCompFunc compFunc)
 {
 	long count = container.size();
 	long start;
 
-	start = __heap_iParent(count - 1);
+	start = heap_iParent__(count - 1);
 
 	while(start >= 0) {
-		__heap_siftdown(container, start, count - 1, compFunc);
+		heap_siftdown__(container, start, count - 1, compFunc);
 		start--;
 	}
 }
@@ -122,16 +124,16 @@ template<template <typename> class C, typename T, typename TCompFunc>
 	if (count < 2)
 		return;
 
-	__heap_heapify(container, compFunc);
+	heap_heapify__(container, compFunc);
 
 	end = count - 1;
 	while (end > 0) {
 		container.swap(0, end);
 		end--;
-		__heap_siftdown(container, 0, end, compFunc);
+		heap_siftdown__(container, 0, end, compFunc);
 	}
 }
  
 }
 
-#endif /* __HEAPSORT_H */
+#endif /* VTL_HEAPSORT_H */

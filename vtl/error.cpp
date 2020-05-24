@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -58,6 +58,7 @@ extern "C" {
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include "vtl/compiler.h"
 #include "vtl/error.h"
 
 static vtl::ErrorHandler *handler;
@@ -72,8 +73,8 @@ void vtl::set_error_handler(vtl::ErrorHandler *eh)
 	handler = eh;
 }
 
-static __always_inline void vtl__vwarnx(const char *fmt, va_list args,
-					bool doexit, int ecode)
+static vtl_always_inline void vtl__vwarnx(const char *fmt, va_list args,
+					  bool doexit, int ecode)
 {
 	if (handler != nullptr) {
 		if (doexit) {
@@ -89,8 +90,8 @@ static __always_inline void vtl__vwarnx(const char *fmt, va_list args,
 	}
 }
 
-static __always_inline void vtl__vwarn(int vtl_errno, const char *fmt,
-				       va_list args, bool doexit, int ecode)
+static vtl_always_inline void vtl__vwarn(int vtl_errno, const char *fmt,
+					 va_list args, bool doexit, int ecode)
 {
 	if (handler != nullptr) {
 		if (doexit) {

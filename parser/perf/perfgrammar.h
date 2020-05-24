@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,6 +57,7 @@
 #include "mm/stringpool.h"
 #include "mm/stringtree.h"
 #include "parser/traceevent.h"
+#include "vtl/compiler.h"
 #include "vtl/time.h"
 
 #define NEXTTOKEN(IS_LEAF)			\
@@ -73,19 +74,19 @@ public:
 	PerfGrammar();
 	~PerfGrammar();
 	void clear();
-	__always_inline bool parseLine(TraceLine &line, TraceEvent &event);
+	vtl_always_inline bool parseLine(TraceLine &line, TraceEvent &event);
 	StringTree<> *eventTree;
 private:
 	void setupEventTree();
-	__always_inline bool StoreMatch(TString *str, TraceEvent &event);
-	__always_inline bool NameMatch(TString *str, TraceEvent &event);
-	__always_inline bool IntArgMatch(TString *str, TraceEvent &event);
-	__always_inline int pidFromString(const TString &str, bool &ok);
-	__always_inline bool PidMatch(TString *str, TraceEvent &event);
-	__always_inline bool CPUMatch(TString *str, TraceEvent &event);
-	__always_inline bool TimeMatch(TString *str, TraceEvent &event);
-	__always_inline bool EventMatch(TString *str, TraceEvent &event);
-	__always_inline bool ArgMatch(TString *str, TraceEvent &event);
+	vtl_always_inline bool StoreMatch(TString *str, TraceEvent &event);
+	vtl_always_inline bool NameMatch(TString *str, TraceEvent &event);
+	vtl_always_inline bool IntArgMatch(TString *str, TraceEvent &event);
+	vtl_always_inline int pidFromString(const TString &str, bool &ok);
+	vtl_always_inline bool PidMatch(TString *str, TraceEvent &event);
+	vtl_always_inline bool CPUMatch(TString *str, TraceEvent &event);
+	vtl_always_inline bool TimeMatch(TString *str, TraceEvent &event);
+	vtl_always_inline bool EventMatch(TString *str, TraceEvent &event);
+	vtl_always_inline bool ArgMatch(TString *str, TraceEvent &event);
 	StringPool<> *argPool;
 	StringPool<> *namePool;
 
@@ -107,7 +108,7 @@ private:
 	} grammarstate_t;
 };
 
-__always_inline bool PerfGrammar::StoreMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::StoreMatch(TString *str, TraceEvent &event)
 {
 	/*
 	 * We temporarily store the process name string(s) into the
@@ -124,12 +125,12 @@ __always_inline bool PerfGrammar::StoreMatch(TString *str, TraceEvent &event)
 	return true;
 }
 
-__always_inline bool PerfGrammar::NameMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::NameMatch(TString *str, TraceEvent &event)
 {
 	return StoreMatch(str, event);
 }
 
-__always_inline bool PerfGrammar::IntArgMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::IntArgMatch(TString *str, TraceEvent &event)
 {
 	char *lastChr = str->ptr + str->len - 1;
 	char *c = str->ptr;
@@ -158,12 +159,12 @@ __always_inline bool PerfGrammar::IntArgMatch(TString *str, TraceEvent &event)
 	return true;
 }
 
-__always_inline bool PerfGrammar::PidMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::PidMatch(TString *str, TraceEvent &event)
 {
 	return StoreMatch(str, event);
 }
 
-__always_inline bool PerfGrammar::CPUMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::CPUMatch(TString *str, TraceEvent &event)
 {
 	char *c;
 	unsigned int cpu = 0;
@@ -189,7 +190,7 @@ error:
 	return false;
 }
 
-__always_inline int PerfGrammar::pidFromString(const TString &str, bool &ok)
+vtl_always_inline int PerfGrammar::pidFromString(const TString &str, bool &ok)
 {
 	char *lastChr = str.ptr + str.len - 1;
 	int pid;
@@ -220,7 +221,7 @@ __always_inline int PerfGrammar::pidFromString(const TString &str, bool &ok)
 	return (neg ? -pid:pid);
 }
 
-__always_inline bool PerfGrammar::TimeMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::TimeMatch(TString *str, TraceEvent &event)
 {
 	bool rval;
 	TString namestr;
@@ -270,7 +271,7 @@ __always_inline bool PerfGrammar::TimeMatch(TString *str, TraceEvent &event)
 	return rval;
 }
 
-__always_inline bool PerfGrammar::EventMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::EventMatch(TString *str, TraceEvent &event)
 {
 	char *lastChr = str->ptr + str->len - 1;
 	char *c;
@@ -314,7 +315,7 @@ __always_inline bool PerfGrammar::EventMatch(TString *str, TraceEvent &event)
 	return true;
 }
 
-__always_inline bool PerfGrammar::ArgMatch(TString *str, TraceEvent &event)
+vtl_always_inline bool PerfGrammar::ArgMatch(TString *str, TraceEvent &event)
 {
 	const TString *newstr;
 	if (event.argc < EVENT_MAX_NR_ARGS) {
@@ -329,7 +330,8 @@ __always_inline bool PerfGrammar::ArgMatch(TString *str, TraceEvent &event)
 }
 
 
-__always_inline bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
+vtl_always_inline
+bool PerfGrammar::parseLine(TraceLine &line, TraceEvent &event)
 {
 	TString *str = line.strings;
 	unsigned int n = line.nStrings;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,13 +54,14 @@
 #define TRACELINEDATA_H
 
 #include <cstdint>
+#include "vtl/compiler.h"
 #include "vtl/time.h"
 
 class TraceEvent;
 
 class TraceLineData {
 public:
-	__always_inline void clear();
+	vtl_always_inline void clear();
 	vtl::Time prevTime;
 	bool prevLineIsEvent;
 	TraceEvent *prevEvent;
@@ -68,7 +69,7 @@ public:
 	unsigned long nrEvents;
 };
 
-__always_inline void TraceLineData::clear()
+vtl_always_inline void TraceLineData::clear()
 {
 	prevTime = VTL_TIME_MIN;
 	prevLineIsEvent = true;

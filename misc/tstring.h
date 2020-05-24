@@ -61,24 +61,24 @@ class TString {
 public:
 	char *ptr;
 	int len;
-	static __always_inline int cmp(const TString *a, const TString *b);
-	static __always_inline int strcmp(const TString *a, const TString *b);
-	static __always_inline int strcmp(const TString *a, const TString *b,
+	static vtl_always_inline int cmp(const TString *a, const TString *b);
+	static vtl_always_inline int strcmp(const TString *a, const TString *b);
+	static vtl_always_inline int strcmp(const TString *a, const TString *b,
 					  short skip,
 					  short *neq);
-	__always_inline bool merge(const TString *s, int maxlen)
+	vtl_always_inline bool merge(const TString *s, int maxlen)
 		attr_warn_unused_result;
-	__always_inline bool set(const TString *s, int maxlen);
+	vtl_always_inline bool set(const TString *s, int maxlen);
 private:
-	__always_inline int TSTRING_MIN(int a, int b);
+	vtl_always_inline int TSTRING_MIN(int a, int b);
 };
 
-__always_inline int TString::TSTRING_MIN(int a, int b)
+int TString::TSTRING_MIN(int a, int b)
 {
 	return ((a) < (b) ? a:b);
 }
 
-__always_inline int TString::cmp(const TString *a, const TString *b) {
+vtl_always_inline int TString::cmp(const TString *a, const TString *b) {
 	int clen;
 	int rval;
 	int diff;
@@ -92,8 +92,8 @@ __always_inline int TString::cmp(const TString *a, const TString *b) {
 		return rval;
 }
 
-__always_inline int TString::strcmp(const TString *a, const TString *b,
-				    short skip, short *eqn)
+vtl_always_inline int TString::strcmp(const TString *a, const TString *b,
+				       short skip, short *eqn)
 {
 	int rval = (int) a->len - (int)  b->len;
 	int cval;
@@ -113,7 +113,7 @@ __always_inline int TString::strcmp(const TString *a, const TString *b,
 }
 
 /* This seems to be the fastest now, at least for stringpool */
-__always_inline int TString::strcmp(const TString *a, const TString *b)
+vtl_always_inline int TString::strcmp(const TString *a, const TString *b)
 {
 	int rval = (int) a->len - (int)  b->len;
 	int cval;
@@ -130,7 +130,7 @@ __always_inline int TString::strcmp(const TString *a, const TString *b)
 	return rval;
 }
 
-__always_inline bool TString::merge(const TString *s, int maxlen)
+vtl_always_inline bool TString::merge(const TString *s, int maxlen)
 {
 	int newlen;
 
@@ -144,7 +144,7 @@ __always_inline bool TString::merge(const TString *s, int maxlen)
 	return true;
 }
 
-__always_inline bool TString::set(const TString *s, int maxlen)
+vtl_always_inline bool TString::set(const TString *s, int maxlen)
 {
 	len = TSTRING_MIN(s->len, maxlen);
 	strncpy(ptr, s->ptr, len);

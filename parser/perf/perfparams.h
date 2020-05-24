@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -69,7 +69,7 @@
 
 #define perf_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
 #define perf_cpuidle_cpu(EVENT)     (uint_after_pfix(EVENT, 1, IDLE_CPUID_PFIX))
-static __always_inline int perf_cpuidle_state(const TraceEvent &event)
+static vtl_always_inline int perf_cpuidle_state(const TraceEvent &event)
 {
 	int32_t state;
 	uint32_t ustate;
@@ -97,8 +97,9 @@ static __always_inline int perf_cpuidle_state(const TraceEvent &event)
 						      MIGRATE_PID_PFIX))
 
 
-static __always_inline bool perf_sched_switch_parse(const TraceEvent &event,
-						    sched_switch_handle& handle)
+static vtl_always_inline
+bool perf_sched_switch_parse(const TraceEvent &event,
+			     sched_switch_handle& handle)
 {
 	int i;
 
@@ -109,7 +110,7 @@ static __always_inline bool perf_sched_switch_parse(const TraceEvent &event,
 	return true;
 }
 
-static __always_inline taskstate_t
+static vtl_always_inline taskstate_t
 perf_sched_switch_handle_state(const TraceEvent &event,
 			       const sched_switch_handle &handle)
 {
@@ -145,7 +146,7 @@ distro_style:
 	return TASK_STATE_PARSER_ERROR;
 }
 
-static __always_inline int
+static vtl_always_inline int
 perf_sched_switch_handle_oldpid(const TraceEvent &event,
 				const sched_switch_handle &handle)
 {
@@ -161,7 +162,7 @@ perf_sched_switch_handle_oldpid(const TraceEvent &event,
 	return oldpid;
 }
 
-static __always_inline int
+static vtl_always_inline int
 perf_sched_switch_handle_newpid(const TraceEvent &event,
 				const sched_switch_handle &handle)
 {
@@ -177,7 +178,7 @@ perf_sched_switch_handle_newpid(const TraceEvent &event,
 	return newpid;
 }
 
-static __always_inline unsigned int
+static vtl_always_inline unsigned int
 perf_sched_switch_handle_oldprio(const TraceEvent &event,
 				 const sched_switch_handle &handle)
 {
@@ -197,7 +198,7 @@ perf_sched_switch_handle_oldprio(const TraceEvent &event,
 	}
 }
 
-static __always_inline unsigned int
+static vtl_always_inline unsigned int
 perf_sched_switch_handle_newprio(const TraceEvent &event,
 				 const sched_switch_handle &handle)
 {
@@ -212,7 +213,7 @@ perf_sched_switch_handle_newprio(const TraceEvent &event,
 	}
 }
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					 StringPool<> *pool,
 					 const sched_switch_handle &handle)
@@ -277,7 +278,7 @@ perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					StringPool<> *pool,
 					const sched_switch_handle &handle);
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					 StringPool<> *pool,
 					 const sched_switch_handle &handle)
@@ -361,7 +362,7 @@ perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 #define perf_sched_wakeup_cpu(EVENT) (uint_after_pfix(EVENT, EVENT.argc - 1, \
 						      WAKE_TCPU_PFIX))
 
-static __always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
+static vtl_always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
 	int i;
@@ -377,7 +378,7 @@ static __always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 	return true;
 }
 
-static __always_inline unsigned int
+static vtl_always_inline unsigned int
 perf_sched_wakeup_prio(const TraceEvent &event)
 {
 	unsigned int newidx = event.argc - 2;
@@ -390,7 +391,7 @@ perf_sched_wakeup_prio(const TraceEvent &event)
 	return uint_after_pfix(event, event.argc - 3, WAKE_PRIO_PFIX);
 }
 
-static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
+static vtl_always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 {
 	int newidx = event.argc - 3;
 	int oldidx;
@@ -412,7 +413,7 @@ static __always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 	return int_after_char(event, oldidx, '=');
 }
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
 	int i;
@@ -481,7 +482,7 @@ const char *perf_sched_wakeup_name_strdup(const TraceEvent &event,
 
 #define perf_sched_process_fork_args_ok(EVENT) (EVENT.argc >= 4)
 
-static __always_inline
+static vtl_always_inline
 int perf_sched_process_fork_childpid(const TraceEvent &event) {
 	int i;
 	int endidx = event.argc - 1;
@@ -500,7 +501,7 @@ int perf_sched_process_fork_childpid(const TraceEvent &event) {
 	return int_after_char(event, i, '=');
 }
 
-static __always_inline
+static vtl_always_inline
 int perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 	int i;
 	int endidx = event.argc - 1;
@@ -521,7 +522,7 @@ int perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 	return int_after_char(event, i, '=');
 }
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 					  StringPool<> *pool)
 {

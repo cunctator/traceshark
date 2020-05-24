@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -56,15 +56,16 @@
 #include "parser/ftrace/ftraceparams.h"
 #include "parser/perf/perfparams.h"
 #include "misc/traceshark.h"
+#include "vtl/compiler.h"
 
-static __always_inline bool tracetype_is_valid(tracetype_t ttype)
+static vtl_always_inline bool tracetype_is_valid(tracetype_t ttype)
 {
 	return ttype == TRACE_TYPE_FTRACE || ttype == TRACE_TYPE_PERF;		
 }
 
 #define DECLARE_GENERIC_TRACEFN(FNAME, RETTYPE)			   \
-static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
-				     const TraceEvent &event)	   \
+static vtl_always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
+				       const TraceEvent &event)	   \
 {							           \
 	if (tt == TRACE_TYPE_FTRACE)				   \
 		return ftrace_##FNAME(event);			   \
@@ -73,9 +74,9 @@ static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
 }
 
 #define DECLARE_GENERIC_TRACEFN_POOL(FNAME, RETTYPE)		   \
-static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
-				     const TraceEvent &event,	   \
-				     StringPool<> *pool)	   \
+static vtl_always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
+				       const TraceEvent &event,	   \
+				       StringPool<> *pool)	   \
 {							           \
 	if (tt == TRACE_TYPE_FTRACE)				   \
 		return ftrace_##FNAME(event, pool);		   \
@@ -84,9 +85,9 @@ static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
 }
 
 #define DECLARE_GENERIC_TRACEFN_HANDLE(FNAME, RETTYPE, HANDLETYPE)	\
-	static __always_inline RETTYPE FNAME(tracetype_t tt,		\
-					     const TraceEvent &event,	\
-					     HANDLETYPE handle		\
+	static vtl_always_inline RETTYPE FNAME(tracetype_t tt,		\
+					       const TraceEvent &event,	\
+					       HANDLETYPE handle	\
 		)							\
 	{								\
 		if (tt == TRACE_TYPE_FTRACE)				\
@@ -97,7 +98,7 @@ static __always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
 
 
 #define DECLARE_GENERIC_TRACEFN_POOL_HANDLE(FNAME, RETTYPE, HANDLETYPE)	\
-	static __always_inline RETTYPE FNAME(tracetype_t tt,		\
+	static vtl_always_inline RETTYPE FNAME(tracetype_t tt,		\
 					     const TraceEvent &event,	\
 					     StringPool<> *pool,	\
 					     HANDLETYPE handle)		\

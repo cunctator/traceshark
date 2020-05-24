@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -56,13 +56,15 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#include "vtl/compiler.h"
+
 class IndexWatcher
 {
 public:
 	IndexWatcher(int bSize = 100);
 	void setBatchSize(int bSize);
-	__always_inline void waitForNextBatch(bool &eof, int &index);
-	__always_inline void sendNextIndex(int index);
+	vtl_always_inline void waitForNextBatch(bool &eof, int &index);
+	vtl_always_inline void sendNextIndex(int index);
 	void sendEOF();
 	void reset();
 private:
@@ -76,7 +78,7 @@ private:
 	QWaitCondition batchCompleted;
 };
 
-__always_inline void IndexWatcher::waitForNextBatch(bool &eof, int &index)
+vtl_always_inline void IndexWatcher::waitForNextBatch(bool &eof, int &index)
 {
 	mutex.lock();
 	while(!isEOF && postedIndex - receivedIndex < batchSize) {
@@ -88,7 +90,7 @@ __always_inline void IndexWatcher::waitForNextBatch(bool &eof, int &index)
 	mutex.unlock();
 }
 
-__always_inline void IndexWatcher::sendNextIndex(int index)
+vtl_always_inline void IndexWatcher::sendNextIndex(int index)
 {
 	mutex.lock();
 	if (index <= postedIndex)

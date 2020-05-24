@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -56,6 +56,7 @@
 #include "mm/mempool.h"
 #include "misc/chunk.h"
 #include "misc/errors.h"
+#include "vtl/compiler.h"
 #include "vtl/error.h"
 #include <QtGlobal>
 #include <new>
@@ -69,7 +70,7 @@ extern "C" {
 #include <unistd.h>
 }
 
-__always_inline static int clib_close(int fd)
+vtl_always_inline static int clib_close(int fd)
 {
 	return close(fd);
 }

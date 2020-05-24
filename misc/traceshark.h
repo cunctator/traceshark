@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -147,7 +147,7 @@ namespace TShark {
 	 * For example, 123.456: is ok. 123.456X is not ok if
 	 * X is not a digit between 0-9 or a ':'
 	 */
-	static __always_inline double timeStrToDouble(char* str, bool &ok)
+	static vtl_always_inline double timeStrToDouble(char* str, bool &ok)
 	{
 		char *c;
 		double r;
@@ -206,7 +206,7 @@ namespace TShark {
 		uint8_t word8[4];
 	};
 
-	__always_inline uint32_t StrHash32(const TString *str)
+	vtl_always_inline uint32_t StrHash32(const TString *str)
 	{
 		union value32 uvalue;
 		uvalue.word32 = 0;
@@ -222,8 +222,8 @@ namespace TShark {
 		return uvalue.word32;
 	}
 
-	__always_inline bool cmp_timespec(const struct timespec &s1,
-					  const struct timespec &s2) {
+	vtl_always_inline bool cmp_timespec(const struct timespec &s1,
+					    const struct timespec &s2) {
 		return s1.tv_sec == s2.tv_sec && s1.tv_nsec == s2.tv_nsec;
 	}
 }

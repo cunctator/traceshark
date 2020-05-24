@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,6 +54,7 @@
 #define WORKITEM_H
 
 #include "misc/traceshark.h"
+#include "vtl/compiler.h"
 
 class WorkQueue;
 
@@ -66,11 +67,11 @@ class AbstractWorkItem {
 public:
 	virtual ~AbstractWorkItem() {}
 protected:
-	__always_inline bool __runWork();
+	vtl_always_inline bool __runWork();
 	virtual bool run() = 0;
 };
 
-__always_inline bool AbstractWorkItem::__runWork() {
+vtl_always_inline bool AbstractWorkItem::__runWork() {
 	return run();
 }
 
@@ -87,7 +88,7 @@ public:
 	virtual ~WorkItem() {}
 	void setObjFn(W *obj, DEFINE_MEMBER_FN(bool, W, fn));
 protected:
-	__always_inline bool run();
+	vtl_always_inline bool run();
 private:
 	W *workObj;
 	DEFINE_MEMBER_FN(bool, W,  workObjFn);
@@ -104,7 +105,7 @@ void WorkItem<W>::setObjFn(W *obj, DEFINE_MEMBER_FN(bool, W, fn)) {
 }
 
 template <class W>
-__always_inline bool WorkItem<W>::run() {
+vtl_always_inline bool WorkItem<W>::run() {
 	return CALL_MEMBER_FN(workObj, workObjFn)();
 }
 

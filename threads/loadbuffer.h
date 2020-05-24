@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -62,6 +62,8 @@ extern "C" {
 #include <unistd.h>
 }
 
+#include "vtl/compiler.h"
+
 class TString;
 
 /*
@@ -90,14 +92,14 @@ public:
 	void endTokenizeBuffer();
 	void beginConsumeBuffer();
 	void endConsumeBuffer();
-	__always_inline bool isEOF() const;
+	vtl_always_inline bool isEOF() const;
 private:
-	__always_inline void waitForLoadingComplete();
-	__always_inline void completeLoading();
-	__always_inline void waitForTokenizationComplete();
-	__always_inline void completeTokenization();
-	__always_inline void waitForConsumptionComplete();
-	__always_inline void completeConsumption();
+	vtl_always_inline void waitForLoadingComplete();
+	vtl_always_inline void completeLoading();
+	vtl_always_inline void waitForTokenizationComplete();
+	vtl_always_inline void completeTokenization();
+	vtl_always_inline void waitForConsumptionComplete();
+	vtl_always_inline void completeConsumption();
 	typedef enum : int {
 		LOADSTATE_EMPTY = 0,
 		LOADSTATE_LOADED,
@@ -111,7 +113,7 @@ private:
 	bool eof;
 };
 
-__always_inline void LoadBuffer::waitForLoadingComplete() {
+vtl_always_inline void LoadBuffer::waitForLoadingComplete() {
 	mutex.lock();
 	while(state != LOADSTATE_LOADED) {
 		/*
@@ -122,13 +124,13 @@ __always_inline void LoadBuffer::waitForLoadingComplete() {
 	}
 }
 
-__always_inline void LoadBuffer::completeLoading() {
+vtl_always_inline void LoadBuffer::completeLoading() {
 	state = LOADSTATE_LOADED;
 	loadingComplete.wakeOne();
 	mutex.unlock();
 }
 
-__always_inline void LoadBuffer::waitForTokenizationComplete() {
+vtl_always_inline void LoadBuffer::waitForTokenizationComplete() {
 	mutex.lock();
 	while(state != LOADSTATE_TOKENIZED) {
 		/*
@@ -139,14 +141,14 @@ __always_inline void LoadBuffer::waitForTokenizationComplete() {
 	}
 }
 
-__always_inline void LoadBuffer::completeTokenization() {
+vtl_always_inline void LoadBuffer::completeTokenization() {
 	state = LOADSTATE_TOKENIZED;
 	parsingComplete.wakeOne();
 	mutex.unlock();
 }
 
 
-__always_inline void LoadBuffer::waitForConsumptionComplete() {
+vtl_always_inline void LoadBuffer::waitForConsumptionComplete() {
 	mutex.lock();
 	while(state != LOADSTATE_EMPTY) {
 		/*
@@ -157,13 +159,13 @@ __always_inline void LoadBuffer::waitForConsumptionComplete() {
 	}
 }
 
-__always_inline void LoadBuffer::completeConsumption() {
+vtl_always_inline void LoadBuffer::completeConsumption() {
 	state = LOADSTATE_EMPTY;
 	consumptionComplete.wakeOne();
 	mutex.unlock();
 }
 
-__always_inline bool LoadBuffer::isEOF() const {
+vtl_always_inline bool LoadBuffer::isEOF() const {
 	return eof;
 }
 

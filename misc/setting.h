@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2018-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -53,10 +53,11 @@
 #ifndef SETTING_H
 #define SETTING_H
 
-#include "vtl/error.h"
-
 #include <QString>
 #include <QMap>
+
+#include "vtl/compiler.h"
+#include "vtl/error.h"
 
 QT_BEGIN_NAMESPACE
 class QTextStream;
@@ -97,15 +98,15 @@ public:
 		Value();
 		Value(bool b);
 		Value(int i);
-		__always_inline bool operator<(const Value &other) const;
-		__always_inline bool operator>(const Value &other) const;
-		__always_inline bool operator<=(const Value &other) const;
-		__always_inline bool operator>=(const Value &other) const;
-		__always_inline bool operator==(const Value &other) const;
-		__always_inline bool operator!=(const Value &other) const;
-		__always_inline bool boolv() const;
-		__always_inline int intv() const;
-		__always_inline type_t type() const;
+		vtl_always_inline bool operator<(const Value &other) const;
+		vtl_always_inline bool operator>(const Value &other) const;
+		vtl_always_inline bool operator<=(const Value &other) const;
+		vtl_always_inline bool operator>=(const Value &other) const;
+		vtl_always_inline bool operator==(const Value &other) const;
+		vtl_always_inline bool operator!=(const Value &other) const;
+		vtl_always_inline bool boolv() const;
+		vtl_always_inline int intv() const;
+		vtl_always_inline type_t type() const;
 	protected:
 		type_t type_;
 		union {
@@ -132,16 +133,16 @@ public:
 		Dependency(index_t i, int low, int high);
 		bool getDesiredBool() const;
 		int getDesiredInt() const;
-		__always_inline enum Type type() const;
-		__always_inline int index() const;
-		__always_inline const Value &desired() const;
-		__always_inline const Value &low() const;
-		__always_inline const Value &high() const;
+		vtl_always_inline enum Type type() const;
+		vtl_always_inline int index() const;
+		vtl_always_inline const Value &desired() const;
+		vtl_always_inline const Value &low() const;
+		vtl_always_inline const Value &high() const;
 		const Value &getLowerBound() const;
 		const Value &getHigherBound() const;
 		bool check(const Value &val) const;
-		__always_inline void assert_desired() const;
-		__always_inline void assert_interval() const;
+		vtl_always_inline void assert_desired() const;
+		vtl_always_inline void assert_interval() const;
 	protected:
 		type_t type_;
 		int index_;
@@ -160,10 +161,10 @@ public:
 private:
 	static void error_type(Value::type_t expected, Value::type_t was);
 protected:
-	__always_inline static void assert_bool(const Value &val);
-	__always_inline static void assert_int(const Value &val);
-	__always_inline static void assert_same(Value::type_t a,
-						Value::type_t b);
+	vtl_always_inline static void assert_bool(const Value &val);
+	vtl_always_inline static void assert_int(const Value &val);
+	vtl_always_inline static void assert_same(Value::type_t a,
+						  Value::type_t b);
 	bool supported;
 	Value value;
 	Value min_value;
@@ -178,7 +179,7 @@ protected:
 	unsigned int nrDependents;
 };
 
-__always_inline
+vtl_always_inline
 bool Setting::Value::operator<(const Setting::Value &other) const
 {
 	assert_same(type_, other.type_);
@@ -196,7 +197,7 @@ bool Setting::Value::operator<(const Setting::Value &other) const
 	return true;
 }
 
-__always_inline
+vtl_always_inline
 bool Setting::Value::operator>(const Setting::Value &other) const
 {
 	assert_same(type_, other.type_);
@@ -214,7 +215,7 @@ bool Setting::Value::operator>(const Setting::Value &other) const
 	return true;
 }
 
-__always_inline
+vtl_always_inline
 bool Setting::Value::operator<=(const Setting::Value &other) const
 {
 	assert_same(type_, other.type_);
@@ -232,7 +233,7 @@ bool Setting::Value::operator<=(const Setting::Value &other) const
 	return true;
 }
 
-__always_inline
+vtl_always_inline
 bool Setting::Value::operator>=(const Setting::Value &other) const
 {
 	assert_same(type_, other.type_);
@@ -250,7 +251,7 @@ bool Setting::Value::operator>=(const Setting::Value &other) const
 	return true;
 }
 
-__always_inline
+vtl_always_inline
 bool Setting::Value::operator!=(const Setting::Value &other) const
 {
 	assert_same(type_, other.type_);
@@ -268,7 +269,7 @@ bool Setting::Value::operator!=(const Setting::Value &other) const
 	return true;
 }
 
-__always_inline
+vtl_always_inline
 bool Setting::Value::operator==(const Setting::Value &other) const
 {
 	assert_same(type_, other.type_);
@@ -286,79 +287,79 @@ bool Setting::Value::operator==(const Setting::Value &other) const
 	return true;
 }
 
-__always_inline
+vtl_always_inline
 bool Setting::Value::boolv() const
 {
 	assert_same(type_, TYPE_BOOL);
 	return value.bool_value;
 }
 
-__always_inline
+vtl_always_inline
 int Setting::Value::intv() const
 {
 	assert_same(type_, TYPE_INT);
 	return value.int_value;
 }
 
-__always_inline
+vtl_always_inline
 Setting::Value::type_t Setting::Value::type() const
 {
 	return type_;
 }
 
-__always_inline void Setting::assert_bool(const Setting::Value &val)
+vtl_always_inline void Setting::assert_bool(const Setting::Value &val)
 {
 	if (val.type_ != Setting::Value::TYPE_BOOL)
 		error_type(Setting::Value::TYPE_BOOL, val.type_);
 }
 
- __always_inline void Setting::assert_int(const Value &val)
+ vtl_always_inline void Setting::assert_int(const Value &val)
 {
 	if (val.type_ != Setting::Value::TYPE_INT)
 		error_type(Setting::Value::TYPE_INT, val.type_);
 }
 
-__always_inline void Setting::assert_same(Value::type_t a, Value::type_t b)
+vtl_always_inline void Setting::assert_same(Value::type_t a, Value::type_t b)
 {
 	if (a != b)
 		error_type(a, b);
 }
 
-__always_inline void Setting::Dependency::assert_desired() const
+vtl_always_inline void Setting::Dependency::assert_desired() const
 {
 	if (type_ != Setting::Dependency::DESIRED_VALUE)
 		error_dep_type();
 }
 
-__always_inline void Setting::Dependency::assert_interval() const
+vtl_always_inline void Setting::Dependency::assert_interval() const
 {
 	if (type_ != Setting::Dependency::DESIRED_INTERVAL)
 		error_dep_type();
 }
 
-__always_inline enum Setting::Dependency::Type Setting::Dependency::type() const
+vtl_always_inline enum Setting::Dependency::Type Setting::Dependency::type() const
 {
 	return type_;
 }
 
-__always_inline int Setting::Dependency::index() const
+vtl_always_inline int Setting::Dependency::index() const
 {
 	return index_;
 }
 
-__always_inline const Setting::Value &Setting::Dependency::desired() const
+vtl_always_inline const Setting::Value &Setting::Dependency::desired() const
 {
 	assert_desired();
 	return desired_value;
 }
 
-__always_inline const Setting::Value &Setting::Dependency::low() const
+vtl_always_inline const Setting::Value &Setting::Dependency::low() const
 {
 	assert_interval();
 	return low_value;
 }
 
-__always_inline const Setting::Value &Setting::Dependency::high() const
+vtl_always_inline const Setting::Value &Setting::Dependency::high() const
 {
 	assert_interval();
 	return high_value;

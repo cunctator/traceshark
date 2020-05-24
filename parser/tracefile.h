@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -69,6 +69,7 @@
 #include "misc/chunk.h"
 #include "misc/errors.h"
 #include "misc/traceshark.h"
+#include "vtl/compiler.h"
 
 class LoadThread;
 class TraceFile
@@ -77,30 +78,30 @@ public:
 	TraceFile(char *name, int &ts_errno, unsigned int bsize = 1024 * 1024);
 	~TraceFile();
 	void close(int *ts_errno);
-	__always_inline unsigned int
+	vtl_always_inline unsigned int
 		ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer);
-	__always_inline bool atEnd() const;
-	__always_inline bool getBufferSwitch() const;
-	__always_inline void clearBufferSwitch();
+	vtl_always_inline bool atEnd() const;
+	vtl_always_inline bool getBufferSwitch() const;
+	vtl_always_inline void clearBufferSwitch();
 	FileInfo fileInfo;
-	__always_inline LoadBuffer *getLoadBuffer(int index) const;
+	vtl_always_inline LoadBuffer *getLoadBuffer(int index) const;
 	QByteArray getChunkArray(const Chunk *chunk,
 						 int *ts_errno);
 	bool isIntact(int *ts_errno);
 	void readChunk(const Chunk *chunk, char *buf, int size,
 				       int *ts_errno);
-	__always_inline int64_t getFileSize();
+	vtl_always_inline int64_t getFileSize();
 	bool allocMmap();
 	void freeMmap();
 private:
-	__always_inline QByteArray getChunkArray_(const Chunk *chunk,
-						  int *ts_errno);
-	__always_inline void readChunk_(const Chunk *chunk, char *buf,
-					int size, int *ts_errno);
-	__always_inline unsigned int nextBufferIdx(unsigned int n);
-	__always_inline unsigned int
+	vtl_always_inline QByteArray getChunkArray_(const Chunk *chunk,
+						    int *ts_errno);
+	vtl_always_inline void readChunk_(const Chunk *chunk, char *buf,
+					  int size, int *ts_errno);
+	vtl_always_inline unsigned int nextBufferIdx(unsigned int n);
+	vtl_always_inline unsigned int
 		ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer);
-	__always_inline bool
+	vtl_always_inline bool
 		CheckBufferSwitch(unsigned int pos,
 				  ThreadBuffer<TraceLine> *tbuffer);
 	int fd;
@@ -120,9 +121,9 @@ private:
 };
 
 
-__always_inline bool TraceFile::CheckBufferSwitch(unsigned int pos,
-						  ThreadBuffer<TraceLine>
-						  *tbuffer)
+vtl_always_inline bool TraceFile::CheckBufferSwitch(unsigned int pos,
+						    ThreadBuffer<TraceLine>
+						    *tbuffer)
 {
 	LoadBuffer *loadBuffer = tbuffer->loadBuffer;
 	if (unlikely(pos >= loadBuffer->nRead)) {
@@ -134,7 +135,7 @@ __always_inline bool TraceFile::CheckBufferSwitch(unsigned int pos,
 	return false;
 }
 
-__always_inline unsigned int
+vtl_always_inline unsigned int
 TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 {
 	unsigned int pos = lastPos;
@@ -184,7 +185,7 @@ TraceFile::ReadNextWord(char **word, ThreadBuffer<TraceLine> *tbuffer)
 	return nchar;
 }
 
-__always_inline unsigned int
+vtl_always_inline unsigned int
 TraceFile::ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer)
 {
 	unsigned int col;
@@ -208,17 +209,17 @@ TraceFile::ReadLine(TraceLine *line, ThreadBuffer<TraceLine> *tbuffer)
 	return col;
 }
 
-__always_inline bool TraceFile::getBufferSwitch() const
+vtl_always_inline bool TraceFile::getBufferSwitch() const
 {
 	return bufferSwitch;
 }
 
-__always_inline void TraceFile::clearBufferSwitch()
+vtl_always_inline void TraceFile::clearBufferSwitch()
 {
 	bufferSwitch = false;
 }
 
-__always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
+vtl_always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
 {
 	n++;
 	if (n == NR_BUFFERS)
@@ -226,13 +227,13 @@ __always_inline unsigned int TraceFile::nextBufferIdx(unsigned int n)
 	return n;
 }
 
-__always_inline LoadBuffer *TraceFile::getLoadBuffer(int index) const
+vtl_always_inline LoadBuffer *TraceFile::getLoadBuffer(int index) const
 {
 	return loadBuffers[index];
 }
 
-__always_inline QByteArray TraceFile::getChunkArray_(const Chunk *chunk,
-						     int *ts_errno)
+vtl_always_inline QByteArray TraceFile::getChunkArray_(const Chunk *chunk,
+						       int *ts_errno)
 {
 	char *buf;
 	size_t count;
@@ -286,8 +287,8 @@ out:
 	return rval;
 }
 
-__always_inline void TraceFile::readChunk_(const Chunk *chunk, char *buf,
-					   int size, int *ts_errno)
+vtl_always_inline void TraceFile::readChunk_(const Chunk *chunk, char *buf,
+					     int size, int *ts_errno)
 {
 	size_t count;
 	char *b;

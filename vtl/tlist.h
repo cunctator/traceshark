@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -102,23 +102,23 @@ class TList
 public:
 	TList();
 	~TList();
-	__always_inline void append(const T &element);
-	__always_inline T& increase();
-	__always_inline T& preAlloc();
-	__always_inline void commit();
-	__always_inline T value(int index) const;
-	__always_inline const T& at(int index) const;
-	__always_inline T& last();
-	__always_inline int size() const;
+	vtl_always_inline void append(const T &element);
+	vtl_always_inline T& increase();
+	vtl_always_inline T& preAlloc();
+	vtl_always_inline void commit();
+	vtl_always_inline T value(int index) const;
+	vtl_always_inline const T& at(int index) const;
+	vtl_always_inline T& last();
+	vtl_always_inline int size() const;
 	void clear();
 	void softclear();
-	__always_inline T& operator[](int index);
-	__always_inline const T& operator[](int index) const;
-	__always_inline void swap(int a, int b);
+	vtl_always_inline T& operator[](int index);
+	vtl_always_inline const T& operator[](int index) const;
+	vtl_always_inline void swap(int a, int b);
 private:
-	__always_inline T& subscript(int index) const;
-	__always_inline int mapFromIndex(int index) const;
-	__always_inline int mapIndexFromIndex(int index)
+	vtl_always_inline T& subscript(int index) const;
+	vtl_always_inline int mapFromIndex(int index) const;
+	vtl_always_inline int mapIndexFromIndex(int index)
 		const;
 	void clearAll();
 	void setupMem();
@@ -143,13 +143,13 @@ TList<T>::~TList()
 }
 
 template<class T>
-__always_inline int TList<T>::mapFromIndex(int index) const
+vtl_always_inline int TList<T>::mapFromIndex(int index) const
 {
 	return (index >> TLIST_MAP_SHIFT);
 }
 
 template<class T>
-__always_inline int TList<T>::mapIndexFromIndex(int index)
+vtl_always_inline int TList<T>::mapIndexFromIndex(int index)
 const
 {
 	return (index & TLIST_MAP_ELEMENT_MASK);
@@ -209,7 +209,7 @@ void TList<T>::clearAll()
 }
 
 template<class T>
-__always_inline T& TList<T>::increase()
+vtl_always_inline T& TList<T>::increase()
 {
 	int map = mapFromIndex(nrElements);
 	int mapIndex = mapIndexFromIndex(nrElements);
@@ -220,7 +220,7 @@ __always_inline T& TList<T>::increase()
 }
 
 template<class T>
-__always_inline T& TList<T>::preAlloc()
+vtl_always_inline T& TList<T>::preAlloc()
 {
 	int map = mapFromIndex(nrElements);
 	int mapIndex = mapIndexFromIndex(nrElements);
@@ -230,13 +230,13 @@ __always_inline T& TList<T>::preAlloc()
 }
 
 template<class T>
-__always_inline void TList<T>::commit()
+vtl_always_inline void TList<T>::commit()
 {
 	nrElements++;
 }
 
 template<class T>
-__always_inline void TList<T>::append(const T &element)
+vtl_always_inline void TList<T>::append(const T &element)
 {
 	int map = mapFromIndex(nrElements);
 	int mapIndex = mapIndexFromIndex(nrElements);
@@ -247,7 +247,7 @@ __always_inline void TList<T>::append(const T &element)
 }
 
 template<class T>
-__always_inline const T& TList<T>::at(int index) const
+vtl_always_inline const T& TList<T>::at(int index) const
 {
 	int map = mapFromIndex(index);
 	int mapIndex = mapIndexFromIndex(index);
@@ -255,7 +255,7 @@ __always_inline const T& TList<T>::at(int index) const
 }
 
 template<class T>
-__always_inline T TList<T>::value(int index) const
+vtl_always_inline T TList<T>::value(int index) const
 {
 	if (index >= nrElements) {
 		T dvalue;
@@ -265,7 +265,7 @@ __always_inline T TList<T>::value(int index) const
 }
 
 template<class T>
-__always_inline T& TList<T>::last()
+vtl_always_inline T& TList<T>::last()
 {
 	int index = nrElements - 1;
 	int map = mapFromIndex(index);
@@ -275,7 +275,7 @@ __always_inline T& TList<T>::last()
 }
 
 template<class T>
-__always_inline int TList<T>::size() const
+vtl_always_inline int TList<T>::size() const
 {
 	return nrElements;
 }
@@ -294,7 +294,7 @@ void TList<T>::softclear()
 }
 
 template<class T>
-__always_inline void TList<T>::swap(int a, int b)
+vtl_always_inline void TList<T>::swap(int a, int b)
 {
 	T foo;
 	T &ta = subscript(a);
@@ -305,7 +305,7 @@ __always_inline void TList<T>::swap(int a, int b)
 }
 
 template<class T>
-__always_inline T& TList<T>::subscript(int index) const
+vtl_always_inline T& TList<T>::subscript(int index) const
 {
 	int map = mapFromIndex(index);
 	int mapIndex = mapIndexFromIndex(index);
@@ -313,13 +313,13 @@ __always_inline T& TList<T>::subscript(int index) const
 }
 
 template<class T>
-__always_inline T& TList<T>::operator[](int index)
+vtl_always_inline T& TList<T>::operator[](int index)
 {
 	return subscript(index);
 }
 
 template<class T>
-__always_inline const T& TList<T>::operator[](int index) const
+vtl_always_inline const T& TList<T>::operator[](int index) const
 {
 	return subscript(index);
 }

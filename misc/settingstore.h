@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,6 +54,8 @@
 #define _TS_SETTINGSTORE_H
 
 #include <QString>
+
+#include "vtl/compiler.h"
 #include "setting.h"
 
 #define TS_SETTING_FILENAME ".traceshark"
@@ -70,7 +72,7 @@ public:
 	const Setting::Value &getMinValue(enum Setting::Index idx) const;
 	const Setting::Value &getMaxValue(enum Setting::Index idx) const;
 	bool isFlagSet(enum Setting::Index idx , enum Setting::Flag f) const;
-	__always_inline bool isSupported(enum Setting::Index idx) const;
+	vtl_always_inline bool isSupported(enum Setting::Index idx) const;
 	unsigned int getNrDependencies(enum Setting::Index idx) const;
 	unsigned int getNrDependents(enum Setting::Index idx) const;
 	const QString &getName(enum Setting::Index idx) const;
@@ -108,7 +110,7 @@ private:
 	static const int this_version;
 };
 
-__always_inline bool SettingStore::isSupported(enum Setting::Index idx) const
+vtl_always_inline bool SettingStore::isSupported(enum Setting::Index idx) const
 {
 	return settings[idx].supported;
 }

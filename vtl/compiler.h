@@ -53,19 +53,53 @@
 #ifndef VTL_COMPILER_H
 #define VTL_COMPILER_H
 
+#include <unistd.h>
+
 #ifdef __has_cpp_attribute
-#define TS_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+#define vtl_has_cpp_attribute(x) __has_cpp_attribute(x)
 #else
-#define TS_HAS_CPP_ATTRIBUTE(x) 0
+#define vtl_has_cpp_attribute(x) 0
 #endif
 
-#if TS_HAS_CPP_ATTRIBUTE(fallthrough)
+#ifdef __has_attribute
+#define vtl_has_attribute(x) __has_attribute(x)
+#else
+#define vtl_has_attribute(x) 0
+#endif
+
+#if vtl_has_cpp_attribute(fallthrough)
 #define ts_fallthrough [[fallthrough]]
-#elif TS_HAS_CPP_ATTRIBUTE(gnu::fallthrough)
+#elif vtl_has_cpp_attribute(gnu::fallthrough)
 #define ts_fallthrough [[gnu::fallthrough]]
 #else
 #define ts_fallthrough (void)0
 #endif
+
+#ifdef __always_inline
+#define vtl_always_inline __always_inline
+#else
+
+#ifdef __inline__
+#define vtl_always_inline __inline__
+#else
+
+#if vtl_has_attribute(always_inline)
+
+#define vtl_always_inline __inline __attribute__((always_inline))
+
+#else
+
+#if vtl_has_attribute(__always_inline__)
+#define vtl_always_inline __inline __attribute__((__always_inline__))
+#else
+#define vtl_always_inline __inline
+#endif /* __has_attribute(__always_inline__) */
+
+#endif /* __has_attribute(always_inline) */
+
+#endif /* ifdef __always_inline */
+
+#endif /* ifdef __inline__ */
 
 #if defined(__GNUC__) || defined (__clang__)
 

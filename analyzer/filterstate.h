@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2017, 2019, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,6 +55,8 @@
 
 #include <cstdint>
 
+#include "vtl/compiler.h"
+
 class FilterState {
 public:
 	FilterState();
@@ -70,12 +72,12 @@ public:
 	void disable(filter_t filter);
 	void disableAll();
 	bool isEnabled() const;
-	__always_inline bool isEnabled(filter_t filter) const;
+	vtl_always_inline bool isEnabled(filter_t filter) const;
 private:
 	bool state[NR_FILTERS];
 };
 
-__always_inline bool FilterState::isEnabled(filter_t filter) const
+vtl_always_inline bool FilterState::isEnabled(filter_t filter) const
 {
 	return state[filter];
 }

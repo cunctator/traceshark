@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -58,6 +58,7 @@
 #include "mm/stringtree.h"
 #include "parser/paramhelpers.h"
 #include "parser/traceevent.h"
+#include "vtl/compiler.h"
 #include "vtl/time.h"
 
 #define NEXTTOKEN(IS_LEAF)			\
@@ -74,19 +75,20 @@ public:
 	FtraceGrammar();
 	~FtraceGrammar();
 	void clear();
-	__always_inline bool parseLine(const TraceLine &line,
+	vtl_always_inline bool parseLine(const TraceLine &line,
 				       TraceEvent &event);
 	StringTree<> *eventTree;
 private:
 	void setupEventTree();
-	__always_inline bool NamePidMatch(const TString *str,
+	vtl_always_inline bool NamePidMatch(const TString *str,
 					  TraceEvent &event);
-	__always_inline bool CPUMatch(const TString *str,
+	vtl_always_inline bool CPUMatch(const TString *str,
 				      TraceEvent &event);
-	__always_inline bool extractNameAndPid(int &pid, TString &compound);
-	__always_inline bool TimeMatch(const TString *str, TraceEvent &event);
-	__always_inline bool EventMatch(const TString *str, TraceEvent &event);
-	__always_inline bool ArgMatch(const TString *str, TraceEvent &event);
+	vtl_always_inline bool extractNameAndPid(int &pid, TString &compound);
+	vtl_always_inline bool TimeMatch(const TString *str, TraceEvent &event);
+	vtl_always_inline
+	bool EventMatch(const TString *str, TraceEvent &event);
+	vtl_always_inline bool ArgMatch(const TString *str, TraceEvent &event);
 	StringPool<> *argPool;
 	StringPool<> *namePool;
 	int unknownTypeCounter;
@@ -101,7 +103,7 @@ private:
 	const TString *tmp_argv[EVENT_MAX_NR_ARGS];
 };
 
-__always_inline bool FtraceGrammar::NamePidMatch(const TString *str,
+vtl_always_inline bool FtraceGrammar::NamePidMatch(const TString *str,
 						 TraceEvent &/*event*/)
 {
 	/*
@@ -119,7 +121,7 @@ __always_inline bool FtraceGrammar::NamePidMatch(const TString *str,
 	return true;
 }
 
-__always_inline bool FtraceGrammar::CPUMatch(const TString *str,
+vtl_always_inline bool FtraceGrammar::CPUMatch(const TString *str,
 					     TraceEvent &event)
 {
 	char *c;
@@ -146,7 +148,7 @@ error:
 	return false;
 }
 
-__always_inline bool FtraceGrammar::extractNameAndPid(int &pid,
+vtl_always_inline bool FtraceGrammar::extractNameAndPid(int &pid,
 						      TString &compound)
 {
 	char *nullChr = compound.ptr + compound.len;
@@ -186,7 +188,7 @@ found1:
 	return true;
 }
 
-__always_inline bool FtraceGrammar::TimeMatch(const TString *str,
+vtl_always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 					      TraceEvent &event)
 {
 	bool rval;
@@ -254,7 +256,7 @@ __always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 	return rval;
 }
 
-__always_inline bool FtraceGrammar::EventMatch(const TString *str,
+vtl_always_inline bool FtraceGrammar::EventMatch(const TString *str,
 					       TraceEvent &event)
 {
 	char buf[512];
@@ -291,7 +293,7 @@ __always_inline bool FtraceGrammar::EventMatch(const TString *str,
 	return true;
 }
 
-__always_inline bool FtraceGrammar::ArgMatch(const TString *str,
+vtl_always_inline bool FtraceGrammar::ArgMatch(const TString *str,
 					     TraceEvent &event)
 {
 	const TString *newstr;
@@ -307,7 +309,7 @@ __always_inline bool FtraceGrammar::ArgMatch(const TString *str,
 }
 
 
-__always_inline bool FtraceGrammar::parseLine(const TraceLine &line,
+vtl_always_inline bool FtraceGrammar::parseLine(const TraceLine &line,
 					      TraceEvent &event)
 {
 	const TString *str = line.strings;

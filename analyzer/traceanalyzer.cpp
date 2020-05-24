@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -66,6 +66,7 @@ extern "C" {
 #include <QList>
 #include <QString>
 
+#include "vtl/compiler.h"
 #include "vtl/error.h"
 #include "vtl/tlist.h"
 
@@ -83,13 +84,13 @@ extern "C" {
 #include "threads/workitem.h"
 #include "threads/workqueue.h"
 
-__always_inline static int clib_open(const char *pathname, int flags,
+vtl_always_inline static int clib_open(const char *pathname, int flags,
 				     mode_t mode)
 {
 	return open(pathname, flags, mode);
 }
 
-__always_inline static int clib_close(int fd)
+vtl_always_inline static int clib_close(int fd)
 {
 	return close(fd);
 }

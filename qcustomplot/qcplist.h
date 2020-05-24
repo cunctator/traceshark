@@ -59,6 +59,32 @@
 #include <cstdint>
 #include <cstdlib>
 
+#ifdef __has_attribute
+#define qcp_has_attribute(x) __has_attribute(x)
+#else
+#define qcp_has_attribute(x) 0
+#endif
+
+#ifdef __always_inline
+#define qcp_always_inline __always_inline
+#else
+
+#if qcp_has_attribute(always_inline)
+
+#define qcp_always_inline __attribute__((always_inline))
+
+#else
+
+#if qcp_has_attribute(__always_inline__)
+#define qcp_always_inline __attribute__((__always_inline__))
+#else
+#define qcp_always_inline inline
+#endif /* __has_attribute(__always_inline__) */
+
+#endif /* __has_attribute(always_inline) */
+
+#endif /* ifdef __always_inline */
+
 template<class T>
 class QCPListElement {
 public:
@@ -162,7 +188,7 @@ public:
 	T &operator[](int index);
 	const T &operator[](int index) const;
 private:
-	__always_inline T &_at(int index) const;
+	qcp_always_inline T &_at(int index) const;
 	void deleteAll();
 	void removeElement(QCPListElement<T> *e);
 	int mysize;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -110,37 +110,37 @@ namespace vtl {
 		time(n ? (- s * NSECS_PER_SEC + ns) : (s * NSECS_PER_SEC + ns)),
 			precision(p)
 		{}
-		__always_inline Time operator+(const Time &other) const;
-		__always_inline void operator+=(const Time &other);
-		__always_inline Time operator-(const Time &other) const;
-		__always_inline void operator-=(const Time &other);
-		__always_inline bool operator<(const Time &other) const;
-		__always_inline bool operator>(const Time &other) const;
-		__always_inline bool operator<=(const Time &other) const;
-		__always_inline bool operator>=(const Time &other) const;
-		__always_inline bool operator==(const Time &other) const;
-		__always_inline Time operator*(long other) const;
-		__always_inline Time operator*(int other) const;
-		__always_inline Time operator*(unsigned long other) const;
-		__always_inline Time operator*(unsigned other) const;
-		__always_inline void operator*=(long other);
-		__always_inline void operator*=(int other);
-		__always_inline void operator*=(unsigned long other);
-		__always_inline void operator*=(unsigned other);
-		__always_inline static Time fromDouble(const double &t);
-		__always_inline static Time fromString(const char *str,
+		vtl_always_inline Time operator+(const Time &other) const;
+		vtl_always_inline void operator+=(const Time &other);
+		vtl_always_inline Time operator-(const Time &other) const;
+		vtl_always_inline void operator-=(const Time &other);
+		vtl_always_inline bool operator<(const Time &other) const;
+		vtl_always_inline bool operator>(const Time &other) const;
+		vtl_always_inline bool operator<=(const Time &other) const;
+		vtl_always_inline bool operator>=(const Time &other) const;
+		vtl_always_inline bool operator==(const Time &other) const;
+		vtl_always_inline Time operator*(long other) const;
+		vtl_always_inline Time operator*(int other) const;
+		vtl_always_inline Time operator*(unsigned long other) const;
+		vtl_always_inline Time operator*(unsigned other) const;
+		vtl_always_inline void operator*=(long other);
+		vtl_always_inline void operator*=(int other);
+		vtl_always_inline void operator*=(unsigned long other);
+		vtl_always_inline void operator*=(unsigned other);
+		vtl_always_inline static Time fromDouble(const double &t);
+		vtl_always_inline static Time fromString(const char *str,
 						       bool &ok);
-		__always_inline static Time fromSpacedString(const char *str,
+		vtl_always_inline static Time fromSpacedString(const char *str,
 							     bool &ok);
-		__always_inline bool isZero();
-		__always_inline QString toQString() const;
-		__always_inline bool sprint(char *buf) const;
-		__always_inline double toDouble() const;
-		__always_inline Time fabs() const;
-		__always_inline unsigned int getPrecision() const;
-		__always_inline void setPrecision(unsigned int p);
+		vtl_always_inline bool isZero();
+		vtl_always_inline QString toQString() const;
+		vtl_always_inline bool sprint(char *buf) const;
+		vtl_always_inline double toDouble() const;
+		vtl_always_inline Time fabs() const;
+		vtl_always_inline unsigned int getPrecision() const;
+		vtl_always_inline void setPrecision(unsigned int p);
 	private:
-		__always_inline static Time __fromString(const char *str,
+		vtl_always_inline static Time __fromString(const char *str,
 							 bool &ok,
 							 bool spaced,
 							 bool colonatend);
@@ -148,7 +148,7 @@ namespace vtl {
 		unsigned int precision : 4;
 	} time_t;
 
-	__always_inline Time Time::operator+(const Time &other) const
+	vtl_always_inline Time Time::operator+(const Time &other) const
 	{
 		Time r;
 		r.precision = _TIME_MAX(precision, other.precision);
@@ -156,13 +156,13 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline void Time::operator+=(const Time &other)
+	vtl_always_inline void Time::operator+=(const Time &other)
 	{
 		precision = _TIME_MAX(precision, other.precision);
 		time = time + other.time;
 	}
 
-	__always_inline Time Time::operator-(const Time &other) const
+	vtl_always_inline Time Time::operator-(const Time &other) const
 	{
 		Time r;
 		r.precision = _TIME_MAX(precision, other.precision);
@@ -170,38 +170,38 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline void Time::operator-=(const Time &other)
+	vtl_always_inline void Time::operator-=(const Time &other)
 	{
 		precision = _TIME_MAX(precision, other.precision);
 		time = time - other.time;
 	}
 
-	__always_inline bool Time::operator>(const Time &other) const
+	vtl_always_inline bool Time::operator>(const Time &other) const
 	{
 		return time > other.time;
 	}
 
-	__always_inline bool Time::operator<(const Time &other) const
+	vtl_always_inline bool Time::operator<(const Time &other) const
 	{
 		return time < other.time;
 	}
 
-	__always_inline bool Time::operator>=(const Time &other) const
+	vtl_always_inline bool Time::operator>=(const Time &other) const
 	{
 		return time >= other.time;
 	}
 
-	__always_inline bool Time::operator<=(const Time &other) const
+	vtl_always_inline bool Time::operator<=(const Time &other) const
 	{
 		return time <= other.time;
 	}
 
-	__always_inline bool Time::operator==(const Time &other) const
+	vtl_always_inline bool Time::operator==(const Time &other) const
 	{
 		return time == other.time;
 	}
 
-	__always_inline Time Time::operator*(long other) const
+	vtl_always_inline Time Time::operator*(long other) const
 	{
 		Time r;
 		r.precision = precision;
@@ -209,7 +209,7 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline Time Time::operator*(int other) const
+	vtl_always_inline Time Time::operator*(int other) const
 	{
 		Time r;
 		r.precision = precision;
@@ -217,7 +217,7 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline Time Time::operator*(unsigned long other) const
+	vtl_always_inline Time Time::operator*(unsigned long other) const
 	{
 		Time r;
 		r.precision = precision;
@@ -225,7 +225,7 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline Time Time::operator*(unsigned other) const
+	vtl_always_inline Time Time::operator*(unsigned other) const
 	{
 		Time r;
 		r.precision = precision;
@@ -233,27 +233,27 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline void Time::operator*=(long other)
+	vtl_always_inline void Time::operator*=(long other)
 	{
 		time *= other;
 	}
 
-	__always_inline void Time::operator*=(int other)
+	vtl_always_inline void Time::operator*=(int other)
 	{
 		time *= other;
 	}
 
-	__always_inline void Time::operator*=(unsigned long other)
+	vtl_always_inline void Time::operator*=(unsigned long other)
 	{
 		time *= other;
 	}
 
-	__always_inline void Time::operator*=(unsigned other)
+	vtl_always_inline void Time::operator*=(unsigned other)
 	{
 		time *= other;
 	}
 
-	__always_inline Time Time::fromDouble(const double &t)
+	vtl_always_inline Time Time::fromDouble(const double &t)
 	{
 		Time r;
 
@@ -264,22 +264,22 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline Time Time::fromString(const char *str, bool &ok)
+	vtl_always_inline Time Time::fromString(const char *str, bool &ok)
 	{
 		return __fromString(str, ok, false, true);
 	}
 
-	__always_inline Time Time::fromSpacedString(const char *str, bool &ok)
+	vtl_always_inline Time Time::fromSpacedString(const char *str, bool &ok)
 	{
 		return __fromString(str, ok, true, false);
 	}
 
-	__always_inline bool Time::isZero()
+	vtl_always_inline bool Time::isZero()
 	{
 		return time == 0;
 	}
 
-	__always_inline Time Time::__fromString(const char *str, bool &ok,
+	vtl_always_inline Time Time::__fromString(const char *str, bool &ok,
 						bool spaced, bool colonatend)
 	{
 		Time r;
@@ -337,7 +337,7 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline QString Time::toQString() const
+	vtl_always_inline QString Time::toQString() const
 	{
 		QString qstr;
 		char buf[40];
@@ -348,7 +348,7 @@ namespace vtl {
 		return qstr;
 	}
 
-	__always_inline bool Time::sprint(char *buf) const
+	vtl_always_inline bool Time::sprint(char *buf) const
 	{
 		int i, len;
 		uint32_t acc;
@@ -407,13 +407,13 @@ namespace vtl {
 		return true;
 	}
 
-	__always_inline double Time::toDouble() const
+	vtl_always_inline double Time::toDouble() const
 	{
 		double r = ((double) time) / NSECS_PER_SEC;
 		return r;
 	}
 
-	__always_inline Time Time::fabs() const
+	vtl_always_inline Time Time::fabs() const
 	{
 		Time r;
 
@@ -422,12 +422,12 @@ namespace vtl {
 		return r;
 	}
 
-	__always_inline unsigned int Time::getPrecision() const
+	vtl_always_inline unsigned int Time::getPrecision() const
 	{
 		return precision;
 	}
 
-	__always_inline void Time::setPrecision(unsigned int p)
+	vtl_always_inline void Time::setPrecision(unsigned int p)
 	{
 		if (p < 10)
 			precision = p;

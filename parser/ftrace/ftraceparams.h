@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -53,14 +53,16 @@
 #ifndef FTRACEPARAMS_H
 #define FTRACEPARAMS_H
 
+#include <cstring>
+#include <cstdint>
+
+#include "vtl/compiler.h"
 #include "mm/stringpool.h"
 #include "parser/traceevent.h"
 #include "parser/paramhelpers.h"
 #include "misc/errors.h"
 #include "misc/string.h"
 #include "misc/traceshark.h"
-#include <cstring>
-#include <cstdint>
 
 #define ftrace_cpufreq_args_ok(EVENT) (EVENT.argc >= 2)
 #define ftrace_cpufreq_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
@@ -68,7 +70,7 @@
 
 #define ftrace_cpuidle_args_ok(EVENT) (EVENT.argc >= 2)
 #define ftrace_cpuidle_cpu(EVENT) (uint_after_char(EVENT, 1, '='))
-static __always_inline int ftrace_cpuidle_state(const TraceEvent &event)
+static vtl_always_inline int ftrace_cpuidle_state(const TraceEvent &event)
 {
 	int32_t state;
 	uint32_t ustate;
@@ -91,7 +93,7 @@ static __always_inline int ftrace_cpuidle_state(const TraceEvent &event)
 #define ftrace_sched_migrate_pid(EVENT) (int_after_char(EVENT, \
 							EVENT.argc - 4, \
 							'='))
-static __always_inline bool
+static vtl_always_inline bool
 ftrace_sched_switch_parse(const TraceEvent &event, sched_switch_handle& handle)
 {
 	int i;
@@ -137,7 +139,7 @@ ftrace_sched_switch_parse(const TraceEvent &event, sched_switch_handle& handle)
 	return true;
 }
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					    StringPool<> *pool,
 					    const sched_switch_handle &handle)
@@ -207,7 +209,7 @@ ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					  const sched_switch_handle &handle);
 
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					    StringPool<> *pool,
 					    const sched_switch_handle &handle)
@@ -281,7 +283,7 @@ ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					  StringPool<> *pool,
 					  const sched_switch_handle &handle);
 
-static __always_inline int
+static vtl_always_inline int
 ftrace_sched_switch_handle_newpid(const TraceEvent &event,
 				  const sched_switch_handle &handle)
 {
@@ -291,7 +293,7 @@ ftrace_sched_switch_handle_newpid(const TraceEvent &event,
 		return int_after_char(event, event.argc - 2, '=');
 }
 
-static __always_inline int
+static vtl_always_inline int
 ftrace_sched_switch_handle_oldpid(const TraceEvent &event,
 				  const sched_switch_handle &handle)
 {
@@ -302,7 +304,7 @@ ftrace_sched_switch_handle_oldpid(const TraceEvent &event,
 		return int_after_char(event, i - 3, '=');
 }
 
-static __always_inline taskstate_t
+static vtl_always_inline taskstate_t
 ftrace_sched_switch_handle_state(const TraceEvent &event,
 				 const sched_switch_handle &handle)
 {
@@ -326,7 +328,7 @@ ftrace_sched_switch_handle_state(const TraceEvent &event,
 	return TASK_STATE_PARSER_ERROR;
 }
 
-static __always_inline taskstate_t
+static vtl_always_inline taskstate_t
 ftrace_sched_switch_handle_oldprio(const TraceEvent &event,
 				   const sched_switch_handle &handle)
 {
@@ -337,7 +339,7 @@ ftrace_sched_switch_handle_oldprio(const TraceEvent &event,
 		return param_inside_braces(event, i - 2);
 }
 
-static __always_inline taskstate_t
+static vtl_always_inline taskstate_t
 ftrace_sched_switch_handle_newprio(const TraceEvent &event,
 				   const sched_switch_handle &handle)
 {
@@ -349,7 +351,7 @@ ftrace_sched_switch_handle_newprio(const TraceEvent &event,
 
 #define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
 
-static __always_inline
+static vtl_always_inline
 unsigned int ftrace_sched_wakeup_cpu(const TraceEvent &event)
 {
 	unsigned int cpu = uint_after_char(event, event.argc - 1, ':');
@@ -361,7 +363,7 @@ unsigned int ftrace_sched_wakeup_cpu(const TraceEvent &event)
 
 #define WAKEUP_SUCC_PFIX "success="
 
-static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
+static vtl_always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
 	const char *c = ss->ptr;
@@ -372,7 +374,7 @@ static __always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 	return true;
 }
 
-static __always_inline
+static vtl_always_inline
 unsigned int ftrace_sched_wakeup_prio(const TraceEvent &event)
 {
 	int idx = event.argc - 3;
@@ -387,7 +389,7 @@ unsigned int ftrace_sched_wakeup_prio(const TraceEvent &event)
 
 #define WAKEUP_PID_PFIX "pid="
 
-static __always_inline int ftrace_sched_wakeup_pid(const TraceEvent &event)
+static vtl_always_inline int ftrace_sched_wakeup_pid(const TraceEvent &event)
 {
 	int idx = event.argc - 3;
 	const char *c = event.argv[idx]->ptr;
@@ -398,7 +400,7 @@ static __always_inline int ftrace_sched_wakeup_pid(const TraceEvent &event)
 	return int_after_char(event, idx, ':');
 }
 
-static __always_inline const char
+static vtl_always_inline const char
 *_ftrace_sched_wakeup_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
 	int beginidx;
@@ -469,7 +471,7 @@ const char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
 #define ftrace_sched_process_fork_childpid(EVENT) \
 	(int_after_char(EVENT, EVENT.argc - 1, '='))
 
-static __always_inline int
+static vtl_always_inline int
 ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 	int i;
 	int endidx;
@@ -490,7 +492,7 @@ ftrace_sched_process_fork_parent_pid(const TraceEvent &event) {
 	return int_after_char(event, i - 1, '=');
 }
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 					     StringPool<> *pool)
 {
@@ -575,7 +577,7 @@ const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 	 &&								\
 	 !prefixcmp(EVENT.argv[EVENT.argc - 1]->ptr, FTRACE_WAKING_CPU_PFIX))
 
-static __always_inline const char *
+static vtl_always_inline const char *
 _ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
 	int beginidx;

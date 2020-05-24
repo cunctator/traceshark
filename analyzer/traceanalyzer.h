@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -62,6 +62,7 @@
 #include <limits>
 
 #include "vtl/avltree.h"
+#include "vtl/compiler.h"
 #include "vtl/tlist.h"
 
 #include "analyzer/cpu.h"
@@ -126,17 +127,17 @@ public:
 	const TraceEvent *findWakingEvent(const TraceEvent *wakeup,
 					  int *index) const;
 	const TraceEvent *findFilteredEvent(int index, int *filterIndex) const;
-	__always_inline unsigned int getMaxCPU() const;
-	__always_inline unsigned int getNrCPUs() const;
-	__always_inline vtl::Time getStartTime() const;
-	__always_inline vtl::Time getEndTime() const;
-	__always_inline int getMinIdleState() const;
-	__always_inline int getMaxIdleState() const;
-	__always_inline unsigned int getTimePrecision() const;
-	__always_inline CPUTask *findCPUTask(int pid,
+	vtl_always_inline unsigned int getMaxCPU() const;
+	vtl_always_inline unsigned int getNrCPUs() const;
+	vtl_always_inline vtl::Time getStartTime() const;
+	vtl_always_inline vtl::Time getEndTime() const;
+	vtl_always_inline int getMinIdleState() const;
+	vtl_always_inline int getMaxIdleState() const;
+	vtl_always_inline unsigned int getTimePrecision() const;
+	vtl_always_inline CPUTask *findCPUTask(int pid,
 					     unsigned int cpu);
-	__always_inline QColor getTaskColor(int pid) const;
-	__always_inline tracetype_t getTraceType() const;
+	vtl_always_inline QColor getTaskColor(int pid) const;
+	vtl_always_inline tracetype_t getTraceType() const;
 	void setSchedOffset(unsigned int cpu, double offset);
 	void setSchedScale(unsigned int cpu, double scale);
 	void setCpuIdleOffset(unsigned int cpu, double offset);
@@ -150,7 +151,7 @@ public:
 	void doStats();
 	void doLimitedStats();
 	void setQCustomPlot(QCustomPlot *plot);
-	__always_inline Task *findTask(int pid);
+	vtl_always_inline Task *findTask(int pid);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
 	void createCPUFilter(QMap<unsigned, unsigned> &map, bool orlogic);
@@ -187,46 +188,46 @@ private:
 	int findIndexBefore(const vtl::Time &time) const;
 	int findIndexAfter(const vtl::Time &time) const;
 	int findFilteredIndexBefore(const vtl::Time &time) const;
-	__always_inline int
+	vtl_always_inline int
 		generic_sched_switch_newpid(const TraceEvent &event) const;
-	__always_inline int
+	vtl_always_inline int
 		generic_sched_switch_oldpid(const TraceEvent &event) const;
-	__always_inline taskstate_t
+	vtl_always_inline taskstate_t
 		generic_sched_switch_state(const TraceEvent &event) const;
-	__always_inline int
+	vtl_always_inline int
 		generic_sched_wakeup_pid(const TraceEvent &event) const;
-	__always_inline int
+	vtl_always_inline int
 		generic_sched_waking_pid(const TraceEvent &event) const;
-	__always_inline vtl::Time estimateWakeUpNew(const CPU *eventCPU,
+	vtl_always_inline vtl::Time estimateWakeUpNew(const CPU *eventCPU,
 						    const vtl::Time &newTime,
 						    const vtl::Time &startTime,
 						    bool &valid) const;
-	__always_inline vtl::Time estimateWakeUp(const Task *task,
+	vtl_always_inline vtl::Time estimateWakeUp(const Task *task,
 						 const vtl::Time &newTime,
 						 bool &valid) const;
 	void handleWrongTaskOnCPU(const TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, int oldpid,
 				  const vtl::Time &oldtime,
 				  int idx);
-	__always_inline void __processSwitchEvent(tracetype_t ttype,
+	vtl_always_inline void __processSwitchEvent(tracetype_t ttype,
 						  const TraceEvent &event,
 						  int idx);
-	__always_inline void __processWakeupEvent(tracetype_t ttype,
+	vtl_always_inline void __processWakeupEvent(tracetype_t ttype,
 						  const TraceEvent &event,
 						  int idx);
-	__always_inline void __processCPUfreqEvent(tracetype_t ttype,
+	vtl_always_inline void __processCPUfreqEvent(tracetype_t ttype,
 						   const TraceEvent &event,
 						   int idx);
-	__always_inline void __processCPUidleEvent(tracetype_t ttype,
+	vtl_always_inline void __processCPUidleEvent(tracetype_t ttype,
 						   const TraceEvent &event,
 						   int idx);
-	__always_inline void __processMigrateEvent(tracetype_t ttype,
+	vtl_always_inline void __processMigrateEvent(tracetype_t ttype,
 						   const TraceEvent &event,
 						   int idx);
-	__always_inline void __processForkEvent(tracetype_t ttype,
+	vtl_always_inline void __processForkEvent(tracetype_t ttype,
 						const TraceEvent &event,
 						int idx);
-	__always_inline void __processExitEvent(tracetype_t ttype,
+	vtl_always_inline void __processExitEvent(tracetype_t ttype,
 						const TraceEvent &event,
 						int idx);
 	void addCpuFreqWork(unsigned int cpu,
@@ -239,16 +240,16 @@ private:
 	void processSchedAddTail();
 	void processFreqAddTail();
 	unsigned int guessTimePrecision();
-	__always_inline void __processGeneric(tracetype_t ttype);
-	__always_inline void updateMaxCPU(unsigned int cpu);
-	__always_inline void updateMaxFreq(unsigned int freq);
-	__always_inline void updateMinFreq(unsigned int freq);
-	__always_inline void updateMaxIdleState(int state);
-	__always_inline void updateMinIdleState(int state);
+	vtl_always_inline void __processGeneric(tracetype_t ttype);
+	vtl_always_inline void updateMaxCPU(unsigned int cpu);
+	vtl_always_inline void updateMaxFreq(unsigned int freq);
+	vtl_always_inline void updateMinFreq(unsigned int freq);
+	vtl_always_inline void updateMaxIdleState(int state);
+	vtl_always_inline void updateMinIdleState(int state);
 	void processFtrace();
 	void processPerf();
 	void processAllFilters();
-	__always_inline
+	vtl_always_inline
 		bool __processPidFilter(const TraceEvent &event,
 					QMap<int, int> &map,
 					bool inclusive);
@@ -303,7 +304,7 @@ private:
 	const SettingStore *setstor;
 };
 
-__always_inline
+vtl_always_inline
 vtl::Time TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,
 					   const vtl::Time &newTime,
 					   const vtl::Time &startTime,
@@ -324,7 +325,7 @@ regular:
 	return delay;
 }
 
-__always_inline
+vtl_always_inline
 vtl::Time TraceAnalyzer::estimateWakeUp(const Task *task,
 					const vtl::Time &newTime,
 					bool &valid) const
@@ -342,7 +343,7 @@ vtl::Time TraceAnalyzer::estimateWakeUp(const Task *task,
 	return delay;
 }
 
-__always_inline int
+vtl_always_inline int
 TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 {
 	sched_switch_handle_t handle;
@@ -355,7 +356,7 @@ TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 	return sched_switch_handle_newpid(ttype, event, handle);;
 }
 
-__always_inline int
+vtl_always_inline int
 TraceAnalyzer::generic_sched_switch_oldpid(const TraceEvent &event) const
 {
 	sched_switch_handle_t handle;
@@ -368,7 +369,7 @@ TraceAnalyzer::generic_sched_switch_oldpid(const TraceEvent &event) const
 	return sched_switch_handle_oldpid(ttype, event, handle);;
 }
 
-__always_inline taskstate_t
+vtl_always_inline taskstate_t
 TraceAnalyzer::generic_sched_switch_state(const TraceEvent &event) const
 {
 	sched_switch_handle_t handle;
@@ -381,7 +382,7 @@ TraceAnalyzer::generic_sched_switch_state(const TraceEvent &event) const
 	return sched_switch_handle_state(ttype, event, handle);
 }
 
-__always_inline int
+vtl_always_inline int
 TraceAnalyzer::generic_sched_wakeup_pid(const TraceEvent &event) const
 {
 	tracetype_t ttype = getTraceType();
@@ -393,7 +394,7 @@ TraceAnalyzer::generic_sched_wakeup_pid(const TraceEvent &event) const
 	return sched_wakeup_pid(ttype, event);
 }
 
-__always_inline int
+vtl_always_inline int
 TraceAnalyzer::generic_sched_waking_pid(const TraceEvent &event) const
 {
 	tracetype_t ttype = getTraceType();
@@ -405,48 +406,48 @@ TraceAnalyzer::generic_sched_waking_pid(const TraceEvent &event) const
 	return sched_waking_pid(ttype, event);
 }
 
-__always_inline unsigned int TraceAnalyzer::getMaxCPU() const
+vtl_always_inline unsigned int TraceAnalyzer::getMaxCPU() const
 {
 	return maxCPU;
 }
 
-__always_inline unsigned int TraceAnalyzer::getNrCPUs() const
+vtl_always_inline unsigned int TraceAnalyzer::getNrCPUs() const
 {
 	return nrCPUs;
 }
 
-__always_inline vtl::Time TraceAnalyzer::getStartTime() const
+vtl_always_inline vtl::Time TraceAnalyzer::getStartTime() const
 {
 	return startTime;
 }
 
-__always_inline vtl::Time TraceAnalyzer::getEndTime() const
+vtl_always_inline vtl::Time TraceAnalyzer::getEndTime() const
 {
 	return endTime;
 }
 
-__always_inline int TraceAnalyzer::getMinIdleState() const
+vtl_always_inline int TraceAnalyzer::getMinIdleState() const
 {
 	return minIdleState;
 }
 
-__always_inline int TraceAnalyzer::getMaxIdleState() const
+vtl_always_inline int TraceAnalyzer::getMaxIdleState() const
 {
 	return maxIdleState;
 }
 
-__always_inline unsigned int TraceAnalyzer::getTimePrecision() const
+vtl_always_inline unsigned int TraceAnalyzer::getTimePrecision() const
 {
 	return timePrecision;
 }
 
-__always_inline QColor TraceAnalyzer::getTaskColor(int pid) const
+vtl_always_inline QColor TraceAnalyzer::getTaskColor(int pid) const
 {
 	TColor taskColor = colorMap.value(pid, black);
 	return taskColor.toQColor();
 }
 
-__always_inline CPUTask *TraceAnalyzer::findCPUTask(int pid,
+vtl_always_inline CPUTask *TraceAnalyzer::findCPUTask(int pid,
 						    unsigned int cpu)
 {
 	if (cpuTaskMaps[cpu].contains(pid))
@@ -455,12 +456,12 @@ __always_inline CPUTask *TraceAnalyzer::findCPUTask(int pid,
 		return nullptr;
 }
 
-__always_inline tracetype_t TraceAnalyzer::getTraceType() const
+vtl_always_inline tracetype_t TraceAnalyzer::getTraceType() const
 {
 	return parser->traceType;
 }
 
-__always_inline Task *TraceAnalyzer::findTask(int pid)
+vtl_always_inline Task *TraceAnalyzer::findTask(int pid)
 {
 	DEFINE_TASKMAP_ITERATOR(iter) = taskMap.find(pid);
 	if (iter == taskMap.end())
@@ -469,7 +470,7 @@ __always_inline Task *TraceAnalyzer::findTask(int pid)
 		return iter.value().task;
 }
 
-__always_inline
+vtl_always_inline
 void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
 					  const TraceEvent &event,
 					  int /* idx */)
@@ -497,7 +498,7 @@ void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
 	migrations.append(m);
 }
 
-__always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
+vtl_always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 						       const TraceEvent &event,
 						       int idx)
 {
@@ -528,7 +529,7 @@ __always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 	}
 }
 
-__always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
+vtl_always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 						       const TraceEvent &event,
 						       int /* idx */)
 {
@@ -551,7 +552,7 @@ __always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 	task->exitStatus = STATUS_EXITCALLED;
 }
 
-__always_inline
+vtl_always_inline
 void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
 					 const TraceEvent &event,
 					 int idx)
@@ -769,7 +770,7 @@ out:
 	return;
 }
 
-__always_inline
+vtl_always_inline
 void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 					 const TraceEvent &event,
 					 int /* idx */)
@@ -805,7 +806,7 @@ void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 	}
 }
 
-__always_inline
+vtl_always_inline
 void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 					  const TraceEvent &event,
 					  int /* idx */)
@@ -837,7 +838,7 @@ void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 	cpuFreq[cpu].data.append((double) freq);
 }
 
-__always_inline
+vtl_always_inline
 void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
 					  const TraceEvent &event,
 					  int /* idx */)
@@ -864,37 +865,37 @@ void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
 	cpuIdle[cpu].data.append((double) state);
 }
 
-__always_inline void TraceAnalyzer::updateMaxCPU(unsigned int cpu)
+vtl_always_inline void TraceAnalyzer::updateMaxCPU(unsigned int cpu)
 {
 	if (cpu > maxCPU)
 		maxCPU = cpu;
 }
 
-__always_inline void TraceAnalyzer::updateMaxFreq(unsigned int freq)
+vtl_always_inline void TraceAnalyzer::updateMaxFreq(unsigned int freq)
 {
 	if (freq > maxFreq)
 		maxFreq = freq;
 }
 
-__always_inline void TraceAnalyzer::updateMinFreq(unsigned int freq)
+vtl_always_inline void TraceAnalyzer::updateMinFreq(unsigned int freq)
 {
 	if (freq < minFreq)
 		minFreq = freq;
 }
 
-__always_inline void TraceAnalyzer::updateMaxIdleState(int state)
+vtl_always_inline void TraceAnalyzer::updateMaxIdleState(int state)
 {
 	if (state > maxIdleState)
 		maxIdleState = state;
 }
 
-__always_inline void TraceAnalyzer::updateMinIdleState(int state)
+vtl_always_inline void TraceAnalyzer::updateMinIdleState(int state)
 {
 	if (state < minIdleState)
 		minIdleState = state;
 }
 
-__always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
+vtl_always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 {
 	int i;
 	bool eof = false;
@@ -957,7 +958,7 @@ __always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 	timePrecision = guessTimePrecision();
 }
 
-__always_inline
+vtl_always_inline
 bool TraceAnalyzer::__processPidFilter(const TraceEvent &event,
 				       QMap<int, int> &map,
 				       bool inclusive)
