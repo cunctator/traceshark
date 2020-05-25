@@ -50,25 +50,24 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Let's piggy back on QThread. This will make TThread a mere container which
- * through a pointer isolates us from having to intherit QObject in our thread
- * classes */
 #include <QList>
 #include <QMap>
 #include <QThread>
 #include "threads/tthread.h"
+#include "misc/osapi.h"
 
-extern "C" {
-#include <sys/prctl.h>
-}
+/*
+ * Let's piggy back on QThread. This will make TThread a mere container which
+ * through a pointer isolates us from having to intherit QObject in our thread
+ * classes.
+ */
 
 __TThread::__TThread(TThread *thr, const QString &name):
 	tThread(thr), threadName(name) {}
 
 void __TThread::run()
 {
-	prctl(PR_SET_NAME, (unsigned long) threadName.toLocal8Bit().data(), 0,
-	      0, 0);
+	tshark_pthread_setname_np(threadName.toLocal8Bit().data());
 	tThread->run();
 }
 

@@ -56,6 +56,7 @@
 #include <cstring>
 
 extern "C" {
+#include <pthread.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -81,11 +82,16 @@ extern "C" {
 #define cmp_mtimespec(s1, s2) TShark::cmp_timespec(s1.st_mtimespec,	\
 						   s2.st_mtimespec)
 
+#define tshark_pthread_setname_np(NAME) pthread_setname_np(NAME)
+
 #elif __linux__
 
 /* These are the Linux versions, note the difference in members names */
 #define cmp_ctimespec(s1, s2) TShark::cmp_timespec(s1.st_ctim, s2.st_ctim)
 #define cmp_mtimespec(s1, s2) TShark::cmp_timespec(s1.st_mtim, s2.st_mtim)
+
+#define tshark_pthread_setname_np(NAME) pthread_setname_np(pthread_self(), \
+							   NAME)
 
 #elif __unix__
 
@@ -102,6 +108,8 @@ extern "C" {
 						   s2.st_ctimespec)
 #define cmp_mtimespec(s1, s2) TShark::cmp_timespec(s1.st_mtimespec,	\
 						   s2.st_mtimespec)
+
+#define tshark_pthread_setname_np(NAME) pthread_setname_np(NAME)
 
 #else /* __unix__ */
 #error "Unknown Operating system"
