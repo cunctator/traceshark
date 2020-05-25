@@ -392,7 +392,6 @@ void TraceAnalyzer::colorizeTasks()
 	int red;
 	int green;
 	int blue;
-	struct drand48_data rdata;
 	int i, j;
 	QList<TColor> colorList;
 	const TColor black(0, 0, 0);
@@ -401,7 +400,7 @@ void TraceAnalyzer::colorizeTasks()
 	TColor tmp;
 	long int rnd = 0;
 
-	srand48_r(290876, &rdata);
+	srand48(290876);
 
 	for (cpu = 0; cpu <= getMaxCPU(); cpu++) {
 		DEFINE_CPUTASKMAP_ITERATOR(iter) = cpuTaskMaps[cpu].begin();
@@ -454,7 +453,7 @@ retry:
 	 * element
 	 */
 	for (i = 0; i < ncolor; i++) {
-		lrand48_r(&rdata, &rnd);
+		rnd = lrand48();
 		j = rnd % ncolor;
 		tmp = colorList[j];
 		colorList[j] = colorList[i];
