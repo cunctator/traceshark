@@ -53,6 +53,8 @@
 #ifndef MISC_OSAPI_H
 #define MISC_OSAPI_H
 
+#include <cstring>
+
 extern "C" {
 #include <sys/types.h>
 #include <unistd.h>
@@ -62,12 +64,29 @@ extern "C" {
 #include <TargetConditionals.h>
 #endif
 
+/*
+ * bzero() was removed from IEEE Std 1003.1-2008 (``POSIX.1'') and some
+ * implementations remove bzero() if we have defined _POSIX_C_SOURCE=200809L
+ */
+#define tshark_bzero(ADDR, SIZE) ((void)memset(ADDR, 0, SIZE))
+
 #if defined(__APPLE__) && TARGET_OS_MAC
+
 #define lseek64(FD, OFFSET, WHENCE) lseek(FD, OFFSET, WHENCE)
+
 #elif __linux__
 #elif __unix__
+
+/*
+ * For now what is here in __unix__ is just copies of whatever is in the mac
+ * section but that's just because at this point I have not tried with the
+ * other unices, so this section is kind of a placeholder. I assume that many
+ * would resemble macOS more than Linux.
+ */
+
 #define lseek64(FD, OFFSET, WHENCE) lseek(FD, OFFSET, WHENCE)
-#else
+
+#else /* __unix__ */
 #error "Unknown Operating system"
 #endif
 

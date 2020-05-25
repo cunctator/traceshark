@@ -56,6 +56,7 @@
 #include <cstdint>
 #include <cstring>
 #include "mm/mempool.h"
+#include "misc/osapi.h"
 #include "misc/traceshark.h"
 #include "misc/tstring.h"
 #include "vtl/avltree.h"
@@ -129,7 +130,7 @@ class StringPoolEntry {
 	friend class StringPool<HashFunc>;
 public:
 StringPoolEntry(void *data): cachePtr(nullptr), avlTree(data) {
-		bzero(cache, SP_CACHE_SIZE);
+		tshark_bzero(cache, SP_CACHE_SIZE);
 	}
 protected:
 	char cache[SP_CACHE_SIZE];
@@ -289,9 +290,9 @@ StringPool<HashFunc>::~StringPool()
 template<typename HashFunc>
 void StringPool<HashFunc>::clearTable()
 {
-	bzero(hashTable, hSize * sizeof(StringPoolEntry<HashFunc>*));
-	bzero(countAllocs, hSize * sizeof(unsigned int));
-	bzero(countReuse, hSize * sizeof(unsigned int));
+	tshark_bzero(hashTable, hSize * sizeof(StringPoolEntry<HashFunc>*));
+	tshark_bzero(countAllocs, hSize * sizeof(unsigned int));
+	tshark_bzero(countReuse, hSize * sizeof(unsigned int));
 }
 
 template<typename HashFunc>

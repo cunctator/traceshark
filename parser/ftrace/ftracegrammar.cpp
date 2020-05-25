@@ -64,7 +64,7 @@ FtraceGrammar::FtraceGrammar() :
 	argPool = new StringPool<>(2048, 1024 * 1024);
 	namePool =  new StringPool<>(1024, 65536);
 	eventTree = new StringTree<>(8, 256, 4096);
-	bzero(tmp_argv, sizeof(tmp_argv));
+	tshark_bzero(tmp_argv, sizeof(tmp_argv));
 	setupEventTree();
 }
 

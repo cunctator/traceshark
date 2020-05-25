@@ -57,6 +57,7 @@
 #include <cstdint>
 #include <cstring>
 #include "mm/mempool.h"
+#include "misc/osapi.h"
 #include "misc/traceshark.h"
 #include "misc/tstring.h"
 #include "misc/types.h"
@@ -266,8 +267,8 @@ StringTree<HashFunc>::~StringTree()
 template<typename HashFunc>
 void StringTree<HashFunc>::clearTable()
 {
-	bzero(hashTable, hSize * sizeof(StringTreeEntry<HashFunc>*));
-	bzero(stringTable, tableSize * sizeof(TString*));
+	tshark_bzero(hashTable, hSize * sizeof(StringTreeEntry<HashFunc>*));
+	tshark_bzero(stringTable, tableSize * sizeof(TString*));
 	maxEvent = (event_t) -1;
 }
 

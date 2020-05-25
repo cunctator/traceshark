@@ -53,6 +53,7 @@
 #include <stdlib.h>
 
 #include "misc/errors.h"
+#include "misc/osapi.h"
 #include "misc/traceshark.h"
 #include "vtl/error.h"
 #include "setting.h"
@@ -79,8 +80,8 @@ Setting::Value::Value(int i) :
 Setting::Setting(): supported(true), flags(FLAG_NO_FLAG), nrDep(0),
 		    nrDependents(0)
 {
-	bzero(dependency, sizeof(dependency));
-	bzero(dependent, sizeof(dependent));
+	tshark_bzero(dependency, sizeof(dependency));
+	tshark_bzero(dependent, sizeof(dependent));
 }
 
 
