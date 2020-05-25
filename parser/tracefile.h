@@ -68,6 +68,7 @@
 #include "parser/traceline.h"
 #include "misc/chunk.h"
 #include "misc/errors.h"
+#include "misc/osapi.h"
 #include "misc/traceshark.h"
 #include "vtl/compiler.h"
 

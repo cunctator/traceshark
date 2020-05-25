@@ -384,6 +384,7 @@ HEADERS      +=  mm/stringtree.h
 
 HEADERS      +=  misc/chunk.h
 HEADERS      +=  misc/errors.h
+HEADERS      +=  misc/osapi.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
 HEADERS      +=  misc/settingstore.h
