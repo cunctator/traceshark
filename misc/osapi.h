@@ -56,6 +56,7 @@
 #include <cstring>
 
 extern "C" {
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 }
@@ -74,7 +75,18 @@ extern "C" {
 
 #define lseek64(FD, OFFSET, WHENCE) lseek(FD, OFFSET, WHENCE)
 
+/* These are for comparing mtime and ctime in a portable way */
+#define cmp_ctimespec(s1, s2) TShark::cmp_timespec(s1.st_ctimespec,	\
+						   s2.st_ctimespec)
+#define cmp_mtimespec(s1, s2) TShark::cmp_timespec(s1.st_mtimespec,	\
+						   s2.st_mtimespec)
+
 #elif __linux__
+
+/* These are the Linux versions, note the difference in members names */
+#define cmp_ctimespec(s1, s2) TShark::cmp_timespec(s1.st_ctim, s2.st_ctim)
+#define cmp_mtimespec(s1, s2) TShark::cmp_timespec(s1.st_mtim, s2.st_mtim)
+
 #elif __unix__
 
 /*
@@ -85,6 +97,11 @@ extern "C" {
  */
 
 #define lseek64(FD, OFFSET, WHENCE) lseek(FD, OFFSET, WHENCE)
+
+#define cmp_ctimespec(s1, s2) TShark::cmp_timespec(s1.st_ctimespec,	\
+						   s2.st_ctimespec)
+#define cmp_mtimespec(s1, s2) TShark::cmp_timespec(s1.st_mtimespec,	\
+						   s2.st_mtimespec)
 
 #else /* __unix__ */
 #error "Unknown Operating system"

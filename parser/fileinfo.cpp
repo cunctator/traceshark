@@ -53,6 +53,7 @@
 #include "parser/fileinfo.h"
 
 #include "misc/errors.h"
+#include "misc/osapi.h"
 #include "misc/traceshark.h"
 
 extern "C" {
@@ -82,8 +83,7 @@ bool FileInfo::cmpStat(int fd, int *ts_errno)
 	else
 		goto error;
 
-	return  cmp_timespec(s.st_ctim, st.st_ctim) &&
-		cmp_timespec(s.st_mtim, st.st_mtim) &&
+	return cmp_mtimespec(s, st) && cmp_ctimespec(s, st) &&
 		s.st_size == st.st_size;
 
 error:
