@@ -178,7 +178,7 @@ make -j5
 sudo make install
 ```
 
-On macOS, the ```sudo make install``` doesn't work. You can find the executable in ```traceshark.app/Contents/MacOS/traceshark```. Running tracesahrk on macOS is currently in a quite experimental state.
+On macOS, the ```sudo make install``` doesn't work. You can find the executable in ```traceshark.app/Contents/MacOS/traceshark```. Running traceshark on macOS is currently in a quite experimental state.
 
 ## 2.3 How to configure your build
 
