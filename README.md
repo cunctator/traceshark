@@ -157,6 +157,17 @@ On Fedora 32:
 sudo dnf install qcustomplot-qt5-devel
 ```
 
+On macOS, you will need to:
+* Install Xcode and macports as described at [macports.org](https://www.macports.org)
+* Install the desired Qt version, for example Qt 5.13:
+```
+sudo port install qt513
+```
+* You need to find the directory where qmake is and add it to your path. Something like this:
+````
+echo 'export PATH=/opt/local/viktor/bin:$PATH:/opt/local/libexec/qt5/bin' >> $HOME/.zshrc
+````
+
 ## 2.2 How to compile and install
 
 The program can be compiled and installed by doing something like this:
@@ -166,6 +177,8 @@ qmake-qt5 (on some distros you should use just qmake instead of qmake-qt5)
 make -j5
 sudo make install
 ```
+
+On macOS, the ```sudo make install``` doesn't work. You can find the executable in ```traceshark.app/Contents/MacOS/traceshark```. Running tracesahrk on macOS is currently in a quite experimental state.
 
 ## 2.3 How to configure your build
 
