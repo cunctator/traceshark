@@ -53,7 +53,9 @@
 #ifndef VTL_COMPILER_H
 #define VTL_COMPILER_H
 
+extern "C" {
 #include <unistd.h>
+}
 
 #ifdef __has_cpp_attribute
 #define vtl_has_cpp_attribute(x) __has_cpp_attribute(x)
@@ -77,29 +79,20 @@
 
 #ifdef __always_inline
 #define vtl_always_inline __always_inline
-#else
 
-#ifdef __inline__
+#elif defined(__inline__)
 #define vtl_always_inline __inline__
-#else
 
-#if vtl_has_attribute(always_inline)
-
+#elif vtl_has_attribute(always_inline)
 #define vtl_always_inline __inline __attribute__((always_inline))
 
-#else
-
-#if vtl_has_attribute(__always_inline__)
+#elif vtl_has_attribute(__always_inline__)
 #define vtl_always_inline __inline __attribute__((__always_inline__))
+
 #else
 #define vtl_always_inline __inline
-#endif /* __has_attribute(__always_inline__) */
 
-#endif /* __has_attribute(always_inline) */
-
-#endif /* ifdef __always_inline */
-
-#endif /* ifdef __inline__ */
+#endif /* #ifdef __always_inline  */
 
 #if defined(__GNUC__) || defined (__clang__)
 

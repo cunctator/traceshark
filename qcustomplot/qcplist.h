@@ -59,6 +59,10 @@
 #include <cstdint>
 #include <cstdlib>
 
+extern "C" {
+#include <unistd.h>
+}
+
 #ifdef __has_attribute
 #define qcp_has_attribute(x) __has_attribute(x)
 #else
@@ -67,23 +71,20 @@
 
 #ifdef __always_inline
 #define qcp_always_inline __always_inline
+
+#elif defined(__inline__)
+#define qcp_always_inline __inline__
+
+#elif qcp_has_attribute(always_inline)
+#define qcp_always_inline __inline __attribute__((always_inline))
+
+#elif qcp_has_attribute(__always_inline__)
+#define qcp_always_inline __inline __attribute__((__always_inline__))
+
 #else
+#define qcp_always_inline __inline
 
-#if qcp_has_attribute(always_inline)
-
-#define qcp_always_inline __attribute__((always_inline))
-
-#else
-
-#if qcp_has_attribute(__always_inline__)
-#define qcp_always_inline __attribute__((__always_inline__))
-#else
-#define qcp_always_inline inline
-#endif /* __has_attribute(__always_inline__) */
-
-#endif /* __has_attribute(always_inline) */
-
-#endif /* ifdef __always_inline */
+#endif /* #ifdef __always_inline  */
 
 template<class T>
 class QCPListElement {
