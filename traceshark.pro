@@ -384,11 +384,14 @@ HEADERS      +=  mm/stringtree.h
 
 HEADERS      +=  misc/chunk.h
 HEADERS      +=  misc/errors.h
+HEADERS      +=  misc/maplist.h
 HEADERS      +=  misc/osapi.h
+HEADERS      +=  misc/pngresources.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
 HEADERS      +=  misc/settingstore.h
 HEADERS      +=  misc/string.h
+HEADERS      +=  misc/svgresources.h
 HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/translate.h
 HEADERS      +=  misc/tstring.h
