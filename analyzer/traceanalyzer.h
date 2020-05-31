@@ -209,25 +209,25 @@ private:
 				  CPU *eventCPU, int oldpid,
 				  const vtl::Time &oldtime,
 				  int idx);
-	vtl_always_inline void __processSwitchEvent(tracetype_t ttype,
+	vtl_always_inline void processSwitchEvent(tracetype_t ttype,
 						  const TraceEvent &event,
 						  int idx);
-	vtl_always_inline void __processWakeupEvent(tracetype_t ttype,
+	vtl_always_inline void processWakeupEvent(tracetype_t ttype,
 						  const TraceEvent &event,
 						  int idx);
-	vtl_always_inline void __processCPUfreqEvent(tracetype_t ttype,
+	vtl_always_inline void processCPUfreqEvent(tracetype_t ttype,
 						   const TraceEvent &event,
 						   int idx);
-	vtl_always_inline void __processCPUidleEvent(tracetype_t ttype,
+	vtl_always_inline void processCPUidleEvent(tracetype_t ttype,
 						   const TraceEvent &event,
 						   int idx);
-	vtl_always_inline void __processMigrateEvent(tracetype_t ttype,
+	vtl_always_inline void processMigrateEvent(tracetype_t ttype,
 						   const TraceEvent &event,
 						   int idx);
-	vtl_always_inline void __processForkEvent(tracetype_t ttype,
+	vtl_always_inline void processForkEvent(tracetype_t ttype,
 						const TraceEvent &event,
 						int idx);
-	vtl_always_inline void __processExitEvent(tracetype_t ttype,
+	vtl_always_inline void processExitEvent(tracetype_t ttype,
 						const TraceEvent &event,
 						int idx);
 	void addCpuFreqWork(unsigned int cpu,
@@ -240,7 +240,7 @@ private:
 	void processSchedAddTail();
 	void processFreqAddTail();
 	unsigned int guessTimePrecision();
-	vtl_always_inline void __processGeneric(tracetype_t ttype);
+	vtl_always_inline void processGeneric(tracetype_t ttype);
 	vtl_always_inline void updateMaxCPU(unsigned int cpu);
 	vtl_always_inline void updateMaxFreq(unsigned int freq);
 	vtl_always_inline void updateMinFreq(unsigned int freq);
@@ -250,9 +250,9 @@ private:
 	void processPerf();
 	void processAllFilters();
 	vtl_always_inline
-		bool __processPidFilter(const TraceEvent &event,
-					QMap<int, int> &map,
-					bool inclusive);
+		bool processPidFilter(const TraceEvent &event,
+				      QMap<int, int> &map,
+				      bool inclusive);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	WorkQueue statsQueue;
@@ -471,9 +471,9 @@ vtl_always_inline Task *TraceAnalyzer::findTask(int pid)
 }
 
 vtl_always_inline
-void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
-					  const TraceEvent &event,
-					  int /* idx */)
+void TraceAnalyzer::processMigrateEvent(tracetype_t ttype,
+					const TraceEvent &event,
+					int /* idx */)
 {
 	Migration m;
 	unsigned int oldcpu;
@@ -498,7 +498,7 @@ void TraceAnalyzer::__processMigrateEvent(tracetype_t ttype,
 	migrations.append(m);
 }
 
-vtl_always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
+vtl_always_inline void TraceAnalyzer::processForkEvent(tracetype_t ttype,
 						       const TraceEvent &event,
 						       int idx)
 {
@@ -529,7 +529,7 @@ vtl_always_inline void TraceAnalyzer::__processForkEvent(tracetype_t ttype,
 	}
 }
 
-vtl_always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
+vtl_always_inline void TraceAnalyzer::processExitEvent(tracetype_t ttype,
 						       const TraceEvent &event,
 						       int /* idx */)
 {
@@ -553,9 +553,9 @@ vtl_always_inline void TraceAnalyzer::__processExitEvent(tracetype_t ttype,
 }
 
 vtl_always_inline
-void TraceAnalyzer::__processSwitchEvent(tracetype_t ttype,
-					 const TraceEvent &event,
-					 int idx)
+void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
+				       const TraceEvent &event,
+				       int idx)
 {
 	sched_switch_handle_t handle;
 	unsigned int cpu = event.cpu;
@@ -771,9 +771,9 @@ out:
 }
 
 vtl_always_inline
-void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
-					 const TraceEvent &event,
-					 int /* idx */)
+void TraceAnalyzer::processWakeupEvent(tracetype_t ttype,
+				       const TraceEvent &event,
+				       int /* idx */)
 {
 	int pid;
 	Task *task;
@@ -807,9 +807,9 @@ void TraceAnalyzer::__processWakeupEvent(tracetype_t ttype,
 }
 
 vtl_always_inline
-void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
-					  const TraceEvent &event,
-					  int /* idx */)
+void TraceAnalyzer::processCPUfreqEvent(tracetype_t ttype,
+					const TraceEvent &event,
+					int /* idx */)
 {
 	unsigned int cpu;
 	unsigned int freq;
@@ -839,9 +839,9 @@ void TraceAnalyzer::__processCPUfreqEvent(tracetype_t ttype,
 }
 
 vtl_always_inline
-void TraceAnalyzer::__processCPUidleEvent(tracetype_t ttype,
-					  const TraceEvent &event,
-					  int /* idx */)
+void TraceAnalyzer::processCPUidleEvent(tracetype_t ttype,
+					const TraceEvent &event,
+					int /* idx */)
 {
 	unsigned int cpu;
 	double time;
@@ -895,7 +895,7 @@ vtl_always_inline void TraceAnalyzer::updateMinIdleState(int state)
 		minIdleState = state;
 }
 
-vtl_always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
+vtl_always_inline void TraceAnalyzer::processGeneric(tracetype_t ttype)
 {
 	int i;
 	bool eof = false;
@@ -920,26 +920,26 @@ vtl_always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 			updateMaxCPU(event.cpu);
 			switch (event.type) {
 			case CPU_FREQUENCY:
-				__processCPUfreqEvent(ttype, event, i);
+				processCPUfreqEvent(ttype, event, i);
 				break;
 			case CPU_IDLE:
-				__processCPUidleEvent(ttype, event, i);
+				processCPUidleEvent(ttype, event, i);
 				break;
 			case SCHED_MIGRATE_TASK:
-				__processMigrateEvent(ttype, event, i);
+				processMigrateEvent(ttype, event, i);
 				break;
 			case SCHED_SWITCH:
-				__processSwitchEvent(ttype, event, i);
+				processSwitchEvent(ttype, event, i);
 				break;
 			case SCHED_WAKEUP:
 			case SCHED_WAKEUP_NEW:
-				__processWakeupEvent(ttype, event, i);
+				processWakeupEvent(ttype, event, i);
 				break;
 			case SCHED_PROCESS_FORK:
-				__processForkEvent(ttype, event, i);
+				processForkEvent(ttype, event, i);
 				break;
 			case SCHED_PROCESS_EXIT:
-				__processExitEvent(ttype, event, i);
+				processExitEvent(ttype, event, i);
 				break;
 			default:
 				break;
@@ -959,9 +959,9 @@ vtl_always_inline void TraceAnalyzer::__processGeneric(tracetype_t ttype)
 }
 
 vtl_always_inline
-bool TraceAnalyzer::__processPidFilter(const TraceEvent &event,
-				       QMap<int, int> &map,
-				       bool inclusive)
+bool TraceAnalyzer::processPidFilter(const TraceEvent &event,
+				     QMap<int, int> &map,
+				     bool inclusive)
 {
 	sched_switch_handle sw_handle;
 	DEFINE_FILTER_PIDMAP_ITERATOR(iter);

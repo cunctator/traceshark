@@ -231,7 +231,7 @@ private:
 	void setupCursors();
 	void setupCursors(const double &red, const double &blue);
 	void setupCursors(const vtl::Time &redtime, const vtl::Time &bluetime);
-	void _setupCursors(vtl::Time redtime, const double &red,
+	void setupCursors_(vtl::Time redtime, const double &red,
 			   vtl::Time bluetime, const double &blue);
 	void updateResetFiltersEnabled();
 	void addSchedGraph(CPUTask &task, unsigned int cpu);

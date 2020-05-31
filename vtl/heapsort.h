@@ -57,32 +57,32 @@
 
 namespace vtl {
 
-vtl_always_inline long heap_iParent__(long i)
+vtl_always_inline long heap_iParent_(long i)
 {
 	return (i - 1) / 2;
 }
 
-vtl_always_inline long heap_iLeftChild__(long i)
+vtl_always_inline long heap_iLeftChild_(long i)
 {
 	return 2 * i + 1;
 }
 
-vtl_always_inline long heap_iRightChild__(long i)
+vtl_always_inline long heap_iRightChild_(long i)
 {
 	return 2 * i + 2;
 }
 
 template<template <typename> class C, typename T, typename TCompFunc>
-vtl_always_inline void heap_siftdown__(C<T> &container,
-				       long start,
-				       long end,
-				       TCompFunc compFunc)
+vtl_always_inline void heap_siftdown_(C<T> &container,
+				      long start,
+				      long end,
+				      TCompFunc compFunc)
 {
 	long root, child, rchild, swap;
 
 	root = start;
-	while (heap_iLeftChild__(root) <= end) {
-		child = heap_iLeftChild__(root);
+	while (heap_iLeftChild_(root) <= end) {
+		child = heap_iLeftChild_(root);
 		swap = root;
 		if (compFunc(container[swap], container[child]) < 0)
 			swap = child;
@@ -100,16 +100,16 @@ vtl_always_inline void heap_siftdown__(C<T> &container,
 }
 
 template<template <typename> class C, typename T, typename TCompFunc>
-vtl_always_inline void heap_heapify__(C<T> &container,
+vtl_always_inline void heap_heapify_(C<T> &container,
 				      TCompFunc compFunc)
 {
 	long count = container.size();
 	long start;
 
-	start = heap_iParent__(count - 1);
+	start = heap_iParent_(count - 1);
 
 	while(start >= 0) {
-		heap_siftdown__(container, start, count - 1, compFunc);
+		heap_siftdown_(container, start, count - 1, compFunc);
 		start--;
 	}
 }
@@ -124,13 +124,13 @@ template<template <typename> class C, typename T, typename TCompFunc>
 	if (count < 2)
 		return;
 
-	heap_heapify__(container, compFunc);
+	heap_heapify_(container, compFunc);
 
 	end = count - 1;
 	while (end > 0) {
 		container.swap(0, end);
 		end--;
-		heap_siftdown__(container, 0, end, compFunc);
+		heap_siftdown_(container, 0, end, compFunc);
 	}
 }
  

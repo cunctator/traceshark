@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -61,7 +61,7 @@
 #include <QtCore>
 #include <QString>
 
-class __TThread;
+class TThread_;
 
 /*
  * I hate this class. I would like to use QThread directly instead of inventing
@@ -69,7 +69,7 @@ class __TThread;
  * templates since it inherits QObject, so here we go down the dirty road.
  */
 class TThread {
-	friend class __TThread;
+	friend class TThread_;
 public:
 	TThread();
 	TThread(const QString &name);
@@ -92,14 +92,14 @@ public:
 protected:
 	virtual void run()=0;
 private:
-	__TThread *threadPtr;
-	static QMap<__TThread*, __TThread*> threadMap;
+	TThread_ *threadPtr;
+	static QMap<TThread_*, TThread_*> threadMap;
 };
 
-class __TThread : public QThread {
+class TThread_ : public QThread {
 	Q_OBJECT
 public:
-	__TThread(TThread *thr, const QString &name);
+	TThread_(TThread *thr, const QString &name);
 protected:
 	void run();
 private:

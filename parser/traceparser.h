@@ -105,8 +105,8 @@ private:
 	void guessTraceType();
 	void sendTraceType();
 	void prepareParse();
-	vtl_always_inline bool __parseBuffer(tracetype_t ttppe,
-					   unsigned int index);
+	vtl_always_inline bool parseBuffer_(tracetype_t ttppe,
+					    unsigned int index);
 	vtl_always_inline bool parseFtraceBuffer(unsigned int index);
 	vtl_always_inline bool parsePerfBuffer(unsigned int index);
 	vtl_always_inline bool parseLineFtrace(TraceLine &line,
@@ -144,18 +144,18 @@ vtl_always_inline void TraceParser::waitForNextBatch(bool &eof, int &index)
 /* This parses a buffer */
 vtl_always_inline bool TraceParser::parseFtraceBuffer(unsigned int index)
 {
-	return __parseBuffer(TRACE_TYPE_FTRACE, index);
+	return parseBuffer_(TRACE_TYPE_FTRACE, index);
 }
 
 /* This parses a buffer */
 vtl_always_inline bool TraceParser::parsePerfBuffer(unsigned int index)
 {
-	return __parseBuffer(TRACE_TYPE_PERF, index);
+	return parseBuffer_(TRACE_TYPE_PERF, index);
 }
 
 /* This parses a buffer */
-vtl_always_inline bool TraceParser::__parseBuffer(tracetype_t ttype,
-						unsigned int index)
+vtl_always_inline bool TraceParser::parseBuffer_(tracetype_t ttype,
+						 unsigned int index)
 {
 	unsigned int i, s;
 	bool eof;

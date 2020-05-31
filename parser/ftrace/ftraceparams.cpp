@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,12 +54,12 @@
 
 const char *ftrace_sched_wakeup_name_strdup(const TraceEvent &event,
 					    StringPool<> *pool) {
-	return _ftrace_sched_wakeup_name_strdup(event, pool);
+	return ftrace_sched_wakeup_name_strdup_(event, pool);
 }
 
 const char *ftrace_sched_process_fork_childname_strdup(const TraceEvent &event,
 						       StringPool<> *pool) {
-	return _ftrace_sched_process_fork_childname_strdup(event, pool);
+	return ftrace_sched_process_fork_childname_strdup_(event, pool);
 }
 
 const char *
@@ -67,7 +67,7 @@ ftrace_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					  StringPool<> *pool,
 					  const sched_switch_handle &handle)
 {
-	return _ftrace_sched_switch_handle_newname_strdup(event, pool, handle);
+	return ftrace_sched_switch_handle_newname_strdup_(event, pool, handle);
 }
 
 const char *
@@ -75,12 +75,12 @@ ftrace_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					  StringPool<> *pool,
 					  const sched_switch_handle &handle)
 {
-	return _ftrace_sched_switch_handle_oldname_strdup(event, pool, handle);
+	return ftrace_sched_switch_handle_oldname_strdup_(event, pool, handle);
 }
 
 
 const char *
 ftrace_sched_waking_name_strdup(const TraceEvent &event, StringPool<> *pool)
 {
-	return _ftrace_sched_waking_name_strdup(event, pool);
+	return ftrace_sched_waking_name_strdup_(event, pool);
 }

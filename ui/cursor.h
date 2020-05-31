@@ -70,7 +70,7 @@ public:
 	void setPosition(const vtl::Time &t);
 	void setColor(const QColor &color);
 private:
-	void _setPosition(double pos);
+	void setPosition_(double pos);
 	void advertiseTime(const vtl::Time &time);
 	double position;
 	vtl::Time time;

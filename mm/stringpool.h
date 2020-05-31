@@ -66,7 +66,7 @@
 #define STRINGPOOL_MAX(A, B) ((A) >= (B) ? A:B)
 #define STRINGPOOL_MIN(A, B) ((A) < (B) ? A:B)
 
-class __DummySP {};
+class DummySP_ {};
 
 class PoolBundleSP {
 public:
@@ -77,9 +77,9 @@ public:
 template<typename HashFunc>
 class StringPool;
 
-#define __STRINGPOOL_ITERATOR(name) \
-vtl::AVLTree<TString, __DummySP, vtl::AVLBALANCE_USEPOINTERS, \
-AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>::iterator
+#define STRINGPOOL_ITERATOR_(name) \
+vtl::AVLTree<TString, DummySP_, vtl::AVLBALANCE_USEPOINTERS, \
+AVLAllocatorSP<TString, DummySP_>, AVLCompareSP<TString>>::iterator
 
 template <class T>
 class AVLCompareSP {
@@ -116,8 +116,8 @@ private:
 	PoolBundleSP pools;
 };
 
-#define AVLTREE_SIZE ((int)sizeof(vtl::AVLTree<TString, __DummySP,	 \
-vtl::AVLBALANCE_USEPOINTERS, AVLAllocatorSP<TString, __DummySP>, \
+#define AVLTREE_SIZE ((int)sizeof(vtl::AVLTree<TString, DummySP_,	 \
+vtl::AVLBALANCE_USEPOINTERS, AVLAllocatorSP<TString, DummySP_>, \
 			     AVLCompareSP<TString>>))
 #define TSTRING_PTR_SIZE ((int)sizeof(TString*))
 #define TYPICAL_CACHE_LINE_SIZE (64)
@@ -135,8 +135,8 @@ StringPoolEntry(void *data): cachePtr(nullptr), avlTree(data) {
 protected:
 	char cache[SP_CACHE_SIZE];
 	TString *cachePtr;
-	vtl::AVLTree<TString, __DummySP, vtl::AVLBALANCE_USEPOINTERS,
-		AVLAllocatorSP<TString, __DummySP>, AVLCompareSP<TString>>
+	vtl::AVLTree<TString, DummySP_, vtl::AVLBALANCE_USEPOINTERS,
+		     AVLAllocatorSP<TString, DummySP_>, AVLCompareSP<TString>>
 		avlTree;
 };
 
@@ -197,7 +197,7 @@ const TString *StringPool<HashFunc>::allocString(const TString *str,
 				countReuse[hval]++;
 			return entry->cachePtr;
 		}
-		__STRINGPOOL_ITERATOR(iter) iter =
+		STRINGPOOL_ITERATOR_(iter) iter =
 			entry->avlTree.findInsert(*str, isNew);
 		TString &refStr = iter.key();
 		if (isNew) {
@@ -216,7 +216,7 @@ const TString *StringPool<HashFunc>::allocString(const TString *str,
 		entry = new StringPoolEntry<HashFunc>(&avlPools);
 		hashTable[hval] = entry;
 		deleteList.append(entry);
-		__STRINGPOOL_ITERATOR(iter) iter =
+		STRINGPOOL_ITERATOR_(iter) iter =
 			entry->avlTree.findInsert(*str, isNew);
 		if (cutoff != 0)
 			countAllocs[hval]++;
@@ -253,7 +253,7 @@ StringPool<HashFunc>::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 		hSize = hSizeP;
 
 	entryPages = 2 * hSize *
-		sizeof(vtl::AVLNode<TString, __DummySP>) / 4096;
+		sizeof(vtl::AVLNode<TString, DummySP_>) / 4096;
 	entryPages = STRINGPOOL_MAX(1, entryPages);
 	strPages = 2* hSize * sizeof(TString) / 4096;
 	strPages = STRINGPOOL_MAX(16, strPages);
@@ -263,7 +263,7 @@ StringPool<HashFunc>::StringPool(unsigned int nr_pages, unsigned int hSizeP)
 
 	avlPools.charPool = new MemPool(nr_pages, sizeof(char));
 	avlPools.nodePool = new MemPool(entryPages, sizeof(vtl::AVLNode<TString,
-							   __DummySP>));
+							   DummySP_>));
 	hashTable = new StringPoolEntry<HashFunc>*[hSize];
 	countAllocs = new unsigned int[hSize];
 	countReuse = new unsigned int[hSize];

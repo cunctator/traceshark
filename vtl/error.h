@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,8 +50,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _VTL_ERROR_H
-#define _VTL_ERROR_H
+#ifndef VTL_ERROR_H
+#define VTL_ERROR_H
 
 #include <cstdarg>
 #include <cerrno>
@@ -91,4 +91,4 @@ namespace vtl {
 	void warn(int vtl_errno, const char *fmt, ...);
 }
 
-#endif /* _VTL_ERROR_H */
+#endif /* VTL_ERROR_H */

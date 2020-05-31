@@ -50,8 +50,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PERFHELPERS_H
-#define _PERFHELPERS_H
+#ifndef PERFHELPERS_H
+#define PERFHELPERS_H
 
 #include "misc/string.h"
 #include "parser/paramhelpers.h"
@@ -82,7 +82,7 @@
  * In a nutshell, this protects us against weirdos but not against lunatics :)
  */
 static vtl_always_inline int
-_perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
+perf_sched_switch_find_arrow_(const TraceEvent &event, bool &is_distro_style)
 {
 	int i;
 	for (i = 2; i < event.argc - 2; i++) {
@@ -127,7 +127,7 @@ _perf_sched_switch_find_arrow(const TraceEvent &event, bool &is_distro_style)
 }
 
 static vtl_always_inline int
-_perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
+perf_sched_switch_handle_oldpid_newformat_(const TraceEvent &event,
 					   const sched_switch_handle &handle)
 {
 	int idx = handle.perf.index;
@@ -168,7 +168,7 @@ _perf_sched_switch_handle_oldpid_newformat(const TraceEvent &event,
 }
 
 static vtl_always_inline int
-_perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
+perf_sched_switch_handle_newpid_newformat_(const TraceEvent &event,
 					   const sched_switch_handle &handle)
 {
 	int i;
@@ -203,4 +203,4 @@ _perf_sched_switch_handle_newpid_newformat(const TraceEvent &event,
 	return ABSURD_INT;
 }
 
-#endif /* _PERFPARAMHELPERS_H */
+#endif /* PERFHELPERS_H */

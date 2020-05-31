@@ -92,17 +92,17 @@ void Cursor::setPosition(double pos)
 	 */
 	time.setPrecision(6);
 	advertiseTime(time);
-	_setPosition(pos);
+	setPosition_(pos);
 }
 
 void Cursor::setPosition(const vtl::Time &t)
 {
 	time = t;
 	advertiseTime(time);
-	_setPosition(time.toDouble());
+	setPosition_(time.toDouble());
 }
 
-void Cursor::_setPosition(double pos)
+void Cursor::setPosition_(double pos)
 {
 	start->setCoords(pos, -10000000000000000);
 	end->setCoords(pos, +10000000000000000);

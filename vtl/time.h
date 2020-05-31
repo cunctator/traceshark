@@ -50,8 +50,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _VTL_TIME_H
-#define _VTL_TIME_H
+#ifndef VTL_TIME_H
+#define VTL_TIME_H
 
 #include <QString>
 #include <climits>
@@ -65,44 +65,44 @@ namespace vtl {
 #define VTL_TIME_MIN vtl::Time(true, UINT_MAX, UINT_MAX)
 #define VTL_TIME_ZERO vtl::Time(false, 0, 0)
 
-#define _TIME_MAX(A, B) (A > B ? A:B)
-#define _TIME_MIN(A, B) (A < B ? A:B)
+#define VTL_TIME_MAX_(A, B) (A > B ? A:B)
+#define VTL_TIME_MIN_(A, B) (A < B ? A:B)
 
-#define _TIMEINT_REQ (1000000000000000000LL)
+#define VTL_TIMEINT_REQ_ (1000000000000000000LL)
 
-#if INT_MAX >= _TIMEINT_REQ && INT_MIN < -_TIMEINT_REQ
-#define	_TIME_MILLE (1000)
-#define TIME_USE_INT
-#define _TIME_FMT_STRING  "%d"
+#if INT_MAX >= VTL_TIMEINT_REQ_ && INT_MIN < -VTL_TIMEINT_REQ_
+#define	VTL_TIME_MILLE_ (1000)
+#define VTL_TIME_USE_INT
+#define VTL_TIME_FMT_STRING_ "%d"
 
 #elif LONG_MAX >= _TIMEINT_REQ && LONG_MIN < -_TIMEINT_REQ
-#define	_TIME_MILLE (1000L)
-#define TIME_USE_LONG
-#define _TIME_FMT_STRING  "%ld"
+#define	VTL_TIME_MILLE_ (1000L)
+#define VTL_TIME_USE_LONG
+#define VTL_TIME_FMT_STRING_  "%ld"
 
 #elif LLONG_MAX >= _TIMEINT_REQ && LLONG_MIN < -_TIMEINT_REQ
-#define	_TIME_MILLE (1000LL)
-#define TIME_USE_LLONG
-#define _TIME_FMT_STRING  "%lld"
+#define	VTL_TIME_MILLE_ (1000LL)
+#define VTL_TIME_USE_LLONG
+#define VTL_TIME_FMT_STRING_  "%lld"
 
 #else
 #error "A longer long long is required!"
 #endif
 
-#define USECS_PER_MSEC (_TIME_MILLE)
-#define NSECS_PER_USEC (_TIME_MILLE)
-#define MSECS_PER_SEC (_TIME_MILLE)
+#define USECS_PER_MSEC (VTL_TIME_MILLE_)
+#define NSECS_PER_USEC (VTL_TIME_MILLE_)
+#define MSECS_PER_SEC (VTL_TIME_MILLE_)
 #define USECS_PER_SEC (MSECS_PER_SEC * USECS_PER_MSEC)
 #define NSECS_PER_SEC (USECS_PER_SEC * NSECS_PER_USEC)
 
 	typedef class Time final {
 	public:
 
-#ifdef TIME_USE_INT
+#ifdef VTL_TIME_USE_INT
 		typedef int timeint_t;
-#elif defined(TIME_USE_LONG)
+#elif defined(VTL_TIME_USE_LONG)
 		typedef long timeint_t;
-#elif defined(TIME_USE_LLONG)
+#elif defined(VTL_TIME_USE_LLONG)
 		typedef long long timeint_t;
 #endif
 	Time(bool n = false, timeint_t s = 0, timeint_t ns = 0,
@@ -140,10 +140,10 @@ namespace vtl {
 		vtl_always_inline unsigned int getPrecision() const;
 		vtl_always_inline void setPrecision(unsigned int p);
 	private:
-		vtl_always_inline static Time __fromString(const char *str,
-							 bool &ok,
-							 bool spaced,
-							 bool colonatend);
+		vtl_always_inline static Time fromString_(const char *str,
+							  bool &ok,
+							  bool spaced,
+							  bool colonatend);
 		timeint_t time;
 		unsigned int precision : 4;
 	} time_t;
@@ -151,28 +151,28 @@ namespace vtl {
 	vtl_always_inline Time Time::operator+(const Time &other) const
 	{
 		Time r;
-		r.precision = _TIME_MAX(precision, other.precision);
+		r.precision = VTL_TIME_MAX_(precision, other.precision);
 		r.time = time + other.time;
 		return r;
 	}
 
 	vtl_always_inline void Time::operator+=(const Time &other)
 	{
-		precision = _TIME_MAX(precision, other.precision);
+		precision = VTL_TIME_MAX_(precision, other.precision);
 		time = time + other.time;
 	}
 
 	vtl_always_inline Time Time::operator-(const Time &other) const
 	{
 		Time r;
-		r.precision = _TIME_MAX(precision, other.precision);
+		r.precision = VTL_TIME_MAX_(precision, other.precision);
 		r.time = time - other.time;
 		return r;
 	}
 
 	vtl_always_inline void Time::operator-=(const Time &other)
 	{
-		precision = _TIME_MAX(precision, other.precision);
+		precision = VTL_TIME_MAX_(precision, other.precision);
 		time = time - other.time;
 	}
 
@@ -266,12 +266,12 @@ namespace vtl {
 
 	vtl_always_inline Time Time::fromString(const char *str, bool &ok)
 	{
-		return __fromString(str, ok, false, true);
+		return fromString_(str, ok, false, true);
 	}
 
 	vtl_always_inline Time Time::fromSpacedString(const char *str, bool &ok)
 	{
-		return __fromString(str, ok, true, false);
+		return fromString_(str, ok, true, false);
 	}
 
 	vtl_always_inline bool Time::isZero()
@@ -279,8 +279,8 @@ namespace vtl {
 		return time == 0;
 	}
 
-	vtl_always_inline Time Time::__fromString(const char *str, bool &ok,
-						bool spaced, bool colonatend)
+	vtl_always_inline Time Time::fromString_(const char *str, bool &ok,
+						 bool spaced, bool colonatend)
 	{
 		Time r;
 		uint32_t base = 0;
@@ -434,4 +434,4 @@ namespace vtl {
 	}
 }
 
-#endif /* _VTL_TIME_H */
+#endif /* VTL_TIME_H */

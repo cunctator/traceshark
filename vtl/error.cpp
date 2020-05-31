@@ -73,7 +73,7 @@ void vtl::set_error_handler(vtl::ErrorHandler *eh)
 	handler = eh;
 }
 
-static vtl_always_inline void vtl__vwarnx(const char *fmt, va_list args,
+static vtl_always_inline void vtl_vwarnx_(const char *fmt, va_list args,
 					  bool doexit, int ecode)
 {
 	if (handler != nullptr) {
@@ -90,7 +90,7 @@ static vtl_always_inline void vtl__vwarnx(const char *fmt, va_list args,
 	}
 }
 
-static vtl_always_inline void vtl__vwarn(int vtl_errno, const char *fmt,
+static vtl_always_inline void vtl_vwarn_(int vtl_errno, const char *fmt,
 					 va_list args, bool doexit, int ecode)
 {
 	if (handler != nullptr) {
@@ -119,7 +119,7 @@ void vtl::errx(int ecode, const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	vtl__vwarnx(fmt, args, true, ecode);
+	vtl_vwarnx_(fmt, args, true, ecode);
 	va_end(args);
 }
 
@@ -128,7 +128,7 @@ void vtl::warnx(const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	vtl__vwarnx(fmt, args, false, 0);
+	vtl_vwarnx_(fmt, args, false, 0);
 	va_end(args);
 }
 
@@ -137,7 +137,7 @@ void vtl::err(int ecode, int vtl_errno, const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	vtl__vwarn(vtl_errno, fmt, args, true, ecode);
+	vtl_vwarn_(vtl_errno, fmt, args, true, ecode);
 	va_end(args);
 }
 
@@ -147,7 +147,7 @@ void vtl::warn(int vtl_errno, const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	vtl__vwarn(vtl_errno, fmt, args, false, 0);
+	vtl_vwarn_(vtl_errno, fmt, args, false, 0);
 	va_end(args);
 }
 

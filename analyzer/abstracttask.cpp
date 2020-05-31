@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018, 2019
+ * Copyright (C) 2015, 2016, 2018-2020
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -321,8 +321,8 @@ void AbstractTask::setEndTime(const vtl::Time &time)
 	endTime = time;
 }
 
-int AbstractTask::_binarySearch(const vtl::Time &time, int lowerIdx,
-			       int higherIdx)
+int AbstractTask::binarySearch_(const vtl::Time &time, int lowerIdx,
+				int higherIdx)
 {
 	int pivot = (lowerIdx + higherIdx) / 2;
 	int width = higherIdx - lowerIdx;
@@ -336,21 +336,21 @@ int AbstractTask::_binarySearch(const vtl::Time &time, int lowerIdx,
 	lowerIdx = pSmaller ? pivot : lowerIdx;
 	higherIdx = pSmaller ? higherIdx : pivot;
 
-	return _binarySearch(time, lowerIdx, higherIdx);
+	return binarySearch_(time, lowerIdx, higherIdx);
 }
 
 int AbstractTask::binarySearch(const vtl::Time &time)
 {
 	int s = schedEventIdx.size();
 
-	return _binarySearch(time, 0, s - 1);
+	return binarySearch_(time, 0, s - 1);
 }
 
 
 int AbstractTask::findLower(const vtl::Time &time)
 {
 	int idxmax = schedEventIdx.size() - 1;
-	int idx = _binarySearch(time, 0, idxmax);
+	int idx = binarySearch_(time, 0, idxmax);
 
 	vtl::Time idxtime = (*events)[schedEventIdx[idx]].time;
 	/*
@@ -370,7 +370,7 @@ int AbstractTask::findLower(const vtl::Time &time)
 int AbstractTask::findHigher(const vtl::Time &time)
 {
 	int idxmax = schedEventIdx.size() - 1;
-	int idx = _binarySearch(time, 0, idxmax);
+	int idx = binarySearch_(time, 0, idxmax);
 
 	vtl::Time idxtime = (*events)[schedEventIdx[idx]].time;
 	/*

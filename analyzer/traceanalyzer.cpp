@@ -85,7 +85,7 @@ extern "C" {
 #include "threads/workqueue.h"
 
 vtl_always_inline static int clib_open(const char *pathname, int flags,
-				     mode_t mode)
+				       mode_t mode)
 {
 	return open(pathname, flags, mode);
 }
@@ -914,12 +914,12 @@ void TraceAnalyzer::doLimitedStats()
 
 void TraceAnalyzer::processFtrace()
 {
-	__processGeneric(TRACE_TYPE_FTRACE);
+	processGeneric(TRACE_TYPE_FTRACE);
 }
 
 void TraceAnalyzer::processPerf()
 {
-	__processGeneric(TRACE_TYPE_PERF);
+	processGeneric(TRACE_TYPE_PERF);
 }
 
 void TraceAnalyzer::processAllFilters()
@@ -941,8 +941,8 @@ void TraceAnalyzer::processAllFilters()
 			}
 		}
 		if (OR_filterState.isEnabled(FilterState::FILTER_PID) &&
-		    !__processPidFilter(event, OR_filterPidMap,
-					OR_pidFilterInclusive)) {
+		    !processPidFilter(event, OR_filterPidMap,
+				      OR_pidFilterInclusive)) {
 			filteredEvents.append(eptr);
 			continue;
 		}
@@ -965,8 +965,8 @@ void TraceAnalyzer::processAllFilters()
 			continue;
 		}
 		if (filterState.isEnabled(FilterState::FILTER_PID) &&
-		    __processPidFilter(event, filterPidMap,
-				       pidFilterInclusive)) {
+		    processPidFilter(event, filterPidMap,
+				     pidFilterInclusive)) {
 			continue;
 		}
 		if (filterState.isEnabled(FilterState::FILTER_EVENT) &&

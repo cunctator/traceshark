@@ -125,8 +125,7 @@ public:
 	TaskGraph *graph;
 
 private:
-	int _binarySearch(const vtl::Time &time, int lowerIdx,
-					  int higherIdx);
+	int binarySearch_(const vtl::Time &time, int lowerIdx, int higherIdx);
 	vtl_always_inline int binarySearch(const vtl::Time &time);
 	int findLower(const vtl::Time &time);
 	int findHigher(const vtl::Time &time);

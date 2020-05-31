@@ -63,10 +63,10 @@
  * classes.
  */
 
-__TThread::__TThread(TThread *thr, const QString &name):
+TThread_::TThread_(TThread *thr, const QString &name):
 	tThread(thr), threadName(name) {}
 
-void __TThread::run()
+void TThread_::run()
 {
 	tshark_pthread_setname_np(threadName.toLocal8Bit().data());
 	tThread->run();
@@ -75,13 +75,13 @@ void __TThread::run()
 TThread::TThread()
 {
 	const QString name("TThread");
-	threadPtr = new __TThread(this, name);
+	threadPtr = new TThread_(this, name);
 	threadMap[threadPtr] = threadPtr;
 }
 
 TThread::TThread(const QString &name)
 {
-	threadPtr = new __TThread(this, name);
+	threadPtr = new TThread_(this, name);
 	threadMap[threadPtr] = threadPtr;
 }
 
@@ -155,9 +155,9 @@ void TThread::quit()
 
 void TThread::listThreads(QList<QThread*> &list)
 {
-	QMap<__TThread*, __TThread*>::iterator iter;
+	QMap<TThread_*, TThread_*>::iterator iter;
 	for (iter = threadMap.begin(); iter != threadMap.end(); iter++)
 		list.append(static_cast<QThread*>(iter.value()));
 }
 
-QMap<__TThread*, __TThread*> TThread::threadMap;
+QMap<TThread_*, TThread_*> TThread::threadMap;

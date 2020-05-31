@@ -77,9 +77,9 @@ public:
 template<typename HashFunc>
 class StringTree;
 
-#define __STRINGTREE_ITERATOR(name) \
+#define VTL_STRINGTREE_ITERATOR_(name) \
 	vtl::AVLTree<TString, event_t, vtl::AVLBALANCE_USEPOINTERS, \
-AVLAllocatorST<TString, event_t>, AVLCompareST<TString>>::iterator
+	AVLAllocatorST<TString, event_t>, AVLCompareST<TString>>::iterator
 
 template <class T>
 class AVLCompareST {
@@ -192,7 +192,7 @@ event_t StringTree<HashFunc>::searchAllocString(const TString *str,
 
 	if (hashTable[hval] != nullptr) {
 		entry = hashTable[hval];
-		__STRINGTREE_ITERATOR(iter) iter =
+		VTL_STRINGTREE_ITERATOR_(iter) iter =
 			entry->avlTree.findInsert(*str, isNew);
 		if (isNew) {
 			event_t &e = iter.value();
@@ -207,7 +207,7 @@ event_t StringTree<HashFunc>::searchAllocString(const TString *str,
 		entry = new StringTreeEntry<HashFunc>(&avlPools);
 		hashTable[hval] = entry;
 		deleteList.append(entry);
-		__STRINGTREE_ITERATOR(iter) iter =
+		VTL_STRINGTREE_ITERATOR_(iter) iter =
 			entry->avlTree.findInsert(*str, isNew);
 		event_t &e = iter.value();
 		e = newval;

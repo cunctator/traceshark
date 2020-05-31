@@ -67,11 +67,11 @@ class AbstractWorkItem {
 public:
 	virtual ~AbstractWorkItem() {}
 protected:
-	vtl_always_inline bool __runWork();
+	vtl_always_inline bool runWork_();
 	virtual bool run() = 0;
 };
 
-vtl_always_inline bool AbstractWorkItem::__runWork() {
+vtl_always_inline bool AbstractWorkItem::runWork_() {
 	return run();
 }
 

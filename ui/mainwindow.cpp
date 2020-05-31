@@ -676,7 +676,7 @@ void MainWindow::setupCursors(const double &red, const double &blue)
 	vtl::Time bluetime = vtl::Time::fromDouble(blue);
 	bluetime.setPrecision(analyzer->getTimePrecision());
 
-	_setupCursors(redtime, red, bluetime, blue);
+	setupCursors_(redtime, red, bluetime, blue);
 }
 
 void MainWindow::setupCursors(const vtl::Time &redtime,
@@ -685,10 +685,10 @@ void MainWindow::setupCursors(const vtl::Time &redtime,
 	double red = redtime.toDouble();
 	double blue = bluetime.toDouble();
 
-	_setupCursors(redtime, red, bluetime, blue);
+	setupCursors_(redtime, red, bluetime, blue);
 }
 
-void MainWindow::_setupCursors(vtl::Time redtime, const double &red,
+void MainWindow::setupCursors_(vtl::Time redtime, const double &red,
 			       vtl::Time bluetime, const double &blue)
 {
 	cursors[TShark::RED_CURSOR] = new Cursor(tracePlot,

@@ -51,8 +51,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __AVLTREE_H
-#define __AVLTREE_H
+#ifndef VTL_AVLTREE_H
+#define VTL_AVLTREE_H
 
 #include <utility>
 #include <cstdlib>
@@ -62,7 +62,7 @@ namespace vtl {
 
 typedef enum : int { AVLBALANCE_USEPOINTERS,  AVLBALANCE_USESWAP } avlbalance_t;
 
-#define __AVLTREEMAX(A, B) ((A) >= (B) ? A:B)
+#define VTL_AVLTREEMAX_(A, B) ((A) >= (B) ? A:B)
 
 template <class T>
 class AVLSampleCompare {
@@ -146,25 +146,25 @@ public:
 	static bool const value = sizeof(Test<K>(0)) == sizeof(Yes);
 };
 
-template<bool b> class __AVLFindInsertSelect;
-template<bool b> class __AVLFindSelect;
-template<bool b> class __AVLFindValueSelect;
-template<bool b> class __AVLAddValueSelect;
-template<bool b> class __AVLClearSelect;
+template<bool b> class AVLFindInsertSelect_;
+template<bool b> class AVLFindSelect_;
+template<bool b> class AVLFindValueSelect_;
+template<bool b> class AVLAddValueSelect_;
+template<bool b> class AVLClearSelect_;
 
 template<class T, class U, avlbalance_t BALANCE = AVLBALANCE_USESWAP,
 	typename ALLOC = AVLDefaultAllocator<T, U>,
 	typename CF = AVLDefaultCompare<T>>
 class AVLTree
 {
-	friend class __AVLFindInsertSelect<false>;
-	friend class __AVLFindSelect<false>;
-	friend class __AVLFindValueSelect<false>;
-	friend class __AVLAddValueSelect<AVLBALANCE_USEPOINTERS>;
-	friend class __AVLFindInsertSelect<true>;
-	friend class __AVLFindSelect<true>;
-	friend class __AVLFindValueSelect<true>;
-	friend class __AVLAddValueSelect<AVLBALANCE_USESWAP>;
+	friend class AVLFindInsertSelect_<false>;
+	friend class AVLFindSelect_<false>;
+	friend class AVLFindValueSelect_<false>;
+	friend class AVLAddValueSelect_<AVLBALANCE_USEPOINTERS>;
+	friend class AVLFindInsertSelect_<true>;
+	friend class AVLFindSelect_<true>;
+	friend class AVLFindValueSelect_<true>;
+	friend class AVLAddValueSelect_<AVLBALANCE_USESWAP>;
 public:
 	class iterator {
 		friend class AVLTree<T, U, BALANCE, ALLOC, CF>;
@@ -203,32 +203,32 @@ public:
 	vtl_always_inline iterator begin() const;
 	vtl_always_inline iterator end() const;
 	protected:
-	vtl_always_inline U &__findValue(const T &key, bool &newEntry);
-	vtl_always_inline U &__findValueCmp(const T &key, bool &newEntry);
-	vtl_always_inline iterator __findCmp(const T &key) const;
-	vtl_always_inline iterator __find(const T &key) const;
+	vtl_always_inline U &findValue_(const T &key, bool &newEntry);
+	vtl_always_inline U &findValueCmp_(const T &key, bool &newEntry);
+	vtl_always_inline iterator findCmp_(const T &key) const;
+	vtl_always_inline iterator find_(const T &key) const;
 	vtl_always_inline iterator
-	__findInsertCmp(const T &key, bool &newEntry);
-	vtl_always_inline iterator __findInsert(const T &key, bool &newEntry);
-	vtl_always_inline AVLNode<T, U> *__addValue(const T &key,
-						    AVLNode<T, U> *&parent,
-						    AVLNode<T, U> **&aentry);
+	findInsertCmp_(const T &key, bool &newEntry);
+	vtl_always_inline iterator findInsert_(const T &key, bool &newEntry);
+	vtl_always_inline AVLNode<T, U> *addValue_(const T &key,
+						   AVLNode<T, U> *&parent,
+						   AVLNode<T, U> **&aentry);
 	vtl_always_inline
-	AVLNode<T, U> *__addValueSwap(const T &key,
-				      AVLNode<T, U> *&parent,
-				      AVLNode<T, U> **&aentry);
+	AVLNode<T, U> *addValueSwap_(const T &key,
+				     AVLNode<T, U> *&parent,
+				     AVLNode<T, U> **&aentry);
 private:
 	void deleteNode(AVLNode<T, U> *node);
 	vtl_always_inline AVLNode<T, U> *addValue(const T &key,
 						  AVLNode<T, U> *&parent,
 						  AVLNode<T, U> **&aentry);
 	AVLNode<T, U> *root;
-	int _size;
+	int size_;
 	ALLOC alloc;
 };
 
 template <bool b>
-	class __AVLFindInsertSelect {
+	class AVLFindInsertSelect_ {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
@@ -236,12 +236,12 @@ public:
 		static typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 		findInsert(AVLTree<T, U, BALANCE, ALLOC, CF> &obj,
 		     const T &key, bool &newEntry) {
-		return obj.__findInsert(key, newEntry);
+		return obj.findInsert_(key, newEntry);
 	}
 };
 
 template <>
-	class __AVLFindInsertSelect<true> {
+	class AVLFindInsertSelect_<true> {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
@@ -249,12 +249,12 @@ public:
 		static typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 		findInsert(AVLTree<T, U, BALANCE, ALLOC, CF> &obj,
 		     const T &key, bool &newEntry) {
-		return obj.__findInsertCmp(key, newEntry);
+		return obj.findInsertCmp_(key, newEntry);
 	}
 };
 
 template <bool b>
-	class __AVLFindSelect {
+	class AVLFindSelect_ {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
@@ -262,12 +262,12 @@ public:
 		static typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 		find(const AVLTree<T, U, BALANCE, ALLOC, CF> &obj,
 		     const T &key) {
-		return obj.__find(key);
+		return obj.find_(key);
 	}
 };
 
 template <>
-	class __AVLFindSelect<true> {
+	class AVLFindSelect_<true> {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
@@ -275,36 +275,36 @@ public:
 		static typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 		find(const AVLTree<T, U, BALANCE, ALLOC, CF> &obj,
 		     const T &key) {
-		return obj.__findCmp(key);
+		return obj.findCmp_(key);
 	}
 };
 
 template<bool b>
-	class __AVLFindValueSelect {
+	class AVLFindValueSelect_ {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
 		vtl_always_inline
 		static U &findValue(AVLTree<T, U, BALANCE, ALLOC, CF> &obj,
 				    const T &key, bool &newEntry) {
-			return obj.__findValue(key, newEntry);
+			return obj.findValue_(key, newEntry);
 		}
 };
 
 template<>
-	class __AVLFindValueSelect<true> {
+	class AVLFindValueSelect_<true> {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
 		vtl_always_inline
 		static U &findValue(AVLTree<T, U, BALANCE, ALLOC, CF> &obj,
 				    const T &key, bool &newEntry) {
-			return obj.__findValueCmp(key, newEntry);
+			return obj.findValueCmp_(key, newEntry);
 		}
 };
 
 template<>
-	class __AVLAddValueSelect<AVLBALANCE_USEPOINTERS> {
+	class AVLAddValueSelect_<AVLBALANCE_USEPOINTERS> {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
@@ -314,12 +314,12 @@ public:
 			const T &key,
 			AVLNode<T, U> *&parent,
 			AVLNode<T, U> **&aentry) {
-		return obj.__addValue(key, parent, aentry);
+		return obj.addValue_(key, parent, aentry);
 	}
 };
 
 template<>
-	class __AVLAddValueSelect<AVLBALANCE_USESWAP> {
+	class AVLAddValueSelect_<AVLBALANCE_USESWAP> {
 public:
 	template <typename T, typename U, avlbalance_t BALANCE, typename ALLOC,
 		typename CF>
@@ -329,12 +329,12 @@ public:
 			const T &key,
 			AVLNode<T, U> *&parent,
 			AVLNode<T, U> **&aentry) {
-			return obj.__addValueSwap(key, parent, aentry);
+			return obj.addValueSwap_(key, parent, aentry);
 		}
 };
 
 template<bool b>
-	class __AVLClearSelect {
+	class AVLClearSelect_ {
 public:
 	template <typename T, typename U, typename ALLOC>
 		static void clear(AVLNode<T, U> *node,
@@ -348,7 +348,7 @@ public:
 };
 
 template<>
-	class __AVLClearSelect<true> {
+	class AVLClearSelect_<true> {
 public:
 	template <typename T, typename U, typename ALLOC>
 		vtl_always_inline static void clear(AVLNode<T, U> */*node*/,
@@ -467,12 +467,12 @@ vtl_always_inline bool AVLTree<T, U, BALANCE, ALLOC, CF>::iterator::
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 AVLTree<T, U, BALANCE, ALLOC, CF>::AVLTree():
-root(nullptr), _size(0), alloc(nullptr)
+root(nullptr), size_(0), alloc(nullptr)
 {}
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 AVLTree<T, U, BALANCE, ALLOC, CF>::AVLTree(void *allocdata):
-root{nullptr}, _size{0}, alloc{allocdata}
+root{nullptr}, size_{0}, alloc{allocdata}
 {}
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
@@ -492,7 +492,7 @@ vtl_always_inline void AVLTree<T, U, BALANCE, ALLOC, CF>::insert(const T &key,
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
-	AVLTree<T, U, BALANCE, ALLOC, CF>::__findCmp(const T &key) const
+	AVLTree<T, U, BALANCE, ALLOC, CF>::findCmp_(const T &key) const
 {
 	AVLNode<T, U> *entry = root;
 	iterator iter;
@@ -511,7 +511,7 @@ vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
-	AVLTree<T, U, BALANCE, ALLOC, CF>::__find(const T &key) const
+	AVLTree<T, U, BALANCE, ALLOC, CF>::find_(const T &key) const
 {
 	AVLNode<T, U> *entry = root;
 	iterator iter;
@@ -529,8 +529,8 @@ vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
-	AVLTree<T, U, BALANCE, ALLOC, CF>::__findInsertCmp(const T &key,
-							   bool &newEntry)
+	AVLTree<T, U, BALANCE, ALLOC, CF>::findInsertCmp_(const T &key,
+							  bool &newEntry)
 {
 	AVLNode<T, U> **aentry;
 	AVLNode<T, U> *entry;
@@ -561,8 +561,8 @@ vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
-	AVLTree<T, U, BALANCE, ALLOC, CF>::__findInsert(const T &key,
-							bool &newEntry)
+	AVLTree<T, U, BALANCE, ALLOC, CF>::findInsert_(const T &key,
+						       bool &newEntry)
 {
 	AVLNode<T, U> **aentry;
 	AVLNode<T, U> *entry;
@@ -594,7 +594,7 @@ template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 	AVLTree<T, U, BALANCE, ALLOC, CF>::find(const T &key) const
 {
-	return __AVLFindSelect<has_compare<CF, T>::value>::find(*this, key);
+	return AVLFindSelect_<has_compare<CF, T>::value>::find(*this, key);
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
@@ -602,7 +602,7 @@ vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 	AVLTree<T, U, BALANCE, ALLOC, CF>::findInsert(const T &key,
 						      bool &newEntry)
 {
-	return __AVLFindInsertSelect<has_compare<CF, T>::value>::
+	return AVLFindInsertSelect_<has_compare<CF, T>::value>::
 		findInsert(*this, key, newEntry);
 }
 
@@ -612,39 +612,39 @@ vtl_always_inline
 U &AVLTree<T, U, BALANCE, ALLOC, CF>::findValue(const T &key,
 						bool &newEntry)
 {
-	return __AVLFindValueSelect<has_compare<CF, T>::value>::
+	return AVLFindValueSelect_<has_compare<CF, T>::value>::
 		findValue(*this, key, newEntry);
 }
 
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline
-U &AVLTree<T, U, BALANCE, ALLOC, CF>::__findValue(const T &key, bool &newEntry)
+U &AVLTree<T, U, BALANCE, ALLOC, CF>::findValue_(const T &key, bool &newEntry)
 {
-	return __findInsert(key, newEntry).value();
+	return findInsert_(key, newEntry).value();
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline
-U &AVLTree<T, U, BALANCE, ALLOC, CF>::__findValueCmp(const T &key,
-						     bool &newEntry)
+U &AVLTree<T, U, BALANCE, ALLOC, CF>::findValueCmp_(const T &key,
+						    bool &newEntry)
 {
-	return __findInsertCmp(key, newEntry).value();
+	return findInsertCmp_(key, newEntry).value();
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
 addValue(const T &key, AVLNode<T, U> *&parent, AVLNode<T, U> **&aentry)
 {
-	return __AVLAddValueSelect<BALANCE>::addValue(*this, key, parent,
-						      aentry);
+	return AVLAddValueSelect_<BALANCE>::addValue(*this, key, parent,
+						     aentry);
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
-	__addValue(const T &key,
-		   AVLNode<T, U> *&parent,
-		   AVLNode<T, U> **&aentry)
+	addValue_(const T &key,
+		  AVLNode<T, U> *&parent,
+		  AVLNode<T, U> **&aentry)
 {
 	AVLNode<T, U> *entry;
 	AVLNode<T, U> *newentry;
@@ -656,7 +656,7 @@ vtl_always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
 	int smallH;
 	int largeH;
 
-	_size++;
+	size_++;
 	newentry = alloc.alloc(key);
 	entry = newentry;
 	*aentry = entry;
@@ -770,7 +770,7 @@ rebalanceLarge:
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline AVLNode<T, U> *AVLTree<T, U, BALANCE, ALLOC, CF>::
-__addValueSwap(const T &key, AVLNode<T, U> *&parent, AVLNode<T, U> **&aentry)
+addValueSwap_(const T &key, AVLNode<T, U> *&parent, AVLNode<T, U> **&aentry)
 {
 	AVLNode<T, U> *entry;
 	AVLNode<T, U> *newentry;
@@ -782,7 +782,7 @@ __addValueSwap(const T &key, AVLNode<T, U> *&parent, AVLNode<T, U> **&aentry)
 	int largeH;
 	int gHeight;
 
-	_size++;
+	size_++;
 	newentry = alloc.alloc(key);
 	entry = newentry;
 	*aentry = entry;
@@ -931,13 +931,13 @@ vtl_always_inline bool AVLTree<T, U, BALANCE, ALLOC, CF>::contains(const T &key)
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline bool AVLTree<T, U, BALANCE, ALLOC, CF>::isEmpty() const
 {
-	return _size == 0;
+	return size_ == 0;
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline int AVLTree<T, U, BALANCE, ALLOC, CF>::size() const
 {
-	return _size;
+	return size_;
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
@@ -976,7 +976,7 @@ vtl_always_inline void AVLNode<T, U>::setHeightFromChildren()
 
 	lh = (small != nullptr) ? (small->height) : -1;
 	rh = (large != nullptr) ? (large->height) : -1;
-	height = __AVLTREEMAX(lh, rh) + 1;
+	height = VTL_AVLTREEMAX_(lh, rh) + 1;
 }
 
 template <class T, class U>
@@ -994,33 +994,33 @@ template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 	AVLTree<T, U, BALANCE, ALLOC, CF>::begin() const
 {
-	iterator _begin;
-	_begin.pos = root;
-	if (_begin.pos == nullptr)
-		return _begin;
-	while (_begin.pos->small != nullptr)
-		_begin.pos = _begin.pos->small;
-	return _begin;
+	iterator begin_;
+	begin_.pos = root;
+	if (begin_.pos == nullptr)
+		return begin_;
+	while (begin_.pos->small != nullptr)
+		begin_.pos = begin_.pos->small;
+	return begin_;
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 vtl_always_inline typename AVLTree<T, U, BALANCE, ALLOC, CF>::iterator
 	AVLTree<T, U, BALANCE, ALLOC, CF>::end() const
 {
-	iterator _end;
-	return _end;
+	iterator end_;
+	return end_;
 }
 
 template <class T, class U, avlbalance_t BALANCE, typename ALLOC, typename CF>
 void AVLTree<T, U, BALANCE, ALLOC, CF>::clear()
 {
 	if (root != nullptr) {
-		__AVLClearSelect<has_clear<ALLOC>::value>::clear(root, alloc);
+		AVLClearSelect_<has_clear<ALLOC>::value>::clear(root, alloc);
 		root = nullptr;
-		_size = 0;
+		size_ = 0;
 	}
 }
 
 }
 
-#endif /* __AVLTREE_H */
+#endif /* VTL_AVLTREE_H */

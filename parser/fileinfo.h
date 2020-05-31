@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,8 +50,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FILE_INFO_H
-#define _FILE_INFO_H
+#ifndef FILE_INFO_H
+#define FILE_INFO_H
 
 #include <cstdint>
 
@@ -70,4 +70,4 @@ private:
 	struct stat st;
 };
 
-#endif /* _FILE_INFO_H */
+#endif /* FILE_INFO_H */

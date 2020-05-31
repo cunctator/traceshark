@@ -103,7 +103,7 @@ bool perf_sched_switch_parse(const TraceEvent &event,
 {
 	int i;
 
-	i = _perf_sched_switch_find_arrow(event, handle.perf.is_distro_style);
+	i = perf_sched_switch_find_arrow_(event, handle.perf.is_distro_style);
 	if( i <= 0)
 		return false;
 	handle.perf.index = i;
@@ -130,7 +130,7 @@ perf_sched_switch_handle_state(const TraceEvent &event,
 				if (t->ptr[j] == '=') {
 					st.len = t->len - 1 - j;
 					st.ptr = t->ptr + j + 1;
-					return  _sched_state_from_tstring(&st);
+					return  sched_state_from_tstring_(&st);
 				}
 			}
 		}
@@ -141,7 +141,7 @@ distro_style:
 	/* This is the distro format */
 	const TString *stateArgStr = event.argv[i];
 	if (stateArgStr->len == 1 || stateArgStr->len == 2) {
-		return _sched_state_from_tstring(stateArgStr);
+		return sched_state_from_tstring_(stateArgStr);
 	}
 	return TASK_STATE_PARSER_ERROR;
 }
@@ -156,7 +156,7 @@ perf_sched_switch_handle_oldpid(const TraceEvent &event,
 	if (handle.perf.is_distro_style) {
 		oldpid = int_after_char(event, idx - 3, ':');
 	} else {
-		oldpid = _perf_sched_switch_handle_oldpid_newformat(event,
+		oldpid = perf_sched_switch_handle_oldpid_newformat_(event,
 								    handle);
 	}
 	return oldpid;
@@ -172,7 +172,7 @@ perf_sched_switch_handle_newpid(const TraceEvent &event,
 		newpid = int_after_char(event, event.argc - 2, ':');
 	} else {
 		//newpid = int_after_char(event, event.argc - 2, '=');
-		newpid = _perf_sched_switch_handle_newpid_newformat(event,
+		newpid = perf_sched_switch_handle_newpid_newformat_(event,
 								    handle);
 	}
 	return newpid;
@@ -214,7 +214,7 @@ perf_sched_switch_handle_newprio(const TraceEvent &event,
 }
 
 static vtl_always_inline const char *
-_perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
+perf_sched_switch_handle_newname_strdup_(const TraceEvent &event,
 					 StringPool<> *pool,
 					 const sched_switch_handle &handle)
 {
@@ -238,8 +238,8 @@ _perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		const TString *first = event.argv[i + 1];
 		beginidx = i + 2;
 		endidx = event.argc - 3;
-		_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
-					  ok);
+		copy_tstring_after_char_(first, '=', c, len, TASKNAME_MAXLEN,
+					 ok);
 		if (!ok)
 			return NullStr;
 
@@ -259,7 +259,7 @@ _perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		_copy_tstring_before_char(last, ':', c, len, TASKNAME_MAXLEN,
+		copy_tstring_before_char_(last, ':', c, len, TASKNAME_MAXLEN,
 					  ok);
 		if (!ok)
 			return NullStr;
@@ -279,7 +279,7 @@ perf_sched_switch_handle_newname_strdup(const TraceEvent &event,
 					const sched_switch_handle &handle);
 
 static vtl_always_inline const char *
-_perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
+perf_sched_switch_handle_oldname_strdup_(const TraceEvent &event,
 					 StringPool<> *pool,
 					 const sched_switch_handle &handle)
 {
@@ -302,8 +302,8 @@ _perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		const TString *first = event.argv[0];
 		beginidx = 1;
 		endidx = i - 4;
-		_copy_tstring_after_char(first, '=', c, len,
-					  TASKNAME_MAXLEN, ok);
+		copy_tstring_after_char_(first, '=', c, len,
+					 TASKNAME_MAXLEN, ok);
 		if (!ok)
 			return NullStr;
 
@@ -324,9 +324,9 @@ _perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 		if (!ok)
 			return NullStr;
 
-		_copy_tstring_before_char(last, ':',
-					   c, len, TASKNAME_MAXLEN,
-					   ok);
+		copy_tstring_before_char_(last, ':',
+					  c, len, TASKNAME_MAXLEN,
+					  ok);
 
 		if (!ok)
 			return NullStr;
@@ -414,7 +414,7 @@ static vtl_always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 }
 
 static vtl_always_inline const char *
-_perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool<> *pool)
+perf_sched_wakeup_name_strdup_(const TraceEvent &event, StringPool<> *pool)
 {
 	int i;
 	int beginidx;
@@ -447,8 +447,8 @@ _perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool<> *pool)
 			return NullStr;
 
 		first = event.argv[0];
-		_copy_tstring_before_char(first, ':', c, len, TASKNAME_MAXLEN,
-					   ok);
+		copy_tstring_before_char_(first, ':', c, len, TASKNAME_MAXLEN,
+					  ok);
 		if (!ok)
 			return NullStr;
 	} else {
@@ -457,8 +457,8 @@ _perf_sched_wakeup_name_strdup(const TraceEvent &event, StringPool<> *pool)
 		endidx = i - 1;
 
 		first = event.argv[0];
-		_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN,
-					  ok);
+		copy_tstring_after_char_(first, '=', c, len, TASKNAME_MAXLEN,
+					 ok);
 		if (!ok)
 			return NullStr;
 
@@ -523,7 +523,7 @@ int perf_sched_process_fork_parent_pid(const TraceEvent &event) {
 }
 
 static vtl_always_inline const char *
-_perf_sched_process_fork_childname_strdup(const TraceEvent &event,
+perf_sched_process_fork_childname_strdup_(const TraceEvent &event,
 					  StringPool<> *pool)
 {
 	int i;
@@ -550,7 +550,7 @@ _perf_sched_process_fork_childname_strdup(const TraceEvent &event,
 	beginidx = i + 1;
 
 	first = event.argv[i];
-	_copy_tstring_after_char(first, '=', c, len, TASKNAME_MAXLEN, ok);
+	copy_tstring_after_char_(first, '=', c, len, TASKNAME_MAXLEN, ok);
 	if (!ok)
 		return NullStr;
 
