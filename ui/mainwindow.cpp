@@ -1216,7 +1216,10 @@ void MainWindow::verticalZoom()
 	if (actionChecked != axisSelected) {
 		QCPAxis::SelectableParts selected =
 			tracePlot->yAxis->selectedParts();
-		selected.setFlag(QCPAxis::spAxis, actionChecked);
+		if (actionChecked)
+			selected |= QCPAxis::spAxis;
+		else
+			selected ^= QCPAxis::spAxis;
 		tracePlot->yAxis->setSelectedParts(selected);
 		tracePlot->replot();
 	}
