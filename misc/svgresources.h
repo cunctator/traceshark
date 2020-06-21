@@ -84,6 +84,7 @@
 #define RESSRC_GPH_TASKSELECT    ":/traceshark/images/taskselector.svg"
 #define RESSRC_GPH_TIMEFILTER    ":/traceshark/images/timefilter.svg"
 #define RESSRC_GPH_FIND_SLEEP    ":/traceshark/images/findsleep.svg"
+#define RESSRC_GPH_VERTICAL_ZOOM ":/traceshark/images/verticalzoom.svg"
 #define RESSRC_GPH_FIND_WAKEUP   ":/traceshark/images/wakeup.svg"
 #define RESSRC_GPH_FIND_WAKING   ":/traceshark/images/waking.svg"
 #define RESSRC_GPH_FIND_WAKING_DIRECT \

@@ -28,6 +28,7 @@
   <file>images/screenshot30x30.png</file>
   <file>images/taskselector30x30.png</file>
   <file>images/timefilter30x30.png</file>
+  <file>images/verticalzoom30x30.png</file>
   <file>images/wakeup30x30.png</file>
   <file>images/waking30x30.png</file>
   <file>images/wakingdirect30x30.png</file>
@@ -62,6 +63,7 @@
   <file>images/screenshot.svg</file>
   <file>images/taskselector.svg</file>
   <file>images/timefilter.svg</file>
+  <file>images/verticalzoom.svg</file>
   <file>images/wakeup.svg</file>
   <file>images/waking.svg</file>
   <file>images/wakingdirect.svg</file>
