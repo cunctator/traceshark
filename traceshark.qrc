@@ -16,6 +16,7 @@
   <file>images/filtercurrent30x30.png</file>
   <file>images/filtercurrentlimited30x30.png</file>
   <file>images/findsleep30x30.png</file>
+  <file>images/fullzoom30x30.png</file>
   <file>images/getstats30x30.png</file>
   <file>images/getstatstimelimit30x30.png</file>
   <file>images/graphenabledialog30x30.png</file>
@@ -49,6 +50,7 @@
   <file>images/filtercurrent.svg</file>
   <file>images/filtercurrentlimited.svg</file>
   <file>images/findsleep.svg</file>
+  <file>images/fullzoom.svg</file>
   <file>images/getstats.svg</file>
   <file>images/getstatstimelimit.svg</file>
   <file>images/graphenabledialog.svg</file>

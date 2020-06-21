@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!-- Creator: fig2dev Version 3.2.7a -->
-<!-- CreationDate: 2020-06-21 15:21:41 -->
+<!-- CreationDate: 2020-06-21 15:15:31 -->
 <!-- Magnification: 1.05 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -14,25 +14,19 @@
 <circle cx="8309" cy="9385" r="428" fill="#000000"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<polyline points=" 6551,6087 8306,9417"
+<polyline points=" 10800,2250 10800,450 9000,450"
+	stroke="#000000" stroke-width="885px"/>
+<!-- Line -->
+<polyline points=" 2250,450 450,450 450,2250"
 	stroke="#000000" stroke-width="885px"/>
 <!-- Line -->
 <polyline points=" 9000,10800 10800,10800 10800,9000"
 	stroke="#000000" stroke-width="885px"/>
 <!-- Line -->
-<polyline points=" 10800,7650 10800,5850 9000,5850"
-	stroke="#000000" stroke-width="885px"/>
-<!-- Line -->
-<polyline points=" 2250,5850 450,5850 450,7650"
-	stroke="#000000" stroke-width="885px"/>
-<!-- Line -->
 <polyline points=" 450,9000 450,10800 2250,10800"
 	stroke="#000000" stroke-width="885px"/>
 <!-- Line -->
-<polyline points=" 2250,450 450,450 450,2250"
-	stroke="#ff0000" stroke-width="885px"/>
-<!-- Line -->
-<polyline points=" 10800,2250 10800,450 9000,450"
-	stroke="#ff0000" stroke-width="885px"/>
+<polyline points=" 6551,6087 8306,9417"
+	stroke="#000000" stroke-width="885px"/>
 </g>
 </svg>
