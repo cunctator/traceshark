@@ -295,6 +295,8 @@ void MainWindow::createTracePlot()
 	setupOpenGL();
 
 	tracePlot->yAxis->setTicker(ticker);
+	tracePlot->yAxis->setSelectableParts(QCPAxis::spAxis);
+	tracePlot->xAxis->setSelectableParts(QCPAxis::spNone);
 	taskRangeAllocator = new TaskRangeAllocator(schedHeight
 						    + schedSpacing);
 	taskRangeAllocator->setStart(bugWorkAroundOffset);
