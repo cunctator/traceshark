@@ -69,6 +69,7 @@
 #define RESSRC_GPH_FILTERCURRENT ":/traceshark/images/filtercurrent30x30.png"
 #define RESSRC_GPH_FILTERCURRENT_LIMIT \
 	                         ":/traceshark/images/filtercurrentlimited30x30.png"
+#define RESSRC_GPH_FULL_ZOOM     ":/traceshark/images/fullzoom30x30.png"
 #define RESSRC_GPH_GETSTATS      ":/traceshark/images/getstats30x30.png"
 #define RESSRC_GPH_GETSTATS_TIMELIMIT \
 	                         ":/traceshark/images/getstatstimelimit30x30.png"

@@ -161,6 +161,7 @@ private slots:
 	void removeTaskGraph(int pid);
 	void cursorZoom();
 	void defaultZoom();
+	void fullZoom();
 	void showTaskSelector();
 	void filterOnCPUs();
 	void showEventFilter();
@@ -317,6 +318,7 @@ private:
 	QAction *exitAction;
 	QAction *cursorZoomAction;
 	QAction *defaultZoomAction;
+	QAction *fullZoomAction;
 	QAction *showTasksAction;
 	QAction *filterCPUsAction;
 	QAction *showEventsAction;

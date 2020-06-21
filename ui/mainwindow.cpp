@@ -105,6 +105,9 @@
 #define DEFAULT_ZOOM_TOOLTIP	        \
 "Zoom to the default zoom level"
 
+#define FULL_ZOOM_TOOLTIP               \
+"Zoom so that the whole trace is visible"
+
 #define TOOLTIP_EXIT			\
 "Exit traceshark"
 
@@ -968,6 +971,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	exportCPUAction->setEnabled(e);
 	cursorZoomAction->setEnabled(e);
 	defaultZoomAction->setEnabled(e);
+	fullZoomAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	filterCPUsAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
@@ -1174,9 +1178,16 @@ void MainWindow::cursorZoom()
 	tracePlot->replot();
 }
 
-void MainWindow::defaultZoom()
+void MainWindow::fullZoom()
 {
 	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+	tracePlot->xAxis->setRange(QCPRange(startTime, endTime));
+	tracePlot->replot();
+}
+
+void MainWindow::defaultZoom()
+{
+	tracePlot->yAxis->setRange(QCPRange(bottom, bottom + autoZoomVSize()));
 	tracePlot->xAxis->setRange(QCPRange(startTime, endTime));
 	tracePlot->replot();
 }
@@ -1525,6 +1536,12 @@ void MainWindow::createActions()
 	tsconnect(defaultZoomAction, triggered(), this,
 		  defaultZoom());
 
+	fullZoomAction = new QAction(tr("Full zoom"), this);
+	fullZoomAction->setIcon(QIcon(RESSRC_GPH_FULL_ZOOM));
+	fullZoomAction->setToolTip(tr(FULL_ZOOM_TOOLTIP));
+	tsconnect(fullZoomAction, triggered(), this,
+		  fullZoom());
+
 	showStatsAction = new QAction(tr("Show stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_GPH_GETSTATS));
 	showStatsAction->setToolTip(TOOLTIP_GETSTATS);
@@ -1652,6 +1669,7 @@ void MainWindow::createToolBars()
 	addToolBar(Qt::LeftToolBarArea, viewToolBar);
 	viewToolBar->addAction(cursorZoomAction);
 	viewToolBar->addAction(defaultZoomAction);
+	viewToolBar->addAction(fullZoomAction);
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(filterCPUsAction);
 	viewToolBar->addAction(showEventsAction);
@@ -1698,6 +1716,7 @@ void MainWindow::createMenus()
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(cursorZoomAction);
 	viewMenu->addAction(defaultZoomAction);
+	viewMenu->addAction(fullZoomAction);
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(filterCPUsAction);
 	viewMenu->addAction(showEventsAction);
