@@ -115,9 +115,11 @@ int main(int argc, char* argv[])
 	parseArguments(&fileName, argc, argv);
 	/* Set graphicssystem to opengl if we have old enough Qt */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#ifdef TRACESHARK_QT4_OPENGL
 	QApplication::setGraphicsSystem("opengl");
 #pragma message(QT4_WARNING)
-#endif
+#endif /* TRACESHARK_QT4_OPENGL */
+#endif /* QT_VERSION < QT_VERSION_CHECK(5, 0, 0) */
 
 	app.setStyle(new TraceSharkStyle);
 	app.setApplicationName(appname);

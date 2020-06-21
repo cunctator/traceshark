@@ -560,7 +560,11 @@ OUR_POSIX_DEFINES += _DARWIN_C_SOURCE
 # Compute the defines to be set with -D flag at the compiler command line
 DEFINES += $${OUR_POSIX_DEFINES}
 !equals(DISABLE_OPENGL, yes) {
+equals(QT_MAJOR_VERSION, 4) {
+DEFINES += TRACESHARK_QT4_OPENGL
+} else {
 DEFINES += QCUSTOMPLOT_USE_OPENGL
+}
 }
 
 ###############################################################################
