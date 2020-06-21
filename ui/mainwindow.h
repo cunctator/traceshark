@@ -141,6 +141,7 @@ private slots:
 	void license();
 	void mouseWheel();
 	void mousePress();
+	void yAxisSelectionChange(const QCPAxis::SelectableParts &parts);
 	void configureScrollBar();
 	void scrollBarChanged(int value);
 	void yAxisChanged(QCPRange range);
@@ -162,6 +163,7 @@ private slots:
 	void cursorZoom();
 	void defaultZoom();
 	void fullZoom();
+	void verticalZoom();
 	void showTaskSelector();
 	void filterOnCPUs();
 	void showEventFilter();
@@ -319,6 +321,7 @@ private:
 	QAction *cursorZoomAction;
 	QAction *defaultZoomAction;
 	QAction *fullZoomAction;
+	QAction *verticalZoomAction;
 	QAction *showTasksAction;
 	QAction *filterCPUsAction;
 	QAction *showEventsAction;

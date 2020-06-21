@@ -108,6 +108,9 @@
 #define FULL_ZOOM_TOOLTIP               \
 "Zoom so that the whole trace is visible"
 
+#define VERTICAL_ZOOM_TOOLTIP		\
+"Toggle vertical zoom and scroll"
+
 #define TOOLTIP_EXIT			\
 "Exit traceshark"
 
@@ -186,6 +189,12 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
+#define ENABLE_VERTICAL_ZOOM		\
+"Enable vertical zoom"
+
+#define DISABLE_VERTICAL_ZOOM		\
+"Disable vertical zoom"
+
 #define QCPRANGE_DIFF(A, B) \
 	(TSABS(A.lower - B.lower) + TSABS(A.upper - B.upper))
 
@@ -254,6 +263,10 @@ MainWindow::MainWindow():
 	tsconnect(scrollBar, valueChanged(int), this, scrollBarChanged(int));
 	tsconnect(tracePlot->yAxis, rangeChanged(QCPRange), this,
 		  yAxisChanged(QCPRange));
+	tsconnect(tracePlot->yAxis,
+		  selectionChanged (const QCPAxis::SelectableParts &),
+		  this,
+		  yAxisSelectionChange(const QCPAxis::SelectableParts &));
 
 	eventsWidget = new EventsWidget(this);
 	eventsWidget->setAllowedAreas(Qt::TopDockWidgetArea |
@@ -972,6 +985,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	cursorZoomAction->setEnabled(e);
 	defaultZoomAction->setEnabled(e);
 	fullZoomAction->setEnabled(e);
+	verticalZoomAction->setEnabled(e);
 	showTasksAction->setEnabled(e);
 	filterCPUsAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
@@ -1192,6 +1206,27 @@ void MainWindow::defaultZoom()
 	tracePlot->replot();
 }
 
+void MainWindow::verticalZoom()
+{
+	bool actionChecked = verticalZoomAction->isChecked();
+	bool axisSelected = tracePlot->yAxis->selectedParts().
+		testFlag(QCPAxis::spAxis);
+	QString text;
+
+	if (actionChecked != axisSelected) {
+		QCPAxis::SelectableParts selected =
+			tracePlot->yAxis->selectedParts();
+		selected.setFlag(QCPAxis::spAxis, actionChecked);
+		tracePlot->yAxis->setSelectedParts(selected);
+		tracePlot->replot();
+	}
+	if (actionChecked)
+		text = tr(DISABLE_VERTICAL_ZOOM);
+	else
+		text = tr(ENABLE_VERTICAL_ZOOM);
+	verticalZoomAction->setText(text);
+}
+
 void MainWindow::about()
 {
 	QString textAboutCaption;
@@ -1317,7 +1352,7 @@ void MainWindow::mouseWheel()
 
 void MainWindow::mousePress()
 {
-	bool xSelected = tracePlot->yAxis->selectedParts().
+	bool xSelected = tracePlot->xAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
 	bool ySelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
@@ -1330,6 +1365,27 @@ void MainWindow::mousePress()
 		tracePlot->axisRect()->setRangeDrag(Qt::Vertical);
 	else
 		tracePlot->axisRect()->setRangeDrag(Qt::Horizontal);
+}
+
+void MainWindow::yAxisSelectionChange(const QCPAxis::SelectableParts &parts)
+{
+	bool actionChecked = verticalZoomAction->isChecked();
+	bool ySelected = parts.testFlag(QCPAxis::spAxis);
+	QString text;
+	/*
+	 * We could also have used the following:
+	 * bool ySelected = tracePlot->yAxis->selectedParts().
+	 * testFlag(QCPAxis::spAxis);
+	 */
+
+	if (ySelected != actionChecked) {
+		if (ySelected)
+			text = tr(DISABLE_VERTICAL_ZOOM);
+		else
+			text = tr(ENABLE_VERTICAL_ZOOM);
+		verticalZoomAction->setText(text);
+		verticalZoomAction->setChecked(ySelected);
+	}
 }
 
 void MainWindow::scrollBarChanged(int value)
@@ -1539,8 +1595,13 @@ void MainWindow::createActions()
 	fullZoomAction = new QAction(tr("Full zoom"), this);
 	fullZoomAction->setIcon(QIcon(RESSRC_GPH_FULL_ZOOM));
 	fullZoomAction->setToolTip(tr(FULL_ZOOM_TOOLTIP));
-	tsconnect(fullZoomAction, triggered(), this,
-		  fullZoom());
+	tsconnect(fullZoomAction, triggered(), this, fullZoom());
+
+	verticalZoomAction = new QAction(tr(ENABLE_VERTICAL_ZOOM), this);
+	verticalZoomAction->setIcon(QIcon(RESSRC_GPH_VERTICAL_ZOOM));
+	verticalZoomAction->setToolTip(tr(VERTICAL_ZOOM_TOOLTIP));
+	verticalZoomAction->setCheckable(true);
+	tsconnect(verticalZoomAction, triggered(), this, verticalZoom());;
 
 	showStatsAction = new QAction(tr("Show stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_GPH_GETSTATS));
@@ -1670,6 +1731,7 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(cursorZoomAction);
 	viewToolBar->addAction(defaultZoomAction);
 	viewToolBar->addAction(fullZoomAction);
+	viewToolBar->addAction(verticalZoomAction);
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(filterCPUsAction);
 	viewToolBar->addAction(showEventsAction);
@@ -1717,6 +1779,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(cursorZoomAction);
 	viewMenu->addAction(defaultZoomAction);
 	viewMenu->addAction(fullZoomAction);
+	viewMenu->addAction(verticalZoomAction);
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(filterCPUsAction);
 	viewMenu->addAction(showEventsAction);
