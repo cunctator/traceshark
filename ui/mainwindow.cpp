@@ -55,6 +55,8 @@
 #include <QApplication>
 #include <QDateTime>
 #include <QList>
+#include <QScrollBar>
+#include <QVBoxLayout>
 #include <QToolBar>
 
 #include "ui/cursor.h"
@@ -181,6 +183,9 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
+#define QCPRANGE_DIFF(A, B) \
+	(TSABS(A.lower - B.lower) + TSABS(A.upper - B.upper))
+
 const double MainWindow::bugWorkAroundOffset = 100;
 const double MainWindow::schedSectionOffset = 100;
 const double MainWindow::schedSpacing = 250;
@@ -188,6 +193,8 @@ const double MainWindow::schedHeight = 950;
 const double MainWindow::cpuSectionOffset = 100;
 const double MainWindow::cpuSpacing = 100;
 const double MainWindow::cpuHeight = 800;
+const double MainWindow::pixelZoomFactor = 33;
+const double MainWindow::refDpiY = 96;
 /*
  * const double migrateHeight doesn't exist. The value used is the
  * dynamically calculated inc variable in MainWindow::computeLayout()
@@ -215,7 +222,8 @@ const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
 const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 
 MainWindow::MainWindow():
-	tracePlot(nullptr), graphEnableDialog(nullptr), filterActive(false)
+	tracePlot(nullptr), scrollBarUpdate(false), graphEnableDialog(nullptr),
+	filterActive(false)
 {
 	settingStore = new SettingStore();
 	loadSettings();
@@ -233,12 +241,16 @@ MainWindow::MainWindow():
 	createStatusBar();
 
 	plotWidget = new QWidget(this);
-	plotLayout = new QVBoxLayout(plotWidget);
+	plotLayout = new QHBoxLayout(plotWidget);
 	setCentralWidget(plotWidget);
 
 	/* createTracePlot needs to have plotWidget created */
+	createScrollBar();
 	createTracePlot();
 	plotConnections();
+	tsconnect(scrollBar, valueChanged(int), this, scrollBarChanged(int));
+	tsconnect(tracePlot->yAxis, rangeChanged(QCPRange), this,
+		  yAxisChanged(QCPRange));
 
 	eventsWidget = new EventsWidget(this);
 	eventsWidget->setAllowedAreas(Qt::TopDockWidgetArea |
@@ -287,6 +299,59 @@ void MainWindow::createTracePlot()
 				   QCP::iSelectPlottables);
 
 	analyzer->setQCustomPlot(tracePlot);
+}
+
+void MainWindow::createScrollBar()
+{
+	scrollBar = new QScrollBar();
+	scrollBar->setInvertedAppearance(true);
+	scrollBar->setInvertedControls(false);
+	scrollBar->setSingleStep(1);
+	scrollBar->hide();
+	plotLayout->addWidget(scrollBar);
+}
+
+void MainWindow::configureScrollBar()
+{
+	int pixels = plotWidget->height();
+	double px_per_zrange;
+	double diff_px;
+	double zrange = tracePlot->yAxis->range().size();
+	double zcenter = tracePlot->yAxis->range().center();
+	double range = TSABS(top - bottom);
+	double diff = range - zrange;
+	double lowcenter;
+	int smin, smax;
+	int value;
+	int pstep;
+	bool visible = tracePlot->yAxis->range().upper < (top - 0.001) ||
+		       tracePlot->yAxis->range().lower > (bottom + 0.001);
+
+	if (zrange < range) {
+		px_per_zrange = pixels / zrange;
+		diff_px = diff * px_per_zrange;
+		smin = 0;
+		smax = (int)(diff_px / 2.0);
+		smax = TSMAX(smax, 1);
+		lowcenter = (bottom + zrange) / 2;
+		value = (zcenter - lowcenter) / diff * smax;
+	} else {
+		smin = 1;
+		smax = 1;
+		value = 1;
+	}
+
+	pstep = zrange / diff * smax;
+
+	scrollBarUpdate = true;
+	if (scrollBar->minimum() != smin || scrollBar->maximum() != smax)
+		scrollBar->setRange(smin, smax);
+	if (scrollBar->value() != value)
+		scrollBar->setValue(value);
+	if (scrollBar->pageStep() != pstep)
+		scrollBar->setPageStep(pstep);
+	scrollBar->setVisible(visible);
+	scrollBarUpdate = false;
 }
 
 MainWindow::~MainWindow()
@@ -409,7 +474,7 @@ void MainWindow::openFile(const QString &name)
 		showTrace();
 		showt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-		tracePlot->show();
+		showTracePlot();
 		tshow = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 		setStatus(STATUS_FILE, &name);
@@ -420,7 +485,7 @@ void MainWindow::openFile(const QString &name)
 		       "setupCursors() took %.6lf s\n"
 		       "rescaleTrace() took %.6lf s\n"
 		       "showTrace() took %.6lf s\n"
-		       "tracePlot->show() took %.6lf s\n",
+		       "showTracePlot() took %.6lf s\n",
 		       (double) (process - start) / 1000,
 		       (double) (layout - process) / 1000,
 		       (double) (eventsw - layout) / 1000,
@@ -438,6 +503,22 @@ void MainWindow::openFile(const QString &name)
 	} else {
 		setStatus(STATUS_ERROR);
 		vtl::warnx("Unknown error when opening trace!");
+	}
+}
+
+void MainWindow::resizeEvent(QResizeEvent */*event*/)
+{
+	if (!tracePlot->isVisible())
+		return;
+
+	QCPRange range = tracePlot->yAxis->range();
+	double b;
+	double maxsize = maxZoomVSize();
+
+	if (range.size() > maxsize) {
+		b = range.lower;
+		tracePlot->yAxis->setRange(QCPRange(b, b + maxsize));
+		tracePlot->replot();
 	}
 }
 
@@ -546,7 +627,7 @@ void MainWindow::clearPlot()
 	cursors[TShark::BLUE_CURSOR] = nullptr;
 	tracePlot->clearItems();
 	tracePlot->clearPlottables();
-	tracePlot->hide();
+	hideTracePlot();
 	TaskGraph::clearMap();
 	taskRangeAllocator->clearAll();
 	infoWidget->setTime(0, TShark::RED_CURSOR);
@@ -565,7 +646,7 @@ void MainWindow::showTrace()
 
 	precision += (int) extra;
 
-	tracePlot->yAxis->setRange(QCPRange(bottom, top));
+	tracePlot->yAxis->setRange(QCPRange(bottom, bottom + autoZoomVSize()));
 	tracePlot->xAxis->setRange(QCPRange(startTime, endTime));
 	tracePlot->xAxis->setNumberPrecision(precision);
 	tracePlot->yAxis->setTicks(false);
@@ -647,6 +728,40 @@ skipIdleFreqGraphs:
 	}
 
 	tracePlot->replot();
+}
+
+void MainWindow::showTracePlot()
+{
+	scrollBar->show();
+	tracePlot->show();
+}
+
+void MainWindow::hideTracePlot()
+{
+	tracePlot->hide();
+	scrollBar->hide();
+}
+
+double MainWindow::maxZoomVSize()
+{
+	double max = (double)(plotWidget->height() * pixelZoomFactor);
+
+	max = refDpiY * max / logicalDpiY();
+	return max;
+}
+
+double MainWindow::autoZoomVSize()
+{
+	double max = maxZoomVSize();
+	double size = top - bottom;
+
+	if (size < 0)
+		size = -size;
+
+	if (size > max)
+		return max;
+
+	return size;
 }
 
 void MainWindow::loadSettings()
@@ -1204,6 +1319,31 @@ void MainWindow::mousePress()
 		tracePlot->axisRect()->setRangeDrag(Qt::Vertical);
 	else
 		tracePlot->axisRect()->setRangeDrag(Qt::Horizontal);
+}
+
+void MainWindow::scrollBarChanged(int value)
+{
+	const QCPRange &qcprange = tracePlot->yAxis->range();
+	double zrange = qcprange.size();
+	double range = TSABS(top - bottom);
+	double lower, upper;
+	QCPRange newrange;
+	double quantum;
+
+	if (zrange < range) {
+		quantum = 1.0L / scrollBar->maximum() * (range - zrange);
+		lower = value * quantum + bottom;
+		upper = lower + zrange;
+		newrange = QCPRange(lower, upper);
+		tracePlot->yAxis->setRange(newrange);
+		tracePlot->replot();
+	}
+}
+
+void MainWindow::yAxisChanged(QCPRange /*range*/)
+{
+	if (!scrollBarUpdate)
+		configureScrollBar();
 }
 
 void MainWindow::plotDoubleClicked(QMouseEvent *event)
@@ -2141,7 +2281,7 @@ void MainWindow::consumeSettings()
 	setupCursors(redtime, bluetime);
 	rescaleTrace();
 	showTrace();
-	tracePlot->show();
+	showTracePlot();
 
 	tracePlot->xAxis->setRange(savedRangeX);
 	/* Restore the task graphs from the list */

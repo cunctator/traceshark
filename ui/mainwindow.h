@@ -53,7 +53,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QHBoxLayout>
 #include <QMainWindow>
 #include <QVector>
 #include <QString>
@@ -90,7 +89,9 @@ class QLabel;
 class QMenu;
 class QPlainTextEdit;
 class QMouseEvent;
+class QScrollBar;
 class QToolBar;
+class QVBoxLayhout;
 template<class T, class U> class QMap;
 QT_END_NAMESPACE
 
@@ -127,6 +128,7 @@ public:
 	MainWindow();
 	virtual ~MainWindow();
 	void openFile(const QString &name);
+	void resizeEvent(QResizeEvent *event);
 protected:
 	void closeEvent(QCloseEvent *event);
 
@@ -139,6 +141,9 @@ private slots:
 	void license();
 	void mouseWheel();
 	void mousePress();
+	void configureScrollBar();
+	void scrollBarChanged(int value);
+	void yAxisChanged(QCPRange range);
 	void plotDoubleClicked(QMouseEvent *event);
 	void infoValueChanged(vtl::Time value, int nr);
 	void moveActiveCursor(vtl::Time time);
@@ -210,6 +215,7 @@ private:
 	void createToolBars();
 	void createMenus();
 	void createTracePlot();
+	void createScrollBar();
 	void createStatusBar();
 	void createDialogs();
 	void plotConnections();
@@ -224,6 +230,10 @@ private:
 	void rescaleTrace();
 	void clearPlot();
 	void showTrace();
+	void showTracePlot();
+	double maxZoomVSize();
+	double autoZoomVSize();
+	void hideTracePlot();
 	int loadTraceFile(const QString &);
 	void setStatus(status_t status, const QString *fileName = nullptr);
 
@@ -278,11 +288,13 @@ private:
 	TaskGraph *selectedGraph();
 
 	TracePlot *tracePlot;
+	QScrollBar *scrollBar;
+	bool scrollBarUpdate;
 	YAxisTicker *yaxisTicker;
 	TaskRangeAllocator *taskRangeAllocator;
 	QCPLayer *cursorLayer;
 	QWidget *plotWidget;
-	QVBoxLayout *plotLayout;
+	QHBoxLayout *plotLayout;
 	EventsWidget *eventsWidget;
 	InfoWidget *infoWidget;
 	QString traceFile;
@@ -351,6 +363,8 @@ private:
 	static const double cpuSectionOffset;
 	static const double cpuSpacing;
 	static const double cpuHeight;
+	static const double pixelZoomFactor;
+	static const double refDpiY;
 	/*
 	 * const double migrateHeight doesn't exist. The value used is the
 	 * dynamically calculated inc variable in MainWindow::computeLayout()
