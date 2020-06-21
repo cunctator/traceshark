@@ -1,38 +1,67 @@
 <?xml version="1.0" standalone="no"?>
-<!-- Creator: fig2dev Version 3.2.7a -->
-<!-- CreationDate: 2020-06-21 15:21:41 -->
-<!-- Magnification: 1.05 -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: fig2dev Version 3.2 Patchlevel 5e -->
+<!-- CreationDate: Mon Jun 22 00:50:10 2020 -->
+<!-- Magnification: 1.050 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
-	width="733pt" height="733pt"
-	viewBox="-188 -188 11626 11626">
-<g fill="none">
+	width="10.2in" height="10.2in"
+	viewBox="-197 -197 12205 12205">
+<g style="stroke-width:.025in; fill:none">
 <!-- Circle -->
-<circle cx="5357" cy="3925" r="2647"
-	stroke="#000000" stroke-width="885px"/>
+<circle cx="5624" cy="4120" r="2779"
+ style="stroke:#000000;stroke-width:930;"/>
 <!-- Circle -->
-<circle cx="8309" cy="9385" r="428" fill="#000000"
-	stroke="#000000" stroke-width="8px"/>
+<circle cx="8723" cy="9853" r="449"
+ style="fill:#000000;stroke:#000000;stroke-width:8;"/>
 <!-- Line -->
-<polyline points=" 6551,6087 8306,9417"
-	stroke="#000000" stroke-width="885px"/>
+<polyline points="6877,6390
+8720,9886
+" style="stroke:#000000;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
 <!-- Line -->
-<polyline points=" 9000,10800 10800,10800 10800,9000"
-	stroke="#000000" stroke-width="885px"/>
+<polyline points="9448,11338
+11338,11338
+11338,9448
+" style="stroke:#000000;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
 <!-- Line -->
-<polyline points=" 10800,7650 10800,5850 9000,5850"
-	stroke="#000000" stroke-width="885px"/>
+<polyline points="11338,8031
+11338,6141
+9448,6141
+" style="stroke:#000000;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
 <!-- Line -->
-<polyline points=" 2250,5850 450,5850 450,7650"
-	stroke="#000000" stroke-width="885px"/>
+<polyline points="2362,6141
+472,6141
+472,8031
+" style="stroke:#000000;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
 <!-- Line -->
-<polyline points=" 450,9000 450,10800 2250,10800"
-	stroke="#000000" stroke-width="885px"/>
+<polyline points="472,9448
+472,11338
+2362,11338
+" style="stroke:#000000;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
 <!-- Line -->
-<polyline points=" 2250,450 450,450 450,2250"
-	stroke="#ff0000" stroke-width="885px"/>
+<polyline points="2362,472
+472,472
+472,2362
+" style="stroke:#ff0000;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
 <!-- Line -->
-<polyline points=" 10800,2250 10800,450 9000,450"
-	stroke="#ff0000" stroke-width="885px"/>
+<polyline points="11338,2362
+11338,472
+9448,472
+" style="stroke:#ff0000;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
 </g>
 </svg>
