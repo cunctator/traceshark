@@ -189,12 +189,6 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
-#define ENABLE_VERTICAL_ZOOM		\
-"Enable vertical zoom"
-
-#define DISABLE_VERTICAL_ZOOM		\
-"Disable vertical zoom"
-
 #define QCPRANGE_DIFF(A, B) \
 	(TSABS(A.lower - B.lower) + TSABS(A.upper - B.upper))
 
@@ -1213,7 +1207,6 @@ void MainWindow::verticalZoom()
 	bool actionChecked = verticalZoomAction->isChecked();
 	bool axisSelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
-	QString text;
 
 	if (actionChecked != axisSelected) {
 		QCPAxis::SelectableParts selected =
@@ -1225,11 +1218,6 @@ void MainWindow::verticalZoom()
 		tracePlot->yAxis->setSelectedParts(selected);
 		tracePlot->replot();
 	}
-	if (actionChecked)
-		text = tr(DISABLE_VERTICAL_ZOOM);
-	else
-		text = tr(ENABLE_VERTICAL_ZOOM);
-	verticalZoomAction->setText(text);
 }
 
 void MainWindow::about()
@@ -1384,11 +1372,6 @@ void MainWindow::yAxisSelectionChange(const QCPAxis::SelectableParts &parts)
 	 */
 
 	if (ySelected != actionChecked) {
-		if (ySelected)
-			text = tr(DISABLE_VERTICAL_ZOOM);
-		else
-			text = tr(ENABLE_VERTICAL_ZOOM);
-		verticalZoomAction->setText(text);
 		verticalZoomAction->setChecked(ySelected);
 	}
 }
@@ -1602,7 +1585,7 @@ void MainWindow::createActions()
 	fullZoomAction->setToolTip(tr(FULL_ZOOM_TOOLTIP));
 	tsconnect(fullZoomAction, triggered(), this, fullZoom());
 
-	verticalZoomAction = new QAction(tr(ENABLE_VERTICAL_ZOOM), this);
+	verticalZoomAction = new QAction("Vertical zooming/scrolling", this);
 	verticalZoomAction->setIcon(QIcon(RESSRC_GPH_VERTICAL_ZOOM));
 	verticalZoomAction->setToolTip(tr(VERTICAL_ZOOM_TOOLTIP));
 	verticalZoomAction->setCheckable(true);
