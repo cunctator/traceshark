@@ -2,59 +2,53 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
 "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Creator: fig2dev Version 3.2 Patchlevel 5e -->
-<!-- CreationDate: Mon Jun 22 20:22:07 2020 -->
+<!-- CreationDate: Tue Jun 23 19:33:44 2020 -->
 <!-- Magnification: 1.050 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
-	width="11.5in" height="11.5in"
-	viewBox="-277 -669 13844 13859">
+	width="9.8in" height="9.8in"
+	viewBox="-297 -669 11736 11733">
 <g style="stroke-width:.025in; fill:none">
 <!-- Circle -->
-<circle cx="6850" cy="4251" r="2779"
+<circle cx="7559" cy="3543" r="2779"
  style="stroke:#000000;stroke-width:930;"/>
 <!-- Circle -->
-<circle cx="9925" cy="10427" r="449"
+<circle cx="10774" cy="9575" r="449"
  style="fill:#000000;stroke:#000000;stroke-width:8;"/>
 <!-- Line -->
-<polyline points="1889,11811
+<polyline points="1889,10393
 1889,0
 " style="stroke:#0000ff;stroke-width:930;
 stroke-linejoin:miter; stroke-linecap:butt;
 "/>
 <!-- Line -->
-<polyline points="1715,430
-392,1800
+<polyline points="3374,8698
+2051,10068
 " style="stroke:#0000ff;stroke-width:930;
 stroke-linejoin:miter; stroke-linecap:butt;
 "/>
 <!-- Line -->
-<polyline points="1993,416
-3363,1739
+<polyline points="372,8698
+1742,10020
 " style="stroke:#0000ff;stroke-width:930;
 stroke-linejoin:miter; stroke-linecap:butt;
 "/>
 <!-- Line -->
-<polyline points="392,10143
-1762,11466
-" style="stroke:#0000ff;stroke-width:930;
-stroke-linejoin:miter; stroke-linecap:butt;
-"/>
-<!-- Line -->
-<polyline points="3304,10104
-1982,11475
-" style="stroke:#0000ff;stroke-width:930;
-stroke-linejoin:miter; stroke-linecap:butt;
-"/>
-<!-- Line -->
-<polyline points="8041,6882
-9884,10379
+<polyline points="8927,6116
+10769,9612
 " style="stroke:#000000;stroke-width:930;
 stroke-linejoin:miter; stroke-linecap:butt;
 "/>
 <!-- Line -->
-<polyline points="1417,12519
-12897,12519
-" style="stroke:#000000;stroke-width:930;
+<polyline points="1995,369
+3365,1692
+" style="stroke:#0000ff;stroke-width:930;
+stroke-linejoin:miter; stroke-linecap:butt;
+"/>
+<!-- Line -->
+<polyline points="1718,337
+395,1707
+" style="stroke:#0000ff;stroke-width:930;
 stroke-linejoin:miter; stroke-linecap:butt;
 "/>
 </g>
