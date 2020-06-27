@@ -328,32 +328,30 @@ void MainWindow::configureScrollBar()
 	int pixels = plotWidget->height();
 	double px_per_zrange;
 	double diff_px;
-	double zrange = tracePlot->yAxis->range().size();
-	double zcenter = tracePlot->yAxis->range().center();
-	double range = TSABS(top - bottom);
-	double diff = range - zrange;
-	double lowcenter;
+	const QCPRange &zrange = tracePlot->yAxis->range();
+	double high = TSMAX(top, zrange.upper);
+	double low = TSMIN(bottom + zrange.size(), zrange.upper);
+	double diff = TSABS(high - low);
 	int smin, smax;
 	int value;
 	int pstep;
 	bool visible = tracePlot->yAxis->range().upper < (top - 0.001) ||
 		       tracePlot->yAxis->range().lower > (bottom + 0.001);
 
-	if (zrange < range) {
-		px_per_zrange = pixels / zrange;
+	if (visible) {
+		px_per_zrange = pixels / zrange.size();
 		diff_px = diff * px_per_zrange;
 		smin = 0;
 		smax = (int)(diff_px / 2.0);
 		smax = TSMAX(smax, 1);
-		lowcenter = (bottom + zrange) / 2;
-		value = (zcenter - lowcenter) / diff * smax;
+		value = TSABS(zrange.upper - low) * smax / diff;
 	} else {
 		smin = 1;
 		smax = 1;
 		value = 1;
 	}
 
-	pstep = zrange / diff * smax;
+	pstep = zrange.size() / diff * smax;
 
 	scrollBarUpdate = true;
 	if (scrollBar->minimum() != smin || scrollBar->maximum() != smax)
@@ -1378,21 +1376,17 @@ void MainWindow::yAxisSelectionChange(const QCPAxis::SelectableParts &parts)
 
 void MainWindow::scrollBarChanged(int value)
 {
-	const QCPRange &qcprange = tracePlot->yAxis->range();
-	double zrange = qcprange.size();
-	double range = TSABS(top - bottom);
-	double lower, upper;
+	const QCPRange &zrange = tracePlot->yAxis->range();
+	double high = TSMAX(top, zrange.upper);
+	double low = TSMIN(bottom + zrange.size(), zrange.upper);
+	double diff = TSABS(high - low);
+	double quantum = 1.0L / scrollBar->maximum() * diff;
 	QCPRange newrange;
-	double quantum;
 
-	if (zrange < range) {
-		quantum = 1.0L / scrollBar->maximum() * (range - zrange);
-		lower = value * quantum + bottom;
-		upper = lower + zrange;
-		newrange = QCPRange(lower, upper);
-		tracePlot->yAxis->setRange(newrange);
-		tracePlot->replot();
-	}
+	newrange.upper = value * quantum + low;
+	newrange.lower = newrange.upper - zrange.size();
+	tracePlot->yAxis->setRange(newrange);
+	tracePlot->replot();
 }
 
 void MainWindow::yAxisChanged(QCPRange /*range*/)
