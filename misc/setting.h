@@ -81,6 +81,8 @@ public:
 		SHOW_MIGRATION_UNLIMITED,
 		OPENGL_ENABLED,
 		LINE_WIDTH,
+		IDLE_LINE_WIDTH,
+		FREQ_LINE_WIDTH,
 		NR_SETTINGS,
 	} index_t;
         class Value;

@@ -63,10 +63,15 @@
 #include "misc/tstring.h"
 #include "vtl/compiler.h"
 
-#define MAX_LINE_WIDTH_OPENGL (4)
+#define DEFAULT_FREQ_LINE_WIDTH (2)
+#define MIN_FREQ_LINE_WIDTH (1)
+#define MAX_FREQ_LINE_WIDTH (8)
+#define DEFAULT_IDLE_LINE_WIDTH (1)
+#define MIN_IDLE_LINE_WIDTH (1)
+#define MAX_IDLE_LINE_WIDTH (8)
 #define MIN_LINE_WIDTH_OPENGL (1)
 #define DEFAULT_LINE_WIDTH_OPENGL (2)
-#define MAX_LINE_WIDTH_OPENGL (4)
+#define MAX_LINE_WIDTH_OPENGL (8)
 #define DEFAULT_LINE_WIDTH (1)
 #define DEFAULT_MAX_VRT_LATENCY (20)
 #define MIN_MAX_VRT_LATENCY (1)

@@ -74,6 +74,8 @@ SettingStore::SettingStore()
 	Setting::Dependency unlimitedDep(Setting::SHOW_MIGRATION_GRAPHS, true);
 	Setting::Dependency openglDep(Setting::OPENGL_ENABLED, true);
 	Setting::Dependency vertwakeDep(Setting::VERTICAL_WAKEUP, true);
+	Setting::Dependency idleDep(Setting::SHOW_CPUIDLE_GRAPHS, true);
+	Setting::Dependency freqDep(Setting::SHOW_CPUFREQ_GRAPHS, true);
 
 	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
 	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
@@ -150,6 +152,24 @@ SettingStore::SettingStore()
 	addDependency(Setting::LINE_WIDTH, openglDep);
 	if (!has_opengl())
 		permanentlyDisable(Setting::LINE_WIDTH);
+
+	setName(Setting::IDLE_LINE_WIDTH, q.tr("Line width of idle graphs"));
+	setUnit(Setting::IDLE_LINE_WIDTH, q.tr("pixels"));
+	setKey(Setting::IDLE_LINE_WIDTH, QString("IDLE_GRAPH_LINE_WIDTH"));
+	initIntValue(Setting::IDLE_LINE_WIDTH, DEFAULT_IDLE_LINE_WIDTH);
+	initMaxIntValue(Setting::IDLE_LINE_WIDTH, MAX_IDLE_LINE_WIDTH);
+	initMinIntValue(Setting::IDLE_LINE_WIDTH, MIN_IDLE_LINE_WIDTH);
+	initDisabledIntValue(Setting::IDLE_LINE_WIDTH, DEFAULT_IDLE_LINE_WIDTH);
+	addDependency(Setting::IDLE_LINE_WIDTH, idleDep);
+
+	setName(Setting::FREQ_LINE_WIDTH, q.tr("Line width of frequency graphs"));
+	setUnit(Setting::FREQ_LINE_WIDTH, q.tr("pixels"));
+	setKey(Setting::FREQ_LINE_WIDTH, QString("FREQ_GRAPH_LINE_WIDTH"));
+	initIntValue(Setting::FREQ_LINE_WIDTH, DEFAULT_FREQ_LINE_WIDTH);
+	initMaxIntValue(Setting::FREQ_LINE_WIDTH, MAX_FREQ_LINE_WIDTH);
+	initMinIntValue(Setting::FREQ_LINE_WIDTH, MIN_FREQ_LINE_WIDTH);
+	initDisabledIntValue(Setting::FREQ_LINE_WIDTH, DEFAULT_FREQ_LINE_WIDTH);
+	addDependency(Setting::FREQ_LINE_WIDTH, freqDep);
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)

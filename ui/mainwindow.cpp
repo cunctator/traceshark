@@ -683,12 +683,17 @@ void MainWindow::showTrace()
 
 		if (settingStore->getValue(Setting::SHOW_CPUIDLE_GRAPHS)
 		    .boolv()) {
+			const int lwidth = settingStore->getValue(
+				Setting::IDLE_LINE_WIDTH).intv();
+			const double adjsize = adjustScatterSize(CPUIDLE_SIZE,
+								 lwidth);
 			graph = tracePlot->addGraph(tracePlot->xAxis,
 						    tracePlot->yAxis);
 			graph->setSelectable(QCP::stNone);
 			name = QString(tr("cpuidle")) + QString::number(cpu);
-			style = QCPScatterStyle(CPUIDLE_SHAPE, CPUIDLE_SIZE);
+			style = QCPScatterStyle(CPUIDLE_SHAPE, adjsize);
 			pen.setColor(Qt::red);
+			pen.setWidth(lwidth);
 			style.setPen(pen);
 			graph->setScatterStyle(style);
 			pen.setColor(Qt::green);
@@ -707,7 +712,9 @@ void MainWindow::showTrace()
 			graph->setSelectable(QCP::stNone);
 			name = QString(tr("cpufreq")) + QString::number(cpu);
 			penF.setColor(Qt::blue);
-			penF.setWidth(2);
+			penF.setWidth(settingStore
+				      ->getValue(Setting::FREQ_LINE_WIDTH)
+				      .intv());
 			graph->setPen(penF);
 			graph->setName(name);
 			graph->setAdaptiveSampling(true);
