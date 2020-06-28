@@ -233,6 +233,7 @@ private:
 	void rescaleTrace();
 	void clearPlot();
 	void showTrace();
+	double adjustScatterSize(double defsize, int linewidth);
 	void showTracePlot();
 	double maxZoomVSize();
 	double autoZoomVSize();

@@ -740,6 +740,18 @@ skipIdleFreqGraphs:
 	tracePlot->replot();
 }
 
+/*
+ * The purpose of this function is to calculate how much the QCPScatterStyle
+ * size should be increased, if we have a large line width.
+ */
+double MainWindow::adjustScatterSize(double default_size, int linewidth)
+{
+	if (linewidth == 1 || linewidth == 2)
+		return default_size;
+
+	return default_size * linewidth / 2;
+}
+
 void MainWindow::showTracePlot()
 {
 	scrollBar->show();
@@ -923,16 +935,19 @@ void MainWindow::addGenericAccessoryGraph(const QString &name,
 					  double size,
 					  const QColor &color)
 {
-	/* Add still running graph on top of the other two...*/
 	if (timev.size() == 0)
 		return;
+	const int lwidth = settingStore->getValue(Setting::LINE_WIDTH).intv();
+	const double adjsize = adjustScatterSize(size, lwidth);
+	/* Add still running graph on top of the other two...*/
 	QCPGraph *graph = tracePlot->addGraph(tracePlot->xAxis,
 					      tracePlot->yAxis);
 	graph->setName(name);
-	QCPScatterStyle style = QCPScatterStyle(sshape, size);
+	QCPScatterStyle style = QCPScatterStyle(sshape, adjsize);
 	QPen pen = QPen();
 
 	pen.setColor(color);
+	pen.setWidth(lwidth);
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
@@ -2483,7 +2498,9 @@ void MainWindow::addAccessoryTaskGraph(QCPGraph **graphPtr,
 	/* Add the still running graph on top of the other two... */
 	QCPGraph *graph;
 	QPen pen;
-	QCPScatterStyle style = QCPScatterStyle(sshape, size);
+	const int lwidth = settingStore->getValue(Setting::LINE_WIDTH).intv();
+	const double adjsize = adjustScatterSize(size, lwidth);
+	QCPScatterStyle style = QCPScatterStyle(sshape, adjsize);
 	if (timev.size() <= 0) {
 		*graphPtr = nullptr;
 		return;
@@ -2491,6 +2508,7 @@ void MainWindow::addAccessoryTaskGraph(QCPGraph **graphPtr,
 	graph = tracePlot->addGraph(tracePlot->xAxis, tracePlot->yAxis);
 	graph->setName(name);
 	pen.setColor(color);
+	pen.setWidth(settingStore->getValue(Setting::LINE_WIDTH).intv());
 	style.setPen(pen);
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
