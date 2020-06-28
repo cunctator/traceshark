@@ -100,6 +100,9 @@ int main(int argc, char* argv[])
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
+#if QT_VERSION >= QT_VERSION_CHECK(5,1,0)
+	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
 
 	QApplication app(argc, argv);
 	MainWindow mainWindow;
