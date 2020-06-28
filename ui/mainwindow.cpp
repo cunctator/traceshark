@@ -215,6 +215,7 @@ const QString MainWindow::UNINT_NAME = tr("uninterruptible");
 const double MainWindow::RUNNING_SIZE = 8;
 const double MainWindow::PREEMPTED_SIZE = 8;
 const double MainWindow::UNINT_SIZE = 12;
+const double MainWindow::CPUIDLE_SIZE = 5;
 
 const QCPScatterStyle::ScatterShape MainWindow::RUNNING_SHAPE =
 	QCPScatterStyle::ssTriangle;
@@ -222,6 +223,8 @@ const QCPScatterStyle::ScatterShape MainWindow::PREEMPTED_SHAPE =
 	QCPScatterStyle::ssTriangle;
 const QCPScatterStyle::ScatterShape MainWindow::UNINT_SHAPE =
 	QCPScatterStyle::ssPlus;
+const QCPScatterStyle::ScatterShape MainWindow::CPUIDLE_SHAPE =
+	QCPScatterStyle::ssCircle;
 
 const QColor MainWindow::RUNNING_COLOR = Qt::blue;
 const QColor MainWindow::PREEMPTED_COLOR = Qt::red;
@@ -684,7 +687,7 @@ void MainWindow::showTrace()
 						    tracePlot->yAxis);
 			graph->setSelectable(QCP::stNone);
 			name = QString(tr("cpuidle")) + QString::number(cpu);
-			style = QCPScatterStyle(QCPScatterStyle::ssCircle, 5);
+			style = QCPScatterStyle(CPUIDLE_SHAPE, CPUIDLE_SIZE);
 			pen.setColor(Qt::red);
 			style.setPen(pen);
 			graph->setScatterStyle(style);

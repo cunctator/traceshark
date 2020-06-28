@@ -385,10 +385,12 @@ private:
 	static const double RUNNING_SIZE;
 	static const double PREEMPTED_SIZE;
 	static const double UNINT_SIZE;
+	static const double CPUIDLE_SIZE;
 
 	static const QCPScatterStyle::ScatterShape RUNNING_SHAPE;
 	static const QCPScatterStyle::ScatterShape PREEMPTED_SHAPE;
 	static const QCPScatterStyle::ScatterShape UNINT_SHAPE;
+	static const QCPScatterStyle::ScatterShape CPUIDLE_SHAPE;
 
 	static const QColor RUNNING_COLOR;
 	static const QColor PREEMPTED_COLOR;
