@@ -147,65 +147,6 @@ namespace TShark {
 
 	enum CursorIdx {RED_CURSOR, BLUE_CURSOR, NR_CURSORS};
 
-	/*
-	 * This functions accepts ':' at the end of the value
-	 * For example, 123.456: is ok. 123.456X is not ok if
-	 * X is not a digit between 0-9 or a ':'
-	 */
-	static vtl_always_inline double timeStrToDouble(char* str, bool &ok)
-	{
-		char *c;
-		double r;
-		unsigned long long base = 0;
-		bool isNeg = false;
-		unsigned int d;
-		unsigned long long divint;
-		double div;
-
-		ok = true;
-
-		if (*str == '-') {
-			str++;
-			isNeg = true;
-		}
-
-		for (c = str; *c != '\0'; c++) {
-			if (*c < '0' || *c > '9')
-				break;
-			d = *c - '0';
-			base *= 10;
-			base += d;
-		}
-
-		r = (double) base;
-
-		if (*c == '.') {
-			divint = 1;
-			base = 0;
-			for (c++; *c != '\0'; c++) {
-				if (*c < '0' || *c > '9')
-					break;
-				d = *c - '0';
-				base *= 10;
-				base += d;
-				divint *= 10;
-			}
-			div = (double) divint;
-			r += base / div;
-		}
-
-		if (*c != ':')
-			goto error;
-
-		if (isNeg)
-			return -r;
-		else
-			return r;
-	error:
-	        ok = false;
-		return 0;
-	}
-
 	union value32 {
 		uint32_t word32;
 		uint8_t word8[4];
