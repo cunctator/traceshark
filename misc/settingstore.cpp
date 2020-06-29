@@ -74,7 +74,6 @@ SettingStore::SettingStore()
 	Setting::Dependency unlimitedDep(Setting::SHOW_MIGRATION_GRAPHS, true);
 	Setting::Dependency openglDep(Setting::OPENGL_ENABLED, true);
 	Setting::Dependency vertwakeDep(Setting::VERTICAL_WAKEUP, true);
-	Setting::Dependency idleDep(Setting::SHOW_CPUIDLE_GRAPHS, true);
 	Setting::Dependency freqDep(Setting::SHOW_CPUFREQ_GRAPHS, true);
 
 	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
@@ -160,7 +159,7 @@ SettingStore::SettingStore()
 	initMaxIntValue(Setting::IDLE_LINE_WIDTH, MAX_IDLE_LINE_WIDTH);
 	initMinIntValue(Setting::IDLE_LINE_WIDTH, MIN_IDLE_LINE_WIDTH);
 	initDisabledIntValue(Setting::IDLE_LINE_WIDTH, DEFAULT_IDLE_LINE_WIDTH);
-	addDependency(Setting::IDLE_LINE_WIDTH, idleDep);
+	addDependency(Setting::IDLE_LINE_WIDTH, openglDep);
 
 	setName(Setting::FREQ_LINE_WIDTH, q.tr("Line width of frequency graphs"));
 	setUnit(Setting::FREQ_LINE_WIDTH, q.tr("pixels"));
