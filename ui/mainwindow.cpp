@@ -1351,8 +1351,6 @@ void MainWindow::license()
 
 void MainWindow::mouseWheel()
 {
-	bool xSelected = tracePlot->yAxis->selectedParts().
-		testFlag(QCPAxis::spAxis);
 	bool ySelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
 
