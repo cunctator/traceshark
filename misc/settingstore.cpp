@@ -74,7 +74,6 @@ SettingStore::SettingStore()
 	Setting::Dependency unlimitedDep(Setting::SHOW_MIGRATION_GRAPHS, true);
 	Setting::Dependency openglDep(Setting::OPENGL_ENABLED, true);
 	Setting::Dependency vertwakeDep(Setting::VERTICAL_WAKEUP, true);
-	Setting::Dependency freqDep(Setting::SHOW_CPUFREQ_GRAPHS, true);
 
 	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
 	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
@@ -168,7 +167,6 @@ SettingStore::SettingStore()
 	initMaxIntValue(Setting::FREQ_LINE_WIDTH, MAX_FREQ_LINE_WIDTH);
 	initMinIntValue(Setting::FREQ_LINE_WIDTH, MIN_FREQ_LINE_WIDTH);
 	initDisabledIntValue(Setting::FREQ_LINE_WIDTH, DEFAULT_FREQ_LINE_WIDTH);
-	addDependency(Setting::FREQ_LINE_WIDTH, freqDep);
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)
