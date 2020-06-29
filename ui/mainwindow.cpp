@@ -1356,11 +1356,7 @@ void MainWindow::mouseWheel()
 	bool ySelected = tracePlot->yAxis->selectedParts().
 		testFlag(QCPAxis::spAxis);
 
-	/* This is not possible but would be cool */
-	if (xSelected && ySelected)
-		tracePlot->axisRect()->setRangeZoom(Qt::Vertical |
-						    Qt::Horizontal);
-	else if (ySelected)
+	if (ySelected)
 		tracePlot->axisRect()->setRangeZoom(Qt::Vertical);
 	else
 		tracePlot->axisRect()->setRangeZoom(Qt::Horizontal);
