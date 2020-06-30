@@ -345,8 +345,7 @@ void MainWindow::configureScrollBar()
 		px_per_zrange = pixels / zrange.size();
 		diff_px = diff * px_per_zrange;
 		smin = 0;
-		smax = (int)(diff_px / 2.0);
-		smax = TSMAX(smax, 1);
+		smax = (int)(diff_px / 2.0) + 1;
 		value = TSABS(zrange.upper - low) * smax / diff;
 	} else {
 		smin = 1;
