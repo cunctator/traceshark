@@ -198,13 +198,14 @@ private:
 		generic_sched_wakeup_pid(const TraceEvent &event) const;
 	vtl_always_inline int
 		generic_sched_waking_pid(const TraceEvent &event) const;
-	vtl_always_inline vtl::Time estimateWakeUpNew(const CPU *eventCPU,
-						    const vtl::Time &newTime,
-						    const vtl::Time &startTime,
-						    bool &valid) const;
+	vtl_always_inline
+	vtl::Time estimateWakeUpNew(const CPU *eventCPU,
+				    const vtl::Time &newTime,
+				    const vtl::Time &startTime,
+				    bool &valid) const;
 	vtl_always_inline vtl::Time estimateWakeUp(const Task *task,
-						 const vtl::Time &newTime,
-						 bool &valid) const;
+						   const vtl::Time &newTime,
+						   bool &valid) const;
 	void handleWrongTaskOnCPU(const TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, int oldpid,
 				  const vtl::Time &oldtime,

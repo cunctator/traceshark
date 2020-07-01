@@ -110,7 +110,7 @@ private:
 	vtl_always_inline bool parseFtraceBuffer(unsigned int index);
 	vtl_always_inline bool parsePerfBuffer(unsigned int index);
 	vtl_always_inline bool parseLineFtrace(TraceLine &line,
-					     TraceEvent &event);
+					       TraceEvent &event);
 	vtl_always_inline
 	bool parseLinePerf(TraceLine &line, TraceEvent &event);
 	void fixLastEvent();
@@ -193,7 +193,7 @@ vtl_always_inline bool TraceParser::parseBuffer_(tracetype_t ttype,
 }
 
 vtl_always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
-						  TraceEvent &event)
+						    TraceEvent &event)
 {
 	if (ftraceGrammar->parseLine(line, event)) {
 		/* Check if the timestamp of this event is affected by
@@ -219,7 +219,7 @@ vtl_always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
 }
 
 vtl_always_inline bool TraceParser::parseLinePerf(TraceLine &line,
-						TraceEvent &event)
+						  TraceEvent &event)
 {
 	if (perfGrammar->parseLine(line, event)) {
 		/* Check if the timestamp of this event is affected by

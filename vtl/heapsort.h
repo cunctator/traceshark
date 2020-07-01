@@ -101,7 +101,7 @@ vtl_always_inline void heap_siftdown_(C<T> &container,
 
 template<template <typename> class C, typename T, typename TCompFunc>
 vtl_always_inline void heap_heapify_(C<T> &container,
-				      TCompFunc compFunc)
+				     TCompFunc compFunc)
 {
 	long count = container.size();
 	long start;

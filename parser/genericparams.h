@@ -99,9 +99,9 @@ static vtl_always_inline RETTYPE FNAME(tracetype_t tt,	  	   \
 
 #define DECLARE_GENERIC_TRACEFN_POOL_HANDLE(FNAME, RETTYPE, HANDLETYPE)	\
 	static vtl_always_inline RETTYPE FNAME(tracetype_t tt,		\
-					     const TraceEvent &event,	\
-					     StringPool<> *pool,	\
-					     HANDLETYPE handle)		\
+					       const TraceEvent &event,	\
+					       StringPool<> *pool,	\
+					       HANDLETYPE handle)	\
 	{								\
 		if (tt == TRACE_TYPE_FTRACE)				\
 			return ftrace_##FNAME(event, pool, handle);	\

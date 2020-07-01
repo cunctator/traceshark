@@ -78,7 +78,8 @@ int TString::TSTRING_MIN(int a, int b)
 	return ((a) < (b) ? a:b);
 }
 
-vtl_always_inline int TString::cmp(const TString *a, const TString *b) {
+vtl_always_inline int TString::cmp(const TString *a, const TString *b)
+{
 	int clen;
 	int rval;
 	int diff;

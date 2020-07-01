@@ -339,7 +339,8 @@ vtl_always_inline void Setting::Dependency::assert_interval() const
 		error_dep_type();
 }
 
-vtl_always_inline enum Setting::Dependency::Type Setting::Dependency::type() const
+vtl_always_inline enum Setting::Dependency::Type Setting::Dependency::type()
+	const
 {
 	return type_;
 }

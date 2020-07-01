@@ -153,7 +153,7 @@ public:
 	~StringTree();
 	vtl_always_inline const TString *stringLookup(event_t value) const;
 	vtl_always_inline event_t searchAllocString(const TString *str,
-						  event_t newval);
+						    event_t newval);
 	vtl_always_inline event_t getMaxEvent() const;
 	void clear();
 	void reset();

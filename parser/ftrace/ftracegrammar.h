@@ -104,7 +104,7 @@ private:
 };
 
 vtl_always_inline bool FtraceGrammar::NamePidMatch(const TString *str,
-						 TraceEvent &/*event*/)
+						   TraceEvent &/*event*/)
 {
 	/*
 	 * We temporarily store the process name string(s) into the
@@ -122,7 +122,7 @@ vtl_always_inline bool FtraceGrammar::NamePidMatch(const TString *str,
 }
 
 vtl_always_inline bool FtraceGrammar::CPUMatch(const TString *str,
-					     TraceEvent &event)
+					       TraceEvent &event)
 {
 	char *c;
 	unsigned int cpu = 0;
@@ -149,7 +149,7 @@ error:
 }
 
 vtl_always_inline bool FtraceGrammar::extractNameAndPid(int &pid,
-						      TString &compound)
+							TString &compound)
 {
 	char *nullChr = compound.ptr + compound.len;
 	char *lastChr = nullChr - 1;
@@ -189,7 +189,7 @@ found1:
 }
 
 vtl_always_inline bool FtraceGrammar::TimeMatch(const TString *str,
-					      TraceEvent &event)
+						TraceEvent &event)
 {
 	bool rval;
 	TString namestr;
@@ -257,7 +257,7 @@ vtl_always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 }
 
 vtl_always_inline bool FtraceGrammar::EventMatch(const TString *str,
-					       TraceEvent &event)
+						 TraceEvent &event)
 {
 	char buf[512];
 	TString estr;
@@ -294,7 +294,7 @@ vtl_always_inline bool FtraceGrammar::EventMatch(const TString *str,
 }
 
 vtl_always_inline bool FtraceGrammar::ArgMatch(const TString *str,
-					     TraceEvent &event)
+					       TraceEvent &event)
 {
 	const TString *newstr;
 	if (event.argc < EVENT_MAX_NR_ARGS) {
@@ -310,7 +310,7 @@ vtl_always_inline bool FtraceGrammar::ArgMatch(const TString *str,
 
 
 vtl_always_inline bool FtraceGrammar::parseLine(const TraceLine &line,
-					      TraceEvent &event)
+						TraceEvent &event)
 {
 	const TString *str = line.strings;
 	int n = line.nStrings;
