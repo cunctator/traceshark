@@ -621,7 +621,7 @@ void MainWindow::rescaleTrace()
 {
 	int maxwakeup;
 	const Setting::Value &maxvalue =
-		settingStore->getValue(Setting::MAX_VRT_WAKEUP_LATENCY);;
+		settingStore->getValue(Setting::MAX_VRT_WAKEUP_LATENCY);
 
 	maxwakeup = maxvalue.intv();
 	CPUTask::setVerticalWakeupMAX(maxwakeup);

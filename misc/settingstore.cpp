@@ -140,7 +140,7 @@ SettingStore::SettingStore()
 	if (!has_opengl())
 		permanentlyDisable(Setting::OPENGL_ENABLED);
 
-	setName(Setting::LINE_WIDTH, q.tr("Line width of sched graphs:"));
+	setName(Setting::LINE_WIDTH, q.tr("Width of sched graphs:"));
 	setUnit(Setting::LINE_WIDTH, q.tr("pixels"));
 	setKey(Setting::LINE_WIDTH, QString("SCHED_GRAPH_LINE_WIDTH"));
 	initIntValue(Setting::LINE_WIDTH, width);
@@ -151,7 +151,7 @@ SettingStore::SettingStore()
 	if (!has_opengl())
 		permanentlyDisable(Setting::LINE_WIDTH);
 
-	setName(Setting::IDLE_LINE_WIDTH, q.tr("Line width of idle graphs"));
+	setName(Setting::IDLE_LINE_WIDTH, q.tr("Width of idle graphs"));
 	setUnit(Setting::IDLE_LINE_WIDTH, q.tr("pixels"));
 	setKey(Setting::IDLE_LINE_WIDTH, QString("IDLE_GRAPH_LINE_WIDTH"));
 	initIntValue(Setting::IDLE_LINE_WIDTH, DEFAULT_IDLE_LINE_WIDTH);
@@ -160,13 +160,22 @@ SettingStore::SettingStore()
 	initDisabledIntValue(Setting::IDLE_LINE_WIDTH, DEFAULT_IDLE_LINE_WIDTH);
 	addDependency(Setting::IDLE_LINE_WIDTH, openglDep);
 
-	setName(Setting::FREQ_LINE_WIDTH, q.tr("Line width of frequency graphs"));
+	setName(Setting::FREQ_LINE_WIDTH, q.tr("Width of frequency graphs"));
 	setUnit(Setting::FREQ_LINE_WIDTH, q.tr("pixels"));
 	setKey(Setting::FREQ_LINE_WIDTH, QString("FREQ_GRAPH_LINE_WIDTH"));
 	initIntValue(Setting::FREQ_LINE_WIDTH, DEFAULT_FREQ_LINE_WIDTH);
 	initMaxIntValue(Setting::FREQ_LINE_WIDTH, MAX_FREQ_LINE_WIDTH);
 	initMinIntValue(Setting::FREQ_LINE_WIDTH, MIN_FREQ_LINE_WIDTH);
 	initDisabledIntValue(Setting::FREQ_LINE_WIDTH, DEFAULT_FREQ_LINE_WIDTH);
+
+	setName(Setting::MIGRATION_WIDTH, q.tr("Width of migration arrows"));
+	setUnit(Setting::MIGRATION_WIDTH, q.tr("pixels"));
+	setKey(Setting::MIGRATION_WIDTH, QString("MIGRATION_LINE_WIDTH"));
+	initIntValue(Setting::MIGRATION_WIDTH, DEFAULT_MIGRATION_WIDTH);
+	initMaxIntValue(Setting::MIGRATION_WIDTH, MAX_MIGRATION_WIDTH);
+	initMinIntValue(Setting::MIGRATION_WIDTH, MIN_MIGRATION_WIDTH);
+	initDisabledIntValue(Setting::MIGRATION_WIDTH, DEFAULT_MIGRATION_WIDTH);
+	addDependency(Setting::MIGRATION_WIDTH, openglDep);
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)

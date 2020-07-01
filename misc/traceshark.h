@@ -63,6 +63,9 @@
 #include "misc/tstring.h"
 #include "vtl/compiler.h"
 
+#define DEFAULT_MIGRATION_WIDTH (1)
+#define MAX_MIGRATION_WIDTH (8)
+#define MIN_MIGRATION_WIDTH (1)
 #define DEFAULT_FREQ_LINE_WIDTH (2)
 #define MIN_FREQ_LINE_WIDTH (1)
 #define MAX_FREQ_LINE_WIDTH (8)

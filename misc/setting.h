@@ -83,6 +83,7 @@ public:
 		LINE_WIDTH,
 		IDLE_LINE_WIDTH,
 		FREQ_LINE_WIDTH,
+		MIGRATION_WIDTH,
 		NR_SETTINGS,
 	} index_t;
         class Value;

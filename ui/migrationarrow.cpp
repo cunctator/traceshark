@@ -53,13 +53,15 @@
 #include "ui/migrationarrow.h"
 
 MigrationArrow::MigrationArrow(double start, double end, double time,
-			       const QColor &color, QCustomPlot *parent):
+			       const QColor &color, QCustomPlot *parent,
+			       int width):
 	QCPItemLine(parent)
 {
 	QPen pen;
 	QCPItemLine::start->setCoords(time, start);
 	QCPItemLine::end->setCoords(time, end);
 	pen.setColor(color);
+	pen.setWidth(width);
 	setPen(pen);
 	setHead(QCPLineEnding::esFlatArrow);
 }

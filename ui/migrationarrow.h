@@ -61,7 +61,7 @@ class MigrationArrow : public QCPItemLine
 	Q_OBJECT
 public:
 	MigrationArrow(double start, double end, double time,
-		       const QColor &color, QCustomPlot *parent);
+		       const QColor &color, QCustomPlot *parent, int width);
 private:
 	QCPLineEnding head;
 };

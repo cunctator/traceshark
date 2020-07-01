@@ -804,6 +804,7 @@ void TraceAnalyzer::scaleMigration()
 {
 	QList<Migration>::iterator iter;
 	double unit = migrationScale / getNrCPUs();
+	const int width = setstor->getValue(Setting::MIGRATION_WIDTH).intv();
 	for (iter = migrations.begin(); iter != migrations.end(); iter++) {
 		Migration &m = *iter;
 		double s = migrationOffset + (m.oldcpu + 1) * unit;
@@ -814,7 +815,7 @@ void TraceAnalyzer::scaleMigration()
 		 * object in the customPlot object.
 		 */
 		new MigrationArrow(s, e, m.time.toDouble(), color,
-				   customPlot);
+				   customPlot, width);
 	}
 }
 
