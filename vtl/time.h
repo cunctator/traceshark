@@ -129,9 +129,9 @@ namespace vtl {
 		vtl_always_inline void operator*=(unsigned other);
 		vtl_always_inline static Time fromDouble(const double &t);
 		vtl_always_inline static Time fromString(const char *str,
-						       bool &ok);
+							 bool &ok);
 		vtl_always_inline static Time fromSpacedString(const char *str,
-							     bool &ok);
+							       bool &ok);
 		vtl_always_inline bool isZero();
 		vtl_always_inline QString toQString() const;
 		vtl_always_inline bool sprint(char *buf) const;
