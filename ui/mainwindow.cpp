@@ -486,7 +486,7 @@ void MainWindow::openFile(const QString &name)
 		showTrace();
 		showt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-		showTracePlot();
+		tracePlot->show();
 		tshow = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 		setStatus(STATUS_FILE, &name);
@@ -497,7 +497,7 @@ void MainWindow::openFile(const QString &name)
 		       "setupCursors() took %.6lf s\n"
 		       "rescaleTrace() took %.6lf s\n"
 		       "showTrace() took %.6lf s\n"
-		       "showTracePlot() took %.6lf s\n",
+		       "tracePlot->show took %.6lf s\n",
 		       (double) (process - start) / 1000,
 		       (double) (layout - process) / 1000,
 		       (double) (eventsw - layout) / 1000,
@@ -639,7 +639,8 @@ void MainWindow::clearPlot()
 	cursors[TShark::BLUE_CURSOR] = nullptr;
 	tracePlot->clearItems();
 	tracePlot->clearPlottables();
-	hideTracePlot();
+	tracePlot->hide();
+	scrollBar->hide();
 	TaskGraph::clearMap();
 	taskRangeAllocator->clearAll();
 	infoWidget->setTime(0, TShark::RED_CURSOR);
@@ -759,18 +760,6 @@ double MainWindow::adjustScatterSize(double default_size, int linewidth)
 		return default_size;
 
 	return default_size * linewidth / 2;
-}
-
-void MainWindow::showTracePlot()
-{
-	scrollBar->show();
-	tracePlot->show();
-}
-
-void MainWindow::hideTracePlot()
-{
-	tracePlot->hide();
-	scrollBar->hide();
 }
 
 double MainWindow::maxZoomVSize()
@@ -2363,7 +2352,7 @@ void MainWindow::consumeSettings()
 	setupCursors(redtime, bluetime);
 	rescaleTrace();
 	showTrace();
-	showTracePlot();
+	tracePlot->show();
 
 	tracePlot->xAxis->setRange(savedRangeX);
 	/* Restore the task graphs from the list */

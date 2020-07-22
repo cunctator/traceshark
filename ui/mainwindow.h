@@ -234,10 +234,8 @@ private:
 	void clearPlot();
 	void showTrace();
 	double adjustScatterSize(double defsize, int linewidth);
-	void showTracePlot();
 	double maxZoomVSize();
 	double autoZoomVSize();
-	void hideTracePlot();
 	int loadTraceFile(const QString &);
 	void setStatus(status_t status, const QString *fileName = nullptr);
 
