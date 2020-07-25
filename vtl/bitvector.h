@@ -111,7 +111,7 @@ vtl_always_inline void BitVector::appendbool(bool value)
 vtl_always_inline unsigned int BitVector::read(unsigned int index) const
 {
 	unsigned int windex = index / BITVECTOR_BITS_PER_WORD;
-        unsigned int r;
+	unsigned int r;
 	unsigned int bitnr = index % BITVECTOR_BITS_PER_WORD;
 
 	const word_t &word = array[windex];
