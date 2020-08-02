@@ -1,0 +1,579 @@
+traceshark (0.9.10-beta) UNRELEASED; urgency=medium
+
+  * Add an option to traceshark.pro to use the system qcustomplot library. It is
+    not recommended to use this feature unless you must.
+  * A small cleanup of the modifications to the QCustomPlot library.
+  * Add a diagnostic message when closing the trace takes longer than 1 second.
+  * Fix statement in the QCustomPlot attribution dialog when we use the system
+    QCustomPlot.
+  * Add a desktop file: traceshark.desktop.
+  * Add a manpage: doc/traceshark.1
+  * Change the default zoom to not necessarily show the whole vertical space
+     in case the trace has many CPUs. The old default zoom button has been
+     renamed and still has its old functionality, i.e. the old default zoom
+     behavior. The new default zoom button triggers the new default zoom.
+  * Add a vertical scrollbar that is visible when the whole trace doesn't fit
+    vertically.
+  * Add support for building and running traceshark on macOS. traceshark is
+    usable on macOS but it's fairly untested and there are some known bugs:
+    - The "About QCustomplot" menu item is missing.
+    - The vertical scrollbar for scrolling the plot in the vertical direction
+      doesn't work. This means that it's necessary to select the y-axis and
+      use the mouse to grab and scroll.
+   * Add a button to enable vertical zoom.
+   * Use SVG graphics for icons.
+   * Add some basic support for HiDPI displays.
+   * Increase the size and line width of accessory graphs (preempted,
+     uninterruptible, and still running) when the line width of scheduling
+     graphs is increased.
+   * Make it possible to increase the line width of idle and frequency graphs.
+   * Make it possible to increase the line width of the migration arrows.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 02 Aug 2020 16:42:41 +0200
+
+traceshark (0.9.9-beta) UNRELEASED; urgency=medium
+
+  * New feature: support a newer format of sched_switch and sched_wakeup from
+    trace-cmd.
+  * New feature: make perf-record.sh more compatible.
+  * traceshark.pro got commented out optimizations for RPI 4.
+  * New feature: CPU filtering of the events view.
+  * Bug fix: A crash that happened after exporting a file and then clicking on
+    the info field.
+  * Bug fix: the minimum calculation in scripts/stats.sh.
+  * Bug fix: many Coverity errors were fixed.
+  * Bug fix: The maximum value for the wakeup latency is now 1000 instead of
+    232.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Fri, 06 Dec 2019 00:47:10 +0100
+
+traceshark (0.9.8-beta) UNRELEASED; urgency=medium
+
+  * New feature: tasks, zoom, cursors, task selections, unified graphs and
+    legends are restored after changing settings in the graph enable dialog.
+  * New feature: if the button to show a dialog is pressed a second time, i.e.
+    if the dialog is already visible, then the dialog will be hidden.
+  * The button to add a legend is only enabled if the operation is possible.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 12 Mar 2019 21:19:07 +0100
+
+traceshark (0.9.7-beta) UNRELEASED; urgency=medium
+
+  * In the task select dialog and in the statistics dialogs a task can be
+    selected by double clicking and in this case the state was not correctly
+    updated. This has now been fixed.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 27 Feb 2019 09:00:21 +0100
+
+traceshark (0.9.6-beta) UNRELEASED; urgency=medium
+
+  * Disable the remove task graph button if the operation is not available.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 26 Feb 2019 23:33:29 +0100
+
+traceshark (0.9.5-beta) UNRELEASED; urgency=medium
+
+  * OpenGL is enabled by default.
+  * New feature: it is possible to select the width of the scheduling graphs in
+    the graph enable dialog.
+  * New feature: it's possible to save the settings in the graph enable dialog.
+    They are saved to $HOME/.traceshark and loaded automatically the next time
+    time traceshark is started.
+  * New feature: excessive migrations (> 200k) are not displayed by default but
+    the user can chose to see them in the graph enable dialog.
+  * New feature: two new zoom buttons have been added. One for cursor zoom and
+    the other for default zoom.
+  * New feature: a new buttons for removing all unified scheduling graphs has
+    been added.
+  * The performance of QCustomPlot with respect to opening and closing traces
+    has been improved. This has been accomplished with QCPList, the new custom
+    container class that has been added to the qcustomplot directory.
+  * The buttons for removing unified graphs are only enabled if a unified graph
+    is in the plot.
+  * The button for clearing the legend is only enabled if there is at least one
+    task in the legend.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 20 Feb 2019 22:39:00 +0100
+
+traceshark (0.9.4-beta) UNRELEASED; urgency=medium
+
+  * MainWindow: Improved menu text.
+  * MainWindow: Increase size of uninterruptible sleep to 12.
+  * Improve file dialogs for uniformity and so that less errors are generated.
+  * Improve the opengl option in traceshark.pro.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 28 Jan 2020 22:15:23 +0100
+
+traceshark (0.9.3-beta) UNRELEASED; urgency=medium
+
+  * Bug fix: an uninitialized variable issue was found with valgrind.
+  * Fixed three Coverity issues: CID 1476427, CID 1476428, and CID 1476429.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 05 Jan 2019 23:36:26 +0200
+
+traceshark (0.9.2-beta) UNRELEASED; urgency=medium
+
+  * Files greater than 2GB can now be opened on 32-bit platforms. Tested with
+    Raspbian on Raspberry Pi 3, i.e. ARM 32-bit.
+  * Add an option for specifying the stack size to perf-record.sh.
+  * Add SPDX-identifiers to source files.
+  * The task selection logic has been improved. If a task is selected now, then
+    traceshark will first try to find a task graph to select, and if that fails
+    it will select the CPU graph with the largest number of scheduling events.
+  * A couple of bugs in the display of preempted graphs were fixed. Previously
+    it could happen that no preempted graphs were displayed, unless there also
+    were a still running graph for the same task.
+  * Uninterruptible sleep is now shown with magenta colored plus signs.
+  * The markers for still running and preempted were changed to  triangles,
+    previously they were small circles.
+  * sched_waking from another task is included in the events that are concerned
+    with inclusive PID filtering.
+  * README.md was updated to describe how still running, preempted and
+    uninterruptible sleep is displayed.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 03 Jan 2019 13:21:00 +0200
+
+traceshark (0.9.1-beta) UNRELEASED; urgency=medium
+
+  * perf-record.sh: Implement options for running perf with SCHED_FIFO.
+  * Do not rely on mmap() working to map the whole trace file. This makes it
+    possible to open much larger files on 32-bit platforms.
+  * Make it possible to export unfiltered events.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 30 Dec 2018 13:46:25 +0200
+
+traceshark (0.9.0-beta) UNRELEASED; urgency=medium
+
+  * traceshark is now beta, no longer alpha because all the features that I had
+    in mind when I started the project have been implemented.
+  * New feature: New button to export CPU cycles only.
+  * New feature: Git revision is added to the version displayed by
+    "Help->About Traceshark".
+  * Some small code readability improvements.
+  * Bug fix: a serious bug in the find next sleep functionality was fixed.
+  * Bug fix: a couple of perf-record.sh bugs were fixed.
+  * A new screenshot presented by README.md.
+  * Improved handling of trace type determination.
+  * Improved handling when opening empty traces.
+  * Bug fix: fixed crash when opening files in wrong format, i.e. opening a
+    binary file.
+  * Fixed crash when using the task select dialog to select the :-1 task.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 25 Dec 2018 22:51:30 +0200
+
+traceshark (0.8.0-alpha) UNRELEASED; urgency=medium
+
+  * New feature: If the user double clicks on a task in the task selection
+    dialog, or one of the statistics dialog, then the task will be selected,
+    both in the plot and in the task toolbar.
+  * If a task graph is removed, and if this graph is selected, then we ought to
+    also remove it from the task toolbar.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 09 Dec 2018 23:16:55 +0100
+
+traceshark (0.7.1-alpha) UNRELEASED; urgency=medium
+
+  * Fix a bug and a corner case with the button to find the next sched_switch
+    sleep.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 06 Dec 2018 22:16:28 +0100
+
+traceshark (0.7.0-alpha) UNRELEASED; urgency=medium
+
+  * New feature: a button to filter on the currently selected task.
+  * New feature: a button to filter on the currently selected task and the time
+    defined by the cursors.
+  * New feature: a button to find the next sched_switch event that puts the
+    currently selected task to sleep.
+  * The buttons that act on the currently selected task are only enabled if a
+    task is selected.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 05 Dec 2018 22:11:16 +0100
+
+traceshark (0.6.0-alpha) UNRELEASED; urgency=medium
+
+  * New feature: A button to find sched_waking events directly, based on the
+    currently selected task and active cursor position. With this button it's
+    not necessary to first find the wakeup event.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 25 Nov 2018 22:11:45 +0100
+
+traceshark (0.5.1-alpha) UNRELEASED; urgency=medium
+
+  * The default size of the back trace windows is now larger.
+  * The wakeup and waking icons are improved.
+  * NullStr is introduced, to reduce crashes if events have unexpected formats.
+  * Coverity fixes. I do not believe that any of these would ever be seen by a
+    user but who knows.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 28 Oct 2018 20:08:48 +0100
+
+traceshark (0.5.0-alpha) UNRELEASED; urgency=medium
+
+  * New feature: A button to find sched_waking events that precedes a specific
+    sched_wakeup event.
+  * Bug fix: The cursor buttons and time fields where not enabled when a trace
+    was opened.
+  * Bug fix: The events widget did not stay in the same place after a filter was
+    disabled.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 04 Oct 2018 23:23:52 +0200
+
+traceshark (0.4.3-alpha) UNRELEASED; urgency=medium
+
+  * The wakeup button is only enabled if a task is selected.
+  * The placement of the task related toolbar is adaptive. Depending on screen
+    width it will be placed to the right of the cursor info fields, or above it
+    in case of a narrow screen.
+  * When the find wakeup button is used, no task will be selected if the wakeup
+    event has a pid of 0, that is the idle task.
+  * There is a new script in the scripts directory:perf-record.sh. This can be
+    used to capture perf traces. It might need local modification.
+  * Bug fix: the parsing of ftrace traces is working again.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 03 Oct 2018 18:42:14 +0200
+
+traceshark (0.4.2-alpha) UNRELEASED; urgency=medium
+
+  * Fix an annoying bug where the final switch event was lost when using perf
+    with the 4.14.x kernel,possibly other version as well.
+  * Fix the buggy handling of the case with missing switch events, this made
+    the above bug much worse.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 20 Sep 2018 02:17:23 +0200
+
+traceshark (0.4.1-alpha) UNRELEASED; urgency=medium
+
+  * Fix an annoying bug with the percentages in the statistics.
+  * Improve the compatibility with perf that is shipped with distros (Debian,
+    Fedora).
+  * Move away from using unsigned integer types.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 05 Sep 2018 21:41:04 +0200
+
+traceshark (0.4.0-alpha) UNRELEASED; urgency=medium
+
+  * Add two new dialogs for statistics.
+  * Add the graph selector, it's possible to select which graphs to select.
+  * The task selector dialog is now a docking widget, as well as the new
+    statistics dialogs.
+  * Make it easier to modify traceshark.pro in order to configure the build.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 13 Aug 2018 00:58:42 +0200
+
+traceshark (0.3.3-alpha) UNRELEASED; urgency=medium
+
+  * Fix the spurious error message when canceling an export.
+  * Improves the README.md description of the wakeup button.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 07 Mar 2018 21:34:13 +0100
+
+traceshark (0.3.2-alpha) UNRELEASED; urgency=medium
+
+  * Now it's possible to export filtered events, so that one can for example
+    generate a flame graph of what has been filtered. If one wants to generate
+    a flamegraph, then it's best to filter on cpu_cycles events and any
+    additional conditions that are wanted, such as pid and time.
+  * There is an error dialog that reports an error if a file cannot be opened
+    or if the exporting of events fails.
+  * The about dialog contains information about the compiler version and the
+    build time.
+  * The traceshark.pro has been equipped with a lot of commented out flags to
+    build for a certain CPU, build with clang, or to do a debug build. The debug
+    build is no longer the default.
+  * Traceshark uses fixed point to calculate time. This means that the rounding
+    problems related to floating point calculations should be a thing of the
+    past.
+  * Traceshark was modified to cope with the output from the 4.14 kernel.
+  * Compiler warnings where fixed for gcc-7.3.
+  * Qt 5 is now the default and recommended version.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 06 Mar 2018 22:39:47 +0100
+
+traceshark (0.3.1-alpha) UNRELEASED; urgency=medium
+
+  * StringTree: Take the AVLTree<> template into use.
+  * Improve the time filter icon.
+  * AVLTree: Use enum instead of bool.
+  * Improve the reset filter and close icons.
+  * AVLTree: Important uninitialized pointer bug fix.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 17 Dec 2017 13:06:56 +0100
+
+traceshark (0.3.0-alpha) UNRELEASED; urgency=medium
+
+  * Add .travis.yml to enable the Travis CI.
+  * MainWindow: Don't use anti-aliased error bars.
+  * Fix the TaskGraph life cycle.
+  * Tone down Qt 5 warning.
+  * Introduce QCPPointer to improve performance of QCustomPlot on Qt 4.
+  * MemPool: Remove duplicated code.
+  * MemPool: Improve coding style a bit.
+  * QCustomPlot: Update to 2.0.0
+  * Change the license of some files. Traceshark source files will be licensed
+    under GPL version 2 or later. In addition it will be possible to license
+    the traceshark source files under the two clause BSD license. In other
+    words the traceshark files will be dual licensed.
+  * The included QCustomPlot will remain under GPL version 3 or later.
+  * Currently, traceshark is dependent on QCustomPlot so that in order to
+    compile a working binary of traceshark, you will need to license everything
+    under GPL version 3, because version 2 and version 3 are not compatible.
+  * The program will only display the GPL version 3 license.
+  * The purpose of this change is to give more licensing flexibility in the
+    future, when/if QCustomPlot gets replaced with another plotting solution.
+  * Adjust .gitignore to ignore .qmake.stash.
+  * mempool: Remove a bit of duplicated code.
+  * MainWindow: New feature - make it easier to iterate through wakeups.
+  * TraceFile: Add some static branch prediction.
+  * LoadThread: Plug file descriptor leaks.
+  * StringTree: Add branch prediction to while loop.
+  * StringPool: Improve the cutoff policy.
+  * parser: Use StringPool instead of MemPool in *_strdup().
+  * Implement filtering of event view by pid.
+  * EventsWidget: Make sure that we don't use uninitialized scroll time.
+  * TaskModel: Use heap sort to sort the tasks.
+  * Change the generation of task names.
+  * TaskSelectDialog: List idle task.
+  * main(): Implement command line loading.
+  * Tracesnalyzer: Replace QMap with AVLTree
+  * Fix signed comparison compiler warning in heapsort implementation.
+  * Introduce the VTL. All replacements of STL and QT library code should go to
+    this directory. I introduce the vtl namespace for these subroutines.
+  * TaskModel: Improve comparison functions for tasks.
+  * AVLTree: Make the implementation a bit more generic an flexible.
+  * Add scripts directory.
+  * TraceAnalyzer: improve color picking algorithm.
+  * EventSelectDialog, TaskSelectDialog: Replace || and &&.
+  * MainWindow: Introduce a menu item and button to reset filters.
+  * TraceAnalyzer: Remove debug output.
+  * Add a filter for time.
+  * Improve the StrHash32() function.
+  * AVLTree: Introduce findInsert and other improvements.
+  * StringPool: Use the AVLTree template class.
+  * Plug memory leaks.
+  * StringPool: allocString() should return const.
+  * Change average.sh to also compute min/max.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 10 Dec 2017 22:03:40 +0100
+
+traceshark (0.2.3-alpha) UNRELEASED; urgency=medium
+
+  * A lot of coverity defects have been fixed.
+  * When a serious error occur, such as failure to allocate memory, the program
+    is killed with abort() rather than assert().
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 17 Sep 2016 14:34:48 +0300
+
+traceshark (0.2.2-alpha) UNRELEASED; urgency=medium
+
+  * Slight performance improvement by increasing fallthrough in the main switch
+    statement of both the ftrace and perf grammars.
+  * Improvement of the heuristics that calculate the size of the main window
+    when the application is started.
+  * Add a status bar at the bottom of the main window.
+  * Implement a better parsing of task state flags.
+  * Change the "still running" circle so that it's blue if the task was not
+    preempted and red if it was preempted.
+  * Add the const keyword to a lot of places, in order to make the code more
+    clear and make some additional optimization possible.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 10 Sep 2016 20:05:29 +0300
+
+traceshark (0.2.1-alpha) UNRELEASED; urgency=medium
+
+  * Now the MainWindow start size is calculated from the available geometry
+    with the help of a heuristic. I feel that this is much better than using
+    hard coded numbers.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 18 Aug 2016 02:55:40 +0300
+
+traceshark (0.2.0-alpha) UNRELEASED; urgency=medium
+
+  * A new dialog for choosing a task from a list that includes all tasks.
+  * The TraceEvent class has lost the eventName field. Thus, the event type is
+    only recorded by an integer that will be increased for every new event type
+    (name) that is encountered in the trace.
+  * strcmp() is used in the StringPool instead of home brewed function.
+  * The perf grammar is extended to parse events that has an extra integer
+    number in front of the event name, and only one semicolon in the event
+    name. This includes a number of HW related events. This change makes them
+    show up in the events widget.
+  * HOWTO for images is added.
+  * Two new tool bars are added in the left toolbar area. These are for opening
+    and closing a trace and for showing the task dialog.
+  * The push buttons in the InfoWidget are made into toolbar buttons. This was
+    partially done in order to make them appear similar to the buttons of the
+    toolbars that were added.
+  * There has been and effort to disable UI elements that are not able to do
+    anything useful when no trace is open. This is true of all the toolbar
+    buttons that somehow relates to an open trace and the input fields for
+    cursor time values, in fact it related to almost every actionable item,
+    except the button to open a new trace and the menu items in the Help menu.
+  * Icons are added to the actions in the menu system.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 17 Aug 2016 23:52:32 +0300
+
+traceshark (0.1.2-alpha) UNRELEASED; urgency=medium
+
+  * Slight performance improvement when parsing Ftrace traces. This improvement
+    is more noticeable on ARM than X86.
+  * The bug with seemingly identical task names being displayed twice in the
+    legend has been fixed. This only happened with Ftrace traces.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 25 Jul 2016 00:54:02 +0300
+
+traceshark (0.1.1-alpha) UNRELEASED; urgency=medium
+
+  * LoadBuffer: Fix build problem on some distros.
+  * Because of the above, traceshark now builds on Fedora.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 02 Jul 2016 23:12:43 +0300
+
+traceshark (0.1.0-alpha) UNRELEASED; urgency=medium
+
+  * TraceFile: Avoid unnecessary copying of all data between buffers.
+  * TraceParser: Fix the last event before sending EOF.
+  * Rewrite the Ftrace and Perf grammars to improve performance.
+  * TraceFile:ReadNextWord(): Minor optimization.
+  * TraceParser: Remove dead code.
+  * TraceParser: Fix bug with garbled task names.
+  * New feature: Add cpuidle graphs.
+  * MainWindow: Change cpufreq and cpuidle graphs to use adaptive sampling.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 11 May 2016 22:59:52 +0300
+
+traceshark (0.0.9-alpha) UNRELEASED; urgency=medium
+
+  * TraceAnalyzer: Fix crash in processSchedAddTail().
+  * TraceAnalyzer: Fix crash in TraceAnalyzer::handleWrongTaskOnCPU().
+  * TraceAnalyzer: Fix unecesarily nested if clause.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 06 Apr 2016 00:54:19 +0300
+
+traceshark (0.0.8-alpha) UNRELEASED; urgency=medium
+
+  * New feature: Add an attribution dialog for QCustomPlot.
+  * MainWindow: Bug fix for showWakeup().
+  * Bug fix: Prevent Task::checkName from being called with nullptr.
+  * Improve zoom range adjustment when adding/removing a task graph.
+  * Improve compilation speed.
+  * TraceAnalyzer: Add heuristic for detecting when wakeup events are missing.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 03 Apr 2016 19:23:26 +0200
+
+traceshark (0.0.7-alpha) UNRELEASED; urgency=medium
+
+  * Replace NULL with nullptr.
+  * InfoWidget, EventsWidget: Add title to these docking widgets.
+  * EventsWidget: Fix bug about application not working if events view is
+    hidden.
+  * New feature: Add the possibility to save screenshots.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 31 Mar 2016 00:04:42 +0200
+
+traceshark (0.0.6-alpha) UNRELEASED; urgency=medium
+
+  * TraceAnalyzer: Increase safety of processSchedAddTail().
+  * New feature: Add unified taskgraphs.
+  * TraceAnalyzer: Fix unified task lifetime.
+  * CPUTask, Task: Move copy pasted code to shared superclass.
+  * TaskRangeAllocator: add a section offset for the unified tasks.
+  * MainWindow: Fix offset bug.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 29 Mar 2016 18:12:52 +0200
+
+traceshark (0.0.5-alpha) UNRELEASED; urgency=medium
+
+  * TaskInfo: Replace the text on "Find wakeup" button with icon.
+  * TaskInfo: Iconize the "Add to legend" button.
+  * TaskInfo: Iconize the "Clear" button.
+  * Improve the wakeup icon.
+  * CursorInfo: Iconsize the buttons for moving cursors.
+  * Modify the axis label of cpu scheduling graphs from cpuX to schecX.
+  * MainWindow: Modify the order of the graphs.
+  * Improve legend icons.
+  * Improve the wakeup icon.
+  * MainWindow: Fix third regression from moving setupCursors().
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Fri, 25 Mar 2016 16:38:17 +0200
+
+traceshark (0.0.4-alpha) UNRELEASED; urgency=medium
+
+  * Improve the name detection of threads that changes name.
+  * EventsModel: minor cleanup.
+  * Add the displaying of task name history in the legend.
+  * MainWindow: run setupCursors() before showTrace().
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 21 Mar 2016 00:11:15 +0200
+
+traceshark (0.0.3-alpha) UNRELEASED; urgency=medium
+
+  * TraceParser: Huge refactoring of perf and ftrace code.
+  * MainWindow: remove unused variable.
+  * TraceParser, MainWindow: Move processing thread creation to TraceParser.
+  * Rename the TraceParser class to TraceAnalyze.
+  * TraceAnalyzer: Break out parser code and put it in separate class.
+  * main(): Change the default window size.
+  * ThreadBuffer: Use QWaitCondition instead of double QMutex.
+  * LoadBuffer: Use QWaitCondition instead of abusing QMutex.
+  * TraceParser: Fix bug regarding very short traces.
+  * WorkItem: Correct comments.
+  * TraceParser, TraceAnalyzer: Improve performance.
+  * TraceParser: Change batch size from 100 to 10000.
+  * TraceAnalyzer: Fix bug about not processing final batch.
+  * Use prctl() to give names to thread.
+  * MainWindow, TraceAnalyzer: consolidate debug output.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 17 Mar 2016 00:19:29 +0200
+
+traceshark (0.0.2-alpha) UNRELEASED; urgency=medium
+
+  * Implement the displaying of the license.
+  * Improve copyright messages.
+  * Improve the shark icon.
+  * Set the application information,
+  * Improve README.md.
+  * Add the StringTree class.
+  * Make StringPool use AVL instead of RB.
+  * Change name of TraceShark namespace to TShark.
+  * Change the StringPool cutoff limit from constant to a parameter.
+  * Improve StringPool loops.
+  * Improve StringTree loops.
+  * MainWindow: Improve about message.
+  * StrHash32(): Simplify hash function.
+  * TaskInfo: Implement adding of task in info field to legend.
+  * FtraceParser: improve task colorization.
+  * MainWindow: remove legend items when double clicked.
+  * ftraceparams.h: Move generic code to separate header.
+  * Implement support for parsing perf traces.
+  * MainWindow: Fix NULL pointer dereference when moving cursor.
+  * MainWindow: close trace if MainWindow is being deleted.
+  * Tune copyright message.
+  * TaskInfo: prevent the same pid from being added multiple times.
+  * TaskGraph: Remove the LegendGraph object from the legend before deletion.
+  * TraceParser: Do not inline handleWrongTaskOnCPU().
+  * LegendGraph: make compile warning go away.
+  * TaskInfo: Add a button for clearing out all tasks from the legend.
+  * Improve the width and use of width by the upper parts of the mainwindow.
+  * TraceParser: Important bug fix regarding buffer indexes.
+  * traceshark.pro: Add directory for generated files.
+  * New feature: Add the display of stack traces.
+  * Remove use use of the STL-compatibility functions of QList and QVector.
+  * Rename EventDialog to EventInfoDialog.
+  * Introduce TList and use it instead of QList for the events list.
+  * TraceParser: Reduce the size of thread buffers.
+  * TraceParser: Fix bug in colorizeTasks().
+  * QCustomPlot: Update to 1.3.2.
+  * TraceParser: improve close().
+  * TraceParser: replace if () else if ... with switch statements.
+  * Fix bug with regards to task name containing a space.
+  * Fix bug with about incorrect parsing of task state in perf traces.
+  * New Feature: Add button for finding wakeup events.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 03 Mar 2016 22:22:11 +0200
+
+traceshark (0.0.1-alpha) UNRELEASED; urgency=medium
+
+  * Initial release.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 24 Aug 2015 00:24:09 +0300
