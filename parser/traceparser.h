@@ -73,7 +73,6 @@
 #include "vtl/compiler.h"
 
 #define NR_TBUFFERS (4)
-#define TBUFSIZE (256)
 
 class TraceFile;
 class TraceAnalyzer;

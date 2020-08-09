@@ -63,6 +63,8 @@
 #include "vtl/compiler.h"
 #include "vtl/tlist.h"
 
+#define TBUF_NRPAGES (4096)
+
 /*
  * This class is a load buffer for two threads where one is a producer and the
  * other is a consumer. The synchronization functions have not been designed
@@ -72,9 +74,8 @@ template<class T>
 class ThreadBuffer
 {
 public:
-	ThreadBuffer(unsigned int nr);
+	ThreadBuffer();
 	~ThreadBuffer();
-	unsigned int nrBuffers;
 	vtl::TList<T> list;
 	MemPool *strPool;
 	void beginProduceBuffer();
@@ -132,10 +133,10 @@ vtl_always_inline void ThreadBuffer<T>::completeConsumption() {
 	mutex.unlock();
 }
 
-template<class T>ThreadBuffer<T>::ThreadBuffer(unsigned int nr):
-nrBuffers(nr), loadBuffer(nullptr), isEmpty(true)
+template<class T>ThreadBuffer<T>::ThreadBuffer():
+loadBuffer(nullptr), isEmpty(true)
 {
-	strPool = new MemPool(4096, sizeof(TString));
+	strPool = new MemPool(TBUF_NRPAGES, sizeof(TString));
 }
 
 template<class T>

@@ -133,7 +133,7 @@ int TraceParser::open(const QString &fileName)
 
 	/* These buffers will be deleted by the parserThread */
 	for (i = 0; i < NR_TBUFFERS; i++)
-		tbuffers[i] = new ThreadBuffer<TraceLine>(TBUFSIZE);
+		tbuffers[i] = new ThreadBuffer<TraceLine>();
 	eventsWatcher->reset();
 	traceTypeWatcher->reset();
 	readerThread->start();
