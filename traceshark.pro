@@ -283,8 +283,8 @@
 
 # If you want to compile with another compiler than the defaul g++, then
 # uncomment and change to the compiler of your choice
-# USE_ALTERNATIVE_COMPILER = clang++-6.0
-# USE_ALTERNATIVE_COMPILER = g++-8
+# USE_ALTERNATIVE_COMPILER = clang++-10
+# USE_ALTERNATIVE_COMPILER = g++-10
 
 # These optimization options do not seem to help, so leave them commented out.
 # Only play with these if you are interested in playing with obscure compiler
