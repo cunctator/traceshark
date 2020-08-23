@@ -70,8 +70,6 @@ EventsWidget::EventsWidget(QWidget *parent):
 	tableView->horizontalHeader()->setStretchLastSection(true);
 	resizeColumnsToContents();
 	tableView->show();
-	tsconnect(tableView, clicked(const QModelIndex &),
-		  this, handleClick(const QModelIndex &));
 	tsconnect(tableView, doubleClicked(const QModelIndex &),
 		  this, handleDoubleClick(const QModelIndex &));
 	tsconnect(tableView, sigSelectionChanged(const QItemSelection &,
@@ -92,8 +90,6 @@ EventsWidget::EventsWidget(vtl::TList<TraceEvent> *e, QWidget *parent):
 	tableView->horizontalHeader()->setStretchLastSection(true);
 	resizeColumnsToContents();
 	tableView->show();
-	tsconnect(tableView, clicked(const QModelIndex &),
-		  this, handleClick(const QModelIndex &));
 	tsconnect(tableView, doubleClicked(const QModelIndex &),
 		  this, handleDoubleClick(const QModelIndex &));
 	tsconnect(tableView, sigSelectionChanged(const QItemSelection &,
@@ -246,20 +242,11 @@ int EventsWidget::binarySearch(const vtl::Time &time, int start, int end)
 		return binarySearch(time, pivot, end);
 }
 
-void EventsWidget::handleClick(const QModelIndex &index)
-{
-	if (index.column() == 0) {
-		vtl::Time time = getEventAt(index.row())->time;
-		emit timeSelected(time);
-	}
-}
-
 void EventsWidget::handleDoubleClick(const QModelIndex &index)
 {
-	if (index.column() == 5) {
-		const TraceEvent &event = *getEventAt(index.row());
-		emit infoDoubleClicked(event);
-	}
+	const TraceEvent &event = *getEventAt(index.row());
+	EventsModel::column_t col = (EventsModel::column_t) index.column();
+	emit eventDoubleClicked(col, event);
 }
 
 void EventsWidget::handleSelectionChanged(const QItemSelection &/*selected*/,

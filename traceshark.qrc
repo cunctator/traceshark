@@ -10,7 +10,14 @@
   <file>images/cpufilter30x30.png</file>
   <file>images/cursorzoom30x30.png</file>
   <file>images/defaultzoom30x30.png</file>
+  <file>images/eventbacktrace30x30.png</file>
   <file>images/eventfilter30x30.png</file>
+  <file>images/eventfiltercpu30x30.png</file>
+  <file>images/eventfiltername30x30.png</file>
+  <file>images/eventfilterpid30x30.png</file>
+  <file>images/eventfiltertype30x30.png</file>
+  <file>images/eventmoveblue30x30.png</file>
+  <file>images/eventmovered30x30.png</file>
   <file>images/exportcpuevents30x30.png</file>
   <file>images/exportevents30x30.png</file>
   <file>images/filtercurrent30x30.png</file>
@@ -45,7 +52,14 @@
   <file>images/cpufilter.svg</file>
   <file>images/cursorzoom.svg</file>
   <file>images/defaultzoom.svg</file>
+  <file>images/eventbacktrace.svg</file>
   <file>images/eventfilter.svg</file>
+  <file>images/eventfiltercpu.svg</file>
+  <file>images/eventfiltername.svg</file>
+  <file>images/eventfilterpid.svg</file>
+  <file>images/eventfiltertype.svg</file>
+  <file>images/eventmoveblue.svg</file>
+  <file>images/eventmovered.svg</file>
   <file>images/exportcpuevents.svg</file>
   <file>images/exportevents.svg</file>
   <file>images/filtercurrent.svg</file>

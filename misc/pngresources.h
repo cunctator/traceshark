@@ -63,6 +63,12 @@
 #define RESSRC_GPH_CURSOR_ZOOM   ":/traceshark/images/cursorzoom30x30.png"
 #define RESSRC_GPH_DEFAULT_ZOOM  ":/traceshark/images/defaultzoom30x30.png"
 #define RESSRC_GPH_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
+#define RESSRC_GPH_EVENTFLTCPU   ":/traceshark/images/eventfiltercpu30x30.png"
+#define RESSRC_GPH_EVENTFLTNAME  ":/traceshark/images/eventfiltername30x30.png"
+#define RESSRC_GPH_EVENTFLTPID   ":/traceshark/images/eventfilterpid30x30.png"
+#define RESSRC_GPH_EVENTFLTTYPE  ":/traceshark/images/eventfiltertype30x30.png"
+#define RESSRC_GPH_EVENTMOVEBLUE ":/traceshark/images/eventmoveblue30x30.png"
+#define RESSRC_GPH_EVENTMOVERED  ":/traceshark/images/eventmovered30x30.png"
 #define RESSRC_GPH_EXPORTCPUEVENTS  \
 	                         ":/traceshark/images/exportcpuevents30x30.png"
 #define RESSRC_GPH_EXPORTEVENTS  ":/traceshark/images/exportevents30x30.png"

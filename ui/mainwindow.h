@@ -54,6 +54,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMap>
 #include <QVector>
 #include <QString>
 #include "analyzer/traceanalyzer.h"
@@ -61,6 +62,7 @@
 #include "misc/traceshark.h"
 #include "parser/traceevent.h"
 #include "threads/workitem.h"
+#include "ui/eventsmodel.h"
 
 #ifdef CONFIG_SYSTEM_QCUSTOMPLOT
 	/*
@@ -92,7 +94,6 @@ class QMouseEvent;
 class QScrollBar;
 class QToolBar;
 class QVBoxLayhout;
-template<class T, class U> class QMap;
 QT_END_NAMESPACE
 
 class TraceAnalyzer;
@@ -148,9 +149,12 @@ private slots:
 	void plotDoubleClicked(QMouseEvent *event);
 	void infoValueChanged(vtl::Time value, int nr);
 	void moveActiveCursor(vtl::Time time);
-	void showEventInfo(const TraceEvent &event);
+	void moveCursor(vtl::Time time, int cursorIdx);
+	void handleEventDoubleClicked(EventsModel::column_t col,
+				      const TraceEvent &event);
 	void taskTriggered(int pid);
 	void handleEventSelected(const TraceEvent *event);
+	void handleEventChanged(bool selected);
 	void selectionChanged();
 	void legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem
 			       *abstractItem);
@@ -199,6 +203,12 @@ private slots:
 	void clearTaskGraphsTriggered();
 	void taskFilterTriggered();
 	void taskFilterLimitedTriggered();
+	void showBackTraceTriggered();
+	void eventCPUTriggered();
+	void eventTypeTriggered();
+	void eventPIDTriggered();
+	void eventMoveBlueTriggered();
+	void eventMoveRedTriggered();
 
 private:
 	typedef enum : int {
@@ -221,6 +231,9 @@ private:
 	void createScrollBar();
 	void createStatusBar();
 	void createDialogs();
+	void createEventCPUFilter(const TraceEvent &event);
+	void createEventPIDFilter(const TraceEvent &event);
+	void createEventTypeFilter(const TraceEvent &event);
 	void plotConnections();
 	void widgetConnections();
 	void dialogConnections();
@@ -275,6 +288,7 @@ private:
 	void setTaskGraphRemovalActionEnabled(bool e);
 	void setTaskGraphClearActionEnabled(bool e);
 	void setAddToLegendActionEnabled(bool e);
+	void setEventActionsEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
@@ -305,6 +319,7 @@ private:
 	QMenu *viewMenu;
 	QMenu *helpMenu;
 	QMenu *taskMenu;
+	QMenu *eventMenu;
 
 	QToolBar *fileToolBar;
 	QToolBar *viewToolBar;
@@ -331,6 +346,14 @@ private:
 	QAction *exportCPUAction;
 	QAction *showStatsAction;
 	QAction *showStatsTimeLimitedAction;
+
+	QAction *backTraceAction;
+	QAction *eventCPUAction;
+	QAction *eventTypeAction;
+	QAction *eventPIDAction;
+	QAction *moveBlueAction;
+	QAction *moveRedAction;
+
 	QAction *aboutAction;
 	QAction *licenseAction;
 	QAction *aboutQtAction;
@@ -404,6 +427,9 @@ private:
 	SettingStore *settingStore;
 	bool filterActive;
 	double cursorPos[TShark::NR_CURSORS];
+	QMap<unsigned, unsigned> eventCPUMap;
+	QMap<int, int> eventPIDMap;
+	QMap<event_t, event_t> eventTypeMap;
 };
 
 #endif /* MAINWINDOW_H */

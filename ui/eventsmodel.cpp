@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -84,14 +84,14 @@ void EventsModel::clear()
 	eventsPtrs = nullptr;
 }
 
-int EventsModel::rowCount(const QModelIndex & /*parent*/) const
+int EventsModel::rowCount(const QModelIndex & /* parent */) const
 {
 	return getSize();
 }
 
 int EventsModel::columnCount(const QModelIndex & /* parent */) const
 {
-	return 6; /* Number from data() and headerData() */
+	return column_to_int(NR_COLUMNS);
 }
 
 QVariant EventsModel::data(const QModelIndex &index, int role) const
@@ -106,7 +106,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		return int(Qt::AlignLeft | Qt::AlignVCenter);
 	} else if (role == Qt::DisplayRole) {
 		int row = index.row();
-		int column = index.column();
+		column_t column = int_to_column(index.column());
 		int size;
 
 		if (events == nullptr && eventsPtrs == nullptr)
@@ -117,18 +117,18 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 
 		const TraceEvent &event = *getEventAt(row);
 		switch(column) {
-		case 0:
+		case COLUMN_TIME:
 			return event.time.toQString();
-		case 1:
+		case COLUMN_TASKNAME:
 			return QString(event.taskName->ptr);
-		case 2:
+		case COLUMN_PID:
 			return QString::number(event.pid);
-		case 3:
+		case COLUMN_CPU:
 			return QString("[") + QString::number(event.cpu) +
 				QString("]");
-		case 4:
+		case COLUMN_TYPE:
 			return QString(event.getEventName()->ptr);
-		case 5:
+		case COLUMN_INFO:
 			/*
 			 * If there was an integer before the event name, then
 			 * we will display that as if it had been the first 
@@ -152,8 +152,8 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-bool EventsModel::setData(const QModelIndex &/*index*/, const QVariant
-			  &/*value*/, int /*role*/)
+bool EventsModel::setData(const QModelIndex & /* index */,
+			  const QVariant & /* value */, int /* role */)
 {
 	return false;
 }
@@ -162,19 +162,20 @@ QVariant EventsModel::headerData(int section,
 				 Qt::Orientation orientation,
 				 int role) const
 {
+	column_t column = int_to_column(section);
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-		switch(section) {
-		case 0:
+		switch(column) {
+		case COLUMN_TIME:
 			return QString(tr("Time"));
-		case 1:
+		case COLUMN_TASKNAME:
 			return QString(tr("Task"));
-		case 2:
+		case COLUMN_PID:
 			return QString(tr("PID(TID)"));
-		case 3:
+		case COLUMN_CPU:
 			return QString(tr("CPU"));
-		case 4:
-			return QString(tr("Event"));
-		case 5:
+		case COLUMN_TYPE:
+			return QString(tr("Event type"));
+		case COLUMN_INFO:
 			return QString(tr("Info"));
 		default:
 			return QString(tr("Error in eventsmodel.cpp"));	

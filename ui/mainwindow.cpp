@@ -189,6 +189,24 @@
 #define SHOW_LICENSE_TOOLTIP		\
 "Show the license of Traceshark"
 
+#define EVENT_BACKTRACE_TOOLTIP         \
+"Show the backtrace of the selected event"
+
+#define EVENT_CPU_TOOLTIP		\
+"Filter the events view on the CPU of the selcted event"
+
+#define EVENT_PID_TOOLTIP		\
+"Filter the events view on the PID of the selected event"
+
+#define EVENT_TYPE_TOOLTIP		\
+"Filter the events view on the type of the selected event"
+
+#define EVENT_MOVEBLUE_TOOLTIP	        \
+"Move the blue cursor to the time of the selected event"
+
+#define EVENT_MOVERED_TOOLTIP		\
+"Move the red cursor to the time of the selected event"
+
 #define QCPRANGE_DIFF(A, B) \
 	(TSABS(A.lower - B.lower) + TSABS(A.upper - B.upper))
 
@@ -449,6 +467,9 @@ void MainWindow::openFile(const QString &name)
 
 		eventsWidget->beginResetModel();
 		eventsWidget->setEvents(analyzer->events);
+		if (analyzer->events->size() > 0)
+			setEventActionsEnabled(true);
+		setEventActionsEnabled(true);
 		eventsWidget->endResetModel();
 
 		taskSelectDialog->beginResetModel();
@@ -1051,6 +1072,16 @@ void MainWindow::setTaskGraphClearActionEnabled(bool e)
 	clearTaskGraphsAction->setEnabled(e);
 }
 
+void MainWindow::setEventActionsEnabled(bool e)
+{
+	backTraceAction->setEnabled(e);
+	moveBlueAction->setEnabled(e);
+	moveRedAction->setEnabled(e);
+	eventCPUAction->setEnabled(e);
+	eventPIDAction->setEnabled(e);
+	eventTypeAction->setEnabled(e);
+}
+
 void MainWindow::closeTrace()
 {
 	quint64 startt, mresett, clearptt, acloset, disablet;
@@ -1098,6 +1129,7 @@ void MainWindow::closeTrace()
 
 	taskToolBar->clear();
 	setTraceActionsEnabled(false);
+	setEventActionsEnabled(false);
 	setLegendActionsEnabled(false);
 	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
@@ -1459,9 +1491,15 @@ void MainWindow::infoValueChanged(vtl::Time value, int nr)
 void MainWindow::moveActiveCursor(vtl::Time time)
 {
 	int cursorIdx;
-	double dblTime = time.toDouble();
 
 	cursorIdx = infoWidget->getCursorIdx();
+	moveCursor(time, cursorIdx);
+}
+
+void MainWindow::moveCursor(vtl::Time time, int cursorIdx)
+{
+	double dblTime = time.toDouble();
+
 	if (cursorIdx != TShark::RED_CURSOR && cursorIdx != TShark::BLUE_CURSOR)
 		return;
 
@@ -1474,9 +1512,32 @@ void MainWindow::moveActiveCursor(vtl::Time time)
 	}
 }
 
-void MainWindow::showEventInfo(const TraceEvent &event)
+void MainWindow::handleEventDoubleClicked(EventsModel::column_t col,
+					  const TraceEvent &event)
 {
-	eventInfoDialog->show(event, *analyzer->getTraceFile());
+	switch (col) {
+	case EventsModel::COLUMN_TIME:
+		moveActiveCursor(event.time);
+		break;
+	case EventsModel::COLUMN_TASKNAME:
+		/* Do nothing, not yet implemented */
+		break;
+	case EventsModel::COLUMN_PID:
+		createEventPIDFilter(event);
+		break;
+	case EventsModel::COLUMN_CPU:
+		createEventCPUFilter(event);
+		break;
+	case EventsModel::COLUMN_TYPE:
+		createEventTypeFilter(event);
+		break;
+	case EventsModel::COLUMN_INFO:
+		eventInfoDialog->show(event, *analyzer->getTraceFile());
+		break;
+	default:
+		/* This should not happen ? */
+		break;
+	}
 }
 
 void MainWindow::taskTriggered(int pid)
@@ -1488,7 +1549,10 @@ void MainWindow::handleEventSelected(const TraceEvent *event)
 {
 	if (event == nullptr) {
 		handleWakeUpChanged(false);
+		handleEventChanged(false);
 		return;
+	} else {
+		handleEventChanged(true);
 	}
 
 	if (event->type == SCHED_WAKEUP || event->type == SCHED_WAKEUP_NEW) {
@@ -1501,6 +1565,11 @@ void MainWindow::handleEventSelected(const TraceEvent *event)
 void MainWindow::handleWakeUpChanged(bool selected)
 {
 	setWakeupActionsEnabled(selected);
+}
+
+void MainWindow::handleEventChanged(bool selected)
+{
+	setEventActionsEnabled(selected);
 }
 
 void MainWindow::createActions()
@@ -1610,6 +1679,36 @@ void MainWindow::createActions()
 	exitAction->setToolTip(tr(TOOLTIP_EXIT));
 	tsconnect(exitAction, triggered(), this, close());
 
+	backTraceAction = new QAction(tr("Show backtrace"), this);
+	backTraceAction->setIcon(QIcon(RESSRC_GPH_EVENTBTRACE));
+	backTraceAction->setToolTip(tr(EVENT_BACKTRACE_TOOLTIP));
+	tsconnect(backTraceAction, triggered(), this, showBackTraceTriggered());
+
+	moveBlueAction = new QAction(tr("Move blue cursor"), this);
+	moveBlueAction->setIcon(QIcon(RESSRC_GPH_EVENTMOVEBLUE));
+	moveBlueAction->setToolTip(tr(EVENT_MOVEBLUE_TOOLTIP));
+	tsconnect(moveBlueAction, triggered(), this, eventMoveBlueTriggered());
+
+	moveRedAction = new QAction(tr("Move red cursor"), this);
+	moveRedAction->setIcon(QIcon(RESSRC_GPH_EVENTMOVERED));
+	moveRedAction->setToolTip(tr(EVENT_MOVERED_TOOLTIP));
+	tsconnect(moveRedAction, triggered(), this, eventMoveRedTriggered());
+
+	eventPIDAction = new QAction(tr("Filter on event PID"), this);
+	eventPIDAction->setIcon(QIcon(RESSRC_GPH_EVENTFLTPID));
+	eventPIDAction->setToolTip(tr(EVENT_PID_TOOLTIP));
+	tsconnect(eventPIDAction, triggered(), this, eventPIDTriggered());
+
+	eventCPUAction = new QAction(tr("Filter on event CPU"), this);
+	eventCPUAction->setIcon(QIcon(RESSRC_GPH_EVENTFLTCPU));
+	eventCPUAction->setToolTip(tr(EVENT_CPU_TOOLTIP));
+	tsconnect(eventCPUAction, triggered(), this, eventCPUTriggered());
+
+	eventTypeAction = new QAction(tr("Filter on event type"), this);
+	eventTypeAction->setIcon(QIcon(RESSRC_GPH_EVENTFLTTYPE));
+	eventTypeAction->setToolTip(tr(EVENT_TYPE_TOOLTIP));
+	tsconnect(eventTypeAction, triggered(), this, eventTypeTriggered());
+
 	aboutQtAction = new QAction(tr("About &Qt"), this);
 	aboutQtAction->setIcon(QIcon(RESSRC_GPH_QT_LOGO));
 	aboutQtAction->setToolTip(tr(ABOUT_QT_TOOLTIP));
@@ -1693,6 +1792,7 @@ void MainWindow::createActions()
 		  taskFilterLimitedTriggered());
 
 	setTraceActionsEnabled(false);
+	setEventActionsEnabled(false);
 	setLegendActionsEnabled(false);
 	setCloseActionsEnabled(false);
 	setTaskActionsEnabled(false);
@@ -1791,6 +1891,14 @@ void MainWindow::createMenus()
 	taskMenu->addAction(taskFilterAction);
 	taskMenu->addAction(taskFilterLimitedAction);
 
+	eventMenu = menuBar()->addMenu(tr("&Event"));
+	eventMenu->addAction(backTraceAction);
+	eventMenu->addAction(moveBlueAction);
+	eventMenu->addAction(moveRedAction);
+	eventMenu->addAction(eventPIDAction);
+	eventMenu->addAction(eventCPUAction);
+	eventMenu->addAction(eventTypeAction);
+
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
 	helpMenu->addAction(aboutQCPAction);
@@ -1859,10 +1967,10 @@ void MainWindow::widgetConnections()
 		  this, infoValueChanged(vtl::Time, int));
 
 	/* Events widget */
-	tsconnect(eventsWidget, timeSelected(vtl::Time), this,
-		  moveActiveCursor(vtl::Time));
-	tsconnect(eventsWidget, infoDoubleClicked(const TraceEvent &),
-		  this, showEventInfo(const TraceEvent &));
+	tsconnect(eventsWidget, eventDoubleClicked(EventsModel::column_t,
+						   const TraceEvent &),
+		  this, handleEventDoubleClicked(EventsModel::column_t,
+						 const TraceEvent &));
 	tsconnect(eventsWidget, eventSelected(const TraceEvent *),
 		  this, handleEventSelected(const TraceEvent *));
 
@@ -2100,6 +2208,27 @@ void MainWindow::timeFilter(void)
 	eventsWidget->endResetModel();
 	scrollTo(saved);
 	updateResetFiltersEnabled();
+}
+
+void MainWindow::createEventCPUFilter(const TraceEvent &event)
+{
+	eventCPUMap.clear();
+	eventCPUMap[event.cpu] =  event.cpu;
+	createCPUFilter(eventCPUMap, false);
+}
+
+void MainWindow::createEventPIDFilter(const TraceEvent &event)
+{
+	eventPIDMap.clear();
+	eventPIDMap[event.pid] = event.pid;
+	createPidFilter(eventPIDMap, false, false);
+}
+
+void MainWindow::createEventTypeFilter(const TraceEvent &event)
+{
+	eventTypeMap.clear();
+	eventTypeMap[event.type] = event.type;
+	createEventFilter(eventTypeMap, false);
 }
 
 void MainWindow::createPidFilter(QMap<int, int> &map,
@@ -3156,4 +3285,54 @@ void MainWindow::taskFilterLimitedTriggered()
 {
 	timeFilter();
 	taskFilter();
+}
+
+void MainWindow::showBackTraceTriggered()
+{
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+
+	if (event != nullptr)
+		eventInfoDialog->show(*event, *analyzer->getTraceFile());
+}
+
+void MainWindow::eventCPUTriggered()
+{
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+
+	if (event != nullptr)
+		createEventCPUFilter(*event);
+}
+
+void MainWindow::eventTypeTriggered()
+{
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+
+	if (event != nullptr)
+		createEventTypeFilter(*event);
+}
+
+void MainWindow::eventPIDTriggered()
+{
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+
+	if (event != nullptr)
+		createEventPIDFilter(*event);
+}
+
+void MainWindow::eventMoveBlueTriggered()
+{
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+
+	if (event != nullptr) {
+		moveCursor(event->time, TShark::BLUE_CURSOR);
+	}
+}
+
+void MainWindow::eventMoveRedTriggered()
+{
+	const TraceEvent *event = eventsWidget->getSelectedEvent();
+
+	if (event != nullptr) {
+		moveCursor(event->time, TShark::RED_CURSOR);
+	}
 }
