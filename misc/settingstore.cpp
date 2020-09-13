@@ -176,6 +176,12 @@ SettingStore::SettingStore()
 	initMinIntValue(Setting::MIGRATION_WIDTH, MIN_MIGRATION_WIDTH);
 	initDisabledIntValue(Setting::MIGRATION_WIDTH, DEFAULT_MIGRATION_WIDTH);
 	addDependency(Setting::MIGRATION_WIDTH, openglDep);
+
+	setName(Setting::EVENT_PID_FLT_INCL_ON,
+		q.tr("Event pid filtering: include relevant wakeup, fork and scheduling events from other PIDs"));
+	setKey(Setting::EVENT_PID_FLT_INCL_ON,
+	       QString("EVENT_PID_FLT_INCL_ON"));
+	initBoolValue(Setting::EVENT_PID_FLT_INCL_ON, false);
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)

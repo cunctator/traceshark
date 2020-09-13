@@ -2219,9 +2219,12 @@ void MainWindow::createEventCPUFilter(const TraceEvent &event)
 
 void MainWindow::createEventPIDFilter(const TraceEvent &event)
 {
+	bool incl;
+
+	incl = settingStore->getValue(Setting::EVENT_PID_FLT_INCL_ON).boolv();
 	eventPIDMap.clear();
 	eventPIDMap[event.pid] = event.pid;
-	createPidFilter(eventPIDMap, false, false);
+	createPidFilter(eventPIDMap, false, incl);
 }
 
 void MainWindow::createEventTypeFilter(const TraceEvent &event)

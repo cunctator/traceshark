@@ -84,6 +84,7 @@ public:
 		IDLE_LINE_WIDTH,
 		FREQ_LINE_WIDTH,
 		MIGRATION_WIDTH,
+		EVENT_PID_FLT_INCL_ON,
 		NR_SETTINGS,
 	} index_t;
         class Value;
