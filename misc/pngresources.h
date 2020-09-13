@@ -62,6 +62,7 @@
 #define RESSRC_GPH_CPUFILTER     ":/traceshark/images/cpufilter30x30.png"
 #define RESSRC_GPH_CURSOR_ZOOM   ":/traceshark/images/cursorzoom30x30.png"
 #define RESSRC_GPH_DEFAULT_ZOOM  ":/traceshark/images/defaultzoom30x30.png"
+#define RESSRC_GPH_EVENTBTRACE   ":/traceshark/images/eventbacktrace30x30.png"
 #define RESSRC_GPH_EVENTFILTER   ":/traceshark/images/eventfilter30x30.png"
 #define RESSRC_GPH_EVENTFLTCPU   ":/traceshark/images/eventfiltercpu30x30.png"
 #define RESSRC_GPH_EVENTFLTNAME  ":/traceshark/images/eventfiltername30x30.png"
