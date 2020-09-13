@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2018-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -58,6 +58,9 @@ TableView::TableView(QWidget *parent, viewtype_t type):
 	if (type == TABLE_ROWSELECT) {
 		setSelectionBehavior(QAbstractItemView::SelectRows);
 		setSelectionMode(QAbstractItemView::ExtendedSelection);
+	} else if (type == TABLE_SINGLEROWSELECT) {
+		setSelectionBehavior(QAbstractItemView::SelectRows);
+		setSelectionMode(QAbstractItemView::SingleSelection);
 	}
 }
 
