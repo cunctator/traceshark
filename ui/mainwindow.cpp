@@ -1592,38 +1592,38 @@ void MainWindow::createActions()
 	saveAction->setToolTip(tr(TOOLTIP_SAVESCREEN));
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
 
-	showTasksAction = new QAction(tr("Show task list..."), this);
+	showTasksAction = new QAction(tr("Show task &list..."), this);
 	showTasksAction->setIcon(QIcon(RESSRC_GPH_TASKSELECT));
 	showTasksAction->setToolTip(tr(TOOLTIP_SHOWTASKS));
 	tsconnect(showTasksAction, triggered(), this, showTaskSelector());
 
-	filterCPUsAction = new QAction(tr("Filter on CPUs..."), this);
+	filterCPUsAction = new QAction(tr("Filter on &CPUs..."), this);
 	filterCPUsAction->setIcon(QIcon(RESSRC_GPH_CPUFILTER));
 	filterCPUsAction->setToolTip(tr(TOOLTIP_CPUFILTER));
 	tsconnect(filterCPUsAction, triggered(), this, filterOnCPUs());
 
-	showEventsAction = new QAction(tr("Filter on event type..."), this);
+	showEventsAction = new QAction(tr("Filter on &event type..."), this);
 	showEventsAction->setIcon(QIcon(RESSRC_GPH_EVENTFILTER));
 	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
 	tsconnect(showEventsAction, triggered(), this, showEventFilter());
 
-	timeFilterAction = new QAction(tr("Filter on time"), this);
+	timeFilterAction = new QAction(tr("Filter on &time"), this);
 	timeFilterAction->setIcon(QIcon(RESSRC_GPH_TIMEFILTER));
 	timeFilterAction->setToolTip(tr(TOOLTIP_TIMEFILTER));
 	tsconnect(timeFilterAction, triggered(), this, timeFilter());
 
-	graphEnableAction = new QAction(tr("Select graphs..."), this);
+	graphEnableAction = new QAction(tr("Select &graphs..."), this);
 	graphEnableAction->setIcon(QIcon(RESSRC_GPH_GRAPHENABLE));
 	graphEnableAction->setToolTip(tr(TOOLTIP_GRAPHENABLE));
 	tsconnect(graphEnableAction, triggered(), this, showGraphEnable());
 
-	resetFiltersAction = new QAction(tr("Reset all filters"), this);
+	resetFiltersAction = new QAction(tr("&Reset all filters"), this);
 	resetFiltersAction->setIcon(QIcon(RESSRC_GPH_RESETFILTERS));
 	resetFiltersAction->setToolTip(tr(TOOLTIP_RESETFILTERS));
 	resetFiltersAction->setEnabled(false);
 	tsconnect(resetFiltersAction, triggered(), this, resetFilters());
 
-	exportEventsAction = new QAction(tr("Export events to a file..."),
+	exportEventsAction = new QAction(tr("&Export events to a file..."),
 					 this);
 	exportEventsAction->setIcon(QIcon(RESSRC_GPH_EXPORTEVENTS));
 	exportEventsAction->setToolTip(tr(TOOLTIP_EXPORTEVENTS));
@@ -1632,42 +1632,42 @@ void MainWindow::createActions()
 		  exportEventsTriggered());
 
 	exportCPUAction = new QAction(
-		tr("Export cpu-cycles events to a file..."), this);
+		tr("Ex&port cpu-cycles events to a file..."), this);
 	exportCPUAction->setIcon(QIcon(RESSRC_GPH_EXPORTCPUEVENTS));
 	exportCPUAction->setToolTip(tr(TOOLTIP_EXPORT_CPU));
 	exportCPUAction->setEnabled(false);
 	tsconnect(exportCPUAction, triggered(), this,
 		  exportCPUTriggered());
 
-	cursorZoomAction = new QAction(tr("Cursor zoom"), this);
+	cursorZoomAction = new QAction(tr("Cursor &zoom"), this);
 	cursorZoomAction->setIcon(QIcon(RESSRC_GPH_CURSOR_ZOOM));
 	cursorZoomAction->setToolTip(tr(CURSOR_ZOOM_TOOLTIP));
 	tsconnect(cursorZoomAction, triggered(), this, cursorZoom());
 
-	defaultZoomAction = new QAction(tr("Default zoom"), this);
+	defaultZoomAction = new QAction(tr("&Default zoom"), this);
 	defaultZoomAction->setIcon(QIcon(RESSRC_GPH_DEFAULT_ZOOM));
 	defaultZoomAction->setToolTip(tr(DEFAULT_ZOOM_TOOLTIP));
 	tsconnect(defaultZoomAction, triggered(), this,
 		  defaultZoom());
 
-	fullZoomAction = new QAction(tr("Full zoom"), this);
+	fullZoomAction = new QAction(tr("&Full zoom"), this);
 	fullZoomAction->setIcon(QIcon(RESSRC_GPH_FULL_ZOOM));
 	fullZoomAction->setToolTip(tr(FULL_ZOOM_TOOLTIP));
 	tsconnect(fullZoomAction, triggered(), this, fullZoom());
 
-	verticalZoomAction = new QAction("Vertical zooming/scrolling", this);
+	verticalZoomAction = new QAction("&Vertical zooming/scrolling", this);
 	verticalZoomAction->setIcon(QIcon(RESSRC_GPH_VERTICAL_ZOOM));
 	verticalZoomAction->setToolTip(tr(VERTICAL_ZOOM_TOOLTIP));
 	verticalZoomAction->setCheckable(true);
 	tsconnect(verticalZoomAction, triggered(), this, verticalZoom());;
 
-	showStatsAction = new QAction(tr("Show stats..."), this);
+	showStatsAction = new QAction(tr("Sh&ow stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_GPH_GETSTATS));
 	showStatsAction->setToolTip(TOOLTIP_GETSTATS);
 	tsconnect(showStatsAction, triggered(), this, showStats());
 
 	showStatsTimeLimitedAction = new QAction(
-		tr("Show stats cursor time..."), this);
+		tr("Show stats c&ursor time..."), this);
 	showStatsTimeLimitedAction->setIcon(
 		QIcon(RESSRC_GPH_GETSTATS_TIMELIMIT));
 	showStatsTimeLimitedAction->setToolTip(TOOLTIP_GETSTATS_TIMELIMITED);
@@ -1679,32 +1679,32 @@ void MainWindow::createActions()
 	exitAction->setToolTip(tr(TOOLTIP_EXIT));
 	tsconnect(exitAction, triggered(), this, close());
 
-	backTraceAction = new QAction(tr("Show backtrace"), this);
+	backTraceAction = new QAction(tr("&Show backtrace"), this);
 	backTraceAction->setIcon(QIcon(RESSRC_GPH_EVENTBTRACE));
 	backTraceAction->setToolTip(tr(EVENT_BACKTRACE_TOOLTIP));
 	tsconnect(backTraceAction, triggered(), this, showBackTraceTriggered());
 
-	moveBlueAction = new QAction(tr("Move blue cursor"), this);
+	moveBlueAction = new QAction(tr("Move &blue cursor"), this);
 	moveBlueAction->setIcon(QIcon(RESSRC_GPH_EVENTMOVEBLUE));
 	moveBlueAction->setToolTip(tr(EVENT_MOVEBLUE_TOOLTIP));
 	tsconnect(moveBlueAction, triggered(), this, eventMoveBlueTriggered());
 
-	moveRedAction = new QAction(tr("Move red cursor"), this);
+	moveRedAction = new QAction(tr("Move &red cursor"), this);
 	moveRedAction->setIcon(QIcon(RESSRC_GPH_EVENTMOVERED));
 	moveRedAction->setToolTip(tr(EVENT_MOVERED_TOOLTIP));
 	tsconnect(moveRedAction, triggered(), this, eventMoveRedTriggered());
 
-	eventPIDAction = new QAction(tr("Filter on event PID"), this);
+	eventPIDAction = new QAction(tr("Filter on event &PID"), this);
 	eventPIDAction->setIcon(QIcon(RESSRC_GPH_EVENTFLTPID));
 	eventPIDAction->setToolTip(tr(EVENT_PID_TOOLTIP));
 	tsconnect(eventPIDAction, triggered(), this, eventPIDTriggered());
 
-	eventCPUAction = new QAction(tr("Filter on event CPU"), this);
+	eventCPUAction = new QAction(tr("Filter on event &CPU"), this);
 	eventCPUAction->setIcon(QIcon(RESSRC_GPH_EVENTFLTCPU));
 	eventCPUAction->setToolTip(tr(EVENT_CPU_TOOLTIP));
 	tsconnect(eventCPUAction, triggered(), this, eventCPUTriggered());
 
-	eventTypeAction = new QAction(tr("Filter on event type"), this);
+	eventTypeAction = new QAction(tr("Filter on event &type"), this);
 	eventTypeAction->setIcon(QIcon(RESSRC_GPH_EVENTFLTTYPE));
 	eventTypeAction->setToolTip(tr(EVENT_TYPE_TOOLTIP));
 	tsconnect(eventTypeAction, triggered(), this, eventTypeTriggered());
@@ -1728,64 +1728,64 @@ void MainWindow::createActions()
 	licenseAction->setToolTip(tr(SHOW_LICENSE_TOOLTIP));
 	tsconnect(licenseAction, triggered(), this, license());
 
-	addTaskGraphAction = new QAction(tr("Add task graph"), this);
+	addTaskGraphAction = new QAction(tr("Add task &graph"), this);
 	addTaskGraphAction->setIcon(QIcon(RESSRC_GPH_ADD_TASK));
 	addTaskGraphAction->setToolTip(tr(ADD_UNIFIED_TOOLTIP));
 	tsconnect(addTaskGraphAction, triggered(), this,
 		  addTaskGraphTriggered());
 
-	addToLegendAction = new QAction(tr("Add task to the legend"), this);
+	addToLegendAction = new QAction(tr("&Add task to the legend"), this);
 	addToLegendAction->setIcon(QIcon(RESSRC_GPH_ADD_TO_LEGEND));
 	addToLegendAction->setToolTip(tr(ADD_LEGEND_TOOLTIP));
 	tsconnect(addToLegendAction, triggered(), this, addToLegendTriggered());
 
-	clearLegendAction = new QAction(tr("Clear the legend"), this);
+	clearLegendAction = new QAction(tr("&Clear the legend"), this);
 	clearLegendAction->setIcon(QIcon(RESSRC_GPH_CLEAR_LEGEND));
 	clearLegendAction->setToolTip(tr(CLEAR_LEGEND_TOOLTIP));
 	tsconnect(clearLegendAction, triggered(), this, clearLegendTriggered());
 
-	findWakeupAction = new QAction(tr("Find wakeup"), this);
+	findWakeupAction = new QAction(tr("&Find wakeup"), this);
 	findWakeupAction->setIcon(QIcon(RESSRC_GPH_FIND_WAKEUP));
 	findWakeupAction->setToolTip(tr(FIND_WAKEUP_TOOLTIP));
 	tsconnect(findWakeupAction, triggered(), this, findWakeupTriggered());
 
-	findWakingAction = new QAction(tr("Find waking"), this);
+	findWakingAction = new QAction(tr("Find &waking"), this);
 	findWakingAction->setIcon(QIcon(RESSRC_GPH_FIND_WAKING));
 	findWakingAction->setToolTip(tr(FIND_WAKING_TOOLTIP));
 	tsconnect(findWakingAction, triggered(), this, findWakingTriggered());
 
-	findWakingDirectAction = new QAction(tr("Find waking direct"), this);
+	findWakingDirectAction = new QAction(tr("Find waking &direct"), this);
 	findWakingDirectAction->setIcon(QIcon(RESSRC_GPH_FIND_WAKING_DIRECT));
 	findWakingDirectAction->setToolTip(tr(FIND_WAKING_DIRECT_TOOLTIP));
 	tsconnect(findWakingDirectAction, triggered(), this,
 		  findWakingDirectTriggered());
 
-	findSleepAction = new QAction(tr("Find sched_switch sleep event"),
+	findSleepAction = new QAction(tr("Find sched_switch &sleep event"),
 				      this);
 	findSleepAction->setIcon(QIcon(RESSRC_GPH_FIND_SLEEP));
 	findSleepAction->setToolTip(tr(TOOLTIP_FIND_SLEEP));
 	tsconnect(findSleepAction, triggered(), this, findSleepTriggered());
 
-	removeTaskGraphAction = new QAction(tr("Remove task graph"), this);
+	removeTaskGraphAction = new QAction(tr("&Remove task graph"), this);
 	removeTaskGraphAction->setIcon(QIcon(RESSRC_GPH_REMOVE_TASK));
 	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
 	tsconnect(removeTaskGraphAction, triggered(), this,
 		  removeTaskGraphTriggered());
 
-	clearTaskGraphsAction = new QAction(tr("Remove task graph"), this);
+	clearTaskGraphsAction = new QAction(tr("Cl&ear all task graphs"), this);
 	clearTaskGraphsAction->setIcon(QIcon(RESSRC_GPH_CLEAR_TASK));
 	clearTaskGraphsAction->setToolTip(tr(CLEAR_TASK_TOOLTIP));
 	tsconnect(clearTaskGraphsAction, triggered(), this,
 		  clearTaskGraphsTriggered());
 
-	taskFilterAction = new QAction(tr("Filter on selected task"), this);
+	taskFilterAction = new QAction(tr("Filter on selected &task"), this);
 	taskFilterAction->setIcon(QIcon(RESSRC_GPH_FILTERCURRENT));
 	taskFilterAction->setToolTip(tr(TASK_FILTER_TOOLTIP));
 	tsconnect(taskFilterAction, triggered(), this,
 		  taskFilterTriggered());
 
 	taskFilterLimitedAction =
-		new QAction(tr("Filter on selected task (time limited)"), this);
+		new QAction(tr("Filter on selected task (time &limited)"), this);
 	taskFilterLimitedAction->setIcon(QIcon(RESSRC_GPH_FILTERCURRENT_LIMIT));
 	taskFilterLimitedAction->setToolTip(tr(TASK_FILTER_TIMELIMIT_TOOLTIP));
 	tsconnect(taskFilterLimitedAction, triggered(), this,
@@ -1899,7 +1899,7 @@ void MainWindow::createMenus()
 	eventMenu->addAction(eventCPUAction);
 	eventMenu->addAction(eventTypeAction);
 
-	helpMenu = menuBar()->addMenu(tr("&Help"));
+	helpMenu = menuBar()->addMenu(tr("He&lp"));
 	helpMenu->addAction(aboutAction);
 	helpMenu->addAction(aboutQCPAction);
 	helpMenu->addAction(aboutQtAction);
