@@ -49,11 +49,11 @@ Another option is to select the vertical axis by left clicking on it with your m
 
 The items in the menus are in general duplicated as buttons. However, there is one exception, those that are in the ```Event``` menu.
 
-![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/17f9eb317f53317c29166d1d9405874d9296e41f/doc/ts-screenshot4.png)
+![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/doc/menu_event.png)
 
 Above is a screenshot of the ```Event``` menu. For these items, there are no push buttons in the GUI. However, these actions can also be triggered by double clicking on the corresponding column of the currently seelcted event in the events menu. Below is a brief explanation of these menu items:
 
-* ![backtrace button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventbacktrace.png) Shows a dialog window containing the backtrace of the currently selected event. The backtrace will look somewhat like this:
+* ![backtrace button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventbacktrace30x30.png) Shows a dialog window containing the backtrace of the currently selected event. The backtrace will look somewhat like this:
 ![close button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/doc/backtrace.png)
 * ![moveblue button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventmoveblue30x30.png) Move the blue cursor to the time of the selected event.
 * ![movered button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventmovered30x30.png) Move the red cursor to the time of the selected event.
