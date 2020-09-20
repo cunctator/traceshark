@@ -193,7 +193,7 @@
 "Show the backtrace of the selected event"
 
 #define EVENT_CPU_TOOLTIP		\
-"Filter the events view on the CPU of the selcted event"
+"Filter the events view on the CPU of the selected event"
 
 #define EVENT_PID_TOOLTIP		\
 "Filter the events view on the PID of the selected event"
