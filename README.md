@@ -45,9 +45,25 @@ If you instead want to zoom or scroll vertically, you need to toggle the ![Toggl
 
 Another option is to select the vertical axis by left clicking on it with your mouse pointer. N.B, you should click directly on the line representing the axis, not on the labels, such as "cpu0", "cpu1", etc. As long as the vertical axis is selected, all scrolling and zooming will be vertical. If you want to switch back to horizontal, then you just need to deselect the axis by clicking on it again. Vertical zooming and scrolling may be particularly useful if you are looking at a trace of a system with a large number of CPUs or if you are short of vertical screen space.
 
-### 1.1.2 Functionality of the buttons
+### 1.1.2 Functionality of the menus
 
-There are a number of buttons in the GUI, here is a description of the buttons in the left panel:
+The items in the menus are in general duplicated as buttons. However, there is one exception, those that are in the ```Event``` menu.
+
+![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/17f9eb317f53317c29166d1d9405874d9296e41f/doc/ts-screenshot4.png)
+
+Above is a screenshot of the ```Event``` menu. For these items, there are no push buttons in the GUI. However, these actions can also be triggered by double clicking on the corresponding column of the currently seelcted event in the events menu. Below is a brief explanation of these menu items:
+
+* ![backtrace button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventbacktrace.png) Shows a dialog window containing the backtrace of the currently selected event. The backtrace will look somewhat like this:
+![close button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/doc/backtrace.png)
+* ![moveblue button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventmoveblue30x30.png) Move the blue cursor to the time of the selected event.
+* ![movered button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventmovered30x30.png) Move the red cursor to the time of the selected event.
+* ![filterpid button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventfilterpid30x30.png) Filter the events view on the PID of the selected event.
+* ![filtercpu button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventfiltercpu30x30.png) Filter the events view on the CPU of the selected event.
+* ![filtertype button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventfiltertype30x30.png) Filter the events view on the type of the selected event.
+
+### 1.1.3 Functionality of the buttons
+
+There are a number of buttons in the GUI. These buttons are also duplicated in the menus.  Here is a description of the buttons in the left panel:
 
 * ![open button](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/open30x30.png) This button is used to open a trace file.
 * ![close button](https://raw.githubusercontent.com/cunctator/traceshark/b2d0b868ea4947d89240dd627f05bb77bd51ce03/images/close30x30.png) Closes the currently open trace.
@@ -66,7 +82,7 @@ There are a number of buttons in the GUI, here is a description of the buttons i
   6. Download the flamegraph software by giving one of the following commands in your home directory:
   ```
   git clone https://github.com/cunctator/FlameGraph.git
-  ````
+  ```
   or
   ```
   git clone https://github.com/brendangregg/FlameGraph.git
@@ -100,7 +116,7 @@ The top widget has some buttons as well:
   3. Make sure that the task is selected.
   4. Click on the ![Wakeup](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/wakeup30x30.png) button.
   5. Locate the wakeup event in the events view. It should be selected.
-  6. Double click on the `Info` field to display the backtrace.
+  6. Double click on the `Info` field to display the backtrace. Alternatively, you can use the ```Event->Show backtrace``` menu item.
   7. If the backtrace leads to an interrupt (including software interrupts), then the wakeup source has been found.
   8. If the `sched_wakeup` event is executed as pid 0, that is no new task has been autoselected, and/or, the backtrace leads to something like this:
      ```
@@ -123,9 +139,9 @@ The top widget has some buttons as well:
 * ![Filter on the current task](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/filtercurrent30x30.png) This will filter the events view so that only events involving the currently selected task will be displayed.
 * ![Filter on the current task time limited](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/images/filtercurrentlimited30x30.png) This will do the same as the previous, except that in addition it will exclude those events that are outside the interval defined by the positions of the cursors.
 
-### 1.1.3 The Events view
+### 1.1.4 The Events view
 
-At the bottom of the screen is the events view. The events view will be automatically scrolled when a cursor is moved. It is also possible to move the currently active cursor by clicking on a time in the events view. Another very important feature is that by double clicking on the info field, a dialog will open that displays the backtrace of that particular event.
+At the bottom of the screen is the events view. The events view will be automatically scrolled when a cursor is moved. It is also possible to move the currently active cursor by double clicking on a time in the events view. Another very important feature is that by double clicking on the info field, a dialog will open that displays the backtrace of that particular event. In general, it is  possible to trigger the actions in the ```Event``` menu by double clicking on the corresponding column of the currently selected event.
 
 # 2. Building traceshark
 
@@ -236,7 +252,7 @@ you happen to prefer Qt 4.
 
 # 3. Obtaining a trace
 
-There are two ways to capture a trace: Ftrace and perf. Perf is the recommended method because it is able to generate backtraces that are understood by traceshark. However, Ftrace has the benefit that it often works right out of the box on many distros. The same cannot be said of perf, which often requires some fiddling, especially if you want backtraces.
+There are two ways to capture a trace: Ftrace and perf. Perf is the recommended method because it is able to generate backtraces that are understood by traceshark. However, Ftrace has the benefit that it almost always works right out of the box on many distros. Nowadays, perf usually works right out of the box too but it was not always the case in the past.
 
 For both Ftrace and perf it is very desirable to avoid lost events because traceshark cannot visualize correctly with lost events, nor can it find a wakeup event that has been lost.
 
@@ -320,7 +336,8 @@ as the perf program has not been patched.
 
 If you use the '-g' flag, you might also want to compile your own perf because
 in some distros perf is compiled without support for backtraces and it starts
-working when you compile perf with those bits enabled.
+working when you compile perf with those bits enabled. Fortunately, nowadays
+it's common that the perf utility shipped with the distro support backtraces.
 
 When you compile perf, you get a report like this:
 
