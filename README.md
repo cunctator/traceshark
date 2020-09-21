@@ -51,7 +51,7 @@ The items in the menus are in general duplicated as buttons. However, there is o
 
 ![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/doc/menu_event.png)
 
-Above is a screenshot of the ```Event``` menu. For these items, there are no push buttons in the GUI. However, these actions can also be triggered by double clicking on the corresponding column of the currently seelcted event in the events view. Below is a brief explanation of these menu items:
+Above is a screenshot of the ```Event``` menu. For these items, there are no push buttons in the GUI. However, these actions can also be triggered by double clicking on the corresponding column of the currently selected event in the events view. Below is a brief explanation of these menu items:
 
 * ![backtrace button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventbacktrace30x30.png)```Show backtrace```: Shows a dialog window containing the backtrace of the currently selected event. The backtrace will look somewhat like this:
 ![close button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/doc/backtrace.png)
@@ -118,7 +118,7 @@ The top widget has some buttons as well:
   5. Locate the wakeup event in the events view. It should be selected.
   6. Double click on the `Info` field to display the backtrace. Alternatively, you can use the ```Event->Show backtrace``` menu item.
   7. If the backtrace leads to an interrupt (including software interrupts), then the wakeup source has been found.
-  8. If the `sched_wakeup` event is executed as pid 0, that is no new task has been autoselected, and/or, the backtrace leads to something like this:
+  8. If the `sched_wakeup` event is executed as pid 0, that is no new task has been auto-selected, and/or, the backtrace leads to something like this:
      ```
      2863f8 ttwu_do_wakeup
      286522 ttwu_do_activate
