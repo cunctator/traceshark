@@ -53,7 +53,7 @@ The items in the menus are in general duplicated as buttons. However, there is o
 
 Above is a screenshot of the ```Event``` menu. For these items, there are no push buttons in the GUI. However, these actions can also be triggered by double clicking on the corresponding column of the currently selected event in the events view. Below is a brief explanation of these menu items:
 
-* ![backtrace button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventbacktrace30x30.png)```Show backtrace```: Shows a dialog window containing the backtrace of the currently selected event. The backtrace will look somewhat like this:
+* ![backtrace button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventbacktrace30x30.png)```Show backtrace```: Shows a dialog window containing the backtrace of the currently selected event. The backtrace dialog window will look somewhat like this:
 ![close button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/doc/backtrace.png)
 * ![moveblue button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventmoveblue30x30.png)```Move blue cursor```: Move the blue cursor to the time of the selected event.
 * ![movered button](https://raw.githubusercontent.com/cunctator/traceshark/d31d91d0dcd39eea830de1fd9172bf9d309b2bc9/images/eventmovered30x30.png)```Move red cursor```: Move the red cursor to the time of the selected event.
