@@ -1,4 +1,20 @@
-traceshark (0.9.10-beta) UNRELEASED; urgency=medium
+traceshark (0.9.11-beta) RELEASED; urgency=medium
+
+  * Add the new Event menu. It has actions for displaying the backtrace,
+    filtering, and moving the cursor. These actions can also be triggered by
+    double clicking on the corresponding column of the currently selected event.
+  * The actions in the above mentioned menu to filter based on the selected
+    event are new.
+  * The selction policy of the events view has changed. Now a whole row is
+    always selected.
+  * The menus have been improved with keyboard shortcuts and the incorrect
+    repetition of "Remove task graph" has been corrected.
+  * README.md has been updated with a new screenshot and some updates to better
+    describe the current version.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 27 Sep 2020 18:54:07 +0200
+
+traceshark (0.9.10-beta) RELEASED; urgency=medium
 
   * Add an option to traceshark.pro to use the system qcustomplot library. It is
     not recommended to use this feature unless you must.
@@ -31,7 +47,7 @@ traceshark (0.9.10-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 02 Aug 2020 16:42:41 +0200
 
-traceshark (0.9.9-beta) UNRELEASED; urgency=medium
+traceshark (0.9.9-beta) RELEASED; urgency=medium
 
   * New feature: support a newer format of sched_switch and sched_wakeup from
     trace-cmd.
@@ -47,7 +63,7 @@ traceshark (0.9.9-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Fri, 06 Dec 2019 00:47:10 +0100
 
-traceshark (0.9.8-beta) UNRELEASED; urgency=medium
+traceshark (0.9.8-beta) RELEASED; urgency=medium
 
   * New feature: tasks, zoom, cursors, task selections, unified graphs and
     legends are restored after changing settings in the graph enable dialog.
@@ -57,7 +73,7 @@ traceshark (0.9.8-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 12 Mar 2019 21:19:07 +0100
 
-traceshark (0.9.7-beta) UNRELEASED; urgency=medium
+traceshark (0.9.7-beta) RELEASED; urgency=medium
 
   * In the task select dialog and in the statistics dialogs a task can be
     selected by double clicking and in this case the state was not correctly
@@ -65,13 +81,13 @@ traceshark (0.9.7-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 27 Feb 2019 09:00:21 +0100
 
-traceshark (0.9.6-beta) UNRELEASED; urgency=medium
+traceshark (0.9.6-beta) RELEASED; urgency=medium
 
   * Disable the remove task graph button if the operation is not available.
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 26 Feb 2019 23:33:29 +0100
 
-traceshark (0.9.5-beta) UNRELEASED; urgency=medium
+traceshark (0.9.5-beta) RELEASED; urgency=medium
 
   * OpenGL is enabled by default.
   * New feature: it is possible to select the width of the scheduling graphs in
@@ -95,7 +111,7 @@ traceshark (0.9.5-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 20 Feb 2019 22:39:00 +0100
 
-traceshark (0.9.4-beta) UNRELEASED; urgency=medium
+traceshark (0.9.4-beta) RELEASED; urgency=medium
 
   * MainWindow: Improved menu text.
   * MainWindow: Increase size of uninterruptible sleep to 12.
@@ -104,14 +120,14 @@ traceshark (0.9.4-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 28 Jan 2020 22:15:23 +0100
 
-traceshark (0.9.3-beta) UNRELEASED; urgency=medium
+traceshark (0.9.3-beta) RELEASED; urgency=medium
 
   * Bug fix: an uninitialized variable issue was found with valgrind.
   * Fixed three Coverity issues: CID 1476427, CID 1476428, and CID 1476429.
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 05 Jan 2019 23:36:26 +0200
 
-traceshark (0.9.2-beta) UNRELEASED; urgency=medium
+traceshark (0.9.2-beta) RELEASED; urgency=medium
 
   * Files greater than 2GB can now be opened on 32-bit platforms. Tested with
     Raspbian on Raspberry Pi 3, i.e. ARM 32-bit.
@@ -133,7 +149,7 @@ traceshark (0.9.2-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 03 Jan 2019 13:21:00 +0200
 
-traceshark (0.9.1-beta) UNRELEASED; urgency=medium
+traceshark (0.9.1-beta) RELEASED; urgency=medium
 
   * perf-record.sh: Implement options for running perf with SCHED_FIFO.
   * Do not rely on mmap() working to map the whole trace file. This makes it
@@ -142,7 +158,7 @@ traceshark (0.9.1-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 30 Dec 2018 13:46:25 +0200
 
-traceshark (0.9.0-beta) UNRELEASED; urgency=medium
+traceshark (0.9.0-beta) RELEASED; urgency=medium
 
   * traceshark is now beta, no longer alpha because all the features that I had
     in mind when I started the project have been implemented.
@@ -161,7 +177,7 @@ traceshark (0.9.0-beta) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 25 Dec 2018 22:51:30 +0200
 
-traceshark (0.8.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.8.0-alpha) RELEASED; urgency=medium
 
   * New feature: If the user double clicks on a task in the task selection
     dialog, or one of the statistics dialog, then the task will be selected,
@@ -171,14 +187,14 @@ traceshark (0.8.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 09 Dec 2018 23:16:55 +0100
 
-traceshark (0.7.1-alpha) UNRELEASED; urgency=medium
+traceshark (0.7.1-alpha) RELEASED; urgency=medium
 
   * Fix a bug and a corner case with the button to find the next sched_switch
     sleep.
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 06 Dec 2018 22:16:28 +0100
 
-traceshark (0.7.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.7.0-alpha) RELEASED; urgency=medium
 
   * New feature: a button to filter on the currently selected task.
   * New feature: a button to filter on the currently selected task and the time
@@ -190,7 +206,7 @@ traceshark (0.7.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 05 Dec 2018 22:11:16 +0100
 
-traceshark (0.6.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.6.0-alpha) RELEASED; urgency=medium
 
   * New feature: A button to find sched_waking events directly, based on the
     currently selected task and active cursor position. With this button it's
@@ -198,7 +214,7 @@ traceshark (0.6.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 25 Nov 2018 22:11:45 +0100
 
-traceshark (0.5.1-alpha) UNRELEASED; urgency=medium
+traceshark (0.5.1-alpha) RELEASED; urgency=medium
 
   * The default size of the back trace windows is now larger.
   * The wakeup and waking icons are improved.
@@ -208,7 +224,7 @@ traceshark (0.5.1-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 28 Oct 2018 20:08:48 +0100
 
-traceshark (0.5.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.5.0-alpha) RELEASED; urgency=medium
 
   * New feature: A button to find sched_waking events that precedes a specific
     sched_wakeup event.
@@ -219,7 +235,7 @@ traceshark (0.5.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 04 Oct 2018 23:23:52 +0200
 
-traceshark (0.4.3-alpha) UNRELEASED; urgency=medium
+traceshark (0.4.3-alpha) RELEASED; urgency=medium
 
   * The wakeup button is only enabled if a task is selected.
   * The placement of the task related toolbar is adaptive. Depending on screen
@@ -233,7 +249,7 @@ traceshark (0.4.3-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 03 Oct 2018 18:42:14 +0200
 
-traceshark (0.4.2-alpha) UNRELEASED; urgency=medium
+traceshark (0.4.2-alpha) RELEASED; urgency=medium
 
   * Fix an annoying bug where the final switch event was lost when using perf
     with the 4.14.x kernel,possibly other version as well.
@@ -242,7 +258,7 @@ traceshark (0.4.2-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 20 Sep 2018 02:17:23 +0200
 
-traceshark (0.4.1-alpha) UNRELEASED; urgency=medium
+traceshark (0.4.1-alpha) RELEASED; urgency=medium
 
   * Fix an annoying bug with the percentages in the statistics.
   * Improve the compatibility with perf that is shipped with distros (Debian,
@@ -251,7 +267,7 @@ traceshark (0.4.1-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 05 Sep 2018 21:41:04 +0200
 
-traceshark (0.4.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.4.0-alpha) RELEASED; urgency=medium
 
   * Add two new dialogs for statistics.
   * Add the graph selector, it's possible to select which graphs to select.
@@ -261,14 +277,14 @@ traceshark (0.4.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 13 Aug 2018 00:58:42 +0200
 
-traceshark (0.3.3-alpha) UNRELEASED; urgency=medium
+traceshark (0.3.3-alpha) RELEASED; urgency=medium
 
   * Fix the spurious error message when canceling an export.
   * Improves the README.md description of the wakeup button.
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 07 Mar 2018 21:34:13 +0100
 
-traceshark (0.3.2-alpha) UNRELEASED; urgency=medium
+traceshark (0.3.2-alpha) RELEASED; urgency=medium
 
   * Now it's possible to export filtered events, so that one can for example
     generate a flame graph of what has been filtered. If one wants to generate
@@ -290,7 +306,7 @@ traceshark (0.3.2-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 06 Mar 2018 22:39:47 +0100
 
-traceshark (0.3.1-alpha) UNRELEASED; urgency=medium
+traceshark (0.3.1-alpha) RELEASED; urgency=medium
 
   * StringTree: Take the AVLTree<> template into use.
   * Improve the time filter icon.
@@ -300,7 +316,7 @@ traceshark (0.3.1-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 17 Dec 2017 13:06:56 +0100
 
-traceshark (0.3.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.3.0-alpha) RELEASED; urgency=medium
 
   * Add .travis.yml to enable the Travis CI.
   * MainWindow: Don't use anti-aliased error bars.
@@ -356,7 +372,7 @@ traceshark (0.3.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 10 Dec 2017 22:03:40 +0100
 
-traceshark (0.2.3-alpha) UNRELEASED; urgency=medium
+traceshark (0.2.3-alpha) RELEASED; urgency=medium
 
   * A lot of coverity defects have been fixed.
   * When a serious error occur, such as failure to allocate memory, the program
@@ -364,7 +380,7 @@ traceshark (0.2.3-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 17 Sep 2016 14:34:48 +0300
 
-traceshark (0.2.2-alpha) UNRELEASED; urgency=medium
+traceshark (0.2.2-alpha) RELEASED; urgency=medium
 
   * Slight performance improvement by increasing fallthrough in the main switch
     statement of both the ftrace and perf grammars.
@@ -379,7 +395,7 @@ traceshark (0.2.2-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 10 Sep 2016 20:05:29 +0300
 
-traceshark (0.2.1-alpha) UNRELEASED; urgency=medium
+traceshark (0.2.1-alpha) RELEASED; urgency=medium
 
   * Now the MainWindow start size is calculated from the available geometry
     with the help of a heuristic. I feel that this is much better than using
@@ -387,7 +403,7 @@ traceshark (0.2.1-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 18 Aug 2016 02:55:40 +0300
 
-traceshark (0.2.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.2.0-alpha) RELEASED; urgency=medium
 
   * A new dialog for choosing a task from a list that includes all tasks.
   * The TraceEvent class has lost the eventName field. Thus, the event type is
@@ -413,7 +429,7 @@ traceshark (0.2.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 17 Aug 2016 23:52:32 +0300
 
-traceshark (0.1.2-alpha) UNRELEASED; urgency=medium
+traceshark (0.1.2-alpha) RELEASED; urgency=medium
 
   * Slight performance improvement when parsing Ftrace traces. This improvement
     is more noticeable on ARM than X86.
@@ -422,14 +438,14 @@ traceshark (0.1.2-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 25 Jul 2016 00:54:02 +0300
 
-traceshark (0.1.1-alpha) UNRELEASED; urgency=medium
+traceshark (0.1.1-alpha) RELEASED; urgency=medium
 
   * LoadBuffer: Fix build problem on some distros.
   * Because of the above, traceshark now builds on Fedora.
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sat, 02 Jul 2016 23:12:43 +0300
 
-traceshark (0.1.0-alpha) UNRELEASED; urgency=medium
+traceshark (0.1.0-alpha) RELEASED; urgency=medium
 
   * TraceFile: Avoid unnecessary copying of all data between buffers.
   * TraceParser: Fix the last event before sending EOF.
@@ -442,7 +458,7 @@ traceshark (0.1.0-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 11 May 2016 22:59:52 +0300
 
-traceshark (0.0.9-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.9-alpha) RELEASED; urgency=medium
 
   * TraceAnalyzer: Fix crash in processSchedAddTail().
   * TraceAnalyzer: Fix crash in TraceAnalyzer::handleWrongTaskOnCPU().
@@ -450,7 +466,7 @@ traceshark (0.0.9-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Wed, 06 Apr 2016 00:54:19 +0300
 
-traceshark (0.0.8-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.8-alpha) RELEASED; urgency=medium
 
   * New feature: Add an attribution dialog for QCustomPlot.
   * MainWindow: Bug fix for showWakeup().
@@ -461,7 +477,7 @@ traceshark (0.0.8-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 03 Apr 2016 19:23:26 +0200
 
-traceshark (0.0.7-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.7-alpha) RELEASED; urgency=medium
 
   * Replace NULL with nullptr.
   * InfoWidget, EventsWidget: Add title to these docking widgets.
@@ -471,7 +487,7 @@ traceshark (0.0.7-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 31 Mar 2016 00:04:42 +0200
 
-traceshark (0.0.6-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.6-alpha) RELEASED; urgency=medium
 
   * TraceAnalyzer: Increase safety of processSchedAddTail().
   * New feature: Add unified taskgraphs.
@@ -482,7 +498,7 @@ traceshark (0.0.6-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Tue, 29 Mar 2016 18:12:52 +0200
 
-traceshark (0.0.5-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.5-alpha) RELEASED; urgency=medium
 
   * TaskInfo: Replace the text on "Find wakeup" button with icon.
   * TaskInfo: Iconize the "Add to legend" button.
@@ -497,7 +513,7 @@ traceshark (0.0.5-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Fri, 25 Mar 2016 16:38:17 +0200
 
-traceshark (0.0.4-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.4-alpha) RELEASED; urgency=medium
 
   * Improve the name detection of threads that changes name.
   * EventsModel: minor cleanup.
@@ -506,7 +522,7 @@ traceshark (0.0.4-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 21 Mar 2016 00:11:15 +0200
 
-traceshark (0.0.3-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.3-alpha) RELEASED; urgency=medium
 
   * TraceParser: Huge refactoring of perf and ftrace code.
   * MainWindow: remove unused variable.
@@ -526,7 +542,7 @@ traceshark (0.0.3-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 17 Mar 2016 00:19:29 +0200
 
-traceshark (0.0.2-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.2-alpha) RELEASED; urgency=medium
 
   * Implement the displaying of the license.
   * Improve copyright messages.
@@ -572,7 +588,7 @@ traceshark (0.0.2-alpha) UNRELEASED; urgency=medium
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Thu, 03 Mar 2016 22:22:11 +0200
 
-traceshark (0.0.1-alpha) UNRELEASED; urgency=medium
+traceshark (0.0.1-alpha) RELEASED; urgency=medium
 
   * Initial release.
 
