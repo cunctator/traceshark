@@ -1899,7 +1899,7 @@ void MainWindow::createMenus()
 	eventMenu->addAction(eventCPUAction);
 	eventMenu->addAction(eventTypeAction);
 
-	helpMenu = menuBar()->addMenu(tr("He&lp"));
+	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAction);
 	helpMenu->addAction(aboutQCPAction);
 	helpMenu->addAction(aboutQtAction);
