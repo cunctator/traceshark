@@ -62,10 +62,6 @@
 
 const int SettingStore::this_version = 1;
 
-//Setting Setting::settings[Setting::NR_SETTINGS];
-
-//QMap<QString, enum Setting::Index> Setting::fileKeyMap;
-
 SettingStore::SettingStore()
 {
 	QObject q;
