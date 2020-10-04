@@ -79,10 +79,7 @@ Setting::Value::Value(int i) :
 
 Setting::Setting(): supported(true), flags(FLAG_NO_FLAG), nrDep(0),
 		    nrDependents(0)
-{
-	tshark_bzero(dependency, sizeof(dependency));
-	tshark_bzero(dependent, sizeof(dependent));
-}
+{}
 
 
 bool Setting::isWideScreen()
@@ -108,27 +105,19 @@ Setting::Dependency::Dependency():
 {}
 
 Setting::Dependency::Dependency(Setting::index_t i, bool desired_val) :
-	type_(DESIRED_VALUE), index_(i)
-{
-	desired_value.type_ = Value::TYPE_BOOL;
-	desired_value.value.bool_value = desired_val;
-}
+	type_(DESIRED_VALUE), index_(i), desired_value(desired_val),
+	low_value(0), high_value(0)
+{}
 
 Setting::Dependency::Dependency(Setting::index_t i, int desired_val) :
-	type_(DESIRED_VALUE), index_(i)
-{
-	desired_value.type_ = Value::TYPE_INT;
-	desired_value.value.int_value = desired_val;
-}
+	type_(DESIRED_VALUE), index_(i), desired_value(desired_val),
+	low_value(0), high_value(0)
+{}
 
 Setting::Dependency::Dependency(Setting::index_t i, int low, int high) :
-	type_(DESIRED_INTERVAL), index_(i)
-{
-	low_value.type_ = Value::TYPE_INT;
-	low_value.value.int_value = low;
-	high_value.type_ = Value::TYPE_INT;
-	high_value.value.int_value = high;
-}
+	type_(DESIRED_INTERVAL), index_(i), desired_value(0),
+	low_value(low), high_value(high)
+{}
 
 bool Setting::Dependency::getDesiredBool() const
 {
