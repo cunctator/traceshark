@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
-<!-- Creator: fig2dev Version 3.2.7a -->
-<!-- CreationDate: 2020-05-21 14:07:08 -->
+<!-- Creator: fig2dev Version 3.2.6a -->
+<!-- CreationDate: 2020-07-05 15:32:32 -->
 <!-- Magnification: 1.05 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -8,26 +8,29 @@
 	viewBox="-284 322 9986 9377">
 <g fill="none">
 <!-- Arc -->
-<path d="M 675,2025 A 7853 7853 0 0 1 8775 2025"
-	stroke="#000000" stroke-width="285px"/>
+<path d="M 1080,2252 A 4901 4901 0 0 0 8280 2252"
+	stroke="#000000" stroke-width="435px"/>
 <!-- Arc -->
-<path d="M 675,2070 A 7853 7853 0 0 0 8775 2070"
-	stroke="#000000" stroke-width="285px"/>
+<path d="M 4252,6122 A 519 519 0 0 0 5107 6122"
+	stroke="#000000" stroke-width="435px"/>
 <!-- Arc -->
-<path d="M 5220,8055 A 563 563 0 0 1 4320 8055"
-	stroke="#000000" stroke-width="285px"/>
+<path d="M 4275,8512 A 428 428 0 1 0 5130 8512"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Arc -->
+<path d="M 1080,2522 A 4901 4901 0 0 1 8280 2522"
+	stroke="#000000" stroke-width="435px"/>
 <!-- Line -->
-<polyline points=" 740,2090 4340,5690"
-	stroke="#000000" stroke-width="285px"/>
+<polyline points=" 8237,2327 5087,6152"
+	stroke="#000000" stroke-width="435px"/>
 <!-- Line -->
-<polyline points=" 8707,2047 5107,5647"
-	stroke="#000000" stroke-width="285px"/>
+<polyline points=" 1136,2323 4286,6148"
+	stroke="#000000" stroke-width="435px"/>
 <!-- Line -->
-<polyline points=" 5175,5625 5175,8100"
-	stroke="#000000" stroke-width="285px"/>
+<polyline points=" 4275,6167 4275,8642"
+	stroke="#000000" stroke-width="435px"/>
 <!-- Line -->
-<polyline points=" 4365,5625 4365,8100"
-	stroke="#000000" stroke-width="285px"/>
+<polyline points=" 5130,6167 5130,8597"
+	stroke="#000000" stroke-width="435px"/>
 <!-- Line -->
 <polyline points=" 9064,960 514,9060"
 	stroke="#ff0000" stroke-width="885px"/>
