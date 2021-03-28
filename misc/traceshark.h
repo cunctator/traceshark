@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -146,7 +146,26 @@ typedef enum : int {
 #define SPROL32(VALUE, N) \
 	((VALUE << N) | (VALUE >> (32 - N)))
 
+#define TSHARK_LOGIC_DEFS_			\
+		TSHARK_LOGIC_ITEM_(OR),		\
+		TSHARK_LOGIC_ITEM_(NOR),	\
+		TSHARK_LOGIC_ITEM_(XOR),	\
+		TSHARK_LOGIC_ITEM_(XNOR),	\
+		TSHARK_LOGIC_ITEM_(AND),	\
+		TSHARK_LOGIC_ITEM_(NAND)
+
+
 namespace TShark {
+
+#undef TSHARK_LOGIC_ITEM_
+#define TSHARK_LOGIC_ITEM_(a) LOGIC_##a
+	enum Logic : int {
+		TSHARK_LOGIC_DEFS_,
+		LOGIC_NR
+	};
+#undef TSHARK_LOGIC_ITEM_
+
+	extern const char * const logic_names[];
 
 	enum CursorIdx {RED_CURSOR, BLUE_CURSOR, NR_CURSORS};
 
@@ -175,6 +194,8 @@ namespace TShark {
 					    const struct timespec &s2) {
 		return s1.tv_sec == s2.tv_sec && s1.tv_nsec == s2.tv_nsec;
 	}
+
+	extern QString translateRegexError(int ecode);
 }
 
 #endif /* TRACESHARK_H */

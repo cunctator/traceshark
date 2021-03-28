@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017, 2019-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2020, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,36 +50,53 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILTERSTATE_H
-#define FILTERSTATE_H
+#ifndef REGEXDIALOG_H
+#define REGEXDIALOG_H
 
-#include <cstdint>
+#include <QDialog>
+#include <QLinkedList>
 
-#include "vtl/compiler.h"
+#include "vtl/error.h"
+#include "analyzer/regexfilter.h"
 
-class FilterState {
+QT_BEGIN_NAMESPACE
+class QComboBox;
+class QVBoxLayout;
+class QTextEdit;
+template <typename T, typename U> class QMap;
+QT_END_NAMESPACE
+
+class ValueBox;
+class RegexWidget;
+
+class RegexDialog : public QDialog {
+	Q_OBJECT
+
 public:
-	FilterState();
-	typedef enum : int {
-		FILTER_PID = 0,
-		FILTER_EVENT,
-		FILTER_TIME,
-		FILTER_CPU,
-		FILTER_REGEX,
-		NR_FILTERS
-	} filter_t;
-	void enable(filter_t filter);
-	void disable(filter_t filter);
-	void disableAll();
-	bool isEnabled() const;
-	vtl_always_inline bool isEnabled(filter_t filter) const;
+	RegexDialog(QWidget *parent = 0);
+	~RegexDialog();
 private:
-	bool state[NR_FILTERS];
+	int savedHeight;
+	QComboBox *logicBox;
+	QVBoxLayout *layout;
+	QLinkedList<RegexWidget *> regexWidgets;
+
+	void addRegexWidget(RegexWidget *after = nullptr);
+        QLinkedList<RegexWidget *>::iterator find(RegexWidget *widget);
+	QLinkedList<RegexWidget *>::iterator findAfter(RegexWidget *widget);
+	RegexFilter filter;
+public slots:
+	void show();
+signals:
+	void resetFilter(void);
+	void createFilter(RegexFilter &filter, bool orlogic);
+private slots:
+	void okClicked();
+	void closeClicked();
+	void addFilterClicked();
+	void resetClicked();
+	void removeRegexWidget(RegexWidget *widget);
+	void addRegexWidgetAfter(RegexWidget *widget);
 };
 
-vtl_always_inline bool FilterState::isEnabled(filter_t filter) const
-{
-	return state[filter];
-}
-
-#endif /* FILTERSTATE_H */
+#endif /* _REGEXDIALOG_H */

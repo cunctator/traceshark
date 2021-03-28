@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -960,6 +960,12 @@ void TraceAnalyzer::processAllFilters()
 				continue;
 			}
 		}
+		if (OR_filterState.isEnabled(FilterState::FILTER_REGEX)) {
+			if (processRegexFilter(event, OR_filterRegex)) {
+				filteredEvents.append(eptr);
+				continue;
+			}
+		}
 		/* AND filters */
 		if (filterState.isEnabled(FilterState::FILTER_CPU) &&
 		    !filterCPUMap.contains(event.cpu)) {
@@ -976,6 +982,9 @@ void TraceAnalyzer::processAllFilters()
 		}
 		if (filterState.isEnabled(FilterState::FILTER_TIME) &&
 		    (event.time < filterTimeLow || event.time > filterTimeHigh))
+			continue;
+		if (filterState.isEnabled(FilterState::FILTER_REGEX) &&
+		    !processRegexFilter(event, filterRegex))
 			continue;
 		filteredEvents.append(eptr);
 	}
@@ -1079,10 +1088,72 @@ void TraceAnalyzer::createTimeFilter(const vtl::Time &low,
 		processAllFilters();
 }
 
+int TraceAnalyzer::createRegexFilter(RegexFilter &regexFilter, bool orlogic)
+{
+	RegexFilter &filter = orlogic ? OR_filterRegex : filterRegex;
+	FilterState &state = orlogic ? OR_filterState : filterState;
+	int ecode;
+
+	if (state.isEnabled(FilterState::FILTER_REGEX))
+		freeRegex(filter);
+	filter = regexFilter;
+	ecode = compileRegex(filter);
+	if (ecode == 0) {
+		state.enable(FilterState::FILTER_REGEX);
+		/* No need to process filters if we only have OR-filters */
+		if (filterState.isEnabled())
+			processAllFilters();
+	} else {
+		freeRegex(filter);
+		state.disable(FilterState::FILTER_REGEX);
+	}
+	return ecode;
+}
+
+int TraceAnalyzer::compileRegex(RegexFilter &filter)
+{
+	QVector<Regex> &regvec = filter.regvec;
+	int s = regvec.size();
+	int i;
+	const char *rstr;
+	const int sflags = REG_NEWLINE | REG_NOSUB;
+	int cflags;
+	int ecode = 0;
+
+	filter.valid = true;
+	for (i = 0; i < s; i++) {
+		cflags = sflags;
+		Regex &rx = regvec[i];
+		rstr = rx.text.toLocal8Bit().data();
+		if (rx.isExtended)
+			cflags |= REG_EXTENDED;
+		if (!rx.caseSensitive)
+			cflags |= REG_ICASE;
+		ecode = regcomp(&rx.regex, rstr, cflags);
+		rx.regex_valid = (ecode == 0);
+		if (ecode != 0) {
+			filter.valid = false;
+			break;
+		}
+	}
+	return ecode;
+}
+
+void TraceAnalyzer::freeRegex(RegexFilter &filter)
+{
+	QVector<Regex> &regvec = filter.regvec;
+	int s = regvec.size();
+	int i;
+
+	for (i = 0; i < s; i++) {
+		Regex rx = regvec[i];
+		if (rx.regex_valid)
+			regfree(&rx.regex);
+	}
+}
+
 void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 {
-	filterState.disable(filter);
-	OR_filterState.disable(filter);
 	switch (filter) {
 	case FilterState::FILTER_PID:
 		filterPidMap.clear();
@@ -1099,12 +1170,19 @@ void TraceAnalyzer::disableFilter(FilterState::filter_t filter)
 		filterCPUMap.clear();
 		OR_filterCPUMap.clear();
 		break;
-	case FilterState::FILTER_ARG:
-		/* Argument filtering is not yet implemented */
+	case FilterState::FILTER_REGEX:
+		if (filterState.isEnabled(FilterState::FILTER_REGEX))
+			freeRegex(filterRegex);
+		if (OR_filterState.isEnabled(FilterState::FILTER_REGEX))
+			freeRegex(OR_filterRegex);
+		filterRegex.regvec.clear();
+		OR_filterRegex.regvec.clear();
 		break;
 	default:
 		break;
 	}
+	filterState.disable(filter);
+	OR_filterState.disable(filter);
 	if (filterState.isEnabled())
 		processAllFilters();
 	else
@@ -1162,6 +1240,13 @@ void TraceAnalyzer::disableAllFilters()
 
 	filterEventMap.clear();
 	OR_filterEventMap.clear();
+
+	if (filterState.isEnabled(FilterState::FILTER_REGEX))
+		freeRegex(filterRegex);
+	if (OR_filterState.isEnabled(FilterState::FILTER_REGEX))
+		freeRegex(OR_filterRegex);
+	filterRegex.regvec.clear();
+	OR_filterRegex.regvec.clear();
 
 	filteredEvents.clear();
 }

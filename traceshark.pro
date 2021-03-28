@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 #
 #  Traceshark - a visualizer for visualizing ftrace and perf traces
-#  Copyright (C) 2014-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2014-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 # This file is dual licensed: you can use it either under the terms of
 # the GPL, or the BSD license, at your option.
@@ -329,6 +329,8 @@ HEADERS      +=  ui/mainwindow.h
 HEADERS      +=  ui/migrationarrow.h
 HEADERS      +=  ui/migrationline.h
 HEADERS      +=  ui/qcustomplot.h
+HEADERS      +=  ui/regexdialog.h
+HEADERS      +=  ui/regexwidget.h
 HEADERS      +=  ui/statslimitedmodel.h
 HEADERS      +=  ui/statsmodel.h
 HEADERS      +=  ui/tableview.h
@@ -349,6 +351,7 @@ HEADERS      +=  analyzer/cpuidle.h
 HEADERS      +=  analyzer/cputask.h
 HEADERS      +=  analyzer/filterstate.h
 HEADERS      +=  analyzer/migration.h
+HEADERS      +=  analyzer/regexfilter.h
 HEADERS      +=  analyzer/task.h
 HEADERS      +=  analyzer/tcolor.h
 HEADERS      +=  analyzer/traceanalyzer.h
@@ -431,6 +434,8 @@ SOURCES      +=  ui/licensedialog.cpp
 SOURCES      +=  ui/mainwindow.cpp
 SOURCES      +=  ui/migrationarrow.cpp
 SOURCES      +=  ui/migrationline.cpp
+SOURCES      +=  ui/regexdialog.cpp
+SOURCES      +=  ui/regexwidget.cpp
 SOURCES      +=  ui/statslimitedmodel.cpp
 SOURCES      +=  ui/statsmodel.cpp
 SOURCES      +=  ui/tableview.cpp
@@ -450,6 +455,7 @@ SOURCES      +=  analyzer/cpufreq.cpp
 SOURCES      +=  analyzer/cpuidle.cpp
 SOURCES      +=  analyzer/cputask.cpp
 SOURCES      +=  analyzer/filterstate.cpp
+SOURCES      +=  analyzer/regexfilter.cpp
 SOURCES      +=  analyzer/task.cpp
 SOURCES      +=  analyzer/tcolor.cpp
 SOURCES      +=  analyzer/traceanalyzer.cpp
@@ -477,6 +483,7 @@ SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
 SOURCES      +=  misc/setting.cpp
 SOURCES      +=  misc/settingstore.cpp
+SOURCES      +=  misc/traceshark.cpp
 
 SOURCES      +=  misc/translate.cpp
 

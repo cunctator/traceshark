@@ -1,9 +1,11 @@
+
 <!-- SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause) -->
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/traceshark">
   <file>images/shark.png</file>
   <file>images/addtask30x30.png</file>
   <file>images/addtolegend30x30.png</file>
+  <file>images/argfilter30x30.png</file>
   <file>images/clearlegend30x30.png</file>
   <file>images/cleartasksgraphs30x30.png</file>
   <file>images/close30x30.png</file>
@@ -46,6 +48,7 @@
   <!-- There are no SVG representations of the qcp and qt logos -->
   <file>images/addtask.svg</file>
   <file>images/addtolegend.svg</file>
+  <file>images/argfilter.svg</file>
   <file>images/clearlegend.svg</file>
   <file>images/cleartasksgraphs.svg</file>
   <file>images/close.svg</file>

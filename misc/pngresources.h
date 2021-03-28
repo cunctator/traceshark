@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -56,6 +56,7 @@
 /* All pixmap resources for icons should be defined here  */
 #define RESSRC_GPH_ADD_TASK      ":/traceshark/images/addtask30x30.png"
 #define RESSRC_GPH_ADD_TO_LEGEND ":/traceshark/images/addtolegend30x30.png"
+#define RESSRC_GPH_ARGFILTER     ":/traceshark/images/argfilter30x30.png"
 #define RESSRC_GPH_CLEAR_LEGEND  ":/traceshark/images/clearlegend30x30.png"
 #define RESSRC_GPH_CLEAR_TASK    ":/traceshark/images/cleartasksgraphs30x30.png"
 #define RESSRC_GPH_CLOSE         ":/traceshark/images/close30x30.png"

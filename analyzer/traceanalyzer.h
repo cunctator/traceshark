@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -63,27 +63,28 @@
 
 #include "vtl/avltree.h"
 #include "vtl/compiler.h"
+#include "vtl/time.h"
 #include "vtl/tlist.h"
 
+#include "analyzer/abstracttask.h"
 #include "analyzer/cpu.h"
 #include "analyzer/cpufreq.h"
 #include "analyzer/cpuidle.h"
-#include "analyzer/filterstate.h"
-#include "parser/genericparams.h"
-#include "mm/mempool.h"
-#include "analyzer/abstracttask.h"
 #include "analyzer/cputask.h"
-#include "analyzer/tcolor.h"
-#include "parser/traceevent.h"
+#include "analyzer/filterstate.h"
 #include "analyzer/migration.h"
-#include "ui/migrationarrow.h"
+#include "analyzer/regexfilter.h"
 #include "analyzer/task.h"
-#include "parser/traceparser.h"
+#include "analyzer/tcolor.h"
 #include "misc/traceshark.h"
+#include "mm/mempool.h"
+#include "parser/genericparams.h"
+#include "parser/traceevent.h"
+#include "parser/traceparser.h"
 #include "threads/workitem.h"
 #include "threads/workthread.h"
 #include "threads/workqueue.h"
-#include "vtl/time.h"
+#include "ui/migrationarrow.h"
 
 #define FAKE_DELTA (vtl::Time(false, 0, 50))
 
@@ -158,6 +159,7 @@ public:
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void createTimeFilter(const vtl::Time &low,
 			      const vtl::Time &high, bool orlogic);
+	int createRegexFilter(RegexFilter &regexFilter, bool orlogic);
 	void disableFilter(FilterState::filter_t filter);
 	void addPidToFilter(int pid);
 	void removePidFromFilter(int pid);
@@ -254,6 +256,10 @@ private:
 		bool processPidFilter(const TraceEvent &event,
 				      QMap<int, int> &map,
 				      bool inclusive);
+	vtl_always_inline bool processRegexFilter(const TraceEvent &event,
+						  const RegexFilter &regex);
+	int compileRegex(RegexFilter &filter);
+	void freeRegex(RegexFilter &filter);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	WorkQueue statsQueue;
@@ -292,6 +298,8 @@ private:
 	QMap<unsigned, unsigned> OR_filterCPUMap;
 	QMap<event_t, event_t> filterEventMap;
 	QMap<event_t, event_t> OR_filterEventMap;
+	RegexFilter filterRegex;
+	RegexFilter OR_filterRegex;
 	bool pidFilterInclusive;
 	bool OR_pidFilterInclusive;
 	vtl::Time filterTimeLow;
@@ -1005,6 +1013,94 @@ bool TraceAnalyzer::processPidFilter(const TraceEvent &event,
 			return true;
 	}
 	return false;
+}
+
+vtl_always_inline
+bool TraceAnalyzer::processRegexFilter(const TraceEvent &event,
+				       const RegexFilter &regex)
+{
+	const QVector<Regex> &rvec = regex.regvec;
+	int i, j;
+	bool sum = true;
+	bool value;
+	int pidx = 0;
+	bool pvalue = false;
+	int pos;
+
+	for (i = 0; i < rvec.size(); i++) {
+		const Regex &regex = rvec[i];
+		value = false;
+		switch (regex.posType) {
+		case Regex::POS_NONE:
+			for (j = 0; j < event.argc; j++) {
+				value = !regexec(&regex.regex,
+						 event.argv[j]->ptr,
+						 0, NULL, 0);
+				if (value) {
+					pidx = j;
+					break;
+				}
+			}
+			break;
+		case Regex::POS_ABSOLUTE:
+			if (regex.pos < 0 || regex.pos > event.argc - 1)
+				value = false;
+			else {
+				value = !regexec(&regex.regex,
+						 event.argv[regex.pos]->ptr,
+						 0, NULL, 0);
+				if (value) {
+					pidx = regex.pos;
+					break;
+				}
+			}
+			break;
+		case Regex::POS_RELATIVE:
+			if (!pvalue)
+				break;
+			pos = pidx + regex.pos;
+			if (pos < 0 || pos > event.argc - 1)
+				value = false;
+			else {
+				value = !regexec(&regex.regex,
+						 event.argv[pos]->ptr,
+						 0, NULL, 0);
+				if (value) {
+					pidx = pos;
+					break;
+				}
+			}
+		default:
+			break;
+		}
+		if (regex.inverted)
+			value = !value;
+		pvalue = value;
+		switch (regex.logic) {
+		case TShark::LOGIC_OR:
+			sum = sum || value;
+			break;
+		case TShark::LOGIC_NOR:
+			sum = !(sum || value);
+			break;
+		case TShark::LOGIC_XOR:
+			sum = (sum != value);
+			break;
+		case TShark::LOGIC_XNOR:
+			sum = !(sum != value);
+			break;
+		case TShark::LOGIC_AND:
+			sum = sum && value;
+			break;
+		case TShark::LOGIC_NAND:
+			sum = !(sum && value);
+			break;
+		default:
+			Q_ASSERT(false);
+			break;
+		}
+	}
+	return sum;
 }
 
 #endif /* TRACEANALYZER_H */

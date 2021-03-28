@@ -65,5 +65,6 @@ typedef QFileDevice::FileError qfile_error_t;
 #endif
 
 tserror_t translate_FileError(qfile_error_t err);
+tserror_t translate_RegexError(int ecode);
 
 #endif /* _TS_TRANSLATE_H */

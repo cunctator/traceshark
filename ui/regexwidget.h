@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017, 2019-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2020, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,36 +50,57 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILTERSTATE_H
-#define FILTERSTATE_H
+#ifndef REGEXWIDGET_H
+#define REGEXWIDGET_H
 
-#include <cstdint>
+#include <QWidget>
 
-#include "vtl/compiler.h"
+#include "analyzer/regexfilter.h"
+#include "misc/traceshark.h"
 
-class FilterState {
+class Regex;
+
+QT_BEGIN_NAMESPACE
+class QComboBox;
+class QLineEdit;
+class QCheckBox;
+class QPushButton;
+class QSpinBox;
+QT_END_NAMESPACE
+
+class RegexWidget : public QWidget {
+	Q_OBJECT
+
 public:
-	FilterState();
-	typedef enum : int {
-		FILTER_PID = 0,
-		FILTER_EVENT,
-		FILTER_TIME,
-		FILTER_CPU,
-		FILTER_REGEX,
-		NR_FILTERS
-	} filter_t;
-	void enable(filter_t filter);
-	void disable(filter_t filter);
-	void disableAll();
-	bool isEnabled() const;
-	vtl_always_inline bool isEnabled(filter_t filter) const;
+	enum Type {
+		REGEX_FIRST,
+		REGEX_LATER
+	};
+	RegexWidget(QWidget *parent = 0, enum Type type = REGEX_LATER);
+	~RegexWidget();
+	const Regex *regex();
+	void setRemoveEnabled(bool e);
+	void setType(enum Type type);
 private:
-	bool state[NR_FILTERS];
+	QComboBox *logicBox;
+	QComboBox *posBox;
+	QSpinBox *posSpinBox;
+	QLineEdit *regexLine;
+	QCheckBox *extendedBox;
+	QCheckBox *caseBox;
+	QCheckBox *notBox;
+	QPushButton *removeButton;
+	Regex regex_m;
+	static const char * const posNames[];
+	enum Type myType;
+private slots:
+	void removeClicked();
+	void addClicked();
+	void posBoxChanged(int index);
+signals:
+	void remove(RegexWidget *widget);
+	void addAfter(RegexWidget *widget);
+private slots:
 };
 
-vtl_always_inline bool FilterState::isEnabled(filter_t filter) const
-{
-	return state[filter];
-}
-
-#endif /* FILTERSTATE_H */
+#endif /*  REGEXWIDGET_H  */

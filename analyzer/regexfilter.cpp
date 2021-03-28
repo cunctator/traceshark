@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017, 2019-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,36 +50,13 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILTERSTATE_H
-#define FILTERSTATE_H
+#include "analyzer/regexfilter.h"
 
-#include <cstdint>
+#undef REGEXFILTER_POS_ITEM_
+#define REGEXFILTER_POS_ITEM_(a, b) b
 
-#include "vtl/compiler.h"
-
-class FilterState {
-public:
-	FilterState();
-	typedef enum : int {
-		FILTER_PID = 0,
-		FILTER_EVENT,
-		FILTER_TIME,
-		FILTER_CPU,
-		FILTER_REGEX,
-		NR_FILTERS
-	} filter_t;
-	void enable(filter_t filter);
-	void disable(filter_t filter);
-	void disableAll();
-	bool isEnabled() const;
-	vtl_always_inline bool isEnabled(filter_t filter) const;
-private:
-	bool state[NR_FILTERS];
+const char * const Regex::posNames[] = {
+	REGEXFILTER_POS_DEFS_
 };
 
-vtl_always_inline bool FilterState::isEnabled(filter_t filter) const
-{
-	return state[filter];
-}
-
-#endif /* FILTERSTATE_H */
+#undef REGEXFILTER_POS_ITEM_

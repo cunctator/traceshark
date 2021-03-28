@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -69,6 +69,7 @@
 #include "ui/licensedialog.h"
 #include "ui/mainwindow.h"
 #include "ui/migrationline.h"
+#include "ui/regexdialog.h"
 #include "ui/taskgraph.h"
 #include "ui/taskrangeallocator.h"
 #include "ui/taskselectdialog.h"
@@ -116,6 +117,9 @@
 
 #define TOOLTIP_SHOWTASKS		\
 "Show a list of all tasks and it's possible to select one"
+
+#define TOOLTIP_SHOWARGFILTER		\
+"Show a dialog for filtering the info field with POSIX regular expressions"
 
 #define TOOLTIP_CPUFILTER		\
 "Select a subset of CPUs to filter on"
@@ -401,6 +405,7 @@ MainWindow::~MainWindow()
 	delete eventSelectDialog;
 	delete cpuSelectDialog;
 	delete graphEnableDialog;
+	delete regexDialog;
 
 	vtl::set_error_handler(nullptr);
 	delete errorDialog;
@@ -1017,6 +1022,7 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	showTasksAction->setEnabled(e);
 	filterCPUsAction->setEnabled(e);
 	showEventsAction->setEnabled(e);
+	showArgFilterAction->setEnabled(e);
 	timeFilterAction->setEnabled(e);
 	showStatsAction->setEnabled(e);
 	showStatsTimeLimitedAction->setEnabled(e);
@@ -1326,6 +1332,17 @@ void MainWindow::about()
 	msgBox->show();
 }
 
+void MainWindow::showError(const QString &caption, const QString &msg)
+{
+	QMessageBox *msgBox = new QMessageBox(this);
+	msgBox->setAttribute(Qt::WA_DeleteOnClose);
+	msgBox->setWindowTitle(tr("Error Message"));
+	msgBox->setText(caption);
+	msgBox->setInformativeText(msg);
+
+	msgBox->show();
+}
+
 void MainWindow::aboutQCustomPlot()
 {
 	QString textAboutCaption;
@@ -1607,6 +1624,11 @@ void MainWindow::createActions()
 	showEventsAction->setToolTip(tr(TOOLTIP_SHOWEVENTS));
 	tsconnect(showEventsAction, triggered(), this, showEventFilter());
 
+	showArgFilterAction = new QAction(tr("Filter on info field..."), this);
+	showArgFilterAction->setIcon(QIcon(RESSRC_GPH_ARGFILTER));
+	showArgFilterAction->setToolTip(tr(TOOLTIP_SHOWARGFILTER));
+	tsconnect(showArgFilterAction, triggered(), this, showArgFilter());
+
 	timeFilterAction = new QAction(tr("Filter on &time"), this);
 	timeFilterAction->setIcon(QIcon(RESSRC_GPH_TIMEFILTER));
 	timeFilterAction->setToolTip(tr(TOOLTIP_TIMEFILTER));
@@ -1824,6 +1846,7 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(filterCPUsAction);
 	viewToolBar->addAction(showEventsAction);
+	viewToolBar->addAction(showArgFilterAction);
 	viewToolBar->addAction(timeFilterAction);
 	viewToolBar->addAction(resetFiltersAction);
 	viewToolBar->addAction(graphEnableAction);
@@ -1872,6 +1895,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(filterCPUsAction);
 	viewMenu->addAction(showEventsAction);
+	viewMenu->addAction(showArgFilterAction);
 	viewMenu->addAction(timeFilterAction);
 	viewMenu->addAction(resetFiltersAction);
 	viewMenu->addAction(graphEnableAction);
@@ -1941,6 +1965,7 @@ void MainWindow::createDialogs()
 	eventSelectDialog = new EventSelectDialog();
 	cpuSelectDialog = new CPUSelectDialog();
 	graphEnableDialog = new GraphEnableDialog(settingStore, nullptr);
+	regexDialog = new RegexDialog();
 
 	vtl::set_error_handler(errorDialog);
 }
@@ -2040,6 +2065,11 @@ void MainWindow::dialogConnections()
 	/* graph enable dialog */
 	tsconnect(graphEnableDialog, settingsChanged(),
 		  this, consumeSettings());
+
+	/* regex dialog */
+	tsconnect(regexDialog, createFilter(RegexFilter &, bool),
+		  this, createRegexFilter(RegexFilter &, bool));
+	tsconnect(regexDialog, resetFilter(), this, resetRegexFilter());
 }
 
 void MainWindow::setStatus(status_t status, const QString *fileName)
@@ -2271,6 +2301,24 @@ void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
 	updateResetFiltersEnabled();
 }
 
+void MainWindow::createRegexFilter(RegexFilter &regexFilter, bool orlogic)
+{
+	vtl::Time saved = eventsWidget->getSavedScroll();
+	int ecode;
+
+	eventsWidget->beginResetModel();
+	ecode = analyzer->createRegexFilter(regexFilter, orlogic);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+	updateResetFiltersEnabled();
+	if (ecode != 0) {
+		showError(tr("<h1>Regex Error</h1>"),
+			  tr("<p>An error in a regex occurred:</p>") +
+			  tr("<p>") + TShark::translateRegexError(ecode) +
+			  tr("</p>"));
+	}
+}
 
 void MainWindow::resetPidFilter()
 {
@@ -2314,6 +2362,22 @@ void MainWindow::resetEventFilter()
 	saved = eventsWidget->getSavedScroll();
 	eventsWidget->beginResetModel();
 	analyzer->disableFilter(FilterState::FILTER_EVENT);
+	setEventsWidgetEvents();
+	eventsWidget->endResetModel();
+	scrollTo(saved);
+	updateResetFiltersEnabled();
+}
+
+void MainWindow::resetRegexFilter()
+{
+	vtl::Time saved;
+
+	if (!analyzer->filterActive(FilterState::FILTER_REGEX))
+		return;
+
+	saved = eventsWidget->getSavedScroll();
+	eventsWidget->beginResetModel();
+	analyzer->disableFilter(FilterState::FILTER_REGEX);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
@@ -2847,6 +2911,14 @@ void MainWindow::showEventFilter()
 		eventSelectDialog->hide();
 	else
 		eventSelectDialog->show();
+}
+
+void MainWindow::showArgFilter()
+{
+	if (regexDialog->isVisible())
+		regexDialog->hide();
+	else
+		regexDialog->show();
 }
 
 void MainWindow::showGraphEnable()

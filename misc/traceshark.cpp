@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017, 2019-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,36 +50,75 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILTERSTATE_H
-#define FILTERSTATE_H
+#include <sys/types.h>
+#include <regex.h>
 
-#include <cstdint>
+#include <QObject>
 
+#include "misc/traceshark.h"
 #include "vtl/compiler.h"
 
-class FilterState {
-public:
-	FilterState();
-	typedef enum : int {
-		FILTER_PID = 0,
-		FILTER_EVENT,
-		FILTER_TIME,
-		FILTER_CPU,
-		FILTER_REGEX,
-		NR_FILTERS
-	} filter_t;
-	void enable(filter_t filter);
-	void disable(filter_t filter);
-	void disableAll();
-	bool isEnabled() const;
-	vtl_always_inline bool isEnabled(filter_t filter) const;
-private:
-	bool state[NR_FILTERS];
-};
+namespace TShark {
 
-vtl_always_inline bool FilterState::isEnabled(filter_t filter) const
-{
-	return state[filter];
+#undef TSHARK_LOGIC_ITEM_
+#define TSHARK_LOGIC_ITEM_(a) vtl_str(a)
+	const char * const logic_names[] = {
+		TSHARK_LOGIC_DEFS_,
+		nullptr
+	};
+#undef TSHARK_LOGIC_ITEM_
+
+	QString translateRegexError(int ecode)
+	{
+		QObject q;
+		QString emsg;
+		switch (ecode) {
+		case REG_BADBR:
+			emsg = q.tr("Invalid use of back reference operator.");
+			break;
+		case REG_BADPAT:
+			emsg = q.tr("Invalid use of pattern operators.");
+			break;
+		case REG_BADRPT:
+			emsg = q.tr("Invalid use of repetition operators.");
+			break;
+		case REG_EBRACE:
+			emsg = q.tr("Un-matched brace interval operators.");
+			break;
+		case REG_EBRACK:
+			emsg = q.tr("Un-matched bracket list operators.");
+			break;
+		case REG_ECOLLATE:
+			emsg = q.tr("Invalid collating element.");
+			break;
+		case REG_ECTYPE:
+			emsg = q.tr("Unknown character class name.");
+			break;
+		case REG_EEND:
+			emsg = q.tr("Nonspecific error.");
+			break;
+		case REG_EESCAPE:
+			emsg = q.tr("Trailing backslash.");
+			break;
+		case REG_EPAREN:
+			emsg = q.tr("Un-matched parenthesis group operators.");
+			break;
+		case REG_ERANGE:
+			emsg = q.tr("Invalid use of the range operator.");
+			break;
+		case REG_ESIZE:
+			emsg = q.tr("Pattern buffer too large.");
+			break;
+		case REG_ESPACE:
+			emsg = q.tr("The regex routines ran out of memory.");
+			break;
+		case REG_ESUBREG:
+			emsg = q.tr("Invalid back reference to a subexpression.");
+			break;
+		default:
+			emsg = q.tr("Unknown error.");
+			break;
+		}
+		return emsg;
+	}
 }
-
-#endif /* FILTERSTATE_H */

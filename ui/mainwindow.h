@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -111,6 +111,8 @@ class QCPLayer;
 class QCPLegend;
 class QCustomPlot;
 class QCPAbstractLegendItem;
+class RegexDialog;
+class RegexFilter;
 class SettingStore;
 class TaskToolBar;
 class TracePlot;
@@ -138,6 +140,7 @@ private slots:
 	void closeTrace();
 	void saveScreenshot();
 	void about();
+	void showError(const QString &caption, const QString &msg);
 	void aboutQCustomPlot();
 	void license();
 	void mouseWheel();
@@ -170,6 +173,7 @@ private slots:
 	void verticalZoom();
 	void showTaskSelector();
 	void filterOnCPUs();
+	void showArgFilter();
 	void showEventFilter();
 	void showGraphEnable();
 	void showWakeupOrWaking(int pid, event_t wakevent);
@@ -178,9 +182,11 @@ private slots:
 			     bool orlogic, bool inclusive);
 	void createCPUFilter(QMap<unsigned, unsigned> &map, bool orlogic);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
+	void createRegexFilter(RegexFilter &regexFilter, bool orlogic);
 	void resetPidFilter();
 	void resetCPUFilter();
 	void resetEventFilter();
+	void resetRegexFilter();
 	void resetFilters();
 	void timeFilter();
 	void exportEvents(TraceAnalyzer::exporttype_t export_type);
@@ -339,6 +345,7 @@ private:
 	QAction *showTasksAction;
 	QAction *filterCPUsAction;
 	QAction *showEventsAction;
+	QAction *showArgFilterAction;
 	QAction *timeFilterAction;
 	QAction *graphEnableAction;
 	QAction *resetFiltersAction;
@@ -382,6 +389,7 @@ private:
 	EventSelectDialog *eventSelectDialog;
 	CPUSelectDialog *cpuSelectDialog;
 	GraphEnableDialog *graphEnableDialog;
+	RegexDialog *regexDialog;
 
 	static const double bugWorkAroundOffset;
 	static const double schedSectionOffset;

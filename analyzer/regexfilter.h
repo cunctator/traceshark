@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2017, 2019-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2020, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,36 +50,51 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILTERSTATE_H
-#define FILTERSTATE_H
+#ifndef _REGEXFILTER_H
+#define _REGEXFILTER_H
 
-#include <cstdint>
-
-#include "vtl/compiler.h"
-
-class FilterState {
-public:
-	FilterState();
-	typedef enum : int {
-		FILTER_PID = 0,
-		FILTER_EVENT,
-		FILTER_TIME,
-		FILTER_CPU,
-		FILTER_REGEX,
-		NR_FILTERS
-	} filter_t;
-	void enable(filter_t filter);
-	void disable(filter_t filter);
-	void disableAll();
-	bool isEnabled() const;
-	vtl_always_inline bool isEnabled(filter_t filter) const;
-private:
-	bool state[NR_FILTERS];
-};
-
-vtl_always_inline bool FilterState::isEnabled(filter_t filter) const
-{
-	return state[filter];
+extern "C" {
+#include <sys/types.h>
+#include <regex.h>
 }
 
-#endif /* FILTERSTATE_H */
+#include <QString>
+#include <QVector>
+
+#include "misc/traceshark.h"
+
+#define REGEXFILTER_POS_DEFS_						\
+	REGEXFILTER_POS_ITEM_(NONE, "None"),				\
+	REGEXFILTER_POS_ITEM_(ABSOLUTE, "Absolute"),			\
+	REGEXFILTER_POS_ITEM_(RELATIVE, "Previous match"),		\
+	REGEXFILTER_POS_ITEM_(NR, nullptr)
+
+class Regex {
+public:
+
+#undef REGEXFILTER_POS_ITEM_
+#define REGEXFILTER_POS_ITEM_(a, b) POS_##a
+	enum PosType : int {
+		REGEXFILTER_POS_DEFS_
+	};
+#undef REGEXFILTER_POS_ITEM_
+	static const char * const posNames[];
+
+	enum TShark::Logic logic;
+	bool inverted;
+	bool caseSensitive;
+	bool isExtended;
+	enum PosType posType;
+	int pos;
+	QString text;
+	regex_t regex;
+	bool regex_valid;
+};
+
+class RegexFilter {
+public:
+	QVector<Regex> regvec;
+	bool valid;
+};
+
+#endif /* _REGEXFILTER_H */
