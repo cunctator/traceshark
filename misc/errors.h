@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -53,32 +53,64 @@
 #ifndef ERRORS_H
 #define ERRORS_H
 
+#define TSHARK_ERROR_DEFS_						\
+	TSHARK_ITEM_(TS_ERROR_NOERROR = 0,				\
+		"No error has occurred."),				\
+	TSHARK_ITEM_(TS_ERROR_INTERNAL,					\
+		"A serious internal error has occurred."),		\
+	TSHARK_ITEM_(TS_ERROR_ERROR,					\
+		"An error in the error reporting has occurred."),	\
+	TSHARK_ITEM_(TS_ERROR_PARSER,					\
+		"A parsing error has occurred."),			\
+	TSHARK_ITEM_(TS_ERROR_NOCPUEV,					\
+		"Could not find cycles or cpu-cycles events."),		\
+	TSHARK_ITEM_(TS_ERROR_FILECHANGED,				\
+		"The tracefile has changed on disk."),			\
+	TSHARK_ITEM_(TS_ERROR_EOF,					\
+		"Unexpected end of file."),				\
+	TSHARK_ITEM_(TS_ERROR_FILEFORMAT,				\
+		"Incorrect file format."),				\
+	TSHARK_ITEM_(TS_ERROR_NEWFORMAT,				\
+		"The file format is from a newer unsupported version."),\
+/* The errors below are to accomodate the Qt QFileDevice::FileError codes */ \
+	TSHARK_ITEM_(TS_ERROR_FILE_READ,				\
+		"An error occurred when reading from the file."),	\
+	TSHARK_ITEM_(TS_ERROR_FILE_WRITE,				\
+		"An error occurred when writing to the file."),		\
+	TSHARK_ITEM_(TS_ERROR_FATALERROR,				\
+		"A fatal error occurred."),				\
+	TSHARK_ITEM_(TS_ERROR_FILE_RESOURCE,				\
+	"Out of resources (e.g., too many open files, out of memory, etc.)"),\
+	TSHARK_ITEM_(TS_ERROR_OPEN,					\
+		"The file could not be opened."),			\
+	TSHARK_ITEM_(TS_ERROR_ABORT,					\
+		"The operation was aborted."),				\
+	TSHARK_ITEM_(TS_ERROR_TIMEOUT,					\
+		"A timeout occurred."),					\
+	TSHARK_ITEM_(TS_ERROR_UNSPEC,					\
+		"An unspecified error occurred."),			\
+	TSHARK_ITEM_(TS_ERROR_FILE_REMOVE,				\
+		"The file could not be removed."),			\
+	TSHARK_ITEM_(TS_ERROR_FILE_RENAME,				\
+		"The file could not be renamed."),			\
+	TSHARK_ITEM_(TS_ERROR_FILE_POS,					\
+		"The position in the file could not be changed."),	\
+	TSHARK_ITEM_(TS_ERROR_FILE_RESIZE,				\
+		"The file could not be resized."),			\
+	TSHARK_ITEM_(TS_ERROR_FILE_PERM,				\
+		"The file could not be accessed."),			\
+	TSHARK_ITEM_(TS_ERROR_FILE_COPY,				\
+		"The file could not be copied."),			\
+	TSHARK_ITEM_(TS_NR_ERRORS,					\
+		nullptr)
+
+
+#undef TSHARK_ITEM_
+#define TSHARK_ITEM_(A, B) A
 typedef enum : int {
-	TS_ERROR_NOERROR = 0,
-		TS_ERROR_INTERNAL,
-		TS_ERROR_ERROR,
-		TS_ERROR_PARSER,
-		TS_ERROR_NOCPUEV,
-		TS_ERROR_FILECHANGED,
-		TS_ERROR_EOF,
-		TS_ERROR_FILEFORMAT,
-		TS_ERROR_NEWFORMAT,
-		TS_ERROR_FILE_READ,
-		TS_ERROR_FILE_WRITE,
-		TS_ERROR_FATALERROR,
-		TS_ERROR_FILE_RESOURCE,
-		TS_ERROR_OPEN,
-		TS_ERROR_ABORT,
-		TS_ERROR_TIMEOUT,
-		TS_ERROR_UNSPEC,
-		TS_ERROR_FILE_REMOVE,
-		TS_ERROR_FILE_RENAME,
-		TS_ERROR_FILE_POS,
-		TS_ERROR_FILE_RESIZE,
-		TS_ERROR_FILE_PERM,
-		TS_ERROR_FILE_COPY,
-		TS_NR_ERRORS
+		TSHARK_ERROR_DEFS_
 } tserror_t;
+#undef TSHARK_ITEM_
 
 const char *ts_strerror(int ts_errno);
 
