@@ -1281,11 +1281,11 @@ void MainWindow::about()
 	       "</p>"
 		).arg(QLatin1String(TRACESHARK_VERSION_STRING));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2014-2021 Viktor Rosendahl"
-	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below."
+	       "<p>Copyright &copy; 2014-2021 Viktor Rosendahl<p>"
+	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below.</p>"
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; select \"License\" under the \"Help\""
-	       " menu for details."
+	       " menu for details.</p>"
 
 	       "<h2>15. Disclaimer of Warranty.</h2>"
 	       "<p>THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT "
@@ -1297,7 +1297,7 @@ void MainWindow::about()
 	       "PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND "
 	       "PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE PROGRAM "
 	       "PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY "
-	       "SERVICING, REPAIR OR CORRECTION."
+	       "SERVICING, REPAIR OR CORRECTION.</p>"
 
 	       "<h2>16. Limitation of Liability.</h2>"
 	       "<p>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED "
@@ -1310,7 +1310,7 @@ void MainWindow::about()
 	       "SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM "
 	       "TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR "
 	       "OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH "
-	       "DAMAGES."
+	       "DAMAGES.</p>"
 
 	       "<h2>17. Interpretation of Sections 15 and 16.</h2>"
 	       "<p>If the disclaimer of warranty and limitation of "
@@ -1319,7 +1319,7 @@ void MainWindow::about()
 	       "law that most closely approximates an absolute waiver of all "
 	       "civil liability in connection with the Program, unless a "
 	       "warranty or assumption of liability accompanies a copy of the "
-	       "Program in return for a fee.");
+	       "Program in return for a fee.</p>");
 	QMessageBox *msgBox = new QMessageBox(this);
 	msgBox->setAttribute(Qt::WA_DeleteOnClose);
 	msgBox->setWindowTitle(tr("About Traceshark"));
