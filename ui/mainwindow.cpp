@@ -1281,7 +1281,7 @@ void MainWindow::about()
 	       "</p>"
 		).arg(QLatin1String(TRACESHARK_VERSION_STRING));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2014-2020 Viktor Rosendahl"
+	       "<p>Copyright &copy; 2014-2021 Viktor Rosendahl"
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below."
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; select \"License\" under the \"Help\""
