@@ -2307,62 +2307,34 @@ void MainWindow::createRegexFilter(RegexFilter &regexFilter, bool orlogic)
 
 void MainWindow::resetPidFilter()
 {
-	vtl::Time saved;
-
-	if (!analyzer->filterActive(FilterState::FILTER_PID))
-		return;
-
-	saved = eventsWidget->getSavedScroll();
-	eventsWidget->beginResetModel();
-	analyzer->disableFilter(FilterState::FILTER_PID);
-	setEventsWidgetEvents();
-	eventsWidget->endResetModel();
-	scrollTo(saved);
-	updateResetFiltersEnabled();
+	resetFilter(FilterState::FILTER_PID);
 }
 
 void MainWindow::resetCPUFilter()
 {
-	vtl::Time saved;
-
-	if (!analyzer->filterActive(FilterState::FILTER_CPU))
-		return;
-
-	saved = eventsWidget->getSavedScroll();
-	eventsWidget->beginResetModel();
-	analyzer->disableFilter(FilterState::FILTER_CPU);
-	setEventsWidgetEvents();
-	eventsWidget->endResetModel();
-	scrollTo(saved);
-	updateResetFiltersEnabled();
+	resetFilter(FilterState::FILTER_CPU);
 }
 
 void MainWindow::resetEventFilter()
 {
-	vtl::Time saved;
-
-	if (!analyzer->filterActive(FilterState::FILTER_EVENT))
-		return;
-
-	saved = eventsWidget->getSavedScroll();
-	eventsWidget->beginResetModel();
-	analyzer->disableFilter(FilterState::FILTER_EVENT);
-	setEventsWidgetEvents();
-	eventsWidget->endResetModel();
-	scrollTo(saved);
-	updateResetFiltersEnabled();
+	resetFilter(FilterState::FILTER_EVENT);
 }
 
 void MainWindow::resetRegexFilter()
 {
+	resetFilter(FilterState::FILTER_REGEX);
+}
+
+void MainWindow::resetFilter(FilterState::filter_t filter)
+{
 	vtl::Time saved;
 
-	if (!analyzer->filterActive(FilterState::FILTER_REGEX))
+	if (!analyzer->filterActive(filter))
 		return;
 
 	saved = eventsWidget->getSavedScroll();
 	eventsWidget->beginResetModel();
-	analyzer->disableFilter(FilterState::FILTER_REGEX);
+	analyzer->disableFilter(filter);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);

@@ -284,6 +284,7 @@ private:
 	void addStillRunningTaskGraph(Task *task);
 	void addPreemptedTaskGraph(Task *task);
 	void addUninterruptibleTaskGraph(Task *task);
+	void resetFilter(FilterState::filter_t filter);
 	void setTraceActionsEnabled(bool e);
 	void setLegendActionsEnabled(bool e);
 	void setCloseActionsEnabled(bool e);
