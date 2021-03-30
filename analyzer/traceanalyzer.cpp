@@ -1276,7 +1276,7 @@ const char TraceAnalyzer::spaceStr[] = \
 	"                                     ";
 const int TraceAnalyzer::spaceStrLen = strlen(spaceStr);
 
-const char *const TraceAnalyzer::cpuevents[] =
+const char * const TraceAnalyzer::cpuevents[] =
 {
 	"cpu-cycles", "cycles",
 };

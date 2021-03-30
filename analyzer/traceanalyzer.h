@@ -308,7 +308,7 @@ private:
 	vtl::Time OR_filterTimeHigh;
 	static const char spaceStr[];
 	static const int spaceStrLen;
-	static const char *const cpuevents[];
+	static const char * const cpuevents[];
 	static const int CPUEVENTS_NR;
 	const SettingStore *setstor;
 };

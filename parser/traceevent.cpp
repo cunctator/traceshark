@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2017, 2019, 2020
+ * Copyright (C) 2015, 2016, 2017, 2019-2021
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -57,6 +57,11 @@
 /* Do not change the order of these without updating the enum in
  * traceevent.h */
 
+/*
+ * The maximum length of these strings should be in the macro
+ * EVENTSTRINGS_MAXLEN
+ */
+
 static char cpufreqstr[] = "cpu_frequency";
 static char cpuidlestr[] = "cpu_idle";
 static char migratestr[] = "sched_migrate_task";
@@ -69,7 +74,7 @@ static char sprexitstr[] = "sched_process_exit";
 static char irqhdlrent[] = "irq_handler_entry";
 static char irqhdlrext[] = "irq_handler_exit";
 
-char *eventstrings[NR_EVENTS] = {
+const char * const eventstrings[NR_EVENTS] = {
 	cpufreqstr,
 	cpuidlestr,
 	migratestr,

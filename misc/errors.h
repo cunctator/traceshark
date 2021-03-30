@@ -142,6 +142,6 @@ typedef enum : int {
 
 const char *ts_strerror(int ts_errno);
 
-extern const char *const NullStr;
+extern const char * const NullStr;
 
 #endif /* ERRORS_H */

@@ -56,7 +56,7 @@
 
 #undef TSHARK_ITEM_
 #define TSHARK_ITEM_(A, B) B
-static const char *errorstrings[] = {
+static const char * const errorstrings[] = {
 	TSHARK_ERROR_DEFS_
 };
 #undef TSHARK_ITEM_
@@ -75,4 +75,4 @@ static const char parsingerr[] = "parsing error";
  * All places were we wish to have a null string that doesn't crash the program
  * like nullptr does, are essentially parsing problems.
  */
-const char *const NullStr = &parsingerr[0];
+const char * const NullStr = &parsingerr[0];

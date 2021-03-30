@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018-2020
+ * Copyright (C) 2015, 2016, 2018-2021
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -51,10 +51,9 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-extern "C" {
-#include <strings.h>
-}
+#include <cstring>
 
+#include "misc/osapi.h"
 #include "parser/ftrace/ftracegrammar.h"
 #include "parser/traceevent.h"
 
@@ -88,10 +87,19 @@ void FtraceGrammar::setupEventTree()
 {
 	int t;
 	TString str;
+	char stra[EVENTSTRINGS_MAXLEN];
+	const int maxsize = arraylen(stra);
+
+	str.ptr = stra;
 
 	for (t = 0; t < NR_EVENTS; t++) {
-		str.ptr = eventstrings[t];
 		str.len = strlen(eventstrings[t]);
+		if (str.len >= maxsize) {
+			vtl::errx(BSD_EX_SOFTWARE,
+				  "Unexpected long string at %s:%d",
+				  __FILE__, __LINE__);
+		}
+		str.ptr = strncpy(str.ptr, eventstrings[t], maxsize);
 		eventTree->searchAllocString(&str, (event_t) t);
 	}
 }
