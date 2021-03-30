@@ -1332,17 +1332,6 @@ void MainWindow::about()
 	msgBox->show();
 }
 
-void MainWindow::showError(const QString &caption, const QString &msg)
-{
-	QMessageBox *msgBox = new QMessageBox(this);
-	msgBox->setAttribute(Qt::WA_DeleteOnClose);
-	msgBox->setWindowTitle(tr("Error Message"));
-	msgBox->setText(caption);
-	msgBox->setInformativeText(msg);
-
-	msgBox->show();
-}
-
 void MainWindow::aboutQCustomPlot()
 {
 	QString textAboutCaption;
@@ -2304,20 +2293,16 @@ void MainWindow::createEventFilter(QMap<event_t, event_t> &map, bool orlogic)
 void MainWindow::createRegexFilter(RegexFilter &regexFilter, bool orlogic)
 {
 	vtl::Time saved = eventsWidget->getSavedScroll();
-	int ecode;
+	int ts_errno;
 
 	eventsWidget->beginResetModel();
-	ecode = analyzer->createRegexFilter(regexFilter, orlogic);
+	ts_errno = analyzer->createRegexFilter(regexFilter, orlogic);
 	setEventsWidgetEvents();
 	eventsWidget->endResetModel();
 	scrollTo(saved);
 	updateResetFiltersEnabled();
-	if (ecode != 0) {
-		showError(tr("<h1>Regex Error</h1>"),
-			  tr("<p>An error in a regex occurred:</p>") +
-			  tr("<p>") + TShark::translateRegexError(ecode) +
-			  tr("</p>"));
-	}
+	if (ts_errno != 0)
+		vtl::warn(ts_errno, "Failed to compile regex");
 }
 
 void MainWindow::resetPidFilter()

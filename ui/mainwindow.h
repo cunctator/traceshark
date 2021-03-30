@@ -140,7 +140,6 @@ private slots:
 	void closeTrace();
 	void saveScreenshot();
 	void about();
-	void showError(const QString &caption, const QString &msg);
 	void aboutQCustomPlot();
 	void license();
 	void mouseWheel();

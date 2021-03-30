@@ -80,6 +80,7 @@ extern "C" {
 #include "misc/setting.h"
 #include "misc/settingstore.h"
 #include "misc/traceshark.h"
+#include "misc/translate.h"
 #include "threads/workthread.h"
 #include "threads/workitem.h"
 #include "threads/workqueue.h"
@@ -1107,6 +1108,8 @@ int TraceAnalyzer::createRegexFilter(RegexFilter &regexFilter, bool orlogic)
 		freeRegex(filter);
 		state.disable(FilterState::FILTER_REGEX);
 	}
+	if (ecode != 0)
+		ecode = -translate_RegcompError(ecode);
 	return ecode;
 }
 

@@ -101,9 +101,37 @@
 		"The file could not be accessed."),			\
 	TSHARK_ITEM_(TS_ERROR_FILE_COPY,				\
 		"The file could not be copied."),			\
+/* The errors below are to accomodate the regcomp() function */		\
+	TSHARK_ITEM_(TS_ERROR_REG_BADBR,				\
+		     "Invalid use of back reference operator."),	\
+	TSHARK_ITEM_(TS_ERROR_REG_BADPAT,				\
+		     "Invalid use of pattern operators."),		\
+	TSHARK_ITEM_(TS_ERROR_REG_BADRPT,				\
+		     "Invalid use of repetition operators."),		\
+	TSHARK_ITEM_(TS_ERROR_REG_EBRACE,				\
+		     "Un-matched brace interval operators."),		\
+	TSHARK_ITEM_(TS_ERROR_REG_EBRACK,				\
+		     "Un-matched bracket list operators."),		\
+	TSHARK_ITEM_(TS_ERROR_REG_ECOLLATE,				\
+		     "Invalid collating element."),			\
+	TSHARK_ITEM_(TS_ERROR_REG_ECTYPE,				\
+		     "Unknown character class name."),			\
+	TSHARK_ITEM_(TS_ERROR_REG_EEND,					\
+		     "Nonspecific error."),				\
+	TSHARK_ITEM_(TS_ERROR_REG_EESCAPE,				\
+		     "Trailing backslash."),				\
+	TSHARK_ITEM_(TS_ERROR_REG_EPAREN,				\
+		     "Un-matched parenthesis group operators."),	\
+	TSHARK_ITEM_(TS_ERROR_REG_ERANGE,				\
+		     "Invalid use of the range operator."),		\
+	TSHARK_ITEM_(TS_ERROR_REG_ESIZE,				\
+		     "Pattern buffer too large."),			\
+	TSHARK_ITEM_(TS_ERROR_REG_ESPACE,				\
+		     "The regex routines ran out of memory."),		\
+	TSHARK_ITEM_(TS_ERROR_REG_ESUBREG,				\
+		     "Invalid back reference to a subexpression."),	\
 	TSHARK_ITEM_(TS_NR_ERRORS,					\
-		nullptr)
-
+		     nullptr)
 
 #undef TSHARK_ITEM_
 #define TSHARK_ITEM_(A, B) A

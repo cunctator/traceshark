@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,11 +50,15 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/types.h>
+#include <regex.h>
+
 #include "translate.h"
 
 tserror_t translate_FileError(qfile_error_t err)
 {
 	tserror_t ecode;
+
 	switch(err) {
 	case qfile_error_class::NoError:
 		ecode = TS_ERROR_NOERROR;
@@ -100,6 +104,60 @@ tserror_t translate_FileError(qfile_error_t err)
 		break;
 	case qfile_error_class::CopyError:
 		ecode = TS_ERROR_FILE_COPY;
+		break;
+	default:
+		ecode = TS_ERROR_UNSPEC;
+		break;
+	}
+	return ecode;
+}
+
+tserror_t translate_RegcompError(int err)
+{
+	tserror_t ecode;
+
+	switch(err) {
+	case REG_BADBR:
+		ecode = TS_ERROR_REG_BADBR;
+		break;
+	case REG_BADPAT:
+		ecode = TS_ERROR_REG_BADPAT;
+		break;
+	case REG_BADRPT:
+		ecode = TS_ERROR_REG_BADRPT;
+		break;
+	case REG_EBRACE:
+		ecode = TS_ERROR_REG_EBRACE;
+		break;
+	case REG_EBRACK:
+		ecode = TS_ERROR_REG_EBRACK;
+		break;
+	case REG_ECOLLATE:
+		ecode = TS_ERROR_REG_ECOLLATE;
+		break;
+	case REG_ECTYPE:
+		ecode = TS_ERROR_REG_ECTYPE;
+		break;
+	case REG_EEND:
+		ecode = TS_ERROR_REG_EEND;
+		break;
+	case REG_EESCAPE:
+		ecode = TS_ERROR_REG_EESCAPE;
+		break;
+	case REG_EPAREN:
+		ecode = TS_ERROR_REG_EPAREN;
+		break;
+	case REG_ERANGE:
+		ecode = TS_ERROR_REG_ERANGE;
+		break;
+	case REG_ESIZE:
+		ecode = TS_ERROR_REG_ESIZE;
+		break;
+	case REG_ESPACE:
+		ecode = TS_ERROR_REG_ESPACE;
+		break;
+	case REG_ESUBREG:
+		ecode = TS_ERROR_REG_ESUBREG;
 		break;
 	default:
 		ecode = TS_ERROR_UNSPEC;

@@ -50,11 +50,6 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <regex.h>
-
-#include <QObject>
-
 #include "misc/traceshark.h"
 #include "vtl/compiler.h"
 
@@ -67,58 +62,4 @@ namespace TShark {
 		nullptr
 	};
 #undef TSHARK_LOGIC_ITEM_
-
-	QString translateRegexError(int ecode)
-	{
-		QObject q;
-		QString emsg;
-		switch (ecode) {
-		case REG_BADBR:
-			emsg = q.tr("Invalid use of back reference operator.");
-			break;
-		case REG_BADPAT:
-			emsg = q.tr("Invalid use of pattern operators.");
-			break;
-		case REG_BADRPT:
-			emsg = q.tr("Invalid use of repetition operators.");
-			break;
-		case REG_EBRACE:
-			emsg = q.tr("Un-matched brace interval operators.");
-			break;
-		case REG_EBRACK:
-			emsg = q.tr("Un-matched bracket list operators.");
-			break;
-		case REG_ECOLLATE:
-			emsg = q.tr("Invalid collating element.");
-			break;
-		case REG_ECTYPE:
-			emsg = q.tr("Unknown character class name.");
-			break;
-		case REG_EEND:
-			emsg = q.tr("Nonspecific error.");
-			break;
-		case REG_EESCAPE:
-			emsg = q.tr("Trailing backslash.");
-			break;
-		case REG_EPAREN:
-			emsg = q.tr("Un-matched parenthesis group operators.");
-			break;
-		case REG_ERANGE:
-			emsg = q.tr("Invalid use of the range operator.");
-			break;
-		case REG_ESIZE:
-			emsg = q.tr("Pattern buffer too large.");
-			break;
-		case REG_ESPACE:
-			emsg = q.tr("The regex routines ran out of memory.");
-			break;
-		case REG_ESUBREG:
-			emsg = q.tr("Invalid back reference to a subexpression.");
-			break;
-		default:
-			emsg = q.tr("Unknown error.");
-			break;
-		}
-		return emsg;
-	}
 }
