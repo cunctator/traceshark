@@ -171,6 +171,4 @@ private:
 
 extern const char * const eventstrings[];
 
-#define EVENTSTRINGS_MAXLEN 20
-
 #endif /* TRACEEVENT_H */

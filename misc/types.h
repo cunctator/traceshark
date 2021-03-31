@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,25 +50,38 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MISC_TYPES_H
-#define _MISC_TYPES_H
+#ifndef MISC_TYPES_H_
+#define MISC_TYPES_H_
 
 typedef uint32_t taskstate_t;
 
-typedef enum : int {
-	EVENT_ERROR = -1,
-	CPU_FREQUENCY,
-	CPU_IDLE,
-	SCHED_MIGRATE_TASK,
-	SCHED_SWITCH,
-	SCHED_WAKEUP,
-	SCHED_WAKEUP_NEW,
-	SCHED_WAKING,
-	SCHED_PROCESS_FORK,
-	SCHED_PROCESS_EXIT,
-	IRQ_HANDLER_ENTRY,
-	IRQ_HANDLER_EXIT,
-	NR_EVENTS,
-} event_t;
+/*
+ * This is the maximum length of strings in TRACEEVENT_DEFS_. If a new string is
+ * added and it is longer than the value below, then it must be increased.
+ */
+#define EVENTSTRINGS_MAXLEN 20
 
-#endif
+#define TRACEEVENTS_DEFS_						\
+	TSHARK_ITEM_(CPU_FREQUENCY = 0,	"cpu_frequency"),		\
+	TSHARK_ITEM_(CPU_IDLE,		"cpu_idle"),			\
+	TSHARK_ITEM_(SCHED_MIGRATE_TASK,"sched_migrate_task"),		\
+	TSHARK_ITEM_(SCHED_SWITCH,	"sched_switch"),		\
+	TSHARK_ITEM_(SCHED_WAKEUP,	"sched_wakeup"),		\
+	TSHARK_ITEM_(SCHED_WAKEUP_NEW,	"sched_wakeup_new"),		\
+	TSHARK_ITEM_(SCHED_WAKING,	"sched_waking"),		\
+	TSHARK_ITEM_(SCHED_PROCESS_FORK,"sched_process_fork"),		\
+	TSHARK_ITEM_(SCHED_PROCESS_EXIT,"sched_process_exit"),		\
+	TSHARK_ITEM_(IRQ_HANDLER_ENTRY,	"irq_handler_entry"),		\
+	TSHARK_ITEM_(IRQ_HANDLER_EXIT,	"irq_handler_exit"),		\
+	TSHARK_ITEM_(NR_EVENTS,		nullptr)
+
+#undef TSHARK_ITEM_
+#define TSHARK_ITEM_(A, B) A
+typedef enum : int {
+	TRACEEVENTS_DEFS_
+} event_t;
+#undef TSHARK_ITEM_
+
+#define EVENT_ERROR ((event_t)-1)
+
+#endif /* MISC_TYPES_H_  */

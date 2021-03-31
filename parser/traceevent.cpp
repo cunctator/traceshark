@@ -62,31 +62,12 @@
  * EVENTSTRINGS_MAXLEN
  */
 
-static char cpufreqstr[] = "cpu_frequency";
-static char cpuidlestr[] = "cpu_idle";
-static char migratestr[] = "sched_migrate_task";
-static char sswitchstr[] = "sched_switch";
-static char swakeupstr[] = "sched_wakeup";
-static char swaknewstr[] = "sched_wakeup_new";
-static char swakingstr[] = "sched_waking";
-static char sprforkstr[] = "sched_process_fork";
-static char sprexitstr[] = "sched_process_exit";
-static char irqhdlrent[] = "irq_handler_entry";
-static char irqhdlrext[] = "irq_handler_exit";
-
-const char * const eventstrings[NR_EVENTS] = {
-	cpufreqstr,
-	cpuidlestr,
-	migratestr,
-	sswitchstr,
-	swakeupstr,
-	swaknewstr,
-	swakingstr,
-	sprforkstr,
-	sprexitstr,
-	irqhdlrent,
-	irqhdlrext
+#undef TSHARK_ITEM_
+#define TSHARK_ITEM_(A, B) B
+const char * const eventstrings[] = {
+	TRACEEVENTS_DEFS_
 };
+#undef TSHARK_ITEM_
 
 StringTree<> *TraceEvent::stringTree = nullptr;
 
