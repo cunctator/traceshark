@@ -52,18 +52,16 @@
  */
 
 #include "parser/traceevent.h"
+#include "misc/types.h"
 #include "mm/stringtree.h"
 
-/* Do not change the order of these without updating the enum in
- * traceevent.h */
-
-/*
- * The maximum length of these strings should be in the macro
- * EVENTSTRINGS_MAXLEN
- */
-
+/* TSHARK_ITEM_ is used by the TRACEEVENT_DEFS_ macro */
 #undef TSHARK_ITEM_
 #define TSHARK_ITEM_(A, B) B
+/*
+ * The maximum length of these strings should be in the macro
+ * EVENTSTRINGS_MAXLEN, which is defined misc/types.h
+ */
 const char * const eventstrings[] = {
 	TRACEEVENTS_DEFS_
 };
