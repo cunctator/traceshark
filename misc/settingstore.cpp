@@ -70,6 +70,7 @@ SettingStore::SettingStore()
 	Setting::Dependency unlimitedDep(Setting::SHOW_MIGRATION_GRAPHS, true);
 	Setting::Dependency openglDep(Setting::OPENGL_ENABLED, true);
 	Setting::Dependency vertwakeDep(Setting::VERTICAL_WAKEUP, true);
+	Setting::Dependency loadsizeDep(Setting::LOAD_WINDOW_SIZE_START, true);
 
 	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
 	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
@@ -172,6 +173,38 @@ SettingStore::SettingStore()
 	initMinIntValue(Setting::MIGRATION_WIDTH, MIN_MIGRATION_WIDTH);
 	initDisabledIntValue(Setting::MIGRATION_WIDTH, DEFAULT_MIGRATION_WIDTH);
 	addDependency(Setting::MIGRATION_WIDTH, openglDep);
+
+	setName(Setting::LOAD_WINDOW_SIZE_START,
+		q.tr("Restore the size of the main window at startup"));
+	setKey(Setting::LOAD_WINDOW_SIZE_START,
+	       QString("LOAD_WINDOW_SIZE_START"));
+	initBoolValue(Setting::LOAD_WINDOW_SIZE_START, false);
+
+	setName(Setting::MAINWINDOW_WIDTH, q.tr("Width of the main window"));
+	setUnit(Setting::MAINWINDOW_WIDTH, q.tr("pixels"));
+	setKey(Setting::MAINWINDOW_WIDTH, QString("MAINWINDOW_WIDTH"));
+	initIntValue(Setting::MAINWINDOW_WIDTH, DEFAULT_MAINWINDOW_WIDTH);
+	initMaxIntValue(Setting::MAINWINDOW_WIDTH, MAX_MAINWINDOW_WIDTH);
+	initMinIntValue(Setting::MAINWINDOW_WIDTH, MIN_MAINWINDOW_WIDTH);
+	initDisabledIntValue(Setting::MAINWINDOW_WIDTH,
+			     DEFAULT_MAINWINDOW_WIDTH);
+	addDependency(Setting::MAINWINDOW_WIDTH, loadsizeDep);
+
+	setName(Setting::MAINWINDOW_HEIGHT, q.tr("Height of the main window"));
+	setUnit(Setting::MAINWINDOW_HEIGHT, q.tr("pixels"));
+	setKey(Setting::MAINWINDOW_HEIGHT, QString("MAINWINDOW_HEIGHT"));
+	initIntValue(Setting::MAINWINDOW_HEIGHT, DEFAULT_MAINWINDOW_HEIGHT);
+	initMaxIntValue(Setting::MAINWINDOW_HEIGHT, MAX_MAINWINDOW_HEIGHT);
+	initMinIntValue(Setting::MAINWINDOW_HEIGHT, MIN_MAINWINDOW_HEIGHT);
+	initDisabledIntValue(Setting::MAINWINDOW_HEIGHT,
+			     DEFAULT_MAINWINDOW_HEIGHT);
+	addDependency(Setting::MAINWINDOW_HEIGHT, loadsizeDep);
+
+	setName(Setting::SAVE_WINDOW_SIZE_EXIT,
+		q.tr("Save the size of the main window at exit"));
+	setKey(Setting::SAVE_WINDOW_SIZE_EXIT,
+	       QString("SAVE_WINDOW_SIZE_EXIT"));
+	initBoolValue(Setting::SAVE_WINDOW_SIZE_EXIT, false);
 
 	setName(Setting::EVENT_PID_FLT_INCL_ON,
 		q.tr("Event pid filtering: include relevant wakeup, fork and scheduling events from other PIDs"));

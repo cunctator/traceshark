@@ -85,6 +85,10 @@ public:
 		FREQ_LINE_WIDTH,
 		MIGRATION_WIDTH,
 		EVENT_PID_FLT_INCL_ON,
+		LOAD_WINDOW_SIZE_START,
+		MAINWINDOW_HEIGHT,
+		MAINWINDOW_WIDTH,
+		SAVE_WINDOW_SIZE_EXIT,
 		NR_SETTINGS,
 	} index_t;
         class Value;
@@ -158,6 +162,7 @@ public:
 	};
 	Setting();
 
+	inline static bool isSizeSetting(Index id);
 	static bool isWideScreen();
 	static bool isLowResScreen();
 
@@ -368,6 +373,13 @@ vtl_always_inline const Setting::Value &Setting::Dependency::high() const
 {
 	assert_interval();
 	return high_value;
+}
+
+inline bool Setting::isSizeSetting(Index id) {
+	return id == LOAD_WINDOW_SIZE_START ||
+		id == MAINWINDOW_HEIGHT ||
+		id == MAINWINDOW_WIDTH ||
+		id == SAVE_WINDOW_SIZE_EXIT;
 }
 
 #endif /* SETTING_H */

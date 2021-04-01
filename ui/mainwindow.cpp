@@ -416,12 +416,26 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+	int wt;
+	int ht;
+	int ts_errno;
+
 	/* Here is a great place to save settings, if we ever want to do it */
 	taskSelectDialog->hide();
 	eventSelectDialog->hide();
 	cpuSelectDialog->hide();
 	statsDialog->hide();
 	statsLimitedDialog->hide();
+	if (settingStore->getValue(Setting::SAVE_WINDOW_SIZE_EXIT).boolv()) {
+		wt = width();
+		ht = height();
+		settingStore->setIntValue(Setting::MAINWINDOW_WIDTH, wt);
+		settingStore->setIntValue(Setting::MAINWINDOW_HEIGHT, ht);
+		ts_errno = settingStore->saveSettings();
+		if (ts_errno != 0)
+			vtl::warn(ts_errno, "Failed to save settings to %s",
+				  TS_SETTING_FILENAME);
+	}
 	event->accept();
 	/* event->ignore() could be used to refuse to close the window */
 }
@@ -813,11 +827,29 @@ double MainWindow::autoZoomVSize()
 void MainWindow::loadSettings()
 {
 	int ts_errno;
+	int wt;
+	int ht;
+	QRect geometry;
 
 	ts_errno = settingStore->loadSettings();
-	if (ts_errno != 0)
+	if (ts_errno != 0) {
 		vtl::warn(ts_errno, "Failed to load settings from %s",
 			  TS_SETTING_FILENAME);
+		return;
+	}
+	if (settingStore->getValue(Setting::LOAD_WINDOW_SIZE_START).boolv()) {
+		wt = settingStore->getValue(
+			Setting::MAINWINDOW_WIDTH).intv();
+		ht = settingStore->getValue(
+			Setting::MAINWINDOW_HEIGHT).intv();
+	} else {
+		geometry = QApplication::desktop()->availableGeometry();
+		wt = geometry.width() - geometry.width() / 32;
+		ht = geometry.height() - geometry.height() / 16;
+		settingStore->setIntValue(Setting::MAINWINDOW_WIDTH, wt);
+		settingStore->setIntValue(Setting::MAINWINDOW_HEIGHT, ht);
+	}
+	resize(wt, ht);
 }
 
 void MainWindow::setupCursors()
@@ -2054,6 +2086,10 @@ void MainWindow::dialogConnections()
 	/* graph enable dialog */
 	tsconnect(graphEnableDialog, settingsChanged(),
 		  this, consumeSettings());
+	tsconnect(graphEnableDialog, sizeChanged(),
+		  this, consumeSizeChange());
+	tsconnect(graphEnableDialog, sizeRequest(),
+		  this, transmitSize());
 
 	/* regex dialog */
 	tsconnect(regexDialog, createFilter(RegexFilter &, bool),
@@ -2533,6 +2569,23 @@ void MainWindow::consumeSettings()
 		updateTaskGraphActions();
 	}
 	graphEnableDialog->checkConsumption();
+}
+
+void MainWindow::consumeSizeChange()
+{
+	int wt, ht;
+
+	if (settingStore->getValue(Setting::LOAD_WINDOW_SIZE_START).boolv()) {
+		ht = settingStore->getValue(Setting::MAINWINDOW_HEIGHT).intv();
+		wt = settingStore->getValue(Setting::MAINWINDOW_WIDTH).intv();
+		if (wt != width() || ht != height())
+			resize(wt, ht);
+	}
+}
+
+void MainWindow::transmitSize()
+{
+	graphEnableDialog->setMainWindowSize(width(), height());
 }
 
 void MainWindow::addTaskGraph(int pid)

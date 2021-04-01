@@ -192,6 +192,8 @@ private slots:
 	void exportEventsTriggered();
 	void exportCPUTriggered();
 	void consumeSettings();
+	void consumeSizeChange();
+	void transmitSize();
 	void showStats();
 	void showStatsTimeLimited();
 	void removeQDockWidget(QDockWidget *widget);

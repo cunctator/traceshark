@@ -109,8 +109,6 @@ int main(int argc, char* argv[])
 	QPixmap pm(QLatin1String(RESSRC_GPH_SHARK));
 	QIcon icon;
 	QString appname = QLatin1String("Traceshark");
-	QRect geometry;
-	int width, height;
 	QString fileName;
 
 	vtl::set_strerror(ts_strerror);
@@ -134,13 +132,6 @@ int main(int argc, char* argv[])
 
 	mainWindow.show();
 
-	geometry = QApplication::desktop()->availableGeometry();
-
-
-	width = geometry.width() - geometry.width() / 32;
-	height = geometry.height() - geometry.height() / 16;
-
-	mainWindow.resize(width, height);
 	if (!fileName.isEmpty())
 		mainWindow.openFile(fileName);
 
