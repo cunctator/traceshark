@@ -1018,6 +1018,27 @@ void TraceAnalyzer::createPidFilter(QMap<int, int> &map,
 		processAllFilters();
 }
 
+bool TraceAnalyzer::updatePidFilter(bool inclusive)
+{
+	bool changed = false;
+	bool or_changed = false;
+
+	if (OR_filterState.isEnabled(FilterState::FILTER_PID)) {
+		or_changed = OR_pidFilterInclusive != inclusive;
+		OR_pidFilterInclusive = inclusive;
+	}
+	if (filterState.isEnabled(FilterState::FILTER_PID)) {
+		changed = pidFilterInclusive != inclusive;
+		pidFilterInclusive = inclusive;
+	}
+	changed = changed || or_changed;
+	if (filterState.isEnabled() && changed) {
+		processAllFilters();
+		return true;
+	}
+	return false;
+}
+
 void TraceAnalyzer::createCPUFilter(QMap<unsigned, unsigned> &map,
 				    bool orlogic)
 {

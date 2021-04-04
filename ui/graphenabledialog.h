@@ -77,6 +77,7 @@ public:
 	void setMainWindowSize(int wt, int ht);
 signals:
 	void settingsChanged();
+	void filterSettingsChanged();
 	void sizeChanged();
 	void sizeRequest();
 private:

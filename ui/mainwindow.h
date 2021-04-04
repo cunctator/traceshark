@@ -192,6 +192,7 @@ private slots:
 	void exportEventsTriggered();
 	void exportCPUTriggered();
 	void consumeSettings();
+	void consumeFilterSettings();
 	void consumeSizeChange();
 	void transmitSize();
 	void showStats();

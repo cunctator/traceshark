@@ -163,6 +163,7 @@ public:
 	Setting();
 
 	inline static bool isSizeSetting(Index id);
+	inline static bool isFilterSetting(Index id);
 	static bool isWideScreen();
 	static bool isLowResScreen();
 
@@ -380,6 +381,10 @@ inline bool Setting::isSizeSetting(Index id) {
 		id == MAINWINDOW_HEIGHT ||
 		id == MAINWINDOW_WIDTH ||
 		id == SAVE_WINDOW_SIZE_EXIT;
+}
+
+inline bool Setting::isFilterSetting(Index id) {
+	return id == EVENT_PID_FLT_INCL_ON;
 }
 
 #endif /* SETTING_H */

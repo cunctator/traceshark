@@ -155,6 +155,7 @@ public:
 	vtl_always_inline Task *findTask(int pid);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
+	bool updatePidFilter(bool inclusive);
 	void createCPUFilter(QMap<unsigned, unsigned> &map, bool orlogic);
 	void createEventFilter(QMap<event_t, event_t> &map, bool orlogic);
 	void createTimeFilter(const vtl::Time &low,

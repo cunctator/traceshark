@@ -219,6 +219,7 @@ void GraphEnableDialog::setUIValue(Setting::Index id,
 void GraphEnableDialog::applyClicked()
 {
 	bool changed = false;
+	bool filter_changed = false;
 	QMap<Setting::Index, ValueBox*>::iterator iter;
 
 	for(iter = valueBoxMap->begin(); iter != valueBoxMap->end(); iter++) {
@@ -227,12 +228,17 @@ void GraphEnableDialog::applyClicked()
 		Setting::Value uivalue = vbox->value();
 		const Setting::Value &setvalue = settingStore->getValue(idxn);
 		if (uivalue != setvalue) {
-			if (!Setting::isSizeSetting(idxn))
+			if (!Setting::isSizeSetting(idxn) &&
+			    !Setting::isFilterSetting(idxn))
 				changed = true;
+			if (Setting::isFilterSetting(idxn))
+				filter_changed = true;
 			settingStore->setValue(idxn, uivalue);
 		}
 	}
 
+	if (filter_changed)
+		emit filterSettingsChanged();
 	if (changed)
 		emit settingsChanged();
 	/*

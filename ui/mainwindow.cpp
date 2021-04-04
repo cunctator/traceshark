@@ -2086,6 +2086,8 @@ void MainWindow::dialogConnections()
 	/* graph enable dialog */
 	tsconnect(graphEnableDialog, settingsChanged(),
 		  this, consumeSettings());
+	tsconnect(graphEnableDialog, filterSettingsChanged(),
+		  this, consumeFilterSettings());
 	tsconnect(graphEnableDialog, sizeChanged(),
 		  this, consumeSizeChange());
 	tsconnect(graphEnableDialog, sizeRequest(),
@@ -2569,6 +2571,21 @@ void MainWindow::consumeSettings()
 		updateTaskGraphActions();
 	}
 	graphEnableDialog->checkConsumption();
+}
+
+void MainWindow::consumeFilterSettings()
+{
+	bool inclusive =
+		settingStore->getValue(Setting::EVENT_PID_FLT_INCL_ON).boolv();
+	if (analyzer->updatePidFilter(inclusive))
+		/*
+		 * When this function is called, the focus is often on the
+		 * graphEnableDialog widget but the user still might be
+		 * expecting to see an immediate update of the eventsWidget,
+		 * therefore we call repaint() here. Unfortunately, it doesn't
+		 * help to call update().
+		 */
+		eventsWidget->repaint();
 }
 
 void MainWindow::consumeSizeChange()
