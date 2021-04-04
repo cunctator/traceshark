@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2017, 2019-2020
+ * Copyright (C) 2015-2017, 2019-2021
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -202,7 +202,7 @@ public:
 	void clear();
 	vtl_always_inline iterator begin() const;
 	vtl_always_inline iterator end() const;
-	protected:
+protected:
 	vtl_always_inline U &findValue_(const T &key, bool &newEntry);
 	vtl_always_inline U &findValueCmp_(const T &key, bool &newEntry);
 	vtl_always_inline iterator findCmp_(const T &key) const;
