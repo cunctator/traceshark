@@ -114,6 +114,14 @@
 
 ### x86-64 Section
 
+# Generic 64-bit x86
+# MARCH_FLAG = -march=x86-64
+# MTUNE_FLAG = -mtune=x86-64
+
+# Generic 64-bit x86
+# MARCH_FLAG = -march=x86-64
+# MTUNE_FLAG = -mtune=generic
+
 ### AMD
 
 # Athlon 64
@@ -148,6 +156,10 @@
 # MARCH_FLAG = -march=znver1
 # MTUNE_FLAG = -mtune=znver1
 
+# Zen v2
+# MARCH_FLAG = -march=znver2
+# MTUNE_FLAG = -mtune=znver2
+
 # Bobcat v1
 # MARCH_FLAG = -march=btver1
 # MTUNE_FLAG = -mtune=btver1
@@ -157,6 +169,10 @@
 # MTUNE_FLAG = -mtune=btver2
 
 ### Intel
+
+# Generic Intel
+# MARCH_FLAG = -march=x86-64
+# MTUNE_FLAG = -mtune=intel
 
 # Cocona
 # MARCH_FLAG = -march=nocona
@@ -202,6 +218,18 @@
 # MARCH_FLAG = -march=silvermont
 # MTUNE_FLAG = -mtune=silvermont
 
+# Goldmont
+# MARCH_FLAG = -march=goldmont
+# MTUNE_FLAG = -mtune=goldmont
+
+# Goldmont Plus
+# MARCH_FLAG = -march=goldmont-plus
+# MTUNE_FLAG = -mtune=goldmont-plus
+
+# Tremont
+# MARCH_FLAG = -march=tremont
+# MTUNE_FLAG = -mtune=tremont
+
 # KNL
 # MARCH_FLAG = -march=knl
 # MTUNE_FLAG = -mtune=knl
@@ -221,6 +249,26 @@
 # Icelake
 # MARCH_FLAG = -march=icelake
 # MTUNE_FLAG = -mtune=icelake
+
+# Icelake Client
+# MARCH_FLAG = -march=icelake-client
+# MTUNE_FLAG = -mtune=icelake-client
+
+# Icelake Server
+# MARCH_FLAG = -march=icelake-server
+# MTUNE_FLAG = -mtune=icelake-server
+
+# Cascadelake
+# MARCH_FLAG = -march=cascadelake
+# MTUNE_FLAG = -mtune=cascadelake
+
+# Cooperlake
+# MARCH_FLAG = -march=cooperlake
+# MTUNE_FLAG = -mtune=cooperlake
+
+# Tigerlake
+# MARCH_FLAG = -march=tigerlake
+# MTUNE_FLAG = -mtune=tigerlake
 
 ### Raspberry PI section
 
