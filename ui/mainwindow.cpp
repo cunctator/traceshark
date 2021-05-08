@@ -406,6 +406,7 @@ MainWindow::~MainWindow()
 	delete cpuSelectDialog;
 	delete graphEnableDialog;
 	delete regexDialog;
+	delete settingStore
 
 	vtl::set_error_handler(nullptr);
 	delete errorDialog;
