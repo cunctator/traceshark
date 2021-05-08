@@ -16,7 +16,7 @@ sched_waking
 
 The `sched_waking` events are not really visualized but there is a button to find the `sched_waking` event that has instigated a particular `sched_wakeup` event.
 
-![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/17f9eb317f53317c29166d1d9405874d9296e41f/doc/ts-screenshot4.png)
+![traceshark screenshot](https://raw.githubusercontent.com/cunctator/traceshark/4d2083d6df569c3bd59a6b64ef210a5c61714cbe/doc/ts-screenshot5.png)
 
 Above is a screenshot of traceshark. The eight uppermost graphs are for displaying CPU idle and frequency states. They are eight because the measurement was made on a system with eight virtual CPUs. The green graphs with red circles ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/idle-graph.png) show the CPU idle states while the thicker blue graphs ![idle graph](https://raw.githubusercontent.com/cunctator/traceshark/608fdb55d78e7beebecf3a5e036cace07842f2c6/doc/freq-graph.png) show the CPU frequency changes.
 
