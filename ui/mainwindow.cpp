@@ -3245,8 +3245,9 @@ bool MainWindow::isOpenGLEnabled()
 
 void MainWindow::setupOpenGL()
 {
-	if (has_opengl() &&
-	    settingStore->getValue(Setting::OPENGL_ENABLED).boolv()) {
+	bool opengl = settingStore->getValue(Setting::OPENGL_ENABLED).boolv();
+
+	if (has_opengl() && opengl) {
 		if (!isOpenGLEnabled()) {
 			tracePlot->setOpenGl(true, 4);
 			if (!tracePlot->openGl()) {
@@ -3261,7 +3262,11 @@ void MainWindow::setupOpenGL()
 			}
 		}
 	}
-	settingStore->setBoolValue(Setting::OPENGL_ENABLED, isOpenGLEnabled());
+	if (opengl != isOpenGLEnabled()) {
+		settingStore->setBoolValue(Setting::OPENGL_ENABLED,
+					   isOpenGLEnabled());
+		settingStore->updateDependents(Setting::OPENGL_ENABLED);
+	}
 }
 
 /* Adds the currently selected task to the legend */

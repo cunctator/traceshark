@@ -211,6 +211,13 @@ SettingStore::SettingStore()
 	setKey(Setting::EVENT_PID_FLT_INCL_ON,
 	       QString("EVENT_PID_FLT_INCL_ON"));
 	initBoolValue(Setting::EVENT_PID_FLT_INCL_ON, false);
+
+	/*
+	 * The values that we have initialized above with initIntValue() and
+	 * initBoolValue() are not expected to break dependencies but let's
+	 * check anyway.
+	 */
+	checkAllDependents();
 }
 
 void SettingStore::setName(enum Setting::Index idx, const QString &n)
@@ -364,6 +371,31 @@ void SettingStore::addDependency(enum Setting::Index idx,
 		return;
 	settings[d.index_].dependent[*nrDependents] = dy;
 	(*nrDependents)++;
+}
+
+void SettingStore::updateDependents(enum Setting::Index idx)
+{
+	unsigned i;
+	const Setting &setting = settings[idx];
+
+	for (i = 0; i < setting.nrDependents; i++) {
+		const Setting::Dependency &d = setting.dependent[i];
+		if (d.desired_value != setting.value) {
+			settings[d.index_].value =
+				settings[d.index_].disabled_value;
+		}
+	}
+}
+
+void SettingStore::checkAllDependents()
+{
+	int i;
+	enum Setting::Index idx;
+
+	for (i = 0; i < Setting::NR_SETTINGS; i++) {
+		idx = (enum Setting::Index) i;
+		updateDependents(idx);
+	}
 }
 
 unsigned int SettingStore::getNrDependencies(enum Setting::Index idx) const
@@ -524,6 +556,12 @@ int SettingStore::loadSettings()
 	}
 	if (version < this_version)
 		rval = handleOlderVersion(version, this_version);
+	/*
+	 * Let's check that we have not loaded values that break dependencies.
+	 * This could happend if the user had manually edited the .traceshark
+	 * file.
+	 */
+	checkAllDependents();
 	return rval;
 }
 
