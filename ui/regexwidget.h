@@ -58,8 +58,6 @@
 #include "analyzer/regexfilter.h"
 #include "misc/traceshark.h"
 
-class Regex;
-
 QT_BEGIN_NAMESPACE
 class QComboBox;
 class QLineEdit;
