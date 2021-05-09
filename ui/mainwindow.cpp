@@ -256,6 +256,8 @@ MainWindow::MainWindow():
 	tracePlot(nullptr), scrollBarUpdate(false), graphEnableDialog(nullptr),
 	filterActive(false)
 {
+	createAboutBox();
+	createAboutQCustomPlot();
 	settingStore = new SettingStore();
 	loadSettings();
 
@@ -1302,7 +1304,7 @@ void MainWindow::verticalZoom()
 	}
 }
 
-void MainWindow::about()
+void MainWindow::createAboutBox()
 {
 	QString textAboutCaption;
 	QString textAbout;
@@ -1353,19 +1355,22 @@ void MainWindow::about()
 	       "civil liability in connection with the Program, unless a "
 	       "warranty or assumption of liability accompanies a copy of the "
 	       "Program in return for a fee.</p>");
-	QMessageBox *msgBox = new QMessageBox(this);
-	msgBox->setAttribute(Qt::WA_DeleteOnClose);
-	msgBox->setWindowTitle(tr("About Traceshark"));
-	msgBox->setText(textAboutCaption);
-	msgBox->setInformativeText(textAbout);
+	aboutBox = new QMessageBox(this);
+	aboutBox->setWindowTitle(tr("About Traceshark"));
+	aboutBox->setText(textAboutCaption);
+	aboutBox->setInformativeText(textAbout);
 
 	QPixmap pm(QLatin1String(RESSRC_GPH_SHARK));
 	if (!pm.isNull())
-		msgBox->setIconPixmap(pm);
-	msgBox->show();
+		aboutBox->setIconPixmap(pm);
 }
 
-void MainWindow::aboutQCustomPlot()
+void MainWindow::about()
+{
+	aboutBox->show();
+}
+
+void MainWindow::createAboutQCustomPlot()
 {
 	QString textAboutCaption;
 	QString textAbout;
@@ -1388,16 +1393,19 @@ void MainWindow::aboutQCustomPlot()
 	       " menu for details."
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; see the license for details.").arg(QLatin1String("http://qcustomplot.com"));
-	QMessageBox *msgBox = new QMessageBox(this);
-	msgBox->setAttribute(Qt::WA_DeleteOnClose);
-	msgBox->setWindowTitle(tr("About QCustomPlot"));
-	msgBox->setText(textAboutCaption);
-	msgBox->setInformativeText(textAbout);
+	aboutQCPBox = new QMessageBox(this);
+	aboutQCPBox->setWindowTitle(tr("About QCustomPlot"));
+	aboutQCPBox->setText(textAboutCaption);
+	aboutQCPBox->setInformativeText(textAbout);
 
 	QPixmap pm(QLatin1String(RESSRC_GPH_QCP_LOGO));
 	if (!pm.isNull())
-		msgBox->setIconPixmap(pm);
-	msgBox->show();
+		aboutQCPBox->setIconPixmap(pm);
+}
+
+void MainWindow::aboutQCustomPlot()
+{
+	aboutQCPBox->show();
 }
 
 void MainWindow::license()

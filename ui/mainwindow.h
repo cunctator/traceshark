@@ -90,6 +90,7 @@ class QAction;
 class QLabel;
 class QMenu;
 class QPlainTextEdit;
+class QMessageBox;
 class QMouseEvent;
 class QScrollBar;
 class QToolBar;
@@ -232,6 +233,8 @@ private:
 	} preference_t;
 
 	/* Helper functions for the constructor */
+	void createAboutBox();
+	void createAboutQCustomPlot();
 	void createActions();
 	void createToolBars();
 	void createMenus();
@@ -441,6 +444,8 @@ private:
 	QMap<unsigned, unsigned> eventCPUMap;
 	QMap<int, int> eventPIDMap;
 	QMap<event_t, event_t> eventTypeMap;
+	QMessageBox *aboutBox;
+	QMessageBox *aboutQCPBox;
 };
 
 #endif /* MAINWINDOW_H */
