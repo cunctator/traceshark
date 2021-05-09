@@ -397,21 +397,10 @@ MainWindow::~MainWindow()
 	if (analyzer->isOpen())
 		closeTrace();
 	delete analyzer;
-	delete tracePlot;
 	delete taskRangeAllocator;
-	delete licenseDialog;
-	delete eventInfoDialog;
-	delete taskSelectDialog;
-	delete statsDialog;
-	delete statsLimitedDialog;
-	delete eventSelectDialog;
-	delete cpuSelectDialog;
-	delete graphEnableDialog;
-	delete regexDialog;
 	delete settingStore;
 
 	vtl::set_error_handler(nullptr);
-	delete errorDialog;
 
 	for (i = 0; i < STATUS_NR; i++)
 		delete statusStrings[i];
@@ -1976,26 +1965,26 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createDialogs()
 {
-	errorDialog = new ErrorDialog();
-	licenseDialog = new LicenseDialog();
-	eventInfoDialog = new EventInfoDialog();
+	errorDialog = new ErrorDialog(this);
+	licenseDialog = new LicenseDialog(this);
+	eventInfoDialog = new EventInfoDialog(this);
 	taskSelectDialog =
-		new TaskSelectDialog(nullptr, tr("Task Selector"),
+		new TaskSelectDialog(this, tr("Task Selector"),
 				     TaskSelectDialog::TaskSelectRegular);
-	statsDialog = new TaskSelectDialog(nullptr, tr("Global Statistics"),
+	statsDialog = new TaskSelectDialog(this, tr("Global Statistics"),
 					   TaskSelectDialog::TaskSelectStats);
 	statsLimitedDialog =
-		new TaskSelectDialog(nullptr, tr("Cursor Statistics"),
+		new TaskSelectDialog(this, tr("Cursor Statistics"),
 				     TaskSelectDialog::TaskSelectStatsLimited);
 
 	taskSelectDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
 	statsDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
 	statsLimitedDialog->setAllowedAreas(Qt::RightDockWidgetArea);
 
-	eventSelectDialog = new EventSelectDialog();
-	cpuSelectDialog = new CPUSelectDialog();
-	graphEnableDialog = new GraphEnableDialog(settingStore, nullptr);
-	regexDialog = new RegexDialog();
+	eventSelectDialog = new EventSelectDialog(this);
+	cpuSelectDialog = new CPUSelectDialog(this);
+	graphEnableDialog = new GraphEnableDialog(settingStore, this);
+	regexDialog = new RegexDialog(this);
 
 	vtl::set_error_handler(errorDialog);
 }
