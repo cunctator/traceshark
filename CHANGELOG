@@ -1,3 +1,29 @@
+traceshark (0.9.12-beta) UNRELEASED; urgency=medium
+
+  * Fixed a bug that results in bad drawing performance when traceshark is built
+    with OpenGL support but linked against a QCustomPlot library that was not
+    built with OpenGL support. This bug currently seem to affect traceshark
+    in both Debian and Ubuntu.
+  * Improved shortcuts.
+  * Got rid of bzero() usage that caused compiler warning.
+  * Removed dead code.
+  * Added the new regex filtering feature that allows to filter events based on
+    regular expression filtering of the event arguments.
+  * Coding style improvements.
+  * Polished the "About Traceshark" message.
+  * Removed duplicated code.
+  * Added a new feature to let the user save the preferred window size.
+  * Change of behavior: filtering is updated when filtering options are changed.
+  * Added commented out compiler flags to traceshark.pro for newer
+    architectures.
+  * Updated the screenshot in the documentation.
+  * Make all dialogs parents of the MainWindow. This should keep them better
+    centered on the main window and also make it impossible to close the main
+    window and still leave the application running with only  a dialog from
+    which a new main window cannot be launched.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 09 May 2021 20:47:32 +0200
+
 traceshark (0.9.11-beta) RELEASED; urgency=medium
 
   * Add the new Event menu. It has actions for displaying the backtrace,
