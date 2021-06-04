@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2019-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019-2021 Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -123,6 +123,8 @@ public:
 	public:
 		iterator operator++(int);
 		iterator operator--(int);
+		iterator &operator++();
+		iterator &operator--();
 		T &operator*();
 		T *operator->();
 		bool operator==(iterator i);
@@ -135,6 +137,8 @@ public:
 	public:
 		const_iterator operator++(int);
 		const_iterator operator--(int);
+		const_iterator &operator++();
+		const_iterator &operator--();
 		const T &operator*();
 		const T *operator->();
 		bool operator==(const_iterator i);
@@ -147,6 +151,8 @@ public:
 	public:
 		reverse_iterator operator++(int);
 		reverse_iterator operator--(int);
+		reverse_iterator &operator++();
+		reverse_iterator &operator--();
 		T &operator*();
 		T *operator->();
 		bool operator==(reverse_iterator i);
@@ -159,6 +165,8 @@ public:
 	public:
 		const_reverse_iterator operator++(int);
 		const_reverse_iterator operator--(int);
+		const_reverse_iterator &operator++();
+		const_reverse_iterator &operator--();
 		const T &operator*();
 		const T *operator->();
 		bool operator==(const_reverse_iterator i);
@@ -177,6 +185,7 @@ public:
 	T &last();
 	bool contains(const T &value) const;
 	int size() const;
+	void reverse();
 	void clear();
 	iterator begin();
 	iterator end();
@@ -360,13 +369,43 @@ int QCPList<T>::size() const
 }
 
 template<class T>
+void QCPList<T>::reverse()
+{
+	QCPListElement<T> rhread;
+	QCPListElement<T> *elem;
+	QCPListElement<T> *prev;
+	QCPListElement<T> *next;
+	QCPListElement<T> *last;
+
+	if (head.next == head.prev)
+		return;
+
+	elem = head.next;
+	last = head.prev;
+	prev = &head;
+
+	do {
+		next = elem->next;
+		elem->next = prev;
+		/*
+		 * We can reverse the order defined by pos by changing the sign.
+		 */
+		elem->pos = - elem->pos;
+		prev->prev = elem;
+		prev = elem;
+		elem = next;
+	} while(prev != last);
+	head.next = prev;
+	prev->prev = &head;
+}
+
+template<class T>
 typename QCPList<T>::iterator QCPList<T>::begin()
 {
 	typename QCPList<T>::iterator r;
 	r.ptr = head.next;
 	return r;
 }
-
 
 template<class T>
 typename QCPList<T>::iterator QCPList<T>::end()
@@ -380,8 +419,8 @@ template<class T>
 typename QCPList<T>::iterator QCPList<T>::iterator::operator++(int)
 {
 	typename QCPList<T>::iterator r;
-	ptr = ptr->next;
 	r.ptr = ptr;
+	ptr = ptr->next;
 	return r;
 }
 
@@ -389,9 +428,23 @@ template<class T>
 typename QCPList<T>::iterator QCPList<T>::iterator::operator--(int)
 {
 	typename QCPList<T>::iterator r;
-	ptr = ptr->prev;
 	r.ptr = ptr;
+	ptr = ptr->prev;
 	return r;
+}
+
+template<class T>
+typename QCPList<T>::iterator &QCPList<T>::iterator::operator++()
+{
+	ptr = ptr->next;
+	return *this;
+}
+
+template<class T>
+typename QCPList<T>::iterator &QCPList<T>::iterator::operator--()
+{
+	ptr = ptr->prev;
+	return *this;
 }
 
 template<class T>
@@ -451,6 +504,20 @@ typename QCPList<T>::const_iterator QCPList<T>::const_iterator::operator--(int)
 	ptr = ptr->prev;
 	r.ptr = ptr;
 	return r;
+}
+
+template<class T>
+typename QCPList<T>::const_iterator &QCPList<T>::const_iterator::operator++()
+{
+	ptr = ptr->next;
+	return *this;
+}
+
+template<class T>
+typename QCPList<T>::const_iterator &QCPList<T>::const_iterator::operator--()
+{
+	ptr = ptr->prev;
+	return *this;
 }
 
 template<class T>
@@ -514,6 +581,22 @@ QCPList<T>::reverse_iterator::operator--(int)
 }
 
 template<class T>
+typename QCPList<T>::reverse_iterator
+&QCPList<T>::reverse_iterator::operator++()
+{
+	ptr = ptr->prev;
+	return *this;
+}
+
+template<class T>
+typename QCPList<T>::reverse_iterator
+&QCPList<T>::reverse_iterator::operator--()
+{
+	ptr = ptr->next;
+	return *this;
+}
+
+template<class T>
 bool QCPList<T>::reverse_iterator::operator==(reverse_iterator i)
 {
 	return ptr == i.ptr;
@@ -571,6 +654,22 @@ QCPList<T>::const_reverse_iterator::operator--(int)
 	ptr = ptr->next;
 	r.ptr = ptr;
 	return r;
+}
+
+template<class T>
+typename QCPList<T>::const_reverse_iterator
+&QCPList<T>::const_reverse_iterator::operator++()
+{
+	ptr = ptr->prev;
+	return *this;
+}
+
+template<class T>
+typename QCPList<T>::const_reverse_iterator
+&QCPList<T>::const_reverse_iterator::operator--()
+{
+	ptr = ptr->next;
+	return *this;
 }
 
 template<class T>
