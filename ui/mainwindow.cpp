@@ -51,6 +51,7 @@
  */
 
 #include <cstdio>
+#include <cstring>
 
 #include <QApplication>
 #include <QDateTime>
@@ -1363,6 +1364,12 @@ void MainWindow::createAboutQCustomPlot()
 {
 	QString textAboutCaption;
 	QString textAbout;
+	QString years = tr("2011-2021");
+
+	if (!strcmp(QCUSTOMPLOT_VERSION_STR, "2.0.1"))
+		years = tr("2011-2018");
+	else if (!strcmp(QCUSTOMPLOT_VERSION_STR, "2.0.0"))
+		years = tr("2011-2017");
 
 	textAboutCaption = QMessageBox::tr(
 	       "<h1>About QCustomPlot</h1>"
@@ -1373,15 +1380,16 @@ void MainWindow::createAboutQCustomPlot()
 #endif
 		).arg(QLatin1String(QCUSTOMPLOT_VERSION_STR));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2011-2018 Emanuel Eichhammer"
+	       "<p>Copyright &copy; %1 Emanuel Eichhammer"
 	       "<p>QCustomPlot is licensed under GNU General Public License as "
 	       "published by the Free Software Foundation, either version 3 of "
 	       " the License, or (at your option) any later version.</p>"
-	       "<p>See <a href=\"%1/\">%1</a> for more information about QCustomPlot.</p>"
+	       "<p>See <a href=\"%2/\">%2</a> for more information about QCustomPlot.</p>"
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; select \"License\" under the \"Help\""
 	       " menu for details."
 	       "<p>This is free software, and you are welcome to redistribute it"
-	       " under certain conditions; see the license for details.").arg(QLatin1String("http://qcustomplot.com"));
+	       " under certain conditions; see the license for details.").arg(
+		       years).arg(QLatin1String("http://qcustomplot.com"));
 	aboutQCPBox = new QMessageBox(this);
 	aboutQCPBox->setWindowTitle(tr("About QCustomPlot"));
 	aboutQCPBox->setText(textAboutCaption);
