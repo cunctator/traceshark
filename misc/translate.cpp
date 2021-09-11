@@ -138,9 +138,6 @@ tserror_t translate_RegcompError(int err)
 	case REG_ECTYPE:
 		ecode = TS_ERROR_REG_ECTYPE;
 		break;
-	case REG_EEND:
-		ecode = TS_ERROR_REG_EEND;
-		break;
 	case REG_EESCAPE:
 		ecode = TS_ERROR_REG_EESCAPE;
 		break;
@@ -150,15 +147,21 @@ tserror_t translate_RegcompError(int err)
 	case REG_ERANGE:
 		ecode = TS_ERROR_REG_ERANGE;
 		break;
-	case REG_ESIZE:
-		ecode = TS_ERROR_REG_ESIZE;
-		break;
 	case REG_ESPACE:
 		ecode = TS_ERROR_REG_ESPACE;
 		break;
 	case REG_ESUBREG:
 		ecode = TS_ERROR_REG_ESUBREG;
 		break;
+/* These two below appear to be linuxisms that are not defined by POSIX */
+#if defined(__linux__)
+	case REG_EEND:
+		ecode = TS_ERROR_REG_EEND;
+		break;
+	case REG_ESIZE:
+		ecode = TS_ERROR_REG_ESIZE;
+		break;
+#endif
 	default:
 		ecode = TS_ERROR_UNSPEC;
 		break;
