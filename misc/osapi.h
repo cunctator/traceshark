@@ -84,7 +84,7 @@ extern "C" {
 
 #define tshark_pthread_setname_np(NAME) pthread_setname_np(NAME)
 
-#elif __linux__
+#elif defined(__linux__)
 
 /* These are the Linux versions, note the difference in members names */
 #define cmp_ctimespec(s1, s2) TShark::cmp_timespec(s1.st_ctim, s2.st_ctim)
@@ -93,7 +93,7 @@ extern "C" {
 #define tshark_pthread_setname_np(NAME) pthread_setname_np(pthread_self(), \
 							   NAME)
 
-#elif __unix__
+#elif defined(__unix__)
 
 /*
  * For now what is here in __unix__ is just copies of whatever is in the mac
