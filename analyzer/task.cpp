@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -60,9 +60,9 @@ TaskName::TaskName():
 
 Task::Task():
 	AbstractTask(), taskName(nullptr), exitStatus(STATUS_ALIVE),
-	lastWakeUP(0), lastSleepEntry(0), wakeUpGraph(nullptr),
-	preemptedGraph(nullptr), runningGraph(nullptr),
-	uninterruptibleGraph(nullptr)
+	lastWakeUP(0), lastWakeUPidx(0), lastWakeUPisSched(false),
+	lastSleepEntry(0), wakeUpGraph(nullptr), preemptedGraph(nullptr),
+	runningGraph(nullptr), uninterruptibleGraph(nullptr)
 {
 	displayName = new QString();
 }

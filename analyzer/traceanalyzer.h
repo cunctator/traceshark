@@ -72,6 +72,7 @@
 #include "analyzer/cpuidle.h"
 #include "analyzer/cputask.h"
 #include "analyzer/filterstate.h"
+#include "analyzer/latency.h"
 #include "analyzer/migration.h"
 #include "analyzer/regexfilter.h"
 #include "analyzer/task.h"
@@ -130,6 +131,7 @@ public:
 	const TraceEvent *findFilteredEvent(int index, int *filterIndex) const;
 	vtl_always_inline unsigned int getMaxCPU() const;
 	vtl_always_inline unsigned int getNrCPUs() const;
+	vtl_always_inline unsigned int getNrSchedLatencies() const;
 	vtl_always_inline vtl::Time getStartTime() const;
 	vtl_always_inline vtl::Time getEndTime() const;
 	vtl_always_inline int getMinIdleState() const;
@@ -151,6 +153,7 @@ public:
 	void doScale();
 	void doStats();
 	void doLimitedStats();
+	void doLatencyStats();
 	void setQCustomPlot(QCustomPlot *plot);
 	vtl_always_inline Task *findTask(int pid);
 	void createPidFilter(QMap<int, int> &map,
@@ -171,7 +174,8 @@ public:
 			     exporttype_t export_type);
 	TraceFile *getTraceFile();
 	vtl::TList<TraceEvent> *events;
-	vtl::TList <const TraceEvent*> filteredEvents;
+	vtl::TList<const TraceEvent*> filteredEvents;
+	vtl::TList<Latency> schedLatencies;
 	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
 		*cpuTaskMaps;
 	vtl::AVLTree<int, TaskHandle> taskMap;
@@ -426,6 +430,11 @@ vtl_always_inline unsigned int TraceAnalyzer::getNrCPUs() const
 	return nrCPUs;
 }
 
+vtl_always_inline unsigned int TraceAnalyzer::getNrSchedLatencies() const
+{
+	return schedLatencies.size();
+}
+
 vtl_always_inline vtl::Time TraceAnalyzer::getStartTime() const
 {
 	return startTime;
@@ -672,6 +681,8 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 			task->runningTimev.append(oldtimeDbl);
 		}
 		task->lastWakeUP = midtime;
+		task->lastWakeUPidx = idx;
+		task->lastWakeUPisSched = true;
 	} else {
 		task->lastSleepEntry = oldtime;
 		uint = task_state_is_flag_set(state, TASK_FLAG_UNINTERRUPTIBLE);
@@ -743,9 +754,21 @@ skip:
 	double delayDbl;
 
 	if (delayOK) {
+		Latency &slatency = schedLatencies.increase();
+
 		delayDbl = delay.toDouble();
 		task->wakeTimev.append(newtimeDbl);
 		task->wakeDelay.append(delayDbl);
+
+		slatency.delay = delay;
+		slatency.pid = newpid;
+		slatency.time = midtime;
+		slatency.sched_idx = idx;
+		/*
+		 * We trust this task->lastWakeUPidx because in this case
+		 * estimateWakeUP or estimateWakeUpNew() found wakeup to be OK.
+		 */
+		slatency.wakeup_idx = task->lastWakeUPidx;
 	}
 
 	task->schedTimev.append(newtimeDbl);
@@ -784,7 +807,7 @@ out:
 vtl_always_inline
 void TraceAnalyzer::processWakeupEvent(tracetype_t ttype,
 				       const TraceEvent &event,
-				       int /* idx */)
+				       int idx)
 {
 	int pid;
 	Task *task;
@@ -804,6 +827,8 @@ void TraceAnalyzer::processWakeupEvent(tracetype_t ttype,
 	/* Handle the woken up task */
 	task = &taskMap[pid].getTask();
 	task->lastWakeUP = time;
+	task->lastWakeUPidx = idx;
+	task->lastWakeUPisSched = false;
 	if (task->isNew) {
 		task->pid = pid;
 		task->isNew = false;

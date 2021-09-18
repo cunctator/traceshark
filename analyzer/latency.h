@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,109 +50,38 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#ifndef LATENCY_H
+#define LATENCY_H
 
-#include <cstring>
-
-#include <QString>
-
-#include "analyzer/abstracttask.h"
 #include "vtl/compiler.h"
 #include "vtl/time.h"
 
-class QCPGraph;
-class TaskGraph;
-class Task;
-
-typedef enum : int {
-	STATUS_ALIVE,
-	STATUS_EXITCALLED,
-	STATUS_FINAL
-} exitstatus_t;
-
-class TaskHandle {
+class Latency {
 public:
-	TaskHandle():task(nullptr) {};
-	Task *task;
-	vtl_always_inline Task &getTask();
+	typedef enum Compare : int {
+		CMP_PID = 0,
+		CMP_NAME,
+		CMP_TIME,
+		CMP_DELAY,
+		CMP_PLACE,
+		/*
+		 * This is only intended for the purpose of sorting the latency
+		 * array when we create the place member.
+		 */
+		CMP_CREATE_PLACE
+	} compare_t;
+
+	typedef enum Order : int {
+		ORDER_NORMAL = 0,
+		ORDER_REVERSE
+	} order_t;
+
+	vtl::Time time;
+	vtl::Time delay;
+	int pid;
+	unsigned int place;
+	int sched_idx;
+	int wakeup_idx;
 };
 
-class TaskName {
-public:
-	TaskName();
-	const char *str;
-	TaskName *prev;
-	bool forkname;
-};
-
-class Task : public AbstractTask {
-public:
-	Task();
-	~Task();
-	void addName(const char *name);
-	vtl_always_inline void checkName(const char *name, bool forkname = false);
-	void generateDisplayName();
-	QString getLastName() const;
-
-	TaskName     *taskName;
-	exitstatus_t exitStatus;
-
-	/* lastWakeUP is only used during extraction */
-	vtl::Time    lastWakeUP;
-	int lastWakeUPidx;
-	bool lastWakeUPisSched;
-
-	vtl::Time    lastSleepEntry;
-
-	/*
-	 * The unified task needs to save pointers to these graphs so that they
-	 * can be deleted when the user requests the unified task to be 
-	 * removed
-	 */
-	QCPGraph     *wakeUpGraph;
-	QCPGraph     *preemptedGraph;
-	QCPGraph     *runningGraph;
-	QCPGraph     *uninterruptibleGraph;
-	QString      *displayName;
-private:
-	vtl_always_inline void appendName(const TaskName *name, bool isnewest);
-};
-
-vtl_always_inline void Task::checkName(const char *name, bool forkname)
-{
-	if (taskName == nullptr || strcmp(taskName->str, name) != 0) {
-		addName(name);
-		taskName->forkname = forkname;
-	}
-}
-
-vtl_always_inline Task &TaskHandle::getTask()
-{
-	if (task == nullptr)
-		task = new Task;
-	return *task;
-}
-
-/*
- * If the name is not the newest name and is "forkname", then we will will
- * surrount it with {}. If the name is not the newest and not a forkname,
- * then we will surround it with ()
- */
-vtl_always_inline void Task::appendName(const TaskName *name, bool isnewest)
-{
-	bool curly  =  name->forkname && !isnewest;
-	bool normal = !name->forkname && !isnewest;
-
-	if (curly)
-		displayName->append("{");
-	if (normal)
-		displayName->append("(");
-	displayName->append(name->str);
-	if (curly)
-		displayName->append("}");
-	if (normal)
-		displayName->append(")");
-}
-
-#endif /* TASK_H */
+#endif

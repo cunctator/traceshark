@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2020, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -127,6 +127,8 @@ namespace vtl {
 		vtl_always_inline void operator*=(int other);
 		vtl_always_inline void operator*=(unsigned long other);
 		vtl_always_inline void operator*=(unsigned other);
+		vtl_always_inline int compare(const Time &other) const;
+		vtl_always_inline int rcompare(const Time &other) const;
 		vtl_always_inline static Time fromDouble(const double &t);
 		vtl_always_inline static Time fromString(const char *str,
 							 bool &ok);
@@ -251,6 +253,28 @@ namespace vtl {
 	vtl_always_inline void Time::operator*=(unsigned other)
 	{
 		time *= other;
+	}
+
+	vtl_always_inline int Time::compare(const Time &other) const
+	{
+		timeint_t r = time - other.time;
+
+		if (r < 0)
+			return -1;
+		if (r > 0)
+			return 1;
+		return 0;
+	}
+
+	vtl_always_inline int Time::rcompare(const Time &other) const
+	{
+		timeint_t r = other.time - time;
+
+		if (r < 0)
+			return -1;
+		if (r > 0)
+			return 1;
+		return 0;
 	}
 
 	vtl_always_inline Time Time::fromDouble(const double &t)

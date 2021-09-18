@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,109 +50,74 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#ifndef LATENCYCOMPFUNC_H
+#define LATENCYCOMPFUNC_H
 
-#include <cstring>
+#include "analyzer/latency.h"
+#include "analyzer/task.h"
+#include "analyzer/traceanalyzer.h"
 
-#include <QString>
-
-#include "analyzer/abstracttask.h"
-#include "vtl/compiler.h"
-#include "vtl/time.h"
-
-class QCPGraph;
-class TaskGraph;
-class Task;
-
-typedef enum : int {
-	STATUS_ALIVE,
-	STATUS_EXITCALLED,
-	STATUS_FINAL
-} exitstatus_t;
-
-class TaskHandle {
-public:
-	TaskHandle():task(nullptr) {};
-	Task *task;
-	vtl_always_inline Task &getTask();
-};
-
-class TaskName {
-public:
-	TaskName();
-	const char *str;
-	TaskName *prev;
-	bool forkname;
-};
-
-class Task : public AbstractTask {
-public:
-	Task();
-	~Task();
-	void addName(const char *name);
-	vtl_always_inline void checkName(const char *name, bool forkname = false);
-	void generateDisplayName();
-	QString getLastName() const;
-
-	TaskName     *taskName;
-	exitstatus_t exitStatus;
-
-	/* lastWakeUP is only used during extraction */
-	vtl::Time    lastWakeUP;
-	int lastWakeUPidx;
-	bool lastWakeUPisSched;
-
-	vtl::Time    lastSleepEntry;
-
-	/*
-	 * The unified task needs to save pointers to these graphs so that they
-	 * can be deleted when the user requests the unified task to be 
-	 * removed
-	 */
-	QCPGraph     *wakeUpGraph;
-	QCPGraph     *preemptedGraph;
-	QCPGraph     *runningGraph;
-	QCPGraph     *uninterruptibleGraph;
-	QString      *displayName;
-private:
-	vtl_always_inline void appendName(const TaskName *name, bool isnewest);
-};
-
-vtl_always_inline void Task::checkName(const char *name, bool forkname)
+class LatencyCompFunc
 {
-	if (taskName == nullptr || strcmp(taskName->str, name) != 0) {
-		addName(name);
-		taskName->forkname = forkname;
+public:
+	LatencyCompFunc(Latency::compare_t cmp,
+			Latency::order_t ord,
+			TraceAnalyzer *azr) :
+		compare(cmp), order(ord), analyzer(azr) {}
+	int operator() (const Latency &ll, const Latency &rl) {
+		int r;
+
+		if (compare == Latency::CMP_NAME) {
+			r = pidToName(ll.pid).compare(pidToName(rl.pid));
+			if (r == 0)
+				r = ll.place - rl.place;
+		} else if (compare == Latency::CMP_TIME) {
+			r = ll.time.compare(rl.time);
+			if (r == 0)
+				r = ll.place - rl.place;
+		} else if (compare == Latency::CMP_DELAY) {
+			/*
+			 * Here we should really compare the delay first but
+			 * since that since place has been generated with the
+			 * Latency::CMP_CREATE_PLACE below, it is not necessary.
+			 */
+			r = ll.place - rl.place;
+		} else if (compare == Latency::CMP_PLACE) {
+			r = ll.place - rl.place;
+		} else if (compare == Latency::CMP_CREATE_PLACE) {
+			/*
+			 * This is only needed for the purpose of sorting the
+			 * latency array when we create the place member.
+			 */
+			r = ll.delay.rcompare(rl.delay);
+			if (r == 0) {
+				r = ll.time.compare(rl.time);
+				if (r == 0)
+					r = pidToName(ll.pid).compare(
+						pidToName(rl.pid));
+			}
+		} else {
+			return 0;
+		}
+
+		if (order == Latency::ORDER_REVERSE)
+			r = -r;
+		return r;
 	}
-}
 
-vtl_always_inline Task &TaskHandle::getTask()
-{
-	if (task == nullptr)
-		task = new Task;
-	return *task;
-}
+private:
+	const QString &pidToName(int pid) {
+		Task *task = analyzer->findTask(pid);
 
-/*
- * If the name is not the newest name and is "forkname", then we will will
- * surrount it with {}. If the name is not the newest and not a forkname,
- * then we will surround it with ()
- */
-vtl_always_inline void Task::appendName(const TaskName *name, bool isnewest)
-{
-	bool curly  =  name->forkname && !isnewest;
-	bool normal = !name->forkname && !isnewest;
+		if (task == nullptr)
+			return dummystr;
+		else
+			return *task->displayName;
+	}
+	Latency::compare_t compare;
+	Latency::order_t order;
+	TraceAnalyzer *analyzer;
+	static const QString dummystr;
+};
 
-	if (curly)
-		displayName->append("{");
-	if (normal)
-		displayName->append("(");
-	displayName->append(name->str);
-	if (curly)
-		displayName->append("}");
-	if (normal)
-		displayName->append(")");
-}
-
-#endif /* TASK_H */
+#endif

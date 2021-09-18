@@ -68,11 +68,13 @@ extern "C" {
 
 #include "vtl/compiler.h"
 #include "vtl/error.h"
+#include "vtl/heapsort.h"
 #include "vtl/tlist.h"
 
 #include "analyzer/cpufreq.h"
 #include "analyzer/cpuidle.h"
 #include "parser/genericparams.h"
+#include "analyzer/latencycomp.h"
 #include "analyzer/traceanalyzer.h"
 #include "parser/tracefile.h"
 #include "parser/traceparser.h"
@@ -188,6 +190,7 @@ void TraceAnalyzer::close(int *ts_errno)
 	colorMap.clear();
 	parser->close(ts_errno);
 	taskNamePool->clear();
+	schedLatencies.clear();
 }
 
 void TraceAnalyzer::resetProperties()
@@ -885,6 +888,7 @@ void TraceAnalyzer::doStats()
 	}
 
 	statsQueue.start();
+	doLatencyStats();
 	statsQueue.wait();
 
 	s = workList.size();
@@ -912,6 +916,18 @@ void TraceAnalyzer::doLimitedStats()
 	s = workList.size();
 	for (i = 0; i < s; i++)
 		delete workList[i];
+}
+
+void TraceAnalyzer::doLatencyStats()
+{
+	unsigned int place;
+	LatencyCompFunc lcompfunc(Latency::CMP_CREATE_PLACE,
+				  Latency::ORDER_NORMAL, this);
+	const int nrLat = schedLatencies.size();
+
+	vtl::heapsort<vtl::TList, Latency>(schedLatencies, lcompfunc);
+	for (place = 0; place < nrLat; place++)
+		schedLatencies[place].place = place;
 }
 
 void TraceAnalyzer::processFtrace()
