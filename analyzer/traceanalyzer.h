@@ -571,6 +571,7 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	unsigned int cpu = event.cpu;
 	vtl::Time oldtime = event.time - FAKE_DELTA;
 	vtl::Time newtime = event.time + FAKE_DELTA;
+	const vtl::Time &midtime = event.time;
 	double oldtimeDbl, newtimeDbl;
 	int oldpid;
 	int newpid;
@@ -670,7 +671,7 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		} else {
 			task->runningTimev.append(oldtimeDbl);
 		}
-		task->lastWakeUP = oldtime;
+		task->lastWakeUP = midtime;
 	} else {
 		task->lastSleepEntry = oldtime;
 		uint = task_state_is_flag_set(state, TASK_FLAG_UNINTERRUPTIBLE);
@@ -730,14 +731,14 @@ skip:
 							  handle);
 		if (name != nullptr)
 			task->checkName(name);
-		delay = estimateWakeUpNew(eventCPU, newtime, startTime,
+		delay = estimateWakeUpNew(eventCPU, midtime, startTime,
 					  delayOK);
 
 		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(FLOOR_BIT);
 		task->schedEventIdx.append(0);
 	} else
-		delay = estimateWakeUp(task, newtime, delayOK);
+		delay = estimateWakeUp(task, midtime, delayOK);
 
 	double delayDbl;
 
