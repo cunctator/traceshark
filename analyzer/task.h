@@ -98,10 +98,10 @@ public:
 	TaskName     *taskName;
 	exitstatus_t exitStatus;
 
-	/* lastWakeUP is only used during extraction */
-	vtl::Time    lastWakeUP;
-	int lastWakeUPidx;
-	bool lastWakeUPisSched;
+	/* lastRunnable is only used during extraction */
+	vtl::Time    lastRunnable;
+	int          lastRunnable_idx;
+	bool         lastRunnable_is_sched;
 
 	vtl::Time    lastSleepEntry;
 
@@ -110,7 +110,7 @@ public:
 	 * can be deleted when the user requests the unified task to be 
 	 * removed
 	 */
-	QCPGraph     *wakeUpGraph;
+	QCPGraph     *delayGraph;
 	QCPGraph     *preemptedGraph;
 	QCPGraph     *runningGraph;
 	QCPGraph     *uninterruptibleGraph;

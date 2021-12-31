@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018-2020
+ * Copyright (C) 2015, 2016, 2018-2021
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -277,9 +277,9 @@ bool AbstractTask::doScaleUnint()
 			      nullptr,  FLOOR_HEIGHT);
 }
 
-bool AbstractTask::doScaleWakeup()
+bool AbstractTask::doScaleDelay()
 {
-	return fillDataVector(wakeDelay, wakeHeight, &wakeZero, WAKEUP_HEIGHT);
+	return fillDataVector(delay, delayHeight, &delayZero, DELAY_HEIGHT);
 }
 
 bool  AbstractTask::fillDataVector(QVector<double> &timev,

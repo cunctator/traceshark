@@ -81,7 +81,7 @@ public:
 	int pid;
 	unsigned int place;
 	int sched_idx;
-	int wakeup_idx;
+	int runnable_idx;
 };
 
 #endif

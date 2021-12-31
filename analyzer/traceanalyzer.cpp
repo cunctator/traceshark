@@ -784,7 +784,7 @@ void TraceAnalyzer::addCpuSchedWork(unsigned int cpu,
 			(&task, &CPUTask::doScale);
 		list.append(taskItem);
 		taskItem = new WorkItem<CPUTask>(&task,
-						 &CPUTask::doScaleWakeup);
+						 &CPUTask::doScaleDelay);
 		list.append(taskItem);
 		taskItem = new WorkItem<CPUTask>(&task,
 						 &CPUTask::doScaleRunning);

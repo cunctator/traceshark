@@ -60,8 +60,8 @@ TaskName::TaskName():
 
 Task::Task():
 	AbstractTask(), taskName(nullptr), exitStatus(STATUS_ALIVE),
-	lastWakeUP(0), lastWakeUPidx(0), lastWakeUPisSched(false),
-	lastSleepEntry(0), wakeUpGraph(nullptr), preemptedGraph(nullptr),
+	lastRunnable(0), lastRunnable_idx(0), lastRunnable_is_sched(false),
+	lastSleepEntry(0), delayGraph(nullptr), preemptedGraph(nullptr),
 	runningGraph(nullptr), uninterruptibleGraph(nullptr)
 {
 	displayName = new QString();

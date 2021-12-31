@@ -657,7 +657,7 @@ void MainWindow::rescaleTrace()
 		settingStore->getValue(Setting::MAX_VRT_WAKEUP_LATENCY);
 
 	maxwakeup = maxvalue.intv();
-	CPUTask::setVerticalWakeupMAX(maxwakeup);
+	CPUTask::setVerticalDelayMAX(maxwakeup);
 	analyzer->doScale();
 }
 
@@ -939,8 +939,8 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	graph->setData(task.wakeTimev, task.wakeHeight);
-	errorBars->setData(task.wakeDelay, task.wakeZero);
+	graph->setData(task.delayTimev, task.delayHeight);
+	errorBars->setData(task.delay, task.delayZero);
 	errorBars->setErrorType(QCPErrorBars::etKeyError);
 	errorBars->setPen(pen);
 	errorBars->setWhiskerWidth(4);
@@ -969,8 +969,8 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	graph->setData(task.wakeTimev, task.wakeHeight);
-	errorBars->setData(task.wakeZero, task.verticalDelay);
+	graph->setData(task.delayTimev, task.delayHeight);
+	errorBars->setData(task.delayZero, task.verticalDelay);
 	errorBars->setErrorType(QCPErrorBars::etValueError);
 	errorBars->setPen(pen);
 	errorBars->setWhiskerWidth(4);
@@ -2538,7 +2538,7 @@ void MainWindow::consumeSettings()
 			 */
 			delete task->graph;
 			task->graph = nullptr;
-			task->wakeUpGraph = nullptr;
+			task->delayGraph = nullptr;
 			task->runningGraph = nullptr;
 			task->preemptedGraph = nullptr;
 			task->uninterruptibleGraph = nullptr;
@@ -2657,7 +2657,7 @@ void MainWindow::addTaskGraph(int pid)
 	task->offset = taskRange->lower;
 	task->scale = schedHeight;
 	task->doScale();
-	task->doScaleWakeup();
+	task->doScaleDelay();
 	task->doScaleRunning();
 	task->doScalePreempted();
 	task->doScaleUnint();
@@ -2676,13 +2676,13 @@ void MainWindow::addTaskGraph(int pid)
 	graph->setScatterStyle(style);
 	graph->setLineStyle(QCPGraph::lsNone);
 	graph->setAdaptiveSampling(true);
-	graph->setData(task->wakeTimev, task->wakeHeight);
-	errorBars->setData(task->wakeDelay, task->wakeZero);
+	graph->setData(task->delayTimev, task->delayHeight);
+	errorBars->setData(task->delay, task->delayZero);
 	errorBars->setErrorType(QCPErrorBars::etKeyError);
 	errorBars->setPen(pen);
 	errorBars->setWhiskerWidth(4);
 	errorBars->setDataPlottable(graph);
-	task->wakeUpGraph = graph;
+	task->delayGraph = graph;
 
 	addStillRunningTaskGraph(task);
 	addPreemptedTaskGraph(task);
@@ -2780,9 +2780,9 @@ void MainWindow::removeTaskGraph(int pid)
 		task->graph = nullptr;
 	}
 
-	if (task->wakeUpGraph != nullptr) {
-		tracePlot->removeGraph(task->wakeUpGraph);
-		task->wakeUpGraph = nullptr;
+	if (task->delayGraph != nullptr) {
+		tracePlot->removeGraph(task->delayGraph);
+		task->delayGraph = nullptr;
 	}
 
 	if (task->runningGraph != nullptr) {
@@ -2837,9 +2837,9 @@ void MainWindow::clearTaskGraphsTriggered()
 		task->graph->destroy();
 		task->graph = nullptr;
 
-		if (task->wakeUpGraph != nullptr) {
-			tracePlot->removeGraph(task->wakeUpGraph);
-			task->wakeUpGraph = nullptr;
+		if (task->delayGraph != nullptr) {
+			tracePlot->removeGraph(task->delayGraph);
+			task->delayGraph = nullptr;
 		}
 
 		if (task->runningGraph != nullptr) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018, 2019
+ * Copyright (C) 2015, 2016, 2018, 2019, 2021
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -58,22 +58,22 @@ CPUTask::CPUTask() :
 	AbstractTask()
 {}
 
-bool CPUTask::doScaleWakeup() {
-	int s = wakeDelay.size();
+bool CPUTask::doScaleDelay() {
+	int s = delay.size();
 	int i;
 	/* Compute a scaled delay vector needed for vertical display */
 	verticalDelay.resize(s);
-	double maxsize = WAKEUP_SIZE * scale;
-	double factor = maxsize / wakeup_max;
+	double maxsize = DELAY_SIZE * scale;
+	double factor = maxsize / delay_max;
 	for (i = 0; i < s; i++)
-		verticalDelay[i] = TSMIN(factor * wakeDelay[i], maxsize);
+		verticalDelay[i] = TSMIN(factor * delay[i], maxsize);
 
-	return AbstractTask::doScaleWakeup();
+	return AbstractTask::doScaleDelay();
 }
 
-void CPUTask::setVerticalWakeupMAX(int w)
+void CPUTask::setVerticalDelayMAX(int w)
 {
-	wakeup_max = (double) w / 1000;
+	delay_max = (double) w / 1000;
 }
 
-double CPUTask::wakeup_max;
+double CPUTask::delay_max;

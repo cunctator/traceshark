@@ -91,13 +91,13 @@
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
-#define WAKEUP_HEIGHT ((double) 0.6)
-#define WAKEUP_SIZE ((double) 0.4)
+#define DELAY_HEIGHT ((double) 0.6)
+#define DELAY_SIZE ((double) 0.4)
 /*
  * This delay (20 ms) rerpresents the "full height" of the error graphs that
- * are used to display wakups in the CPU scheduling graphs
+ * are used to display delays in the CPU scheduling graphs
  */
-#define WAKEUP_MAX ((double) 0.020)
+#define DELAY_MAX ((double) 0.020)
 
 class TraceFile;
 class QCustomPlot;
@@ -206,13 +206,13 @@ private:
 	vtl_always_inline int
 		generic_sched_waking_pid(const TraceEvent &event) const;
 	vtl_always_inline
-	vtl::Time estimateWakeUpNew(const CPU *eventCPU,
-				    const vtl::Time &newTime,
-				    const vtl::Time &startTime,
-				    bool &valid) const;
-	vtl_always_inline vtl::Time estimateWakeUp(const Task *task,
-						   const vtl::Time &newTime,
-						   bool &valid) const;
+	vtl::Time estimateSchedDelayNew(const CPU *eventCPU,
+					const vtl::Time &newTime,
+					const vtl::Time &startTime,
+					bool &valid) const;
+	vtl_always_inline vtl::Time estimateSchedDelay(const Task *task,
+						       const vtl::Time &newTime,
+						       bool &valid) const;
 	void handleWrongTaskOnCPU(const TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, int oldpid,
 				  const vtl::Time &oldtime,
@@ -319,10 +319,10 @@ private:
 };
 
 vtl_always_inline
-vtl::Time TraceAnalyzer::estimateWakeUpNew(const CPU *eventCPU,
-					   const vtl::Time &newTime,
-					   const vtl::Time &startTime,
-					   bool &valid) const
+vtl::Time TraceAnalyzer::estimateSchedDelayNew(const CPU *eventCPU,
+					       const vtl::Time &newTime,
+					       const vtl::Time &startTime,
+					       bool &valid) const
 {
 	vtl::Time delay;
 
@@ -340,19 +340,19 @@ regular:
 }
 
 vtl_always_inline
-vtl::Time TraceAnalyzer::estimateWakeUp(const Task *task,
-					const vtl::Time &newTime,
-					bool &valid) const
+vtl::Time TraceAnalyzer::estimateSchedDelay(const Task *task,
+					    const vtl::Time &newTime,
+					    bool &valid) const
 {
 	vtl::Time delay;
 
 	/* Is this reasonable ? */
-	if (task->lastWakeUP < task->lastSleepEntry) {
+	if (task->lastRunnable < task->lastSleepEntry) {
 		valid = false;
 		return 0;
 	}
 
-	delay = newTime - task->lastWakeUP;
+	delay = newTime - task->lastRunnable;
 	valid = true;
 	return delay;
 }
@@ -680,9 +680,9 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		} else {
 			task->runningTimev.append(oldtimeDbl);
 		}
-		task->lastWakeUP = midtime;
-		task->lastWakeUPidx = idx;
-		task->lastWakeUPisSched = true;
+		task->lastRunnable = midtime;
+		task->lastRunnable_idx = idx;
+		task->lastRunnable_is_sched = true;
 	} else {
 		task->lastSleepEntry = oldtime;
 		uint = task_state_is_flag_set(state, TASK_FLAG_UNINTERRUPTIBLE);
@@ -742,14 +742,14 @@ skip:
 							  handle);
 		if (name != nullptr)
 			task->checkName(name);
-		delay = estimateWakeUpNew(eventCPU, midtime, startTime,
-					  delayOK);
+		delay = estimateSchedDelayNew(eventCPU, midtime, startTime,
+					      delayOK);
 
 		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(FLOOR_BIT);
 		task->schedEventIdx.append(0);
 	} else
-		delay = estimateWakeUp(task, midtime, delayOK);
+		delay = estimateSchedDelay(task, midtime, delayOK);
 
 	double delayDbl;
 
@@ -757,18 +757,19 @@ skip:
 		Latency &slatency = schedLatencies.increase();
 
 		delayDbl = delay.toDouble();
-		task->wakeTimev.append(newtimeDbl);
-		task->wakeDelay.append(delayDbl);
+		task->delayTimev.append(newtimeDbl);
+		task->delay.append(delayDbl);
 
 		slatency.delay = delay;
 		slatency.pid = newpid;
 		slatency.time = midtime;
 		slatency.sched_idx = idx;
 		/*
-		 * We trust this task->lastWakeUPidx because in this case
-		 * estimateWakeUP or estimateWakeUpNew() found wakeup to be OK.
+		 * We trust this task->lastRunnable_idx because in this case
+		 * estimateSchedDelay or estimateSchedDelayNew() found wakeup
+		 * to be OK.
 		 */
-		slatency.wakeup_idx = task->lastWakeUPidx;
+		slatency.runnable_idx = task->lastRunnable_idx;
 	}
 
 	task->schedTimev.append(newtimeDbl);
@@ -788,8 +789,8 @@ skip:
 	}
 
 	if (delayOK) {
-		cpuTask->wakeTimev.append(newtimeDbl);
-		cpuTask->wakeDelay.append(delayDbl);
+		cpuTask->delayTimev.append(newtimeDbl);
+		cpuTask->delay.append(delayDbl);
 	}
 
 	cpuTask->schedTimev.append(newtimeDbl);
@@ -826,9 +827,9 @@ void TraceAnalyzer::processWakeupEvent(tracetype_t ttype,
 
 	/* Handle the woken up task */
 	task = &taskMap[pid].getTask();
-	task->lastWakeUP = time;
-	task->lastWakeUPidx = idx;
-	task->lastWakeUPisSched = false;
+	task->lastRunnable = time;
+	task->lastRunnable_idx = idx;
+	task->lastRunnable_is_sched = false;
 	if (task->isNew) {
 		task->pid = pid;
 		task->isNew = false;
