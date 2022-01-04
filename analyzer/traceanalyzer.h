@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -132,6 +132,7 @@ public:
 	vtl_always_inline unsigned int getMaxCPU() const;
 	vtl_always_inline unsigned int getNrCPUs() const;
 	vtl_always_inline unsigned int getNrSchedLatencies() const;
+	vtl_always_inline unsigned int getNrWakeLatencies() const;
 	vtl_always_inline vtl::Time getStartTime() const;
 	vtl_always_inline vtl::Time getEndTime() const;
 	vtl_always_inline int getMinIdleState() const;
@@ -176,6 +177,7 @@ public:
 	vtl::TList<TraceEvent> *events;
 	vtl::TList<const TraceEvent*> filteredEvents;
 	vtl::TList<Latency> schedLatencies;
+	vtl::TList<Latency> wakeLatencies;
 	vtl::AVLTree<int, CPUTask, vtl::AVLBALANCE_USEPOINTERS>
 		*cpuTaskMaps;
 	vtl::AVLTree<int, TaskHandle> taskMap;
@@ -213,6 +215,9 @@ private:
 	vtl_always_inline vtl::Time estimateSchedDelay(const Task *task,
 						       const vtl::Time &newTime,
 						       bool &valid) const;
+	vtl_always_inline vtl::Time estimateWakeDelay(const Task *task,
+						      const vtl::Time &newTime,
+						      bool &valid) const;
 	void handleWrongTaskOnCPU(const TraceEvent &event, unsigned int cpu,
 				  CPU *eventCPU, int oldpid,
 				  const vtl::Time &oldtime,
@@ -357,6 +362,25 @@ vtl::Time TraceAnalyzer::estimateSchedDelay(const Task *task,
 	return delay;
 }
 
+vtl_always_inline
+vtl::Time TraceAnalyzer::estimateWakeDelay(const Task *task,
+					   const vtl::Time &newTime,
+					   bool &valid) const
+{
+	vtl::Time delay;
+
+	/* Is this reasonable ? */
+	if (task->lastRunnable_is_sched ||
+	    task->lastRunnable < task->lastSleepEntry) {
+		valid = false;
+		return 0;
+	}
+
+	delay = newTime - task->lastRunnable;
+	valid = true;
+	return delay;
+}
+
 vtl_always_inline int
 TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 {
@@ -433,6 +457,11 @@ vtl_always_inline unsigned int TraceAnalyzer::getNrCPUs() const
 vtl_always_inline unsigned int TraceAnalyzer::getNrSchedLatencies() const
 {
 	return schedLatencies.size();
+}
+
+vtl_always_inline unsigned int TraceAnalyzer::getNrWakeLatencies() const
+{
+	return wakeLatencies.size();
 }
 
 vtl_always_inline vtl::Time TraceAnalyzer::getStartTime() const
@@ -588,6 +617,8 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	Task *task;
 	vtl::Time delay;
 	bool delayOK;
+	vtl::Time wakedelay;
+	bool wakedelayOK;
 	CPU *eventCPU = &CPUs[cpu];
 	taskstate_t state;
 	const char *name;
@@ -748,8 +779,17 @@ skip:
 		task->schedTimev.append(startTimeDbl);
 		task->schedData.append(FLOOR_BIT);
 		task->schedEventIdx.append(0);
-	} else
+
+		/*
+		 * In this case, we will not record a wakeup latency because we
+		 * do not know whether or not this task has been woken up or if
+		 * it was runnable when scheduled out.
+		 */
+		wakedelayOK = false;
+	} else {
 		delay = estimateSchedDelay(task, midtime, delayOK);
+		wakedelay = estimateWakeDelay(task, midtime, wakedelayOK);
+	}
 
 	double delayDbl;
 
@@ -766,10 +806,31 @@ skip:
 		slatency.sched_idx = idx;
 		/*
 		 * We trust this task->lastRunnable_idx because in this case
-		 * estimateSchedDelay or estimateSchedDelayNew() found wakeup
+		 * estimateSchedDelay() or estimateSchedDelayNew() found wakeup
 		 * to be OK.
 		 */
 		slatency.runnable_idx = task->lastRunnable_idx;
+	}
+
+	double wakedelayDbl;
+
+	if (wakedelayOK) {
+		Latency &wlatency = wakeLatencies.increase();
+
+		wakedelayDbl = wakedelay.toDouble();
+		task->wakeTimev.append(newtimeDbl);
+		task->wakeDelay.append(wakedelayDbl);
+
+		wlatency.delay = wakedelay;
+		wlatency.pid = newpid;
+		wlatency.time = midtime;
+		wlatency.sched_idx = idx;
+		/*
+		 * We trust this task->lastRunnable_idx to be pointing to a
+		 * valid wakeup because in this case estimateWakeDelay() above
+		 * found wakeup to be OK.
+		 */
+		wlatency.runnable_idx = task->lastRunnable_idx;
 	}
 
 	task->schedTimev.append(newtimeDbl);
@@ -791,6 +852,11 @@ skip:
 	if (delayOK) {
 		cpuTask->delayTimev.append(newtimeDbl);
 		cpuTask->delay.append(delayDbl);
+	}
+
+	if (wakedelayOK) {
+		cpuTask->wakeTimev.append(newtimeDbl);
+		cpuTask->wakeDelay.append(wakedelayDbl);
 	}
 
 	cpuTask->schedTimev.append(newtimeDbl);

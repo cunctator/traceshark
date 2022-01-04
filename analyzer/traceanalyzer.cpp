@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -191,6 +191,7 @@ void TraceAnalyzer::close(int *ts_errno)
 	parser->close(ts_errno);
 	taskNamePool->clear();
 	schedLatencies.clear();
+	wakeLatencies.clear();
 }
 
 void TraceAnalyzer::resetProperties()
@@ -923,11 +924,16 @@ void TraceAnalyzer::doLatencyStats()
 	unsigned int place;
 	LatencyCompFunc lcompfunc(Latency::CMP_CREATE_PLACE,
 				  Latency::ORDER_NORMAL, this);
-	const int nrLat = schedLatencies.size();
+	const unsigned nrSchedLat = int2uint(schedLatencies.size());
+	const unsigned nrWakeLat = int2uint(wakeLatencies.size());
 
 	vtl::heapsort<vtl::TList, Latency>(schedLatencies, lcompfunc);
-	for (place = 0; place < nrLat; place++)
+	for (place = 0; place < nrSchedLat; place++)
 		schedLatencies[place].place = place;
+
+	vtl::heapsort<vtl::TList, Latency>(wakeLatencies, lcompfunc);
+	for (place = 0; place < nrWakeLat; place++)
+		wakeLatencies[place].place = place;
 }
 
 void TraceAnalyzer::processFtrace()

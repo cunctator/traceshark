@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -118,6 +118,10 @@ typedef enum : int {
 	connect(src, SIGNAL(ssig), dest, SIGNAL(dsig))
 
 #define lastfunc(myint) ((double) myint)
+
+vtl_always_inline unsigned int int2uint(int value) {
+	return (unsigned int) (value >= 0 ? value : 0);
+}
 
 #define DEFINE_CPUTASKMAP_ITERATOR(name) \
 	vtl::AVLTree<int, CPUTask, \
