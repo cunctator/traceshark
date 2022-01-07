@@ -1,0 +1,67 @@
+<?xml version="1.0" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.6a -->
+<!-- CreationDate: 2021-09-26 23:20:14 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="452pt" height="408pt"
+	viewBox="2719 1819 7161 6468">
+<g fill="none">
+<!-- Arc -->
+<path d="M 9450,3600 A 955 955 0 0 0 8100 2250" fill="#ff0000"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Arc -->
+<path d="M 4500,2250 A 955 955 0 0 0 3150 3600" fill="#00ff00"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Circle -->
+<circle cx="6300" cy="5400" r="2737" fill="#0000ff"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Circle -->
+<circle cx="6300" cy="5400" r="2349" fill="#ffffff"
+	stroke="#0000ff" stroke-width="285px"/>
+<!-- Circle -->
+<circle cx="6300" cy="5400" r="351" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 6300,3150 6300,3600"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 4050,5400 4500,5400"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 8550,5400 8100,5400"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 6300,7650 6300,7200"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 4744,3844 5062,4162"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 7557,6657 7875,6975"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 4725,6975 5043,6657"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 7557,4143 7875,3825"
+	stroke="#ff00ff" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 6300,5400 6975,3825"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 8280,3420 8775,2925"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 3825,2925 4320,3420"
+	stroke="#000000" stroke-width="585px"/>
+<!-- Line -->
+<polyline points=" 3060,3690 4590,2160"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Line -->
+<polyline points=" 8010,2160 9540,3690"
+	stroke="#000000" stroke-width="285px"/>
+<!-- Text -->
+<text xml:space="preserve" x="5535" y="6615" fill="#000000" font-family="Times" font-style="normal" font-weight="normal" font-size="960" text-anchor="start">ms</text>
+</g>
+</svg>
