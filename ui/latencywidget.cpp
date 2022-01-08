@@ -50,44 +50,85 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LATENCY_H
-#define LATENCY_H
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QWidget>
 
-#include "vtl/compiler.h"
-#include "vtl/time.h"
+#include "misc/traceshark.h"
+#include "ui/latencymodel.h"
+#include "ui/latencywidget.h"
+#include "ui/tableview.h"
 
-class Latency {
-public:
+LatencyWidget::LatencyWidget(const QString &title, enum Latency::Type type,
+			     QWidget *parent)
+	: QDockWidget(title, parent)
+{
+	QWidget *widget = new QWidget(this);
+	QVBoxLayout *mainLayout =  new QVBoxLayout(widget);
+	setWidget(widget);
+	QHBoxLayout *buttonLayout = new QHBoxLayout();
 
-	typedef enum Type : int {
-		TYPE_WAKEUP = 0,
-		TYPE_SCHED
-	} type_t;
+	latencyView =  new TableView(this, TableView::TABLE_SINGLEROWSELECT);
+	latencyModel = new LatencyModel(type);
 
-	typedef enum Compare : int {
-		CMP_PID = 0,
-		CMP_NAME,
-		CMP_TIME,
-		CMP_DELAY,
-		CMP_PLACE,
-		/*
-		 * This is only intended for the purpose of sorting the latency
-		 * array when we create the place member.
-		 */
-		CMP_CREATE_PLACE
-	} compare_t;
+	latencyView->setModel(latencyModel);
 
-	typedef enum Order : int {
-		ORDER_NORMAL = 0,
-		ORDER_REVERSE
-	} order_t;
+	mainLayout->addWidget(latencyView);
+	mainLayout->addLayout(buttonLayout);
 
-	vtl::Time time;
-	vtl::Time delay;
-	int pid;
-	unsigned int place;
-	int sched_idx;
-	int runnable_idx;
-};
+	QPushButton *closeButton = new QPushButton(tr("Close"));
+	buttonLayout->addStretch();
+	buttonLayout->addWidget(closeButton);
+	buttonLayout->addStretch();
 
-#endif
+	hide();
+
+	tsconnect(closeButton, clicked(), this, closeClicked());
+	tsconnect(latencyView, doubleClicked(const QModelIndex &),
+		  this, handleDoubleClick(const QModelIndex &));
+}
+
+
+LatencyWidget::~LatencyWidget()
+{}
+
+void LatencyWidget::setAnalyzer(TraceAnalyzer *azr)
+{
+	latencyModel->setAnalyzer(azr);
+}
+
+void LatencyWidget::clear()
+{
+	latencyModel->clear();
+}
+
+/*
+ * Apparently it's a bad idea to do taskView->resizeColumnsToContents() if we
+ * are not visible.
+ */
+void LatencyWidget::resizeColumnsToContents()
+{
+	if (QDockWidget::isVisible())
+		latencyView->resizeColumnsToContents();
+}
+
+void LatencyWidget::show()
+{
+	QDockWidget::show();
+	latencyView->resizeColumnsToContents();
+}
+
+void LatencyWidget::closeClicked()
+{
+	QDockWidget::hide();
+	emit QDockWidgetNeedsRemoval(this);
+}
+
+void LatencyWidget::handleDoubleClick(const QModelIndex &index)
+{
+	const Latency *latency = latencyModel->rowToLatency(index.row());
+
+	if (latency != nullptr)
+		emit latencyDoubleClicked(latency);
+}

@@ -67,6 +67,7 @@
 #include "ui/errordialog.h"
 #include "ui/graphenabledialog.h"
 #include "ui/infowidget.h"
+#include "ui/latencywidget.h"
 #include "ui/licensedialog.h"
 #include "ui/mainwindow.h"
 #include "ui/migrationline.h"
@@ -118,6 +119,12 @@
 
 #define TOOLTIP_SHOWTASKS		\
 "Show a list of all tasks and it's possible to select one"
+
+#define TOOLTIP_SHOWSCHEDLATENCIES		\
+"Shows a list of scheduling latencies and it's possible to select one"
+
+#define TOOLTIP_SHOWWAKELATENCIES		\
+"Shows a list of wakeup latencies and it's possible to select one"
 
 #define TOOLTIP_SHOWARGFILTER		\
 "Show a dialog for filtering the info field with POSIX regular expressions"
@@ -419,6 +426,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	cpuSelectDialog->hide();
 	statsDialog->hide();
 	statsLimitedDialog->hide();
+	schedLatencyWidget->hide();
+	wakeupLatencyWidget->hide();
 	if (settingStore->getValue(Setting::SAVE_WINDOW_SIZE_EXIT).boolv()) {
 		wt = width();
 		ht = height();
@@ -515,6 +524,9 @@ void MainWindow::openFile(const QString &name)
 		statsLimitedDialog->setTaskMap(&analyzer->taskMap,
 					       analyzer->getNrCPUs());
 		statsLimitedDialog->endResetModel();
+
+		schedLatencyWidget->setAnalyzer(analyzer);
+		wakeupLatencyWidget->setAnalyzer(analyzer);
 
 		showTrace();
 		showt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
@@ -1051,6 +1063,8 @@ void MainWindow::setTraceActionsEnabled(bool e)
 	timeFilterAction->setEnabled(e);
 	showStatsAction->setEnabled(e);
 	showStatsTimeLimitedAction->setEnabled(e);
+	showSchedLatencyAction->setEnabled(e);
+	showWakeupLatencyAction->setEnabled(e);
 }
 
 void MainWindow::setLegendActionsEnabled(bool e)
@@ -1145,6 +1159,9 @@ void MainWindow::closeTrace()
 	cpuSelectDialog->beginResetModel();
 	cpuSelectDialog->setNrCPUs(0);
 	cpuSelectDialog->endResetModel();
+
+	schedLatencyWidget->clear();
+	wakeupLatencyWidget->clear();
 
 	mresett = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
@@ -1589,6 +1606,59 @@ void MainWindow::taskTriggered(int pid)
 	selectTaskByPid(pid, nullptr, PR_TRY_TASKGRAPH);
 }
 
+void MainWindow::showLatency(const Latency *latency)
+{
+	int activeIdx = infoWidget->getCursorIdx();
+	int inactiveIdx;
+	unsigned int lcpu;
+	int lpid;
+
+	inactiveIdx = TShark::RED_CURSOR;
+	if (activeIdx == inactiveIdx)
+		inactiveIdx = TShark::BLUE_CURSOR;
+
+	Cursor *activeCursor = cursors[activeIdx];
+	Cursor *inactiveCursor = cursors[inactiveIdx];
+
+	const TraceEvent &schedevent = analyzer->events->at(latency->sched_idx);
+	const TraceEvent &wakeupevent =
+		analyzer->events->at(latency->runnable_idx);
+
+	/*
+	 * This is what we do, we move the *active* cursor to the wakeup
+	 * event, move the *inactive* cursor to the scheduling event and then
+	 * finally scroll the events widget to the same time and highlight
+	 * the task that was doing the wakeup. This way we can push the button
+	 * again to see who woke up the task that was doing the wakeup
+	 */
+	activeCursor->setPosition(wakeupevent.time);
+	inactiveCursor->setPosition(schedevent.time);
+	checkStatsTimeLimited();
+	infoWidget->setTime(wakeupevent.time, activeIdx);
+	infoWidget->setTime(schedevent.time, inactiveIdx);
+	cursorPos[activeIdx] = wakeupevent.time.toDouble();
+	cursorPos[inactiveIdx] = schedevent.time.toDouble();
+
+	if (!analyzer->isFiltered()) {
+		eventsWidget->scrollTo(latency->runnable_idx);
+	} else {
+		/*
+		 * If a filter is enabled we need to try to find the index in
+		 * analyzer->filteredEvents
+		 */
+		int filterIndex;
+		if (analyzer->findFilteredEvent(latency->runnable_idx,
+						&filterIndex)
+		    != nullptr)
+			eventsWidget->scrollTo(filterIndex);
+	}
+
+	lcpu = schedevent.cpu;
+	lpid = latency->pid;
+
+	selectTaskByPid(lpid, &lcpu, PR_TRY_TASKGRAPH);
+}
+
 void MainWindow::handleEventSelected(const TraceEvent *event)
 {
 	if (event == nullptr) {
@@ -1635,6 +1705,20 @@ void MainWindow::createActions()
 	saveAction->setShortcuts(QKeySequence::SaveAs);
 	saveAction->setToolTip(tr(TOOLTIP_SAVESCREEN));
 	tsconnect(saveAction, triggered(), this, saveScreenshot());
+
+	showSchedLatencyAction = new QAction(tr("Show scheduling latencies..."),
+					     this);
+	showSchedLatencyAction->setIcon(QIcon(RESSRC_GPH_LATENCY));
+	showSchedLatencyAction->setToolTip(tr(TOOLTIP_SHOWSCHEDLATENCIES));
+	tsconnect(showSchedLatencyAction, triggered(), this,
+		  showSchedLatencyWidget());
+
+	showWakeupLatencyAction = new QAction(tr("Show wakeup latencies..."),
+					      this);
+	showWakeupLatencyAction->setIcon(QIcon(RESSRC_GPH_WAKEUP_LATENCY));
+	showWakeupLatencyAction->setToolTip(tr(TOOLTIP_SHOWWAKELATENCIES));
+	tsconnect(showWakeupLatencyAction, triggered(), this,
+		  showWakeupLatencyWidget());
 
 	showTasksAction = new QAction(tr("Show task &list..."), this);
 	showTasksAction->setIcon(QIcon(RESSRC_GPH_TASKSELECT));
@@ -1870,6 +1954,8 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(defaultZoomAction);
 	viewToolBar->addAction(fullZoomAction);
 	viewToolBar->addAction(verticalZoomAction);
+	viewToolBar->addAction(showSchedLatencyAction);
+	viewToolBar->addAction(showWakeupLatencyAction);
 	viewToolBar->addAction(showTasksAction);
 	viewToolBar->addAction(filterCPUsAction);
 	viewToolBar->addAction(showEventsAction);
@@ -1919,6 +2005,8 @@ void MainWindow::createMenus()
 	viewMenu->addAction(defaultZoomAction);
 	viewMenu->addAction(fullZoomAction);
 	viewMenu->addAction(verticalZoomAction);
+	viewMenu->addAction(showSchedLatencyAction);
+	viewMenu->addAction(showWakeupLatencyAction);
 	viewMenu->addAction(showTasksAction);
 	viewMenu->addAction(filterCPUsAction);
 	viewMenu->addAction(showEventsAction);
@@ -1993,6 +2081,12 @@ void MainWindow::createDialogs()
 	cpuSelectDialog = new CPUSelectDialog(this);
 	graphEnableDialog = new GraphEnableDialog(settingStore, this);
 	regexDialog = new RegexDialog(this);
+	schedLatencyWidget = new LatencyWidget(tr("Scheduling Latencies"),
+					       Latency::TYPE_SCHED, this);
+	schedLatencyWidget->setAllowedAreas(Qt::RightDockWidgetArea);
+	wakeupLatencyWidget = new LatencyWidget(tr("Wakeup Latencies"),
+						Latency::TYPE_WAKEUP, this);
+	wakeupLatencyWidget->setAllowedAreas(Qt::LeftDockWidgetArea);
 
 	vtl::set_error_handler(errorDialog);
 }
@@ -2103,6 +2197,20 @@ void MainWindow::dialogConnections()
 	tsconnect(regexDialog, createFilter(RegexFilter &, bool),
 		  this, createRegexFilter(RegexFilter &, bool));
 	tsconnect(regexDialog, resetFilter(), this, resetRegexFilter());
+
+	/* sched latency widget */
+	tsconnect(schedLatencyWidget,
+		  latencyDoubleClicked(const Latency *),
+		  this, showLatency(const Latency *));
+	tsconnect(schedLatencyWidget, QDockWidgetNeedsRemoval(QDockWidget *),
+		  this, removeQDockWidget(QDockWidget*));
+
+	/* wakeup latency widget */
+	tsconnect(wakeupLatencyWidget,
+		  latencyDoubleClicked(const Latency *),
+		  this, showLatency(const Latency *));
+	tsconnect(wakeupLatencyWidget, QDockWidgetNeedsRemoval(QDockWidget *),
+		  this, removeQDockWidget(QDockWidget*));
 }
 
 void MainWindow::setStatus(status_t status, const QString *fileName)
@@ -2928,6 +3036,43 @@ void MainWindow::showTaskSelector()
 
 	if (dockWidgetArea(statsDialog) == Qt::LeftDockWidgetArea)
 		tabifyDockWidget(statsDialog, taskSelectDialog);
+	else if (dockWidgetArea(wakeupLatencyWidget) == Qt::LeftDockWidgetArea)
+		tabifyDockWidget(wakeupLatencyWidget, taskSelectDialog);
+}
+
+void MainWindow::showSchedLatencyWidget()
+{
+	showLatencyWidget(schedLatencyWidget, Qt::RightDockWidgetArea);
+}
+
+void MainWindow::showWakeupLatencyWidget()
+{
+	showLatencyWidget(wakeupLatencyWidget, Qt::LeftDockWidgetArea);
+}
+
+void MainWindow::showLatencyWidget(LatencyWidget *lwidget,
+				   Qt::DockWidgetArea area)
+{
+	if (lwidget->isVisible()) {
+		lwidget->hide();
+		return;
+	}
+
+	lwidget->show();
+
+	if (dockWidgetArea(lwidget) == Qt::NoDockWidgetArea)
+		addDockWidget(area, lwidget);
+
+	if (area == Qt::RightDockWidgetArea) {
+		if (dockWidgetArea(statsLimitedDialog)
+		    == Qt::RightDockWidgetArea)
+			tabifyDockWidget(statsLimitedDialog, lwidget);
+	} else if (area ==  Qt::LeftDockWidgetArea) {
+		if (dockWidgetArea(taskSelectDialog) == Qt::LeftDockWidgetArea)
+			tabifyDockWidget(taskSelectDialog, lwidget);
+		else if (dockWidgetArea(statsDialog) == Qt::LeftDockWidgetArea)
+			tabifyDockWidget(statsDialog, lwidget);
+	}
 }
 
 void MainWindow::filterOnCPUs()
@@ -2974,6 +3119,8 @@ void MainWindow::showStats()
 
 	if (dockWidgetArea(taskSelectDialog) == Qt::LeftDockWidgetArea)
 		tabifyDockWidget(taskSelectDialog, statsDialog);
+	else if (dockWidgetArea(wakeupLatencyWidget) == Qt::LeftDockWidgetArea)
+		tabifyDockWidget(wakeupLatencyWidget, statsDialog);
 }
 
 void MainWindow::showStatsTimeLimited()
@@ -2990,6 +3137,9 @@ void MainWindow::showStatsTimeLimited()
 	statsLimitedDialog->show();
 	if (dockWidgetArea(statsLimitedDialog) == Qt::NoDockWidgetArea)
 		addDockWidget(Qt::RightDockWidgetArea, statsLimitedDialog);
+
+	if (dockWidgetArea(schedLatencyWidget) == Qt::RightDockWidgetArea)
+		tabifyDockWidget(schedLatencyWidget, statsLimitedDialog);
 }
 
 void MainWindow::removeQDockWidget(QDockWidget *widget)

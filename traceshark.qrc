@@ -30,6 +30,7 @@
   <file>images/getstatstimelimit30x30.png</file>
   <file>images/graphenabledialog30x30.png</file>
   <file>images/latency30x30.png</file>
+  <file>images/latency-wakeup30x30.png</file>
   <file>images/moveblue30x30.png</file>
   <file>images/movered30x30.png</file>
   <file>images/open30x30.png</file>
@@ -74,6 +75,7 @@
   <file>images/getstatstimelimit.svg</file>
   <file>images/graphenabledialog.svg</file>
   <file>images/latency.svg</file>
+  <file>images/latency-wakeup.svg</file>
   <file>images/moveblue.svg</file>
   <file>images/movered.svg</file>
   <file>images/open.svg</file>

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -82,6 +82,9 @@
 #define RESSRC_GPH_GETSTATS_TIMELIMIT \
 	                         ":/traceshark/images/getstatstimelimit.svg"
 #define RESSRC_GPH_GRAPHENABLE   ":/traceshark/images/graphenabledialog.svg"
+#define RESSRC_GPH_LATENCY       ":/traceshark/images/latency.svg"
+#define RESSRC_GPH_WAKEUP_LATENCY \
+                                 ":/traceshark/images/latency-wakeup30x30.png"
 #define RESSRC_GPH_MOVE_BLUE     ":/traceshark/images/moveblue.svg"
 #define RESSRC_GPH_MOVE_RED      ":/traceshark/images/movered.svg"
 #define RESSRC_GPH_OPEN          ":/traceshark/images/open.svg"
@@ -96,7 +99,7 @@
 #define RESSRC_GPH_FIND_WAKEUP   ":/traceshark/images/wakeup.svg"
 #define RESSRC_GPH_FIND_WAKING   ":/traceshark/images/waking.svg"
 #define RESSRC_GPH_FIND_WAKING_DIRECT \
-				 ":/traceshark/images/wakingdirect.svg"
+                                 ":/traceshark/images/wakingdirect.svg"
 #define RESSRC_GPH_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
 #define RESSRC_GPH_QT_LOGO       ":/traceshark/images/qtlogo-64.png"
 

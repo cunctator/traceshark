@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -72,16 +72,19 @@
 #define RESSRC_GPH_EVENTMOVEBLUE ":/traceshark/images/eventmoveblue30x30.png"
 #define RESSRC_GPH_EVENTMOVERED  ":/traceshark/images/eventmovered30x30.png"
 #define RESSRC_GPH_EXPORTCPUEVENTS  \
-	                         ":/traceshark/images/exportcpuevents30x30.png"
+                                 ":/traceshark/images/exportcpuevents30x30.png"
 #define RESSRC_GPH_EXPORTEVENTS  ":/traceshark/images/exportevents30x30.png"
 #define RESSRC_GPH_FILTERCURRENT ":/traceshark/images/filtercurrent30x30.png"
 #define RESSRC_GPH_FILTERCURRENT_LIMIT \
-	                         ":/traceshark/images/filtercurrentlimited30x30.png"
+                                 ":/traceshark/images/filtercurrentlimited30x30.png"
 #define RESSRC_GPH_FULL_ZOOM     ":/traceshark/images/fullzoom30x30.png"
 #define RESSRC_GPH_GETSTATS      ":/traceshark/images/getstats30x30.png"
 #define RESSRC_GPH_GETSTATS_TIMELIMIT \
-	                         ":/traceshark/images/getstatstimelimit30x30.png"
+                                 ":/traceshark/images/getstatstimelimit30x30.png"
 #define RESSRC_GPH_GRAPHENABLE   ":/traceshark/images/graphenabledialog30x30.png"
+#define RESSRC_GPH_LATENCY       ":/traceshark/images/latency30x30.png"
+#define RESSRC_GPH_WAKEUP_LATENCY \
+                                 ":/traceshark/images/latency-wakeup30x30.png"
 #define RESSRC_GPH_MOVE_BLUE     ":/traceshark/images/moveblue30x30.png"
 #define RESSRC_GPH_MOVE_RED      ":/traceshark/images/movered30x30.png"
 #define RESSRC_GPH_OPEN          ":/traceshark/images/open30x30.png"
@@ -96,7 +99,7 @@
 #define RESSRC_GPH_FIND_WAKEUP   ":/traceshark/images/wakeup30x30.png"
 #define RESSRC_GPH_FIND_WAKING   ":/traceshark/images/waking30x30.png"
 #define RESSRC_GPH_FIND_WAKING_DIRECT \
-				 ":/traceshark/images/wakingdirect30x30.png"
+                                 ":/traceshark/images/wakingdirect30x30.png"
 #define RESSRC_GPH_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
 #define RESSRC_GPH_QT_LOGO       ":/traceshark/images/qtlogo-64.png"
 

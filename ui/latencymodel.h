@@ -50,44 +50,72 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LATENCY_H
-#define LATENCY_H
+#ifndef _LATENCYMODEL_H
+#define _LATENCYMODEL_H
 
-#include "vtl/compiler.h"
-#include "vtl/time.h"
+#include <QAbstractTableModel>
+#include "analyzer/latency.h"
 
-class Latency {
+namespace vtl {
+	template<class T> class TList;
+}
+
+class Latency;
+class TraceAnalyzer;
+
+class LatencyModel : public QAbstractTableModel
+{
+	Q_OBJECT
 public:
-
-	typedef enum Type : int {
-		TYPE_WAKEUP = 0,
-		TYPE_SCHED
-	} type_t;
-
-	typedef enum Compare : int {
-		CMP_PID = 0,
-		CMP_NAME,
-		CMP_TIME,
-		CMP_DELAY,
-		CMP_PLACE,
-		/*
-		 * This is only intended for the purpose of sorting the latency
-		 * array when we create the place member.
-		 */
-		CMP_CREATE_PLACE
-	} compare_t;
-
-	typedef enum Order : int {
-		ORDER_NORMAL = 0,
-		ORDER_REVERSE
-	} order_t;
-
-	vtl::Time time;
-	vtl::Time delay;
-	int pid;
-	unsigned int place;
-	int sched_idx;
-	int runnable_idx;
+	typedef enum : int {
+		COLUMN_PID = 0,
+		COLUMN_TASKNAME,
+		COLUMN_TIME,
+		COLUMN_DELAY,
+		COLUMN_PLACE,
+		COLUMN_PERCENT,
+		NR_COLUMNS
+	} column_t;
+	LatencyModel(enum Latency::Type type, QObject *parent = 0);
+	~LatencyModel();
+	void setAnalyzer(TraceAnalyzer *azr);
+	void clear();
+	int rowCount(const QModelIndex &parent) const;
+	int columnCount(const QModelIndex &parent) const;
+	QVariant data(const QModelIndex &index, int role) const;
+	bool setData(const QModelIndex &index, const QVariant &value,
+		     int role);
+	QVariant headerData(int section, Qt::Orientation orientation,
+			    int role) const;
+	int rowToPid(int row, bool &ok) const;
+	const QString &rowToName(int row, bool &ok) const;
+	const Latency *rowToLatency(int row) const;
+	Qt::ItemFlags flags(const QModelIndex &index) const;
+	static vtl_always_inline column_t int_to_column(int i);
+	static vtl_always_inline int column_to_int(column_t c);
+	vtl_always_inline enum Latency::Type getLatencyType() const;
+private:
+	int getSize() const;
+	QString placeToPct(unsigned int place) const;
+	enum Latency::Type latency_type;
+	vtl::TList<Latency> *latencies;
+	TraceAnalyzer *analyzer;
+	QString *errorStr;
 };
 
-#endif
+vtl_always_inline LatencyModel::column_t LatencyModel::int_to_column(int i)
+{
+	return (column_t) i;
+}
+
+vtl_always_inline int LatencyModel::column_to_int(LatencyModel::column_t c)
+{
+	return (int) c;
+}
+
+vtl_always_inline enum Latency::Type LatencyModel::getLatencyType() const
+{
+	return latency_type;
+}
+
+#endif /* _LATENCYMODEL_H */

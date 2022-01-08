@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 #
 #  Traceshark - a visualizer for visualizing ftrace and perf traces
-#  Copyright (C) 2014-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2014-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 # This file is dual licensed: you can use it either under the terms of
 # the GPL, or the BSD license, at your option.
@@ -372,6 +372,8 @@ HEADERS      +=  ui/eventsmodel.h
 HEADERS      +=  ui/eventswidget.h
 HEADERS      +=  ui/graphenabledialog.h
 HEADERS      +=  ui/infowidget.h
+HEADERS      +=  ui/latencymodel.h
+HEADERS      +=  ui/latencywidget.h
 HEADERS      +=  ui/licensedialog.h
 HEADERS      +=  ui/mainwindow.h
 HEADERS      +=  ui/migrationarrow.h
@@ -480,6 +482,8 @@ SOURCES      +=  ui/eventsmodel.cpp
 SOURCES      +=  ui/eventswidget.cpp
 SOURCES      +=  ui/graphenabledialog.cpp
 SOURCES      +=  ui/infowidget.cpp
+SOURCES      +=  ui/latencymodel.cpp
+SOURCES      +=  ui/latencywidget.cpp
 SOURCES      +=  ui/licensedialog.cpp
 SOURCES      +=  ui/mainwindow.cpp
 SOURCES      +=  ui/migrationarrow.cpp

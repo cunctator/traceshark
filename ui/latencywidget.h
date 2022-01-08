@@ -50,44 +50,43 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LATENCY_H
-#define LATENCY_H
+#ifndef _LATENCYWIDGET_H
+#define _LATENCYWIDGET_H
 
-#include "vtl/compiler.h"
-#include "vtl/time.h"
+#include <QDockWidget>
 
-class Latency {
+#include "analyzer/latency.h"
+#include "ui/latencymodel.h"
+
+class TableView;
+class TraceAnalyzer;
+
+class LatencyWidget : public QDockWidget {
+	Q_OBJECT
 public:
-
-	typedef enum Type : int {
-		TYPE_WAKEUP = 0,
-		TYPE_SCHED
-	} type_t;
-
-	typedef enum Compare : int {
-		CMP_PID = 0,
-		CMP_NAME,
-		CMP_TIME,
-		CMP_DELAY,
-		CMP_PLACE,
-		/*
-		 * This is only intended for the purpose of sorting the latency
-		 * array when we create the place member.
-		 */
-		CMP_CREATE_PLACE
-	} compare_t;
-
-	typedef enum Order : int {
-		ORDER_NORMAL = 0,
-		ORDER_REVERSE
-	} order_t;
-
-	vtl::Time time;
-	vtl::Time delay;
-	int pid;
-	unsigned int place;
-	int sched_idx;
-	int runnable_idx;
+	LatencyWidget(const QString &title, enum Latency::Type type,
+		      QWidget *parent);
+	~LatencyWidget();
+	void setAnalyzer(TraceAnalyzer *azr);
+	void clear();
+	void resizeColumnsToContents();
+	vtl_always_inline enum Latency::Type getLatencyType() const;
+public slots:
+	void show();
+signals:
+	void latencyDoubleClicked(const Latency *latency);
+	void QDockWidgetNeedsRemoval(QDockWidget *widget);
+private slots:
+	void closeClicked();
+	void handleDoubleClick(const QModelIndex &index);
+private:
+	TableView *latencyView;
+	LatencyModel *latencyModel;
 };
 
-#endif
+vtl_always_inline enum Latency::Type LatencyWidget::getLatencyType() const
+{
+	return latencyModel->getLatencyType();
+}
+
+#endif /* _LATENCYWIDGET_H */
