@@ -666,7 +666,7 @@ void MainWindow::rescaleTrace()
 {
 	int maxwakeup;
 	const Setting::Value &maxvalue =
-		settingStore->getValue(Setting::MAX_VRT_WAKEUP_LATENCY);
+		settingStore->getValue(Setting::MAX_VRT_LATENCY);
 
 	maxwakeup = maxvalue.intv();
 	CPUTask::setVerticalDelayMAX(maxwakeup);
@@ -933,7 +933,7 @@ void MainWindow::addSchedGraph(CPUTask &cpuTask, unsigned int cpu)
 
 void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 {
-	if (!settingStore->getValue(Setting::HORIZONTAL_WAKEUP).boolv())
+	if (!settingStore->getValue(Setting::HORIZONTAL_LATENCY).boolv())
 		return;
 
 	/* Add wakeup graph on top of scheduling */
@@ -962,7 +962,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 
 void MainWindow::addWakeupGraph(CPUTask &task)
 {
-	if (!settingStore->getValue(Setting::VERTICAL_WAKEUP).boolv())
+	if (!settingStore->getValue(Setting::VERTICAL_LATENCY).boolv())
 		return;
 
 	/* Add wakeup graph on top of scheduling */

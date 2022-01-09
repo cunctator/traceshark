@@ -60,7 +60,7 @@
 
 #define TRACESHARK_VERSION_KEY "TRACESHARK_FILE_VERSION"
 
-const int SettingStore::this_version = 1;
+const int SettingStore::this_version = 2;
 
 SettingStore::SettingStore()
 {
@@ -69,37 +69,38 @@ SettingStore::SettingStore()
 	Setting::Dependency schedDep(Setting::SHOW_SCHED_GRAPHS, true);
 	Setting::Dependency unlimitedDep(Setting::SHOW_MIGRATION_GRAPHS, true);
 	Setting::Dependency openglDep(Setting::OPENGL_ENABLED, true);
-	Setting::Dependency vertwakeDep(Setting::VERTICAL_WAKEUP, true);
+	Setting::Dependency vertlatDep(Setting::VERTICAL_LATENCY, true);
 	Setting::Dependency loadsizeDep(Setting::LOAD_WINDOW_SIZE_START, true);
 
 	setName(Setting::SHOW_SCHED_GRAPHS, q.tr("Show scheduling graphs"));
 	setKey(Setting::SHOW_SCHED_GRAPHS, QString("SHOW_SCHED_GRAPHS"));
 	initBoolValue(Setting::SHOW_SCHED_GRAPHS, true);
 
-	setName(Setting::HORIZONTAL_WAKEUP,
+	setName(Setting::HORIZONTAL_LATENCY,
 		q.tr("Show horizontal wakeup latency"));
-	setKey(Setting::HORIZONTAL_WAKEUP, QString("HORIZONTAL_WAKEUP"));
-	initBoolValue(Setting::HORIZONTAL_WAKEUP, false);
-	initDisabledBoolValue(Setting::HORIZONTAL_WAKEUP, false);
-	addDependency(Setting::HORIZONTAL_WAKEUP, schedDep);
+	setKey(Setting::HORIZONTAL_LATENCY, QString("HORIZONTAL_LATENCY"));
+	initBoolValue(Setting::HORIZONTAL_LATENCY, false);
+	initDisabledBoolValue(Setting::HORIZONTAL_LATENCY, false);
+	addDependency(Setting::HORIZONTAL_LATENCY, schedDep);
 
-	setName(Setting::VERTICAL_WAKEUP, q.tr("Show vertical wakeup latency"));
-	setKey(Setting::VERTICAL_WAKEUP, QString("VERTICAL_WAKEUP"));
-	initBoolValue(Setting::VERTICAL_WAKEUP, true);
-	initDisabledBoolValue(Setting::VERTICAL_WAKEUP, false);
-	addDependency(Setting::VERTICAL_WAKEUP, schedDep);
+	setName(Setting::VERTICAL_LATENCY,
+		q.tr("Show vertical wakeup latency"));
+	setKey(Setting::VERTICAL_LATENCY, QString("VERTICAL_LATENCY"));
+	initBoolValue(Setting::VERTICAL_LATENCY, true);
+	initDisabledBoolValue(Setting::VERTICAL_LATENCY, false);
+	addDependency(Setting::VERTICAL_LATENCY, schedDep);
 
-	setName(Setting::MAX_VRT_WAKEUP_LATENCY,
+	setName(Setting::MAX_VRT_LATENCY,
 		q.tr("Latency of a full vertical latency bar"));
-	setUnit(Setting::MAX_VRT_WAKEUP_LATENCY, q.tr("ms"));
-	setKey(Setting::MAX_VRT_WAKEUP_LATENCY,
-	       QString("MAX_VRT_WAKEUP_LATENCY"));
-	initIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, DEFAULT_MAX_VRT_LATENCY);
-	initMaxIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MAX_MAX_VRT_LATENCY);
-	initMinIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MIN_MAX_VRT_LATENCY);
-	initDisabledIntValue(Setting::MAX_VRT_WAKEUP_LATENCY,
+	setUnit(Setting::MAX_VRT_LATENCY, q.tr("ms"));
+	setKey(Setting::MAX_VRT_LATENCY,
+	       QString("MAX_VRT_LATENCY"));
+	initIntValue(Setting::MAX_VRT_LATENCY, DEFAULT_MAX_VRT_LATENCY);
+	initMaxIntValue(Setting::MAX_VRT_LATENCY, MAX_MAX_VRT_LATENCY);
+	initMinIntValue(Setting::MAX_VRT_LATENCY, MIN_MAX_VRT_LATENCY);
+	initDisabledIntValue(Setting::MAX_VRT_LATENCY,
 			     DEFAULT_MAX_VRT_LATENCY);
-	addDependency(Setting::MAX_VRT_WAKEUP_LATENCY, vertwakeDep);
+	addDependency(Setting::MAX_VRT_LATENCY, vertlatDep);
 
 	setName(Setting::SHOW_CPUFREQ_GRAPHS,
 		q.tr("Show CPU frequency graphs"));
@@ -211,6 +212,22 @@ SettingStore::SettingStore()
 	setKey(Setting::EVENT_PID_FLT_INCL_ON,
 	       QString("EVENT_PID_FLT_INCL_ON"));
 	initBoolValue(Setting::EVENT_PID_FLT_INCL_ON, false);
+
+	/*
+	 * These are legacy settings that are needed for file compatibility in
+	 * settingstore.cpp
+	 */
+	setKey(Setting::HORIZONTAL_WAKEUP, QString("HORIZONTAL_WAKEUP"));
+	initBoolValue(Setting::HORIZONTAL_WAKEUP, false);
+
+	setKey(Setting::VERTICAL_WAKEUP, QString("VERTICAL_WAKEUP"));
+	initBoolValue(Setting::VERTICAL_WAKEUP, true);
+
+	setKey(Setting::MAX_VRT_WAKEUP_LATENCY,
+	       QString("MAX_VRT_WAKEUP_LATENCY"));
+	initIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, DEFAULT_MAX_VRT_LATENCY);
+	initMaxIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MAX_MAX_VRT_LATENCY);
+	initMinIntValue(Setting::MAX_VRT_WAKEUP_LATENCY, MIN_MAX_VRT_LATENCY);
 
 	/*
 	 * The values that we have initialized above with initIntValue() and
@@ -583,13 +600,25 @@ int SettingStore::readKeyValuePair(QTextStream &stream,
 	return 0;
 }
 
-int SettingStore::handleOlderVersion(int /*oldver*/, int /*newver*/)
+int SettingStore::handleOlderVersion(int oldver, int /*newver*/)
 {
-	/*
-	 * At present we are at version 1. There has never been an older
-	 * version.
-	 */
-	return -TS_ERROR_INTERNAL;
+	/* This should not happen because currently this_version is 2 */
+	if (oldver >= 2)
+		return -TS_ERROR_INTERNAL;
+
+	if (oldver <= 1) {
+		/*
+		 * These keys have changed name, so we transfer the value of the
+		 * old setting into the new key.
+		 */
+		setValue(Setting::HORIZONTAL_LATENCY,
+			 getValue(Setting::HORIZONTAL_WAKEUP));
+		setValue(Setting::VERTICAL_LATENCY,
+			 getValue(Setting::VERTICAL_WAKEUP));
+		setValue(Setting::MAX_VRT_LATENCY,
+			 getValue(Setting::MAX_VRT_WAKEUP_LATENCY));
+	}
+	return 0;
 }
 
 const QString &SettingStore::boolToQString(bool b)

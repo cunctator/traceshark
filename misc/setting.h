@@ -72,9 +72,9 @@ class Setting
 public:
 	typedef enum Index : int {
 		SHOW_SCHED_GRAPHS = 0,
-		HORIZONTAL_WAKEUP,
-		VERTICAL_WAKEUP,
-		MAX_VRT_WAKEUP_LATENCY,
+		HORIZONTAL_LATENCY,
+		VERTICAL_LATENCY,
+		MAX_VRT_LATENCY,
 		SHOW_CPUFREQ_GRAPHS,
 		SHOW_CPUIDLE_GRAPHS,
 		SHOW_MIGRATION_GRAPHS,
@@ -89,6 +89,17 @@ public:
 		MAINWINDOW_HEIGHT,
 		MAINWINDOW_WIDTH,
 		SAVE_WINDOW_SIZE_EXIT,
+
+		/*
+		 * Deprecated settings, kept for .traceshark file
+		 * compatibility. These should only be read in the
+		 * SettingStore::handleOlderVersion() function and not be used
+		 * anywhere else.
+		 */
+		HORIZONTAL_WAKEUP,
+		VERTICAL_WAKEUP,
+		MAX_VRT_WAKEUP_LATENCY,
+
 		NR_SETTINGS,
 	} index_t;
         class Value;
