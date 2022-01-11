@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2019-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -107,7 +107,7 @@ private:
 	int handleOlderVersion(int oldver, int newver);
 	static const QString &boolToQString(bool b);
 	static bool boolFromValue(bool *ok, const QString &value);
-	Setting settings[Setting::NR_SETTINGS];
+	Setting settings[Setting::NR_ALL_SETTINGS];
 	QMap<QString, enum Setting::Index> fileKeyMap;
 	static const int this_version;
 };

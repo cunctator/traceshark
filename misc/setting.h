@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2018-2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2018-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -89,6 +89,7 @@ public:
 		MAINWINDOW_HEIGHT,
 		MAINWINDOW_WIDTH,
 		SAVE_WINDOW_SIZE_EXIT,
+		NR_SETTINGS,
 
 		/*
 		 * Deprecated settings, kept for .traceshark file
@@ -100,7 +101,7 @@ public:
 		VERTICAL_WAKEUP,
 		MAX_VRT_WAKEUP_LATENCY,
 
-		NR_SETTINGS,
+		NR_ALL_SETTINGS,
 	} index_t;
         class Value;
 	class Dependency;
