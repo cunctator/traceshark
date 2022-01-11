@@ -77,14 +77,14 @@ SettingStore::SettingStore()
 	initBoolValue(Setting::SHOW_SCHED_GRAPHS, true);
 
 	setName(Setting::HORIZONTAL_LATENCY,
-		q.tr("Show horizontal wakeup latency"));
+		q.tr("Show horizontal latency graphs"));
 	setKey(Setting::HORIZONTAL_LATENCY, QString("HORIZONTAL_LATENCY"));
 	initBoolValue(Setting::HORIZONTAL_LATENCY, false);
 	initDisabledBoolValue(Setting::HORIZONTAL_LATENCY, false);
 	addDependency(Setting::HORIZONTAL_LATENCY, schedDep);
 
 	setName(Setting::VERTICAL_LATENCY,
-		q.tr("Show vertical wakeup latency"));
+		q.tr("Show vertical latency graphs"));
 	setKey(Setting::VERTICAL_LATENCY, QString("VERTICAL_LATENCY"));
 	initBoolValue(Setting::VERTICAL_LATENCY, true);
 	initDisabledBoolValue(Setting::VERTICAL_LATENCY, false);
