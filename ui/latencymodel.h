@@ -100,7 +100,6 @@ private:
 	enum Latency::Type latency_type;
 	vtl::TList<Latency> *latencies;
 	TraceAnalyzer *analyzer;
-	QString *errorStr;
 };
 
 vtl_always_inline LatencyModel::column_t LatencyModel::int_to_column(int i)
