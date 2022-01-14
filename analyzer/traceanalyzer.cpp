@@ -1359,15 +1359,12 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 {
 	bool isFtrace = false, isPerf = false;
 	char *wbuf, *wb;
-	int fd, w;
-	int written, written_io, space, nrspaces, write_rval;
+	int fd;
+	int written, written_io, space, write_rval, wrote;
 	int nr_elements;
 	int idx;
-	int i;
 	const TraceEvent *eptr;
 	bool rval = true;
-	const char *ename;
-	char tbuf[40];
 	event_t cpuevent_type = (event_t) 0;
 	bool ok;
 	bool filtered = isFiltered();
@@ -1444,75 +1441,14 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 			if (export_type == EXPORT_TYPE_CPU_CYCLES &&
 			    eptr->type != cpuevent_type)
 				continue;
-			eptr->time.sprint(tbuf);
-			w = snprintf(wb, space,
-				     "%s %5u [%03u] %s: ",
-				     eptr->taskName->ptr, eptr->pid,
-				     eptr->cpu, tbuf);
-			if (w > 0) {
-				written += w;
-				space   -= w;
-				wb      += w;
-			}
-			if (eptr->intArg != 0) {
-				w = snprintf(wb, space, "%10u ",
-					     eptr->intArg);
-				if (w > 0) {
-					written += w;
-					space   -= w;
-					wb      += w;
-				}
-			}
 
-			ename = eptr->getEventName()->ptr;
-			nrspaces = TSMAX(1, spaceStrLen - strlen(ename));
-			nrspaces = TSMIN(nrspaces, space);
-			if (nrspaces > 0) {
-				strncpy(wb, spaceStr, nrspaces);
-				written += nrspaces;
-				space   -= nrspaces;
-				wb      += nrspaces;
+			wrote = writePerfEvent(wb, &space, eptr, ts_errno);
+			if (*ts_errno != 0) {
+				rval = false;
+				goto error_close;
 			}
-
-			w = snprintf(wb, space, "%s:", ename);
-			if (w > 0) {
-				written += w;
-				space   -= w;
-				wb      += w;
-			}
-
-			for (i = 0; i < eptr->argc; i++) {
-				w = snprintf(wb, space, " %s",
-					     eptr->argv[i]->ptr);
-				if (w > 0) {
-					written += w;
-					space   -= w;
-					wb      += w;
-				}
-			}
-			w = snprintf(wb, space, "\n");
-			if (w > 0) {
-				written += w;
-				space   -= w;
-				wb      += w;
-			}
-			if (eptr->postEventInfo != nullptr &&
-			    eptr->postEventInfo->len > 0) {
-				size_t cs = TSMIN(space,
-						  eptr->postEventInfo->len);
-				parser->traceFile->readChunk(
-					eptr->postEventInfo, wb, space,
-					ts_errno);
-				if (*ts_errno != 0) {
-					rval = false;
-					goto error_close;
-				}
-				if (cs > 0) {
-					written += cs;
-					space   -= cs;
-					wb      += cs;
-				}
-			}
+			wb      += wrote;
+			written += wrote;
 		}
 
 		if (written > 0) {
@@ -1561,6 +1497,95 @@ error_munmap:
 		munmap_err();
 
 	return rval;
+}
+
+int TraceAnalyzer::writePerfEvent(char *wb, int *space, const TraceEvent *eptr,
+			      int *ts_errno)
+{
+	char tbuf[40];
+	int written = 0;
+	int w;
+	const char *ename;
+	int nrspaces;
+	int i;
+
+	*ts_errno = 0;
+
+	eptr->time.sprint(tbuf);
+	w = snprintf(wb, *space, "%s %5u [%03u] %s: ",
+		     eptr->taskName->ptr, eptr->pid, eptr->cpu, tbuf);
+	if (likely(w > 0)) {
+		written += w;
+		*space  -= w;
+		wb      += w;
+	}
+
+	if (eptr->intArg != 0) {
+		w = snprintf(wb, *space, "%10u ", eptr->intArg);
+		if (likely(w > 0)) {
+			written += w;
+			*space  -= w;
+			wb      += w;
+		}
+	}
+
+	ename = eptr->getEventName()->ptr;
+	nrspaces = TSMAX(1, spaceStrLen - strlen(ename));
+	nrspaces = TSMIN(nrspaces, *space);
+	if (likely(nrspaces > 0)) {
+		strncpy(wb, spaceStr, nrspaces);
+		written += nrspaces;
+		*space  -= nrspaces;
+		wb      += nrspaces;
+	}
+
+	w = snprintf(wb, *space, "%s:", ename);
+	if (likely(w > 0)) {
+		written += w;
+		*space  -= w;
+		wb      += w;
+	}
+
+	for (i = 0; i < eptr->argc; i++) {
+		w = snprintf(wb, *space, " %s", eptr->argv[i]->ptr);
+		if (likely(w > 0)) {
+			written += w;
+			*space  -= w;
+			wb      += w;
+		}
+	}
+	w = snprintf(wb, *space, "\n");
+	if (w > 0) {
+		written += w;
+		*space  -= w;
+		wb      += w;
+	}
+
+	if (eptr->postEventInfo != nullptr && eptr->postEventInfo->len > 0) {
+		size_t cs = TSMIN(*space, eptr->postEventInfo->len);
+		parser->traceFile->readChunk(eptr->postEventInfo, wb, *space,
+					     ts_errno);
+		if (*ts_errno != 0)
+			return written;
+
+		if (cs > 0) {
+			written += cs;
+			*space  -= cs;
+			wb      += cs;
+		}
+	}
+
+	/*
+	 * We are supposed to have ample of space to spare in here. If nothing
+	 * is left, then we assume that something is wrong and and that we ran
+	 * out, even if it's theoretically possible that the buffer was exactly
+	 * as long as needed with no byte to spare. In this way we don't need
+	 * to check if there is space left for every snprintf() and strncpy()
+	 * operation above.
+	 */
+	if (unlikely(*space <= 0))
+		*ts_errno = -TS_ERROR_BUF_NOSPACE;
+	return written;
 }
 
 TraceFile *TraceAnalyzer::getTraceFile()

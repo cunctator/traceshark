@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2019, 2021, 2022
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -130,6 +131,8 @@
 		     "The regex routines ran out of memory."),		\
 	TSHARK_ITEM_(TS_ERROR_REG_ESUBREG,				\
 		     "Invalid back reference to a subexpression."),	\
+	TSHARK_ITEM_(TS_ERROR_BUF_NOSPACE,				\
+		     "The program ran out of space in an internal buffer."), \
 	TSHARK_ITEM_(TS_NR_ERRORS,					\
 		     nullptr)
 

@@ -270,6 +270,8 @@ private:
 						  const RegexFilter &regex);
 	int compileRegex(RegexFilter &filter);
 	void freeRegex(RegexFilter &filter);
+	int writePerfEvent(char *wb, int *space, const TraceEvent *eptr,
+				  int *ts_errno);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	WorkQueue statsQueue;
