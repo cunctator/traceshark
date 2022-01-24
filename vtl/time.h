@@ -61,8 +61,8 @@
 
 namespace vtl {
 
-#define VTL_TIME_MAX_(A, B) (A > B ? A:B)
-#define VTL_TIME_MIN_(A, B) (A < B ? A:B)
+#define VTL_TIME_MAXFN(A, B) (A > B ? A:B)
+#define VTL_TIME_MINFN(A, B) (A < B ? A:B)
 
 #define VTL_TIMEINT_REQ_ (1000000000000000000LL)
 
@@ -158,28 +158,28 @@ namespace vtl {
 	vtl_always_inline Time Time::operator+(const Time &other) const
 	{
 		Time r;
-		r.precision = VTL_TIME_MAX_(precision, other.precision);
+		r.precision = VTL_TIME_MAXFN(precision, other.precision);
 		r.time = time + other.time;
 		return r;
 	}
 
 	vtl_always_inline void Time::operator+=(const Time &other)
 	{
-		precision = VTL_TIME_MAX_(precision, other.precision);
+		precision = VTL_TIME_MAXFN(precision, other.precision);
 		time = time + other.time;
 	}
 
 	vtl_always_inline Time Time::operator-(const Time &other) const
 	{
 		Time r;
-		r.precision = VTL_TIME_MAX_(precision, other.precision);
+		r.precision = VTL_TIME_MAXFN(precision, other.precision);
 		r.time = time - other.time;
 		return r;
 	}
 
 	vtl_always_inline void Time::operator-=(const Time &other)
 	{
-		precision = VTL_TIME_MAX_(precision, other.precision);
+		precision = VTL_TIME_MAXFN(precision, other.precision);
 		time = time - other.time;
 	}
 
