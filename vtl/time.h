@@ -152,7 +152,7 @@ namespace vtl {
 							  bool spaced,
 							  bool colonatend);
 		timeint_t time;
-		unsigned int precision : 4;
+		unsigned int precision : 8;
 	} time_t;
 
 	vtl_always_inline Time Time::operator+(const Time &other) const
