@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2018, 2020, 2022
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -362,8 +363,8 @@ void TraceParser::fixLastEvent()
 	}
 }
 
-#define CORR_DELTA vtl::Time(false, 0, 900000000)
-#define TIME_10MS  vtl::Time(false, 0, 10000000)
+#define CORR_DELTA vtl::Time(900000000)
+#define TIME_10MS  vtl::Time(10000000)
 
 bool TraceParser::parseLineBugFixup(TraceEvent* event,
 				    const vtl::Time &prevTime)

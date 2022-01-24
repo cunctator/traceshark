@@ -87,7 +87,7 @@
 #include "threads/workqueue.h"
 #include "ui/migrationarrow.h"
 
-#define FAKE_DELTA (vtl::Time(false, 0, 50))
+#define FAKE_DELTA (vtl::Time(50))
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)

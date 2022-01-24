@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018-2020
+ * Copyright (C) 2015, 2016, 2018-2020, 2022
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -59,7 +59,7 @@
 #include "vtl/time.h"
 
 Cursor::Cursor(QCustomPlot *parent, TShark::CursorIdx idx):
-	QCPItemLine(parent), position(0), time(false, 0, 0, 6), cursorIdx(idx)
+	QCPItemLine(parent), position(0), time(0, 6), cursorIdx(idx)
 {
 	QColor color;
 

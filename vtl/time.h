@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2020, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2020-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -61,10 +61,6 @@
 
 namespace vtl {
 
-#define VTL_TIME_MAX vtl::Time(false, UINT_MAX, UINT_MAX)
-#define VTL_TIME_MIN vtl::Time(true, UINT_MAX, UINT_MAX)
-#define VTL_TIME_ZERO vtl::Time(false, 0, 0)
-
 #define VTL_TIME_MAX_(A, B) (A > B ? A:B)
 #define VTL_TIME_MIN_(A, B) (A < B ? A:B)
 
@@ -73,21 +69,31 @@ namespace vtl {
 #if INT_MAX >= VTL_TIMEINT_REQ_ && INT_MIN < -VTL_TIMEINT_REQ_
 #define	VTL_TIME_MILLE_ (1000)
 #define VTL_TIME_USE_INT
+#define VTL_TIME_INT_MAX INT_MAX
+#define VTL_TIME_INT_MIN INT_MIN
 #define VTL_TIME_FMT_STRING_ "%d"
 
 #elif LONG_MAX >= VTL_TIMEINT_REQ_ && LONG_MIN < -VTL_TIMEINT_REQ_
 #define	VTL_TIME_MILLE_ (1000L)
 #define VTL_TIME_USE_LONG
+#define VTL_TIME_INT_MAX LONG_MAX
+#define VTL_TIME_INT_MIN LONG_MIN
 #define VTL_TIME_FMT_STRING_  "%ld"
 
 #elif LLONG_MAX >= VTL_TIMEINT_REQ_ && LLONG_MIN < -VTL_TIMEINT_REQ_
 #define	VTL_TIME_MILLE_ (1000LL)
 #define VTL_TIME_USE_LLONG
+#define VTL_TIME_INT_MAX LLONG_MAX
+#define VTL_TIME_INT_MIN LLONG_MIN
 #define VTL_TIME_FMT_STRING_  "%lld"
 
 #else
 #error "A longer long long is required!"
 #endif
+
+#define VTL_TIME_MAX vtl::Time(VTL_TIME_INT_MAX)
+#define VTL_TIME_MIN vtl::Time(VTL_TIME_INT_MIN)
+#define VTL_TIME_ZERO vtl::Time(0)
 
 #define USECS_PER_MSEC (VTL_TIME_MILLE_)
 #define NSECS_PER_USEC (VTL_TIME_MILLE_)
@@ -105,11 +111,10 @@ namespace vtl {
 #elif defined(VTL_TIME_USE_LLONG)
 		typedef long long timeint_t;
 #endif
-	Time(bool n = false, timeint_t s = 0, timeint_t ns = 0,
-	     unsigned int p = 0):
-		time(n ? (- s * NSECS_PER_SEC + ns) : (s * NSECS_PER_SEC + ns)),
-			precision(p)
-		{}
+
+		Time(timeint_t ns = 0, unsigned int p = 6):
+			time(ns), precision(p)
+			{}
 		vtl_always_inline Time operator+(const Time &other) const;
 		vtl_always_inline void operator+=(const Time &other);
 		vtl_always_inline Time operator-(const Time &other) const;

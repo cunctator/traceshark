@@ -59,7 +59,7 @@
 #define SCHED_HEIGHT ((double) 0.5)
 #define FLOOR_HEIGHT ((double) 0)
 
-#define ABSTRACT_TASK_TIME_ZERO vtl::Time(false, 0, 0, 6)
+#define ABSTRACT_TASK_TIME_ZERO vtl::Time(0, 6)
 
 AbstractTask::AbstractTask() :
 	pid(0), accTime(), accPct(0), cursorTime(), cursorPct(0), isNew(true),
