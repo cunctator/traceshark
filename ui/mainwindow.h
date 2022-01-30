@@ -198,6 +198,8 @@ private slots:
 	void exportEvents(TraceAnalyzer::exporttype_t export_type);
 	void exportEventsTriggered();
 	void exportCPUTriggered();
+	void exportSchedLatencies(int format);
+	void exportWakeupLatencies(int format);
 	void consumeSettings();
 	void consumeFilterSettings();
 	void consumeSizeChange();
@@ -309,6 +311,8 @@ private:
 	void setEventActionsEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
+	void exportLatencies(TraceAnalyzer::exportformat_t format,
+			     TraceAnalyzer::latencytype_t type);
 	void handleLegendGraphDoubleClick(QCPGraph *legendGraph);
 	void handleWakeUpChanged(bool selected);
 	void checkStatsTimeLimited();

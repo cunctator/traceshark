@@ -58,6 +58,10 @@
 #include "analyzer/latency.h"
 #include "ui/latencymodel.h"
 
+QT_BEGIN_NAMESPACE
+class QComboBox;
+QT_END_NAMESPACE
+
 class TableView;
 class TraceAnalyzer;
 
@@ -76,12 +80,15 @@ public slots:
 signals:
 	void latencyDoubleClicked(const Latency *latency);
 	void QDockWidgetNeedsRemoval(QDockWidget *widget);
+	void exportRequested(int typeidx);
 private slots:
 	void closeClicked();
+	void exportClicked();
 	void handleDoubleClick(const QModelIndex &index);
 private:
 	TableView *latencyView;
 	LatencyModel *latencyModel;
+	QComboBox *formatBox;
 };
 
 vtl_always_inline enum Latency::Type LatencyWidget::getLatencyType() const

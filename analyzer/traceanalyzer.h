@@ -110,6 +110,18 @@ public:
 		EXPORT_TYPE_ALL = 0,
 		EXPORT_TYPE_CPU_CYCLES
 	} exporttype_t;
+
+	typedef enum : int {
+		LATENCY_WAKEUP = 0,
+		LATENCY_SCHED,
+	} latencytype_t;
+
+	typedef enum ExportFormat : int {
+		EXPORT_ASCII = 0,
+		EXPORT_CSV,
+		EXPORT_NR,
+	} exportformat_t;
+
 	TraceAnalyzer(const SettingStore *sstore);
 	~TraceAnalyzer();
 	int open(const QString &fileName);
@@ -173,6 +185,8 @@ public:
 	bool filterActive(FilterState::filter_t filter) const;
 	bool exportTraceFile(const char *fileName, int *ts_errno,
 			     exporttype_t export_type);
+	bool exportLatencies(exportformat_t format, latencytype_t type,
+			     const char *fileName, int *ts_errno);
 	TraceFile *getTraceFile();
 	vtl::TList<TraceEvent> *events;
 	vtl::TList<const TraceEvent*> filteredEvents;
@@ -272,6 +286,8 @@ private:
 	void freeRegex(RegexFilter &filter);
 	int writePerfEvent(char *wb, int *space, const TraceEvent *eptr,
 				  int *ts_errno);
+	int writeLatency(char *wb, int *space, const Latency *lptr, int size,
+			 const char *sep, int *ts_errno);
 	WorkQueue processingQueue;
 	WorkQueue scalingQueue;
 	WorkQueue statsQueue;

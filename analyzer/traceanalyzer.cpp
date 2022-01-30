@@ -1499,6 +1499,113 @@ error_munmap:
 	return rval;
 }
 
+bool TraceAnalyzer::exportLatencies(exportformat_t format, latencytype_t type,
+				    const char *fileName, int *ts_errno)
+{
+	const char *sep = nullptr;
+	const vtl::TList<Latency> *latencies = nullptr;
+	char *wbuf = nullptr;
+	char *wb = nullptr;
+	int written, written_io, space, write_rval, wrote;
+	int nr_elements;
+	int idx;
+	const Latency *lptr;
+	bool rval = true;
+	int fd;
+
+	switch (format) {
+	case EXPORT_ASCII:
+		sep = " ";
+		break;
+	case EXPORT_CSV:
+		sep = ";";
+		break;
+	default:
+		*ts_errno = - TS_ERROR_INTERNAL;
+		return false;
+	}
+
+	switch (type) {
+	case LATENCY_WAKEUP:
+		latencies = &wakeLatencies;
+		break;
+	case LATENCY_SCHED:
+		latencies = &schedLatencies;
+		break;
+	default:
+		*ts_errno = - TS_ERROR_INTERNAL;
+		return false;
+	}
+
+	nr_elements = latencies->size();
+
+	wbuf = (char*) mmap(nullptr, (size_t) WRITE_BUFFER_SIZE,
+			    PROT_READ|PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
+			    -1, 0);
+	if (wbuf == MAP_FAILED)
+		mmap_err();
+
+	fd =  clib_open(fileName, O_WRONLY | O_CREAT,
+			(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
+
+	if (fd < 0) {
+		rval = false;
+		*ts_errno = errno;
+		goto error_munmap;
+	}
+
+	idx = 0;
+
+	do {
+		written = 0;
+		space = WRITE_BUFFER_SIZE;
+		wb = wbuf;
+
+		while (idx < nr_elements && written < WRITE_BUFFER_LIMIT) {
+			lptr = &(*latencies)[idx];
+			idx++;
+
+			wrote = writeLatency(wb, &space, lptr, nr_elements,
+					     sep, ts_errno);
+			if (*ts_errno != 0) {
+				rval = false;
+				goto error_close;
+			}
+			wb      += wrote;
+			written += wrote;
+		}
+
+		if (written > 0) {
+			written_io = 0;
+			do {
+				write_rval = write(fd, wbuf, written);
+				if (write_rval > 0) {
+					written_io += write_rval;
+				}
+				if (write_rval < 0 && errno != EINTR) {
+					rval = false;
+					*ts_errno = errno;
+					goto error_close;
+				}
+			} while(written_io < written);
+		}
+	} while(idx >= nr_elements);
+
+error_close:
+	if (clib_close(fd) != 0) {
+		if (errno != EINTR) {
+			rval = false;
+			*ts_errno = errno;
+		}
+	}
+
+error_munmap:
+	if (munmap(wbuf, WRITE_BUFFER_SIZE) != 0)
+		munmap_err();
+
+	return rval;
+}
+
 int TraceAnalyzer::writePerfEvent(char *wb, int *space, const TraceEvent *eptr,
 			      int *ts_errno)
 {
@@ -1585,6 +1692,61 @@ int TraceAnalyzer::writePerfEvent(char *wb, int *space, const TraceEvent *eptr,
 	 */
 	if (unlikely(*space <= 0))
 		*ts_errno = -TS_ERROR_BUF_NOSPACE;
+	return written;
+}
+
+int TraceAnalyzer::writeLatency(char *wb, int *space, const Latency *lptr,
+				int size, const char *sep, int *ts_errno)
+{
+	uint64_t pct = 10000UL;
+	char tbuf[40];
+	char lbuf[40];
+	int written = 0;
+	int w;
+	Task *task;
+	const unsigned int usize = size > 1 ? size - 1 : 1;
+
+	pct *= usize - lptr->place;
+	pct /= usize;
+
+	*ts_errno = 0;
+	lptr->time.sprint(tbuf);
+	lptr->delay.sprint(lbuf);
+
+	task = findTask(lptr->pid);
+	const QString &dname = *task->displayName;
+
+	/*
+	 * The format below is bascially the same as in the LatencyModel class,
+	 * which is used by LatencyWidget to display latencies, see
+	 * LatencyModel::data().
+	 */
+	w = snprintf(wb, *space, "%d%s%s%s%s%s%s%s%d%s%u.%02u\n",
+		     lptr->pid, sep, dname.toLatin1().data(), sep, tbuf,
+		     sep, lbuf, sep, lptr->place, sep, (unsigned) (pct / 100),
+		     (unsigned) (pct % 100));
+	if (likely(w > 0)) {
+		written += w;
+		*space  -= w;
+		wb      += w;
+	} else {
+		if (w < 0)
+			*ts_errno = errno;
+		else
+			*ts_errno = - TS_ERROR_UNSPEC;
+		return written;
+	}
+
+	/*
+	 * We are supposed to have ample of space to spare in here. If nothing
+	 * is left, then we assume that something is wrong and and that we ran
+	 * out, even if it's theoretically possible that the buffer was exactly
+	 * as long as needed with no byte to spare. In this way we don't need
+	 * to check if there is space left for every snprintf() and strncpy()
+	 * operation above.
+	 */
+	if (unlikely(*space <= 0))
+		*ts_errno = - TS_ERROR_BUF_NOSPACE;
 	return written;
 }
 

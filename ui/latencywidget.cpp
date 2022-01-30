@@ -77,14 +77,29 @@ LatencyWidget::LatencyWidget(const QString &title, enum Latency::Type type,
 	mainLayout->addWidget(latencyView);
 	mainLayout->addLayout(buttonLayout);
 
+	formatBox = new QComboBox();
+
+	/*
+	 * These must be in the same order as the items in
+	 * TraceAnalyzer:exportformat_t
+	 */
+	formatBox->addItem(QString(tr("ASCII")));
+	formatBox->addItem(QString(tr("CSV")));
+	formatBox->setCurrentIndex(0);
+
+	QPushButton *exportButton = new QPushButton(tr("Export"));
 	QPushButton *closeButton = new QPushButton(tr("Close"));
+
 	buttonLayout->addStretch();
+	buttonLayout->addWidget(formatBox);
+	buttonLayout->addWidget(exportButton);
 	buttonLayout->addWidget(closeButton);
 	buttonLayout->addStretch();
 
 	hide();
 
 	tsconnect(closeButton, clicked(), this, closeClicked());
+	tsconnect(exportButton, clicked(), this, exportClicked());
 	tsconnect(latencyView, doubleClicked(const QModelIndex &),
 		  this, handleDoubleClick(const QModelIndex &));
 }
@@ -123,6 +138,11 @@ void LatencyWidget::closeClicked()
 {
 	QDockWidget::hide();
 	emit QDockWidgetNeedsRemoval(this);
+}
+
+void LatencyWidget::exportClicked()
+{
+	emit exportRequested(formatBox->currentIndex());
 }
 
 void LatencyWidget::handleDoubleClick(const QModelIndex &index)

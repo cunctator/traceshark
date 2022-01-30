@@ -2204,6 +2204,8 @@ void MainWindow::dialogConnections()
 		  this, showLatency(const Latency *));
 	tsconnect(schedLatencyWidget, QDockWidgetNeedsRemoval(QDockWidget *),
 		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(schedLatencyWidget, exportRequested(int),
+		  this, exportSchedLatencies(int));
 
 	/* wakeup latency widget */
 	tsconnect(wakeupLatencyWidget,
@@ -2211,6 +2213,8 @@ void MainWindow::dialogConnections()
 		  this, showLatency(const Latency *));
 	tsconnect(wakeupLatencyWidget, QDockWidgetNeedsRemoval(QDockWidget *),
 		  this, removeQDockWidget(QDockWidget*));
+	tsconnect(wakeupLatencyWidget, exportRequested(int),
+		  this, exportWakeupLatencies(int));
 }
 
 void MainWindow::setStatus(status_t status, const QString *fileName)
@@ -2568,6 +2572,53 @@ void MainWindow::exportCPUTriggered()
 void MainWindow::exportEventsTriggered()
 {
 	exportEvents(TraceAnalyzer::EXPORT_TYPE_ALL);
+}
+
+void MainWindow::exportSchedLatencies(int format)
+{
+	exportLatencies((TraceAnalyzer::exportformat_t)format,
+			TraceAnalyzer::LATENCY_SCHED);
+}
+
+void MainWindow::exportWakeupLatencies(int format)
+{
+	exportLatencies((TraceAnalyzer::exportformat_t)format,
+			TraceAnalyzer::LATENCY_WAKEUP);
+}
+
+void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
+				 TraceAnalyzer::latencytype_t type)
+{
+	QString caption;
+	QFileDialog::Options options;
+	QString fileName;
+	int ts_errno;
+
+	switch (type) {
+	case TraceAnalyzer::LATENCY_WAKEUP:
+		caption = tr("Export the wakeup latencies");
+		break;
+	case TraceAnalyzer::LATENCY_SCHED:
+		caption = tr("Export the scheduling latencies");
+		break;
+	default:
+		vtl::warn(TS_ERROR_INTERNAL, "Unknown latency type");
+		return;
+	}
+
+	fileName = QFileDialog::getSaveFileName(this, caption, QString(),
+						tr("ASCII Text (*.asc *.txt)"),
+						nullptr, options);
+
+	if (fileName.isEmpty())
+		return;
+
+	if (!analyzer->exportLatencies(format, type,
+				       fileName.toLocal8Bit().data(),
+				       &ts_errno))
+		vtl::warn(ts_errno, "Failed to export latencies to %s",
+			  fileName.toLocal8Bit().data());
+
 }
 
 void MainWindow::consumeSettings()
