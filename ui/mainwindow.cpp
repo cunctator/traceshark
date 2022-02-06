@@ -2593,6 +2593,32 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	QFileDialog::Options options;
 	QString fileName;
 	int ts_errno;
+	QString ascfilter = tr("ASCII Text (*.txt)");
+	QString csvfilter = tr("CSV (*.csv)");
+	QString fsep = QString(";;");
+	QString selected;
+	QString filter;
+	TraceAnalyzer::exportformat_t override_fmt = format;
+
+	/*
+	 * The first filter will be the default one displayed by the
+	 * QFileDialog::getSaveFileName() dialog. The "format" variable contains
+	 * the format selected in LatencyWidget. So based on this we select the
+	 * default format by arranging the order of the filter string. The user
+	 * still have the option to select another format. This will be recorded
+	 * in the "selected" variable.
+	 */
+	switch (format) {
+	case TraceAnalyzer::EXPORT_ASCII:
+		filter = ascfilter + fsep + csvfilter;
+		break;
+	case TraceAnalyzer::EXPORT_CSV:
+		filter = csvfilter + fsep + ascfilter;
+		break;
+	default:
+		vtl::warn(TS_ERROR_INTERNAL, "Unknown file format");
+		return;
+	}
 
 	switch (type) {
 	case TraceAnalyzer::LATENCY_WAKEUP:
@@ -2607,13 +2633,23 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	}
 
 	fileName = QFileDialog::getSaveFileName(this, caption, QString(),
-						tr("ASCII Text (*.asc *.txt)"),
-						nullptr, options);
+						filter, &selected, options);
 
 	if (fileName.isEmpty())
 		return;
 
-	if (!analyzer->exportLatencies(format, type,
+	/*
+	 * The purpose of this override_fmt is to allow the user to select
+	 * another format in the dialog provided by
+	 * QFileDialog::getSaveFileName(). This will override the originally
+	 * selected format in the LatencyWidget widget.
+	 */
+	if (selected == ascfilter)
+		override_fmt = TraceAnalyzer::EXPORT_ASCII;
+	else if (selected == csvfilter)
+		override_fmt = TraceAnalyzer::EXPORT_CSV;
+
+	if (!analyzer->exportLatencies(override_fmt, type,
 				       fileName.toLocal8Bit().data(),
 				       &ts_errno))
 		vtl::warn(ts_errno, "Failed to export latencies to %s",
