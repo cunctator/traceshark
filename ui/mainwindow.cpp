@@ -262,7 +262,8 @@ const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 
 MainWindow::MainWindow():
 	tracePlot(nullptr), scrollBarUpdate(false), graphEnableDialog(nullptr),
-	filterActive(false)
+	filterActive(false), foptions(QFileDialog::DontUseNativeDialog |
+				      QFileDialog::DontUseSheet)
 {
 	createAboutBox();
 	createAboutQCustomPlot();
@@ -446,12 +447,10 @@ void MainWindow::openTrace()
 {
 	QString name;
 	QString caption = tr("Open a trace file");
-	QFileDialog::Options options = QFileDialog::DontUseNativeDialog |
-		QFileDialog::DontUseSheet;
 
 	name = QFileDialog::getOpenFileName(this, caption, QString(),
 					    tr("ASCII (*.asc *.txt)"), nullptr,
-					    options);
+					    foptions);
 	if (!name.isEmpty()) {
 		openFile(name);
 	}
@@ -1219,7 +1218,6 @@ void MainWindow::saveScreenshot()
 	QString pdfCreator = QString("traceshark ");
 	QString pdfTitle;
 	QString diagcapt;
-	QFileDialog::Options options;
 
 	pdfCreator += QString(TRACESHARK_VERSION_STRING);
 
@@ -1241,10 +1239,9 @@ void MainWindow::saveScreenshot()
 	pdfTitle += pdfCreator;
 
 	diagcapt = tr("Save screenshot to image");
-	options = QFileDialog::DontUseNativeDialog | QFileDialog::DontUseSheet;
 	fileName = QFileDialog::getSaveFileName(this, diagcapt, QString(),
 						tr("Images (*.png *.bmp *.jpg *.pdf)"),
-						nullptr, options);
+						nullptr, foptions);
 	if (fileName.isEmpty())
 		return;
 
@@ -2526,7 +2523,6 @@ void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 	QString fileName;
 	int ts_errno;
 	QString caption;
-	QFileDialog::Options options;
 
 	if (analyzer->events->size() <= 0) {
 		vtl::warnx("The trace is empty. There is nothing to export");
@@ -2550,10 +2546,9 @@ void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 		break;
 	}
 
-	options = QFileDialog::DontUseNativeDialog | QFileDialog::DontUseSheet;
 	fileName = QFileDialog::getSaveFileName(this, caption, QString(),
 						tr("ASCII Text (*.asc *.txt)"),
-						nullptr, options);
+						nullptr, foptions);
 	if (fileName.isEmpty())
 		return;
 
@@ -2590,7 +2585,6 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 				 TraceAnalyzer::latencytype_t type)
 {
 	QString caption;
-	QFileDialog::Options options;
 	QString fileName;
 	int ts_errno;
 	QString ascfilter = tr("ASCII Text (*.txt)");
@@ -2633,7 +2627,7 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	}
 
 	fileName = QFileDialog::getSaveFileName(this, caption, QString(),
-						filter, &selected, options);
+						filter, &selected, foptions);
 
 	if (fileName.isEmpty())
 		return;

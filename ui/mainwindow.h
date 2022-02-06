@@ -53,6 +53,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QFileDialog>
 #include <QMainWindow>
 #include <QMap>
 #include <QVector>
@@ -460,6 +461,7 @@ private:
 	QMap<event_t, event_t> eventTypeMap;
 	QMessageBox *aboutBox;
 	QMessageBox *aboutQCPBox;
+	QFileDialog::Options foptions;
 };
 
 #endif /* MAINWINDOW_H */
