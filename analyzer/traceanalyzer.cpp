@@ -1589,7 +1589,7 @@ bool TraceAnalyzer::exportLatencies(exportformat_t format, latencytype_t type,
 				}
 			} while(written_io < written);
 		}
-	} while(idx >= nr_elements);
+	} while(idx < nr_elements);
 
 error_close:
 	if (clib_close(fd) != 0) {
