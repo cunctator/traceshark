@@ -1465,9 +1465,7 @@ bool TraceAnalyzer::exportTraceFile(const char *fileName, int *ts_errno,
 				}
 			} while(written_io < written);
 		}
-		if (idx >= nr_elements)
-			break;
-	} while(true);
+	} while(idx < nr_elements);
 
 	if (!parser->traceFile->isIntact(ts_errno)) {
 		rval = false;
