@@ -63,7 +63,7 @@
 
 AbstractTask::AbstractTask() :
 	pid(0), accTime(), accPct(0), cursorTime(), cursorPct(0), isNew(true),
-	offset(0), scale(0), graph(nullptr)
+	offset(0), scale(0), graph(nullptr), horizontalDelayBars(nullptr)
 {}
 
 AbstractTask::~AbstractTask()

@@ -54,6 +54,7 @@
 #include <cstring>
 
 #include <QApplication>
+#include <QColorDialog>
 #include <QDateTime>
 #include <QList>
 #include <QScrollBar>
@@ -185,6 +186,9 @@
 
 #define ADD_LEGEND_TOOLTIP		\
 "Add this task to the legend"
+
+#define COLOR_TASK_TOOLTIP		\
+"Pick a new color for this task"
 
 #define CLEAR_LEGEND_TOOLTIP		\
 "Remove all tasks from the legend"
@@ -975,6 +979,7 @@ void MainWindow::addHorizontalWakeupGraph(CPUTask &task)
 	errorBars->setPen(pen);
 	errorBars->setWhiskerWidth(4);
 	errorBars->setDataPlottable(graph);
+	task.horizontalDelayBars = errorBars;
 	/* errorBars->setSymbolGap(0); */
 }
 
@@ -1005,6 +1010,7 @@ void MainWindow::addWakeupGraph(CPUTask &task)
 	errorBars->setPen(pen);
 	errorBars->setWhiskerWidth(4);
 	errorBars->setDataPlottable(graph);
+	task.verticalDelayBars = errorBars;
 }
 
 void MainWindow::addGenericAccessoryGraph(const QString &name,
@@ -1103,6 +1109,7 @@ void MainWindow::setCloseActionsEnabled(bool e)
  */
 void MainWindow::setTaskActionsEnabled(bool e)
 {
+	colorTaskAction->setEnabled(e);
 	findWakeupAction->setEnabled(e);
 	findWakingDirectAction->setEnabled(e);
 	findSleepAction->setEnabled(e);
@@ -1914,6 +1921,11 @@ void MainWindow::createActions()
 	addToLegendAction->setToolTip(tr(ADD_LEGEND_TOOLTIP));
 	tsconnect(addToLegendAction, triggered(), this, addToLegendTriggered());
 
+	colorTaskAction = new QAction(tr("C&olor task"), this);
+	colorTaskAction->setIcon(QIcon(RESSRC_GPH_COLORTASK));
+	colorTaskAction->setToolTip(tr(COLOR_TASK_TOOLTIP));
+	tsconnect(colorTaskAction, triggered(), this, colorToolbarTaskTriggered());
+
 	clearLegendAction = new QAction(tr("&Clear the legend"), this);
 	clearLegendAction->setIcon(QIcon(RESSRC_GPH_CLEAR_LEGEND));
 	clearLegendAction->setToolTip(tr(CLEAR_LEGEND_TOOLTIP));
@@ -2017,6 +2029,7 @@ void MainWindow::createToolBars()
 	}
 
 	taskToolBar->addAction(addToLegendAction);
+	taskToolBar->addAction(colorTaskAction);
 	taskToolBar->addAction(clearLegendAction);
 	taskToolBar->addAction(findWakeupAction);
 	taskToolBar->addAction(findWakingAction);
@@ -2061,6 +2074,7 @@ void MainWindow::createMenus()
 
 	taskMenu = menuBar()->addMenu(tr("&Task"));
 	taskMenu->addAction(addToLegendAction);
+	taskMenu->addAction(colorTaskAction);
 	taskMenu->addAction(clearLegendAction);
 	taskMenu->addAction(findWakeupAction);
 	taskMenu->addAction(findWakingAction);
@@ -2796,6 +2810,8 @@ void MainWindow::consumeSettings()
 			CPUTask &task = iter.value();
 			delete task.graph;
 			task.graph = nullptr;
+			task.horizontalDelayBars = nullptr;
+			task.verticalDelayBars = nullptr;
 		}
 	}
 
@@ -2817,6 +2833,7 @@ void MainWindow::consumeSettings()
 			task->runningGraph = nullptr;
 			task->preemptedGraph = nullptr;
 			task->uninterruptibleGraph = nullptr;
+			task->horizontalDelayBars = nullptr;
 		}
 	}
 
@@ -2960,6 +2977,7 @@ void MainWindow::addTaskGraph(int pid)
 	errorBars->setWhiskerWidth(4);
 	errorBars->setDataPlottable(graph);
 	task->delayGraph = graph;
+	task->horizontalDelayBars = errorBars;
 
 	addStillRunningTaskGraph(task);
 	addPreemptedTaskGraph(task);
@@ -3061,6 +3079,8 @@ void MainWindow::removeTaskGraph(int pid)
 		tracePlot->removeGraph(task->delayGraph);
 		task->delayGraph = nullptr;
 	}
+
+	task->horizontalDelayBars = nullptr;
 
 	if (task->runningGraph != nullptr) {
 		tracePlot->removeGraph(task->runningGraph);
@@ -3682,6 +3702,77 @@ void MainWindow::clearLegendTriggered()
 {
 	taskToolBar->clearLegend();
 	updateAddToLegendAction();
+}
+
+/* let's the user chose a color for the toolbar task */
+void MainWindow::colorTask(int pid)
+{
+	const QColorDialog::ColorDialogOptions options;
+	const QColor oldcolor = analyzer->getTaskColor(pid);
+	unsigned int cpu;
+	const unsigned int nrCPUs = analyzer->getNrCPUs();
+
+	Task *task = analyzer->findTask(pid);
+	if (task == nullptr || task->isGhostAlias)
+		return;
+
+	const QString title = tr("New Color for task: ") +
+		QString(task->taskName->str) +
+		QLatin1String(":") +
+		QString::number(task->pid);
+
+	const QColor color = QColorDialog::getColor(oldcolor, this, title, options);
+
+	if (!color.isValid())
+		return;
+
+	analyzer->setTaskColor(pid, color);
+
+	QPen pen = QPen();
+	pen.setColor(color);
+	pen.setWidth(settingStore->getValue(Setting::LINE_WIDTH).intv());
+
+	/* Add code here for coloring a unified graph */
+	if (task->graph != nullptr)
+		task->graph->setPen(pen);
+	if (task->horizontalDelayBars != nullptr)
+		task->horizontalDelayBars->setPen(pen);
+
+	for (cpu = 0; cpu < nrCPUs; cpu++) {
+		DEFINE_CPUTASKMAP_ITERATOR(iter) = analyzer->
+			cpuTaskMaps[cpu].find(pid);
+
+		if (iter == analyzer->cpuTaskMaps[cpu].end())
+			continue;
+
+		CPUTask &cputask = iter.value();
+
+		/* Add code here for coloring per cpu graph */
+		if (cputask.verticalDelayBars != nullptr)
+			cputask.verticalDelayBars->setPen(pen);
+		if (cputask.horizontalDelayBars != nullptr)
+			cputask.horizontalDelayBars->setPen(pen);
+
+		if (cputask.graph != nullptr)
+			cputask.graph->setPen(pen);
+	}
+	tracePlot->replot();
+}
+
+/* let's the user chose a color for the toolbar task */
+void MainWindow::colorToolbarTaskTriggered()
+{
+	const int pid = taskToolBar->getPid();
+
+	colorTask(pid);
+}
+
+void MainWindow::colorTasks(const QList<int> &pids)
+{
+	QList<int>::const_iterator iter;
+
+	for (iter = pids.cbegin(); iter != pids.cend(); iter++)
+		colorTask(*iter);
 }
 
 /* Finds the preceding wakeup of the currently selected task */

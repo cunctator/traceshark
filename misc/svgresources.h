@@ -60,6 +60,7 @@
 #define RESSRC_GPH_CLEAR_LEGEND  ":/traceshark/images/clearlegend.svg"
 #define RESSRC_GPH_CLEAR_TASK    ":/traceshark/images/cleartasksgraphs.svg"
 #define RESSRC_GPH_CLOSE         ":/traceshark/images/close.svg"
+#define RESSRC_GPH_COLORTASK     ":/traceshark/images/colortask.svg"
 #define RESSRC_GPH_CPUFILTER     ":/traceshark/images/cpufilter.svg"
 #define RESSRC_GPH_CURSOR_ZOOM   ":/traceshark/images/cursorzoom.svg"
 #define RESSRC_GPH_DEFAULT_ZOOM  ":/traceshark/images/defaultzoom.svg"

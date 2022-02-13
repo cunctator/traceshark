@@ -9,6 +9,7 @@
   <file>images/clearlegend30x30.png</file>
   <file>images/cleartasksgraphs30x30.png</file>
   <file>images/close30x30.png</file>
+  <file>images/colortask30x30.png</file>
   <file>images/cpufilter30x30.png</file>
   <file>images/cursorzoom30x30.png</file>
   <file>images/defaultzoom30x30.png</file>
@@ -54,6 +55,7 @@
   <file>images/clearlegend.svg</file>
   <file>images/cleartasksgraphs.svg</file>
   <file>images/close.svg</file>
+  <file>images/colortask.svg</file>
   <file>images/cpufilter.svg</file>
   <file>images/cursorzoom.svg</file>
   <file>images/defaultzoom.svg</file>

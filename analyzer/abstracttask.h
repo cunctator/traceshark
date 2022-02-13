@@ -60,6 +60,7 @@
 #include "vtl/time.h"
 #include "misc/traceshark.h"
 
+class QCPErrorBars;
 class TaskGraph;
 class TraceEvent;
 class TraceAnalyzer;
@@ -129,6 +130,11 @@ public:
 
 	TaskGraph *graph;
 
+	/*
+	 * If we are to make it possible to change color of tasks, we need a
+	 * pointer to these bars.
+	 */
+	QCPErrorBars *horizontalDelayBars;
 private:
 	int binarySearch_(const vtl::Time &time, int lowerIdx, int higherIdx);
 	vtl_always_inline int binarySearch(const vtl::Time &time);

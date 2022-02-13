@@ -61,6 +61,7 @@
 #include "vtl/compiler.h"
 #include "vtl/time.h"
 
+class QCPErrorBars;
 class QCPGraph;
 class TaskGraph;
 class Task;

@@ -57,12 +57,20 @@
 #include <QVector>
 #include "analyzer/abstracttask.h"
 
+class QCPErrorBars;
+
 class CPUTask: public AbstractTask {
 public:
 	CPUTask();
 	QVector<double> verticalDelay;
 	bool doScaleDelay();
 	static void setVerticalDelayMAX(int w);
+
+	/*
+	 * If we are to make it possible to change color of tasks, we need a
+	 * pointer to these bars.
+	 */
+	QCPErrorBars *verticalDelayBars;
 private:
 	static double delay_max;
 };

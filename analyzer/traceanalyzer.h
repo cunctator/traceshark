@@ -160,6 +160,7 @@ public:
 	vtl_always_inline CPUTask *findCPUTask(int pid,
 					     unsigned int cpu);
 	vtl_always_inline QColor getTaskColor(int pid) const;
+	vtl_always_inline void setTaskColor(int pid, const QColor &color);
 	vtl_always_inline tracetype_t getTraceType() const;
 	void setSchedOffset(unsigned int cpu, double offset);
 	void setSchedScale(unsigned int cpu, double scale);
@@ -520,6 +521,13 @@ vtl_always_inline QColor TraceAnalyzer::getTaskColor(int pid) const
 {
 	TColor taskColor = colorMap.value(pid, black);
 	return taskColor.toQColor();
+}
+
+vtl_always_inline void TraceAnalyzer::setTaskColor(int pid,
+						   const QColor &color)
+{
+	TColor taskColor = TColor::fromQColor(color);
+	colorMap[pid] = taskColor;
 }
 
 vtl_always_inline CPUTask *TraceAnalyzer::findCPUTask(int pid,

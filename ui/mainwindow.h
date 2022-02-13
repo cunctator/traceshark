@@ -214,6 +214,9 @@ private slots:
 
 	void addTaskGraphTriggered();
 	void addToLegendTriggered();
+	void colorTask(int pid);
+	void colorTasks(const QList<int> &pids);
+	void colorToolbarTaskTriggered();
 	void clearLegendTriggered();
 	void findSleepTriggered();
 	void findWakeupTriggered();
@@ -390,6 +393,7 @@ private:
 
 	QAction *addTaskGraphAction;
 	QAction *addToLegendAction;
+	QAction *colorTaskAction;
 	QAction *clearLegendAction;
 	QAction *findSleepAction;
 	QAction *findWakeupAction;

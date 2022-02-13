@@ -55,7 +55,7 @@
 #include "analyzer/traceanalyzer.h"
 
 CPUTask::CPUTask() :
-	AbstractTask()
+	AbstractTask(), verticalDelayBars(nullptr)
 {}
 
 bool CPUTask::doScaleDelay() {
