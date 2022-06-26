@@ -87,7 +87,14 @@
 #include "threads/workqueue.h"
 #include "ui/migrationarrow.h"
 
-#define FAKE_DELTA (vtl::Time(50))
+/*
+ * Ftrace and perf only record sched_switch events, there is no record of when
+ * the old task was schedule out, and when the new task was scheduled. To solve
+ * this we simply assume that the old task was scheduled out FAKE_DELTA before
+ * the sched_switch event and the new task was scheduled FAKE_DELTA after the
+ * sched_switch event.
+ */
+#define FAKE_DELTA (vtl::Time(20))
 
 /* Macros for the heights of the scheduling graph */
 #define FULL_HEIGHT  ((double) 1)
@@ -627,7 +634,7 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	unsigned int cpu = event.cpu;
 	vtl::Time oldtime = event.time - FAKE_DELTA;
 	vtl::Time newtime = event.time + FAKE_DELTA;
-	const vtl::Time &midtime = event.time;
+	vtl::Time midtime = event.time;
 	double oldtimeDbl, newtimeDbl;
 	int oldpid;
 	int newpid;
@@ -674,6 +681,20 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	if (eventCPU->pidOnCPU != oldpid && eventCPU->hasBeenScheduled)
 		handleWrongTaskOnCPU(event, cpu, eventCPU, oldpid, oldtime,
 				     idx);
+
+	/*
+	 * Sometimes there are consecutive switch events with exactly the same
+	 * timestamp. We guard against this by checking lastSched. If it has
+	 * happened, or the timestamps are too close for the FAKE_DELTA to work,
+	 * then we simply add time equal to two FAKE_DELTAs to the lastSched
+	 * time and assumes that this is a more accurate time than the
+	 * event.time!
+	 */
+	if (eventCPU->lastSched >= oldtime && eventCPU->hasBeenScheduled) {
+		midtime = eventCPU->lastSched + FAKE_DELTA * 2;
+		oldtime = midtime - FAKE_DELTA;
+		newtime = midtime + FAKE_DELTA;
+	}
 
 	if (oldpid <= 0) {
 		eventCPU->lastExitIdle = oldtime;
