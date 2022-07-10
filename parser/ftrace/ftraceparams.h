@@ -349,7 +349,22 @@ ftrace_sched_switch_handle_newprio(const TraceEvent &event,
 		return param_inside_braces(event, event.argc - 1);
 }
 
-#define ftrace_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
+#define WAKEUP_SUCC_PFIX "success="
+
+static vtl_always_inline bool ftrace_sched_wakeup_args_ok(
+	const TraceEvent &event)
+{
+	const TString *ss = event.argv[event.argc - 2];
+	const char *c = ss->ptr;
+
+	if (event.argc < 3)
+		return false;
+
+	if (!prefixcmp(c, WAKEUP_SUCC_PFIX))
+		return event.argc >= 4;
+
+	return event.argc >= 3;
+}
 
 static vtl_always_inline
 unsigned int ftrace_sched_wakeup_cpu(const TraceEvent &event)
@@ -360,8 +375,6 @@ unsigned int ftrace_sched_wakeup_cpu(const TraceEvent &event)
 		cpu = uint_after_char(event, event.argc - 1, '=');
 	return cpu;
 }
-
-#define WAKEUP_SUCC_PFIX "success="
 
 static vtl_always_inline bool ftrace_sched_wakeup_success(const TraceEvent &event)
 {
@@ -374,6 +387,12 @@ static vtl_always_inline bool ftrace_sched_wakeup_success(const TraceEvent &even
 	return true;
 }
 
+/*
+ * This function is currently not used. However, let it be known that it would
+ * in its current form not work for all known trace formats. In particular, it
+ * would break down for wakeup events with the warning in the trace arguments:
+ * xterm:6879 [120]<CANT FIND FIELD success> CPU:006
+ */
 static vtl_always_inline
 unsigned int ftrace_sched_wakeup_prio(const TraceEvent &event)
 {
@@ -393,10 +412,35 @@ static vtl_always_inline int ftrace_sched_wakeup_pid(const TraceEvent &event)
 {
 	int idx = event.argc - 3;
 	const char *c = event.argv[idx]->ptr;
+
 	if (!prefixcmp(c, WAKEUP_PID_PFIX))
 		return int_after_char(event, idx, '=');
 	/* We assume the old format here */
-	idx = event.argc - 4;
+	idx = event.argc - 3;
+	if (!strcmp(event.argv[idx]->ptr, "FIELD")) {
+		/*
+		 * Here we assume that the arguments of this wakeup event
+		 * contains a warning, of a missing field, like this:
+		 * xterm:6879 [120]<CANT FIND FIELD success> CPU:006
+		 */
+		if (event.argc >= 6) {
+			idx = event.argc - 6;
+			goto out;
+		}
+	}
+	idx = event.argc - 2;
+	if (!prefixcmp(event.argv[idx]->ptr, WAKEUP_SUCC_PFIX)) {
+		/* This means that we have the sucess=1 parameter, as in:
+		 *  xterm:1656 [120] success=1 CPU:000
+		 */
+		idx = event.argc - 4;
+	} else {
+		/* No success=1 param, so it should look like this:
+		 * xterm:1656 [120] CPU:000
+		 */
+		idx = event.argc - 3;
+	}
+out:
 	return int_after_char(event, idx, ':');
 }
 
@@ -405,6 +449,7 @@ static vtl_always_inline const char
 {
 	int beginidx;
 	int endidx;
+	int pfix_idx;
 	int len = 0;
 	char *c;
 	const TString *first;
@@ -439,9 +484,26 @@ static vtl_always_inline const char
 
 	} else {
 		/* oldformat */
-		last = event.argv[event.argc - 4];
 		beginidx = 0;
-		endidx = event.argc - 5;
+		pfix_idx = event.argc - 2;
+		last = event.argv[event.argc - 3];
+
+		if (event.argc >= 6 && !strcmp(last->ptr, "FIELD")) {
+			/*
+			 * Here again we assume that the arguments of this
+			 * wakeup event contains a warning, of a missing field,
+			 * this:
+			 * xterm:6879 [120]<CANT FIND FIELD success> CPU:006
+			 */
+			last = event.argv[event.argc - 6];
+			endidx = event.argc - 7;
+		} else if (prefixcmp(event.argv[pfix_idx]->ptr,
+				     WAKEUP_SUCC_PFIX)) {
+			endidx = event.argc - 4;
+		} else {
+			last = event.argv[event.argc - 4];
+			endidx = event.argc - 5;
+		}
 
 		merge_args_into_cstring(event, beginidx, endidx,
 					c, len, TASKNAME_MAXLEN,
