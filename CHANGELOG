@@ -1,4 +1,29 @@
-traceshark (0.9.12-beta) UNRELEASED; urgency=medium
+traceshark (0.9.13-beta) RELEASED; urgency=medium
+
+   * Update QCustomPlot to 2.1.0.
+   * Unbreak the build for macOS.
+   * Use the time of the sched_switch event for wakeup latency.
+   * Add a feature to be able to display scheduling latencies with a button.
+   * Add a feature to be able to display wakeup latencies with a button.
+   * Improve the description of the latency settings in the settings widget.
+   * Add documentation to the README.md for the two new buttons for displaying
+     wakeup and scheduling latencies.
+   * Fix CID 1510793 in Coverity.
+   * Shorten exportTraceFile() by moving code into a new function.
+   * Fix some bugs in vtl/time.h that currently have no impact.
+   * Implement the possibility for exporting latencies.
+   * Handle the case when consecutive sched_switch events on the same CPU have
+     exactly the same timestamp. The handling is artistic rather than
+     scientific; we add some time between the events.
+   * Add handling for ftrace wakeup event missing the success parameter,
+     including older version that inserts a warning about it missing.
+   * Improve the handling of missing wakeup events. No schedluing or wakeup
+     latency will be calculated if there is no reasonble wakup or
+     schec_switch event preceding the task being scheduled.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 11 Jul 2022 20:38:45 +0300
+
+traceshark (0.9.12-beta) RELEASED; urgency=medium
 
   * Fixed a bug that results in bad drawing performance when traceshark is built
     with OpenGL support but linked against a QCustomPlot library that was not
