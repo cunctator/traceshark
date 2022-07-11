@@ -377,7 +377,8 @@ vtl::Time TraceAnalyzer::estimateSchedDelay(const Task *task,
 	vtl::Time delay;
 
 	/* Is this reasonable ? */
-	if (task->lastRunnable < task->lastSleepEntry) {
+	if (task->lastRunnable_status == RUN_STATUS_INVALID ||
+	    task->lastRunnable < task->lastSleepEntry) {
 		valid = false;
 		return 0;
 	}
@@ -395,7 +396,7 @@ vtl::Time TraceAnalyzer::estimateWakeDelay(const Task *task,
 	vtl::Time delay;
 
 	/* Is this reasonable ? */
-	if (task->lastRunnable_is_sched ||
+	if (task->lastRunnable_status != RUN_STATUS_WAKEUP ||
 	    task->lastRunnable < task->lastSleepEntry) {
 		valid = false;
 		return 0;
@@ -591,6 +592,7 @@ vtl_always_inline void TraceAnalyzer::processForkEvent(tracetype_t ttype,
 	if (task->isNew) {
 		/* This should be very likely for a task that just forked !*/
 		task->isNew = false;
+		task->lastRunnable_status = RUN_STATUS_INVALID;
 		task->pid = m.pid;
 		task->events = events;
 		task->schedTimev.append(event.time.toDouble());
@@ -675,6 +677,7 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		if (task->isNew) {
 			task->pid = event.pid;
 			task->events = events;
+			task->lastRunnable_status = RUN_STATUS_INVALID;
 		}
 	}
 
@@ -752,12 +755,13 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		}
 		task->lastRunnable = midtime;
 		task->lastRunnable_idx = idx;
-		task->lastRunnable_is_sched = true;
+		task->lastRunnable_status = RUN_STATUS_SCHED;
 	} else {
 		task->lastSleepEntry = oldtime;
 		uint = task_state_is_flag_set(state, TASK_FLAG_UNINTERRUPTIBLE);
 		if (uint)
 			task->uninterruptibleTimev.append(oldtimeDbl);
+		task->lastRunnable_status = RUN_STATUS_INVALID;
 	}
 
 	/* ... then handle the per CPU task */
@@ -934,7 +938,7 @@ void TraceAnalyzer::processWakeupEvent(tracetype_t ttype,
 	task = &taskMap[pid].getTask();
 	task->lastRunnable = time;
 	task->lastRunnable_idx = idx;
-	task->lastRunnable_is_sched = false;
+	task->lastRunnable_status = RUN_STATUS_WAKEUP;
 	if (task->isNew) {
 		task->pid = pid;
 		task->isNew = false;

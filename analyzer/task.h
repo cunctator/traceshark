@@ -86,6 +86,12 @@ public:
 	bool forkname;
 };
 
+typedef enum RunStatus : int {
+	RUN_STATUS_INVALID = 0,
+	RUN_STATUS_WAKEUP,
+	RUN_STATUS_SCHED
+} runstatus_t;
+
 class Task : public AbstractTask {
 public:
 	Task();
@@ -101,7 +107,7 @@ public:
 	/* lastRunnable is only used during extraction */
 	vtl::Time    lastRunnable;
 	int          lastRunnable_idx;
-	bool         lastRunnable_is_sched;
+	runstatus_t  lastRunnable_status;
 
 	vtl::Time    lastSleepEntry;
 
