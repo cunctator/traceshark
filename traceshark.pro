@@ -160,6 +160,10 @@
 # MARCH_FLAG = -march=znver2
 # MTUNE_FLAG = -mtune=znver2
 
+# Zen v3
+# MARCH_FLAG = -march=znver3
+# MTUNE_FLAG = -mtune=znver3
+
 # Bobcat v1
 # MARCH_FLAG = -march=btver1
 # MTUNE_FLAG = -mtune=btver1
@@ -270,6 +274,18 @@
 # MARCH_FLAG = -march=tigerlake
 # MTUNE_FLAG = -mtune=tigerlake
 
+# Sapphire Rapids
+# MARCH_FLAG = -march=sapphirerapids
+# MTUNE_FLAG = -mtune=sapphirerapids
+
+# Alder Lake
+# MARCH_FLAG = -march=alderlake
+# MTUNE_FLAG = -mtune=alderlake
+
+# Rocket Lake
+# MARCH_FLAG = -march=rocketlake
+# MTUNE_FLAG = -mtune=rocketlake
+
 ### Raspberry PI section
 
 # RPI 3 - this does not seem to help much, if at all
@@ -320,6 +336,7 @@
 
 # Uncomment this for debug symbols and without optimization:
 # USE_DEBUG_FLAG = -g -O0
+# USE_DEBUG_FLAG = -g -Og
 
 # Uncomment this for debug build. This affects Qt.
 # QT_DEBUG_BUILD = yes
@@ -331,15 +348,34 @@
 
 # If you want to compile with another compiler than the defaul g++, then
 # uncomment and change to the compiler of your choice
-# USE_ALTERNATIVE_COMPILER = clang++-10
-# USE_ALTERNATIVE_COMPILER = g++-10
+# USE_ALTERNATIVE_COMPILER = clang++-14
+# USE_ALTERNATIVE_COMPILER = g++-12
 
-# These optimization options do not seem to help, so leave them commented out.
+# These optimization options probably do not help, so leave them commented out.
 # Only play with these if you are interested in playing with obscure compiler
 # optimizations.
-# USE_EXTRA_OPTS  = -fpredictive-commoning -fvect-cost-model -fsplit-paths -ftree-vectorize -funswitch-loops -floop-interchange
+# USE_EXTRA_OPTS += -fgcse-after-reload
+# USE_EXTRA_OPTS += -fipa-cp-clone
+# USE_EXTRA_OPTS += -floop-interchange
+# USE_EXTRA_OPTS += -floop-unroll-and-jam
+# USE_EXTRA_OPTS += -fpeel-loops
+# USE_EXTRA_OPTS += -fpredictive-commoning
+# USE_EXTRA_OPTS += -fsplit-loops
+# USE_EXTRA_OPTS += -fsplit-paths
+# USE_EXTRA_OPTS += -ftree-loop-distribution
+# USE_EXTRA_OPTS += -ftree-partial-pre
+# USE_EXTRA_OPTS += -funswitch-loops
+# USE_EXTRA_OPTS += -fvect-cost-model=dynamic
+# USE_EXTRA_OPTS += -fversion-loops-for-strides
+
 # USE_EXTRA_OPTS += -funsafe-math-optimizations
+# USE_EXTRA_OPTS += -ftree-vectorize
+# USE_EXTRA_OPTS += -floop-interchange
+
+# USE_EXTRA_OPTS += -ffast-math
 # USE_EXTRA_OPTS += -O3
+# USE_EXTRA_OPTS += -Ofast
+# USE_EXTRA_OPTS += -Oz
 
 ############################# ATTENTION !!!!! ##################################
 ############################# ATTENTION !!!!! ##################################
