@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -2814,16 +2814,18 @@ void MainWindow::addTaskGraph(int pid)
 	if (!isNew || taskRange == nullptr)
 		return;
 
-	Task *task = analyzer->findTask(pid);
-	QColor color = analyzer->getTaskColor(pid);
+	Task *task = analyzer->findRealTask(pid);
 
 	if (task == nullptr) {
 		taskRangeAllocator->putTaskRange(taskRange);
 		return;
 	}
 
+	/* task->pid may be different from pid, if pid is a ghost task */
+	QColor color = analyzer->getTaskColor(task->pid);
+
 	for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
-		cpuTask = analyzer->findCPUTask(pid, cpu);
+		cpuTask = analyzer->findCPUTask(task->pid, cpu);
 		if (cpuTask != nullptr)
 			break;
 	}
@@ -2951,7 +2953,7 @@ void MainWindow::addUninterruptibleTaskGraph(Task *task)
 
 void MainWindow::removeTaskGraph(int pid)
 {
-	Task *task = analyzer->findTask(pid);
+	Task *task = analyzer->findRealTask(pid);
 	QCPGraph *qcpGraph;
 
 	if (task == nullptr) {
@@ -2989,7 +2991,7 @@ void MainWindow::removeTaskGraph(int pid)
 		task->uninterruptibleGraph = nullptr;
 	}
 
-	taskRangeAllocator->putTaskRange(pid);
+	taskRangeAllocator->putTaskRange(task->pid);
 	bottom = taskRangeAllocator->getBottom();
 
 	QCPRange range = tracePlot->yAxis->range();
@@ -3381,6 +3383,7 @@ void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu,
 				 preference_t preference)
 {
 	Task *task;
+	int realpid;
 	QCPGraph *qcpGraph;
 	CPUTask *cpuTask;
 	TaskGraph *graph = nullptr;
@@ -3398,16 +3401,22 @@ void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu,
 	if (pid == 0)
 		goto out;
 
-	if (preference == PR_CPUGRAPH_ONLY)
-		goto do_cpugraph;
-
-	task = analyzer->findTask(pid);
+	task = analyzer->findRealTask(pid);
 
 	/* task is always supposed to be != nullptr, so display warning */
 	if (task == nullptr) {
 		oops_warnx();
 		goto out;
 	}
+
+	/*
+	 * task->pid may be different from pid. Look at what findRealTask() does
+	 * if you are confused.
+	 */
+	realpid = task->pid;
+
+	if (preference == PR_CPUGRAPH_ONLY)
+		goto do_cpugraph;
 
 	if (task->graph == nullptr)
 		goto do_cpugraph;
@@ -3428,7 +3437,7 @@ do_cpugraph:
 		maxTask = nullptr;
 		maxSize = -1;
 		for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
-			cpuTask = analyzer->findCPUTask(pid, cpu);
+			cpuTask = analyzer->findCPUTask(realpid, cpu);
 			if (cpuTask != nullptr) {
 				if (cpuTask->schedTimev.size() > maxSize) {
 					maxSize = cpuTask->schedTimev.size();
@@ -3438,7 +3447,7 @@ do_cpugraph:
 		}
 		cpuTask = maxTask;
 	} else {
-		cpuTask = analyzer->findCPUTask(pid, *preferred_cpu);
+		cpuTask = analyzer->findCPUTask(realpid, *preferred_cpu);
 	}
 	/* If we can't find what we expected we warn the user */
 	if (cpuTask == nullptr || cpuTask->graph == nullptr) {

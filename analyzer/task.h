@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -121,6 +121,23 @@ public:
 	QCPGraph     *runningGraph;
 	QCPGraph     *uninterruptibleGraph;
 	QString      *displayName;
+
+	/*
+	 * These contain the information if this task is a ghost alias and for
+	 * what pid. A ghost alias is a pid that appear as the pid of a
+	 * sched_switch event but is not the oldpid. The ghost alias pid may
+	 * also appear as the pid of waking and wakeup events and this is the
+	 * primary reason why we want to record this information.
+	 */
+	bool isGhostAlias;
+	int isGhostAliasForPID;
+
+	/* Currently, the thinking is that there is a one to one mapping between
+	 * ghost alias tasks and real tasks. If we discover that this is not the
+	 * case, that a task is an alias for sever tasks, then this information
+	 * is recorded in oneToManyError.
+	 */
+	bool oneToManyError;
 private:
 	vtl_always_inline void appendName(const TaskName *name, bool isnewest);
 };

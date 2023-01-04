@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -176,6 +176,7 @@ public:
 	void doLatencyStats();
 	void setQCustomPlot(QCustomPlot *plot);
 	vtl_always_inline Task *findTask(int pid);
+	Task *findRealTask(int pid);
 	void createPidFilter(QMap<int, int> &map,
 			     bool orlogic, bool inclusive);
 	bool updatePidFilter(bool inclusive);
@@ -743,6 +744,39 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	task->schedTimev.append(oldtimeDbl);
 	task->schedData.append(FLOOR_BIT);
 	task->schedEventIdx.append(idx);
+
+	/*
+	 * Usually, the pid of the scheduling event is the same as the oldpid
+	 * that is being scheduled out. However, that doesn't need to be the
+	 * case with some kernels. At least in some container scenarios it has
+	 * been seen that this is not the case. In that case the event pid
+	 * appears to be some kind of alias for the oldpid.
+	 */
+	if (event.pid != oldpid) {
+		Task *event_Task = &taskMap[event.pid].getTask();
+
+		event_Task->checkName(event.taskName->ptr);
+		if (event_Task->isNew) {
+			event_Task->isNew = false;
+			event_Task->pid = event.pid;
+			event_Task->events = events;
+			event_Task->lastRunnable_status = RUN_STATUS_INVALID;
+		}
+		if (event_Task->isGhostAlias) {
+			/*
+			 * If it is already identified as a ghost alias, we
+			 * must check that the pid matches this event's oldpid.
+			 * because we expect the trace to have a one to one
+			 * mapping between ghosts and real tasks. If the one to
+			 * many scenario happens, we record it.
+			 */
+			if (event_Task->isGhostAliasForPID != oldpid)
+				event_Task->oneToManyError = true;
+		} else {
+			event_Task->isGhostAlias = true;
+			event_Task->isGhostAliasForPID = oldpid;
+		}
+	}
 
 	runnable = task_state_is_runnable(state);
 

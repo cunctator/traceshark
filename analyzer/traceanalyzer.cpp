@@ -280,6 +280,13 @@ void TraceAnalyzer::processSchedAddTail()
 		task.generateDisplayName();
 		if (s <= 0)
 			continue;
+		/*
+		 * Ghost processes aren't supposed to have any scheduling
+		 * events. If we have then, then we interpret it to mean that
+		 * it isn't really a ghost procesess.
+		 */
+		if (task.isGhostAlias)
+			task.isGhostAlias = false;
 		lastTime = task.schedTimev[s - 1];
 		if (lastTime >= endTimeDbl
 		    || task.exitStatus == STATUS_FINAL)
@@ -744,6 +751,33 @@ void TraceAnalyzer::setMigrationScale(double scale)
 void TraceAnalyzer::setQCustomPlot(QCustomPlot *plot)
 {
 	customPlot = plot;
+}
+
+Task *TraceAnalyzer::findRealTask(int pid)
+{
+	Task *task = findTask(pid);
+	Task *realtask;
+	int rpid;
+	QMap<int, int>::const_iterator iter;
+
+	if (task == nullptr)
+		return nullptr;
+
+	if (!task->isGhostAlias)
+		return task;
+
+	if (task->oneToManyError)
+		return nullptr;
+
+	realtask = findTask(task->isGhostAliasForPID);
+
+	if (realtask == nullptr)
+		return nullptr;
+
+	if (realtask->isGhostAlias)
+		return nullptr;
+
+	return realtask;
 }
 
 void TraceAnalyzer::addCpuFreqWork(unsigned int cpu,
