@@ -676,6 +676,7 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		task = &taskMap[event.pid].getTask();
 		task->checkName(event.taskName->ptr);
 		if (task->isNew) {
+			task->isNew = false;
 			task->pid = event.pid;
 			task->events = events;
 			task->lastRunnable_status = RUN_STATUS_INVALID;
