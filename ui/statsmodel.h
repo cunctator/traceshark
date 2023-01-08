@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,14 +57,6 @@
 #include "vtl/avltree.h"
 #include "misc/traceshark.h"
 
-namespace vtl {
-       template<class T> class TList;
-}
-
-
-class Task;
-class TaskHandle;
-
 QT_BEGIN_NAMESPACE
 class QStringList;
 QT_END_NAMESPACE
@@ -74,7 +66,6 @@ class StatsModel : public AbstractTaskModel
 	Q_OBJECT
 public:
 	StatsModel(QObject *parent = 0);
-	~StatsModel();
 	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 			unsigned int nrcpus);
 	int rowCount(const QModelIndex &parent) const;
@@ -84,17 +75,11 @@ public:
 		     int role);
 	QVariant headerData(int section, Qt::Orientation orientation,
 			    int role) const;
-	int rowToPid(int row, bool &ok) const;
-	const QString &rowToName(int row, bool &ok) const;
 	void rowToPct(QString &str, int row, bool &ok) const;
 	void rowToTime(QString &str, int row, bool &ok) const;
 	void beginResetModel();
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
-private:
-	vtl::TList<const Task*> *taskList;
-	QString *errorStr;
-	Task *idleTask;
 };
 
 #endif /* _STATSMODEL_H */

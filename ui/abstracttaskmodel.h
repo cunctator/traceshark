@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,8 +54,16 @@
 #define _ABSTRACTTASKMODEL_H
 
 #include <QAbstractTableModel>
+
 #include "vtl/avltree.h"
 
+#include "analyzer/task.h"
+
+namespace vtl {
+       template<class T> class TList;
+}
+
+class Task;
 class TaskHandle;
 
 class AbstractTaskModel : public QAbstractTableModel
@@ -68,7 +76,12 @@ public:
 				unsigned int nrcpus) = 0;
 	virtual void beginResetModel() = 0;
 	virtual void endResetModel() = 0;
-	virtual int rowToPid(int row, bool &ok) const = 0;
+	virtual int rowToPid(int row, bool &ok) const;
+	const QString &rowToName(int row, bool &ok) const;
+protected:
+	vtl::TList<const Task*> *taskList;
+	QString *errorStr;
+	Task *idleTask;
 };
 
 #endif /* _ABSTRACTTASKMODEL_H */

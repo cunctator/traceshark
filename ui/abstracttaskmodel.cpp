@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,11 +50,60 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "vtl/tlist.h"
+
 #include "abstracttaskmodel.h"
+#include "analyzer/task.h"
+
+static const char swappername[] = "swapper";
 
 AbstractTaskModel::AbstractTaskModel(QObject *parent) :
 	QAbstractTableModel(parent)
-{}
+{
+	taskList = new vtl::TList<const Task*>;
+	errorStr = new QString(tr("Error in a task mdoel"));
+	idleTask = new Task;
+	idleTask->pid = 0;
+	idleTask->checkName(swappername, false);
+	idleTask->generateDisplayName();
+}
 
 AbstractTaskModel::~AbstractTaskModel()
-{}
+{
+	delete taskList;
+	delete errorStr;
+	delete idleTask;
+}
+
+int AbstractTaskModel::rowToPid(int row, bool &ok) const
+{
+	if (row < 0) {
+		ok = false;
+		return 0;
+	}
+	if (row >= taskList->size()) {
+		ok = false;
+		return 0;
+	}
+
+	ok = true;
+	const Task *task = taskList->at(row);
+	return task->pid;
+}
+
+const QString &AbstractTaskModel::rowToName(int row, bool &ok) const
+{
+	if (row < 0) {
+		ok = false;
+		return *errorStr;
+	}
+	if (row >= taskList->size()) {
+		ok = false;
+		return *errorStr;
+	}
+
+	ok = true;
+	const Task *task = taskList->at(row);
+
+	return *task->displayName;
+}

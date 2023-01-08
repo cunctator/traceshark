@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2018, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,28 +55,11 @@
 #include "vtl/tlist.h"
 
 #include "ui/statsmodel.h"
-#include "misc/traceshark.h"
 #include "analyzer/task.h"
-
-static const char swappername[] = "swapper";
 
 StatsModel::StatsModel(QObject *parent):
 	AbstractTaskModel(parent)
-{
-	taskList = new vtl::TList<const Task*>;
-	errorStr = new QString(tr("Error in taskmodel.cpp"));
-	idleTask = new Task;
-	idleTask->pid = 0;
-	idleTask->checkName(swappername, false);
-	idleTask->generateDisplayName();
-}
-
-StatsModel::~StatsModel()
-{
-	delete taskList;
-	delete errorStr;
-	delete idleTask;
-}
+{}
 
 void StatsModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 			    unsigned int nrcpus)
@@ -131,39 +114,6 @@ int StatsModel::rowCount(const QModelIndex & /* index */) const
 int StatsModel::columnCount(const QModelIndex & /* index */) const
 {
 	return 4; /* Number from data() and headerData() */
-}
-
-int StatsModel::rowToPid(int row, bool &ok) const
-{
-	if (row < 0) {
-		ok = false;
-		return 0;
-	}
-	if (row >= taskList->size()) {
-		ok = false;
-		return 0;
-	}
-
-	ok = true;
-	const Task *task = taskList->at(row);
-	return task->pid;
-}
-
-const QString &StatsModel::rowToName(int row, bool &ok) const
-{
-	if (row < 0) {
-		ok = false;
-		return *errorStr;
-	}
-	if (row >= taskList->size()) {
-		ok = false;
-		return *errorStr;
-	}
-
-	ok = true;
-	const Task *task = taskList->at(row);
-
-	return *task->displayName;
 }
 
 void StatsModel::rowToPct(QString &str, int row, bool &ok) const
