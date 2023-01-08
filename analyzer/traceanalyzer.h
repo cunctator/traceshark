@@ -595,7 +595,6 @@ vtl_always_inline void TraceAnalyzer::processForkEvent(tracetype_t ttype,
 		task->isNew = false;
 		task->lastRunnable_status = RUN_STATUS_INVALID;
 		task->pid = m.pid;
-		task->events = events;
 		task->schedTimev.append(event.time.toDouble());
 		task->schedData.append(FLOOR_BIT);
 		task->schedEventIdx.append(idx);
@@ -621,10 +620,8 @@ vtl_always_inline void TraceAnalyzer::processExitEvent(tracetype_t ttype,
 	migrations.append(m);
 
 	Task *task = &taskMap[m.pid].getTask();
-	if (task->isNew) {
+	if (task->isNew)
 		task->pid = m.pid;
-		task->events = events;
-	}
 	task->exitStatus = STATUS_EXITCALLED;
 }
 
@@ -678,7 +675,6 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		if (task->isNew) {
 			task->isNew = false;
 			task->pid = event.pid;
-			task->events = events;
 			task->lastRunnable_status = RUN_STATUS_INVALID;
 		}
 	}
@@ -724,7 +720,6 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		/* true means task is newly constructed above */
 		task->pid = oldpid;
 		task->isNew = false;
-		task->events = events;
 		name = sched_switch_handle_oldname_strdup(ttype,
 							  event,
 							  taskNamePool,
@@ -760,7 +755,6 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		if (event_Task->isNew) {
 			event_Task->isNew = false;
 			event_Task->pid = event.pid;
-			event_Task->events = events;
 			event_Task->lastRunnable_status = RUN_STATUS_INVALID;
 		}
 		if (event_Task->isGhostAlias) {
@@ -804,7 +798,6 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 		/* true means task is newly constructed above */
 		cpuTask->pid = oldpid;
 		cpuTask->isNew = false;
-		cpuTask->events = events;
 
 		/* Apparently this task was on CPU when we started tracing */
 		cpuTask->schedTimev.append(startTimeDbl);
@@ -844,7 +837,6 @@ skip:
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
-		task->events = events;
 		name = sched_switch_handle_newname_strdup(ttype,
 							  event,
 							  taskNamePool,
@@ -920,7 +912,6 @@ skip:
 		/* true means task is newly constructed above */
 		cpuTask->pid = newpid;
 		cpuTask->isNew = false;
-		cpuTask->events = events;
 
 		cpuTask->schedTimev.append(startTimeDbl);
 		cpuTask->schedData.append(FLOOR_BIT);
@@ -977,7 +968,6 @@ void TraceAnalyzer::processWakeupEvent(tracetype_t ttype,
 	if (task->isNew) {
 		task->pid = pid;
 		task->isNew = false;
-		task->events = events;
 		name = sched_wakeup_name_strdup(ttype, event, taskNamePool);
 		if (name != nullptr)
 			task->checkName(name);
@@ -1091,6 +1081,7 @@ vtl_always_inline void TraceAnalyzer::processGeneric(tracetype_t ttype)
 
 	startTime = (*events)[0].time;
 	AbstractTask::setStartTime(startTime);
+	AbstractTask::setEvents(events);
 	startTimeDbl = startTime.toDouble();
 
 	while(true) {

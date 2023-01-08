@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018-2022
+ * Copyright (C) 2015, 2016, 2018-2023
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -63,7 +63,7 @@
 
 AbstractTask::AbstractTask() :
 	pid(0), accTime(), accPct(0), cursorTime(), cursorPct(0), isNew(true),
-	offset(0), scale(0), graph(nullptr), events(nullptr)
+	offset(0), scale(0), graph(nullptr)
 {}
 
 AbstractTask::~AbstractTask()
@@ -325,6 +325,11 @@ void AbstractTask::setEndTime(const vtl::Time &time)
 	endTime = time;
 }
 
+void AbstractTask::setEvents(const vtl::TList<TraceEvent> *ev)
+{
+	events = ev;
+}
+
 int AbstractTask::binarySearch_(const vtl::Time &time, int lowerIdx,
 				int higherIdx)
 {
@@ -396,3 +401,4 @@ vtl::Time AbstractTask::endTime;
 vtl::Time AbstractTask::lowerTimeLimit;
 vtl::Time AbstractTask::higherTimeLimit;
 vtl::Time AbstractTask::cursorValues[TShark::NR_CURSORS];
+const vtl::TList<TraceEvent> *AbstractTask::events;
