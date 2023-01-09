@@ -757,7 +757,6 @@ Task *TraceAnalyzer::findRealTask(int pid)
 {
 	Task *task = findTask(pid);
 	Task *realtask;
-	int rpid;
 	QMap<int, int>::const_iterator iter;
 
 	if (task == nullptr)
