@@ -78,6 +78,7 @@ public:
 	virtual void endResetModel() = 0;
 	virtual int rowToPid(int row, bool &ok) const;
 	const QString &rowToName(int row, bool &ok) const;
+	bool rowToGhostStatus(int row, bool &ok) const;
 protected:
 	vtl::TList<const Task*> *taskList;
 	QString *errorStr;

@@ -107,3 +107,20 @@ const QString &AbstractTaskModel::rowToName(int row, bool &ok) const
 
 	return *task->displayName;
 }
+
+bool AbstractTaskModel::rowToGhostStatus(int row, bool &ok) const
+{
+	if (row < 0) {
+		ok = false;
+		return false;
+	}
+	if (row >= taskList->size()) {
+		ok = false;
+		return false;
+	}
+
+	ok = true;
+	const Task *task = taskList->at(row);
+
+	return task->isGhostAlias;
+}

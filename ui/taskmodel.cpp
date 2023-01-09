@@ -106,6 +106,7 @@ int TaskModel::columnCount(const QModelIndex & /* index */) const
 QVariant TaskModel::data(const QModelIndex &index, int role) const
 {
 	bool ok;
+	bool ghost;
 
 	if (!index.isValid())
 		return QVariant();
@@ -134,6 +135,27 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 			break;
 		}
 	}
+
+	if (role == Qt::BackgroundRole) {
+		int row = index.row();
+
+		ghost = rowToGhostStatus(row, ok);
+		if (ok && ghost)
+			return QBrush(Qt::cyan);
+		else
+			return QVariant();
+	}
+
+	if (role == Qt::ForegroundRole) {
+		int row = index.row();
+
+		ghost = rowToGhostStatus(row, ok);
+		if (ok && ghost)
+			return QBrush(Qt::red);
+		else
+			return QVariant();
+	}
+
 	return QVariant();
 }
 
