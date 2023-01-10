@@ -677,6 +677,31 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 			task->pid = event.pid;
 			task->lastRunnable_status = RUN_STATUS_INVALID;
 		}
+		/*
+		 * Usually, the pid of the scheduling event is the same as the
+		 * oldpid that is being scheduled out. However, that doesn't
+		 * need to be the case with some kernels. At least in some
+		 * container scenarios it has been seen that this is not the
+		 * case. In that case the event pid appears to be some kind of
+		 * alias for the oldpid.
+		 */
+		if (event.pid != oldpid && oldpid > 0 && event.pid > 0) {
+			if (task->isGhostAlias) {
+				/*
+				 * If it is already identified as a ghost
+				 * alias, we must check that the pid matches
+				 * this event's oldpid because we expect the
+				 * trace to have a one to one mapping between
+				 * ghosts and real tasks. If the one to many
+				 * scenario happens, we record it.
+				 */
+				if (task->isGhostAliasForPID != oldpid)
+					task->oneToManyError = true;
+			} else {
+				task->isGhostAlias = true;
+				task->isGhostAliasForPID = oldpid;
+			}
+		}
 	}
 
 	if (eventCPU->pidOnCPU != oldpid && eventCPU->hasBeenScheduled)
@@ -740,38 +765,6 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	task->schedTimev.append(oldtimeDbl);
 	task->schedData.append(FLOOR_BIT);
 	task->schedEventIdx.append(idx);
-
-	/*
-	 * Usually, the pid of the scheduling event is the same as the oldpid
-	 * that is being scheduled out. However, that doesn't need to be the
-	 * case with some kernels. At least in some container scenarios it has
-	 * been seen that this is not the case. In that case the event pid
-	 * appears to be some kind of alias for the oldpid.
-	 */
-	if (event.pid != oldpid && event.pid > 0 && oldpid > 0) {
-		Task *event_Task = &taskMap[event.pid].getTask();
-
-		event_Task->checkName(event.taskName->ptr);
-		if (event_Task->isNew) {
-			event_Task->isNew = false;
-			event_Task->pid = event.pid;
-			event_Task->lastRunnable_status = RUN_STATUS_INVALID;
-		}
-		if (event_Task->isGhostAlias) {
-			/*
-			 * If it is already identified as a ghost alias, we
-			 * must check that the pid matches this event's oldpid.
-			 * because we expect the trace to have a one to one
-			 * mapping between ghosts and real tasks. If the one to
-			 * many scenario happens, we record it.
-			 */
-			if (event_Task->isGhostAliasForPID != oldpid)
-				event_Task->oneToManyError = true;
-		} else {
-			event_Task->isGhostAlias = true;
-			event_Task->isGhostAliasForPID = oldpid;
-		}
-	}
 
 	runnable = task_state_is_runnable(state);
 
