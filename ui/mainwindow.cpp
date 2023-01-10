@@ -3408,10 +3408,12 @@ void MainWindow::selectTaskByPid(int pid, const unsigned int *preferred_cpu,
 	tracePlot->deselectAll();
 
 	/*
-	 * If the task to be selected is pid 0, that is swapper, then remove
-	 * the task from the task toolbar and disable the task actions.
+	 * If the task to be selected is pid 0, that is swapper, or negative,
+	 * that is those negative pids that sometimes appears as the pid of
+	 * sched_switch events, then remove the task from the task toolbar and
+	 * disable the task actions.
 	 */
-	if (pid == 0)
+	if (pid <= 0)
 		goto out;
 
 	task = analyzer->findRealTask(pid);
@@ -3462,12 +3464,18 @@ do_cpugraph:
 	} else {
 		cpuTask = analyzer->findCPUTask(realpid, *preferred_cpu);
 	}
-	/* If we can't find what we expected we warn the user */
-	if (cpuTask == nullptr || cpuTask->graph == nullptr) {
-		oops_warnx();
+	/*
+	 * If we can't find what we expected we give up but don't warn the
+	 * user. There is probably yet another case of tasks that has a global
+	 * task but no per CPU task.
+	 */
+	if (cpuTask == nullptr || cpuTask->graph == nullptr)
 		goto out;
-	}
 	qcpGraph = cpuTask->graph->getQCPGraph();
+	/*
+	 * I would still expect all per CPU tasks that exists to have a QCP
+	 * graph, so in this case we warn the user
+	 */
 	if (qcpGraph == nullptr) {
 		oops_warnx();
 		goto out;
@@ -3477,9 +3485,8 @@ do_cpugraph:
 
 	/* Finally update the TaskToolBar to reflect the change in selection */
 	graph = TaskGraph::fromQCPGraph(qcpGraph);
-	if (graph == nullptr) {
+	if (graph == nullptr)
 		oops_warnx();
-	}
 
 out:
 	if (graph != nullptr) {
