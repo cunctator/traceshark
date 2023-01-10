@@ -748,7 +748,7 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	 * been seen that this is not the case. In that case the event pid
 	 * appears to be some kind of alias for the oldpid.
 	 */
-	if (event.pid != oldpid) {
+	if (event.pid != oldpid && event.pid > 0 && oldpid > 0) {
 		Task *event_Task = &taskMap[event.pid].getTask();
 
 		event_Task->checkName(event.taskName->ptr);
