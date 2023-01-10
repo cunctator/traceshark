@@ -2308,6 +2308,19 @@ void MainWindow::addTaskToLegend(int pid)
 {
 	CPUTask *cpuTask = nullptr;
 	unsigned int cpu;
+	int realpid;
+	Task *task = analyzer->findRealTask(pid);
+
+	/*
+	 * I believe that if task == nullptr, then we will probably fail to
+	 * find any per CPU task below but let's anyway try with the original
+	 * pid. The idea behind using findRealTask is that pid may be a ghost
+	 * pid selected by the user in the TaskSelectDialog class.
+	 */
+	if (task == nullptr)
+		realpid = pid;
+	else
+		realpid = task->pid;
 
 	/*
 	 * Let's find a per CPU taskGraph, because they are always created,
@@ -2315,7 +2328,7 @@ void MainWindow::addTaskToLegend(int pid)
 	 * displayed by the user
 	 */
 	for (cpu = 0; cpu < analyzer->getNrCPUs(); cpu++) {
-		cpuTask = analyzer->findCPUTask(pid, cpu);
+		cpuTask = analyzer->findCPUTask(realpid, cpu);
 		if (cpuTask != nullptr)
 			break;
 	}
