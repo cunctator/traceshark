@@ -93,7 +93,7 @@ vtl_always_inline void heap_siftdown_(C<T> &container,
 		if (swap == root)
 			return;
 		else {
-			container.swap(root, swap);
+			container.swapItemsAt(root, swap);
 			root = swap;
 		}
 	}
@@ -128,7 +128,7 @@ template<template <typename> class C, typename T, typename TCompFunc>
 
 	end = count - 1;
 	while (end > 0) {
-		container.swap(0, end);
+		container.swapItemsAt(0, end);
 		end--;
 		heap_siftdown_(container, 0, end, compFunc);
 	}

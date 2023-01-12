@@ -114,7 +114,8 @@ public:
 	void softclear();
 	vtl_always_inline T& operator[](int index);
 	vtl_always_inline const T& operator[](int index) const;
-	vtl_always_inline void swap(int a, int b);
+	vtl_always_inline void swap(TList<T> &other);
+	vtl_always_inline void swapItemsAt(int a, int b);
 private:
 	vtl_always_inline T& subscript(int index) const;
 	vtl_always_inline int mapFromIndex(int index) const;
@@ -294,7 +295,23 @@ void TList<T>::softclear()
 }
 
 template<class T>
-vtl_always_inline void TList<T>::swap(int a, int b)
+vtl_always_inline void TList<T>::swap(TList<T> &other)
+{
+	int tmp_nrMaps = other.nrMaps;
+	int tmp_nrElements = other.nrElements;
+	T **tmp_mapArray = other.mapArray;
+
+	other.nrMaps = nrMaps;
+	other.nrElements = nrElements;
+	other.mapArray = mapArray;
+
+	nrMaps = tmp_nrMaps;
+	nrElements = tmp_nrElements;
+	mapArray = tmp_mapArray;
+}
+
+template<class T>
+vtl_always_inline void TList<T>::swapItemsAt(int a, int b)
 {
 	T foo;
 	T &ta = subscript(a);
