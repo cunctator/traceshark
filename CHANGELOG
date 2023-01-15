@@ -1,3 +1,27 @@
+traceshark (0.9.14-dev) UNRELEASED; urgency=medium
+
+   * Added commented out options for newer compiler the file traceshark.pro
+   * perf-record.sh: add option to specify alternative perf command
+   * New feature: identify ghost tasks. Ghost tasks are tasks that appears as
+     as event tasks of sched_switch events but are neither oldpid, nor newpid.
+     They are of interest because the same tasks also appears as the event task
+     of sched_wakeup and sched_waking events. In the widgets showing lists of
+     tasks, ghost tasks will be displayed with red foreground and cyan
+     background.
+   * What appears to be a bug was fixed in processSwitchEvent()
+   * Some members of AbstractTask was made static.
+   * Some code that was duplicated across StatsModel, StatsLimitedModel, and
+     TaskModel was moved into their common parent class AbstractTaskModel.
+   * Some corner cases of tasks with negative pids where corrected in
+     MainWindow.
+   * The TList class was modified to be more compatible with QList and QVector,
+     so that swap() and swapItemAt() now performs the same operations.
+   * CID 1530657 and CID 1530656, two newly detected Coverity issues, were
+     fixed. Both have been lurking in the code for a long time but apparently
+     they were only discovered now because of some new feature in Coverity.
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 15 Jan 2023 23:37:55 +0100
+
 traceshark (0.9.13-beta) RELEASED; urgency=medium
 
    * Update QCustomPlot to 2.1.0.
