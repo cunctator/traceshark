@@ -1346,7 +1346,10 @@ bool TraceAnalyzer::filterActive(FilterState::filter_t filter) const
 		OR_filterState.isEnabled(filter);
 }
 
-#define WRITE_BUFFER_SIZE (256 * sysconf(_SC_PAGESIZE))
+#define SC_CANDIDATE (sysconf(_SC_PAGESIZE))
+#define ANALYZER_PAGESIZE (SC_CANDIDATE > 512 ? SC_CANDIDATE : 4096)
+
+#define WRITE_BUFFER_SIZE (256 * ANALYZER_PAGESIZE)
 #define WRITE_BUFFER_LIMIT ((WRITE_BUFFER_SIZE - 64 * 1024))
 
 const char TraceAnalyzer::spaceStr[] = \
