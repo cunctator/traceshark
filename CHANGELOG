@@ -1,4 +1,4 @@
-traceshark (0.9.14-dev) UNRELEASED; urgency=medium
+traceshark (0.9.14-beta) RELEASED; urgency=medium
 
    * Added commented out options for newer compiler the file traceshark.pro
    * perf-record.sh: add option to specify alternative perf command
