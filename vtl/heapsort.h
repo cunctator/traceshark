@@ -133,7 +133,47 @@ template<template <typename> class C, typename T, typename TCompFunc>
 		heap_siftdown_(container, 0, end, compFunc);
 	}
 }
- 
+
+template<class T>
+class heapsort_DefaultComp
+{
+public:
+	int operator() (const T &ll, const T &rl) {
+		if (ll > rl)
+			return 1;
+		else if (ll < rl)
+			return -1;
+		return 0;
+	}
+};
+
+template<class T>
+class heapsort_DefaultRComp
+{
+public:
+	int operator() (const T &ll, const T &rl) {
+		if (ll < rl)
+			return 1;
+		else if (ll > rl)
+			return -1;
+		return 0;
+	}
+};
+
+template<template <typename> class C, typename T>
+void heapsort(C<T> &container)
+{
+	heapsort_DefaultComp<T> comp;
+	heapsort<C, T>(container, comp);
+}
+
+template<template <typename> class C, typename T>
+void heapsort_reverse(C<T> &container)
+{
+	heapsort_DefaultRComp<T> comp;
+	heapsort<C, T>(container, comp);
+}
+
 }
 
 #endif /* VTL_HEAPSORT_H */
