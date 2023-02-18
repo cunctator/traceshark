@@ -1378,8 +1378,10 @@ void MainWindow::createAboutQCustomPlot()
 {
 	QString textAboutCaption;
 	QString textAbout;
-	QString years = tr("2011-2021");
+	QString years = tr("2011-2022");
 
+	if (!strcmp(QCUSTOMPLOT_VERSION_STR, "2.1.0"))
+		years = tr("2011-2021");
 	if (!strcmp(QCUSTOMPLOT_VERSION_STR, "2.0.1"))
 		years = tr("2011-2018");
 	else if (!strcmp(QCUSTOMPLOT_VERSION_STR, "2.0.0"))

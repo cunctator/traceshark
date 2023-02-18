@@ -2,7 +2,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2022 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,9 +19,9 @@
 **                                                                        **
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
-**  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 29.03.21                                             **
-**          Version: 2.1.0                                                **
+**  Website/Contact: https://www.qcustomplot.com/                         **
+**             Date: 06.11.22                                             **
+**          Version: 2.1.1                                                **
 ****************************************************************************/
 
 #ifndef QCUSTOMPLOT_H
@@ -131,11 +131,11 @@ class QCPPolarAxisAngular;
 class QCPPolarGrid;
 class QCPPolarGraph;
 
-/* including file 'src/global.h', size 16978                                 */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* including file 'src/global.h', size 18099                                 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
-#define QCUSTOMPLOT_VERSION_STR "2.1.0"
-#define QCUSTOMPLOT_VERSION 0x020100
+#define QCUSTOMPLOT_VERSION_STR "2.1.1"
+#define QCUSTOMPLOT_VERSION 0x020101
 
 // decl definitions for shared library compilation/usage:
 #if defined(QT_STATIC_BUILD)
@@ -159,26 +159,35 @@ class QCPPolarGraph;
   
   It provides QMetaObject-based reflection of its enums and flags via \a QCP::staticMetaObject.
 */
-#ifndef Q_MOC_RUN
+
+// Qt version < 6.2.0: to get metatypes Q_GADGET/Q_ENUMS/Q_FLAGS in namespace we have to make it look like a class during moc-run
+#if QT_VERSION >= 0x060200 // don't use QT_VERSION_CHECK here, some moc versions don't understand it
 namespace QCP {
-#else
-class QCP { // when in moc-run, make it look like a class, so we get Q_GADGET, Q_ENUMS/Q_FLAGS features in namespace
+  Q_NAMESPACE // this is how to add the staticMetaObject to namespaces in newer Qt versions
+#else // Qt version older than 6.2.0
+#  ifndef Q_MOC_RUN
+namespace QCP {
+#  else // not in moc run
+class QCP {
   Q_GADGET
   Q_ENUMS(ExportPen)
   Q_ENUMS(ResolutionUnit)
   Q_ENUMS(SignDomain)
   Q_ENUMS(MarginSide)
-  Q_FLAGS(MarginSides)
   Q_ENUMS(AntialiasedElement)
-  Q_FLAGS(AntialiasedElements)
   Q_ENUMS(PlottingHint)
-  Q_FLAGS(PlottingHints)
   Q_ENUMS(Interaction)
-  Q_FLAGS(Interactions)
   Q_ENUMS(SelectionRectMode)
   Q_ENUMS(SelectionType)
+  
+  Q_FLAGS(AntialiasedElements)
+  Q_FLAGS(PlottingHints)
+  Q_FLAGS(MarginSides)
+  Q_FLAGS(Interactions)
 public:
+#  endif
 #endif
+
 
 /*!
   Defines the different units in which the image resolution can be specified in the export
@@ -381,14 +390,39 @@ inline int getMarginValue(const QMargins &margins, QCP::MarginSide side)
   return 0;
 }
 
+// for newer Qt versions we have to declare the enums/flags as metatypes inside the namespace using Q_ENUM_NS/Q_FLAG_NS:
+// if you change anything here, don't forget to change it for older Qt versions below, too,
+// and at the start of the namespace in the fake moc-run class
+#if QT_VERSION >= 0x060200
+Q_ENUM_NS(ExportPen)
+Q_ENUM_NS(ResolutionUnit)
+Q_ENUM_NS(SignDomain)
+Q_ENUM_NS(MarginSide)
+Q_ENUM_NS(AntialiasedElement)
+Q_ENUM_NS(PlottingHint)
+Q_ENUM_NS(Interaction)
+Q_ENUM_NS(SelectionRectMode)
+Q_ENUM_NS(SelectionType)
 
-extern const QMetaObject staticMetaObject; // in moc-run we create a static meta object for QCP "fake" object. This line is the link to it via QCP::staticMetaObject in normal operation as namespace
+Q_FLAG_NS(AntialiasedElements)
+Q_FLAG_NS(PlottingHints)
+Q_FLAG_NS(MarginSides)
+Q_FLAG_NS(Interactions)
+#else
+extern const QMetaObject staticMetaObject;
+#endif
 
 } // end of namespace QCP
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(QCP::AntialiasedElements)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QCP::PlottingHints)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QCP::MarginSides)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QCP::Interactions)
+
+// for older Qt versions we have to declare the enums/flags as metatypes outside the namespace using Q_DECLARE_METATYPE:
+// if you change anything here, don't forget to change it for newer Qt versions above, too,
+// and at the start of the namespace in the fake moc-run class
+#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
 Q_DECLARE_METATYPE(QCP::ExportPen)
 Q_DECLARE_METATYPE(QCP::ResolutionUnit)
 Q_DECLARE_METATYPE(QCP::SignDomain)
@@ -398,12 +432,13 @@ Q_DECLARE_METATYPE(QCP::PlottingHint)
 Q_DECLARE_METATYPE(QCP::Interaction)
 Q_DECLARE_METATYPE(QCP::SelectionRectMode)
 Q_DECLARE_METATYPE(QCP::SelectionType)
+#endif
 
 /* end of 'src/global.h' */
 
 
 /* including file 'src/vector2d.h', size 4988                                */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPVector2D
 {
@@ -478,7 +513,7 @@ inline QDebug operator<< (QDebug d, const QCPVector2D &vec)
 
 
 /* including file 'src/painter.h', size 4035                                 */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPPainter : public QPainter
 {
@@ -537,7 +572,7 @@ Q_DECLARE_METATYPE(QCPPainter::PainterMode)
 
 
 /* including file 'src/paintbuffer.h', size 5006                             */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAbstractPaintBuffer
 {
@@ -645,7 +680,7 @@ protected:
 
 
 /* including file 'src/layer.h', size 7062                                   */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   Q_MOC_INCLUDE("core.h") // Qt6 needs this if using forward declared types in Q_PROPERTY
@@ -798,7 +833,7 @@ private:
 
 
 /* including file 'src/axis/range.h', size 5280                              */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPRange
 {
@@ -916,7 +951,7 @@ inline const QCPRange operator/(const QCPRange& range, double value)
 
 
 /* including file 'src/selection.h', size 8569                               */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPDataRange
 {
@@ -1120,7 +1155,7 @@ inline QDebug operator<< (QDebug d, const QCPDataSelection &selection)
 
 
 /* including file 'src/selectionrect.h', size 3354                           */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPSelectionRect : public QCPLayerable
 {
@@ -1174,7 +1209,7 @@ protected:
 
 
 /* including file 'src/layout.h', size 14279                                 */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPMarginGroup : public QObject
 {
@@ -1495,7 +1530,7 @@ Q_DECLARE_METATYPE(QCPLayoutInset::InsetPlacement)
 
 
 /* including file 'src/lineending.h', size 4426                              */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPLineEnding
 {
@@ -1559,7 +1594,7 @@ Q_DECLARE_METATYPE(QCPLineEnding::EndingStyle)
 
 
 /* including file 'src/axis/labelpainter.h', size 7086                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCPLabelPainterPrivate
 {
@@ -1699,7 +1734,7 @@ Q_DECLARE_METATYPE(QCPLabelPainterPrivate::AnchorSide)
 
 
 /* including file 'src/axis/axisticker.h', size 4230                         */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAxisTicker
 {
@@ -1764,7 +1799,7 @@ Q_DECLARE_METATYPE(QSharedPointer<QCPAxisTicker>)
 
 
 /* including file 'src/axis/axistickerdatetime.h', size 3600                 */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAxisTickerDateTime : public QCPAxisTicker
 {
@@ -1813,7 +1848,7 @@ protected:
 
 
 /* including file 'src/axis/axistickertime.h', size 3542                     */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAxisTickerTime : public QCPAxisTicker
 {
@@ -1865,7 +1900,7 @@ Q_DECLARE_METATYPE(QCPAxisTickerTime::TimeUnit)
 
 
 /* including file 'src/axis/axistickerfixed.h', size 3308                    */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAxisTickerFixed : public QCPAxisTicker
 {
@@ -1907,7 +1942,7 @@ Q_DECLARE_METATYPE(QCPAxisTickerFixed::ScaleStrategy)
 
 
 /* including file 'src/axis/axistickertext.h', size 3090                     */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAxisTickerText : public QCPAxisTicker
 {
@@ -1945,7 +1980,7 @@ protected:
 
 
 /* including file 'src/axis/axistickerpi.h', size 3911                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAxisTickerPi : public QCPAxisTicker
 {
@@ -2004,7 +2039,7 @@ Q_DECLARE_METATYPE(QCPAxisTickerPi::FractionStyle)
 
 
 /* including file 'src/axis/axistickerlog.h', size 2594                      */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAxisTickerLog : public QCPAxisTicker
 {
@@ -2036,7 +2071,7 @@ protected:
 
 
 /* including file 'src/axis/axis.h', size 20913                              */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   Q_MOC_INCLUDE("layoutelements/layoutelement-axisrect.h") // Qt6 needs this if using forward declared types in Q_PROPERTY; path is relative to .pro
@@ -2468,7 +2503,7 @@ protected:
 
 
 /* including file 'src/scatterstyle.h', size 7275                            */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPScatterStyle
 {
@@ -2574,8 +2609,8 @@ Q_DECLARE_METATYPE(QCPScatterStyle::ScatterShape)
 /* end of 'src/scatterstyle.h' */
 
 
-/* including file 'src/datacontainer.h', size 34070                          */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* including file 'src/datacontainer.h', size 34305                          */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 /*! \relates QCPDataContainer
   Returns whether the sort key of \a a is less than the sort key of \a b.
@@ -3244,6 +3279,8 @@ QCPRange QCPDataContainer<DataType>::keyRange(bool &foundRange, QCP::SignDomain 
   output parameter \a foundRange indicates whether a sensible range was found. If this is false,
   you should not use the returned QCPRange (e.g. the data container is empty or all points have the
   same value).
+  
+  Inf and -Inf data values are ignored.
 
   If \a inKeyRange has both lower and upper bound set to zero (is equal to <tt>QCPRange()</tt>),
   all data points are considered, without any restriction on the keys.
@@ -3281,12 +3318,12 @@ QCPRange QCPDataContainer<DataType>::valueRange(bool &foundRange, QCP::SignDomai
       if (restrictKeyRange && (it->mainKey() < inKeyRange.lower || it->mainKey() > inKeyRange.upper))
         continue;
       current = it->valueRange();
-      if ((current.lower < range.lower || !haveLower) && !qIsNaN(current.lower))
+      if ((current.lower < range.lower || !haveLower) && !qIsNaN(current.lower) && std::isfinite(current.lower))
       {
         range.lower = current.lower;
         haveLower = true;
       }
-      if ((current.upper > range.upper || !haveUpper) && !qIsNaN(current.upper))
+      if ((current.upper > range.upper || !haveUpper) && !qIsNaN(current.upper) && std::isfinite(current.upper))
       {
         range.upper = current.upper;
         haveUpper = true;
@@ -3299,12 +3336,12 @@ QCPRange QCPDataContainer<DataType>::valueRange(bool &foundRange, QCP::SignDomai
       if (restrictKeyRange && (it->mainKey() < inKeyRange.lower || it->mainKey() > inKeyRange.upper))
         continue;
       current = it->valueRange();
-      if ((current.lower < range.lower || !haveLower) && current.lower < 0 && !qIsNaN(current.lower))
+      if ((current.lower < range.lower || !haveLower) && current.lower < 0 && !qIsNaN(current.lower) && std::isfinite(current.lower))
       {
         range.lower = current.lower;
         haveLower = true;
       }
-      if ((current.upper > range.upper || !haveUpper) && current.upper < 0 && !qIsNaN(current.upper))
+      if ((current.upper > range.upper || !haveUpper) && current.upper < 0 && !qIsNaN(current.upper) && std::isfinite(current.upper))
       {
         range.upper = current.upper;
         haveUpper = true;
@@ -3317,12 +3354,12 @@ QCPRange QCPDataContainer<DataType>::valueRange(bool &foundRange, QCP::SignDomai
       if (restrictKeyRange && (it->mainKey() < inKeyRange.lower || it->mainKey() > inKeyRange.upper))
         continue;
       current = it->valueRange();
-      if ((current.lower < range.lower || !haveLower) && current.lower > 0 && !qIsNaN(current.lower))
+      if ((current.lower < range.lower || !haveLower) && current.lower > 0 && !qIsNaN(current.lower) && std::isfinite(current.lower))
       {
         range.lower = current.lower;
         haveLower = true;
       }
-      if ((current.upper > range.upper || !haveUpper) && current.upper > 0 && !qIsNaN(current.upper))
+      if ((current.upper > range.upper || !haveUpper) && current.upper > 0 && !qIsNaN(current.upper) && std::isfinite(current.upper))
       {
         range.upper = current.upper;
         haveUpper = true;
@@ -3417,7 +3454,7 @@ void QCPDataContainer<DataType>::performAutoSqueeze()
 
 
 /* including file 'src/plottable.h', size 8463                               */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPSelectionDecorator
 {
@@ -3574,7 +3611,7 @@ private:
 
 
 /* including file 'src/item.h', size 9431                                    */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPItemAnchor
 {
@@ -3759,7 +3796,7 @@ private:
 
 
 /* including file 'src/core.h', size 20165                                   */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCustomPlot : public QWidget
 {
@@ -4132,7 +4169,7 @@ ItemType *QCustomPlot::itemAt(const QPointF &pos, bool onlySelectable) const
 
 
 /* including file 'src/plottable1d.h', size 25638                            */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCPPlottableInterface1D
 {
@@ -4724,7 +4761,7 @@ void QCPAbstractPlottable1D<DataType>::drawPolyline(QCPPainter *painter, const Q
 
 
 /* including file 'src/colorgradient.h', size 7262                           */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPColorGradient
 {
@@ -4827,7 +4864,7 @@ Q_DECLARE_METATYPE(QCPColorGradient::GradientPreset)
 
 
 /* including file 'src/selectiondecorator-bracket.h', size 4458              */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPSelectionDecoratorBracket : public QCPSelectionDecorator
 {
@@ -4896,7 +4933,7 @@ Q_DECLARE_METATYPE(QCPSelectionDecoratorBracket::BracketStyle)
 
 
 /* including file 'src/layoutelements/layoutelement-axisrect.h', size 7533   */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPAxisRect : public QCPLayoutElement
 {
@@ -5022,7 +5059,7 @@ private:
 
 
 /* including file 'src/layoutelements/layoutelement-legend.h', size 10425    */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPAbstractLegendItem : public QCPLayoutElement
 {
@@ -5240,7 +5277,7 @@ Q_DECLARE_METATYPE(QCPLegend::SelectablePart)
 
 
 /* including file 'src/layoutelements/layoutelement-textelement.h', size 5359 */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200  */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100  */
 
 class QCP_LIB_DECL QCPTextElement : public QCPLayoutElement
 {
@@ -5327,7 +5364,7 @@ private:
 
 
 /* including file 'src/layoutelements/layoutelement-colorscale.h', size 5943 */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 
 class QCPColorScaleAxisRectPrivate : public QCPAxisRect
@@ -5435,7 +5472,7 @@ private:
 
 
 /* including file 'src/plottables/plottable-graph.h', size 9318              */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPGraphData
 {
@@ -5574,7 +5611,7 @@ Q_DECLARE_METATYPE(QCPGraph::LineStyle)
 
 
 /* including file 'src/plottables/plottable-curve.h', size 7434              */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPCurveData
 {
@@ -5689,7 +5726,7 @@ Q_DECLARE_METATYPE(QCPCurve::LineStyle)
 
 
 /* including file 'src/plottables/plottable-bars.h', size 8957               */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPBarsGroup : public QObject
 {
@@ -5877,7 +5914,7 @@ Q_DECLARE_METATYPE(QCPBars::WidthType)
 
 
 /* including file 'src/plottables/plottable-statisticalbox.h', size 7522     */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPStatisticalBoxData
 {
@@ -5994,7 +6031,7 @@ protected:
 
 
 /* including file 'src/plottables/plottable-colormap.h', size 7094           */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPColorMapData
 {
@@ -6130,7 +6167,7 @@ protected:
 
 
 /* including file 'src/plottables/plottable-financial.h', size 8644          */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPFinancialData
 {
@@ -6269,7 +6306,7 @@ Q_DECLARE_METATYPE(QCPFinancial::ChartStyle)
 
 
 /* including file 'src/plottables/plottable-errorbar.h', size 7751           */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPErrorBarsData
 {
@@ -6394,7 +6431,7 @@ protected:
 
 
 /* including file 'src/items/item-straightline.h', size 3137                 */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemStraightLine : public QCPAbstractItem
 {
@@ -6437,7 +6474,7 @@ protected:
 
 
 /* including file 'src/items/item-line.h', size 3429                         */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemLine : public QCPAbstractItem
 {
@@ -6487,7 +6524,7 @@ protected:
 
 
 /* including file 'src/items/item-curve.h', size 3401                        */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemCurve : public QCPAbstractItem
 {
@@ -6538,7 +6575,7 @@ protected:
 
 
 /* including file 'src/items/item-rect.h', size 3710                         */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemRect : public QCPAbstractItem
 {
@@ -6597,7 +6634,7 @@ protected:
 
 
 /* including file 'src/items/item-text.h', size 5576                         */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemText : public QCPAbstractItem
 {
@@ -6694,7 +6731,7 @@ protected:
 
 
 /* including file 'src/items/item-ellipse.h', size 3890                      */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemEllipse : public QCPAbstractItem
 {
@@ -6756,7 +6793,7 @@ protected:
 
 
 /* including file 'src/items/item-pixmap.h', size 4407                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemPixmap : public QCPAbstractItem
 {
@@ -6825,7 +6862,7 @@ protected:
 
 
 /* including file 'src/items/item-tracer.h', size 4811                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemTracer : public QCPAbstractItem
 {
@@ -6911,7 +6948,7 @@ Q_DECLARE_METATYPE(QCPItemTracer::TracerStyle)
 
 
 /* including file 'src/items/item-bracket.h', size 3991                      */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPItemBracket : public QCPAbstractItem
 {
@@ -6978,7 +7015,7 @@ Q_DECLARE_METATYPE(QCPItemBracket::BracketStyle)
 
 
 /* including file 'src/polar/radialaxis.h', size 12227                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 class QCP_LIB_DECL QCPPolarAxisRadial : public QCPLayerable
@@ -7230,7 +7267,7 @@ Q_DECLARE_METATYPE(QCPPolarAxisRadial::SelectablePart)
 
 
 /* including file 'src/polar/layoutelement-angularaxis.h', size 13461        */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 class QCP_LIB_DECL QCPPolarAxisAngular : public QCPLayoutElement
 {
@@ -7503,7 +7540,7 @@ Q_DECLARE_METATYPE(QCPPolarAxisAngular::SelectablePart)
 
 
 /* including file 'src/polar/polargrid.h', size 4508                         */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 class QCP_LIB_DECL QCPPolarGrid :public QCPLayerable
 {
@@ -7583,7 +7620,7 @@ Q_DECLARE_METATYPE(QCPPolarGrid::GridType)
 
 
 /* including file 'src/polar/polargraph.h', size 9610                        */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 
 class QCP_LIB_DECL QCPPolarLegendItem : public QCPAbstractLegendItem

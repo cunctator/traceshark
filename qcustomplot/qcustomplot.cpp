@@ -2,7 +2,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2022 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,16 +19,16 @@
 **                                                                        **
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
-**  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 29.03.21                                             **
-**          Version: 2.1.0                                                **
+**  Website/Contact: https://www.qcustomplot.com/                         **
+**             Date: 06.11.22                                             **
+**          Version: 2.1.1                                                **
 ****************************************************************************/
 
 #include "qcustomplot.h"
 
 
 /* including file 'src/vector2d.cpp', size 7973                              */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPVector2D
@@ -273,7 +273,7 @@ QCPVector2D &QCPVector2D::operator-=(const QCPVector2D &vector)
 
 
 /* including file 'src/painter.cpp', size 8656                               */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPPainter
@@ -490,7 +490,7 @@ void QCPPainter::makeNonCosmetic()
 
 
 /* including file 'src/paintbuffer.cpp', size 18915                          */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAbstractPaintBuffer
@@ -977,7 +977,7 @@ void QCPPaintBufferGlFbo::reallocateBuffer()
 
 
 /* including file 'src/layer.cpp', size 37674                                */
-/* commit 26a9bd6eb33391d550ce6177d71adf1e03c8a665 2021-04-23 23:45:57 +0200 */
+/* commit 98cadd781a72212f8ca43000bf12a802832aa81e 2021-04-23 23:45:57 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLayer
@@ -1837,7 +1837,7 @@ void QCPLayerable::wheelEvent(QWheelEvent *event)
 
 
 /* including file 'src/axis/range.cpp', size 12221                           */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPRange
@@ -2159,7 +2159,7 @@ bool QCPRange::validRange(const QCPRange &range)
 
 
 /* including file 'src/selection.cpp', size 21837                            */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPDataRange
@@ -2760,7 +2760,7 @@ QCPDataSelection QCPDataSelection::inverse(const QCPDataRange &outerRange) const
 
 
 /* including file 'src/selectionrect.cpp', size 9215                         */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionRect
@@ -2989,7 +2989,7 @@ void QCPSelectionRect::draw(QCPPainter *painter)
 
 
 /* including file 'src/layout.cpp', size 78863                               */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPMarginGroup
@@ -5162,7 +5162,7 @@ void QCPLayoutInset::addElement(QCPLayoutElement *element, const QRectF &rect)
 
 
 /* including file 'src/lineending.cpp', size 11189                           */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLineEnding
@@ -5455,8 +5455,8 @@ void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, double ang
 /* end of 'src/lineending.cpp' */
 
 
-/* including file 'src/axis/labelpainter.cpp', size 27296                    */
-/* commit 54e30477846ee747a9b785d85e8cfbc5238228cb 2021-03-29 02:08:08 +0200 */
+/* including file 'src/axis/labelpainter.cpp', size 27519                    */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5654,8 +5654,8 @@ QByteArray QCPLabelPainterPrivate::generateLabelParameterHash() const
   QByteArray result;
   result.append(QByteArray::number(mParentPlot->bufferDevicePixelRatio()));
   result.append(QByteArray::number(mRotation));
-  //result.append(QByteArray::number((int)tickLabelSide)); TODO: check whether this is really a cache-invalidating property
-  result.append(QByteArray::number((int)mSubstituteExponent));
+  //result.append(QByteArray::number(int(tickLabelSide))); TODO: check whether this is really a cache-invalidating property
+  result.append(QByteArray::number(int(mSubstituteExponent)));
   result.append(QString(mMultiplicationSymbol).toUtf8());
   result.append(mColor.name().toLatin1()+QByteArray::number(mColor.alpha(), 16));
   result.append(mFont.toString().toLatin1());
@@ -5758,9 +5758,12 @@ QPointF QCPLabelPainterPrivate::getAnchorPos(const QPointF &tickPos)
         case asTopRight:    return tickPos+QPointF(-mPadding*M_SQRT1_2, mPadding*M_SQRT1_2);
         case asBottomRight: return tickPos+QPointF(-mPadding*M_SQRT1_2, -mPadding*M_SQRT1_2);
         case asBottomLeft:  return tickPos+QPointF(mPadding*M_SQRT1_2, -mPadding*M_SQRT1_2);
+        default: qDebug() << Q_FUNC_INFO << "invalid mode for anchor side: " << mAnchorSide; break;
       }
+      break;
     }
     case amSkewedUpright:
+      // fall through
     case amSkewedRotated:
     {
       QCPVector2D anchorNormal(tickPos-mAnchorReference);
@@ -5769,6 +5772,7 @@ QPointF QCPLabelPainterPrivate::getAnchorPos(const QPointF &tickPos)
       anchorNormal.normalize();
       return tickPos+(anchorNormal*mPadding).toPointF();
     }
+    default: qDebug() << Q_FUNC_INFO << "invalid mode for anchor mode: " << mAnchorMode; break;
   }
   return tickPos;
 }
@@ -5986,8 +5990,8 @@ QByteArray QCPLabelPainterPrivate::cacheKey(const QString &text, const QColor &c
 {
   return text.toUtf8()+
       QByteArray::number(color.red()+256*color.green()+65536*color.blue(), 36)+
-      QByteArray::number(color.alpha()+256*(int)side, 36)+
-      QByteArray::number((int)(rotation*100)%36000, 36);
+      QByteArray::number(color.alpha()+256*int(side), 36)+
+      QByteArray::number(int(rotation*100), 36);
 }
 
 QCPLabelPainterPrivate::AnchorSide QCPLabelPainterPrivate::skewedAnchorSide(const QPointF &tickPos, double sideExpandHorz, double sideExpandVert) const
@@ -6054,8 +6058,8 @@ void QCPLabelPainterPrivate::analyzeFontMetrics()
 /* end of 'src/axis/labelpainter.cpp' */
 
 
-/* including file 'src/axis/axisticker.cpp', size 18688                      */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* including file 'src/axis/axisticker.cpp', size 18693                      */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTicker
@@ -6439,7 +6443,7 @@ double QCPAxisTicker::pickClosest(double target, const QVector<double> &candidat
 */
 double QCPAxisTicker::getMantissa(double input, double *magnitude) const
 {
-  const double mag = qPow(10.0, qFloor(qLn(input)/qLn(10.0)));
+  const double mag = std::pow(10.0, std::floor(std::log10(input)));
   if (magnitude) *magnitude = mag;
   return input/mag;
 }
@@ -6475,7 +6479,7 @@ double QCPAxisTicker::cleanMantissa(double input) const
 
 
 /* including file 'src/axis/axistickerdatetime.cpp', size 18829              */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerDateTime
@@ -6832,7 +6836,7 @@ double QCPAxisTickerDateTime::dateTimeToKey(const QDate &date, Qt::TimeSpec time
 
 
 /* including file 'src/axis/axistickertime.cpp', size 11745                  */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerTime
@@ -7081,7 +7085,7 @@ void QCPAxisTickerTime::replaceUnit(QString &text, QCPAxisTickerTime::TimeUnit u
 
 
 /* including file 'src/axis/axistickerfixed.cpp', size 5575                  */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerFixed
@@ -7183,7 +7187,7 @@ double QCPAxisTickerFixed::getTickStep(const QCPRange &range)
 
 
 /* including file 'src/axis/axistickertext.cpp', size 8742                   */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerText
@@ -7400,7 +7404,7 @@ QVector<double> QCPAxisTickerText::createTickVector(double tickStep, const QCPRa
 
 
 /* including file 'src/axis/axistickerpi.cpp', size 11177                    */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerPi
@@ -7687,7 +7691,7 @@ QString QCPAxisTickerPi::unicodeSubscript(int number) const
 
 
 /* including file 'src/axis/axistickerlog.cpp', size 7890                    */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerLog
@@ -7827,8 +7831,8 @@ QVector<double> QCPAxisTickerLog::createTickVector(double tickStep, const QCPRan
 /* end of 'src/axis/axistickerlog.cpp' */
 
 
-/* including file 'src/axis/axis.cpp', size 100102                           */
-/* commit b3523f54a7654db36fa2d8b2145a7a6470531f5d 2021-04-24 01:10:32 +0200 */
+/* including file 'src/axis/axis.cpp', size 100130                           */
+/* commit 53e1117d04095e30cf9d0b37d053133826a74915 2021-04-24 01:10:32 +0200 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -10352,7 +10356,7 @@ QCPAxisPainterPrivate::TickLabelData QCPAxisPainterPrivate::getTickLabelData(con
   int eLast = -1; // last index of exponent part, rest of text after this will be suffixPart
   if (substituteExponent)
   {
-    ePos = text.indexOf(QLatin1Char('e'));
+    ePos = text.indexOf(QString(mParentPlot->locale().exponential()));
     if (ePos > 0 && text.at(ePos-1).isDigit())
     {
       eLast = ePos;
@@ -10549,7 +10553,7 @@ void QCPAxisPainterPrivate::getMaxTickLabelSize(const QFont &font, const QString
 
 
 /* including file 'src/scatterstyle.cpp', size 17466                         */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPScatterStyle
@@ -11022,7 +11026,7 @@ void QCPScatterStyle::drawShape(QCPPainter *painter, double x, double y) const
 
 
 /* including file 'src/plottable.cpp', size 38820                            */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionDecorator
@@ -11993,7 +11997,7 @@ void QCPAbstractPlottable::deselectEvent(bool *selectionStateChanged)
 
 
 /* including file 'src/item.cpp', size 49490                                 */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200 */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemAnchor
@@ -13264,8 +13268,8 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
 /* end of 'src/item.cpp' */
 
 
-/* including file 'src/core.cpp', size 128406                                */
-/* commit b3523f54a7654db36fa2d8b2145a7a6470531f5d 2021-04-24 01:10:32 +0200 */
+/* including file 'src/core.cpp', size 128833                                */
+/* commit 53e1117d04095e30cf9d0b37d053133826a74915 2021-04-24 01:10:32 +0200 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCustomPlot
@@ -13277,7 +13281,7 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
   interacts with the user.
   
   For tutorials on how to use QCustomPlot, see the website\n
-  http://www.qcustomplot.com/
+  https://www.qcustomplot.com/
 */
 
 /* start of documentation of inline functions */
@@ -13601,7 +13605,7 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
   xAxis2(nullptr),
   yAxis2(nullptr),
   legend(nullptr),
-  mBufferDevicePixelRatio(1.0), // will be adapted to primary screen below
+  mBufferDevicePixelRatio(1.0), // will be adapted to true value below
   mPlotLayout(nullptr),
   mAutoAddPlottableToLegend(true),
   mAntialiasedElements(QCP::aeNone),
@@ -13630,7 +13634,6 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
   mOpenGlCacheLabelsBackup(true)
 {
   setAttribute(Qt::WA_NoMousePropagation);
-  setAttribute(Qt::WA_OpaquePaintEvent);
   setFocusPolicy(Qt::ClickFocus);
   setMouseTracking(true);
   QLocale currentLocale = locale();
@@ -15498,6 +15501,22 @@ QSize QCustomPlot::sizeHint() const
 void QCustomPlot::paintEvent(QPaintEvent *event)
 {
   Q_UNUSED(event)
+  
+  // detect if the device pixel ratio has changed (e.g. moving window between different DPI screens), and adapt buffers if necessary:
+#ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
+#  ifdef QCP_DEVICEPIXELRATIO_FLOAT
+  double newDpr = devicePixelRatioF();
+#  else
+  double newDpr = devicePixelRatio();
+#  endif
+  if (!qFuzzyCompare(mBufferDevicePixelRatio, newDpr))
+  {
+    setBufferDevicePixelRatio(newDpr);
+    replot(QCustomPlot::rpQueuedRefresh);
+    return;
+  }
+#endif
+  
   QCPPainter painter(this);
   if (painter.isActive())
   {
@@ -16514,8 +16533,8 @@ void QCustomPlot::toPainter(QCPPainter *painter, int width, int height)
 /* end of 'src/core.cpp' */
 
 
-/* including file 'src/colorgradient.cpp', size 25278                        */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* including file 'src/colorgradient.cpp', size 25408                        */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -16745,10 +16764,10 @@ void QCPColorGradient::colorize(const double *data, const QCPRange &range, QRgb 
     const double value = data[dataIndexFactor*i];
     if (skipNanCheck || !std::isnan(value))
     {
-      int index = int((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
+      qint64 index = qint64((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
       if (!mPeriodic)
       {
-        index = qBound(0, index, mLevelCount-1);
+        index = qBound(qint64(0), index, qint64(mLevelCount-1));
       } else
       {
         index %= mLevelCount;
@@ -16806,10 +16825,10 @@ void QCPColorGradient::colorize(const double *data, const unsigned char *alpha, 
     const double value = data[dataIndexFactor*i];
     if (skipNanCheck || !std::isnan(value))
     {
-      int index = int((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
+      qint64 index = qint64((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
       if (!mPeriodic)
       {
-        index = qBound(0, index, mLevelCount-1);
+        index = qBound(qint64(0), index, qint64(mLevelCount-1));
       } else
       {
         index %= mLevelCount;
@@ -17052,7 +17071,7 @@ void QCPColorGradient::updateColorBuffer()
     for (int i=0; i<mLevelCount; ++i)
     {
       double position = i*indexToPosFactor;
-      QMap<double, QColor>::const_iterator it = mColorStops.lowerBound(position);
+      QMap<double, QColor>::const_iterator it = const_cast<const QMap<double, QColor>*>(&mColorStops)->lowerBound(position); // force using the const lowerBound method
       if (it == mColorStops.constEnd()) // position is on or after last stop, use color of last stop
       {
         if (useAlpha)
@@ -17150,7 +17169,7 @@ void QCPColorGradient::updateColorBuffer()
 
 
 /* including file 'src/selectiondecorator-bracket.cpp', size 12308           */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionDecoratorBracket
@@ -17436,7 +17455,7 @@ QPointF QCPSelectionDecoratorBracket::getPixelCoordinates(const QCPPlottableInte
 
 
 /* including file 'src/layoutelements/layoutelement-axisrect.cpp', size 47440 */
-/* commit d80413e1d78389c89ec7dc34573ce7797eaffb1c 2021-04-24 01:21:37 +0200  */
+/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200  */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18724,7 +18743,7 @@ void QCPAxisRect::wheelEvent(QWheelEvent *event)
 
 
 /* including file 'src/layoutelements/layoutelement-legend.cpp', size 31762  */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAbstractLegendItem
@@ -19648,7 +19667,7 @@ void QCPLegend::parentPlotInitialized(QCustomPlot *parentPlot)
 
 
 /* including file 'src/layoutelements/layoutelement-textelement.cpp', size 12925 */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200     */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100     */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPTextElement
@@ -20054,7 +20073,7 @@ QColor QCPTextElement::mainTextColor() const
 
 
 /* including file 'src/layoutelements/layoutelement-colorscale.cpp', size 26609 */
-/* commit b3523f54a7654db36fa2d8b2145a7a6470531f5d 2021-04-24 01:10:32 +0200    */
+/* commit 53e1117d04095e30cf9d0b37d053133826a74915 2021-04-24 01:10:32 +0200    */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20738,8 +20757,8 @@ void QCPColorScaleAxisRectPrivate::axisSelectableChanged(QCPAxis::SelectablePart
 /* end of 'src/layoutelements/layoutelement-colorscale.cpp' */
 
 
-/* including file 'src/plottables/plottable-graph.cpp', size 74518           */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* including file 'src/plottables/plottable-graph.cpp', size 74926           */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPGraphData
@@ -21569,21 +21588,37 @@ QVector<QPointF> QCPGraph::dataToImpulseLines(const QVector<QCPGraphData> &data)
   {
     for (int i=0; i<data.size(); ++i)
     {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(valueAxis->coordToPixel(0));
-      result[i*2+0].setY(key);
-      result[i*2+1].setX(valueAxis->coordToPixel(data.at(i).value));
-      result[i*2+1].setY(key);
+      const QCPGraphData &current = data.at(i);
+      if (!qIsNaN(current.value))
+      {
+        const double key = keyAxis->coordToPixel(current.key);
+        result[i*2+0].setX(valueAxis->coordToPixel(0));
+        result[i*2+0].setY(key);
+        result[i*2+1].setX(valueAxis->coordToPixel(current.value));
+        result[i*2+1].setY(key);
+      } else
+      {
+        result[i*2+0] = QPointF(0, 0);
+        result[i*2+1] = QPointF(0, 0);
+      }
     }
   } else // key axis is horizontal
   {
     for (int i=0; i<data.size(); ++i)
     {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(key);
-      result[i*2+0].setY(valueAxis->coordToPixel(0));
-      result[i*2+1].setX(key);
-      result[i*2+1].setY(valueAxis->coordToPixel(data.at(i).value));
+      const QCPGraphData &current = data.at(i);
+      if (!qIsNaN(current.value))
+      {
+        const double key = keyAxis->coordToPixel(data.at(i).key);
+        result[i*2+0].setX(key);
+        result[i*2+0].setY(valueAxis->coordToPixel(0));
+        result[i*2+1].setX(key);
+        result[i*2+1].setY(valueAxis->coordToPixel(data.at(i).value));
+      } else
+      {
+        result[i*2+0] = QPointF(0, 0);
+        result[i*2+1] = QPointF(0, 0);
+      }
     }
   }
   return result;
@@ -22497,7 +22532,7 @@ int QCPGraph::findIndexBelowY(const QVector<QPointF> *data, double y) const
 
 
 /* including file 'src/plottables/plottable-curve.cpp', size 63851           */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPCurveData
@@ -23955,7 +23990,7 @@ double QCPCurve::pointDistance(const QPointF &pixelPoint, QCPCurveDataContainer:
 
 
 /* including file 'src/plottables/plottable-bars.cpp', size 43907            */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25131,7 +25166,7 @@ void QCPBars::connectBars(QCPBars *lower, QCPBars *upper)
 
 
 /* including file 'src/plottables/plottable-statisticalbox.cpp', size 28951  */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPStatisticalBoxData
@@ -25792,8 +25827,8 @@ QVector<QLineF> QCPStatisticalBox::getWhiskerBarLines(QCPStatisticalBoxDataConta
 /* end of 'src/plottables/plottable-statisticalbox.cpp' */
 
 
-/* including file 'src/plottables/plottable-colormap.cpp', size 48149        */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* including file 'src/plottables/plottable-colormap.cpp', size 48189        */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPColorMapData
@@ -26163,8 +26198,8 @@ void QCPColorMapData::recalculateDataBounds()
 {
   if (mKeySize > 0 && mValueSize > 0)
   {
-    double minHeight = mData[0];
-    double maxHeight = mData[0];
+    double minHeight = std::numeric_limits<double>::max();
+    double maxHeight = -std::numeric_limits<double>::max();
     const int dataCount = mValueSize*mKeySize;
     for (int i=0; i<dataCount; ++i)
     {
@@ -26207,8 +26242,7 @@ void QCPColorMapData::clearAlpha()
 void QCPColorMapData::fill(double z)
 {
   const int dataCount = mValueSize*mKeySize;
-  for (int i=0; i<dataCount; ++i)
-    mData[i] = z;
+  memset(mData, z, dataCount*sizeof(*mData));
   mDataBounds = QCPRange(z, z);
   mDataModified = true;
 }
@@ -26227,8 +26261,7 @@ void QCPColorMapData::fillAlpha(unsigned char alpha)
   if (mAlpha || createAlpha(false))
   {
     const int dataCount = mValueSize*mKeySize;
-    for (int i=0; i<dataCount; ++i)
-      mAlpha[i] = alpha;
+    memset(mAlpha, alpha, dataCount*sizeof(*mAlpha));
     mDataModified = true;
   }
 }
@@ -26926,7 +26959,7 @@ void QCPColorMap::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
 
 
 /* including file 'src/plottables/plottable-financial.cpp', size 42914       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPFinancialData
@@ -27888,7 +27921,7 @@ QRectF QCPFinancial::selectionHitBox(QCPFinancialDataContainer::const_iterator i
 
 
 /* including file 'src/plottables/plottable-errorbar.cpp', size 37679        */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPErrorBarsData
@@ -28856,7 +28889,7 @@ bool QCPErrorBars::rectIntersectsLine(const QRectF &pixelRect, const QLineF &lin
 
 
 /* including file 'src/items/item-straightline.cpp', size 7596               */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemStraightLine
@@ -29037,7 +29070,7 @@ QPen QCPItemStraightLine::mainPen() const
 
 
 /* including file 'src/items/item-line.cpp', size 8525                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemLine
@@ -29268,7 +29301,7 @@ QPen QCPItemLine::mainPen() const
 
 
 /* including file 'src/items/item-curve.cpp', size 7273                      */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemCurve
@@ -29437,7 +29470,7 @@ QPen QCPItemCurve::mainPen() const
 
 
 /* including file 'src/items/item-rect.cpp', size 6472                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemRect
@@ -29594,7 +29627,7 @@ QBrush QCPItemRect::mainBrush() const
 
 
 /* including file 'src/items/item-text.cpp', size 13335                      */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemText
@@ -29942,7 +29975,7 @@ QBrush QCPItemText::mainBrush() const
 
 
 /* including file 'src/items/item-ellipse.cpp', size 7881                    */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemEllipse
@@ -30131,7 +30164,7 @@ QBrush QCPItemEllipse::mainBrush() const
 
 
 /* including file 'src/items/item-pixmap.cpp', size 10622                    */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemPixmap
@@ -30401,7 +30434,7 @@ QPen QCPItemPixmap::mainPen() const
 
 
 /* including file 'src/items/item-tracer.cpp', size 14645                    */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemTracer
@@ -30771,7 +30804,7 @@ QBrush QCPItemTracer::mainBrush() const
 
 
 /* including file 'src/items/item-bracket.cpp', size 10705                   */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemBracket
@@ -31012,7 +31045,7 @@ QPen QCPItemBracket::mainPen() const
 
 
 /* including file 'src/polar/radialaxis.cpp', size 49415                     */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 
@@ -32473,7 +32506,7 @@ QCP::Interaction QCPPolarAxisRadial::selectionCategory() const
 
 
 /* including file 'src/polar/layoutelement-angularaxis.cpp', size 57266      */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34164,7 +34197,7 @@ bool QCPPolarAxisAngular::registerPolarGraph(QCPPolarGraph *graph)
 
 
 /* including file 'src/polar/polargrid.cpp', size 7493                       */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34352,7 +34385,7 @@ void QCPPolarGrid::drawAngularGrid(QCPPainter *painter, const QPointF &center, d
 
 
 /* including file 'src/polar/polargraph.cpp', size 44035                     */
-/* commit cb6613980296d3512b892b7075555ff9ae71394d 2021-03-29 01:47:49 +0200 */
+/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
