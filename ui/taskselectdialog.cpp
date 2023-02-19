@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2019, 2021, 2023
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -68,8 +69,11 @@
 #include "ui/tableview.h"
 #include "misc/traceshark.h"
 
-#define CBOX_INDEX_AND 0
-#define CBOX_INDEX_OR  1
+#define LBOX_INDEX_AND 0
+#define LBOX_INDEX_OR  1
+
+#define EBOX_INDEX_CSV   0
+#define EBOX_INDEX_ASCII 1
 
 TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 				   enum TaskSelectType type)
@@ -81,6 +85,11 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	QHBoxLayout *filterLayout = new QHBoxLayout();
 	QHBoxLayout *settingLayout = new QHBoxLayout();
+	QHBoxLayout *exportLayout = NULL;
+	/* Do we have stats that can be exported ? */
+	bool has_stats = (type == TaskSelectStats ||
+			  type == TaskSelectStatsLimited);
+	QPushButton *exportButton = NULL;
 
 	taskView = new TableView(this, TableView::TABLE_ROWSELECT);
 	switch (type) {
@@ -102,6 +111,10 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	mainLayout->addLayout(buttonLayout);
 	mainLayout->addLayout(filterLayout);
 	mainLayout->addLayout(settingLayout);
+	if (has_stats) {
+		exportLayout = new QHBoxLayout();
+		mainLayout->addLayout(exportLayout);
+	}
 
 	QPushButton *closeButton = new QPushButton(tr("Close"));
 	QPushButton *addUnifiedButton =
@@ -117,7 +130,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	logicBox = new QComboBox();
 	logicBox->addItem(QString(tr("AND")));
 	logicBox->addItem(QString(tr("OR")));
-	logicBox->setCurrentIndex(CBOX_INDEX_AND);
+	logicBox->setCurrentIndex(LBOX_INDEX_AND);
 
 	QPushButton *addFilterButton =
 		new QPushButton(tr("Create pid filter"));
@@ -140,6 +153,21 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	settingLayout->addWidget(includeBox);
 	settingLayout->addStretch();
 
+	if (has_stats) {
+		exportButton = new QPushButton(tr("Export"));
+		QLabel *exportlabel = new QLabel(tr("Export format:"));
+		exportBox = new QComboBox();
+		exportBox->addItem(QString(tr("CSV")));
+		exportBox->addItem(QString(tr("ASCII")));
+		exportBox->setCurrentIndex(EBOX_INDEX_CSV);
+
+		exportLayout->addWidget(exportlabel);
+		exportLayout->addWidget(exportBox);
+		exportLayout->addWidget(exportButton);
+		exportLayout->addStretch();
+	} else
+		exportBox = nullptr;
+
 	hide();
 
 	tsconnect(closeButton, clicked(), this, closeClicked());
@@ -149,6 +177,8 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	tsconnect(taskView, doubleClicked(const QModelIndex &),
 		  this, handleDoubleClick(const QModelIndex &));
 	sigconnect(resetFilterButton, clicked(), this, resetFilter());
+	if (has_stats)
+		tsconnect(exportButton, clicked(), this, exportClicked());
 
 	filterMap = new QMap<int, int>();
 }
@@ -182,6 +212,11 @@ void TaskSelectDialog::resizeColumnsToContents()
 {
 	if (QDockWidget::isVisible())
 		taskView->resizeColumnsToContents();
+}
+
+void TaskSelectDialog::exportStats(bool csv, const QString &filename)
+{
+	taskModel->exportStats(csv, filename);
 }
 
 void TaskSelectDialog::show()
@@ -259,9 +294,16 @@ void TaskSelectDialog::addFilterClicked()
 		if (ok)
 			(*filterMap)[pid] = pid;
 	}
-	orlogic = logicBox->currentIndex() == CBOX_INDEX_OR;
+	orlogic = logicBox->currentIndex() == LBOX_INDEX_OR;
 	inclusive = includeBox->isChecked();
 	emit createFilter(*filterMap, orlogic, inclusive);
+}
+
+void TaskSelectDialog::exportClicked()
+{
+	bool csv = exportBox->currentIndex() == EBOX_INDEX_CSV;
+
+	emit doExport(csv);
 }
 
 void TaskSelectDialog::handleDoubleClick(const QModelIndex &index)

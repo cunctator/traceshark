@@ -2153,6 +2153,7 @@ void MainWindow::dialogConnections()
 		  this, removeQDockWidget(QDockWidget*));
 	tsconnect(statsDialog, taskDoubleClicked(int),
 		  this, taskTriggered(int));
+	tsconnect(statsDialog, doExport(bool), this, exportStats(bool));
 
 	/* Time limited statistics Dialog */
 	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
@@ -2169,6 +2170,8 @@ void MainWindow::dialogConnections()
 		  this, removeQDockWidget(QDockWidget*));
 	tsconnect(statsLimitedDialog, taskDoubleClicked(int),
 		  this, taskTriggered(int));
+	tsconnect(statsLimitedDialog, doExport(bool), this,
+		  exportStatsTimeLimited(bool));
 
 	/* the CPU filter dialog */
 	tsconnect(cpuSelectDialog, createFilter(QMap<unsigned, unsigned> &,
@@ -3238,6 +3241,35 @@ void MainWindow::showStatsTimeLimited()
 
 	if (dockWidgetArea(schedLatencyWidget) == Qt::RightDockWidgetArea)
 		tabifyDockWidget(schedLatencyWidget, statsLimitedDialog);
+}
+
+void MainWindow::exportStats(bool csv)
+{
+	exportStats_(csv, false);
+}
+
+void MainWindow::exportStatsTimeLimited(bool csv)
+{
+	exportStats_(csv, true);
+}
+
+void MainWindow::exportStats_(bool csv, bool limited)
+{
+	QString name;
+	QString caption = tr("Export statistics");
+	QString filter = csv ? tr("*.csv") : tr("*.asc");
+
+	name = QFileDialog::getSaveFileName(this, caption, QString(),
+					    filter, nullptr,
+					    foptions);
+
+	if (name.isEmpty())
+		return;
+
+	if (limited)
+		statsLimitedDialog->exportStats(csv, name);
+	else
+		statsDialog->exportStats(csv, name);
 }
 
 void MainWindow::removeQDockWidget(QDockWidget *widget)

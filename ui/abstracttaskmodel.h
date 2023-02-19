@@ -77,8 +77,11 @@ public:
 	virtual void beginResetModel() = 0;
 	virtual void endResetModel() = 0;
 	virtual int rowToPid(int row, bool &ok) const;
+	virtual void rowToPct(QString &str, int row, bool &ok) const;
+	virtual void rowToTime(QString &str, int row, bool &ok) const;
 	const QString &rowToName(int row, bool &ok) const;
 	bool rowToGhostStatus(int row, bool &ok) const;
+	int exportStats(bool csv, const QString &filename);
 protected:
 	vtl::TList<const Task*> *taskList;
 	QString *errorStr;

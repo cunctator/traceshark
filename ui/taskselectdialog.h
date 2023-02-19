@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2019, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -86,6 +86,7 @@ public:
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
+	void exportStats(bool csv, const QString &filename);
 public slots:
 	void show();
 signals:
@@ -94,6 +95,7 @@ signals:
 	void needLegendCheck(void);
 	void addTaskToLegend(int pid);
 	void resetFilter(void);
+	void doExport(bool csv);
 	void createFilter(QMap<int, int> &map, bool orlogic, bool inclusive);
 	void QDockWidgetNeedsRemoval(QDockWidget *widget);
 	void taskDoubleClicked(int pid);
@@ -102,11 +104,13 @@ private slots:
 	void addUnifiedClicked();
 	void addLegendClicked();
 	void addFilterClicked();
+	void exportClicked();
 	void handleDoubleClick(const QModelIndex &index);
 private:
 	TableView *taskView;
 	AbstractTaskModel *taskModel;
 	QComboBox *logicBox;
+	QComboBox *exportBox;
 	QCheckBox *includeBox;
 	QMap<int, int> *filterMap;
 	int savedHeight;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -207,6 +207,8 @@ private slots:
 	void transmitSize();
 	void showStats();
 	void showStatsTimeLimited();
+	void exportStats(bool csv);
+	void exportStatsTimeLimited(bool csv);
 	void removeQDockWidget(QDockWidget *widget);
 	void taskFilter();
 
@@ -324,6 +326,7 @@ private:
 	void setupOpenGL();
 	void updateTaskGraphActions();
 	void updateAddToLegendAction();
+	void exportStats_(bool csv, bool limited);
 	TaskGraph *selectedGraph();
 
 	TracePlot *tracePlot;

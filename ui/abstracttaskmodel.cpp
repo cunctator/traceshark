@@ -50,8 +50,11 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <QFile>
+
 #include "vtl/tlist.h"
 
+#include "misc/translate.h"
 #include "abstracttaskmodel.h"
 #include "analyzer/task.h"
 
@@ -91,6 +94,16 @@ int AbstractTaskModel::rowToPid(int row, bool &ok) const
 	return task->pid;
 }
 
+void AbstractTaskModel::rowToPct(QString &/*str*/, int /*row*/, bool &ok) const
+{
+	ok = false;
+}
+
+void AbstractTaskModel::rowToTime(QString &/*str*/, int /*row*/, bool &ok) const
+{
+	ok = false;
+}
+
 const QString &AbstractTaskModel::rowToName(int row, bool &ok) const
 {
 	if (row < 0) {
@@ -123,4 +136,78 @@ bool AbstractTaskModel::rowToGhostStatus(int row, bool &ok) const
 	const Task *task = taskList->at(row);
 
 	return task->isGhostAlias;
+}
+
+int AbstractTaskModel::exportStats(bool csv, const QString &filename)
+{
+	/* Todo add export code here */
+	qfile_error_t err;
+	int row;
+	QString sep = csv ? QString(",") : QString("\t");
+	QString str;
+	bool ok;
+	bool is_ghost;
+	const int s = taskList->size();
+	QTextStream stream;
+	QString gstatus;
+
+	if (filename.isEmpty())
+		return 0;
+
+	QFile file(filename);
+
+	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly))
+		goto error_file;
+
+	stream.setDevice(&file);
+
+	stream << "TASK_NAME" << sep << "PID(TID)" << sep << "CPU_TIME_PCT(%)"
+	       << sep << "CPU_TIME(s)" << sep << "GHOST_STATUS" << "\n";
+
+	for (row = 0; row < s; row++) {
+		str = rowToName(row, ok);
+		if (ok)
+			stream << str << sep;
+
+		str = QString::number(rowToPid(row, ok));
+		if (ok)
+			stream << str << sep;
+
+		rowToPct(str, row, ok);
+		if (ok)
+			stream << str << sep;
+
+		rowToTime(str, row, ok);
+		if (ok)
+			stream << str;
+
+		is_ghost = rowToGhostStatus(row, ok);
+
+		if (ok) {
+			gstatus = is_ghost ?
+				QLatin1String("GHOST") :
+				QLatin1String("REAL");
+		} else {
+			gstatus = QLatin1String("UNKNOWN");
+		}
+		stream << sep << gstatus;
+		stream << "\n";
+	}
+
+	stream.flush();
+	if (!file.flush())
+		goto error_file;
+	file.close();
+
+	err = file.error();
+	if (err == qfile_error_class::NoError)
+		return 0;
+	goto error_translate;
+
+error_file:
+	err = file.error();
+	if (err == qfile_error_class::NoError)
+		return -TS_ERROR_UNSPEC;
+error_translate:
+	return -translate_FileError(err);
 }
