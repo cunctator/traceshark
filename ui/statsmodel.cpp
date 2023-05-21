@@ -152,9 +152,6 @@ void StatsModel::rowToPct(QString &str, int row, bool &ok) const
 			nonzero = true;
 			buf[n] = '0' + p;
 			n++;
-		} else if (i >= 3) {
-			buf[n] = ' ';
-			n++;
 		}
 		rest = rest % div;
 		div = div / 10;
