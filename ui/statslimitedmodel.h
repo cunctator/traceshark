@@ -53,33 +53,21 @@
 #ifndef _STATSLIMITEDMODEL_H
 #define _STATSLIMITEDMODEL_H
 
-#include "abstracttaskmodel.h"
-#include "vtl/avltree.h"
-#include "misc/traceshark.h"
+#include "statsmodel.h"
 
-QT_BEGIN_NAMESPACE
-class QStringList;
-QT_END_NAMESPACE
-
-class StatsLimitedModel : public AbstractTaskModel
+class StatsLimitedModel : public StatsModel
 {
 	Q_OBJECT
 public:
 	StatsLimitedModel(QObject *parent = 0);
-	void setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
-			unsigned int nrcpus);
-	int rowCount(const QModelIndex &parent) const;
-	int columnCount(const QModelIndex &parent) const;
-	QVariant data(const QModelIndex &index, int role) const;
-	bool setData(const QModelIndex &index, const QVariant &value,
-		     int role);
-	QVariant headerData(int section, Qt::Orientation orientation,
-			    int role) const;
-	void rowToPct(QString &str, int row, bool &ok) const;
-	void rowToTime(QString &str, int row, bool &ok) const;
-	void beginResetModel();
-	void endResetModel();
-	Qt::ItemFlags flags(const QModelIndex &index) const;
+protected:
+	vtl::Time &getRelevantTime(Task *task);
+	const vtl::Time &getRelevantTimeConst(const Task *task) const;
+	unsigned &getRelevantPct(Task *task);
+	const unsigned &getRelevantPctConst(const Task *task) const;
+	virtual vtl::Time getDeltaTime() const;
+	bool checkZeroTime() const;
+	void sortTaskList();
 };
 
 #endif /* _STATSLIMITEDMODEL_H */

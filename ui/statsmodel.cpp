@@ -64,46 +64,37 @@ StatsModel::StatsModel(QObject *parent):
 void StatsModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 			    unsigned int nrcpus)
 {
-	vtl::Time delta = AbstractTask::endTime - AbstractTask::startTime;
+	vtl::Time delta = getDeltaTime();
 
 	taskList->clear();
 
 	if (map == nullptr)
 		return;
 
-	idleTask->accTime = delta * nrcpus;
+	vtl::Time &idle_time = getRelevantTime(idleTask);
+	unsigned &idle_pct = getRelevantPct(idleTask);
+
+	idle_time = delta * nrcpus;
 
 	DEFINE_TASKMAP_ITERATOR(iter) = map->begin();
 	while (iter != map->end()) {
 		Task *task = iter.value().task;
-		taskList->append(task);
-		idleTask->accTime -= task->accTime;
+
+		vtl::Time &stat_time = getRelevantTime(task);
+		if (!checkZeroTime() || !stat_time.isZero()) {
+			taskList->append(task);
+			idle_time -= stat_time;
+		}
 		iter++;
 	}
 
-	idleTask->accPct = (unsigned)
-		(10000 * (idleTask->accTime.toDouble() / delta.toDouble() +
+	idle_pct = (unsigned)
+		(10000 * (idle_time.toDouble() / delta.toDouble() +
 			  0.00005));
 
 	/* Add a fake idle task for event filtering purposes */
 	taskList->append(idleTask);
-
-	vtl::heapsort<vtl::TList, const Task*>(
-		*taskList, [] (const Task *&a, const Task *&b) -> int {
-			const QString &as = *a->displayName;
-			const QString &bs = *b->displayName;
-
-			if (a->accTime < b->accTime)
-				return 1;
-			if (a->accTime > b->accTime)
-				return -1;
-
-			int cmp1 = as.compare(bs);
-			if (cmp1 != 0)
-				return cmp1;
-			long cmp2 = (long) a->pid - (long) b->pid;
-			return (int) cmp2;
-		});
+	sortTaskList();
 }
 
 int StatsModel::rowCount(const QModelIndex & /* index */) const
@@ -136,7 +127,7 @@ void StatsModel::rowToPct(QString &str, int row, bool &ok) const
 
 	ok = true;
 	const Task *task = taskList->at(row);
-	unsigned pct = task->accPct;
+	unsigned pct = getRelevantPctConst(task);
 
 	/* We assume no system has more than 9999 CPUs */
 	if (pct > 99990000) {
@@ -182,7 +173,7 @@ void StatsModel::rowToTime(QString &str, int row, bool &ok) const
 
 	ok = true;
 	const Task *task = taskList->at(row);
-	str = task->accTime.toQString();
+	str = getRelevantTimeConst(task).toQString();
 }
 
 
@@ -293,4 +284,54 @@ void StatsModel::beginResetModel()
 void StatsModel::endResetModel()
 {
 	QAbstractTableModel::endResetModel();
+}
+
+vtl::Time &StatsModel::getRelevantTime(Task *task)
+{
+	return task->accTime;
+}
+
+const vtl::Time &StatsModel::getRelevantTimeConst(const Task *task) const
+{
+	return task->accTime;
+}
+
+unsigned &StatsModel::getRelevantPct(Task *task)
+{
+	return task->accPct;
+}
+
+const unsigned &StatsModel::getRelevantPctConst(const Task *task) const
+{
+	return task->accPct;
+}
+
+vtl::Time StatsModel::getDeltaTime() const
+{
+	return AbstractTask::endTime - AbstractTask::startTime;
+}
+
+bool StatsModel::checkZeroTime() const
+{
+	return false;
+}
+
+void StatsModel::sortTaskList()
+{
+	vtl::heapsort<vtl::TList, const Task*>(
+		*taskList, [] (const Task *&a, const Task *&b) -> int {
+			const QString &as = *a->displayName;
+			const QString &bs = *b->displayName;
+
+			if (a->accTime < b->accTime)
+				return 1;
+			if (a->accTime > b->accTime)
+				return -1;
+
+			int cmp1 = as.compare(bs);
+			if (cmp1 != 0)
+				return cmp1;
+			long cmp2 = (long) a->pid - (long) b->pid;
+			return (int) cmp2;
+		});
 }
