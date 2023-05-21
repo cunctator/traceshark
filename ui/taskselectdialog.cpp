@@ -94,12 +94,15 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	taskView = new TableView(this, TableView::TABLE_ROWSELECT);
 	switch (type) {
 	case TaskSelectStats:
-		taskModel = new StatsModel(taskView);
+		statsModel = new StatsModel(taskView);
+		taskModel = statsModel;
 		break;
 	case TaskSelectStatsLimited:
-		taskModel = new StatsLimitedModel(taskView);
+		statsModel = new StatsLimitedModel(taskView);
+		taskModel = statsModel;
 		break;
 	case TaskSelectRegular:
+		statsModel = nullptr;
 		taskModel = new TaskModel(taskView);
 		break;
 	default:
@@ -216,7 +219,8 @@ void TaskSelectDialog::resizeColumnsToContents()
 
 void TaskSelectDialog::exportStats(bool csv, const QString &filename)
 {
-	taskModel->exportStats(csv, filename);
+	if (statsModel != nullptr)
+		statsModel->exportStats(csv, filename);
 }
 
 void TaskSelectDialog::show()

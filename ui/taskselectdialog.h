@@ -69,6 +69,7 @@ QT_END_NAMESPACE
 class TaskModel;
 class TableView;
 class AbstractTaskModel;
+class StatsModel;
 
 class TaskSelectDialog : public QDockWidget {
 	Q_OBJECT
@@ -108,6 +109,7 @@ private slots:
 	void handleDoubleClick(const QModelIndex &index);
 private:
 	TableView *taskView;
+	StatsModel *statsModel;
 	AbstractTaskModel *taskModel;
 	QComboBox *logicBox;
 	QComboBox *exportBox;

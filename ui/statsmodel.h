@@ -80,6 +80,7 @@ public:
 	void beginResetModel();
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
+	int exportStats(bool csv, const QString &filename);
 protected:
 	virtual vtl::Time &getRelevantTime(Task *task);
 	virtual const vtl::Time &getRelevantTimeConst(const Task *task) const;
