@@ -76,6 +76,7 @@ void StatsModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 
 	vtl::Time &idle_time = getRelevantTime(idleTask);
 	unsigned &idle_pct = getRelevantPct(idleTask);
+	const bool check_zero = checkZeroTime();
 
 	idle_time = delta * nrcpus;
 
@@ -84,7 +85,7 @@ void StatsModel::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
 		Task *task = iter.value().task;
 
 		vtl::Time &stat_time = getRelevantTime(task);
-		if (!checkZeroTime() || !stat_time.isZero()) {
+		if (!check_zero || !stat_time.isZero()) {
 			taskList->append(task);
 			idle_time -= stat_time;
 		}
