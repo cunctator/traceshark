@@ -471,6 +471,7 @@ int SettingStore::saveSettings() const
 	QString name = getFileName();
 	QFile file(name);
 	QMap<QString, enum Setting::Index>::const_iterator iter;
+	bool flush_err;
 
 	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
 		qfile_error_t error = file.error();
@@ -502,9 +503,15 @@ int SettingStore::saveSettings() const
 		};
 	}
 	stream.flush();
+	flush_err = !file.flush();
 	qfile_error_t err = file.error();
-	if (err != qfile_error_class::NoError)
+	if (flush_err || err != qfile_error_class::NoError) {
+		file.close();
+		if (err ==  qfile_error_class::NoError)
+			return -TS_ERROR_UNSPEC;
 		return -translate_FileError(err);
+	}
+	file.close();
 	return 0;
 }
 
