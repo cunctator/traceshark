@@ -67,6 +67,7 @@
 #include "ui/statsmodel.h"
 #include "ui/statslimitedmodel.h"
 #include "ui/tableview.h"
+#include "misc/errors.h"
 #include "misc/traceshark.h"
 
 #define LBOX_INDEX_AND 0
@@ -217,10 +218,11 @@ void TaskSelectDialog::resizeColumnsToContents()
 		taskView->resizeColumnsToContents();
 }
 
-void TaskSelectDialog::exportStats(bool csv, const QString &filename)
+int TaskSelectDialog::exportStats(bool csv, const QString &filename)
 {
 	if (statsModel != nullptr)
-		statsModel->exportStats(csv, filename);
+		return statsModel->exportStats(csv, filename);
+	return -TS_ERROR_INTERNAL;
 }
 
 void TaskSelectDialog::show()

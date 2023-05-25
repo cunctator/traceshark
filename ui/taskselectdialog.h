@@ -87,7 +87,7 @@ public:
 	void beginResetModel();
 	void endResetModel();
 	void resizeColumnsToContents();
-	void exportStats(bool csv, const QString &filename);
+	int exportStats(bool csv, const QString &filename);
 public slots:
 	void show();
 signals:

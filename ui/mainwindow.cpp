@@ -3258,6 +3258,7 @@ void MainWindow::exportStats_(bool csv, bool limited)
 	QString name;
 	QString caption = tr("Export statistics");
 	QString filter = csv ? tr("*.csv") : tr("*.asc");
+	int ts_errno = 0;
 
 	name = QFileDialog::getSaveFileName(this, caption, QString(),
 					    filter, nullptr,
@@ -3267,9 +3268,13 @@ void MainWindow::exportStats_(bool csv, bool limited)
 		return;
 
 	if (limited)
-		statsLimitedDialog->exportStats(csv, name);
+		ts_errno = statsLimitedDialog->exportStats(csv, name);
 	else
-		statsDialog->exportStats(csv, name);
+		ts_errno = statsDialog->exportStats(csv, name);
+
+	if (ts_errno != 0)
+		vtl::warn(ts_errno, "Failed to export statistics to %s",
+			  name.toLocal8Bit().data());
 }
 
 void MainWindow::removeQDockWidget(QDockWidget *widget)
