@@ -206,6 +206,11 @@ namespace TShark {
 	}
 
 	extern QString translateRegexError(int ecode);
+
+	void checkSuffix(QString *string, const QString &suffix);
+
+	void checkSuffix(QString *string, const QString &suffix,
+			 const QString &rsuffix);
 }
 
 #endif /* TRACESHARK_H */

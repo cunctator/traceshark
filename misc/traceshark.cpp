@@ -62,4 +62,19 @@ namespace TShark {
 		nullptr
 	};
 #undef TSHARK_LOGIC_ITEM_
+
+	void checkSuffix(QString *string, const QString &suffix) {
+		if (!string->endsWith(suffix.toLower()) &&
+		    !string->endsWith(suffix.toUpper()))
+			string->append(suffix);
+	}
+
+	void checkSuffix(QString *string, const QString &suffix,
+			 const QString &rsuffix) {
+		if (!string->endsWith(suffix.toLower()) &&
+		    !string->endsWith(suffix.toUpper()) &&
+		    !string->endsWith(rsuffix.toLower()) &&
+		    !string->endsWith(rsuffix.toUpper()))
+			string->append(suffix);
+	}
 }

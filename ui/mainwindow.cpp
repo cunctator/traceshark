@@ -1211,13 +1211,20 @@ void MainWindow::saveScreenshot()
 {
 	QStringList fileNameList;
 	QString fileName;
-	QString pngSuffix = QString(".png");
-	QString bmpSuffix = QString(".bmp");
-	QString jpgSuffix = QString(".jpg");
-	QString pdfSuffix = QString(".pdf");
+	QString png_suffix = QString(".png");
+	QString png_filter = QString("PNG (*.png)");
+	QString bmp_suffix = QString(".bmp");
+	QString bmp_filter = QString("BMP (*.bmp)");
+	QString jpg_suffix = QString(".jpg");
+	QString jpg_filter = QString ("JPEG (*.jpg)");
+	QString pdf_suffix = QString(".pdf");
+	QString pdf_filter = QString("PDF (*.pdf)");
+	QString fsep = QString(";;");
 	QString pdfCreator = QString("traceshark ");
 	QString pdfTitle;
 	QString diagcapt;
+	QString filter;
+	QString selected;
 
 	pdfCreator += QString(TRACESHARK_VERSION_STRING);
 
@@ -1237,25 +1244,36 @@ void MainWindow::saveScreenshot()
 	}
 
 	pdfTitle += pdfCreator;
+	filter = png_filter + fsep + bmp_filter + fsep + jpg_filter + fsep +
+		pdf_filter;
 
 	diagcapt = tr("Save screenshot to image");
 	fileName = QFileDialog::getSaveFileName(this, diagcapt, QString(),
-						tr("Images (*.png *.bmp *.jpg *.pdf)"),
-						nullptr, foptions);
+						filter, &selected, foptions);
+
 	if (fileName.isEmpty())
 		return;
 
-	if (fileName.endsWith(pngSuffix, Qt::CaseInsensitive)) {
+	if (selected == png_filter) {
+		TShark::checkSuffix(&fileName, png_suffix);
 		tracePlot->savePng(fileName);
-	} else if (fileName.endsWith(bmpSuffix, Qt::CaseInsensitive)) {
+	} else if (selected == bmp_filter) {
+		TShark::checkSuffix(&fileName, bmp_suffix);
 		tracePlot->saveBmp(fileName);
-	} else if (fileName.endsWith(jpgSuffix, Qt::CaseInsensitive)) {
+	} else if (selected == jpg_filter) {
+		TShark::checkSuffix(&fileName, jpg_suffix);
 		tracePlot->saveJpg(fileName);
-	} else if (fileName.endsWith(pdfSuffix, Qt::CaseInsensitive)) {
+	} else if (selected == pdf_filter) {
+		TShark::checkSuffix(&fileName, pdf_suffix);
 		tracePlot->savePdf(fileName, 0, 0,  QCP::epAllowCosmetic,
 				   pdfCreator, pdfTitle);
 	} else {
-		tracePlot->savePng(fileName + pngSuffix);
+		/*
+		 * I believe that this should never happen but if it does,
+		 * then we use PNG as default.
+		 */
+		TShark::checkSuffix(&fileName, png_suffix);
+		tracePlot->savePng(fileName);
 	}
 }
 
@@ -2570,6 +2588,8 @@ void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 	if (fileName.isEmpty())
 		return;
 
+	TShark::checkSuffix(&fileName, QString(".asc"), QString(".txt"));
+
 	if (!analyzer->exportTraceFile(fileName.toLocal8Bit().data(),
 				       &ts_errno, export_type)) {
 		vtl::warn(ts_errno, "Failed to export trace to %s",
@@ -2656,10 +2676,13 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	 * QFileDialog::getSaveFileName(). This will override the originally
 	 * selected format in the LatencyWidget widget.
 	 */
-	if (selected == ascfilter)
+	if (selected == ascfilter) {
 		override_fmt = TraceAnalyzer::EXPORT_ASCII;
-	else if (selected == csvfilter)
+		TShark::checkSuffix(&fileName, QString(".txt"));
+	} else if (selected == csvfilter) {
 		override_fmt = TraceAnalyzer::EXPORT_CSV;
+		TShark::checkSuffix(&fileName, QString(".csv"));
+	}
 
 	if (!analyzer->exportLatencies(override_fmt, type,
 				       fileName.toLocal8Bit().data(),
@@ -3257,20 +3280,44 @@ void MainWindow::exportStats_(bool csv, bool limited)
 {
 	QString name;
 	QString caption = tr("Export statistics");
-	QString filter = csv ? tr("*.csv") : tr("*.asc");
+	QString csv_filter = QString("CSV (*.csv)");
+	QString csv_suffix = QString(".csv");
+	QString asc_filter = QString("ASCII (*.txt)");
+	QString asc_suffix = QString(".txt");
+	QString fsep = QString(";;");
+	QString filter;
 	int ts_errno = 0;
+	QString selected;
+	bool override_csv = csv;
+
+	if (csv)
+		filter = csv_filter + fsep + asc_filter;
+	else
+		filter = asc_filter + fsep + csv_filter;
 
 	name = QFileDialog::getSaveFileName(this, caption, QString(),
-					    filter, nullptr,
-					    foptions);
+					    filter, &selected, foptions);
 
 	if (name.isEmpty())
 		return;
 
+	if (selected == csv_filter) {
+		override_csv = true;
+		TShark::checkSuffix(&name, csv_suffix);
+	} else if (selected == asc_filter) {
+		override_csv = false;
+		TShark::checkSuffix(&name, asc_suffix);
+	} else {
+		if (csv)
+			TShark::checkSuffix(&name, QString(".csv"));
+		else
+			TShark::checkSuffix(&name, QString(".asc"));
+	}
+
 	if (limited)
-		ts_errno = statsLimitedDialog->exportStats(csv, name);
+		ts_errno = statsLimitedDialog->exportStats(override_csv, name);
 	else
-		ts_errno = statsDialog->exportStats(csv, name);
+		ts_errno = statsDialog->exportStats(override_csv, name);
 
 	if (ts_errno != 0)
 		vtl::warn(ts_errno, "Failed to export statistics to %s",
