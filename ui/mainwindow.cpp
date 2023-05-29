@@ -252,7 +252,7 @@ const QString MainWindow::CSV_SUFFIX = QString(".csv");
 const QString MainWindow::ASC_SUFFIX = QString(".asc");
 const QString MainWindow::TXT_SUFFIX = QString(".txt");
 
-const QString MainWindow::PNG_FILTER = QString("PNG (*.png)");;
+const QString MainWindow::PNG_FILTER = QString("PNG (*.png)");
 const QString MainWindow::BMP_FILTER = QString("BMP (*.bmp)");
 const QString MainWindow::JPG_FILTER = QString ("JPEG (*.jpg)");
 const QString MainWindow::PDF_FILTER = QString("PDF (*.pdf)");

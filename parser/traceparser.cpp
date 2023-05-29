@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2018, 2020, 2022
+ * Copyright (C) 2014-2018, 2020, 2022, 2023
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -430,7 +430,7 @@ bool TraceParser::parseBuffer(unsigned int index)
 
 	s = tbuf->list.size();
 	argv = (const TString**)
-		ptrPool->preallocN(EVENT_MAX_NR_ARGS);;
+		ptrPool->preallocN(EVENT_MAX_NR_ARGS);
 
 	for(i = 0; i < s; i++) {
 		TraceLine &line = tbuf->list[i];
@@ -439,14 +439,14 @@ bool TraceParser::parseBuffer(unsigned int index)
 		ft_event.argv = argv;
 		if (parseLineFtrace(line, ft_event)) {
 			argv = (const TString**)
-				ptrPool->preallocN(EVENT_MAX_NR_ARGS);;
+				ptrPool->preallocN(EVENT_MAX_NR_ARGS);
 		}
 		TraceEvent &p_event = perfEvents->preAlloc();
 		p_event.argc = 0;
 		p_event.argv = argv;
 		if (parseLinePerf(line, p_event)) {
 			argv = (const TString**)
-				ptrPool->preallocN(EVENT_MAX_NR_ARGS);;
+				ptrPool->preallocN(EVENT_MAX_NR_ARGS);
 		}
 	}
 	eof = tbuf->loadBuffer->isEOF();

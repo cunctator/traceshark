@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -210,7 +210,7 @@ vtl_always_inline bool FtraceGrammar::TimeMatch(const TString *str,
 	 * atof() and sscanf() are not up to the task because they are
 	 * too slow and get confused by locality issues.
 	 */
-	event.time = vtl::Time::fromString(str->ptr, rval);;
+	event.time = vtl::Time::fromString(str->ptr, rval);
 
 	/*
 	 * This is the time field, if it is successful we need to assemble

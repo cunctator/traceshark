@@ -418,7 +418,7 @@ TraceAnalyzer::generic_sched_switch_newpid(const TraceEvent &event) const
 		return INT_MAX;
 	if (!sched_switch_parse(ttype, event, handle))
 		return INT_MAX;
-	return sched_switch_handle_newpid(ttype, event, handle);;
+	return sched_switch_handle_newpid(ttype, event, handle);
 }
 
 vtl_always_inline int
@@ -431,7 +431,7 @@ TraceAnalyzer::generic_sched_switch_oldpid(const TraceEvent &event) const
 		return INT_MAX;
 	if (!sched_switch_parse(ttype, event, handle))
 		return INT_MAX;
-	return sched_switch_handle_oldpid(ttype, event, handle);;
+	return sched_switch_handle_oldpid(ttype, event, handle);
 }
 
 vtl_always_inline taskstate_t
