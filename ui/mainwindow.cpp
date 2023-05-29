@@ -1809,7 +1809,7 @@ void MainWindow::createActions()
 	verticalZoomAction->setIcon(QIcon(RESSRC_GPH_VERTICAL_ZOOM));
 	verticalZoomAction->setToolTip(tr(VERTICAL_ZOOM_TOOLTIP));
 	verticalZoomAction->setCheckable(true);
-	tsconnect(verticalZoomAction, triggered(), this, verticalZoom());;
+	tsconnect(verticalZoomAction, triggered(), this, verticalZoom());
 
 	showStatsAction = new QAction(tr("Sh&ow stats..."), this);
 	showStatsAction->setIcon(QIcon(RESSRC_GPH_GETSTATS));
