@@ -2689,6 +2689,22 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	} else if (selected == CSV_FILTER) {
 		override_fmt = TraceAnalyzer::EXPORT_CSV;
 		TShark::checkSuffix(&fileName, CSV_SUFFIX);
+	} else {
+		/*
+		 * I believe that this should never happen but let's handle it
+		 * anyway.
+		 */
+		switch (format) {
+		case TraceAnalyzer::EXPORT_ASCII:
+			TShark::checkSuffix(&fileName, TXT_SUFFIX);
+			break;
+		case TraceAnalyzer::EXPORT_CSV:
+			TShark::checkSuffix(&fileName, CSV_SUFFIX);
+			break;
+		default:
+			override_fmt = TraceAnalyzer::EXPORT_CSV;
+			TShark::checkSuffix(&fileName, CSV_SUFFIX);
+		}
 	}
 
 	if (!analyzer->exportLatencies(override_fmt, type,
