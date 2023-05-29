@@ -242,6 +242,25 @@ const QString MainWindow::RUNNING_NAME = tr("is runnable");
 const QString MainWindow::PREEMPTED_NAME = tr("was preempted");
 const QString MainWindow::UNINT_NAME = tr("uninterruptible");
 
+const QString MainWindow::F_SEP = QString(";;");
+
+const QString MainWindow::PNG_SUFFIX = QString(".png");
+const QString MainWindow::BMP_SUFFIX = QString(".bmp");
+const QString MainWindow::JPG_SUFFIX = QString(".jpg");
+const QString MainWindow::PDF_SUFFIX = QString(".pdf");
+const QString MainWindow::CSV_SUFFIX = QString(".csv");
+const QString MainWindow::ASC_SUFFIX = QString(".asc");
+const QString MainWindow::TXT_SUFFIX = QString(".txt");
+
+const QString MainWindow::PNG_FILTER = QString("PNG (*.png)");;
+const QString MainWindow::BMP_FILTER = QString("BMP (*.bmp)");
+const QString MainWindow::JPG_FILTER = QString ("JPEG (*.jpg)");
+const QString MainWindow::PDF_FILTER = QString("PDF (*.pdf)");
+const QString MainWindow::CSV_FILTER = QString("CSV (*.csv)");
+const QString MainWindow::ASC_FILTER = QString("ASCII Text (*.asc)");
+const QString MainWindow::TXT_FILTER = QString("ASCII Text (*.txt)");
+const QString MainWindow::ASCTXT_FILTER = QString("ASCII Text (*.asc *.txt)");
+
 const double MainWindow::RUNNING_SIZE = 8;
 const double MainWindow::PREEMPTED_SIZE = 8;
 const double MainWindow::UNINT_SIZE = 12;
@@ -449,7 +468,7 @@ void MainWindow::openTrace()
 	QString caption = tr("Open a trace file");
 
 	name = QFileDialog::getOpenFileName(this, caption, QString(),
-					    tr("ASCII (*.asc *.txt)"), nullptr,
+					    ASCTXT_FILTER, nullptr,
 					    foptions);
 	if (!name.isEmpty()) {
 		openFile(name);
@@ -1211,15 +1230,6 @@ void MainWindow::saveScreenshot()
 {
 	QStringList fileNameList;
 	QString fileName;
-	QString png_suffix = QString(".png");
-	QString png_filter = QString("PNG (*.png)");
-	QString bmp_suffix = QString(".bmp");
-	QString bmp_filter = QString("BMP (*.bmp)");
-	QString jpg_suffix = QString(".jpg");
-	QString jpg_filter = QString ("JPEG (*.jpg)");
-	QString pdf_suffix = QString(".pdf");
-	QString pdf_filter = QString("PDF (*.pdf)");
-	QString fsep = QString(";;");
 	QString pdfCreator = QString("traceshark ");
 	QString pdfTitle;
 	QString diagcapt;
@@ -1244,8 +1254,8 @@ void MainWindow::saveScreenshot()
 	}
 
 	pdfTitle += pdfCreator;
-	filter = png_filter + fsep + bmp_filter + fsep + jpg_filter + fsep +
-		pdf_filter;
+	filter = PNG_FILTER + F_SEP + BMP_FILTER + F_SEP + JPG_FILTER + F_SEP +
+		PDF_FILTER;
 
 	diagcapt = tr("Save screenshot to image");
 	fileName = QFileDialog::getSaveFileName(this, diagcapt, QString(),
@@ -1254,17 +1264,17 @@ void MainWindow::saveScreenshot()
 	if (fileName.isEmpty())
 		return;
 
-	if (selected == png_filter) {
-		TShark::checkSuffix(&fileName, png_suffix);
+	if (selected == PNG_FILTER) {
+		TShark::checkSuffix(&fileName, PNG_SUFFIX);
 		tracePlot->savePng(fileName);
-	} else if (selected == bmp_filter) {
-		TShark::checkSuffix(&fileName, bmp_suffix);
+	} else if (selected == BMP_FILTER) {
+		TShark::checkSuffix(&fileName, BMP_SUFFIX);
 		tracePlot->saveBmp(fileName);
-	} else if (selected == jpg_filter) {
-		TShark::checkSuffix(&fileName, jpg_suffix);
+	} else if (selected == JPG_FILTER) {
+		TShark::checkSuffix(&fileName, JPG_SUFFIX);
 		tracePlot->saveJpg(fileName);
-	} else if (selected == pdf_filter) {
-		TShark::checkSuffix(&fileName, pdf_suffix);
+	} else if (selected == PDF_FILTER) {
+		TShark::checkSuffix(&fileName, PDF_SUFFIX);
 		tracePlot->savePdf(fileName, 0, 0,  QCP::epAllowCosmetic,
 				   pdfCreator, pdfTitle);
 	} else {
@@ -1272,7 +1282,7 @@ void MainWindow::saveScreenshot()
 		 * I believe that this should never happen but if it does,
 		 * then we use PNG as default.
 		 */
-		TShark::checkSuffix(&fileName, png_suffix);
+		TShark::checkSuffix(&fileName, PNG_SUFFIX);
 		tracePlot->savePng(fileName);
 	}
 }
@@ -2583,12 +2593,12 @@ void MainWindow::exportEvents(TraceAnalyzer::exporttype_t export_type)
 	}
 
 	fileName = QFileDialog::getSaveFileName(this, caption, QString(),
-						tr("ASCII Text (*.asc *.txt)"),
-						nullptr, foptions);
+						ASCTXT_FILTER, nullptr,
+						foptions);
 	if (fileName.isEmpty())
 		return;
 
-	TShark::checkSuffix(&fileName, QString(".asc"), QString(".txt"));
+	TShark::checkSuffix(&fileName, ASC_SUFFIX, TXT_SUFFIX);
 
 	if (!analyzer->exportTraceFile(fileName.toLocal8Bit().data(),
 				       &ts_errno, export_type)) {
@@ -2625,9 +2635,6 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	QString caption;
 	QString fileName;
 	int ts_errno;
-	QString ascfilter = tr("ASCII Text (*.txt)");
-	QString csvfilter = tr("CSV (*.csv)");
-	QString fsep = QString(";;");
 	QString selected;
 	QString filter;
 	TraceAnalyzer::exportformat_t override_fmt = format;
@@ -2642,10 +2649,10 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	 */
 	switch (format) {
 	case TraceAnalyzer::EXPORT_ASCII:
-		filter = ascfilter + fsep + csvfilter;
+		filter = TXT_FILTER + F_SEP + CSV_FILTER;
 		break;
 	case TraceAnalyzer::EXPORT_CSV:
-		filter = csvfilter + fsep + ascfilter;
+		filter = CSV_FILTER + F_SEP + TXT_FILTER;
 		break;
 	default:
 		vtl::warn(TS_ERROR_INTERNAL, "Unknown file format");
@@ -2676,12 +2683,12 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	 * QFileDialog::getSaveFileName(). This will override the originally
 	 * selected format in the LatencyWidget widget.
 	 */
-	if (selected == ascfilter) {
+	if (selected == TXT_FILTER) {
 		override_fmt = TraceAnalyzer::EXPORT_ASCII;
-		TShark::checkSuffix(&fileName, QString(".txt"));
-	} else if (selected == csvfilter) {
+		TShark::checkSuffix(&fileName, TXT_SUFFIX);
+	} else if (selected == CSV_FILTER) {
 		override_fmt = TraceAnalyzer::EXPORT_CSV;
-		TShark::checkSuffix(&fileName, QString(".csv"));
+		TShark::checkSuffix(&fileName, CSV_SUFFIX);
 	}
 
 	if (!analyzer->exportLatencies(override_fmt, type,
@@ -3280,20 +3287,15 @@ void MainWindow::exportStats_(bool csv, bool limited)
 {
 	QString name;
 	QString caption = tr("Export statistics");
-	QString csv_filter = QString("CSV (*.csv)");
-	QString csv_suffix = QString(".csv");
-	QString asc_filter = QString("ASCII (*.txt)");
-	QString asc_suffix = QString(".txt");
-	QString fsep = QString(";;");
 	QString filter;
 	int ts_errno = 0;
 	QString selected;
 	bool override_csv = csv;
 
 	if (csv)
-		filter = csv_filter + fsep + asc_filter;
+		filter = CSV_FILTER + F_SEP + TXT_FILTER;
 	else
-		filter = asc_filter + fsep + csv_filter;
+		filter = TXT_FILTER + F_SEP + CSV_FILTER;
 
 	name = QFileDialog::getSaveFileName(this, caption, QString(),
 					    filter, &selected, foptions);
@@ -3301,17 +3303,17 @@ void MainWindow::exportStats_(bool csv, bool limited)
 	if (name.isEmpty())
 		return;
 
-	if (selected == csv_filter) {
+	if (selected == CSV_FILTER) {
 		override_csv = true;
-		TShark::checkSuffix(&name, csv_suffix);
-	} else if (selected == asc_filter) {
+		TShark::checkSuffix(&name, CSV_SUFFIX);
+	} else if (selected == TXT_FILTER) {
 		override_csv = false;
-		TShark::checkSuffix(&name, asc_suffix);
+		TShark::checkSuffix(&name, TXT_SUFFIX);
 	} else {
 		if (csv)
-			TShark::checkSuffix(&name, QString(".csv"));
+			TShark::checkSuffix(&name, CSV_SUFFIX);
 		else
-			TShark::checkSuffix(&name, QString(".asc"));
+			TShark::checkSuffix(&name, TXT_SUFFIX);
 	}
 
 	if (limited)

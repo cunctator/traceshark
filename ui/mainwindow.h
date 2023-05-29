@@ -435,6 +435,25 @@ private:
 	static const QString PREEMPTED_NAME;
 	static const QString UNINT_NAME;
 
+	static const QString F_SEP;
+
+	static const QString PNG_SUFFIX;
+	static const QString BMP_SUFFIX;
+	static const QString JPG_SUFFIX;
+	static const QString PDF_SUFFIX;
+	static const QString CSV_SUFFIX;
+	static const QString ASC_SUFFIX;
+	static const QString TXT_SUFFIX;
+
+	static const QString PNG_FILTER;
+	static const QString BMP_FILTER;
+	static const QString JPG_FILTER;
+	static const QString PDF_FILTER;
+	static const QString CSV_FILTER;
+	static const QString ASC_FILTER;
+	static const QString TXT_FILTER;
+	static const QString ASCTXT_FILTER;
+
 	static const double RUNNING_SIZE;
 	static const double PREEMPTED_SIZE;
 	static const double UNINT_SIZE;
