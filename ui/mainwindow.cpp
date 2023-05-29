@@ -1264,7 +1264,22 @@ void MainWindow::saveScreenshot()
 	if (fileName.isEmpty())
 		return;
 
-	if (selected == PNG_FILTER) {
+	/*
+	 * If the user has taken the trouble to type in a suffix that tells us
+	 * what the expected format is, then we will use that, in spite of
+	 * everything else. Otherwiise, we will go with the format selected by
+	 * the QFileDialog::getSaveFileName() dialog.
+	 */
+	if (fileName.endsWith(PNG_SUFFIX))
+		tracePlot->savePng(fileName);
+	else if (fileName.endsWith(BMP_SUFFIX))
+		tracePlot->saveBmp(fileName);
+	else if (fileName.endsWith(JPG_SUFFIX))
+		tracePlot->saveJpg(fileName);
+	else if (fileName.endsWith(PDF_FILTER)) {
+		tracePlot->savePdf(fileName, 0, 0,  QCP::epAllowCosmetic,
+				   pdfCreator, pdfTitle);
+	} else if (selected == PNG_FILTER) {
 		TShark::checkSuffix(&fileName, PNG_SUFFIX);
 		tracePlot->savePng(fileName);
 	} else if (selected == BMP_FILTER) {
@@ -2682,8 +2697,15 @@ void MainWindow::exportLatencies(TraceAnalyzer::exportformat_t format,
 	 * another format in the dialog provided by
 	 * QFileDialog::getSaveFileName(). This will override the originally
 	 * selected format in the LatencyWidget widget.
+	 *
+	 * However, first we will check if the user has taken the trouble a
+	 * suffix. In that case we will follow that.
 	 */
-	if (selected == TXT_FILTER) {
+	if (fileName.endsWith(TXT_SUFFIX) || fileName.endsWith(ASC_SUFFIX))
+		override_fmt = TraceAnalyzer::EXPORT_ASCII;
+	else if (fileName.endsWith(CSV_SUFFIX))
+		override_fmt = TraceAnalyzer::EXPORT_CSV;
+	else if (selected == TXT_FILTER) {
 		override_fmt = TraceAnalyzer::EXPORT_ASCII;
 		TShark::checkSuffix(&fileName, TXT_SUFFIX);
 	} else if (selected == CSV_FILTER) {
@@ -3319,7 +3341,15 @@ void MainWindow::exportStats_(bool csv, bool limited)
 	if (name.isEmpty())
 		return;
 
-	if (selected == CSV_FILTER) {
+	/*
+	 * First check if the user has typed in a suffix, then check what
+	 * format has been selected by the combo box in the dialog.
+	 */
+	if (name.endsWith(ASC_SUFFIX) || name.endsWith(TXT_SUFFIX))
+		override_csv = false;
+	else if (name.endsWith(CSV_SUFFIX))
+		override_csv = true;
+	else if (selected == CSV_FILTER) {
 		override_csv = true;
 		TShark::checkSuffix(&name, CSV_SUFFIX);
 	} else if (selected == TXT_FILTER) {
