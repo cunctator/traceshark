@@ -64,7 +64,7 @@ protected:
 	vtl::Time &getRelevantTime(Task *task);
 	const vtl::Time &getRelevantTimeConst(const Task *task) const;
 	unsigned &getRelevantPct(Task *task);
-	const unsigned &getRelevantPctConst(const Task *task) const;
+	unsigned getRelevantPctConst(const Task *task) const;
 	vtl::Time getDeltaTime() const;
 	bool checkZeroTime() const;
 	void sortTaskList();

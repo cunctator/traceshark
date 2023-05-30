@@ -76,7 +76,7 @@ unsigned &StatsLimitedModel::getRelevantPct(Task *task)
 	return task->cursorPct;
 }
 
-const unsigned &StatsLimitedModel::getRelevantPctConst(const Task *task) const
+unsigned StatsLimitedModel::getRelevantPctConst(const Task *task) const
 {
 	return task->cursorPct;
 }

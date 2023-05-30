@@ -131,7 +131,7 @@ void StatsModel::rowToPct(QString &str, int row, bool &ok) const
 
 	ok = true;
 	const Task *task = taskList->at(row);
-	unsigned pct = getRelevantPctConst(task);
+	const unsigned pct = getRelevantPctConst(task);
 
 	/* We assume no system has more than 9999 CPUs */
 	if (pct > 99990000) {
@@ -376,7 +376,7 @@ unsigned &StatsModel::getRelevantPct(Task *task)
 	return task->accPct;
 }
 
-const unsigned &StatsModel::getRelevantPctConst(const Task *task) const
+unsigned StatsModel::getRelevantPctConst(const Task *task) const
 {
 	return task->accPct;
 }
