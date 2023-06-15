@@ -117,6 +117,8 @@ public:
 #define WAKE_PRIO_PFIX "prio="
 #define WAKE_TCPU_PFIX "target_cpu="
 
+#define WAKE_CPU_PFIX "CPU:"
+
 #define EXIT_COMM_PFIX "comm="
 #define EXIT_PID_PFIX  "pid="
 #define EXIT_PRIO_PFIX "prio="
@@ -358,6 +360,27 @@ static vtl_always_inline bool is_param_inside_braces(const TString *str)
 	int s = str->len;
 	bool r =  s > 2 && str->ptr[0] == '[' && str->ptr[s - 1] == ']';
 	return r;
+}
+
+/*
+ * This function checks whethe the string has the format "[<parameter>]", or
+ * "[<parameter>]<CANT". This latter case can happen when we have wakeup events
+ * with an old libtraceevent, and we get a wakeup event with an error message.:
+ *
+ * <PNAME>:<PID> [<PRIO>]<CANT FIND FIELD success> CPU:<CPU>
+ */
+static vtl_always_inline bool is_param_inside_braces_or_cant(const TString *str)
+{
+	int s = str->len;
+
+	/* Check that we */
+	if (!(s > 2 && str->ptr[0] == '['))
+		return false;
+
+	if (str->ptr[s - 1] == ']')
+		return true;
+
+	return !suffixcmp(str->ptr, "]<CANT");
 }
 
 static vtl_always_inline

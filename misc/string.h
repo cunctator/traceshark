@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -57,5 +57,23 @@
 
 #define prefixcmp(STR, PREFIX) \
 	strncmp(STR, PREFIX, strlen(PREFIX))
+
+static vtl_always_inline int suffixcmp_(const char *str, const char *suffix,
+					const size_t sulen)
+{
+	size_t len = strlen(str);
+
+	if (len < sulen)
+		return 1;
+
+	size_t difflen = len - sulen;
+
+	const char *c = str + difflen;
+
+	return strncmp(c, suffix, sulen);
+}
+
+#define suffixcmp(STR, SUFFIX)			\
+	suffixcmp_(STR, SUFFIX, strlen(SUFFIX))
 
 #endif /* _MISC_STRING_H */

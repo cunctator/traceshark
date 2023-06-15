@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -345,18 +345,22 @@ perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					const sched_switch_handle &handle);
 
 /*
- * These functions for sched_wakeup assumes that the format is either the "old"
- * or "new", that
- * is:
- * Xorg   829 [003]  2726.130986: sched:sched_wakeup: comm=spotify pid=9288 \
- * prio=120 success=1 target_cpu=000
+ * These functions for sched_wakeup assumes that the arguments is in any of the
+ * following formats:
  *
- * ..or:
- * Xorg   829 [003]  2726.130986: sched:sched_wakeup: comm=spotify pid=9288 \
- * prio=120 target_cpu=000
+ * With a perf that uses libtraceevent, we would get something like this:
+ *
+ * <PNAME>:<PID> [<PRIO>] CPU:<CPU>
+ * <PNAME>:<PID> [<PRIO>] success=1 CPU:<CPU>
+ * <PNAME>:<PID> [<PRIO>]<CANT FIND FIELD success> CPU:<CPU>
+ * (The above happens when a newer perf is used with an older libtraceeevent.)
+ *
+ * These are the old formats without libtraceevent:
+ * comm=<PNAME> pid=<PID> prio=<PRIO> target_cpu=<CPU>
+ * comm=<PNAME> pid=<PID> prio=<PRIO> success=1 target_cpu=<CPU>
  */
 
-#define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 4)
+#define perf_sched_wakeup_args_ok(EVENT) (EVENT.argc >= 3)
 
 /* The last argument is target_cpu, regardless of old or new */
 #define perf_sched_wakeup_cpu(EVENT) (uint_after_pfix(EVENT, EVENT.argc - 1, \
@@ -365,96 +369,159 @@ perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 static vtl_always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 {
 	const TString *ss = event.argv[event.argc - 2];
-	int i;
 
 	if (prefixcmp(ss->ptr, WAKE_SUCC_PFIX) == 0)
 		return int_after_char(event, event.argc - 2, '=');
 
-	for (i = 0; i < event.argc; i++) {
-		if (prefixcmp(event.argv[i]->ptr, WAKE_SUCC_PFIX) == 0)
-			return int_after_char(event, i, '=');
-	}
-	/* Assume that wakeup is successful if no success field is found */
+	/*
+	 * Here we could search through all arguments in case we woudl find the
+	 * success field. Assume that wakeup is successful if no success field
+	 * is found. We don't bother doing it because I am not aware of any
+	 * kernel with a different format for the success field, or any kernel
+	 * that would generate unsuccessful wakeup events.
+	 */
 	return true;
 }
 
+/*
+ * Fix me, this doesn't work for negative prio, or if we have the format
+ * <PNAME>:<PID> [<PRIO>]<CANT FIND FIELD success> CPU:<CPU>. We would need
+ * to implement a param_inside_braces_or_cant() that can handle negative
+ * numbers to solve this.
+ *
+ * Fixing this has low priority because:
+ * - traceshark is curently not using this function. We do not consume the prio
+ *   value anywhere.
+ * - So far, I have only seen positive prio values
+ * - This "[<PRIO>]<CANT" thing only happens when an old libtraceevent is used
+ *   with a newer perf.
+ *
+ */
 static vtl_always_inline unsigned int
 perf_sched_wakeup_prio(const TraceEvent &event)
 {
-	unsigned int newidx = event.argc - 2;
-	/* Check if we are on the new format */
-	if (!prefixcmp(event.argv[newidx]->ptr, WAKE_PRIO_PFIX)) {
-		return uint_after_char(event, newidx, '=');
-	}
+	const int lastidx = event.argc - 1;
+	int idx = 0;
+	int i;
 
-	/* Assume that this is the old format */
-	return uint_after_pfix(event, event.argc - 3, WAKE_PRIO_PFIX);
+	if (!prefixcmp(event.argv[lastidx]->ptr, WAKE_CPU_PFIX)) {
+		/* libtraceevent output format: newer perf or Fedora */
+		const int maxi = event.argc - 3;
+		for (i = 0; i <= maxi; i++) {
+			idx = event.argc - 2 - i;
+			const TString *priostr = event.argv[idx];
+			if (is_param_inside_braces(priostr))
+				return param_inside_braces(event, idx);
+		}
+		return ABSURD_INT;
+	} else if (!prefixcmp(event.argv[lastidx]->ptr, WAKE_TCPU_PFIX)) {
+		/* older perf */
+		const int maxi = event.argc - 2;
+		for (i = 0; i <= maxi; i++) {
+			idx = event.argc - 2 - i;
+			const TString *priostr = event.argv[idx];
+			if (!prefixcmp(priostr->ptr, WAKE_PRIO_PFIX))
+				return uint_after_char(event, idx, '=');
+		}
+		return ABSURD_INT;
+	} else {
+		/* Hmmm, this would be a completely unknown format */
+		return ABSURD_INT;
+	}
 }
 
 static vtl_always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 {
-	int newidx = event.argc - 3;
-	int oldidx;
+	const int lastidx = event.argc - 1;
+	int idx = 0;
 
-	/* Check if we are on the new format */
-	if (!prefixcmp(event.argv[newidx]->ptr, WAKE_PID_PFIX)) {
-		return int_after_char(event, newidx, '=');
+	if (!prefixcmp(event.argv[lastidx]->ptr, WAKE_CPU_PFIX)) {
+		/* libtraceevent output format: newer perf or Fedora */
+		for (idx = event.argc - 2; idx >= 1 ; idx--) {
+			const TString *priostr = event.argv[idx];
+			if (is_param_inside_braces_or_cant(priostr)) {
+				idx--;
+				break;
+			}
+		}
+		return int_after_char(event, idx, ':');
+	} else if (!prefixcmp(event.argv[lastidx]->ptr, WAKE_TCPU_PFIX)) {
+		/* older perf */
+		for (idx = event.argc - 3; idx >= 0; idx--) {
+			const TString *pidstr = event.argv[idx];
+			if (!prefixcmp(pidstr->ptr, WAKE_PID_PFIX))
+				return int_after_char(event, idx, '=');
+		}
+
+		/*
+		 * I would not expect this to be succesful, unless we encounter
+		 * a previously unknown format. However, try with this string
+		 * too. We know that event.argc >= 3
+		 */
+		idx = event.argc - 2;
+		const TString *pidstr = event.argv[idx];
+		if (!prefixcmp(pidstr->ptr, WAKE_PID_PFIX))
+			return int_after_char(event, idx, '=');
+		return ABSURD_INT;
+	} else {
+		/* Hmmm, this would be a completely unknown format */
+		return ABSURD_INT;
 	}
-
-	const TString *priostr = event.argv[event.argc - 3];
-	if (is_param_inside_braces(priostr)) {
-		/* This must be distro format */
-	        int name_pid_idx =event.argc - 4;
-		return int_after_char(event, name_pid_idx, ':');
-	}
-
-	/* Assume that this is the old format */
-	oldidx = event.argc - 4;
-	return int_after_char(event, oldidx, '=');
 }
 
 static vtl_always_inline const char *
 perf_sched_wakeup_name_strdup_(const TraceEvent &event, StringPool<> *pool)
 {
-	int i;
+	const int lastidx = event.argc - 1;
 	int beginidx;
 	int endidx;
-	int len = 0;
+	const TString *retstr;
 	char *c;
 	const TString *first;
+	const TString *last;
 	bool ok;
 	char sbuf[TASKNAME_MAXLEN + 1];
+	int len = 0;
 	TString ts;
-	const TString *retstr;
 
 	c = &sbuf[0];
 	ts.ptr = c;
 
-	/* Find the index of the pid=... that is followed by prio= */
-	for (i = 1; i <= event.argc - 2; i++) {
-		char *c1 = event.argv[i + 0]->ptr;
-		char *c2 = event.argv[i + 1]->ptr;
-		if (!prefixcmp(c1, WAKE_PID_PFIX) &&
-		    !prefixcmp(c2, WAKE_PRIO_PFIX))
-			break;
-	}
-	if (!(i <= event.argc - 2)) {
+	if (!prefixcmp(event.argv[lastidx]->ptr, WAKE_CPU_PFIX)) {
 		beginidx = 0;
-		endidx = event.argc - 5;
+
+		for (endidx = event.argc - 2; endidx > 0; endidx--) {
+			const TString *priostr = event.argv[endidx];
+			if (is_param_inside_braces_or_cant(priostr))
+				break;
+		}
+		if (endidx <= 0)
+			return NullStr;
+		endidx = endidx - 2;
+
 		merge_args_into_cstring(event, beginidx, endidx, c, len,
 					TASKNAME_MAXLEN, ok);
+
 		if (!ok)
 			return NullStr;
 
-		first = event.argv[0];
-		copy_tstring_before_char_(first, ':', c, len, TASKNAME_MAXLEN,
+		last = event.argv[endidx + 1];
+		copy_tstring_before_char_(last, ':', c, len, TASKNAME_MAXLEN,
 					  ok);
 		if (!ok)
 			return NullStr;
-	} else {
 
+	} else if (!prefixcmp(event.argv[lastidx]->ptr, WAKE_TCPU_PFIX)) {
 		beginidx = 1;
-		endidx = i - 1;
+
+		for (endidx = event.argc - 2; endidx > 0; endidx--) {
+			const TString *pidstr = event.argv[endidx];
+			if (!prefixcmp(pidstr->ptr, WAKE_PID_PFIX))
+				break;
+		}
+		if (endidx <= 0)
+			return NullStr;
+		endidx--;
 
 		first = event.argv[0];
 		copy_tstring_after_char_(first, '=', c, len, TASKNAME_MAXLEN,
@@ -467,7 +534,8 @@ perf_sched_wakeup_name_strdup_(const TraceEvent &event, StringPool<> *pool)
 						      ok);
 		if (!ok)
 			return NullStr;
-	}
+	} else
+		return NullStr;
 
 	ts.len = len;
 	retstr = pool->allocString(&ts, 0);
