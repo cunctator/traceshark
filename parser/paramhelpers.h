@@ -189,6 +189,7 @@ static vtl_always_inline void copy_tstring_before_char_(const TString *str,
 	int i;
 	int flen;
 	char *src;
+	ok = true;
 	/* Find the char 'delim' in the string */
 	for (i = str->len - 1; i >= 0; i--) {
 		if (str->ptr[i] == delim)
