@@ -278,8 +278,15 @@ void TraceAnalyzer::processSchedAddTail()
 		int s = task.schedTimev.size();
 		iter++;
 		task.generateDisplayName();
-		if (s <= 0)
+		if (s <= 0) {
+			if (task.isGhostAlias && !task.oneToManyError) {
+				const Task *rtask =
+					findTask(task.isGhostAliasForPID);
+				if (rtask != nullptr)
+					task.generateGhostName(rtask);
+			}
 			continue;
+		}
 		/*
 		 * Ghost processes aren't supposed to have any scheduling
 		 * events. If we have then, then we interpret it to mean that

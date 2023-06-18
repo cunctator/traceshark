@@ -93,15 +93,16 @@ void Task::addName(const char *name)
 /*
  * If the name has more than two names, we add ...
  */
-void Task::generateDisplayName()
+void Task::generateNameFromTask(const Task *task)
 {
-	if (taskName != nullptr) {
-		appendName(taskName, true);
-		if (taskName->prev != nullptr) {
-			appendName(taskName->prev, false);
-			if (taskName->prev->prev != nullptr) {
-				if (taskName->prev->prev->forkname)
-					appendName(taskName->prev->prev, false);
+	if (task->taskName != nullptr) {
+		appendName(task->taskName, true);
+		if (task->taskName->prev != nullptr) {
+			appendName(task->taskName->prev, false);
+			if (task->taskName->prev->prev != nullptr) {
+				if (task->taskName->prev->prev->forkname)
+					appendName(task->taskName->prev->prev,
+						   false);
 				else
 					displayName->append("...");
 			}

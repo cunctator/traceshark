@@ -98,7 +98,9 @@ public:
 	~Task();
 	void addName(const char *name);
 	vtl_always_inline void checkName(const char *name, bool forkname = false);
-	void generateDisplayName();
+	vtl_always_inline void generateDisplayName();
+	vtl_always_inline void generateGhostName(const Task *realtask);
+	void generateNameFromTask(const Task *rtask);
 	QString getLastName() const;
 
 	TaskName     *taskName;
@@ -176,6 +178,16 @@ vtl_always_inline void Task::appendName(const TaskName *name, bool isnewest)
 		displayName->append("}");
 	if (normal)
 		displayName->append(")");
+}
+
+vtl_always_inline void Task::generateGhostName(const Task *realtask)
+{
+	generateNameFromTask(realtask);
+}
+
+vtl_always_inline void Task::generateDisplayName()
+{
+	generateNameFromTask(this);
 }
 
 #endif /* TASK_H */
