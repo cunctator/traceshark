@@ -69,7 +69,7 @@ const char *ts_strerror(int ts_errno)
 	return errorstrings[ts_errno];
 }
 
-static const char parsingerr[] = "parsing error";
+static const char parsingerr[] = "{parsing_error}";
 
 /*
  * All places were we wish to have a null string that doesn't crash the program
