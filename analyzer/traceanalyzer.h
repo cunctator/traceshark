@@ -671,9 +671,13 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	 */
 	if (event.pid != 0) {
 		task = &taskMap[event.pid].getTask();
-		task->checkName(event.taskName->ptr);
 		if (task->isNew) {
-			task->isNew = false;
+			/*
+			 * We do not set task->isNew = false here because
+			 * we do not update the name. We do not update the
+			 * name because the event name is garbled with some
+			 * kernels.
+			 */
 			task->pid = event.pid;
 			task->lastRunnable_status = RUN_STATUS_INVALID;
 		}
