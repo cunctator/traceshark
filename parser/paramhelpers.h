@@ -363,7 +363,7 @@ static vtl_always_inline bool is_param_inside_braces(const TString *str)
 }
 
 /*
- * This function checks whethe the string has the format "[<parameter>]", or
+ * This function checks if the string has the format "[<parameter>]", or
  * "[<parameter>]<CANT". This latter case can happen when we have wakeup events
  * with an old libtraceevent, and we get a wakeup event with an error message.:
  *

@@ -345,7 +345,7 @@ perf_sched_switch_handle_oldname_strdup(const TraceEvent &event,
 					const sched_switch_handle &handle);
 
 /*
- * These functions for sched_wakeup assumes that the arguments is in any of the
+ * These functions for sched_wakeup assume that the arguments is in one of the
  * following formats:
  *
  * With a perf that uses libtraceevent, we would get something like this:
@@ -374,7 +374,7 @@ static vtl_always_inline bool perf_sched_wakeup_success(const TraceEvent &event)
 		return int_after_char(event, event.argc - 2, '=');
 
 	/*
-	 * Here we could search through all arguments in case we woudl find the
+	 * Here we could search through all arguments in case we would find the
 	 * success field. Assume that wakeup is successful if no success field
 	 * is found. We don't bother doing it because I am not aware of any
 	 * kernel with a different format for the success field, or any kernel
@@ -456,7 +456,9 @@ static vtl_always_inline int perf_sched_wakeup_pid(const TraceEvent &event)
 		/*
 		 * I would not expect this to be succesful, unless we encounter
 		 * a previously unknown format. However, try with this string
-		 * too. We know that event.argc >= 3
+		 * too. We know that event.argc >= 3 becaus presumably,
+		 * the caller has checked this with
+		 * perf_sched_wakeup_args_ok()
 		 */
 		idx = event.argc - 2;
 		const TString *pidstr = event.argv[idx];
