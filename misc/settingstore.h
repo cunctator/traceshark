@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2019-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019-2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -101,9 +101,6 @@ private:
 	void setKey(enum Setting::Index idx, const QString &key);
 	void addDependency(enum Setting::Index idx,
 			   const Setting::Dependency &d);
-	int readKeyValuePair(QTextStream &stream,
-			     QString &key,
-			     QString &value);
 	int handleOlderVersion(int oldver, int newver);
 	static const QString &boolToQString(bool b);
 	static bool boolFromValue(bool *ok, const QString &value);

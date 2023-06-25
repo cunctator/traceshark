@@ -134,7 +134,7 @@ public:
 	int open(const QString &fileName);
 	bool isOpen() const;
 	void close(int *ts_errno);
-	void processTrace();
+	void processTrace(const QMap<int, QColor> &cmap);
 	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
 						 int pid,
 						 int *index) const;
@@ -215,7 +215,7 @@ private:
 	int binarySearch(const vtl::Time &time, int start, int end) const;
 	int binarySearchFiltered(const vtl::Time &time, int start, int end)
 		const;
-	void colorizeTasks();
+	void colorizeTasks(const QMap<int, QColor> &cmap);
 	event_t determineCPUEvent(bool &ok);
 	int findIndexBefore(const vtl::Time &time) const;
 	int findIndexAfter(const vtl::Time &time) const;

@@ -537,7 +537,7 @@ int SettingStore::loadSettings()
 	}
 	QTextStream stream(&file);
 	if (!stream.atEnd()) {
-		rval = readKeyValuePair(stream, key, value);
+		rval = TShark::readKeyValuePair(stream, key, value);
 		if (rval != 0)
 			return rval;
 		if (key != QString(TRACESHARK_VERSION_KEY))
@@ -551,7 +551,7 @@ int SettingStore::loadSettings()
 		return -TS_ERROR_EOF;
 	}
 	while (!stream.atEnd()) {
-		rval = readKeyValuePair(stream, key, value);
+		rval = TShark::readKeyValuePair(stream, key, value);
 		if (rval != 0)
 			return rval;
 		enum Setting::Index idx;
@@ -589,23 +589,6 @@ int SettingStore::loadSettings()
 	return rval;
 }
 
-int SettingStore::readKeyValuePair(QTextStream &stream,
-				   QString &key,
-				   QString &value)
-{
-	QString line;
-	QStringList lineList;
-
-	line = stream.readLine();
-	do {
-		lineList = line.split(' ', QString::SkipEmptyParts);
-	} while(lineList.size() == 0 && !stream.atEnd());
-	if (lineList.size() != 2)
-		return -TS_ERROR_FILEFORMAT;
-	key = lineList[0];
-	value = lineList[1];
-	return 0;
-}
 
 int SettingStore::handleOlderVersion(int oldver, int /*newver*/)
 {

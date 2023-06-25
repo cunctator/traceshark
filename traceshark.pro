@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 #
 #  Traceshark - a visualizer for visualizing ftrace and perf traces
-#  Copyright (C) 2014-2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2014-2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 # This file is dual licensed: you can use it either under the terms of
 # the GPL, or the BSD license, at your option.
@@ -483,6 +483,7 @@ HEADERS      +=  misc/setting.h
 HEADERS      +=  misc/settingstore.h
 HEADERS      +=  misc/string.h
 HEADERS      +=  misc/svgresources.h
+HEADERS      +=  misc/statefile.h
 HEADERS      +=  misc/traceshark.h
 HEADERS      +=  misc/translate.h
 HEADERS      +=  misc/tstring.h
@@ -574,6 +575,7 @@ SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
 SOURCES      +=  misc/setting.cpp
 SOURCES      +=  misc/settingstore.cpp
+SOURCES      +=  misc/statefile.cpp
 SOURCES      +=  misc/traceshark.cpp
 
 SOURCES      +=  misc/translate.cpp

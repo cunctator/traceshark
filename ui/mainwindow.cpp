@@ -86,6 +86,7 @@
 #include "misc/resources.h"
 #include "misc/setting.h"
 #include "misc/settingstore.h"
+#include "misc/statefile.h"
 #include "misc/traceshark.h"
 #include "threads/workqueue.h"
 #include "threads/workitem.h"
@@ -288,6 +289,8 @@ MainWindow::MainWindow():
 	filterActive(false), foptions(QFileDialog::DontUseNativeDialog |
 				      QFileDialog::DontUseSheet)
 {
+	stateFile = new StateFile();
+
 	createAboutBox();
 	createAboutQCustomPlot();
 	settingStore = new SettingStore();
@@ -436,6 +439,8 @@ MainWindow::~MainWindow()
 
 	for (i = 0; i < STATUS_NR; i++)
 		delete statusStrings[i];
+
+	delete stateFile;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -603,7 +608,7 @@ void MainWindow::resizeEvent(QResizeEvent */*event*/)
 
 void MainWindow::processTrace()
 {
-	analyzer->processTrace();
+	analyzer->processTrace(stateFile->getColorMap());
 	startTime = analyzer->getStartTime().toDouble();
 	endTime = analyzer->getEndTime().toDouble();
 }
@@ -1156,6 +1161,11 @@ void MainWindow::closeTrace()
 {
 	quint64 startt, mresett, clearptt, acloset, disablet;
 	int ts_errno = 0;
+
+	ts_errno = stateFile->saveState();
+	if (ts_errno != 0)
+		vtl::warn(ts_errno, "Failed to save state file");
+	stateFile->clear();
 
 	startt = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 	resetFilters();
@@ -2291,6 +2301,12 @@ int MainWindow::loadTraceFile(const QString &fileName)
 {
 	qint64 start, stop;
         int rval;
+
+	stateFile->setTraceFile(fileName);
+	rval = stateFile->loadState();
+
+	if (rval != 0)
+		vtl::warn(rval, "Failed to load state file");
 
 	printf("opening %s\n", fileName.toLocal8Bit().data());
 	
@@ -3726,6 +3742,7 @@ void MainWindow::colorTask(int pid)
 	if (!color.isValid())
 		return;
 
+	stateFile->setTaskColor(pid, color);
 	analyzer->setTaskColor(pid, color);
 
 	QPen pen = QPen();

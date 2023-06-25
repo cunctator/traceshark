@@ -60,6 +60,12 @@
 #include <QtCore>
 #include <cstdint>
 #include <cstdio>
+
+QT_BEGIN_NAMESPACE
+class QString;
+class QTextStream;
+QT_END_NAMESPACE
+
 #include "misc/tstring.h"
 #include "vtl/compiler.h"
 
@@ -211,6 +217,8 @@ namespace TShark {
 
 	void checkSuffix(QString *string, const QString &suffix,
 			 const QString &rsuffix);
+
+	int readKeyValuePair(QTextStream &stream, QString &key, QString &value);
 }
 
 #endif /* TRACESHARK_H */

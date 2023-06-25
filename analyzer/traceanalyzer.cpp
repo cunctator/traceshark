@@ -211,7 +211,7 @@ void TraceAnalyzer::resetProperties()
 	events = nullptr;
 }
 
-void TraceAnalyzer::processTrace()
+void TraceAnalyzer::processTrace(const QMap<int, QColor> &cmap)
 {
 	resetProperties();
 	/*
@@ -219,7 +219,7 @@ void TraceAnalyzer::processTrace()
 	 * we would have to wait for it
 	 */
 	threadProcess();
-	colorizeTasks();
+	colorizeTasks(cmap);
 }
 
 void TraceAnalyzer::threadProcess()
@@ -401,7 +401,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(const TraceEvent &/*event*/,
 	}
 }
 
-void TraceAnalyzer::colorizeTasks()
+void TraceAnalyzer::colorizeTasks(const QMap<int, QColor> &cmap)
 {
 	unsigned int cpu;
 	double nf;
@@ -488,6 +488,20 @@ retry:
 		iter++;
 		color = colorList.at(i % ncolor);
 		i++;
+	}
+
+	/*
+	 * Set those colors that have been defined by a user in previous
+	 * session.
+	 */
+	QMap<int, QColor>::const_iterator uiter;
+	for (uiter = cmap.begin(); uiter != cmap.cend(); uiter++) {
+		int pid = uiter.key();
+		iter = colorMap.find(pid);
+		if (iter != colorMap.end()) {
+			TColor &color = iter.value();
+			color = TColor::fromQColor(uiter.value());
+		}
 	}
 }
 

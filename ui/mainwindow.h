@@ -117,6 +117,7 @@ class QCPAbstractLegendItem;
 class RegexDialog;
 class RegexFilter;
 class SettingStore;
+class StateFile;
 class TaskToolBar;
 class TracePlot;
 class TraceEvent;
@@ -488,6 +489,7 @@ private:
 	QMessageBox *aboutBox;
 	QMessageBox *aboutQCPBox;
 	QFileDialog::Options foptions;
+	StateFile *stateFile;
 };
 
 #endif /* MAINWINDOW_H */

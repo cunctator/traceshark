@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2021, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,52 +50,48 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef TS_STATEFILE_H
+#define TS_STATEFILE_H
+
+#include <QMap>
 #include <QString>
-#include <QStringList>
-#include <QTextStream>
 
-#include "misc/errors.h"
-#include "misc/traceshark.h"
-#include "vtl/compiler.h"
+QT_BEGIN_NAMESPACE
+class QColor;
+QT_END_NAMESPACE
 
-namespace TShark {
+class StateFile {
+public:
+	StateFile();
+	~StateFile();
+	void setTraceFile(const QString &name);
+	void setTaskColor(int pid, const QColor &color);
+	bool getTaskColor(int pid, QColor *color) const;
+	int saveState();
+	int loadState();
+	void clear();
+	inline const QMap<int, QColor> &getColorMap() const;
+	inline const char *getStateFileName();
+private:
+	void checkStateFile();
+	int loadColorSection(QTextStream &stream);
+	static const int this_version;
+	QMap<int, QColor> colorMap;
+	QString traceFile;
+	QString stateFile;
+	const static QString SECTION_BEGIN;
+	const static QString SECTION_END;
+	const static QString SECTION_COLORS;
+	const static QString STATE_VERSION_KEY;
+};
 
-#undef TSHARK_LOGIC_ITEM_
-#define TSHARK_LOGIC_ITEM_(a) vtl_str(a)
-	const char * const logic_names[] = {
-		TSHARK_LOGIC_DEFS_,
-		nullptr
-	};
-#undef TSHARK_LOGIC_ITEM_
-
-	void checkSuffix(QString *string, const QString &suffix) {
-		if (!string->endsWith(suffix.toLower()) &&
-		    !string->endsWith(suffix.toUpper()))
-			string->append(suffix);
-	}
-
-	void checkSuffix(QString *string, const QString &suffix,
-			 const QString &rsuffix) {
-		if (!string->endsWith(suffix.toLower()) &&
-		    !string->endsWith(suffix.toUpper()) &&
-		    !string->endsWith(rsuffix.toLower()) &&
-		    !string->endsWith(rsuffix.toUpper()))
-			string->append(suffix);
-	}
-
-	int readKeyValuePair(QTextStream &stream, QString &key, QString &value)
-	{
-		QString line;
-		QStringList lineList;
-
-		line = stream.readLine();
-		do {
-			lineList = line.split(' ', QString::SkipEmptyParts);
-		} while(lineList.size() == 0 && !stream.atEnd());
-		if (lineList.size() != 2)
-			return -TS_ERROR_FILEFORMAT;
-		key = lineList[0];
-		value = lineList[1];
-		return 0;
-	}
+inline  const QMap<int, QColor> &StateFile::getColorMap() const {
+	return colorMap;
 }
+
+inline const char *StateFile::getStateFileName() {
+	checkStateFile();
+	return stateFile.toLocal8Bit().data();
+}
+
+#endif
