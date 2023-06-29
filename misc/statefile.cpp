@@ -238,7 +238,6 @@ int StateFile::loadState()
 	return 0;
 }
 
-
 int StateFile::loadColorSection(QTextStream &stream)
 {
 	QString key;
@@ -283,6 +282,23 @@ void StateFile::clear()
 	colorMap.clear();
 	traceFile.clear();
 	stateFile.clear();
+}
+
+ void StateFile::resetColors()
+{
+	colorMap.clear();
+	checkStateFile();
+
+	if (stateFile.isEmpty())
+		return;
+
+	QFile file(stateFile);
+
+	if (!file.exists())
+		return;
+
+	/* Ignore failure */
+	file.remove();
 }
 
 const QString StateFile::SECTION_BEGIN("BEGIN_SECTION");

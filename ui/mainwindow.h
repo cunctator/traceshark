@@ -216,8 +216,10 @@ private slots:
 	void addTaskGraphTriggered();
 	void addToLegendTriggered();
 	void colorTask(int pid);
+	void setGraphColor(int pid, const QColor &color);
 	void colorTasks(const QList<int> &pids);
 	void colorToolbarTaskTriggered();
+	void resetTaskColors();
 	void clearLegendTriggered();
 	void findSleepTriggered();
 	void findWakeupTriggered();
@@ -316,6 +318,7 @@ private:
 	void setTaskGraphClearActionEnabled(bool e);
 	void setAddToLegendActionEnabled(bool e);
 	void setEventActionsEnabled(bool e);
+	void setResetTaskColorEnabled(bool e);
 	void setEventsWidgetEvents();
 	void scrollTo(const vtl::Time &time);
 	void exportLatencies(TraceAnalyzer::exportformat_t format,
@@ -375,6 +378,7 @@ private:
 	QAction *timeFilterAction;
 	QAction *graphEnableAction;
 	QAction *resetFiltersAction;
+	QAction *resetTaskColorAction;
 	QAction *exportEventsAction;
 	QAction *exportCPUAction;
 	QAction *showStatsAction;

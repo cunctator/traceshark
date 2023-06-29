@@ -189,6 +189,7 @@ void TraceAnalyzer::close(int *ts_errno)
 	disableAllFilters();
 	migrations.clear();
 	colorMap.clear();
+	origColorMap.clear();
 	parser->close(ts_errno);
 	taskNamePool->clear();
 	schedLatencies.clear();
@@ -211,7 +212,7 @@ void TraceAnalyzer::resetProperties()
 	events = nullptr;
 }
 
-void TraceAnalyzer::processTrace(const QMap<int, QColor> &cmap)
+bool TraceAnalyzer::processTrace(const QMap<int, QColor> &cmap)
 {
 	resetProperties();
 	/*
@@ -219,7 +220,7 @@ void TraceAnalyzer::processTrace(const QMap<int, QColor> &cmap)
 	 * we would have to wait for it
 	 */
 	threadProcess();
-	colorizeTasks(cmap);
+	return colorizeTasks(cmap);
 }
 
 void TraceAnalyzer::threadProcess()
@@ -401,7 +402,7 @@ void TraceAnalyzer::handleWrongTaskOnCPU(const TraceEvent &/*event*/,
 	}
 }
 
-void TraceAnalyzer::colorizeTasks(const QMap<int, QColor> &cmap)
+bool TraceAnalyzer::colorizeTasks(const QMap<int, QColor> &cmap)
 {
 	unsigned int cpu;
 	double nf;
@@ -419,6 +420,7 @@ void TraceAnalyzer::colorizeTasks(const QMap<int, QColor> &cmap)
 	TColor gray;
 	TColor tmp;
 	long int rnd = 0;
+	bool usercolors = false;
 
 	srand48(290876);
 
@@ -500,9 +502,12 @@ retry:
 		iter = colorMap.find(pid);
 		if (iter != colorMap.end()) {
 			TColor &color = iter.value();
+			origColorMap[pid] = color;
 			color = TColor::fromQColor(uiter.value());
+			usercolors = true;
 		}
 	}
+	return usercolors;
 }
 
 
@@ -1809,4 +1814,63 @@ int TraceAnalyzer::writeLatency(char *wb, int *space, const Latency *lptr,
 TraceFile *TraceAnalyzer::getTraceFile()
 {
 	return parser->traceFile;
+}
+
+void TraceAnalyzer::setTaskColor(int pid, const QColor &color)
+{
+	TColor newColor = TColor::fromQColor(color);
+	DEFINE_COLORMAP_ITERATOR(iter) = colorMap.find(pid);
+
+	if (iter != colorMap.end()) {
+		TColor &current = iter.value();
+
+		DEFINE_COLORMAP_ITERATOR(oiter) = origColorMap.find(pid);
+		/*
+		 * We only save the current color to the origColorMap if it is
+		 * the original color, i.e. this task doesn't already have a
+		 * color in the origColorMap. The user may manually change the
+		 * color of a task several times and we are interested in
+		 * saving the original randomly chosen color, not merely the
+		 * previous color.
+		 */
+		if (oiter == origColorMap.end())
+			origColorMap[pid] = current;
+		current = newColor;
+	} else {
+		/*
+		 * We expect that when this function is used, all tasks already
+		 * have a color set by colorizeTasks(), so if we end up here,
+		 * then something is not right.
+		 */
+		oops_warnx();
+		colorMap[pid] = newColor;
+	}
+}
+
+void TraceAnalyzer::resetTaskColors()
+{
+	DEFINE_COLORMAP_ITERATOR(iter);
+
+	for (iter = origColorMap.begin(); iter != origColorMap.end(); iter++) {
+		int pid = iter.key();
+		TColor origColor = iter.value();
+		colorMap[pid] = origColor;
+	}
+	origColorMap.clear();
+}
+
+void TraceAnalyzer::getOrigTaskColors(QList<int> &pids,
+				      QList<QColor> &colors)
+{
+	pids.clear();
+	colors.clear();
+
+	DEFINE_COLORMAP_ITERATOR(iter);
+	for (iter = origColorMap.begin(); iter != origColorMap.end(); iter++) {
+		int pid = iter.key();
+		const TColor &color = iter.value();
+		QColor qcolor = color.toQColor();
+		pids.append(pid);
+		colors.append(qcolor);
+	}
 }

@@ -146,6 +146,9 @@
 #define TOOLTIP_RESETFILTERS		\
 "Reset all filters"
 
+#define TOOLTIP_RESETCOLORS		\
+"Reset the task colors to the default colors"
+
 #define TOOLTIP_EXPORTEVENTS		\
 "Export the filtered events"
 
@@ -608,9 +611,14 @@ void MainWindow::resizeEvent(QResizeEvent */*event*/)
 
 void MainWindow::processTrace()
 {
-	analyzer->processTrace(stateFile->getColorMap());
+	const QMap<int, QColor> &cmap = stateFile->getColorMap();
+	bool usercolors;
+
+	usercolors = analyzer->processTrace(cmap);
 	startTime = analyzer->getStartTime().toDouble();
 	endTime = analyzer->getEndTime().toDouble();
+	if (usercolors)
+		setResetTaskColorEnabled(true);
 }
 
 void MainWindow::computeLayout()
@@ -1155,6 +1163,11 @@ void MainWindow::setEventActionsEnabled(bool e)
 	eventCPUAction->setEnabled(e);
 	eventPIDAction->setEnabled(e);
 	eventTypeAction->setEnabled(e);
+}
+
+void MainWindow::setResetTaskColorEnabled(bool e)
+{
+	resetTaskColorAction->setEnabled(e);
 }
 
 void MainWindow::closeTrace()
@@ -1815,6 +1828,12 @@ void MainWindow::createActions()
 	resetFiltersAction->setEnabled(false);
 	tsconnect(resetFiltersAction, triggered(), this, resetFilters());
 
+	resetTaskColorAction = new QAction(tr("&Reset all filters"), this);
+	resetTaskColorAction->setIcon(QIcon(RESSRC_GPH_RESETCOLORS));
+	resetTaskColorAction->setToolTip(tr(TOOLTIP_RESETCOLORS));
+	resetTaskColorAction ->setEnabled(false);
+	tsconnect(resetTaskColorAction , triggered(), this, resetTaskColors());
+
 	exportEventsAction = new QAction(tr("&Export events to a file..."),
 					 this);
 	exportEventsAction->setIcon(QIcon(RESSRC_GPH_EXPORTEVENTS));
@@ -2026,6 +2045,7 @@ void MainWindow::createToolBars()
 	viewToolBar->addAction(showArgFilterAction);
 	viewToolBar->addAction(timeFilterAction);
 	viewToolBar->addAction(resetFiltersAction);
+	viewToolBar->addAction(resetTaskColorAction);
 	viewToolBar->addAction(graphEnableAction);
 	viewToolBar->addAction(showStatsAction);
 	viewToolBar->addAction(showStatsTimeLimitedAction);
@@ -2078,6 +2098,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(showArgFilterAction);
 	viewMenu->addAction(timeFilterAction);
 	viewMenu->addAction(resetFiltersAction);
+	viewMenu->addAction(resetTaskColorAction);
 	viewMenu->addAction(graphEnableAction);
 	viewMenu->addAction(showStatsAction);
 	viewMenu->addAction(showStatsTimeLimitedAction);
@@ -3745,6 +3766,20 @@ void MainWindow::colorTask(int pid)
 	stateFile->setTaskColor(pid, color);
 	analyzer->setTaskColor(pid, color);
 
+	setGraphColor(pid, color);
+	tracePlot->replot();
+
+	setResetTaskColorEnabled(true);
+}
+
+void MainWindow::setGraphColor(int pid, const QColor &color)
+{
+	const unsigned int nrCPUs = analyzer->getNrCPUs();
+	unsigned int cpu;
+	Task *task = analyzer->findTask(pid);
+	if (task == nullptr || task->isGhostAlias)
+		return;
+
 	QPen pen = QPen();
 	pen.setColor(color);
 	pen.setWidth(settingStore->getValue(Setting::LINE_WIDTH).intv());
@@ -3773,7 +3808,6 @@ void MainWindow::colorTask(int pid)
 		if (cputask.graph != nullptr)
 			cputask.graph->setPen(pen);
 	}
-	tracePlot->replot();
 }
 
 /* let's the user chose a color for the toolbar task */
@@ -3790,6 +3824,30 @@ void MainWindow::colorTasks(const QList<int> &pids)
 
 	for (iter = pids.cbegin(); iter != pids.cend(); iter++)
 		colorTask(*iter);
+}
+
+void MainWindow::resetTaskColors()
+{
+	QList<int> pids;
+	QList<QColor> colors;
+	int s1, s2, s, i;
+
+	analyzer->getOrigTaskColors(pids, colors);
+	setResetTaskColorEnabled(false);
+
+	s1 = pids.size();
+	s2 = colors.size();
+	/* s1 and s2 should be equal but test anyway */
+	s = TSMIN(s1, s2);
+
+	for (i = 0; i < s; i++) {
+		int pid = pids[i];
+		QColor color = colors[i];
+		setGraphColor(pid, color);
+	}
+	tracePlot->replot();
+	analyzer->resetTaskColors();
+	stateFile->resetColors();
 }
 
 /* Finds the preceding wakeup of the currently selected task */

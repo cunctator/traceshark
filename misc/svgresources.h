@@ -90,6 +90,7 @@
 #define RESSRC_GPH_MOVE_RED      ":/traceshark/images/movered.svg"
 #define RESSRC_GPH_OPEN          ":/traceshark/images/open.svg"
 #define RESSRC_GPH_REMOVE_TASK   ":/traceshark/images/removetask.svg"
+#define RESSRC_GPH_RESETCOLORS   ":/traceshark/images/resetcolors.svg"
 #define RESSRC_GPH_RESETFILTERS  ":/traceshark/images/resetfilters.svg"
 #define RESSRC_GPH_SCREENSHOT    ":/traceshark/images/screenshot.svg"
 #define RESSRC_GPH_SHARK         ":/traceshark/images/shark.png"

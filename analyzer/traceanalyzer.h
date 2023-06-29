@@ -134,7 +134,7 @@ public:
 	int open(const QString &fileName);
 	bool isOpen() const;
 	void close(int *ts_errno);
-	void processTrace(const QMap<int, QColor> &cmap);
+	bool processTrace(const QMap<int, QColor> &cmap);
 	const TraceEvent *findPreviousSchedEvent(const vtl::Time &time,
 						 int pid,
 						 int *index) const;
@@ -160,7 +160,9 @@ public:
 	vtl_always_inline CPUTask *findCPUTask(int pid,
 					     unsigned int cpu);
 	vtl_always_inline QColor getTaskColor(int pid) const;
-	vtl_always_inline void setTaskColor(int pid, const QColor &color);
+	void setTaskColor(int pid, const QColor &color);
+	void resetTaskColors();
+	void getOrigTaskColors(QList<int> &pids, QList<QColor> &colors);
 	vtl_always_inline tracetype_t getTraceType() const;
 	void setSchedOffset(unsigned int cpu, double offset);
 	void setSchedScale(unsigned int cpu, double scale);
@@ -215,7 +217,7 @@ private:
 	int binarySearch(const vtl::Time &time, int start, int end) const;
 	int binarySearchFiltered(const vtl::Time &time, int start, int end)
 		const;
-	void colorizeTasks(const QMap<int, QColor> &cmap);
+	bool colorizeTasks(const QMap<int, QColor> &cmap);
 	event_t determineCPUEvent(bool &ok);
 	int findIndexBefore(const vtl::Time &time) const;
 	int findIndexAfter(const vtl::Time &time) const;
@@ -301,7 +303,8 @@ private:
 	WorkQueue scalingQueue;
 	WorkQueue statsQueue;
 	WorkQueue statsLimitedQueue;
-	vtl::AVLTree <int, TColor> colorMap;
+	vtl::AVLTree<int, TColor> colorMap;
+	vtl::AVLTree<int, TColor> origColorMap;
 	TColor black;
 	TColor white;
 	QVector<double> schedOffset;
@@ -521,13 +524,6 @@ vtl_always_inline QColor TraceAnalyzer::getTaskColor(int pid) const
 {
 	TColor taskColor = colorMap.value(pid, black);
 	return taskColor.toQColor();
-}
-
-vtl_always_inline void TraceAnalyzer::setTaskColor(int pid,
-						   const QColor &color)
-{
-	TColor taskColor = TColor::fromQColor(color);
-	colorMap[pid] = taskColor;
 }
 
 vtl_always_inline CPUTask *TraceAnalyzer::findCPUTask(int pid,

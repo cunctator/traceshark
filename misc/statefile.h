@@ -56,6 +56,8 @@
 #include <QMap>
 #include <QString>
 
+#include "vtl/compiler.h"
+
 QT_BEGIN_NAMESPACE
 class QColor;
 QT_END_NAMESPACE
@@ -72,6 +74,7 @@ public:
 	void clear();
 	inline const QMap<int, QColor> &getColorMap() const;
 	inline const char *getStateFileName();
+	void resetColors();
 private:
 	void checkStateFile();
 	int loadColorSection(QTextStream &stream);
