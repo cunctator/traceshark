@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.8b -->
+<!-- CreationDate: 2023-07-01 20:38:55 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="1015pt" height="1015pt"
+	viewBox="-2650 -2650 16100 16100">
+<g fill="none">
+<!-- Line -->
+<rect x="0" y="2700" width="2700" height="2700" fill="#0000ff"
+	stroke="#0000ff" stroke-width="8px"/>
+<!-- Line -->
+<rect x="0" y="5400" width="2700" height="2700" fill="#00ff00"
+	stroke="#00ff00" stroke-width="8px"/>
+<!-- Line -->
+<rect x="2700" y="0" width="2700" height="2700" fill="#ff0000"
+	stroke="#ff0000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="2700" y="2700" width="2700" height="2700" fill="#ff00ff"
+	stroke="#ff00ff" stroke-width="8px"/>
+<!-- Line -->
+<rect x="2700" y="5400" width="2700" height="2700" fill="#ffff00"
+	stroke="#ffff00" stroke-width="8px"/>
+<!-- Line -->
+<rect x="2700" y="8100" width="2700" height="2700" fill="#00008f"
+	stroke="#00008f" stroke-width="8px"/>
+<!-- Line -->
+<rect x="5400" y="0" width="2700" height="2700" fill="#0000b0"
+	stroke="#0000b0" stroke-width="8px"/>
+<!-- Line -->
+<rect x="5400" y="5400" width="2700" height="2700" fill="#87cfff"
+	stroke="#87cfff" stroke-width="8px"/>
+<!-- Line -->
+<rect x="5400" y="8100" width="2700" height="2700" fill="#008f00"
+	stroke="#008f00" stroke-width="8px"/>
+<!-- Line -->
+<rect x="8100" y="2700" width="2700" height="2700" fill="#00d100"
+	stroke="#00d100" stroke-width="8px"/>
+<!-- Line -->
+<rect x="8100" y="5400" width="2700" height="2700" fill="#008f8f"
+	stroke="#008f8f" stroke-width="8px"/>
+<!-- Line -->
+<rect x="5400" y="2700" width="2700" height="2700" fill="#ffd600"
+	stroke="#ffd600" stroke-width="8px"/>
+<!-- Line -->
+<rect x="8100" y="8100" width="2700" height="2700" fill="#0000d1"
+	stroke="#0000d1" stroke-width="8px"/>
+<!-- Line -->
+<rect x="8100" y="0" width="2700" height="2700" fill="#ff8080"
+	stroke="#ff8080" stroke-width="8px"/>
+<!-- Line -->
+<rect x="0" y="8100" width="2700" height="2700" fill="#00ffff"
+	stroke="#00ffff" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" -1800,12600 12600,-1800"
+	stroke="#ff0000" stroke-width="1185px"/>
+<!-- Line -->
+<rect x="0" y="0" width="2700" height="2700" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 12600,12600 -1800,-1800"
+	stroke="#ff0000" stroke-width="1185px"/>
+</g>
+</svg>
