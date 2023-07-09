@@ -744,16 +744,17 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	task = &taskMap[oldpid].getTask();
 	state = sched_switch_handle_state(ttype, event, handle);
 
+	name = sched_switch_handle_oldname_strdup(ttype,
+						  event,
+						  taskNamePool,
+						  handle);
+	task->checkName(name);
+
 	/* First handle the global task */
 	if (task->isNew) {
 		/* true means task is newly constructed above */
 		task->pid = oldpid;
 		task->isNew = false;
-		name = sched_switch_handle_oldname_strdup(ttype,
-							  event,
-							  taskNamePool,
-							  handle);
-		task->checkName(name);
 
 		/* Apparently this task was running when we started tracing */
 		task->schedTimev.append(startTimeDbl);
@@ -831,15 +832,15 @@ skip:
 
 	/* Handle the incoming task */
 	task = &taskMap[newpid].getTask();
+	name = sched_switch_handle_newname_strdup(ttype,
+						  event,
+						  taskNamePool,
+						  handle);
+	if (name != nullptr)
+		task->checkName(name);
 	if (task->isNew) {
 		task->pid = newpid;
 		task->isNew = false;
-		name = sched_switch_handle_newname_strdup(ttype,
-							  event,
-							  taskNamePool,
-							  handle);
-		if (name != nullptr)
-			task->checkName(name);
 		delay = estimateSchedDelayNew(eventCPU, midtime, startTime,
 					      delayOK);
 
