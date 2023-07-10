@@ -3763,8 +3763,6 @@ void MainWindow::colorTask(int pid)
 {
 	const QColorDialog::ColorDialogOptions options;
 	const QColor oldcolor = analyzer->getTaskColor(pid);
-	unsigned int cpu;
-	const unsigned int nrCPUs = analyzer->getNrCPUs();
 
 	Task *task = analyzer->findTask(pid);
 	if (task == nullptr || task->isGhostAlias)
