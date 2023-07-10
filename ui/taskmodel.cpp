@@ -50,10 +50,13 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <QFile>
+
 #include "vtl/avltree.h"
 #include "vtl/heapsort.h"
 #include "vtl/tlist.h"
 
+#include "misc/translate.h"
 #include "ui/taskmodel.h"
 #include "analyzer/task.h"
 
@@ -196,4 +199,70 @@ void TaskModel::beginResetModel()
 void TaskModel::endResetModel()
 {
 	QAbstractTableModel::endResetModel();
+}
+
+int TaskModel::exportStats(bool csv, const QString &filename)
+{
+	/* Todo add export code here */
+	qfile_error_t err;
+	int row;
+	QString sep = csv ? QString(",") : QString("\t");
+	QString str;
+	bool ok;
+	bool is_ghost;
+	const int s = taskList->size();
+	QTextStream stream;
+	QString gstatus;
+
+	if (filename.isEmpty())
+		return 0;
+
+	QFile file(filename);
+
+	if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly))
+		goto error_file;
+
+	stream.setDevice(&file);
+
+	stream << "TASK_NAME" << sep << "PID(TID)" << sep << "GHOST_STATUS"
+	       << "\n";
+
+	for (row = 0; row < s; row++) {
+		str = rowToName(row, ok);
+		if (ok)
+			stream << str << sep;
+
+		str = QString::number(rowToPid(row, ok));
+		if (ok)
+			stream << str << sep;
+
+		is_ghost = rowToGhostStatus(row, ok);
+
+		if (ok) {
+			gstatus = is_ghost ?
+				QLatin1String("GHOST") :
+				QLatin1String("REAL");
+		} else {
+			gstatus = QLatin1String("UNKNOWN");
+		}
+		stream << sep << gstatus;
+		stream << "\n";
+	}
+
+	stream.flush();
+	if (!file.flush())
+		goto error_file;
+	file.close();
+
+	err = file.error();
+	if (err == qfile_error_class::NoError)
+		return 0;
+	goto error_translate;
+
+error_file:
+	err = file.error();
+	if (err == qfile_error_class::NoError)
+		return -TS_ERROR_UNSPEC;
+error_translate:
+	return -translate_FileError(err);
 }

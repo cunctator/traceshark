@@ -2227,6 +2227,7 @@ void MainWindow::dialogConnections()
 		  this, removeQDockWidget(QDockWidget*));
 	tsconnect(taskSelectDialog, taskDoubleClicked(int),
 		  this, taskTriggered(int));
+	tsconnect(taskSelectDialog, doExport(bool), this, exportTasks(bool));
 
 	/* statistics Dialog */
 	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
@@ -3368,17 +3369,22 @@ void MainWindow::showStatsTimeLimited()
 		tabifyDockWidget(schedLatencyWidget, statsLimitedDialog);
 }
 
+void MainWindow::exportTasks(bool csv)
+{
+	exportStats_(csv, EXPORT_TASK_NAMES);
+}
+
 void MainWindow::exportStats(bool csv)
 {
-	exportStats_(csv, false);
+	exportStats_(csv, EXPORT_STATS);
 }
 
 void MainWindow::exportStatsTimeLimited(bool csv)
 {
-	exportStats_(csv, true);
+	exportStats_(csv, EXPORT_STATS_LIMITED);
 }
 
-void MainWindow::exportStats_(bool csv, bool limited)
+void MainWindow::exportStats_(bool csv, taskexport_t exporttype)
 {
 	QString name;
 	QString caption = tr("Export statistics");
@@ -3419,10 +3425,21 @@ void MainWindow::exportStats_(bool csv, bool limited)
 			TShark::checkSuffix(&name, TXT_SUFFIX);
 	}
 
-	if (limited)
+	switch (exporttype) {
+	case EXPORT_TASK_NAMES:
+		ts_errno = taskSelectDialog->exportStats(override_csv, name);
+		break;
+	case EXPORT_STATS_LIMITED:
 		ts_errno = statsLimitedDialog->exportStats(override_csv, name);
-	else
+		break;
+	case EXPORT_STATS:
 		ts_errno = statsDialog->exportStats(override_csv, name);
+		break;
+	default:
+		vtl::errx(BSD_EX_SOFTWARE,
+			   "Unexcpected failure at %s:%d", __FILE__, __LINE__);
+		break;
+	}
 
 	if (ts_errno != 0)
 		vtl::warn(ts_errno, "Failed to export statistics to %s",

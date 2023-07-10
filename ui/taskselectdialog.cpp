@@ -88,22 +88,17 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	QHBoxLayout *settingLayout = new QHBoxLayout();
 	QHBoxLayout *exportLayout = NULL;
 	/* Do we have stats that can be exported ? */
-	bool has_stats = (type == TaskSelectStats ||
-			  type == TaskSelectStatsLimited);
 	QPushButton *exportButton = NULL;
 
 	taskView = new TableView(this, TableView::TABLE_ROWSELECT);
 	switch (type) {
 	case TaskSelectStats:
-		statsModel = new StatsModel(taskView);
-		taskModel = statsModel;
+		taskModel = new StatsModel(taskView);
 		break;
 	case TaskSelectStatsLimited:
-		statsModel = new StatsLimitedModel(taskView);
-		taskModel = statsModel;
+		taskModel = new StatsLimitedModel(taskView);
 		break;
 	case TaskSelectRegular:
-		statsModel = nullptr;
 		taskModel = new TaskModel(taskView);
 		break;
 	default:
@@ -115,10 +110,9 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	mainLayout->addLayout(buttonLayout);
 	mainLayout->addLayout(filterLayout);
 	mainLayout->addLayout(settingLayout);
-	if (has_stats) {
-		exportLayout = new QHBoxLayout();
-		mainLayout->addLayout(exportLayout);
-	}
+
+	exportLayout = new QHBoxLayout();
+	mainLayout->addLayout(exportLayout);
 
 	QPushButton *closeButton = new QPushButton(tr("Close"));
 	QPushButton *addUnifiedButton =
@@ -157,20 +151,17 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	settingLayout->addWidget(includeBox);
 	settingLayout->addStretch();
 
-	if (has_stats) {
-		exportButton = new QPushButton(tr("Export"));
-		QLabel *exportlabel = new QLabel(tr("Export format:"));
-		exportBox = new QComboBox();
-		exportBox->addItem(QString(tr("CSV")));
-		exportBox->addItem(QString(tr("ASCII")));
-		exportBox->setCurrentIndex(EBOX_INDEX_CSV);
+	exportButton = new QPushButton(tr("Export"));
+	QLabel *exportlabel = new QLabel(tr("Export format:"));
+	exportBox = new QComboBox();
+	exportBox->addItem(QString(tr("CSV")));
+	exportBox->addItem(QString(tr("ASCII")));
+	exportBox->setCurrentIndex(EBOX_INDEX_CSV);
 
-		exportLayout->addWidget(exportlabel);
-		exportLayout->addWidget(exportBox);
-		exportLayout->addWidget(exportButton);
-		exportLayout->addStretch();
-	} else
-		exportBox = nullptr;
+	exportLayout->addWidget(exportlabel);
+	exportLayout->addWidget(exportBox);
+	exportLayout->addWidget(exportButton);
+	exportLayout->addStretch();
 
 	hide();
 
@@ -181,8 +172,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	tsconnect(taskView, doubleClicked(const QModelIndex &),
 		  this, handleDoubleClick(const QModelIndex &));
 	sigconnect(resetFilterButton, clicked(), this, resetFilter());
-	if (has_stats)
-		tsconnect(exportButton, clicked(), this, exportClicked());
+	tsconnect(exportButton, clicked(), this, exportClicked());
 
 	filterMap = new QMap<int, int>();
 }
@@ -220,9 +210,7 @@ void TaskSelectDialog::resizeColumnsToContents()
 
 int TaskSelectDialog::exportStats(bool csv, const QString &filename)
 {
-	if (statsModel != nullptr)
-		return statsModel->exportStats(csv, filename);
-	return -TS_ERROR_INTERNAL;
+	return taskModel->exportStats(csv, filename);
 }
 
 void TaskSelectDialog::show()

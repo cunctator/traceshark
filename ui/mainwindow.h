@@ -208,6 +208,7 @@ private slots:
 	void transmitSize();
 	void showStats();
 	void showStatsTimeLimited();
+	void exportTasks(bool csv);
 	void exportStats(bool csv);
 	void exportStatsTimeLimited(bool csv);
 	void removeQDockWidget(QDockWidget *widget);
@@ -248,6 +249,12 @@ private:
 		PR_CPUGRAPH_ONLY,
 		PR_TRY_TASKGRAPH
 	} preference_t;
+
+	typedef enum : int {
+		EXPORT_TASK_NAMES = 1,
+		EXPORT_STATS,
+		EXPORT_STATS_LIMITED
+	} taskexport_t;
 
 	/* Helper functions for the constructor */
 	void createAboutBox();
@@ -333,7 +340,7 @@ private:
 	void setupOpenGL();
 	void updateTaskGraphActions();
 	void updateAddToLegendAction();
-	void exportStats_(bool csv, bool limited);
+	void exportStats_(bool csv, taskexport_t exporttype);
 	TaskGraph *selectedGraph();
 
 	TracePlot *tracePlot;

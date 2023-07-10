@@ -109,7 +109,6 @@ private slots:
 	void handleDoubleClick(const QModelIndex &index);
 private:
 	TableView *taskView;
-	StatsModel *statsModel;
 	AbstractTaskModel *taskModel;
 	QComboBox *logicBox;
 	QComboBox *exportBox;
