@@ -141,7 +141,7 @@
 "Filter on the time interval specified by the current position of the cursors"
 
 #define TOOLTIP_GRAPHENABLE		\
-"Select which types of graphs should be enabled"
+"Select graphs or change settings"
 
 #define TOOLTIP_RESETFILTERS		\
 "Reset all filters"
@@ -1817,7 +1817,8 @@ void MainWindow::createActions()
 	timeFilterAction->setToolTip(tr(TOOLTIP_TIMEFILTER));
 	tsconnect(timeFilterAction, triggered(), this, timeFilter());
 
-	graphEnableAction = new QAction(tr("Select &graphs..."), this);
+	graphEnableAction = new QAction(tr("Select &graphs and settings..."),
+					this);
 	graphEnableAction->setIcon(QIcon(RESSRC_GPH_GRAPHENABLE));
 	graphEnableAction->setToolTip(tr(TOOLTIP_GRAPHENABLE));
 	tsconnect(graphEnableAction, triggered(), this, showGraphEnable());
