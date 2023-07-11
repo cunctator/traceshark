@@ -2229,6 +2229,8 @@ void MainWindow::dialogConnections()
 	tsconnect(taskSelectDialog, taskDoubleClicked(int),
 		  this, taskTriggered(int));
 	tsconnect(taskSelectDialog, doExport(bool), this, exportTasks(bool));
+	tsconnect(taskSelectDialog, colorChangeReq(const QList<int> *),
+		  this, changeColors(const QList<int> *));
 
 	/* statistics Dialog */
 	tsconnect(statsDialog, addTaskGraph(int), this, addTaskGraph(int));
@@ -2244,6 +2246,8 @@ void MainWindow::dialogConnections()
 	tsconnect(statsDialog, taskDoubleClicked(int),
 		  this, taskTriggered(int));
 	tsconnect(statsDialog, doExport(bool), this, exportStats(bool));
+	tsconnect(statsDialog, colorChangeReq(const QList<int> *),
+		  this, changeColors(const QList<int> *));
 
 	/* Time limited statistics Dialog */
 	tsconnect(statsLimitedDialog, addTaskGraph(int), this,
@@ -2262,6 +2266,8 @@ void MainWindow::dialogConnections()
 		  this, taskTriggered(int));
 	tsconnect(statsLimitedDialog, doExport(bool), this,
 		  exportStatsTimeLimited(bool));
+	tsconnect(statsLimitedDialog, colorChangeReq(const QList<int> *),
+		  this, changeColors(const QList<int> *));
 
 	/* the CPU filter dialog */
 	tsconnect(cpuSelectDialog, createFilter(QMap<unsigned, unsigned> &,
@@ -3840,6 +3846,11 @@ void MainWindow::colorTasks(const QList<int> &pids)
 
 	for (iter = pids.cbegin(); iter != pids.cend(); iter++)
 		colorTask(*iter);
+}
+
+void MainWindow::changeColors(const QList<int> *pids)
+{
+	colorTasks(*pids);
 }
 
 void MainWindow::resetTaskColors()

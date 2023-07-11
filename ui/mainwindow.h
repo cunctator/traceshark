@@ -213,6 +213,7 @@ private slots:
 	void exportStatsTimeLimited(bool csv);
 	void removeQDockWidget(QDockWidget *widget);
 	void taskFilter();
+	void changeColors(const QList<int> *pids);
 
 	void addTaskGraphTriggered();
 	void addToLegendTriggered();

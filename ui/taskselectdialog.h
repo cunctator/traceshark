@@ -63,6 +63,7 @@ QT_BEGIN_NAMESPACE
 class QStringList;
 class QCheckBox;
 class QComboBox;
+template <typename> class QList;
 template <typename, typename> class QMap;
 QT_END_NAMESPACE
 
@@ -100,7 +101,9 @@ signals:
 	void createFilter(QMap<int, int> &map, bool orlogic, bool inclusive);
 	void QDockWidgetNeedsRemoval(QDockWidget *widget);
 	void taskDoubleClicked(int pid);
+	void colorChangeReq(const QList<int> *list);
 private slots:
+	void colorClicked();
 	void closeClicked();
 	void addUnifiedClicked();
 	void addLegendClicked();
@@ -113,7 +116,9 @@ private:
 	QComboBox *logicBox;
 	QComboBox *exportBox;
 	QCheckBox *includeBox;
+	QMap<int, int> *indexMap;
 	QMap<int, int> *filterMap;
+	QList<int> *colorList;
 	int savedHeight;
 };
 

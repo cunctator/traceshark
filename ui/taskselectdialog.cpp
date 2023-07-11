@@ -54,7 +54,9 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
+#include <QList>
 #include <QMap>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QWidget>
@@ -68,6 +70,7 @@
 #include "ui/statslimitedmodel.h"
 #include "ui/tableview.h"
 #include "misc/errors.h"
+#include "misc/resources.h"
 #include "misc/traceshark.h"
 
 #define LBOX_INDEX_AND 0
@@ -86,9 +89,10 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	QHBoxLayout *filterLayout = new QHBoxLayout();
 	QHBoxLayout *settingLayout = new QHBoxLayout();
-	QHBoxLayout *exportLayout = NULL;
+	QHBoxLayout *exportLayout = nullptr;
 	/* Do we have stats that can be exported ? */
-	QPushButton *exportButton = NULL;
+	QPushButton *exportButton = nullptr;
+	QPushButton *closeButton = nullptr;
 
 	taskView = new TableView(this, TableView::TABLE_ROWSELECT);
 	switch (type) {
@@ -114,13 +118,14 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	exportLayout = new QHBoxLayout();
 	mainLayout->addLayout(exportLayout);
 
-	QPushButton *closeButton = new QPushButton(tr("Close"));
+	QPushButton *colorButton = new QPushButton(QIcon(RESSRC_GPH_COLORTASK),
+						   tr("Color"));
 	QPushButton *addUnifiedButton =
 		new QPushButton(tr("Add a unified graph"));
 	QPushButton *addLegendButton =
 		new QPushButton(tr("Add to legend"));
 	buttonLayout->addStretch();
-	buttonLayout->addWidget(closeButton);
+	buttonLayout->addWidget(colorButton);
 	buttonLayout->addWidget(addUnifiedButton);
 	buttonLayout->addWidget(addLegendButton);
 	buttonLayout->addStretch();
@@ -151,6 +156,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	settingLayout->addWidget(includeBox);
 	settingLayout->addStretch();
 
+	closeButton = new QPushButton(tr("Close"));
 	exportButton = new QPushButton(tr("Export"));
 	QLabel *exportlabel = new QLabel(tr("Export format:"));
 	exportBox = new QComboBox();
@@ -158,6 +164,7 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	exportBox->addItem(QString(tr("ASCII")));
 	exportBox->setCurrentIndex(EBOX_INDEX_CSV);
 
+	exportLayout->addWidget(closeButton);
 	exportLayout->addWidget(exportlabel);
 	exportLayout->addWidget(exportBox);
 	exportLayout->addWidget(exportButton);
@@ -165,6 +172,11 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 
 	hide();
 
+	indexMap = new QMap<int, int>();
+	filterMap = new QMap<int, int>();
+	colorList = new QList<int>();
+
+	tsconnect(colorButton, clicked(), this, colorClicked());
 	tsconnect(closeButton, clicked(), this, closeClicked());
 	tsconnect(addUnifiedButton, clicked(), this, addUnifiedClicked());
 	tsconnect(addLegendButton, clicked(), this, addLegendClicked());
@@ -173,13 +185,13 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 		  this, handleDoubleClick(const QModelIndex &));
 	sigconnect(resetFilterButton, clicked(), this, resetFilter());
 	tsconnect(exportButton, clicked(), this, exportClicked());
-
-	filterMap = new QMap<int, int>();
 }
 
 TaskSelectDialog::~TaskSelectDialog()
 {
+	delete colorList;
 	delete filterMap;
+	delete indexMap;
 }
 
 void TaskSelectDialog::setTaskMap(vtl::AVLTree<int, TaskHandle> *map,
@@ -223,6 +235,32 @@ void TaskSelectDialog::closeClicked()
 {
 	QDockWidget::hide();
 	emit QDockWidgetNeedsRemoval(this);
+}
+
+void TaskSelectDialog::colorClicked()
+{
+	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
+	QList<QModelIndex>::const_iterator iter;
+	bool ok = false;
+	int pid = 0;
+
+	colorList->clear();
+	indexMap->clear();
+
+	for (iter = indexList.cbegin(); iter != indexList.cend(); iter++) {
+		const QModelIndex &index = *iter;
+
+		pid = taskModel->rowToPid(index.row(), ok);
+		if (!ok)
+			continue;
+		if (indexMap->find(pid) == indexMap->cend()) {
+			(*indexMap)[pid] = pid;
+			colorList->append(pid);
+		}
+	}
+
+	if (colorList->size() > 0)
+		emit colorChangeReq(colorList);
 }
 
 void TaskSelectDialog::addUnifiedClicked()
