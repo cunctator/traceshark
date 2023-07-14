@@ -253,7 +253,7 @@ void TaskSelectDialog::colorClicked()
 		pid = taskModel->rowToPid(index.row(), ok);
 		if (!ok)
 			continue;
-		if (indexMap->find(pid) == indexMap->cend()) {
+		if (pid > 0 && indexMap->find(pid) == indexMap->cend()) {
 			(*indexMap)[pid] = pid;
 			colorList->append(pid);
 		}
@@ -280,7 +280,7 @@ void TaskSelectDialog::addUnifiedClicked()
 		pid = taskModel->rowToPid(index.row(), ok);
 		if (!ok)
 			continue;
-		if (pid != 0 && indexMap->find(pid) == indexMap->cend()) {
+		if (pid > 0 && indexMap->find(pid) == indexMap->cend()) {
 			(*indexMap)[pid] = pid;
 			emit addTaskGraph(pid);
 			need = true;
@@ -307,7 +307,7 @@ void TaskSelectDialog::addLegendClicked()
 		pid = taskModel->rowToPid(index.row(), ok);
 		if (!ok)
 			continue;
-		if (pid != 0 && indexMap->find(pid) == indexMap->cend()) {
+		if (pid > 0 && indexMap->find(pid) == indexMap->cend()) {
 			need = true;
 			emit addTaskToLegend(pid);
 		}
