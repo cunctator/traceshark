@@ -116,6 +116,7 @@ private:
 	QComboBox *logicBox;
 	QComboBox *exportBox;
 	QCheckBox *includeBox;
+	/* indexMap is used to avoid multiple calls per pid */
 	QMap<int, int> *indexMap;
 	QMap<int, int> *filterMap;
 	QList<int> *colorList;

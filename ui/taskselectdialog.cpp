@@ -266,17 +266,22 @@ void TaskSelectDialog::colorClicked()
 void TaskSelectDialog::addUnifiedClicked()
 {
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
+	QList<QModelIndex>::const_iterator iter;
 	int pid;
 	bool ok;
 	bool need = false;
-	int i, s;
+	int i;
 
-	s = indexList.size();
-	for (i = 0; i < s; i++) {
-		const QModelIndex &index = indexList.at(i);
+	indexMap->clear();
+
+	for (iter = indexList.cbegin(); iter != indexList.cend(); iter++) {
+		const QModelIndex &index = *iter;
 
 		pid = taskModel->rowToPid(index.row(), ok);
-		if (ok && pid != 0) {
+		if (!ok)
+			continue;
+		if (pid != 0 && indexMap->find(pid) == indexMap->cend()) {
+			(*indexMap)[pid] = pid;
 			emit addTaskGraph(pid);
 			need = true;
 		}
@@ -288,17 +293,21 @@ void TaskSelectDialog::addUnifiedClicked()
 void TaskSelectDialog::addLegendClicked()
 {
 	const QList<QModelIndex> &indexList = taskView->selectedIndexes();
+	QList<QModelIndex>::const_iterator iter;
 	int pid;
 	bool ok;
-	int i, s;
+	int i;
 	bool need = false;
 
-	s = indexList.size();
-	for (i = 0; i < s; i++) {
-		const QModelIndex &index = indexList.at(i);
+	indexMap->clear();
+
+	for (iter = indexList.cbegin(); iter != indexList.end(); iter ++) {
+		const QModelIndex &index = *iter;
 
 		pid = taskModel->rowToPid(index.row(), ok);
-		if (ok && pid != 0) {
+		if (!ok)
+			continue;
+		if (pid != 0 && indexMap->find(pid) == indexMap->cend()) {
 			need = true;
 			emit addTaskToLegend(pid);
 		}
@@ -323,8 +332,9 @@ void TaskSelectDialog::addFilterClicked()
 		const QModelIndex &index = indexList.at(i);
 
 		pid = taskModel->rowToPid(index.row(), ok);
-		if (ok)
-			(*filterMap)[pid] = pid;
+		if (!ok)
+			continue;
+		(*filterMap)[pid] = pid;
 	}
 	orlogic = logicBox->currentIndex() == LBOX_INDEX_OR;
 	inclusive = includeBox->isChecked();
