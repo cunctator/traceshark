@@ -1234,6 +1234,7 @@ void MainWindow::closeTrace()
 	setTaskGraphRemovalActionEnabled(false);
 	setTaskGraphClearActionEnabled(false);
 	setAddToLegendActionEnabled(false);
+	setResetTaskColorEnabled(false);
 	setStatus(STATUS_NOFILE);
 
 	if (ts_errno != 0)
