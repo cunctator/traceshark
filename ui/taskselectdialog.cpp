@@ -121,9 +121,9 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	QPushButton *colorButton = new QPushButton(QIcon(RESSRC_GPH_COLORTASK),
 						   tr("Color"));
 	QPushButton *addUnifiedButton =
-		new QPushButton(tr("Add a unified graph"));
+		new QPushButton(QIcon(RESSRC_GPH_ADD_TASK), tr("Unified Graph"));
 	QPushButton *addLegendButton =
-		new QPushButton(tr("Add to legend"));
+		new QPushButton(QIcon(RESSRC_GPH_ADD_TO_LEGEND), tr("Legend"));
 	buttonLayout->addStretch();
 	buttonLayout->addWidget(colorButton);
 	buttonLayout->addWidget(addUnifiedButton);
@@ -136,9 +136,11 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	logicBox->setCurrentIndex(LBOX_INDEX_AND);
 
 	QPushButton *addFilterButton =
-		new QPushButton(tr("Create pid filter"));
+		new QPushButton(QIcon(RESSRC_GPH_EVENTFLTPID),
+				tr("pid filter"));
 	QPushButton *resetFilterButton =
-		new QPushButton(tr("Reset pid filter"));
+		new QPushButton(QIcon(RESSRC_GPH_RESETFILTERS),
+				tr("Reset pid filter"));
 
 	filterLayout->addStretch();
 	filterLayout->addWidget(logicBox);
@@ -156,8 +158,13 @@ TaskSelectDialog::TaskSelectDialog(QWidget *parent, const QString &title,
 	settingLayout->addWidget(includeBox);
 	settingLayout->addStretch();
 
-	closeButton = new QPushButton(tr("Close"));
-	exportButton = new QPushButton(tr("Export"));
+	closeButton = new QPushButton(QIcon(RESSRC_GPH_CLOSE), tr("Close"));
+	/*
+	 * We use the export events icon, although we are exporting task
+	 * information, such as name, pid, CPU percentage, etc.
+	 */
+	exportButton = new QPushButton(QIcon(RESSRC_GPH_EXPORTEVENTS),
+				       tr("Export"));
 	QLabel *exportlabel = new QLabel(tr("Export format:"));
 	exportBox = new QComboBox();
 	exportBox->addItem(QString(tr("CSV")));
