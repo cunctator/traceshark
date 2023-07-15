@@ -1941,7 +1941,7 @@ void MainWindow::createActions()
 	licenseAction->setToolTip(tr(SHOW_LICENSE_TOOLTIP));
 	tsconnect(licenseAction, triggered(), this, license());
 
-	addTaskGraphAction = new QAction(tr("Add task &graph"), this);
+	addTaskGraphAction = new QAction(tr("Add unified &graph"), this);
 	addTaskGraphAction->setIcon(QIcon(RESSRC_GPH_ADD_TASK));
 	addTaskGraphAction->setToolTip(tr(ADD_UNIFIED_TOOLTIP));
 	tsconnect(addTaskGraphAction, triggered(), this,
@@ -1984,13 +1984,14 @@ void MainWindow::createActions()
 	findSleepAction->setToolTip(tr(TOOLTIP_FIND_SLEEP));
 	tsconnect(findSleepAction, triggered(), this, findSleepTriggered());
 
-	removeTaskGraphAction = new QAction(tr("&Remove task graph"), this);
+	removeTaskGraphAction = new QAction(tr("&Remove unified graph"), this);
 	removeTaskGraphAction->setIcon(QIcon(RESSRC_GPH_REMOVE_TASK));
 	removeTaskGraphAction->setToolTip(tr(REMOVE_TASK_TOOLTIP));
 	tsconnect(removeTaskGraphAction, triggered(), this,
 		  removeTaskGraphTriggered());
 
-	clearTaskGraphsAction = new QAction(tr("Cl&ear all task graphs"), this);
+	clearTaskGraphsAction = new QAction(tr("Cl&ear all unified graphs"),
+					    this);
 	clearTaskGraphsAction->setIcon(QIcon(RESSRC_GPH_CLEAR_TASK));
 	clearTaskGraphsAction->setToolTip(tr(CLEAR_TASK_TOOLTIP));
 	tsconnect(clearTaskGraphsAction, triggered(), this,
@@ -2816,7 +2817,7 @@ void MainWindow::consumeSettings()
 		return;
 	}
 
-	/* Save the PIDs of the tasks that have a task graph */
+	/* Save the PIDs of the tasks that have a unified task graph */
 	taskGraphs = taskRangeAllocator->getPidList();
 
 	/* Save the Pids of the tasks that have a legend */
@@ -2868,7 +2869,7 @@ void MainWindow::consumeSettings()
 		Task *task = iter.value().task;
 		if (task->graph != nullptr) {
 			/*
-			 * This implies that the task had a task graph added.
+			 * This implies that the task had a unified graph added.
 			 * We delete the TaskGraph object and set the pointers
 			 * to nullptr. The actual QCPGraph objects is already
 			 * deleted by the clearPlot() function above.
@@ -2890,7 +2891,7 @@ void MainWindow::consumeSettings()
 	tracePlot->show();
 
 	tracePlot->xAxis->setRange(savedRangeX);
-	/* Restore the task graphs from the list */
+	/* Restore the unified task graphs from the list */
 	QList<int>::const_iterator j;
 	for (j = taskGraphs.begin(); j != taskGraphs.end(); j++)
 		addTaskGraph(*j);
@@ -3601,7 +3602,7 @@ bool MainWindow::selectQCPGraph(QCPGraph *graph)
 	return true;
 }
 
-/* Add a task graph for the currently selected task */
+/* Add a unified task graph for the currently selected task */
 void MainWindow::addTaskGraphTriggered()
 {
 	addTaskGraph(taskToolBar->getPid());
