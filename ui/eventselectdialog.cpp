@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016, 2017, 2019, 2023
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -56,10 +57,11 @@
 #include <QHBoxLayout>
 #include <QMap>
 
+#include "misc/resources.h"
+#include "misc/traceshark.h"
 #include "ui/eventselectdialog.h"
 #include "ui/eventselectmodel.h"
 #include "ui/tableview.h"
-#include "misc/traceshark.h"
 
 #define CBOX_INDEX_AND 0
 #define CBOX_INDEX_OR  1
@@ -77,7 +79,8 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 	mainLayout->addWidget(eventView);
 	mainLayout->addLayout(filterLayout);
 
-	QPushButton *closeButton = new QPushButton(tr("Close"));
+	QPushButton *closeButton =
+		new QPushButton(QIcon(RESSRC_GPH_CLOSE), tr("Close"));
 
 	logicBox = new QComboBox();
 	logicBox->addItem(QString(tr("AND")));
@@ -85,9 +88,11 @@ EventSelectDialog::EventSelectDialog(QWidget *parent)
 	logicBox->setCurrentIndex(CBOX_INDEX_AND);
 
 	QPushButton *addFilterButton =
-		new QPushButton(tr("Create event filter"));
+		new QPushButton(QIcon(RESSRC_GPH_EVENTFLTTYPE),
+				tr("Create event filter"));
 	QPushButton *resetFilterButton =
-		new QPushButton(tr("Reset event filter"));
+		new QPushButton(QIcon(RESSRC_GPH_RESETFILTERS),
+				tr("Reset event filter"));
 
 	filterLayout->addStretch();
 	filterLayout->addWidget(closeButton);
