@@ -75,6 +75,7 @@
 #define RESSRC_GPH_EXPORTCPUEVENTS  \
 	                         ":/traceshark/images/exportcpuevents.svg"
 #define RESSRC_GPH_EXPORTEVENTS  ":/traceshark/images/exportevents.svg"
+#define RESSRC_GPH_FILTER        ":/traceshark/images/filter.svg"
 #define RESSRC_GPH_FILTERCURRENT ":/traceshark/images/filtercurrent.svg"
 #define RESSRC_GPH_FILTERCURRENT_LIMIT \
 	                         ":/traceshark/images/filtercurrentlimited.svg"
@@ -88,6 +89,7 @@
                                  ":/traceshark/images/latency-wakeup30x30.png"
 #define RESSRC_GPH_MOVE_BLUE     ":/traceshark/images/moveblue.svg"
 #define RESSRC_GPH_MOVE_RED      ":/traceshark/images/movered.svg"
+#define RESSRC_GPH_OK            ":/traceshark/images/ok.svg"
 #define RESSRC_GPH_OPEN          ":/traceshark/images/open.svg"
 #define RESSRC_GPH_REMOVE_TASK   ":/traceshark/images/removetask.svg"
 #define RESSRC_GPH_RESETCOLORS   ":/traceshark/images/resetcolors.svg"

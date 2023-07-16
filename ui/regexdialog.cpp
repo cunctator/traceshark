@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2020, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2020, 2021, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,6 +50,7 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "ui/regexdialog.h"
 #include "ui/regexwidget.h"
@@ -82,11 +83,14 @@ RegexDialog::RegexDialog(QWidget *parent):
 	logicBox->setCurrentIndex(CBOX_INDEX_AND);
 
 	QPushButton *addFilterButton =
-		new QPushButton(tr("Create regex filter"));
+		new QPushButton(QIcon(RESSRC_GPH_ARGFILTER),
+				tr("Create regex filter"));
 	QPushButton *resetButton =
-		new QPushButton(tr("Reset regex filter"));
-	QPushButton *closeButton = new QPushButton(tr("Close"));
-	QPushButton *okButton = new QPushButton(tr("OK"));
+		new QPushButton(QIcon(RESSRC_GPH_RESETFILTERS),
+				tr("Reset regex filter"));
+	QPushButton *closeButton = new QPushButton(QIcon(RESSRC_GPH_CLOSE),
+						   tr("Close"));
+	QPushButton *okButton = new QPushButton(QIcon(RESSRC_GPH_OK), tr("OK"));
 
 	buttonLayout->addStretch();
 	buttonLayout->addWidget(closeButton);

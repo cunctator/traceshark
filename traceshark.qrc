@@ -24,6 +24,7 @@
   <file>images/exportcpuevents30x30.png</file>
   <file>images/exportevents30x30.png</file>
   <file>images/filtercurrent30x30.png</file>
+  <file>images/filter30x30.png</file>
   <file>images/filtercurrentlimited30x30.png</file>
   <file>images/findsleep30x30.png</file>
   <file>images/fullzoom30x30.png</file>
@@ -34,6 +35,7 @@
   <file>images/latency-wakeup30x30.png</file>
   <file>images/moveblue30x30.png</file>
   <file>images/movered30x30.png</file>
+  <file>images/ok30x30.png</file>
   <file>images/open30x30.png</file>
   <file>images/removetask30x30.png</file>
   <file>images/resetcolors30x30.png</file>
@@ -70,6 +72,7 @@
   <file>images/eventmovered.svg</file>
   <file>images/exportcpuevents.svg</file>
   <file>images/exportevents.svg</file>
+  <file>images/filter.svg</file>
   <file>images/filtercurrent.svg</file>
   <file>images/filtercurrentlimited.svg</file>
   <file>images/findsleep.svg</file>
@@ -81,6 +84,7 @@
   <file>images/latency-wakeup.svg</file>
   <file>images/moveblue.svg</file>
   <file>images/movered.svg</file>
+  <file>images/ok.svg</file>
   <file>images/open.svg</file>
   <file>images/removetask.svg</file>
   <file>images/resetcolors.svg</file>
