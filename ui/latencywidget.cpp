@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2021, 2022  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2021, 2022, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,6 +55,7 @@
 #include <QPushButton>
 #include <QWidget>
 
+#include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "ui/latencymodel.h"
 #include "ui/latencywidget.h"
@@ -87,8 +88,10 @@ LatencyWidget::LatencyWidget(const QString &title, enum Latency::Type type,
 	formatBox->addItem(QString(tr("CSV")));
 	formatBox->setCurrentIndex(0);
 
-	QPushButton *exportButton = new QPushButton(tr("Export"));
-	QPushButton *closeButton = new QPushButton(tr("Close"));
+	QPushButton *exportButton =
+		new QPushButton(QIcon(RESSRC_GPH_EXPORTEVENTS), tr("Export"));
+	QPushButton *closeButton =
+		new QPushButton(QIcon(RESSRC_GPH_CLOSE), tr("Close"));
 
 	buttonLayout->addStretch();
 	buttonLayout->addWidget(formatBox);
