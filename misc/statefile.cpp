@@ -50,6 +50,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <utility>
+
 #include <QColor>
 #include <QFile>
 #include <QTextStream>
@@ -270,7 +272,7 @@ int StateFile::loadColorSection(QTextStream &stream)
 		unsigned alpha =  coluint              & 0xff;
 
 		QColor color(red, green, blue, alpha);
-		map[pid] = color;
+		map[pid] = std::move(color);
 	}
 
 	colorMap = map;

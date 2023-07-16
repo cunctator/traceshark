@@ -52,6 +52,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <utility>
 
 #include <QApplication>
 #include <QColorDialog>
@@ -353,7 +354,7 @@ void MainWindow::createTracePlot()
 	tracePlot = new TracePlot(plotWidget);
 	setupOpenGL();
 
-	tracePlot->yAxis->setTicker(ticker);
+	tracePlot->yAxis->setTicker(std::move(ticker));
 	tracePlot->yAxis->setSelectableParts(QCPAxis::spAxis);
 	tracePlot->xAxis->setSelectableParts(QCPAxis::spNone);
 	taskRangeAllocator = new TaskRangeAllocator(schedHeight
@@ -3598,7 +3599,7 @@ bool MainWindow::selectQCPGraph(QCPGraph *graph)
 		return false;
 	QCPDataRange wholeRange(0,  end);
 	QCPDataSelection wholeSelection(wholeRange);
-	graph->setSelection(wholeSelection);
+	graph->setSelection(std::move(wholeSelection));
 	return true;
 }
 
