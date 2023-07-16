@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.8b -->
+<!-- CreationDate: 2023-07-16 23:12:15 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="488pt" height="534pt"
+	viewBox="817 720 7739 8468">
+<g fill="none">
+<!-- Arc -->
+<path d="M 1080,2252 A 4901 4901 0 0 0 8280 2252"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Arc -->
+<path d="M 4252,6122 A 519 519 0 0 0 5107 6122"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Arc -->
+<path d="M 4275,8512 A 428 428 0 1 0 5130 8512"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Arc -->
+<path d="M 1080,2522 A 4901 4901 0 0 1 8280 2522"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Line -->
+<polyline points=" 8237,2327 5087,6152"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Line -->
+<polyline points=" 1136,2323 4286,6148"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Line -->
+<polyline points=" 4275,6167 4275,8642"
+	stroke="#000000" stroke-width="435px"/>
+<!-- Line -->
+<polyline points=" 5130,6167 5130,8597"
+	stroke="#000000" stroke-width="435px"/>
+</g>
+</svg>
