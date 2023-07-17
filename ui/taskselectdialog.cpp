@@ -277,7 +277,6 @@ void TaskSelectDialog::addUnifiedClicked()
 	int pid;
 	bool ok;
 	bool need = false;
-	int i;
 
 	indexMap->clear();
 
@@ -303,7 +302,6 @@ void TaskSelectDialog::addLegendClicked()
 	QList<QModelIndex>::const_iterator iter;
 	int pid;
 	bool ok;
-	int i;
 	bool need = false;
 
 	indexMap->clear();
