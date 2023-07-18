@@ -5,6 +5,7 @@
   <file>images/shark.png</file>
   <file>images/addtask30x30.png</file>
   <file>images/addtolegend30x30.png</file>
+  <file>images/apply30x30.png</file>
   <file>images/argfilter30x30.png</file>
   <file>images/clearlegend30x30.png</file>
   <file>images/cleartasksgraphs30x30.png</file>
@@ -40,6 +41,7 @@
   <file>images/removetask30x30.png</file>
   <file>images/resetcolors30x30.png</file>
   <file>images/resetfilters30x30.png</file>
+  <file>images/save30x30.png</file>
   <file>images/screenshot30x30.png</file>
   <file>images/taskselector30x30.png</file>
   <file>images/timefilter30x30.png</file>
@@ -47,6 +49,7 @@
   <file>images/wakeup30x30.png</file>
   <file>images/waking30x30.png</file>
   <file>images/wakingdirect30x30.png</file>
+  <file>images/window30x30.png</file>
   <file>images/qcp-logo.png</file>
   <file>images/qtlogo-64.png</file>
 
@@ -54,6 +57,7 @@
   <!-- There are no SVG representations of the qcp and qt logos -->
   <file>images/addtask.svg</file>
   <file>images/addtolegend.svg</file>
+  <file>images/apply.svg</file>
   <file>images/argfilter.svg</file>
   <file>images/clearlegend.svg</file>
   <file>images/cleartasksgraphs.svg</file>
@@ -89,6 +93,7 @@
   <file>images/removetask.svg</file>
   <file>images/resetcolors.svg</file>
   <file>images/resetfilters.svg</file>
+  <file>images/save.svg</file>
   <file>images/screenshot.svg</file>
   <file>images/taskselector.svg</file>
   <file>images/timefilter.svg</file>
@@ -96,6 +101,7 @@
   <file>images/wakeup.svg</file>
   <file>images/waking.svg</file>
   <file>images/wakingdirect.svg</file>
+  <file>images/window.svg</file>
   <file>LICENSE</file>
 </qresource>
 </RCC>

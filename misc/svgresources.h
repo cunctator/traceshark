@@ -56,6 +56,7 @@
 /* All pixmap resources for icons should be defined here  */
 #define RESSRC_GPH_ADD_TASK      ":/traceshark/images/addtask.svg"
 #define RESSRC_GPH_ADD_TO_LEGEND ":/traceshark/images/addtolegend.svg"
+#define RESSRC_GPH_APPLY         ":/traceshark/images/apply.svg"
 #define RESSRC_GPH_ARGFILTER     ":/traceshark/images/argfilter.svg"
 #define RESSRC_GPH_CLEAR_LEGEND  ":/traceshark/images/clearlegend.svg"
 #define RESSRC_GPH_CLEAR_TASK    ":/traceshark/images/cleartasksgraphs.svg"
@@ -94,6 +95,7 @@
 #define RESSRC_GPH_REMOVE_TASK   ":/traceshark/images/removetask.svg"
 #define RESSRC_GPH_RESETCOLORS   ":/traceshark/images/resetcolors.svg"
 #define RESSRC_GPH_RESETFILTERS  ":/traceshark/images/resetfilters.svg"
+#define RESSRC_GPH_SAVE          ":/traceshark/images/save.svg"
 #define RESSRC_GPH_SCREENSHOT    ":/traceshark/images/screenshot.svg"
 #define RESSRC_GPH_SHARK         ":/traceshark/images/shark.png"
 #define RESSRC_GPH_TASKSELECT    ":/traceshark/images/taskselector.svg"
@@ -104,6 +106,7 @@
 #define RESSRC_GPH_FIND_WAKING   ":/traceshark/images/waking.svg"
 #define RESSRC_GPH_FIND_WAKING_DIRECT \
                                  ":/traceshark/images/wakingdirect.svg"
+#define RESSRC_GPH_WINDOW        ":/traceshark/images/window.svg"
 #define RESSRC_GPH_QCP_LOGO      ":/traceshark/images/qcp-logo.png"
 #define RESSRC_GPH_QT_LOGO       ":/traceshark/images/qtlogo-64.png"
 

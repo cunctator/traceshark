@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018, 2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2019, 2021, 2023
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,6 +51,7 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "misc/resources.h"
 #include "misc/setting.h"
 #include "misc/settingstore.h"
 #include "misc/traceshark.h"
@@ -128,11 +130,14 @@ GraphEnableDialog::GraphEnableDialog(SettingStore *sstore, QWidget *parent):
 
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
 	mainLayout->addLayout(buttonLayout);
-	cancelButton = new QPushButton(tr("Cancel"));
-	getSizeButton = new QPushButton(tr("Use current main window size"));
-	okButton = new QPushButton(tr("OK"));
-	applyButton = new QPushButton(tr("Apply"));
-	saveButton = new QPushButton(tr("Apply && Save"));
+	cancelButton = new QPushButton(QIcon(RESSRC_GPH_CLOSE),
+				       tr("Cancel"));
+	getSizeButton = new QPushButton(QIcon(RESSRC_GPH_WINDOW),
+					tr("Use current main window size"));
+	okButton = new QPushButton(QIcon(RESSRC_GPH_OK), tr("OK"));
+	applyButton = new QPushButton(QIcon(RESSRC_GPH_APPLY), tr("Apply"));
+	saveButton = new QPushButton(QIcon(RESSRC_GPH_SAVE),
+				     tr("Apply && Save"));
 
 	if (!settingStore->getValue(Setting::LOAD_WINDOW_SIZE_START).boolv())
 		getSizeButton->setEnabled(false);
