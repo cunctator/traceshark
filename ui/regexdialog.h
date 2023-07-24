@@ -53,8 +53,9 @@
 #ifndef REGEXDIALOG_H
 #define REGEXDIALOG_H
 
+#include <list>
+
 #include <QDialog>
-#include <QLinkedList>
 
 #include "vtl/error.h"
 #include "analyzer/regexfilter.h"
@@ -79,11 +80,11 @@ private:
 	int savedHeight;
 	QComboBox *logicBox;
 	QVBoxLayout *layout;
-	QLinkedList<RegexWidget *> regexWidgets;
+	std::list<RegexWidget *> regexWidgets;
 
 	void addRegexWidget(RegexWidget *after = nullptr);
-        QLinkedList<RegexWidget *>::iterator find(RegexWidget *widget);
-	QLinkedList<RegexWidget *>::iterator findAfter(RegexWidget *widget);
+	std::list<RegexWidget *>::iterator find(RegexWidget *widget);
+	std::list<RegexWidget *>::iterator findAfter(RegexWidget *widget);
 	RegexFilter filter;
 public slots:
 	void show();

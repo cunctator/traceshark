@@ -55,6 +55,7 @@
 #include <QTextStream>
 
 #include "misc/errors.h"
+#include "misc/qtcompat.h"
 #include "misc/traceshark.h"
 #include "vtl/compiler.h"
 
@@ -90,7 +91,7 @@ namespace TShark {
 
 		line = stream.readLine();
 		do {
-			lineList = line.split(' ', QString::SkipEmptyParts);
+			lineList = line.split(' ', QtCompat::SkipEmptyParts);
 		} while(lineList.size() == 0 && !stream.atEnd());
 		if (lineList.size() != 2)
 			return -TS_ERROR_FILEFORMAT;

@@ -60,7 +60,6 @@
 #include "vtl/avltree.h"
 
 QT_BEGIN_NAMESPACE
-class QStringList;
 class QCheckBox;
 class QComboBox;
 template <typename> class QList;

@@ -115,7 +115,7 @@ RegexDialog::~RegexDialog()
 void RegexDialog::addRegexWidget(RegexWidget *after)
 {
 	RegexWidget *widget;
-	QLinkedList<RegexWidget *>::iterator pos = findAfter(after);
+	std::list<RegexWidget *>::iterator pos = findAfter(after);
 	enum RegexWidget::Type type = RegexWidget::REGEX_LATER;
 
 	if (after == nullptr)
@@ -138,9 +138,9 @@ void RegexDialog::addRegexWidget(RegexWidget *after)
 		  this, addRegexWidgetAfter(RegexWidget *));
 }
 
-QLinkedList<RegexWidget *>::iterator RegexDialog::find(RegexWidget *widget)
+std::list<RegexWidget *>::iterator RegexDialog::find(RegexWidget *widget)
 {
-	QLinkedList<RegexWidget *>::iterator iter;
+	std::list<RegexWidget *>::iterator iter;
 
 	for (iter = regexWidgets.begin(); iter != regexWidgets.end(); iter++)
 		if (*iter == widget)
@@ -148,9 +148,9 @@ QLinkedList<RegexWidget *>::iterator RegexDialog::find(RegexWidget *widget)
 	return iter;
 }
 
-QLinkedList<RegexWidget *>::iterator RegexDialog::findAfter(RegexWidget *widget)
+std::list<RegexWidget *>::iterator RegexDialog::findAfter(RegexWidget *widget)
 {
-	QLinkedList<RegexWidget *>::iterator iter = find(widget);
+	std::list<RegexWidget *>::iterator iter = find(widget);
 
 	if (iter != regexWidgets.end())
 		iter++;
@@ -166,8 +166,8 @@ void RegexDialog::okClicked()
 
 void RegexDialog::closeClicked()
 {
-	QLinkedList<RegexWidget *>::iterator iter;
-	QLinkedList<RegexWidget *>::iterator next;
+	std::list<RegexWidget *>::iterator iter;
+	std::list<RegexWidget *>::iterator next;
 	RegexWidget *rwidget;
 
 	hide();
@@ -188,19 +188,19 @@ void RegexDialog::resetClicked()
 
 void RegexDialog::removeRegexWidget(RegexWidget *widget)
 {
-	regexWidgets.removeOne(widget);
+	regexWidgets.remove(widget);
 	widget->deleteLater();
 
 	/* Make sure that the first widget knows that it's first */
-	if (!regexWidgets.isEmpty())
-		regexWidgets.first()->setType(RegexWidget::REGEX_FIRST);
+	if (!regexWidgets.empty())
+		regexWidgets.front()->setType(RegexWidget::REGEX_FIRST);
 
 	/*
 	 * If we only have one widget left, then we should disabled its remove
 	 * button.
 	 */
 	if (regexWidgets.size() == 1)
-		regexWidgets.first()->setRemoveEnabled(false);
+		regexWidgets.front()->setRemoveEnabled(false);
 }
 
 void RegexDialog::addRegexWidgetAfter(RegexWidget *widget)
@@ -215,7 +215,7 @@ void RegexDialog::addRegexWidgetAfter(RegexWidget *widget)
 
 void RegexDialog::addFilterClicked()
 {
-	QLinkedList<RegexWidget *>::iterator iter;
+	std::list<RegexWidget *>::iterator iter;
 	RegexWidget *rwidget;
 	Regex regex;
 

@@ -88,7 +88,7 @@ bool StateFile::getTaskColor(int pid, QColor *color) const
 {
 	QMap<int, QColor>::const_iterator iter = colorMap.find(pid);
 
-	if (iter == colorMap.cend())
+	if (iter == colorMap.constEnd())
 		return false;
 
 	*color = iter.value();
@@ -146,7 +146,8 @@ int StateFile::saveState()
 
 	QMap<int, QColor>::const_iterator iter;
 
-	for (iter = colorMap.cbegin(); iter != colorMap.cend(); iter++) {
+	for (iter = colorMap.constBegin(); iter != colorMap.constEnd();
+	     iter++) {
 		int pid = iter.key();
 		const QColor &color = iter.value();
 		const uint32_t coluint = ((uint32_t) color.alpha()) |

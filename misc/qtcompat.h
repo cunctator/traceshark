@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,46 +50,102 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVENTSELECTDIALOG
-#define EVENTSELECTDIALOG
+#ifndef MISC_QTAPI_H
+#define MISC_QTAPI_H
 
-#include <QDialog>
+#include <QApplication>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 6, 0)
+
+#include <QDesktopWidget>
+
+#else /* QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) */
+
+#include <QScreen>
+
+#endif
+
+#include <QFileDialog>
+#include <QMouseEvent>
 #include <QString>
 
-#include "analyzer/task.h"
-#include "parser/traceevent.h"
+#include "vtl/compiler.h"
 
-QT_BEGIN_NAMESPACE
-class QComboBox;
-template <typename, typename> class QMap;
-QT_END_NAMESPACE
+#define QT4_WARNING \
+"WARNING!!! WARNING!!! WARNING!!!\n" \
+"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
+"\n" \
+"You are using a Qt version that is < 5.0.0. This may go well but is\n"  \
+"not recommended unless you have a strong preference for Qt 4.\n" \
+"\n" \
+"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
+"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!"
 
-class EventSelectModel;
-class TableView;
+namespace QtCompat {
 
-class EventSelectDialog : public QDialog {
-	Q_OBJECT
-public:
-	EventSelectDialog(QWidget *parent = 0);
-	~EventSelectDialog();
-	void setStringTree(const StringTree<> *stree);
-	void beginResetModel();
-	void endResetModel();
-	void resizeColumnsToContents();
-public slots:
-	void show();
-signals:
-	void resetFilter(void);
-	void createFilter(QMap<event_t, event_t> &map, bool orlogic);
-private slots:
-	void closeClicked();
-	void addFilterClicked();
-private:
-	TableView *eventView;
-	EventSelectModel *eventModel;
-	QComboBox *logicBox;
-	QMap<event_t, event_t> *filterMap;
-	int savedHeight;
-};
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 
-#endif /* EVENTSELECTDIALOG */
+	vtl_always_inline double
+	getPosXFromMouseEvent(const QMouseEvent *event) {
+		return (double) event->position().x();
+	}
+
+#else /* QT_VERSION < QT_VERSION_CHECK(6,0,0)  */
+
+	vtl_always_inline double
+	getPosXFromMouseEvent(const QMouseEvent *event) {
+		return (double) event->x();
+	}
+
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 6, 0)
+
+	vtl_always_inline QRect availableGeometry() {
+		return QApplication::desktop()->availableGeometry();
+	}
+
+#else /* QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) */
+
+	vtl_always_inline QRect availableGeometry() {
+		return QApplication::primaryScreen()->availableGeometry();
+	}
+
+#endif
+
+	vtl_always_inline void enableHighDpi() {
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,6,0) && \
+	QT_VERSION < QT_VERSION_CHECK(6,0,0)
+		QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,1,0) && \
+	QT_VERSION < QT_VERSION_CHECK(6,0,0)
+		QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
+	}
+
+	vtl_always_inline void Qt4_enableOpenGL() {
+		/* Set graphicssystem to opengl if we have old enough Qt */
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#ifdef TRACESHARK_QT4_OPENGL
+		QApplication::setGraphicsSystem("opengl");
+#pragma message(QT4_WARNING)
+#endif /* TRACESHARK_QT4_OPENGL */
+#endif /* QT_VERSION < QT_VERSION_CHECK(5, 0, 0) */
+	}
+
+	extern const QFileDialog::Options ts_foptions;
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+
+	extern const QString::SplitBehavior SkipEmptyParts;
+
+#else /* QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  */
+
+	extern const Qt::SplitBehavior SkipEmptyParts;
+
+#endif
+}
+#endif /* MISC_QTAPI_H */

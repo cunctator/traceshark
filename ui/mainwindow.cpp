@@ -84,6 +84,7 @@
 #include "ui/traceplot.h"
 #include "ui/yaxisticker.h"
 #include "misc/errors.h"
+#include "misc/qtcompat.h"
 #include "misc/resources.h"
 #include "misc/setting.h"
 #include "misc/settingstore.h"
@@ -290,8 +291,7 @@ const QColor MainWindow::UNINT_COLOR = QColor(205, 0, 205);
 
 MainWindow::MainWindow():
 	tracePlot(nullptr), scrollBarUpdate(false), graphEnableDialog(nullptr),
-	filterActive(false), foptions(QFileDialog::DontUseNativeDialog |
-				      QFileDialog::DontUseSheet)
+	filterActive(false), foptions(QtCompat::ts_foptions)
 {
 	stateFile = new StateFile();
 
@@ -884,7 +884,7 @@ void MainWindow::loadSettings()
 		ht = settingStore->getValue(
 			Setting::MAINWINDOW_HEIGHT).intv();
 	} else {
-		geometry = QApplication::desktop()->availableGeometry();
+		geometry = QtCompat::availableGeometry();
 		wt = geometry.width() - geometry.width() / 32;
 		ht = geometry.height() - geometry.height() / 16;
 		settingStore->setIntValue(Setting::MAINWINDOW_WIDTH, wt);
@@ -1596,7 +1596,7 @@ void MainWindow::plotDoubleClicked(QMouseEvent *event)
 
 	Cursor *cursor = cursors[cursorIdx];
 	if (cursor != nullptr) {
-		double pixel = (double) event->x();
+		double pixel = QtCompat::getPosXFromMouseEvent(event);
 		double coord = tracePlot->xAxis->pixelToCoord(pixel);
 		vtl::Time time = vtl::Time::fromDouble(coord);
 		time.setPrecision(analyzer->getTimePrecision());
@@ -3847,7 +3847,7 @@ void MainWindow::colorTasks(const QList<int> &pids)
 {
 	QList<int>::const_iterator iter;
 
-	for (iter = pids.cbegin(); iter != pids.cend(); iter++)
+	for (iter = pids.constBegin(); iter != pids.constEnd(); iter++)
 		colorTask(*iter);
 }
 

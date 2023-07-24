@@ -55,6 +55,7 @@
 #include <cstdlib>
 
 #include "misc/errors.h"
+#include "misc/qtcompat.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "threads/tthread.h"
@@ -240,14 +241,13 @@ void ErrorDialog::errorX(int ecode, const char *fmt, va_list ap)
 
 void ErrorDialog::updateSize()
 {
-	QSize screenSize;
+	QRect screenSize;
 	int wscreen;
 	int hscreen;
 	int width = 640;
 	int height = 350;
 
-	screenSize = QApplication::desktop()->availableGeometry(QCursor::pos())
-		.size();
+	screenSize = QtCompat::availableGeometry();
 
 	wscreen = screenSize.width();
 	hscreen = screenSize.height();

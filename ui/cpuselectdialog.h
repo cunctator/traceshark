@@ -58,7 +58,6 @@
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
-class QStringList;
 template <typename, typename> class QMap;
 QT_END_NAMESPACE
 

@@ -52,6 +52,7 @@
 
 #include "misc/chunk.h"
 #include "misc/errors.h"
+#include "misc/qtcompat.h"
 #include "misc/traceshark.h"
 #include "ui/eventinfodialog.h"
 #include "parser/traceevent.h"
@@ -97,14 +98,13 @@ EventInfoDialog::EventInfoDialog(QWidget *parent)
 
 void EventInfoDialog::updateSize()
 {
-	QSize screenSize;
+	QRect screenSize;
 	int wscreen;
 	int hscreen;
 	int width = 1600;
 	int height = 850;
 
-	screenSize = QApplication::desktop()->availableGeometry(QCursor::pos())
-		.size();
+	screenSize = QtCompat::availableGeometry();
 
 	wscreen = screenSize.width();
 	hscreen = screenSize.height();

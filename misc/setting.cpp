@@ -54,6 +54,7 @@
 
 #include "misc/errors.h"
 #include "misc/osapi.h"
+#include "misc/qtcompat.h"
 #include "misc/traceshark.h"
 #include "vtl/error.h"
 #include "setting.h"
@@ -86,7 +87,7 @@ bool Setting::isWideScreen()
 {
 	QRect geometry;
 
-	geometry = QApplication::desktop()->availableGeometry();
+	geometry = QtCompat::availableGeometry();
 	return geometry.width() > 1800;
 }
 
@@ -94,7 +95,7 @@ bool Setting::isLowResScreen()
 {
 	QRect geometry;
 
-	geometry = QApplication::desktop()->availableGeometry();
+	geometry = QtCompat::availableGeometry();
 	/* This is a heuristic */
 	return geometry.width() < 1700 && geometry.height() < 1220;
 }

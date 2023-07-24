@@ -58,6 +58,7 @@
 #include <QHBoxLayout>
 #include <QTextStream>
 
+#include "misc/qtcompat.h"
 #include "misc/resources.h"
 #include "misc/traceshark.h"
 #include "ui/licensedialog.h"
@@ -102,14 +103,13 @@ LicenseDialog::LicenseDialog(QWidget *parent)
 
 void LicenseDialog::updateSize()
 {
-	QSize screenSize;
+	QRect screenSize;
 	int wscreen;
 	int hscreen;
 	int width = 640;
 	int height = 700;
 
-	screenSize = QApplication::desktop()->availableGeometry(QCursor::pos())
-		.size();
+	screenSize = QtCompat::availableGeometry();
 
 	wscreen = screenSize.width();
 	hscreen = screenSize.height();

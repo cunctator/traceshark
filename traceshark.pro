@@ -478,6 +478,7 @@ HEADERS      +=  misc/errors.h
 HEADERS      +=  misc/maplist.h
 HEADERS      +=  misc/osapi.h
 HEADERS      +=  misc/pngresources.h
+HEADERS      +=  misc/qtcompat.h
 HEADERS      +=  misc/resources.h
 HEADERS      +=  misc/setting.h
 HEADERS      +=  misc/settingstore.h
@@ -573,6 +574,7 @@ SOURCES      +=  mm/mempool.cpp
 
 SOURCES      +=  misc/errors.cpp
 SOURCES      +=  misc/main.cpp
+SOURCES      +=  misc/qtcompat.cpp
 SOURCES      +=  misc/setting.cpp
 SOURCES      +=  misc/settingstore.cpp
 SOURCES      +=  misc/statefile.cpp
@@ -635,7 +637,14 @@ OUR_FLAGS += -DCONFIG_SYSTEM_QCUSTOMPLOT
 LIBS += -lqcustomplot
 }
 
-OUR_NORMAL_CXXFLAGS = -pedantic -Wall -std=c++11
+
+OUR_NORMAL_CXXFLAGS = -pedantic -Wall
+equals(QT_MAJOR_VERSION, 6) {
+OUR_NORMAL_CXXFLAGS += -std=c++17
+} else {
+OUR_NORMAL_CXXFLAGS += -std=c++11
+}
+
 OUR_NORMAL_CFLAGS = -pedantic -Wall -std=c11
 
 QMAKE_CXXFLAGS_RELEASE += $${OUR_NORMAL_CXXFLAGS} $${OUR_FLAGS}
@@ -674,7 +683,7 @@ DEFINES += QCUSTOMPLOT_USE_OPENGL
 QT           += core
 QT           += widgets
 QT           += printsupport
-!equals(DISABLE_OPENGL, yes): equals(QT_MAJOR_VERSION, 4) {
+!equals(DISABLE_OPENGL, yes): !equals(QT_MAJOR_VERSION, 5) {
 QT           += opengl
 }
 

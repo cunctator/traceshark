@@ -254,13 +254,14 @@ void TaskSelectDialog::colorClicked()
 	colorList->clear();
 	indexMap->clear();
 
-	for (iter = indexList.cbegin(); iter != indexList.cend(); iter++) {
+	for (iter = indexList.constBegin(); iter != indexList.constEnd();
+	     iter++) {
 		const QModelIndex &index = *iter;
 
 		pid = taskModel->rowToPid(index.row(), ok);
 		if (!ok)
 			continue;
-		if (pid > 0 && indexMap->find(pid) == indexMap->cend()) {
+		if (pid > 0 && indexMap->find(pid) == indexMap->constEnd()) {
 			(*indexMap)[pid] = pid;
 			colorList->append(pid);
 		}
@@ -280,13 +281,13 @@ void TaskSelectDialog::addUnifiedClicked()
 
 	indexMap->clear();
 
-	for (iter = indexList.cbegin(); iter != indexList.cend(); iter++) {
+	for (iter = indexList.constBegin(); iter != indexList.constEnd(); iter++) {
 		const QModelIndex &index = *iter;
 
 		pid = taskModel->rowToPid(index.row(), ok);
 		if (!ok)
 			continue;
-		if (pid > 0 && indexMap->find(pid) == indexMap->cend()) {
+		if (pid > 0 && indexMap->find(pid) == indexMap->constEnd()) {
 			(*indexMap)[pid] = pid;
 			emit addTaskGraph(pid);
 			need = true;
@@ -306,13 +307,14 @@ void TaskSelectDialog::addLegendClicked()
 
 	indexMap->clear();
 
-	for (iter = indexList.cbegin(); iter != indexList.end(); iter ++) {
+	for (iter = indexList.constBegin(); iter != indexList.constEnd();
+	     iter ++) {
 		const QModelIndex &index = *iter;
 
 		pid = taskModel->rowToPid(index.row(), ok);
 		if (!ok)
 			continue;
-		if (pid > 0 && indexMap->find(pid) == indexMap->cend()) {
+		if (pid > 0 && indexMap->find(pid) == indexMap->constEnd()) {
 			need = true;
 			emit addTaskToLegend(pid);
 		}

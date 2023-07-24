@@ -57,10 +57,6 @@
 #include "vtl/avltree.h"
 #include "misc/traceshark.h"
 
-QT_BEGIN_NAMESPACE
-class QStringList;
-QT_END_NAMESPACE
-
 class TaskModel : public AbstractTaskModel
 {
 	Q_OBJECT

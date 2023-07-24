@@ -497,7 +497,7 @@ retry:
 	 * session.
 	 */
 	QMap<int, QColor>::const_iterator uiter;
-	for (uiter = cmap.begin(); uiter != cmap.cend(); uiter++) {
+	for (uiter = cmap.constBegin(); uiter != cmap.constEnd(); uiter++) {
 		int pid = uiter.key();
 		iter = colorMap.find(pid);
 		if (iter != colorMap.end()) {

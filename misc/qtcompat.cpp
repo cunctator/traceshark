@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016, 2017, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,46 +50,22 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVENTSELECTDIALOG
-#define EVENTSELECTDIALOG
+#include "misc/qtcompat.h"
 
-#include <QDialog>
-#include <QString>
+const QFileDialog::Options QtCompat::ts_foptions =
+	QFileDialog::DontUseNativeDialog |
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	QFileDialog::DontUseNativeDialog | QFileDialog::DontUseNativeDialog;
+#else /* QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)  */
+	QFileDialog::DontUseNativeDialog;
+#endif
 
-#include "analyzer/task.h"
-#include "parser/traceevent.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
 
-QT_BEGIN_NAMESPACE
-class QComboBox;
-template <typename, typename> class QMap;
-QT_END_NAMESPACE
+const QString::SplitBehavior QtCompat::SkipEmptyParts = QString::SkipEmptyParts;
 
-class EventSelectModel;
-class TableView;
+#else /* QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  */
 
-class EventSelectDialog : public QDialog {
-	Q_OBJECT
-public:
-	EventSelectDialog(QWidget *parent = 0);
-	~EventSelectDialog();
-	void setStringTree(const StringTree<> *stree);
-	void beginResetModel();
-	void endResetModel();
-	void resizeColumnsToContents();
-public slots:
-	void show();
-signals:
-	void resetFilter(void);
-	void createFilter(QMap<event_t, event_t> &map, bool orlogic);
-private slots:
-	void closeClicked();
-	void addFilterClicked();
-private:
-	TableView *eventView;
-	EventSelectModel *eventModel;
-	QComboBox *logicBox;
-	QMap<event_t, event_t> *filterMap;
-	int savedHeight;
-};
+const Qt::SplitBehavior QtCompat::SkipEmptyParts = Qt::SkipEmptyParts;
 
-#endif /* EVENTSELECTDIALOG */
+#endif

@@ -55,20 +55,11 @@
 #include <QString>
 #include <QtCore>
 #include "misc/errors.h"
+#include "misc/qtcompat.h"
 #include "misc/resources.h"
 #include "ui/mainwindow.h"
 #include "ui/tracesharkstyle.h"
 #include "vtl/error.h"
-
-#define QT4_WARNING \
-"WARNING!!! WARNING!!! WARNING!!!\n" \
-"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
-"\n" \
-"You are using a Qt version that is < 5.0.0. This may go well but is\n"  \
-"not recommended unless you have a preference for Qt 4.\n" \
-"\n" \
-"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!\n" \
-"WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!"
 
 static char *prgname;
 
@@ -96,13 +87,7 @@ static void parseArguments(QString *fileName, int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-	/* must be called before QApplication is created */
-#if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
-	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-#if QT_VERSION >= QT_VERSION_CHECK(5,1,0)
-	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#endif
+	QtCompat::enableHighDpi();
 
 	QApplication app(argc, argv);
 	MainWindow mainWindow;
@@ -114,13 +99,8 @@ int main(int argc, char* argv[])
 	vtl::set_strerror(ts_strerror);
 
 	parseArguments(&fileName, argc, argv);
-	/* Set graphicssystem to opengl if we have old enough Qt */
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#ifdef TRACESHARK_QT4_OPENGL
-	QApplication::setGraphicsSystem("opengl");
-#pragma message(QT4_WARNING)
-#endif /* TRACESHARK_QT4_OPENGL */
-#endif /* QT_VERSION < QT_VERSION_CHECK(5, 0, 0) */
+
+	QtCompat::Qt4_enableOpenGL();
 
 	app.setStyle(new TraceSharkStyle);
 	app.setApplicationName(appname);
