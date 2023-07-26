@@ -87,7 +87,7 @@
 #define RESSRC_GPH_GRAPHENABLE   ":/traceshark/images/graphenabledialog.svg"
 #define RESSRC_GPH_LATENCY       ":/traceshark/images/latency.svg"
 #define RESSRC_GPH_WAKEUP_LATENCY \
-                                 ":/traceshark/images/latency-wakeup30x30.png"
+                                 ":/traceshark/images/latency-wakeup.svg"
 #define RESSRC_GPH_MOVE_BLUE     ":/traceshark/images/moveblue.svg"
 #define RESSRC_GPH_MOVE_RED      ":/traceshark/images/movered.svg"
 #define RESSRC_GPH_OK            ":/traceshark/images/ok.svg"
