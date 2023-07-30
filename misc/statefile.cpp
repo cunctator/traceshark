@@ -97,7 +97,6 @@ bool StateFile::getTaskColor(int pid, QColor *color) const
 
 void StateFile::checkStateFile()
 {
-	QChar qdot('.');
 	int n;
 	QString basename;
 
