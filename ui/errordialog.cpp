@@ -131,7 +131,6 @@ void ErrorDialog::setErrno(int d_errno)
 
 void ErrorDialog::killThreads()
 {
-	QList<QThread*>::iterator iter;
 	QThread *current = QThread::currentThread();
 	QList<QThread*> list;
 	TThread::listThreads(list);
