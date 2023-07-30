@@ -733,7 +733,6 @@ void MainWindow::showTrace()
 	unsigned int cpu;
 	int precision = 7;
 	double extra = 0;
-	QColor color;
 
 	if (endTime >= 10)
 		extra = floor (log(endTime) / log(10));
