@@ -210,7 +210,13 @@ if [ -z $bufsize_opt ];then
     else
 	perfmem=$wantedmem
     fi
+    if [ $perfmem -gt 1048576 ];then
+	perfmem=1048576
+    fi
 else
+    if [ $bufsize_opt -gt 1024 ];then
+	echo "warning: Trying to use a bigger than 1024M buffer may not work"
+    fi
     perfmem=$(expr $bufsize_opt '*' 1024)
 fi
 
