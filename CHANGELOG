@@ -1,3 +1,45 @@
+traceshark (1.0) UNRELEASED; urgency=medium
+
+   * Update qcustomplot to 2.1.1 from upstream.
+   * Add a button for exporting statistics to the statistics widgets.
+   * Make StatsLimitedModel a subclass of StatsModel in order to remove copy
+     pasted code. The statistics code is moved to StatsModel.
+   * Do not add leading spaces to statistics percentages less than 100.
+   * Report error from failed export of a trace.
+   * Make the behavior of file formats and suffixes more uniform. The user will
+     be able to override the file format in the file dialog. The default format
+     will be the one requested by the user in the widget but it is still
+     possible to change it in the file dialog by selecting the proper suffix
+     in the combo box of the file diaglog. If the user types in a valid suffix
+     in the file name textbox that will be honored.
+   * Make some string constant members of MainWindow instead of creating and
+     destroying them on the stack.
+   * Make perf sched_wakeup argument parsing work with newer perf.
+   * New feature: Allow the user to change the color of a task.
+   * New feature: save manually selected colors.
+   * New Feature: Make it possible to reset task colors.
+   * Make it possible to export from the regular task dialog.
+   * Change menu text and tooltip for the settings dialog.
+   * New feature: Add a color button to the task selector dialogs, this allows
+     the user to select color from the task selector and statistics dialog.
+   * Require pid to be positive for graph operations. Tasks with a pid of 0, or
+     negative can no longer be added to the legend having a unified graph or
+     changing the color. This tasks are not real.
+   * Add icons to push buttons to the task select and statistics dialogs.
+   * Change the name of "task graphs" to "unified graphs" in the UI.
+   * Use std::move() in order to fix  CID 1566290, 1566288, and 156287 in
+     Coverity.
+   * Use icons in the push buttons in the regex dialogs.
+   * Use icons in the push buttons in the latency widget.
+   * Use icons in the push buttons in the CPU select dialog.
+   * Use icons in the push buttons in the event select dialog.
+   * Use icons in the settings dialog.
+   * Fix bug where png icon was used instead of svg icon.
+   * Add support for building with Qt6
+   * perf-record.sh: Do not try to automatically use more than 1G of buffers
+
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 30 Oct 2023 00:32:43 +0200
+
 traceshark (0.9.14-beta) RELEASED; urgency=medium
 
    * Added commented out options for newer compiler the file traceshark.pro
