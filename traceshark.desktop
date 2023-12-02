@@ -1,10 +1,10 @@
 [Desktop Entry]
-Version=0.9.9-beta
+Version=0.9.15-beta
 Type=Application
 Name=traceshark
 GenericName=traceshark
 Comment=
 Exec=/usr/bin/traceshark
-Icon=/usr/share/icons/traceshark/shark.png
+Icon=/usr/share/icons/traceshark/shark64x64.png
 Categories=System;
 Terminal=false
