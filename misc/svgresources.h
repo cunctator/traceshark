@@ -97,7 +97,6 @@
 #define RESSRC_GPH_RESETFILTERS  ":/traceshark/images/resetfilters.svg"
 #define RESSRC_GPH_SAVE          ":/traceshark/images/save.svg"
 #define RESSRC_GPH_SCREENSHOT    ":/traceshark/images/screenshot.svg"
-#define RESSRC_GPH_SHARK         ":/traceshark/images/shark.png"
 #define RESSRC_GPH_TASKSELECT    ":/traceshark/images/taskselector.svg"
 #define RESSRC_GPH_TIMEFILTER    ":/traceshark/images/timefilter.svg"
 #define RESSRC_GPH_FIND_SLEEP    ":/traceshark/images/findsleep.svg"

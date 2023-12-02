@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2016-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2016-2020, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -54,6 +54,15 @@
 #define RESOURCES_H
 
 #include <QtCore>
+
+#define RESSRC_GPH_SHARK         ":/traceshark/images/shark.png"
+#define RESSRC_GPH_SHARK64       ":/traceshark/images/shark64x64.png"
+#define RESSRC_GPH_SHARK128      ":/traceshark/images/shark128x128.png"
+#define RESSRC_GPH_SHARK256      ":/traceshark/images/shark256x256.png"
+#define RESSRC_GPH_SHARK_PENGUIN ":/traceshark/images/shark-penguin.png"
+#define RESSRC_GPH_SHARK_PENG64  ":/traceshark/images/shark-penguin64x64.png"
+#define RESSRC_GPH_SHARK_PENG128 ":/traceshark/images/shark-penguin128x128.png"
+#define RESSRC_GPH_SHARK_PENG256 ":/traceshark/images/shark-penguin256x256.png"
 
 #if QT_VERSION < QT_VERSION_CHECK(5,6,0)
 

@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
 	QApplication app(argc, argv);
 	MainWindow mainWindow;
-	QPixmap pm(QLatin1String(RESSRC_GPH_SHARK));
+	QPixmap pm(QLatin1String(RESSRC_GPH_SHARK64));
 	QIcon icon;
 	QString appname = QLatin1String("Traceshark");
 	QString fileName;

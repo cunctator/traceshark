@@ -1438,7 +1438,7 @@ void MainWindow::createAboutBox()
 	aboutBox->setText(textAboutCaption);
 	aboutBox->setInformativeText(textAbout);
 
-	QPixmap pm(QLatin1String(RESSRC_GPH_SHARK));
+	QPixmap pm(QLatin1String(RESSRC_GPH_SHARK_PENG256));
 	if (!pm.isNull())
 		aboutBox->setIconPixmap(pm);
 }
@@ -1928,7 +1928,7 @@ void MainWindow::createActions()
 	tsconnect(aboutQtAction, triggered(), qApp, aboutQt());
 
 	aboutAction = new QAction(tr("&About Traceshark"), this);
-	aboutAction->setIcon(QIcon(RESSRC_GPH_SHARK));
+	aboutAction->setIcon(QIcon(RESSRC_GPH_SHARK_PENG256));
 	aboutAction->setToolTip(tr(ABOUT_TSHARK_TOOLTIP));
 	tsconnect(aboutAction, triggered(), this, about());
 
