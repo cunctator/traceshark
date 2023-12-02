@@ -711,5 +711,14 @@ documentation.files = doc/traceshark.1
 target.path = $${INSTALL_PREFIX}/bin
 target.files = traceshark
 
+icons.path = $${INSTALL_PREFIX}/share/icons/traceshark
+icons.files = images/shark64x64.png
+icons.files += images/shark128x128.png
+
+desktopfile.path = $${INSTALL_PREFIX}/share/applications
+desktopfile.files = traceshark.desktop
+
 INSTALLS += documentation
 INSTALLS += target
+INSTALLS += icons
+INSTALLS += desktopfile
