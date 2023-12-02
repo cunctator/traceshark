@@ -1,3 +1,5 @@
+![traceshark logo](https://raw.githubusercontent.com/cunctator/traceshark/af433ddf184a0d8fe1d6bf5fbae004d58906f0c7/images/shark-penguin.png)
+
 # 1. Introduction to Traceshark
 
 This is a graphical viewer for the Ftrace and Perf events that can be captured by the Linux kernel. It visualizes the following events:
