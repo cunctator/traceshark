@@ -1,4 +1,4 @@
-![traceshark logo](https://raw.githubusercontent.com/cunctator/traceshark/e2fb64abab0ee52894d53ca86aabf78fa2709cd9/images/shark-penguin.png)
+![traceshark logo](https://raw.githubusercontent.com/cunctator/traceshark/882584f48e9c03b85e6a5a6b96725040ef1739f5/images/shark-penguin.png)
 
 # 1. Introduction to Traceshark
 
