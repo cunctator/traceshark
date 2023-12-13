@@ -157,10 +157,16 @@ In order to build traceshark, you will need three things:
 * make
 * The development packages for Qt
 
-On Ubuntu and Debian (tested on Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Debian 9, and Debian 10), you can install these like this:
+On Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Debian 9, and Debian 10, you can install these like this:
 
 ```
 sudo apt-get install qt5-default g++ make
+```
+
+On Ubuntu 22.04 and Debian 11, you can install these like this:
+
+```
+sudo apt install qtbase5-dev g++ make
 ```
 
 On Fedora (tested with Fedora 32), you can do the following:
