@@ -322,10 +322,9 @@ ftrace_sched_switch_handle_state(const TraceEvent &event,
 				return  sched_state_from_tstring_(&stateStr);
 			}
 		}
-	} else if (stateArgStr->len == 1 || stateArgStr->len == 2)
-		return sched_state_from_tstring_(stateArgStr);
-
-	return TASK_STATE_PARSER_ERROR;
+		return TASK_STATE_PARSER_ERROR;
+	}
+	return sched_state_from_tstring_(stateArgStr);
 }
 
 static vtl_always_inline taskstate_t

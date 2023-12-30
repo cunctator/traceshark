@@ -458,26 +458,29 @@ sched_state_from_tstring_(const TString *str)
 		case TASK_CHAR_TRACED:
 			flag = TASK_FLAG_TRACED;
 			break;
-		case TASK_CHAR_EXIT_DEAD:
-			flag = TASK_FLAG_EXIT_DEAD;
+		case TASK_CHAR_EXIT_DEAD_OR_ZOMBIE:
+			flag = TASK_FLAG_EXIT_DEAD_OR_ZOMBIE;
 			break;
-		case TASK_CHAR_EXIT_ZOMBIE:
-			flag = TASK_FLAG_EXIT_ZOMBIE;
+		case TASK_CHAR_EXIT_ZOMBIE_OR_DEAD:
+			flag = TASK_FLAG_EXIT_ZOMBIE_OR_DEAD;
 			break;
-		case TASK_CHAR_DEAD:
-			flag = TASK_FLAG_DEAD;
+		case TASK_CHAR_DEAD_V1:
+			flag = TASK_FLAG_DEAD_V1;
 			break;
-		case TASK_CHAR_WAKEKILL:
-			flag = TASK_FLAG_WAKEKILL;
+		case TASK_CHAR_DEAD_V2:
+			flag = TASK_FLAG_DEAD_V2;
 			break;
-		case TASK_CHAR_WAKING:
-			flag = TASK_FLAG_WAKING;
+		case TASK_CHAR_WAKEKILL_OLD:
+			flag = TASK_FLAG_WAKEKILL_OLD;
+			break;
+		case TASK_CHAR_WAKING_OLD:
+			flag = TASK_FLAG_WAKING_OLD;
 			break;
 		case TASK_CHAR_PARKED:
 			flag = TASK_FLAG_PARKED;
 			break;
-		case TASK_CHAR_NOLOAD:
-			flag = TASK_FLAG_NOLOAD;
+		case TASK_CHAR_NOLOAD_OLD:
+			flag = TASK_FLAG_NOLOAD_OLD;
 			break;
 		case TASK_CHAR_PREEMPT:
 			flag = TASK_FLAG_PREEMPT;
@@ -489,8 +492,9 @@ sched_state_from_tstring_(const TString *str)
 		case ' ':
 			flag = 0;
 			break;
+		/* Accept also unknown characters and set the unknown flag */
 		default:
-			return TASK_STATE_PARSER_ERROR;
+			flag = TASK_FLAG_UNKNOWN;
 			break;
 		};
 		state |= flag;

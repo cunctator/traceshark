@@ -140,10 +140,7 @@ perf_sched_switch_handle_state(const TraceEvent &event,
 distro_style:
 	/* This is the distro format */
 	const TString *stateArgStr = event.argv[i];
-	if (stateArgStr->len == 1 || stateArgStr->len == 2) {
-		return sched_state_from_tstring_(stateArgStr);
-	}
-	return TASK_STATE_PARSER_ERROR;
+	return sched_state_from_tstring_(stateArgStr);
 }
 
 static vtl_always_inline int

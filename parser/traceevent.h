@@ -65,58 +65,72 @@
 /*
  * The definitions of the char values below comes from how the Linux kernel
  * outputs the task state when sched_switch events are emitted, see how the
- * sched_switch event is define in include/trace/events/sched.h in the Linux
- * kernel sources, here I am referring to version 4.7.2
+ * sched_switch event is defined in include/trace/events/sched.h in the Linux
+ * kernel sources, here I am referring to versions 4.7 - 6.7-rc7
+ *
+ * You can also checkout include/linux/sched.h
  */
 
-#define TASK_STATE_RUNNABLE		0
-#define TASK_SCHAR_RUNNABLE		'R'
+#define TASK_STATE_RUNNABLE			0x0000
+#define TASK_SCHAR_RUNNABLE			'R'
 
-#define TASK_FLAG_INTERRUPTIBLE		1
-#define TASK_CHAR_INTERRUPTIBLE		'S'
+#define TASK_FLAG_INTERRUPTIBLE			0x0001
+#define TASK_CHAR_INTERRUPTIBLE			'S'
 
-#define TASK_FLAG_UNINTERRUPTIBLE	2
-#define TASK_CHAR_UNINTERRUPTIBLE	'D'
+#define TASK_FLAG_UNINTERRUPTIBLE		0x0002
+#define TASK_CHAR_UNINTERRUPTIBLE		'D'
 
-#define TASK_FLAG_STOPPED		4 /* Use with care */
-#define TASK_CHAR_STOPPED		'T'
+#define TASK_FLAG_STOPPED			0x0004 /* Use with care */
+#define TASK_CHAR_STOPPED			'T'
 
-#define TASK_FLAG_TRACED		8 /* Use with care */
-#define TASK_CHAR_TRACED		't'
+#define TASK_FLAG_TRACED			0x0008 /* Use with care */
+#define TASK_CHAR_TRACED			't'
 
-#define TASK_FLAG_EXIT_DEAD		16
-#define TASK_CHAR_EXIT_DEAD		'Z'
+/*
+ * The meaning of 'Z' and 'X' has been swapped somewhere between v4.7 and
+ * 6.7-rc7
+ */
+#define TASK_FLAG_EXIT_DEAD_OR_ZOMBIE		0x0010
+#define TASK_CHAR_EXIT_DEAD_OR_ZOMBIE		'Z'
 
-#define TASK_FLAG_EXIT_ZOMBIE		32
-#define TASK_CHAR_EXIT_ZOMBIE		'X'
+#define TASK_FLAG_EXIT_ZOMBIE_OR_DEAD	       0x0020
+#define TASK_CHAR_EXIT_ZOMBIE_OR_DEAD		'X'
 
 /* I guess this well never be used but include it for completeness sake */
-#define TASK_FLAG_EXIT_TRACE		(16 | 32)
+#define TASK_FLAG_EXIT_TRACE			(0x0010 | 0x0020)
 
-#define TASK_FLAG_DEAD			64
-#define TASK_CHAR_DEAD			'x'
+#define TASK_FLAG_DEAD_V1			0x0040
+#define TASK_CHAR_DEAD_V1			'x'
 
-#define TASK_FLAG_WAKEKILL		128
-#define TASK_CHAR_WAKEKILL		'K'
+#define TASK_FLAG_DEAD_V2			0x0080
+#define TASK_CHAR_DEAD_V2			'I'
 
-#define TASK_FLAG_WAKING		256
-#define TASK_CHAR_WAKING		'W'
+/* This is apparently deprecated */
+#define TASK_FLAG_WAKEKILL_OLD			0x0100
+#define TASK_CHAR_WAKEKILL_OLD			'K'
 
-#define TASK_FLAG_PARKED		512
-#define TASK_CHAR_PARKED		'P'
+/* This too is deprecated */
+#define TASK_FLAG_WAKING_OLD			0x0200
+#define TASK_CHAR_WAKING_OLD			'W'
 
-#define TASK_FLAG_NOLOAD		1024
-#define TASK_CHAR_NOLOAD		'N'
+#define TASK_FLAG_PARKED			0x0400
+#define TASK_CHAR_PARKED			'P'
 
-#define TASK_STATE_PARSER_ERROR         2048
+/* This too is deprecated */
+#define TASK_FLAG_NOLOAD_OLD			0x0800
+#define TASK_CHAR_NOLOAD_OLD			'N'
 
-#define TASK_FLAG_MAX			4096
-#define TASK_FLAG_PREEMPT      		TASK_FLAG_MAX
-#define TASK_CHAR_PREEMPT		'+'
+#define TASK_FLAG_UNKNOWN 		        0x1000
 
-#define TASK_FLAG_MASK			(TASK_FLAG_MAX - 1)
+#define TASK_STATE_PARSER_ERROR			0x2000
 
-#define TASK_CHAR_SEPARATOR		'|'
+#define TASK_FLAG_MAX				0x4000
+#define TASK_FLAG_PREEMPT    	  		TASK_FLAG_MAX
+#define TASK_CHAR_PREEMPT			'+'
+
+#define TASK_FLAG_MASK				(TASK_FLAG_MAX - 1)
+
+#define TASK_CHAR_SEPARATOR			'|'
 
 /*
  * This works because TASK_FLAG_MASK will mask out the preemption flag
