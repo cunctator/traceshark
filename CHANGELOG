@@ -1,4 +1,4 @@
-traceshark (1.0) UNRELEASED; urgency=medium
+traceshark (1.0-rc) UNRELEASED; urgency=medium
 
    * Update qcustomplot to 2.1.1 from upstream.
    * Add a button for exporting statistics to the statistics widgets.
@@ -27,8 +27,8 @@ traceshark (1.0) UNRELEASED; urgency=medium
      changing the color. This tasks are not real.
    * Add icons to push buttons to the task select and statistics dialogs.
    * Change the name of "task graphs" to "unified graphs" in the UI.
-   * Use std::move() in order to fix  CID 1566290, 1566288, and 156287 in
-     Coverity.
+   * Use std::move() in order to fix  CID 1566290, 1566288, 156287, and 1575567
+     in Coverity.
    * Use icons in the push buttons in the regex dialogs.
    * Use icons in the push buttons in the latency widget.
    * Use icons in the push buttons in the CPU select dialog.
@@ -37,6 +37,8 @@ traceshark (1.0) UNRELEASED; urgency=medium
    * Fix bug where png icon was used instead of svg icon.
    * Add support for building with Qt6
    * perf-record.sh: Do not try to automatically use more than 1G of buffers
+   * Improve support for modern kernels with respect to the parsing of the state
+     of the previous task in sched_switch events.
 
  -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 30 Oct 2023 00:32:43 +0200
 
