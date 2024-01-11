@@ -189,22 +189,18 @@ sudo dnf install qcustomplot-qt5-devel
 ```
 
 On macOS, you will need to:
-* Install Xcode and macports as described at [macports.org](https://www.macports.org)
-* Install the desired Qt version, for example Qt 5.13:
+* Install Xcode and Homebrew as described at [brew.sh](https://brew.sh)
+* Install Qt version 6.x:
 ```
-sudo port install qt513
+brew install qt
 ```
-* You need to find the directory where qmake is and add it to your path. Something like this:
-````
-echo 'export PATH=/opt/local/viktor/bin:$PATH:/opt/local/libexec/qt5/bin' >> $HOME/.zshrc
-````
 
 ## 2.2 How to compile and install
 
 The program can be compiled and installed by doing something like this:
 
 ```
-qmake-qt5 (on some distros you should use just qmake instead of qmake-qt5)
+qmake (on some distros you should use qmake6, or qmake-qt5 instead of qmake)
 make -j5
 sudo make install
 ```
