@@ -195,6 +195,9 @@ On macOS, you will need to:
 brew install qt
 ```
 
+NB: It seems like on macOS you need to make sure that the currently used screen resolution matches the screen's native resolution. Otherwise, the graphs will be rendered in a very strange way; at least this has been seen on a Mac Studio with Ventura.
+
+
 ## 2.2 How to compile and install
 
 The program can be compiled and installed by doing something like this:
