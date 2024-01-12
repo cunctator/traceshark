@@ -236,8 +236,8 @@ uncomment this to build for Broadwell:
 The recommended default compiler is g++ but you can compile with clang, or another version of g++, if you like, by uncommenting and possibly editing one of the following in traceshark.pro:
 
 ```
-# USE_ALTERNATIVE_COMPILER = clang++-6.0
-# USE_ALTERNATIVE_COMPILER = g++-8
+# USE_ALTERNATIVE_COMPILER = clang++-14
+# USE_ALTERNATIVE_COMPILER = g++-12
 ```
 
 If you want to build a debug build, uncomment one of the following two lines:
@@ -246,8 +246,15 @@ If you want to build a debug build, uncomment one of the following two lines:
 # Uncomment this for debug build:
 # USE_DEBUG_FLAG = -g
 
-# Uncomment this for debug build without optimization:
-# USE_DEBUG_FLAG = -g -O0
+# Uncomment this for debug symbols and optmized for debug:
+# USE_DEBUG_FLAG = -g -Og
+```
+
+If you want to enable the Qt debug features, then you need to uncomment this line:
+
+```
+# Uncomment this for debug build. This affects Qt.
+# QT_DEBUG_BUILD = yes
 ```
 
 This is not recommended because it will very likely result in worse performance but if you absolutely want to use the QCustomPlot library on your system, then you need to uncomment the following line:
