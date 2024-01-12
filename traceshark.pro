@@ -336,6 +336,8 @@
 
 # Uncomment this for debug symbols and without optimization:
 # USE_DEBUG_FLAG = -g -O0
+
+# Uncomment this for debug symbols and optmized for debug:
 # USE_DEBUG_FLAG = -g -Og
 
 # Uncomment this for debug build. This affects Qt.
