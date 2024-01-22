@@ -155,6 +155,7 @@ public:
 	const TString *taskName;
 	int pid;
 	unsigned int cpu;
+	const TString *flagstr;
 	vtl::Time time;
 	int intArg;
 	event_t type;

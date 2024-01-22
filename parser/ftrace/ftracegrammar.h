@@ -81,20 +81,24 @@ public:
 private:
 	void setupEventTree();
 	vtl_always_inline bool NamePidMatch(const TString *str,
-					  TraceEvent &event);
+					    TraceEvent &event);
 	vtl_always_inline bool CPUMatch(const TString *str,
-				      TraceEvent &event);
+					TraceEvent &event);
+	vtl_always_inline bool FlagMatch(const TString *str,
+					 TraceEvent &event);
 	vtl_always_inline bool extractNameAndPid(int &pid, TString &compound);
 	vtl_always_inline bool TimeMatch(const TString *str, TraceEvent &event);
 	vtl_always_inline
 	bool EventMatch(const TString *str, TraceEvent &event);
 	vtl_always_inline bool ArgMatch(const TString *str, TraceEvent &event);
 	StringPool<> *argPool;
+	StringPool<> *flagPool;
 	StringPool<> *namePool;
 	int unknownTypeCounter;
 	typedef enum : int {
 		STATE_NAMEPID = 0,
 		STATE_CPU,
+		STATE_FLAGS,
 		STATE_TIME,
 		STATE_EVENT,
 		STATE_ARG
@@ -146,6 +150,39 @@ vtl_always_inline bool FtraceGrammar::CPUMatch(const TString *str,
 error:
 	event.cpu = 0;
 	return false;
+}
+
+vtl_always_inline bool FtraceGrammar::FlagMatch(const TString *str,
+						TraceEvent &event)
+{
+	char fourth;
+	char fifth;
+	int i;
+
+	event.flagstr = nullptr;
+
+	if (str->len != 5)
+		return false;
+
+	fourth = str->ptr[3];
+	fifth = str->ptr[4];
+
+	/*
+	 * We except any alphabetic letter here, although only a subset have
+	 * a defined meaning at the moment.
+	 */
+	for (i = 0; i < 3; i++) {
+		if (!isalpha(str->ptr[i]) && str->ptr[i] != '.')
+			return false;
+	}
+
+	if (fourth != '.' && !isxdigit(fourth))
+		return false;
+	if (fifth != '.' && !isxdigit(fifth))
+		return false;
+
+	event.flagstr = flagPool->allocString(str, 0);
+	return true;
 }
 
 vtl_always_inline bool FtraceGrammar::extractNameAndPid(int &pid,
@@ -333,6 +370,15 @@ vtl_always_inline bool FtraceGrammar::parseLine(const TraceLine &line,
 				break;
 			}
 			NEXTTOKEN(false);
+			ts_fallthrough;
+		case STATE_FLAGS:
+			/*
+			 * The flag field is optional, if it doesn't match, we
+			 * just fallthrough to the time field. If it matches, we
+			 * go to the proceed to the next token
+			 */
+			if (FlagMatch(str, event))
+				NEXTTOKEN(false);
 			ts_fallthrough;
 		case STATE_TIME:
 			if (!TimeMatch(str, event)) {

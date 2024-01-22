@@ -61,6 +61,7 @@ FtraceGrammar::FtraceGrammar() :
 	unknownTypeCounter(EVENT_UNKNOWN), tmp_argc(0)
 {
 	argPool = new StringPool<>(2048, 1024 * 1024);
+	flagPool = new StringPool<>(1024, 65536);
 	namePool =  new StringPool<>(1024, 65536);
 	eventTree = new StringTree<>(8, 256, 4096);
 	tshark_bzero(tmp_argv, sizeof(tmp_argv));
@@ -70,6 +71,7 @@ FtraceGrammar::FtraceGrammar() :
 FtraceGrammar::~FtraceGrammar()
 {
 	delete argPool;
+	delete flagPool;
 	delete namePool;
 	delete eventTree;
 }
@@ -77,6 +79,7 @@ FtraceGrammar::~FtraceGrammar()
 void FtraceGrammar::clear()
 {
 	argPool->clear();
+	flagPool->clear();
 	namePool->clear();
 	eventTree->clear();
 	setupEventTree();
