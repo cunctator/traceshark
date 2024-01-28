@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020, 2024
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,6 +51,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdio>
+
 #include <QVariant>
 #include <QString>
 #include "ui/eventsmodel.h"
@@ -59,29 +62,66 @@
 
 
 EventsModel::EventsModel(QObject *parent):
-	QAbstractTableModel(parent), events(nullptr), eventsPtrs(nullptr)
+	QAbstractTableModel(parent), has_flag_field(false), events(nullptr),
+	eventsPtrs(nullptr)
 {}
 
 EventsModel::EventsModel(vtl::TList<TraceEvent> *e, QObject *parent):
-	QAbstractTableModel(parent), events(e), eventsPtrs(nullptr)
+	QAbstractTableModel(parent), has_flag_field(false), events(e),
+	eventsPtrs(nullptr)
 {}
 
 void EventsModel::setEvents(vtl::TList<TraceEvent> *e)
 {
 	events = e;
 	eventsPtrs = nullptr;
+	checkFlagField();
 }
 
 void EventsModel::setEvents(vtl::TList<const TraceEvent*> *e)
 {
 	events = nullptr;
 	eventsPtrs = e;
+	checkFlagField();
 }
 
 void EventsModel::clear()
 {
 	events = nullptr;
 	eventsPtrs = nullptr;
+	checkFlagField();
+}
+
+void EventsModel::checkFlagField()
+{
+	int s = getSize();
+
+	has_flag_field = false;
+
+	if (s <= 0)
+		return;
+
+	/*
+	 * We check the first event, an event in the middle and the last event.
+	 * If any of these has a flag field, we add the flag field.
+	 */
+	const TraceEvent &first_event = *getEventAt(0);
+	if (first_event.flagstr != nullptr) {
+		has_flag_field = true;
+		return;
+	}
+
+	const TraceEvent &middle_event = *getEventAt(s / 2);
+	if (middle_event.flagstr != nullptr) {
+		has_flag_field = true;
+		return;
+	}
+
+	const TraceEvent &last_event = *getEventAt(s - 1);
+	if (last_event.flagstr != nullptr) {
+		has_flag_field = true;
+		return;
+	}
 }
 
 int EventsModel::rowCount(const QModelIndex & /* parent */) const
@@ -91,7 +131,11 @@ int EventsModel::rowCount(const QModelIndex & /* parent */) const
 
 int EventsModel::columnCount(const QModelIndex & /* parent */) const
 {
-	return column_to_int(NR_COLUMNS);
+	int nr_col = column_to_int(NR_COLUMNS);
+
+	if (!has_flag_field)
+		nr_col--;
+	return nr_col;
 }
 
 QVariant EventsModel::data(const QModelIndex &index, int role) const
@@ -106,7 +150,14 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		return int(Qt::AlignLeft | Qt::AlignVCenter);
 	} else if (role == Qt::DisplayRole) {
 		int row = index.row();
-		column_t column = int_to_column(index.column());
+		int col = index.column();
+
+		if (!has_flag_field) {
+			if (col >= column_to_int(COLUMN_FLAGS))
+				col++;
+		}
+
+		column_t column = int_to_column(col);
 		int size;
 
 		if (events == nullptr && eventsPtrs == nullptr)
@@ -116,6 +167,8 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 
 		const TraceEvent &event = *getEventAt(row);
+
+
 		switch(column) {
 		case COLUMN_TIME:
 			return event.time.toQString();
@@ -126,6 +179,10 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 		case COLUMN_CPU:
 			return QString("[") + QString::number(event.cpu) +
 				QString("]");
+		case COLUMN_FLAGS:
+			if (event.flagstr != nullptr)
+				str += QString(event.flagstr->ptr);
+			return str;
 		case COLUMN_TYPE:
 			return QString(event.getEventName()->ptr);
 		case COLUMN_INFO:
@@ -162,7 +219,14 @@ QVariant EventsModel::headerData(int section,
 				 Qt::Orientation orientation,
 				 int role) const
 {
-	column_t column = int_to_column(section);
+	column_t column;
+
+	if (!has_flag_field) {
+		if (section >= column_to_int(COLUMN_FLAGS))
+			section++;
+	}
+
+	column = int_to_column(section);
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
 		switch(column) {
 		case COLUMN_TIME:
@@ -173,11 +237,14 @@ QVariant EventsModel::headerData(int section,
 			return QString(tr("PID(TID)"));
 		case COLUMN_CPU:
 			return QString(tr("CPU"));
+		case COLUMN_FLAGS:
+			return QString(tr("Flags"));
 		case COLUMN_TYPE:
 			return QString(tr("Event type"));
 		case COLUMN_INFO:
 			return QString(tr("Info"));
 		default:
+			printf("%s(column=%d)\n", __FUNCTION__, (int) column);
 			return QString(tr("Error in eventsmodel.cpp"));	
 		}
 	}

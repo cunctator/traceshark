@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2018, 2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2018, 2020, 2024
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -70,6 +71,7 @@ public:
 		COLUMN_TASKNAME,
 		COLUMN_PID,
 		COLUMN_CPU,
+		COLUMN_FLAGS,
 		COLUMN_TYPE,
 		COLUMN_INFO,
 		NR_COLUMNS
@@ -92,10 +94,12 @@ public:
 	static vtl_always_inline column_t int_to_column(int i);
 	static vtl_always_inline int column_to_int(column_t c);
 private:
+	bool has_flag_field;
 	vtl::TList<TraceEvent> *events;
 	vtl::TList<const TraceEvent*> *eventsPtrs;
 	const TraceEvent* getEventAt(int index) const;
 	int getSize() const;
+	void checkFlagField(void);
 };
 
 vtl_always_inline EventsModel::column_t EventsModel::int_to_column(int i)
