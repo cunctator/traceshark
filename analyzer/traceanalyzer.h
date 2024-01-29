@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2024  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -639,21 +639,23 @@ void TraceAnalyzer::processSwitchEvent(tracetype_t ttype,
 	vtl::Time oldtime = event.time - FAKE_DELTA;
 	vtl::Time newtime = event.time + FAKE_DELTA;
 	vtl::Time midtime = event.time;
-	double oldtimeDbl, newtimeDbl;
-	int oldpid;
-	int newpid;
-	CPUTask *cpuTask;
-	Task *task;
+	double oldtimeDbl = 0.0, newtimeDbl = 0.0;
+	int oldpid = 0;
+	int newpid = 0;
+	CPUTask *cpuTask = nullptr;
+	Task *task = nullptr;
 	vtl::Time delay;
-	bool delayOK;
+	bool delayOK = false;
 	vtl::Time wakedelay;
-	bool wakedelayOK;
+	bool wakedelayOK = false;
 	CPU *eventCPU = &CPUs[cpu];
-	taskstate_t state;
-	const char *name;
-	bool runnable;
-	bool preempted;
-	bool uint;
+	taskstate_t state = 0;
+	const char *name = nullptr;
+	bool runnable = false;
+	bool preempted = false;
+	bool uint = false;
+	double delayDbl = 0.0;
+	double wakedelayDbl = 0.0;
 
 	if (!sched_switch_parse(ttype, event, handle))
 		return;
@@ -863,8 +865,6 @@ skip:
 		wakedelay = estimateWakeDelay(task, midtime, wakedelayOK);
 	}
 
-	double delayDbl;
-
 	if (delayOK) {
 		Latency &slatency = schedLatencies.increase();
 
@@ -883,8 +883,6 @@ skip:
 		 */
 		slatency.runnable_idx = task->lastRunnable_idx;
 	}
-
-	double wakedelayDbl;
 
 	if (wakedelayOK) {
 		Latency &wlatency = wakeLatencies.increase();
