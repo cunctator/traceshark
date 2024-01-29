@@ -131,11 +131,7 @@ int EventsModel::rowCount(const QModelIndex & /* parent */) const
 
 int EventsModel::columnCount(const QModelIndex & /* parent */) const
 {
-	int nr_col = column_to_int(NR_COLUMNS);
-
-	if (!has_flag_field)
-		nr_col--;
-	return nr_col;
+	return column_to_int(NR_COLUMNS);
 }
 
 QVariant EventsModel::data(const QModelIndex &index, int role) const
@@ -151,11 +147,6 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 	} else if (role == Qt::DisplayRole) {
 		int row = index.row();
 		int col = index.column();
-
-		if (!has_flag_field) {
-			if (col >= column_to_int(COLUMN_FLAGS))
-				col++;
-		}
 
 		column_t column = int_to_column(col);
 		int size;
@@ -220,11 +211,6 @@ QVariant EventsModel::headerData(int section,
 				 int role) const
 {
 	column_t column;
-
-	if (!has_flag_field) {
-		if (section >= column_to_int(COLUMN_FLAGS))
-			section++;
-	}
 
 	column = int_to_column(section);
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {

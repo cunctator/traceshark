@@ -245,7 +245,7 @@ int EventsWidget::binarySearch(const vtl::Time &time, int start, int end)
 void EventsWidget::handleDoubleClick(const QModelIndex &index)
 {
 	const TraceEvent &event = *getEventAt(index.row());
-	EventsModel::column_t col = (EventsModel::column_t) index.column();
+	EventsModel::column_t col = eventsModel->int_to_column(index.column());
 	emit eventDoubleClicked(col, event);
 }
 

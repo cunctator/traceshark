@@ -91,8 +91,8 @@ public:
 	void beginResetModel();
 	void endResetModel();
 	Qt::ItemFlags flags(const QModelIndex &index) const;
-	static vtl_always_inline column_t int_to_column(int i);
-	static vtl_always_inline int column_to_int(column_t c);
+	vtl_always_inline column_t int_to_column(int i) const;
+	vtl_always_inline int column_to_int(column_t c) const;
 private:
 	bool has_flag_field;
 	vtl::TList<TraceEvent> *events;
@@ -102,14 +102,20 @@ private:
 	void checkFlagField(void);
 };
 
-vtl_always_inline EventsModel::column_t EventsModel::int_to_column(int i)
+vtl_always_inline EventsModel::column_t EventsModel::int_to_column(int i) const
 {
+	if (!has_flag_field && i >= ((int)(COLUMN_FLAGS)))
+		i++;
 	return (column_t) i;
 }
 
-vtl_always_inline int EventsModel::column_to_int(EventsModel::column_t c)
+vtl_always_inline int EventsModel::column_to_int(EventsModel::column_t c) const
 {
-	return (int) c;
+	int i = (int) c;
+
+	if (!has_flag_field && i >= ((int)(COLUMN_FLAGS) + 1))
+		i--;
+	return i;
 }
 
 #endif /* EVENTSMODEL_H */
