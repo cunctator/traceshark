@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2.8b -->
+<!-- CreationDate: 2024-02-03 21:35:43 -->
+<!-- Magnification: 1.05 -->
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="542pt" height="541pt"
+	viewBox="2463 213 8596 8574">
+<g fill="none">
+<!-- Circle -->
+<circle cx="6750" cy="4500" r="2925"
+	stroke="#000000" stroke-width="1185px"/>
+<!-- Circle -->
+<circle cx="6750" cy="4500" r="1575" fill="#008f8f"
+	stroke="#008f8f" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 4860,7470 3960,7920 3330,7290 3780,6390" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 3780,2610 3330,1710 3960,1080 4860,1530" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 5868,1125 6318,225 7218,225 7668,1125 5868,1125" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 8595,1530 9495,1080 10125,1710 9675,2610" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 10147,3611 11047,4061 11047,4961 10147,5411 10147,3611" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 9710,6385 10160,7285 9530,7915 8630,7465" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 7650,7875 7200,8775 6300,8775 5850,7875 7650,7875" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<polyline points=" 3375,5400 2475,4950 2475,4050 3375,3600 3375,5400" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
+</g>
+</svg>

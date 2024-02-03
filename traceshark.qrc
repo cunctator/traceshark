@@ -38,7 +38,6 @@
   <file>images/fullzoom30x30.png</file>
   <file>images/getstats30x30.png</file>
   <file>images/getstatstimelimit30x30.png</file>
-  <file>images/graphenabledialog30x30.png</file>
   <file>images/latency30x30.png</file>
   <file>images/latency-wakeup30x30.png</file>
   <file>images/moveblue30x30.png</file>
@@ -50,6 +49,7 @@
   <file>images/resetfilters30x30.png</file>
   <file>images/save30x30.png</file>
   <file>images/screenshot30x30.png</file>
+  <file>images/settings30x30.png</file>
   <file>images/taskselector30x30.png</file>
   <file>images/timefilter30x30.png</file>
   <file>images/verticalzoom30x30.png</file>
@@ -90,7 +90,6 @@
   <file>images/fullzoom.svg</file>
   <file>images/getstats.svg</file>
   <file>images/getstatstimelimit.svg</file>
-  <file>images/graphenabledialog.svg</file>
   <file>images/latency.svg</file>
   <file>images/latency-wakeup.svg</file>
   <file>images/moveblue.svg</file>
@@ -102,6 +101,7 @@
   <file>images/resetfilters.svg</file>
   <file>images/save.svg</file>
   <file>images/screenshot.svg</file>
+  <file>images/settings.svg</file>
   <file>images/taskselector.svg</file>
   <file>images/timefilter.svg</file>
   <file>images/verticalzoom.svg</file>

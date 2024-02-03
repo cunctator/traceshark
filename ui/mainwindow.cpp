@@ -1821,7 +1821,7 @@ void MainWindow::createActions()
 
 	graphEnableAction = new QAction(tr("Select &graphs and settings..."),
 					this);
-	graphEnableAction->setIcon(QIcon(RESSRC_GPH_GRAPHENABLE));
+	graphEnableAction->setIcon(QIcon(RESSRC_GPH_SETTINGS));
 	graphEnableAction->setToolTip(tr(TOOLTIP_GRAPHENABLE));
 	tsconnect(graphEnableAction, triggered(), this, showGraphEnable());
 
