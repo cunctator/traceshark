@@ -273,6 +273,24 @@ There are two ways to capture a trace: Ftrace and perf. Perf is the recommended 
 
 For both Ftrace and perf it is very desirable to avoid lost events because traceshark cannot visualize correctly with lost events, nor can it find a wakeup event that has been lost.
 
+When tracing, particularly when capturing many kilobytes of the stack with each event, the impact of the filesystem may easily become non-negligible. In particular, if when tracing some hot event that may be triggered by the file system, then if the storing of one event on average generates one or more additional events then there will of course be an explosion of events, and the tracing will end in a non-desirable way in one way or another.
+
+If the system has enough RAM, one thing that can be done to ameliorate the situation is to store the trace to tmpfs. You can create a tmpfs by doing something like this:
+
+```
+ sudo mkdir -p /mnt/tmp
+ sudo mount -t tmpfs -o size=8192M tmpfs /mnt/tmp
+```
+
+...or you can add a line to your /etc/fstab:
+
+```
+tmpfs      /mnt/tmp        tmpfs   size=8192M      0        2
+```
+
+The above is only provided as an example; you will probably need to adjust the size and path according to your needs. The benefit with tmpfs is that it is very fast and generally doesn't generate a lot of events. The downside is of course that it will easily consume a lot of RAM.
+
+
 ## 3.1 Sample traces
 
 If you are not anxious to trace anything in particular but only want to play around with traceshark, then you can find sample traces [here](https://github.com/cunctator/traceshark-resources), or just clone the repo with the samples:
@@ -390,3 +408,11 @@ On Ubunut Bionic and Debian Buster/Bullseye the following might work:
 ```
 sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang2-dev libslang2 'libunwind*' libunwind8 python-dev libzstd-dev libcap-dev
 ```
+
+On Ubunut Jammy, the following might work:
+
+```
+sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang2-dev libslang2 libunwind-dev libunwind8 python3-dev libzstd-dev libcap-dev libtraceevent-dev libssl-dev libbabeltrace-dev  python3-setuptools libpfm4-dev systemtap-sdt-dev java-common openjdk-8-jdk
+```
+
+The two examples above may need to be adjusted based on what kernel version you have.
