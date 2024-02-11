@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2019, 2024  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -176,7 +176,7 @@ void ValueBox::setValue(const Setting::Value &v)
 		break;
 	case TYPE_COMBOBOX:
 		Setting::assert_int(v);
-		comboBox->setCurrentIndex(v.value.bool_value - value_min);
+		comboBox->setCurrentIndex(v.value.int_value - value_min);
 		break;
 	case TYPE_SPINBOX:
 		Setting::assert_int(v);
