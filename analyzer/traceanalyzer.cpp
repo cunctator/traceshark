@@ -1739,7 +1739,7 @@ int TraceAnalyzer::writePerfEvent(char *wb, int *space, const TraceEvent *eptr,
 		if (cs > 0) {
 			written += cs;
 			*space  -= cs;
-			wb      += cs;
+			/* wb      += cs; We don't need wb anymore */
 		}
 	}
 
@@ -1789,7 +1789,7 @@ int TraceAnalyzer::writeLatency(char *wb, int *space, const Latency *lptr,
 	if (likely(w > 0)) {
 		written += w;
 		*space  -= w;
-		wb      += w;
+		/* wb   += w; We don't need wb anymore */
 	} else {
 		if (w < 0)
 			*ts_errno = errno;
