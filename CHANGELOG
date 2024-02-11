@@ -35,12 +35,16 @@ traceshark (1.0-rc) UNRELEASED; urgency=medium
    * Use icons in the push buttons in the event select dialog.
    * Use icons in the settings dialog.
    * Fix bug where png icon was used instead of svg icon.
-   * Add support for building with Qt6
-   * perf-record.sh: Do not try to automatically use more than 1G of buffers
-   * Improve support for modern kernels with respect to the parsing of the state
+   * Add support for building with Qt6.
+   * perf-record.sh: Do not try to automatically use more than 1G of buffers.
+   * Improve support for modern kernels with respect to the parsing of the state.
      of the previous task in sched_switch events.
+   * Replace the icon for settings and selecting graphs.
+   * Parse and display the Ftrace flags field. This field has always been
+     in /sys/kernel/debug/tracing/trace{,_pipe} but now it's also present
+     the output from trace-cmd.
 
- -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Mon, 30 Oct 2023 00:32:43 +0200
+ -- Viktor Rosendahl <viktor.rosendahl@gmail.com>  Sun, 11 Feb 2024 23:09:43 +0200
 
 traceshark (0.9.14-beta) RELEASED; urgency=medium
 
