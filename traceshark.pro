@@ -343,6 +343,11 @@
 # Uncomment this for debug build. This affects Qt.
 # QT_DEBUG_BUILD = yes
 
+# Uncomment this to enable ASan and/or UBSan
+# USE_DYNAMIC_CHECKERS = -fsanitize=address -g -O1
+# USE_DYNAMIC_CHECKERS = -fsanitize=undefined -g -O1
+# USE_DYNAMIC_CHECKERS = -fsanitize=address,undefined -g -O1
+
 # Uncomment if you want to use hardening flags
 # Not really needed, unless browsing data controlled by a non-trusted source
 # or for testing purposes.
@@ -621,7 +626,7 @@ HARDENING_CXXFLAGS += -fstack-protector-strong
 
 HARDENING_LFLAGS += -Wl,-z,relro,-z,now
 
-OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${USE_DEBUG_FLAG} $${USE_EXTRA_OPTS}
+OUR_FLAGS = $${MARCH_FLAG} $${MTUNE_FLAG} $${USE_DEBUG_FLAG} $${USE_DYNAMIC_CHECKERS} $${USE_EXTRA_OPTS}
 
 equals(USE_HARDENING_CXXFLAGS, yes) {
 OUR_FLAGS += $${HARDENING_CXXFLAGS}
