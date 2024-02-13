@@ -416,6 +416,7 @@ void MainWindow::configureScrollBar()
 		value = 1;
 	}
 
+	diff = TSMAX(0.001, diff);
 	pstep = zrange.size() / diff * smax;
 
 	scrollBarUpdate = true;
