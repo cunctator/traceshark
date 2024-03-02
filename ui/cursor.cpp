@@ -104,8 +104,8 @@ void Cursor::setPosition(const vtl::Time &t)
 
 void Cursor::setPosition_(double pos)
 {
-	start->setCoords(pos, -10000000000000000);
-	end->setCoords(pos, +10000000000000000);
+	start->setCoords(pos, -1000000000);
+	end->setCoords(pos, +1000000000);
 	parentPlot()->replot();
 	position = pos;
 }
