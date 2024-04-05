@@ -286,6 +286,20 @@
 # MARCH_FLAG = -march=rocketlake
 # MTUNE_FLAG = -mtune=rocketlake
 
+### Generic X86-64
+
+# x86-64
+# MARCH_FLAG = -march=x86-64
+
+# x86-64-v2
+# MARCH_FLAG = -march=x86-64-v2
+
+# x86-64-v3
+# MARCH_FLAG = -march=x86-64-v3
+
+# x86-64-v4
+# MARCH_FLAG = -march=x86-64-v4
+
 ### Raspberry PI section
 
 # RPI 3 - this does not seem to help much, if at all
