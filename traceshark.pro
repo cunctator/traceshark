@@ -112,15 +112,27 @@
 # MARCH_FLAG = -march=prescott
 # MTUNE_FLAG = -mtune=prescott
 
-### x86-64 Section
+### Generic x86-64 Section
 
-# Generic 64-bit x86
+# x86-64
 # MARCH_FLAG = -march=x86-64
-# MTUNE_FLAG = -mtune=x86-64
+# MTUNE_FLAG = -mtune=intel
+# MTUNE_FLAG = -mtune=amd
 
-# Generic 64-bit x86
-# MARCH_FLAG = -march=x86-64
-# MTUNE_FLAG = -mtune=generic
+# x86-64-v2
+# MARCH_FLAG = -march=x86-64-v2
+# MTUNE_FLAG = -mtune=intel
+# MTUNE_FLAG = -mtune=amd
+
+# x86-64-v3
+# MARCH_FLAG = -march=x86-64-v3
+# MTUNE_FLAG = -mtune=intel
+# MTUNE_FLAG = -mtune=amd
+
+# x86-64-v4
+# MARCH_FLAG = -march=x86-64-v4
+# MTUNE_FLAG = -mtune=intel
+# MTUNE_FLAG = -mtune=amd
 
 ### AMD
 
@@ -173,10 +185,6 @@
 # MTUNE_FLAG = -mtune=btver2
 
 ### Intel
-
-# Generic Intel
-# MARCH_FLAG = -march=x86-64
-# MTUNE_FLAG = -mtune=intel
 
 # Cocona
 # MARCH_FLAG = -march=nocona
@@ -285,20 +293,6 @@
 # Rocket Lake
 # MARCH_FLAG = -march=rocketlake
 # MTUNE_FLAG = -mtune=rocketlake
-
-### Generic X86-64
-
-# x86-64
-# MARCH_FLAG = -march=x86-64
-
-# x86-64-v2
-# MARCH_FLAG = -march=x86-64-v2
-
-# x86-64-v3
-# MARCH_FLAG = -march=x86-64-v3
-
-# x86-64-v4
-# MARCH_FLAG = -march=x86-64-v4
 
 ### Raspberry PI section
 
