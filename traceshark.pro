@@ -116,23 +116,23 @@
 
 # x86-64
 # MARCH_FLAG = -march=x86-64
-# MTUNE_FLAG = -mtune=intel
 # MTUNE_FLAG = -mtune=amd
+# MTUNE_FLAG = -mtune=intel
 
 # x86-64-v2
 # MARCH_FLAG = -march=x86-64-v2
-# MTUNE_FLAG = -mtune=intel
 # MTUNE_FLAG = -mtune=amd
+# MTUNE_FLAG = -mtune=intel
 
 # x86-64-v3
 # MARCH_FLAG = -march=x86-64-v3
-# MTUNE_FLAG = -mtune=intel
 # MTUNE_FLAG = -mtune=amd
+# MTUNE_FLAG = -mtune=intel
 
 # x86-64-v4
 # MARCH_FLAG = -march=x86-64-v4
-# MTUNE_FLAG = -mtune=intel
 # MTUNE_FLAG = -mtune=amd
+# MTUNE_FLAG = -mtune=intel
 
 ### AMD
 
