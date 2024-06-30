@@ -294,7 +294,8 @@
 # MARCH_FLAG = -march=rocketlake
 # MTUNE_FLAG = -mtune=rocketlake
 
-### Raspberry PI section
+
+### ARM64 section
 
 # RPI 3 - this does not seem to help much, if at all
 # MARCH_FLAG = -mcpu=cortex-a53
@@ -304,9 +305,19 @@
 # MARCH_FLAG = -mcpu=cortex-a72
 # MTUNE_FLAG = -mtune=cortex-a72
 
-# Asus Tinkerboard
+# RK3288 (Asus Tinkerboard et al.)
 # MARCH_FLAG = -mcpu=cortex-a17
 # MTUNE_FLAG = -mtune=cortex-a17
+
+# RK3588 (Orange Pi 5 Plus et al.)
+# MARCH_FLAG = -mcpu=cortex-a76.cortex-a55
+# MTUNE_FLAG = -mtune=cortex-a76.cortex-a55
+
+# RK3588 (Orange Pi 5 Plus et al. with clang)
+# - clang does not suuport BIG.little option cortex-a76.cortex-a55
+# MARCH_FLAG = -mcpu=cortex-a55
+# MTUNE_FLAG = -mtune=cortex-a55
+
 
 ###############################################################################
 # Build configuration options used to compute generic compiler flags
