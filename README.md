@@ -404,12 +404,12 @@ of those dwarf, bfd, elf, and unwind related options are enabled. They tend to
 get automatically enabled if you have the necessary development packages
 installed on your machine.
 
-On Ubunut Bionic and Debian Buster/Bullseye the following might work:
+On Ubuntu Bionic and Debian Buster/Bullseye the following might work:
 ```
 sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang2-dev libslang2 'libunwind*' libunwind8 python-dev libzstd-dev libcap-dev
 ```
 
-On Ubunut Jammy, the following might work:
+On Ubuntu Jammy, the following might work:
 
 ```
 sudo apt-get install binutils-dev binutils-multiarch-dev bison elfutils flex libaudit-dev libbfd-dev libdw-dev libelf-dev libelf1 libgtk2.0-dev libiberty-dev liblzma-dev libnuma-dev libperl-dev libslang2-dev libslang2 libunwind-dev libunwind8 python3-dev libzstd-dev libcap-dev libtraceevent-dev libssl-dev libbabeltrace-dev  python3-setuptools libpfm4-dev systemtap-sdt-dev java-common openjdk-8-jdk
