@@ -176,6 +176,10 @@
 # MARCH_FLAG = -march=znver3
 # MTUNE_FLAG = -mtune=znver3
 
+# Zen v4
+# MARCH_FLAG = -march=znver4
+# MTUNE_FLAG = -mtune=znver4
+
 # Bobcat v1
 # MARCH_FLAG = -march=btver1
 # MTUNE_FLAG = -mtune=btver1
@@ -374,7 +378,7 @@
 
 # If you want to compile with another compiler than the defaul g++, then
 # uncomment and change to the compiler of your choice
-# USE_ALTERNATIVE_COMPILER = clang++-14
+# USE_ALTERNATIVE_COMPILER = clang++-16
 # USE_ALTERNATIVE_COMPILER = g++-12
 
 # These optimization options probably do not help, so leave them commented out.
