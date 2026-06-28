@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2018, 2020, 2022, 2023
+ * Copyright (C) 2014-2018, 2020, 2022, 2023, 2026
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -65,6 +65,7 @@
 #include "parser/traceparser.h"
 #include "misc/errors.h"
 #include "misc/chunk.h"
+#include "misc/osapi.h"
 #include "misc/traceshark.h"
 #include "threads/indexwatcher.h"
 #include "threads/threadbuffer.h"
@@ -95,6 +96,7 @@ TraceParser::TraceParser()
 
 	fakePostEventInfo.offset = 0;
 	fakePostEventInfo.len = 0;
+	fakePostEventInfo.next = nullptr;
 
 	ftraceLineData.clear();
 	perfLineData.clear();
@@ -308,6 +310,7 @@ void TraceParser::prepareParse()
 {
 	fakePostEventInfo.offset = 0;
 	fakePostEventInfo.len = 0;
+	fakePostEventInfo.next = nullptr;
 	fakeEvent.postEventInfo = &fakePostEventInfo;
 
 	perfLineData.clear();
@@ -315,10 +318,19 @@ void TraceParser::prepareParse()
 
 	ftraceLineData.clear();
 	ftraceLineData.prevEvent = &fakeEvent;
+	clearFtraceStackData();
 
 	ftraceEvents->clear();
 	perfEvents->clear();
 	events = nullptr;
+}
+
+void TraceParser::clearFtraceStackData()
+{
+	ftraceStackPending = false;
+	ftraceStackInfoBegin = 0;
+	ftraceStackOrigin = nullptr;
+	tshark_bzero(ftraceLastEventByCPU, sizeof(ftraceLastEventByCPU));
 }
 
 /*
@@ -346,7 +358,23 @@ void TraceParser::fixLastEvent()
 		break;
 	};
 
-	/* Only perf traces will have backtraces after events, I think */
+	/*
+	 * For ftrace traces the only post-event info is a stack-trace capture
+	 * from a trailing kernel_stack/user_stack event. If the trace ends while
+	 * such a capture is pending, finalize it here because there is no
+	 * following event line to do it.
+	 */
+	if (traceType == TRACE_TYPE_FTRACE) {
+		if (ftraceStackPending) {
+			attachStackChunk(ftraceStackOrigin,
+					 ftraceStackInfoBegin,
+					 traceFile->getFileSize());
+			ftraceStackPending = false;
+		}
+		return;
+	}
+
+	/* Only perf traces have backtraces directly after events */
 	if (traceType != TRACE_TYPE_PERF)
 		return;
 	/* If no events were found in the trace, then there is nothing to fix */
@@ -360,7 +388,33 @@ void TraceParser::fixLastEvent()
 			allocObj();
 		chunk->offset = infoBegin;
 		chunk->len =  traceFile->getFileSize() - infoBegin;
+		chunk->next = nullptr;
 		lastEvent.postEventInfo = chunk;
+	}
+}
+
+/*
+ * Allocate a Chunk for the file range [begin, end) and append it to the chain of
+ * post-event info chunks of the origin event. This is used to attach the text of
+ * a kernel_stack/user_stack event to the ordinary event that the stack trace
+ * belongs to. The chain normally holds at most two chunks (a kernel stack and a
+ * user stack).
+ */
+void TraceParser::attachStackChunk(TraceEvent *origin, int64_t begin,
+				   int64_t end)
+{
+	Chunk *chunk = (Chunk*) postEventPool->allocObj();
+	chunk->offset = begin;
+	chunk->len = (int32_t) (end - begin);
+	chunk->next = nullptr;
+
+	if (origin->postEventInfo == nullptr) {
+		origin->postEventInfo = chunk;
+	} else {
+		Chunk *tail = origin->postEventInfo;
+		while (tail->next != nullptr)
+			tail = tail->next;
+		tail->next = chunk;
 	}
 }
 

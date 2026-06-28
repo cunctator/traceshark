@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2014-2019, 2021  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2014-2019, 2021, 2026
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -61,6 +62,10 @@ typedef uint32_t taskstate_t;
  */
 #define EVENTSTRINGS_MAXLEN 20
 
+/* Unfortunately, these event names are also needed elsewhere */
+#define EVENTSTR_KERNEL_STACK "kernel_stack"
+#define EVENTSTR_USER_STACK   "user_stack"
+
 #define TRACEEVENTS_DEFS_						\
 	TSHARK_ITEM_(CPU_FREQUENCY = 0,	"cpu_frequency"),		\
 	TSHARK_ITEM_(CPU_IDLE,		"cpu_idle"),			\
@@ -73,6 +78,8 @@ typedef uint32_t taskstate_t;
 	TSHARK_ITEM_(SCHED_PROCESS_EXIT,"sched_process_exit"),		\
 	TSHARK_ITEM_(IRQ_HANDLER_ENTRY,	"irq_handler_entry"),		\
 	TSHARK_ITEM_(IRQ_HANDLER_EXIT,	"irq_handler_exit"),		\
+	TSHARK_ITEM_(KERNEL_STACK,	EVENTSTR_KERNEL_STACK),		\
+	TSHARK_ITEM_(USER_STACK,	EVENTSTR_USER_STACK),		\
 	TSHARK_ITEM_(NR_EVENTS,		nullptr)
 
 #undef TSHARK_ITEM_

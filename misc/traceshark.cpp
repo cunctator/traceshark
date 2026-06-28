@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2021, 2023  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2021, 2023, 2026  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -50,6 +50,8 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstring>
+
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
@@ -57,9 +59,82 @@
 #include "misc/errors.h"
 #include "misc/qtcompat.h"
 #include "misc/traceshark.h"
+#include "misc/types.h"
 #include "vtl/compiler.h"
 
 namespace TShark {
+
+/*
+ * Search for needle within [hay, end). Returns a pointer to the first match or
+ * nullptr. Used to locate the short stack-trace labels within a single line.
+ */
+static const char *findInRange(const char *hay, const char *end,
+			       const char *needle, int nlen)
+{
+	for (const char *h = hay; h + nlen <= end; h++) {
+		if (memcmp(h, needle, nlen) == 0)
+			return h;
+	}
+	return nullptr;
+}
+
+int stripStackTraceHeaders(const char *in, int inlen, char *out)
+{
+	static const char kernelLabel[] = EVENTSTR_KERNEL_STACK ":";
+	static const char userLabel[] = EVENTSTR_USER_STACK ":";
+	const int kernelLen = (int) (sizeof(kernelLabel) - 1);
+	const int userLen = (int) (sizeof(userLabel) - 1);
+	const char *p = in;
+	const char *end = in + inlen;
+	char *o = out;
+
+	while (p < end) {
+		const char *nl = (const char*) memchr(p, '\n', end - p);
+		const char *lineEnd = (nl != nullptr) ? nl : end;
+		const char *content = p;
+		const char *c;
+		int n;
+
+		/*
+		 * Fast path: stack frame lines start with "=>" (after optional
+		 * leading whitespace) and can never contain a header label, so
+		 * copy them verbatim without searching.
+		 */
+		for (c = p; c < lineEnd && (*c == ' ' || *c == '\t'); c++)
+			;
+		if (c + 1 < lineEnd && c[0] == '=' && c[1] == '>')
+			goto copy;
+
+		if (findInRange(p, lineEnd, kernelLabel, kernelLen) != nullptr) {
+			/* Drop the whole kernel_stack header line. */
+			p = (nl != nullptr) ? nl + 1 : end;
+			continue;
+		}
+
+		c = findInRange(p, lineEnd, userLabel, userLen);
+		if (c != nullptr) {
+			content = c + userLen;
+			while (content < lineEnd &&
+			       (*content == ' ' || *content == '\t'))
+				content++;
+			/*
+			 * Insert a tab before copying the inlined item, since
+			 * user space stacktrace lines are always indented by a
+			 * tab.
+			 */
+			*o = '\t';
+			o++;
+		}
+copy:
+		n = (int) (lineEnd - content);
+		memcpy(o, content, n);
+		o += n;
+		if (nl != nullptr)
+			*o++ = '\n';
+		p = (nl != nullptr) ? nl + 1 : end;
+	}
+	return (int) (o - out);
+}
 
 #undef TSHARK_LOGIC_ITEM_
 #define TSHARK_LOGIC_ITEM_(a) vtl_str(a)

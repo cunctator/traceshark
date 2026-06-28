@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2024  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2024, 2026  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -219,6 +219,27 @@ namespace TShark {
 			 const QString &rsuffix);
 
 	int readKeyValuePair(QTextStream &stream, QString &key, QString &value);
+
+	/*
+	 * Remove the ftrace kernel_stack/user_stack header lines from a captured
+	 * stack-trace text, leaving only the stack frames. This is a fast, single
+	 * pass over raw bytes with no allocations, intended to be reused wherever
+	 * an ftrace stack trace needs to be produced (event info, flame graphs,
+	 * ...).
+	 *
+	 * A line containing the "kernel_stack:" label is dropped entirely (it only
+	 * carries a "<stack trace >" placeholder; its frames follow on subsequent
+	 * lines). On a line containing the "user_stack:" label, the prefix up to
+	 * and including the label and the following blanks is removed, preserving
+	 * the first stack frame which the kernel emits inline on that line. All
+	 * other lines, including perf backtraces which contain neither label, are
+	 * copied verbatim.
+	 *
+	 * The cleaned text is written to out, which must have room for at least
+	 * inlen bytes (the result is never longer than the input). Returns the
+	 * number of bytes written to out.
+	 */
+	int stripStackTraceHeaders(const char *in, int inlen, char *out);
 }
 
 #endif /* TRACESHARK_H */

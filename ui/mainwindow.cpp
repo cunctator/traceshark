@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2024  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2024, 2026  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -1396,7 +1396,7 @@ void MainWindow::createAboutBox()
 	       "</p>"
 		).arg(QLatin1String(TRACESHARK_VERSION_STRING));
 	textAbout = QMessageBox::tr(
-	       "<p>Copyright &copy; 2014-2024 Viktor Rosendahl<p>"
+	       "<p>Copyright &copy; 2014-2024, 2026 Viktor Rosendahl<p>"
 	       "<p>This program comes with ABSOLUTELY NO WARRANTY; details below.</p>"
 	       "<p>This is free software, and you are welcome to redistribute it"
 	       " under certain conditions; select \"License\" under the \"Help\""
@@ -1668,7 +1668,8 @@ void MainWindow::handleEventDoubleClicked(EventsModel::column_t col,
 		createEventTypeFilter(event);
 		break;
 	case EventsModel::COLUMN_INFO:
-		eventInfoDialog->show(event, *analyzer->getTraceFile());
+		eventInfoDialog->show(event, *analyzer->getTraceFile(),
+				      analyzer->getTraceType());
 		break;
 	default:
 		/* This should not happen ? */
@@ -3996,7 +3997,8 @@ void MainWindow::showBackTraceTriggered()
 	const TraceEvent *event = eventsWidget->getSelectedEvent();
 
 	if (event != nullptr)
-		eventInfoDialog->show(*event, *analyzer->getTraceFile());
+		eventInfoDialog->show(*event, *analyzer->getTraceFile(),
+				      analyzer->getTraceType());
 }
 
 void MainWindow::eventCPUTriggered()

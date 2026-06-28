@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2018  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2018, 2026  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -59,6 +59,14 @@ class Chunk {
 public:
 	int64_t offset;
 	int32_t len;
+	/*
+	 * Singly linked list of chunks. For perf traces this is always nullptr
+	 * because a perf backtrace is a single contiguous range in the file. For
+	 * ftrace traces an event's stack trace is captured from the separate
+	 * kernel_stack and user_stack events, which are not adjacent in the file,
+	 * so postEventInfo may be a chain of more than one Chunk.
+	 */
+	Chunk *next;
 };
 
 #endif /* _TS_CHUNK_H */

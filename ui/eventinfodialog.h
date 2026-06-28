@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2018, 2019  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015, 2018, 2019, 2026
+ * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -55,6 +56,8 @@
 
 #include <QDialog>
 
+#include "misc/traceshark.h"
+
 QT_BEGIN_NAMESPACE
 class QPlainTextEdit;
 QT_END_NAMESPACE
@@ -68,7 +71,7 @@ class EventInfoDialog : public QDialog {
 public:
 	EventInfoDialog(QWidget *parent = 0);
 public slots:
-	void show(const TraceEvent &event, TraceFile &file);
+	void show(const TraceEvent &event, TraceFile &file, tracetype_t ttype);
 private:
 	QPlainTextEdit *textEdit;
 	void updateSize();

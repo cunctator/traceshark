@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015-2020  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+ * Copyright (C) 2015-2020, 2026  Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
  * the GPL, or the BSD license, at your option.
@@ -115,6 +115,12 @@ private:
 	void fixLastEvent();
 	bool parseBuffer(unsigned int index);
 	bool parseLineBugFixup(TraceEvent* event, const vtl::Time &prevTime);
+	void attachStackChunk(TraceEvent *origin, int64_t begin, int64_t end);
+	void clearFtraceStackData();
+	vtl_always_inline TraceEvent *ftraceLastEventForCPU(unsigned int cpu)
+		const;
+	vtl_always_inline void ftraceSetLastEventForCPU(unsigned int cpu,
+							TraceEvent *event);
 	MemPool *ptrPool;
 	MemPool *postEventPool;
 	TraceEvent fakeEvent;
@@ -126,6 +132,19 @@ private:
 	WorkThread<TraceParser> *readerThread;
 	TraceLineData ftraceLineData;
 	TraceLineData perfLineData;
+	/*
+	 * The fields below are only used when parsing ftrace traces, in order
+	 * to associate kernel_stack/user_stack events with the event whose
+	 * stack trace they contain. Such an event belongs to the most recent
+	 * ordinary event on the same CPU, which is tracked by
+	 * ftraceLastEventByCPU. The ftraceStack* fields hold a stack-trace
+	 * capture whose length is not yet known because it ends at the next
+	 * event line.
+	 */
+	bool ftraceStackPending;
+	int64_t ftraceStackInfoBegin;
+	TraceEvent *ftraceStackOrigin;
+	TraceEvent *ftraceLastEventByCPU[NR_CPUS_ALLOWED];
 	vtl::TList<TraceEvent> *ftraceEvents;
 	vtl::TList<TraceEvent> *perfEvents;
 	vtl::TList<TraceEvent> *events;
@@ -138,6 +157,21 @@ private:
 vtl_always_inline void TraceParser::waitForNextBatch(bool &eof, int &index)
 {
 	eventsWatcher->waitForNextBatch(eof, index);
+}
+
+vtl_always_inline
+TraceEvent *TraceParser::ftraceLastEventForCPU(unsigned int cpu) const
+{
+	if (isValidCPU(cpu))
+		return ftraceLastEventByCPU[cpu];
+	return nullptr;
+}
+
+vtl_always_inline void TraceParser::ftraceSetLastEventForCPU(unsigned int cpu,
+							    TraceEvent *event)
+{
+	if (isValidCPU(cpu))
+		ftraceLastEventByCPU[cpu] = event;
 }
 
 /* This parses a buffer */
@@ -195,6 +229,18 @@ vtl_always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
 						    TraceEvent &event)
 {
 	if (ftraceGrammar->parseLine(line, event)) {
+		/*
+		 * This event line terminates any pending stack-trace capture
+		 * from a preceding kernel_stack/user_stack event; the captured
+		 * range ends where this line begins.
+		 */
+		if (ftraceStackPending) {
+			attachStackChunk(ftraceStackOrigin,
+					 ftraceStackInfoBegin,
+					 line.begin);
+			ftraceStackPending = false;
+		}
+
 		/* Check if the timestamp of this event is affected by
 		 * the infamous ftrace timestamp rollover bug and
 		 * try to correct it */
@@ -204,13 +250,31 @@ vtl_always_inline bool TraceParser::parseLineFtrace(TraceLine &line,
 		}
 		ftraceLineData.prevTime = event.time;
 
+		if (event.type == KERNEL_STACK || event.type == USER_STACK) {
+			/*
+			 * The stack trace belongs to the most recent ordinary
+			 * event on the same CPU. Begin capturing its text
+			 * (which spans this line and the trailing frame lines,
+			 * up to the next event line) and discard the stack
+			 * event itself by not committing it. If there is no
+			 * such ordinary event yet, there is nothing to attach
+			 * it to, so just drop it.
+			 */
+			TraceEvent *origin = ftraceLastEventForCPU(event.cpu);
+			if (origin != nullptr) {
+				ftraceStackPending = true;
+				ftraceStackInfoBegin = line.begin;
+				ftraceStackOrigin = origin;
+			}
+			return false;
+		}
+
 		ptrPool->commitN(event.argc);
 		ftraceEvents->commit();
 
 		event.postEventInfo = nullptr;
+		ftraceSetLastEventForCPU(event.cpu, &event);
 		ftraceLineData.nrEvents++;
-		/* probably not necessary because ftrace traces doesn't
-		 * have backtraces and stuff but do it anyway */
 		ftraceLineData.prevLineIsEvent = true;
 		return true;
 	}
@@ -240,6 +304,7 @@ vtl_always_inline bool TraceParser::parseLinePerf(TraceLine &line,
 				allocObj();
 			chunk->offset = perfLineData.infoBegin;
 			chunk->len = line.begin - perfLineData.infoBegin;
+			chunk->next = nullptr;
 			perfLineData.prevEvent->postEventInfo = chunk;
 			perfLineData.prevLineIsEvent = true;
 		}

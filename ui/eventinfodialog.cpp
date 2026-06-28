@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 /*
  * Traceshark - a visualizer for visualizing ftrace and perf traces
- * Copyright (C) 2015, 2016, 2018, 2023
+ * Copyright (C) 2015, 2016, 2018, 2023, 2026
  * Viktor Rosendahl <viktor.rosendahl@gmail.com>
  *
  * This file is dual licensed: you can use it either under the terms of
@@ -119,26 +119,56 @@ void EventInfoDialog::updateSize()
 	setFixedHeight(height);
 }
 
-void EventInfoDialog::show(const TraceEvent &event, TraceFile &file)
+void EventInfoDialog::show(const TraceEvent &event, TraceFile &file,
+			   tracetype_t ttype)
 {
 	QByteArray array;
 	QString text;
 	int ts_errno = 0;
+	const Chunk *chunk;
 
-	if (event.postEventInfo != nullptr && event.postEventInfo->len > 0)
-		array = file.getChunkArray(event.postEventInfo, &ts_errno);
-	else
-		return;
-
-	if (ts_errno == 0) {
-		if (file.isIntact(&ts_errno)) {
-			text = QString(array);
-			textEdit->setPlainText(text);
-			QDialog::show();
+	/*
+	 * The post-event info may be a chain of chunks. For perf traces it is a
+	 * single chunk holding the backtrace; for ftrace traces it may hold a
+	 * kernel stack and a user stack captured from separate events.
+	 */
+	for (chunk = event.postEventInfo; chunk != nullptr; chunk = chunk->next) {
+		if (chunk->len <= 0)
+			continue;
+		array += file.getChunkArray(chunk, &ts_errno);
+		if (ts_errno != 0) {
+			vtl::warn(ts_errno, "Could not retrieve event info");
 			return;
 		}
-		if (ts_errno == 0)
-			ts_errno = - TS_ERROR_FILECHANGED;
 	}
+
+	if (array.isEmpty())
+		return;
+
+	if (file.isIntact(&ts_errno)) {
+		if (ttype == TRACE_TYPE_FTRACE) {
+			/*
+			 * Strip the ftrace kernel_stack/user_stack header lines
+			 * so that only the stack frames are shown. The result is
+			 * never longer than the input, so the input size is
+			 * enough for the output.
+			 */
+			QByteArray cleaned;
+			int len;
+			cleaned.resize(array.size());
+			len = TShark::stripStackTraceHeaders(array.constData(),
+							     (int) array.size(),
+							     cleaned.data());
+			cleaned.resize(len);
+			text = QString(cleaned);
+		} else {
+			text = QString(array);
+		}
+		textEdit->setPlainText(text);
+		QDialog::show();
+		return;
+	}
+	if (ts_errno == 0)
+		ts_errno = - TS_ERROR_FILECHANGED;
 	vtl::warn(ts_errno, "Could not retrieve event info");
 }
