@@ -1,0 +1,27 @@
+migration/0      18 [000] 12942.039622:                sched:sched_switch: prev_comm=migration/0 prev_pid=18 prev_prio=0 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+	ffffffffb7ad6b30 class_srcu_fast_notrace_destructor+0x8e0 (inlined)
+	ffffffffb7ad6b30 __do_trace_sched_switch+0x8e0 (inlined)
+	ffffffffb7ad6b30 trace_sched_switch+0x8e0 (inlined)
+	ffffffffb7ad6b30 __schedule+0x8e0 ([kernel.kallsyms])
+	ffffffffb7ad7303 __preempt_count_sub+0x23 (inlined)
+	ffffffffb7ad7303 __schedule_loop+0x23 (inlined)
+	ffffffffb7ad7303 schedule+0x23 ([kernel.kallsyms])
+	ffffffffb6f477cc smpboot_thread_fn+0x18c ([kernel.kallsyms])
+	ffffffffb6f388cf kthread+0xdf ([kernel.kallsyms])
+	ffffffffb6e9fce6 ret_from_fork+0x236 ([kernel.kallsyms])
+	ffffffffb6e5ba5a ret_from_fork_asm+0x1a ([kernel.kallsyms])
+
+swapper       0 [000] 12942.039629:                    power:cpu_idle: state=3 cpu_id=0
+	ffffffffb7ad1606 __do_trace_cpu_idle+0x186 (inlined)
+	ffffffffb7ad1606 trace_cpu_idle+0x186 (inlined)
+	ffffffffb7ad1606 cpuidle_enter_state+0x186 ([kernel.kallsyms])
+	ffffffffb782c3a9 cpuidle_enter+0x29 ([kernel.kallsyms])
+	ffffffffb6f6e5ee cpuidle_idle_call+0x13e (inlined)
+	ffffffffb6f6e5ee do_idle+0x13e ([kernel.kallsyms])
+	ffffffffb6f6e945 cpu_startup_entry+0x25 ([kernel.kallsyms])
+	ffffffffb7ad2a37 [unknown] ([kernel.kallsyms])
+	ffffffffb8af90fc [unknown] ([kernel.kallsyms].init.text)
+	ffffffffb8b0aed0 __pfx_clear_bss+0x0 ([kernel.kallsyms].init.text)
+	ffffffffb8b0b000 __pfx_reserve_bios_regions+0x0 ([kernel.kallsyms].init.text)
+	ffffffffb6e8e70d common_startup_64+0x13e ([kernel.kallsyms])
+

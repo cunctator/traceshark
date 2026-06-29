@@ -1,0 +1,37 @@
+       trace-cmd-17890 [015] d..2. 18481.505414: sched_switch:         trace-cmd:17890 [120] S ==> swapper/15:0 [120]
+          <idle>-0     [004] d..1. 18481.505417: cpu_idle:             state=4294967295 cpu_id=4
+       trace-cmd-17890 [015] d..2. 18481.505419: kernel_stack:         <stack trace >
+=> trace_event_raw_event_sched_switch (ffffffffb4d4fc8e)
+=> __traceiter_sched_switch (ffffffffb4d498f1)
+=> __schedule (ffffffffb58d6b30)
+=> schedule (ffffffffb58d7303)
+=> do_nanosleep (ffffffffb58ddebe)
+=> hrtimer_nanosleep (ffffffffb4de3562)
+=> common_nsleep (ffffffffb4dedd2f)
+=> __x64_sys_clock_nanosleep (ffffffffb4df122c)
+=> do_syscall_64 (ffffffffb58ca3f6)
+=> entry_SYSCALL_64_after_hwframe (ffffffffb4a0012b)
+       trace-cmd-17890 [015] d..2. 18481.505419: user_stack:           	=> 0x7fd77245b687
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+          <idle>-0     [004] d..1. 18481.505423: kernel_stack:         <stack trace >
+=> trace_event_raw_event_cpu (ffffffffb4eacb07)
+=> cpuidle_enter_state (ffffffffb58d167f)
+=> cpuidle_enter (ffffffffb562c529)
+=> do_idle (ffffffffb4d6e5ee)
+=> cpu_startup_entry (ffffffffb4d6e945)
+=> start_secondary (ffffffffb4cc9269)
+=> common_startup_64 (ffffffffb4c8e70d)
+          <idle>-0     [004] d..1. 18481.505424: user_stack:           	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0
+	=> 0x0

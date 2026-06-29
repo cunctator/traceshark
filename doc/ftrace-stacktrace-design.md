@@ -287,8 +287,8 @@ the event-export output would be a separate enhancement.
 
 ## 6. Testing
 
-- `ftrace-stacktrace-format.txt` and `perf-stacktrace-format.txt` (repo root) are
-  the reference fixtures. Verify:
+- `ftrace-stacktrace-format.txt` and `perf-stacktrace-format.txt` (in this `doc/`
+  directory, alongside this document) are the reference fixtures. Verify:
   - Clicking the `sched_switch` on CPU 15 shows both its kernel and user frames.
   - Clicking the `cpu_idle` on CPU 4 shows its kernel and user frames.
   - The `kernel_stack` / `user_stack` lines no longer appear as their own rows in
