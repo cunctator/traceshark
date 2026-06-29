@@ -158,6 +158,7 @@ void TraceParser::close(int *ts_errno)
 		*ts_errno = 0;
 	}
 	ptrPool->reset();
+	postEventPool->reset();
 	perfGrammar->clear();
 	perfEvents->clear();
 	ftraceGrammar->clear();
