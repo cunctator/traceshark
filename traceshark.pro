@@ -349,10 +349,12 @@
 # USE_SYSTEM_QCUSTOMPLOT = yes
 
 # If you have uncommented the previous, you can uncomment this to customize
-# the flag for linking with libqcustomplot. It defaults to -lqcustomplot.
+# the flag for linking with libqcustomplot. It defaults to -lQCustomPlotQt6.
 # Make sure that you compile traceshark with the same Qt version as your
-# libqcustomplot. Currently it is better to use Qt 5.
-# USE_CUSTOM_QCUSTOMPLOT_FLAG = -lqcustomplot-qt5
+# libqcustomplot. Currently it is better to use Qt 6. If you want, you might
+# uncomment and edit the line below, depending on your Linux distro, and what
+# name it uses for your desired version of libqcustomplot.
+# USE_CUSTOM_LIB_QCUSTOMPLOT_FLAG = -lQCustomPlot
 
 # Uncomment this for debug symbols
 # USE_DEBUG_FLAG = -g
@@ -657,14 +659,14 @@ OUR_FLAGS += $${HARDENING_CXXFLAGS}
 
 equals(USE_SYSTEM_QCUSTOMPLOT, yes) {
 
-isEmpty(USE_CUSTOM_QCUSTOMPLOT_FLAG) {
-QCUSTOM_FLAG = -lqcustomplot
+isEmpty(USE_CUSTOM_LIB_QCUSTOMPLOT_FLAG) {
+LIB_QCUSTOMPLOT_FLAG = -lQCustomPlotQt6
 } else {
-QCUSTOM_FLAG = $${USE_CUSTOM_QCUSTOMPLOT_FLAG}
+LIB_QCUSTOMPLOT_FLAG = $${USE_CUSTOM_LIB_QCUSTOMPLOT_FLAG}
 }
 
 OUR_FLAGS += -DCONFIG_SYSTEM_QCUSTOMPLOT
-LIBS += -lqcustomplot
+LIBS += $${LIB_QCUSTOMPLOT_FLAG}
 }
 
 
