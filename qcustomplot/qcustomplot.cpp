@@ -489,8 +489,8 @@ void QCPPainter::makeNonCosmetic()
 /* end of 'src/painter.cpp' */
 
 
-/* including file 'src/paintbuffer.cpp', size 18915                          */
-/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
+/* including file 'src/paintbuffer.cpp', size 19361                          */
+/* commit 43f753cf2e3121c7e76c2388c2c09171155da381 2026-07-05 03:43:36 +0300 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAbstractPaintBuffer
@@ -909,7 +909,15 @@ void QCPPaintBufferGlFbo::draw(QCPPainter *painter) const
     qDebug() << Q_FUNC_INFO << "OpenGL frame buffer object doesn't exist, reallocateBuffer was not called?";
     return;
   }
-  painter->drawImage(0, 0, mGlFrameBuffer->toImage());
+  QImage bufferImage(mGlFrameBuffer->toImage());
+#ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
+  // The fbo is mSize*mDevicePixelRatio physical pixels (see reallocateBuffer),
+  // but toImage() returns an image with a device pixel ratio of 1. Tag it with
+  // the buffer's ratio so drawImage maps it to mSize logical pixels instead of
+  // painting it mDevicePixelRatio times too large under HiDPI scaling.
+  bufferImage.setDevicePixelRatio(mDevicePixelRatio);
+#endif
+  painter->drawImage(0, 0, bufferImage);
 }
 
 /* inherits documentation from base class */

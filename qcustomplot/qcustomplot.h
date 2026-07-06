@@ -679,8 +679,8 @@ protected:
 /* end of 'src/paintbuffer.h' */
 
 
-/* including file 'src/layer.h', size 7062                                   */
-/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
+/* including file 'src/layer.h', size 6921                                   */
+/* commit 64bbcaef213d8a941d341238152ba728bff60c2d 2026-07-06 22:16:24 +0300 */
 
 class QCP_LIB_DECL QCPLayer : public QObject
 {
@@ -2066,8 +2066,8 @@ protected:
 /* end of 'src/axis/axistickerlog.h' */
 
 
-/* including file 'src/axis/axis.h', size 20913                              */
-/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
+/* including file 'src/axis/axis.h', size 20713                              */
+/* commit 64bbcaef213d8a941d341238152ba728bff60c2d 2026-07-06 22:16:24 +0300 */
 
 class QCP_LIB_DECL QCPGrid :public QCPLayerable
 {
@@ -3446,7 +3446,7 @@ void QCPDataContainer<DataType>::performAutoSqueeze()
 
 
 /* including file 'src/plottable.h', size 8463                               */
-/* commit a36732118b6527be2b3df1a7c3968cd64ff6b108 2021-04-24 01:21:37 +0200 */
+/* commit 64bbcaef213d8a941d341238152ba728bff60c2d 2026-07-06 22:16:24 +0300 */
 
 class QCP_LIB_DECL QCPSelectionDecorator
 {
@@ -6853,8 +6853,8 @@ protected:
 /* end of 'src/items/item-pixmap.h' */
 
 
-/* including file 'src/items/item-tracer.h', size 4811                       */
-/* commit c4ee9b546bade9007be8af646820b1afe3358eda 2022-11-06 12:47:03 +0100 */
+/* including file 'src/items/item-tracer.h', size 4784                       */
+/* commit 64bbcaef213d8a941d341238152ba728bff60c2d 2026-07-06 22:16:24 +0300 */
 
 class QCP_LIB_DECL QCPItemTracer : public QCPAbstractItem
 {
