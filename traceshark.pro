@@ -322,6 +322,17 @@
 # MARCH_FLAG = -mcpu=cortex-a55
 # MTUNE_FLAG = -mtune=cortex-a55
 
+# Apple M1
+# MARCH_FLAG = -mcpu=apple-m1
+# MTUNE_FLAG = -mtune=apple-m1
+
+# Apple M2
+# MARCH_FLAG = -mcpu=apple-m2
+# MTUNE_FLAG = -mtune=apple-m2
+
+# Apple M3
+# MARCH_FLAG = -mcpu=apple-m3
+# MTUNE_FLAG = -mtune=apple-m3
 
 ###############################################################################
 # Build configuration options used to compute generic compiler flags
