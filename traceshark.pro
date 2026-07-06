@@ -354,7 +354,7 @@
 # libqcustomplot. Currently it is better to use Qt 6. If you want, you might
 # uncomment and edit the line below, depending on your Linux distro, and what
 # name it uses for your desired version of libqcustomplot.
-# USE_CUSTOM_LIB_QCUSTOMPLOT_FLAG = -lQCustomPlot
+# USE_CUSTOM_LIB_QCUSTOMPLOT_FLAG = -lqcustomplot-qt6
 
 # Uncomment this for debug symbols
 # USE_DEBUG_FLAG = -g
