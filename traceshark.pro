@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
 #
 #  Traceshark - a visualizer for visualizing ftrace and perf traces
-#  Copyright (C) 2014-2024  Viktor Rosendahl <viktor.rosendahl@gmail.com>
+#  Copyright (C) 2014-2024, 2026  Viktor Rosendahl <viktor.rosendahl@gmail.com>
 #
 # This file is dual licensed: you can use it either under the terms of
 # the GPL, or the BSD license, at your option.
@@ -61,56 +61,6 @@
 # Automatic detection. Does not necessarily work
 # MARCH_FLAG = -march=native
 # MTUNE_FLAG = -mtune=native
-
-##### x86-32 Section
-
-# i386
-# MARCH_FLAG = -march=i386
-# MTUNE_FLAG = -mtune=i386
-
-# i486
-# MARCH_FLAG = -march=i486
-# MTUNE_FLAG = -mtune=i486
-
-# Pentium
-# MARCH_FLAG = -march=pentium
-# MTUNE_FLAG = -mtune=pentium
-
-# Lakemont
-# MARCH_FLAG = -march=lakemont
-# MTUNE_FLAG = -mtune=lakemont
-
-# Pentium MMX
-# MARCH_FLAG = -march=pentium-mmx
-# MTUNE_FLAG = -mtune=pentium-mmx
-
-# Pentium Pro
-# MARCH_FLAG = -march=pentiumpro
-# MTUNE_FLAG = -mtune=pentiumpro
-
-# i686
-# MARCH_FLAG = -march=i686
-# MTUNE_FLAG = -mtune=i686
-
-# Pentium 2
-# MARCH_FLAG = -march=pentium2
-# MTUNE_FLAG = -mtune=pentium2
-
-# Pentium 3
-# MARCH_FLAG = -march=pentium3
-# MTUNE_FLAG = -mtune=pentium3
-
-# Pentium M
-# MARCH_FLAG = -march=pentium-m
-# MTUNE_FLAG = -mtune=pentium-m
-
-# Pentium 4
-# MARCH_FLAG = -march=pentium4
-# MTUNE_FLAG = -mtune=pentium4
-
-# Prescott
-# MARCH_FLAG = -march=prescott
-# MTUNE_FLAG = -mtune=prescott
 
 ### Generic x86-64 Section
 
